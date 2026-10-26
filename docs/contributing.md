@@ -32,6 +32,50 @@ quoted, and Windows uses `gradlew.bat`. The version property pins local checks; 
 its own compiler and client dependency. The [submission guide](plugin-hub-submission.md) describes
 that separate build and the release order. The map repository's contract tests and `npm run story`
 exercise the real plugin against a local map. They complement the [logged-in checks](live-checks.md).
+The build compiles with a Java 11 toolchain that Gradle downloads. Do not compile with a newer JDK
+yourself: Lombok fails on it with an error about javac internals rather than the version.
+
+## Rules a change must keep
+
+**What the Plugin Hub allows.** No reflection, `Thread.sleep`, `Thread.interrupt`, threads of the
+plugin's own, `KeyboardFocusManager`, or new `OkHttpClient` or `Gson` instances. HTTP clients are
+derived from the injected one through `CompanionHttp.pinnedToServer`. Nothing automates input: the
+only game action is the world hop, and only from a button press. See RuneLite's
+[rejected and restricted features](https://github.com/runelite/runelite/wiki/Rejected-or-Rolled-Back-Features).
+
+**Threads.** Game state is read and changed on the client thread, Swing on the EDT. `shutDown`
+and `ConfigChanged` run on the EDT while a game tick may still be running, so anything a tick owns
+is reset through `clientThread.invoke`. A field written on one thread and read on another needs a
+lock, `volatile` or a hand-off.
+
+**The network.** Nothing is sent before Connect, and each kind of character data only with its own
+sharing choice. Redirects are refused, a map address must be https unless it is on this machine,
+and every reply is read with a size limit. Anything the map sends, a name, a title or a link, was
+typed by someone in the group: escape it, strip tags, cap its length, and check that a link is on
+the approved map. Never raise a request rate; failures back off.
+
+**Answers sent with confidence.** For a moment after a login or a world hop every varbit reads
+zero. A reader that cannot know yet sends nothing, never "none", "not started" or "carrying
+nothing". `SessionSettle` holds that rule; use it rather than writing another.
+
+**Saved state.** RuneLite syncs config and announces every write to every plugin, so large values
+are written in batches: the kill log at most every thirty seconds. Every way a session ends must
+write what is pending: logout, a character switch, `shutDown`, and `ClientShutdown`, because
+closing RuneLite does not call `shutDown`.
+
+**Tests.** A test for a fix must fail when the fix is reverted, so revert it once and check. Do
+not delete, skip or loosen a test to make it pass. Rewrite one only when the behaviour changed on
+purpose, and say why in the test.
+
+**The map's contract.** The map's tests read this source directly: capability flags from the
+`new Capability("…")` entries in `CapabilityEvaluator`, the snapshot shape from
+`CompanionSnapshot`, and `unique-rates.json`, which must stay identical to the map's copy. A flag
+the map knows must stay in that list.
+
+**Commits.** The message is an imperative sentence about what changed for the player, with no
+`feat:` or `fix:` prefix. The body says what was wrong, what it does now and the decision worth
+reading the diff for. One concern per commit, and formatting never mixed with behaviour. The
+history is public, so commit under your GitHub noreply address.
 
 ## Local development
 
@@ -40,8 +84,8 @@ perform game actions yourself. IntelliJ also has checked-in Run client, Run clie
 All tests configurations under `.run`. All tests is headless; the client configurations are not.
 
 To test the map connection, run the map project (osrs-map.com's source, which is not public) with
-its fixture star feed and an isolated database, then set **Advanced → Map address** to its localhost URL. The first Connect still requires
-server approval. Never use an upstream write endpoint or increase upstream feed polling for a test.
+its fixture star feed and an isolated database, then set **Advanced → Map address** to its
+localhost URL. The first Connect still requires server approval. Never use an upstream write endpoint or increase upstream feed polling for a test.
 
 ## Integration harness
 
