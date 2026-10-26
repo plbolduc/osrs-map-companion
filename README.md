@@ -8,6 +8,17 @@ around your unlocks, and share a map with friends.
 - Shooting stars, favourite sites and optional website filter sync.
 - Local drop luck, death-location links, destinations and meetup reminders.
 
+<p>
+  <img src="docs/mockups/sharing-sidebar-overview.png" width="240" alt="The sidebar's Overview tab: connected to a group, Open the map, and a Drop luck card for an aberrant spectre">
+  <img src="docs/mockups/sharing-sidebar-sharing.png" width="240" alt="The Sharing tab: map presence, progress and travel, tasks and timers, and loot, each chosen separately">
+  <img src="docs/mockups/stars-tab-list.png" width="240" alt="The Stars tab: shooting stars by site, world, tier and time left, with filters">
+</p>
+<p>
+  <img src="docs/mockups/world-map-pins.png" width="510" alt="Pins on the game's world map: two friends, a quiet friend, a destination and a meetup">
+</p>
+
+The pictures are the plugin's own panels drawn with made-up data.
+
 **Not yet listed on the Plugin Hub.** The [submission guide](docs/plugin-hub-submission.md)
 and [live-check record](docs/live-checks.md) distinguish completed checks from remaining work.
 
