@@ -1,0 +1,31 @@
+{
+  "destination": {
+    "x": 3222,
+    "y": 3218,
+    "plane": 0,
+    "name": "Lumbridge",
+    "world": 302,
+    "note": "T7 · ~16m left"
+  },
+  "event": {
+    "title": "Star hunt",
+    "x": 3222,
+    "y": 3218,
+    "plane": 0,
+    "world": 302,
+    "startsAtMs": 1800000000000
+  },
+  "members": [
+    {
+      "id": "c4e2d3f5-0000-4000-8000-000000000000",
+      "name": "Big Rob",
+      "colour": "#38bdf8",
+      "x": 2440,
+      "y": 3090,
+      "plane": 1,
+      "world": 302,
+      "instance": true,
+      "stale": true
+    }
+  ]
+}

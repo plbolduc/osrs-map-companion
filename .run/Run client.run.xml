@@ -1,0 +1,22 @@
+<component name="ProjectRunConfigurationManager">
+  <!--
+    Starts a RuneLite client with this plugin loaded, from IntelliJ.
+
+    This is the configuration to use while developing: it runs in the IDE's own process, so
+    breakpoints, the debugger and hot-swapping a changed method all work against a live client.
+    The Gradle configuration beside it does the same thing without depending on how IntelliJ
+    happened to name the modules, and is the one to fall back to if this reports a missing module.
+
+    -ea is load-bearing rather than a habit. RuneLite reads enabled assertions as developer mode,
+    which is what allows a plugin loaded this way to show up at all.
+  -->
+  <configuration default="false" name="Run client" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="com.pbolduc.mapcompanion.MapCompanionPluginTest" />
+    <module name="osrs-map-companion.test" />
+    <option name="VM_PARAMETERS" value="-ea" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

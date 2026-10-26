@@ -1,0 +1,17 @@
+# Copyright (c) 2026, pbolduc. All rights reserved.
+# SPDX-License-Identifier: BSD-2-Clause
+# RuneLite's Java conventions; import layout and annotations use its IntelliJ scheme.
+mode=java
+style=allman
+indent=force-tab=4
+indent-continuation=1
+indent-switches
+min-conditional-indent=0
+add-braces
+break-one-line-headers
+pad-oper
+pad-comma
+pad-header
+unpad-paren
+lineend=linux
+suffix=none

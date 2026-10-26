@@ -1,0 +1,438 @@
+{
+  "chestNames": [
+    "Brimstone Chest",
+    "Crystal Chest",
+    "Larran's big chest",
+    "Larran's small chest",
+    "Elven Crystal Chest",
+    "Stone chest",
+    "Dorgesh-Kaan Chest",
+    "Grubby Chest",
+    "Isle of Souls Chest",
+    "Dark Chest",
+    "Rogues' Chest",
+    "Chest (Ancient Vault)",
+    "Muddy Chest",
+    "Chest (Aldarin Villas)",
+    "Chest (Moon key)",
+    "Chest (Alchemist's signet)",
+    "Rusty chest",
+    "Tarnished chest",
+    "Reinforced chest"
+  ],
+  "shadeNames": [
+    "Bronze key red",
+    "Bronze key brown",
+    "Bronze key crimson",
+    "Bronze key black",
+    "Bronze key purple",
+    "Steel key red",
+    "Steel key brown",
+    "Steel key crimson",
+    "Steel key black",
+    "Steel key purple",
+    "Black key red",
+    "Black key brown",
+    "Black key crimson",
+    "Black key black",
+    "Black key purple",
+    "Silver key red",
+    "Silver key brown",
+    "Silver key crimson",
+    "Silver key black",
+    "Silver key purple",
+    "Gold key red",
+    "Gold key brown",
+    "Gold key crimson",
+    "Gold key black",
+    "Gold key purple"
+  ],
+  "dynamic": [
+    {
+      "symbol": "CAMDOZAAL_VAULT_CHEST_LOW",
+      "name": "Simple lockbox",
+      "id": 25647
+    },
+    {
+      "symbol": "CAMDOZAAL_VAULT_CHEST_MID",
+      "name": "Elaborate lockbox",
+      "id": 25649
+    },
+    {
+      "symbol": "CAMDOZAAL_VAULT_CHEST_HIGH",
+      "name": "Ornate lockbox",
+      "id": 25651
+    },
+    {
+      "symbol": "TOA_RUNE_CACHE",
+      "name": "Cache of runes",
+      "id": 27293
+    },
+    {
+      "symbol": "GOTR_INTRICATE_POUCH",
+      "name": "Intricate pouch",
+      "id": 26908
+    },
+    {
+      "symbol": "FROZEN_CACHE",
+      "name": "Frozen cache",
+      "id": 27622
+    },
+    {
+      "symbol": "BH_EP_CRATE_2",
+      "name": "Bounty crate (tier 1)",
+      "id": 28082
+    },
+    {
+      "symbol": "BH_EP_CRATE_3",
+      "name": "Bounty crate (tier 2)",
+      "id": 28084
+    },
+    {
+      "symbol": "BH_EP_CRATE_4",
+      "name": "Bounty crate (tier 3)",
+      "id": 28086
+    },
+    {
+      "symbol": "BH_EP_CRATE_5",
+      "name": "Bounty crate (tier 4)",
+      "id": 28088
+    },
+    {
+      "symbol": "BH_EP_CRATE_6",
+      "name": "Bounty crate (tier 5)",
+      "id": 28090
+    },
+    {
+      "symbol": "BH_EP_CRATE_7",
+      "name": "Bounty crate (tier 6)",
+      "id": 28092
+    },
+    {
+      "symbol": "BH_EP_CRATE_8",
+      "name": "Bounty crate (tier 7)",
+      "id": 28094
+    },
+    {
+      "symbol": "BH_EP_CRATE_9",
+      "name": "Bounty crate (tier 8)",
+      "id": 28096
+    },
+    {
+      "symbol": "BH_EP_CRATE_10",
+      "name": "Bounty crate (tier 9)",
+      "id": 28098
+    },
+    {
+      "symbol": "MM_POTION_PACK_LOW",
+      "name": "Apprentice potion pack",
+      "id": 29971
+    },
+    {
+      "symbol": "MM_POTION_PACK_MED",
+      "name": "Adept potion pack",
+      "id": 29972
+    },
+    {
+      "symbol": "MM_POTION_PACK_HIGH",
+      "name": "Expert potion pack",
+      "id": 29973
+    },
+    {
+      "symbol": "CASTLEWARS_CRATE",
+      "name": "Castle wars supply crate",
+      "id": 30690
+    },
+    {
+      "symbol": "FORGOTTEN_LOCKBOX",
+      "name": "Forgotten lockbox",
+      "id": 30763
+    },
+    {
+      "symbol": "YAMA_DOSSIER",
+      "name": "Dossier",
+      "id": 30803
+    }
+  ],
+  "hunter": [
+    {
+      "symbol": "HG_LOOTSACK_DROPTRACKING",
+      "name": "Hunters' loot sack",
+      "id": 29250
+    },
+    {
+      "symbol": "HG_LOOTSACK_T0",
+      "name": "Hunters' loot sack (basic)",
+      "id": 29242
+    },
+    {
+      "symbol": "HG_LOOTSACK_T1",
+      "name": "Hunters' loot sack (adept)",
+      "id": 29244
+    },
+    {
+      "symbol": "HG_LOOTSACK_T2",
+      "name": "Hunters' loot sack (expert)",
+      "id": 29246
+    },
+    {
+      "symbol": "HG_LOOTSACK_T3",
+      "name": "Hunters' loot sack (master)",
+      "id": 29248
+    }
+  ],
+  "tarnished": [
+    {
+      "symbol": "TARNISHED_2H_SWORD",
+      "name": "Tarnished 2h sword",
+      "id": 33681
+    },
+    {
+      "symbol": "TARNISHED_AMULET",
+      "name": "Tarnished amulet",
+      "id": 33693
+    },
+    {
+      "symbol": "TARNISHED_BATTLEAXE",
+      "name": "Tarnished battleaxe",
+      "id": 33683
+    },
+    {
+      "symbol": "TARNISHED_HALBERD",
+      "name": "Tarnished halberd",
+      "id": 33685
+    },
+    {
+      "symbol": "TARNISHED_LONGSWORD",
+      "name": "Tarnished longsword",
+      "id": 33677
+    },
+    {
+      "symbol": "TARNISHED_NECKLACE",
+      "name": "Tarnished necklace",
+      "id": 33691
+    },
+    {
+      "symbol": "TARNISHED_RING",
+      "name": "Tarnished ring",
+      "id": 33687
+    },
+    {
+      "symbol": "TARNISHED_SPEAR",
+      "name": "Tarnished spear",
+      "id": 33679
+    },
+    {
+      "symbol": "TARNISHED_BRACELET",
+      "name": "Tarnished bracelet",
+      "id": 33689
+    }
+  ],
+  "small": [
+    {
+      "symbol": "ENT_TOTEMS_LOOT",
+      "name": "Vale offerings",
+      "id": 31054
+    },
+    {
+      "symbol": "DIRTY_ARROWTIPS",
+      "name": "Dirty arrowtips",
+      "id": 31047
+    },
+    {
+      "symbol": "RUBIUM_GEODE",
+      "name": "Rubium geode",
+      "id": 31724
+    }
+  ],
+  "salvage": [
+    {
+      "symbol": "SAILING_SMALL_SHIPWRECK_SALVAGE",
+      "name": "Small salvage",
+      "id": 32847
+    },
+    {
+      "symbol": "SAILING_FISHERMAN_SHIPWRECK_SALVAGE",
+      "name": "Fishy salvage",
+      "id": 32849
+    },
+    {
+      "symbol": "SAILING_BARRACUDA_SHIPWRECK_SALVAGE",
+      "name": "Barracuda salvage",
+      "id": 32851
+    },
+    {
+      "symbol": "SAILING_LARGE_SHIPWRECK_SALVAGE",
+      "name": "Large salvage",
+      "id": 32853
+    },
+    {
+      "symbol": "SAILING_PIRATE_SHIPWRECK_SALVAGE",
+      "name": "Plundered salvage",
+      "id": 32855
+    },
+    {
+      "symbol": "SAILING_MERCENARY_SHIPWRECK_SALVAGE",
+      "name": "Martial salvage",
+      "id": 32857
+    },
+    {
+      "symbol": "SAILING_FREMENNIK_SHIPWRECK_SALVAGE",
+      "name": "Fremennik salvage",
+      "id": 32859
+    },
+    {
+      "symbol": "SAILING_MERCHANT_SHIPWRECK_SALVAGE",
+      "name": "Opulent salvage",
+      "id": 32861
+    }
+  ],
+  "sourceCommit": "ac79ed8bd8926bec7bf172aa291574b4d944b0e7",
+  "source": "https://github.com/runelite/runelite/blob/ac79ed8bd8926bec7bf172aa291574b4d944b0e7/runelite-client/src/main/java/net/runelite/client/plugins/loottracker/LootTrackerPlugin.java",
+  "acceptedActivityNames": [
+    "Adept potion pack",
+    "Apprentice potion pack",
+    "Bag full of gems (Belona)",
+    "Bag full of gems (Dusuri)",
+    "Bag full of gems (Percy)",
+    "Barbarian Assault high gamble",
+    "Barracuda salvage",
+    "Barrows",
+    "Bird nest",
+    "Black key black",
+    "Black key brown",
+    "Black key crimson",
+    "Black key purple",
+    "Black key red",
+    "Bounty crate (tier 1)",
+    "Bounty crate (tier 2)",
+    "Bounty crate (tier 3)",
+    "Bounty crate (tier 4)",
+    "Bounty crate (tier 5)",
+    "Bounty crate (tier 6)",
+    "Bounty crate (tier 7)",
+    "Bounty crate (tier 8)",
+    "Bounty crate (tier 9)",
+    "Brimstone Chest",
+    "Bronze key black",
+    "Bronze key brown",
+    "Bronze key crimson",
+    "Bronze key purple",
+    "Bronze key red",
+    "Cache of runes",
+    "Casket",
+    "Casket (Tempoross)",
+    "Castle wars supply crate",
+    "Chambers of Xeric",
+    "Chest (Alchemist's signet)",
+    "Chest (Aldarin Villas)",
+    "Chest (Ancient Vault)",
+    "Chest (Moon key)",
+    "Clue Scroll (Beginner)",
+    "Clue Scroll (Easy)",
+    "Clue Scroll (Elite)",
+    "Clue Scroll (Hard)",
+    "Clue Scroll (Master)",
+    "Clue Scroll (Medium)",
+    "Crystal Chest",
+    "Dark Chest",
+    "Dirty arrowtips",
+    "Doom of Mokhaiotl",
+    "Dorgesh-Kaan Chest",
+    "Dossier",
+    "Drift Net",
+    "Elaborate lockbox",
+    "Elven Crystal Chest",
+    "Expert potion pack",
+    "Fishing Trawler",
+    "Fishy salvage",
+    "Forgotten lockbox",
+    "Fortis Colosseum",
+    "Fremennik salvage",
+    "Frozen cache",
+    "Gold key black",
+    "Gold key brown",
+    "Gold key crimson",
+    "Gold key purple",
+    "Gold key red",
+    "Golem Crafting",
+    "Grubby Chest",
+    "Guardians of the Rift",
+    "H.A.M. chest (bronze)",
+    "H.A.M. chest (iron)",
+    "H.A.M. chest (silver)",
+    "H.A.M. chest (steel)",
+    "Hallowed Sack",
+    "Herbiboar",
+    "Hunters' loot sack",
+    "Hunters' loot sack (adept)",
+    "Hunters' loot sack (basic)",
+    "Hunters' loot sack (expert)",
+    "Hunters' loot sack (master)",
+    "Intricate pouch",
+    "Isle of Souls Chest",
+    "Kingdom of Miscellania",
+    "Large salvage",
+    "Larran's big chest",
+    "Larran's small chest",
+    "Lunar Chest",
+    "Magic Bird House",
+    "Mahogany Bird House",
+    "Maple Bird House",
+    "Martial salvage",
+    "Muddy Chest",
+    "Oak Bird House",
+    "Opulent salvage",
+    "Ore Pack (Volcanic Mine)",
+    "Ornate lockbox",
+    "Plundered salvage",
+    "Redwood Bird House",
+    "Regular Bird House",
+    "Reinforced chest",
+    "Reward cart (Wintertodt)",
+    "Reward pool (Tempoross)",
+    "Rogues' Chest",
+    "Rubium geode",
+    "Rusty chest",
+    "Seed pack",
+    "Silver key black",
+    "Silver key brown",
+    "Silver key crimson",
+    "Silver key purple",
+    "Silver key red",
+    "Simple lockbox",
+    "Small salvage",
+    "Spoils of war",
+    "Steel key black",
+    "Steel key brown",
+    "Steel key crimson",
+    "Steel key purple",
+    "Steel key red",
+    "Stone chest",
+    "Supply crate (Mahogany Homes)",
+    "Supply crate (Wintertodt)",
+    "Tarnished 2h sword",
+    "Tarnished amulet",
+    "Tarnished battleaxe",
+    "Tarnished bracelet",
+    "Tarnished chest",
+    "Tarnished halberd",
+    "Tarnished longsword",
+    "Tarnished necklace",
+    "Tarnished ring",
+    "Tarnished spear",
+    "Teak Bird House",
+    "Theatre of Blood",
+    "Tombs of Amascut",
+    "Unsired",
+    "Vale offerings",
+    "Willow Bird House",
+    "Yew Bird House",
+    "Zombie Pirate's Locker"
+  ],
+  "explicitlyExcluded": [
+    "Loot Chest (PvP loot-key contents)",
+    "NPC, PLAYER, PICKPOCKET and UNKNOWN LootReceived types",
+    "Unrecognized EVENT names"
+  ]
+}

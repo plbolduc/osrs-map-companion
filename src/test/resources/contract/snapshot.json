@@ -1,0 +1,197 @@
+{
+  "v": 1,
+  "member": {
+    "id": "b3f1c2d4-0000-4000-8000-000000000000",
+    "nick": "Zezima",
+    "characterName": "Zezima"
+  },
+  "accountType": "gim",
+  "world": 444,
+  "worldFlags": [
+    "members"
+  ],
+  "pos": {
+    "x": 3185,
+    "y": 3436,
+    "plane": 1
+  },
+  "instanced": true,
+  "instanceLayout": "copy",
+  "skills": {
+    "Mining": 72,
+    "Agility": 61,
+    "Total": 1650
+  },
+  "questsCompleted": [
+    "Lost City"
+  ],
+  "questStates": {
+    "Lost City": "finished",
+    "Fairytale II - Cure a Queen": "in_progress"
+  },
+  "questLog": {
+    "Lost City": "finished",
+    "Fairytale II - Cure a Queen": "in_progress",
+    "Cook's Assistant": "finished"
+  },
+  "diaries": {
+    "Falador": "hard"
+  },
+  "travelUnlocks": {
+    "ates-darkfrost": true,
+    "ates-ralos-rise": false
+  },
+  "house": "rellekka",
+  "stashUnits": {
+    "28960": true
+  },
+  "birdhouses": [
+    {
+      "id": "meadow-north",
+      "state": "seeded",
+      "observedMsAgo": 120000
+    }
+  ],
+  "hunterRumour": {
+    "name": "Red salamander",
+    "detail": "Wolf",
+    "state": "active",
+    "observedMsAgo": 0
+  },
+  "mahoganyHome": {
+    "name": "Jess",
+    "detail": "Expert",
+    "state": "active",
+    "observedMsAgo": 0
+  },
+  "farmingContract": {
+    "name": "Snapdragon",
+    "detail": "herb",
+    "state": "active",
+    "observedMsAgo": 0
+  },
+  "diaryRewards": {
+    "Varrock": "medium"
+  },
+  "milestones": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "session": "11111111-1111-4111-8111-111111111111",
+      "sequence": 1,
+      "kind": "npc_drop",
+      "msAgo": 4000,
+      "npc": "Abyssal demon",
+      "item": "Abyssal whip",
+      "itemId": 4151,
+      "quantity": 1
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000002",
+      "session": "11111111-1111-4111-8111-111111111111",
+      "sequence": 2,
+      "kind": "reward",
+      "msAgo": 4000,
+      "item": "Abyssal whip",
+      "itemId": 4151,
+      "quantity": 1,
+      "rewardType": "item",
+      "source": {
+        "kind": "npc",
+        "name": "Abyssal demon"
+      },
+      "collectionNew": true
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000003",
+      "session": "11111111-1111-4111-8111-111111111111",
+      "sequence": 3,
+      "kind": "level",
+      "msAgo": 3000,
+      "skill": "Mining",
+      "level": 72
+    }
+  ],
+  "detailsTruncated": true,
+  "capabilities": [
+    "amuletOfGlory",
+    "dramenStaff"
+  ],
+  "slayer": {
+    "taskName": "Kalphites",
+    "remaining": 43,
+    "areaName": "Kalphite Lair"
+  },
+  "clue": {
+    "tier": "hard",
+    "text": "Talk to the bartender.",
+    "itemId": 2722,
+    "coordTile": {
+      "x": 3094,
+      "y": 3491,
+      "plane": 0
+    },
+    "mapTile": {
+      "x": 3167,
+      "y": 3360,
+      "plane": 0
+    }
+  },
+  "farming": {
+    "patches": [
+      {
+        "id": "falador-herb",
+        "state": "growing",
+        "produce": "Ranarr weed",
+        "stagesLeft": 4,
+        "readyInMinMs": 3600000,
+        "readyInMaxMs": 4800000,
+        "observedMsAgo": 1000,
+        "completionId": "replant-26",
+        "completedMsAgo": 5000
+      }
+    ],
+    "progressVersion": 1
+  },
+  "loot": {
+    "npcs": [
+      {
+        "npc": "Abyssal demon",
+        "kills": 120,
+        "lastKillMsAgo": 90000,
+        "ratedKey": "0a1b2c3d",
+        "drops": [
+          {
+            "item": "Abyssal whip",
+            "obtained": 1,
+            "killsAtLast": 100,
+            "trackedSinceKill": 3,
+            "boostedSinceLast": 12,
+            "boostedWatched": 40
+          }
+        ],
+        "dropsComplete": true
+      }
+    ],
+    "current": "Abyssal demon",
+    "currentOnTask": true,
+    "pinned": {
+      "npc": "Abyssal demon",
+      "item": "Abyssal whip"
+    }
+  },
+  "death": {
+    "tile": {
+      "x": 3222,
+      "y": 3218,
+      "plane": 0
+    },
+    "msAgo": 60000
+  },
+  "activeSkill": {
+    "skill": "Mining",
+    "xpGained5m": 22000,
+    "msSinceLastDrop": 1500
+  },
+  "idleMs": 0,
+  "sentAtMs": 1800000000000
+}

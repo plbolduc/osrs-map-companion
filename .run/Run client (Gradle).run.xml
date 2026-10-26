@@ -1,0 +1,30 @@
+<component name="ProjectRunConfigurationManager">
+  <!--
+    The same client, started through Gradle.
+
+    Slower to start and without hot-swap, but it depends on nothing about the IDE's project model —
+    so it works on a fresh clone, before or after a Gradle re-import, and on whatever IntelliJ has
+    decided to call the modules this week. If "Run client" cannot find its module, use this.
+  -->
+  <configuration default="false" name="Run client (Gradle)" type="GradleRunConfiguration" factoryName="Gradle">
+    <ExternalSystemSettings>
+      <option name="executionName" />
+      <option name="externalProjectPath" value="$PROJECT_DIR$" />
+      <option name="externalSystemIdString" value="GRADLE" />
+      <option name="scriptParameters" value="" />
+      <option name="taskDescriptions">
+        <list />
+      </option>
+      <option name="taskNames">
+        <list>
+          <option value="runClient" />
+        </list>
+      </option>
+      <option name="vmOptions" />
+    </ExternalSystemSettings>
+    <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+    <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+    <DebugAllEnabled>false</DebugAllEnabled>
+    <method v="2" />
+  </configuration>
+</component>

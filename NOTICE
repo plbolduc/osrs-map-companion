@@ -1,0 +1,77 @@
+Third-party notices
+===================
+
+This plugin is BSD 2-Clause licensed; see LICENSE. Its farming definitions and crop decoder
+derive from RuneLite's source, and its assignment name lists from two Plugin Hub plugins; each
+carries its authors' notice. Its drop rates come from the OSRS Wiki under CC BY-NC-SA 3.0.
+
+
+RuneLite — farming patch regions and slots
+------------------------------------------
+
+src/main/java/com/pbolduc/mapcompanion/FarmingPatchCatalog.java transcribes region ids, varbit
+slots, and the neighbouring regions each slot transmits from, out of:
+
+  net/runelite/client/plugins/timetracking/farming/FarmingWorld.java
+
+  Copyright (c) 2018, NotFoxtrot <https://github.com/NotFoxtrot>
+  Copyright (c) 2018, Abex
+  All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+RuneLite — crop decoding and growth timings
+-------------------------------------------
+
+src/main/resources/farming-crops.txt captures the supported herb, tree and fruit-tree values
+from RuneLite 1.12.36's PatchImplementation.java and Produce.java. PatchStates reads this table
+without reflection or a runtime dependency on RuneLite's farming plugin internals.
+
+  PatchImplementation.java: Copyright (c) 2019 Abex
+  Produce.java: Copyright (c) 2018 Abex
+
+The full BSD 2-Clause notice and source URL are bundled beside the table in
+src/main/resources/farming-LICENSE.txt. The same redistribution conditions and disclaimer
+printed above apply. Automated tests compare each supported value and its growth timing with
+the installed RuneLite client; writeFarmingDecode regenerates the table explicitly.
+
+
+Hunter rumours and Mahogany Homes — assignment name lists
+---------------------------------------------------------
+
+src/main/resources/assignment-rumours.txt lists the creature names from
+geel9/runelite-hunter-rumours at commit 4f267d841978a33b722711a3cc61393080543caa
+(Copyright (c) 2024, Joshua Coffey), and src/main/resources/assignment-homes.txt the customer
+names from TheStonedTurtle/Mahogany-Homes at commit 7ec419eed23dbd8f3970c40bbe0b03d5b951a0dd,
+src/main/java/thestonedturtle/mahoganyhomes/Home.java (Copyright (c) 2020, TheStonedTurtle).
+Both are BSD 2-Clause; their full notices are bundled in
+src/main/resources/assignments-LICENSE.txt, and the conditions and disclaimer printed above
+apply.
+
+
+OSRS Wiki — drop rates
+----------------------
+
+src/main/resources/unique-rates.json holds drop rates transcribed from Old School RuneScape Wiki
+pages (https://oldschool.runescape.wiki), each row naming the page it came from. Wiki content is
+licensed CC BY-NC-SA 3.0 (https://creativecommons.org/licenses/by-nc-sa/3.0/); that table is
+offered under the same licence, and the plugin is distributed free of charge.

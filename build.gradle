@@ -1,0 +1,249 @@
+/*
+ * OSRS Map Companion — RuneLite plugin build.
+ *
+ * This is the local development build: tests, the game launcher and the map's integration harness
+ * need tasks that the shipped plugin does not. The Hub's `build=standard` replaces this file with
+ * its own template and packages only src/main; keep runtime dependencies within that template.
+ */
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenLocal {
+        /*
+         * Keep locally built RuneLite artifacts available, but resolve LWJGL from a remote
+         * repository. A Maven cache may have its metadata without every native classifier;
+         * Gradle then looks only there and cannot fetch a missing native from Maven Central.
+         */
+        content {
+            excludeGroup 'org.lwjgl'
+        }
+    }
+    maven {
+        url = 'https://repo.runelite.net'
+    }
+    mavenCentral()
+}
+
+/*
+ * Local builds track the released client unless a reproducible run pins `-PruneLiteVersion`.
+ * The Hub supplies its own client version through its packager, independently of this property.
+ * Single-string dependency coordinates also keep this build compatible with Gradle 9 and 10.
+ */
+def runeLiteVersion = findProperty('runeLiteVersion') ?: 'latest.release'
+
+dependencies {
+    compileOnly "net.runelite:client:${runeLiteVersion}"
+
+    compileOnly 'org.projectlombok:lombok:1.18.34'
+    annotationProcessor 'org.projectlombok:lombok:1.18.34'
+
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation "net.runelite:client:${runeLiteVersion}"
+    testImplementation "net.runelite:jshell:${runeLiteVersion}"
+}
+
+group = 'com.pbolduc.mapcompanion'
+version = '1.2.0'
+
+/*
+ * Java 11, because that is what the RuneLite client targets. Building against a newer release
+ * produces class files the client cannot load, and the failure appears at runtime as a plugin
+ * that silently refuses to start.
+ *
+ * A toolchain also runs Lombok on Java 11 rather than on whichever compiler launched Gradle;
+ * source/target compatibility alone would leave its javac internals dependent on that machine.
+ */
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    /*
+     * Warnings on, minus 'classfile'. That one category is entirely noise from outside this
+     * repository: RuneLite's own API classes carry org.jetbrains.annotations.Range, which is not on
+     * the plugin classpath, and javac reports sixty 'cannot find annotation method' lines that no
+     * change here could ever fix. Leaving it on would bury the deprecation warnings that do matter,
+     * which are the early notice that a client update is going to break this build.
+     */
+    options.compilerArgs << '-Xlint:all' << '-Xlint:-classfile'
+}
+
+/*
+ * The RuneLite client declares LWJGL's native binaries for every platform it ships on, so a plain
+ * `build` tries to fetch six sets of OpenGL and OpenCL natives for a test suite that will run
+ * exactly none of them — nothing under src/test opens a window.
+ *
+ * Headless tests need none of those binaries. The graphical launcher keeps them in clientRuntime,
+ * where the repository filter above prevents an incomplete Maven cache from hiding a native.
+ */
+configurations.testRuntimeClasspath {
+    exclude group: 'org.lwjgl'
+}
+
+test {
+    useJUnit()
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+    }
+
+    /*
+     * The disclosure test reads README.md and this plugin's own .java files as *text*, and Gradle
+     * cannot see that. With only prose changed nothing it declares has moved, so the task is
+     * skipped as up to date and the one check that guards the network disclosure passes by not
+     * running — which is the same failure the check exists to catch one level up. Declaring both
+     * as inputs is what makes editing a paragraph re-run the test that reads it.
+     */
+    inputs.file('README.md')
+        .withPropertyName('readme')
+        .withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.dir('src/main/java')
+        .withPropertyName('mainSourcesAsText')
+        .withPathSensitivity(PathSensitivity.RELATIVE)
+}
+
+
+/*
+ * Running the client, which is how a plugin is actually developed.
+ *
+ * Almost everything in this repository reads live game state, so a unit test can reach very little
+ * of it — `./gradlew runClient` starts a real RuneLite with this plugin loaded, which is the only
+ * way to watch most of it work. The equivalent IntelliJ configurations are checked in under `.run`.
+ *
+ * It has its own dependency configuration rather than borrowing the test one, and the reason is the
+ * LWJGL exclusion above. Dropping those natives is right for a test suite that never opens a window;
+ * it is wrong for a task whose entire job is to open one, because the client loads its GPU plugin
+ * during boot and that plugin is LWJGL from top to bottom. Sharing the configuration would trade a
+ * slow test suite for a client that dies on startup.
+ */
+configurations {
+    clientRuntime
+}
+
+dependencies {
+    clientRuntime "net.runelite:client:${runeLiteVersion}"
+    clientRuntime "net.runelite:jshell:${runeLiteVersion}"
+}
+
+tasks.register('runClient', JavaExec) {
+    group = 'application'
+    description = 'Starts a RuneLite client with this plugin loaded.'
+
+    /*
+     * The launcher under src/test rather than RuneLite's own main: this plugin has to be handed to
+     * ExternalPluginManager before the client boots, and that is the one thing the launcher does.
+     */
+    mainClass = 'com.pbolduc.mapcompanion.MapCompanionPluginTest'
+    classpath = sourceSets.test.output + sourceSets.main.output + configurations.clientRuntime
+
+    /*
+     * -ea is not a formality here. RuneLite reads assertions being enabled as developer mode, which
+     * is what lets a plugin loaded this way appear at all, and what turns on the developer tools.
+     */
+    jvmArgs = ['-ea']
+
+    /* The same Java 11 the rest of the build uses, rather than whatever happens to run Gradle. */
+    javaLauncher = javaToolchains.launcherFor(java.toolchain)
+}
+
+/*
+ * The integration harness: this plugin's real classes, driven by a script instead of by a game.
+ *
+ * A source set of its own rather than another folder under src/main, because none of it is the
+ * plugin. The Hub clones this repository and builds what `jar` produces, and `jar` takes
+ * sourceSets.main and nothing else — so the harness cannot reach a player's client however this
+ * file changes, which is a property worth having rather than a promise worth making. It is not
+ * mentioned in runelite-plugin.properties either, for the same reason.
+ *
+ * It sees main's classes and main's dependencies, and it needs the RuneLite client at *runtime*
+ * where the plugin only compiles against it: a fake client is still an implementation of a real
+ * interface, and the readers it drives are real code calling real API. Everything it uses is
+ * already in the build's dependency cache, so this adds a source set and no downloads.
+ */
+sourceSets {
+    harness {
+        java.srcDir 'src/harness/java'
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+}
+
+configurations {
+    /* Compiled and run against exactly what the plugin is built against. */
+    harnessImplementation.extendsFrom compileOnly
+
+    /*
+     * And no LWJGL, for the reason the test configuration gives above and one more: nothing here
+     * opens a window either — the whole client is a proxy over an interface — so the six sets of
+     * native binaries are most of what a fresh checkout would download to run a story that never
+     * draws a pixel.
+     */
+    harnessRuntimeClasspath {
+        exclude group: 'org.lwjgl'
+    }
+}
+
+dependencies {
+    harnessImplementation "net.runelite:client:${runeLiteVersion}"
+}
+
+/*
+ * The harness's own classes are on the test classpath, so the fake can have a test.
+ *
+ * `HarnessGameTest` is short on purpose and pins one thing: the list of methods the fake client
+ * answers. A fake that grows is a fake that has started to be a second, unverified implementation
+ * of the game, and every answer this plugin drew from it would then be a fact about the fake.
+ */
+sourceSets.test.compileClasspath += sourceSets.harness.output
+sourceSets.test.runtimeClasspath += sourceSets.harness.output
+tasks.named('compileTestJava') {
+    dependsOn tasks.named('harnessClasses')
+}
+
+tasks.register('runHarness', JavaExec) {
+    group = 'verification'
+    description = 'Runs one plugin installation against a map, reading commands on stdin.'
+    mainClass = 'com.pbolduc.mapcompanion.HarnessMain'
+    classpath = sourceSets.harness.runtimeClasspath
+    standardInput = System.in
+    javaLauncher = javaToolchains.launcherFor(java.toolchain)
+}
+
+/*
+ * The same thing without Gradle in the way.
+ *
+ * The story script starts a plugin installation per member and expects it to answer in
+ * milliseconds; a Gradle invocation per process would spend more time starting a daemon than the
+ * whole story takes. So this writes the jar and, beside it, the classpath to run it with — a
+ * plain file rather than a manifest Class-Path, because the entries are absolute paths into the
+ * dependency cache and a text file is the form that cannot be misread.
+ */
+tasks.register('harnessJar', Jar) {
+    group = 'build'
+    description = 'Packages the harness with the plugin, and writes the classpath to run it with.'
+    archiveFileName = 'map-companion-harness.jar'
+    destinationDirectory = layout.buildDirectory.dir('harness')
+    from sourceSets.main.output, sourceSets.harness.output
+    manifest {
+        attributes('Main-Class': 'com.pbolduc.mapcompanion.HarnessMain')
+    }
+    doLast {
+        File classpath = new File(destinationDirectory.get().asFile, 'classpath.txt')
+        List<String> entries = [archiveFile.get().asFile.absolutePath]
+        entries += sourceSets.harness.runtimeClasspath.files
+            .findAll { it.name.endsWith('.jar') }
+            .collect { it.absolutePath }
+        classpath.text = entries.join(File.pathSeparator)
+    }
+}
+
+/* Decode updates are explicit; ordinary builds verify the bundled table without rewriting it. */
+tasks.register('writeFarmingDecode', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.pbolduc.mapcompanion.FarmingDecodeReference'
+}

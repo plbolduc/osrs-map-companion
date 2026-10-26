@@ -1,0 +1,4 @@
+# Copyright (c) 2026, pbolduc. All rights reserved.
+# SPDX-License-Identifier: BSD-2-Clause
+*.java text eol=lf
+*.gradle text eol=lf

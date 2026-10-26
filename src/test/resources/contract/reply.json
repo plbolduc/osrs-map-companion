@@ -1,0 +1,25 @@
+{
+  "pollIntervalMs": 2000,
+  "directive": {
+    "destination": {
+      "x": 3222,
+      "y": 3218,
+      "plane": 0,
+      "name": "Lumbridge",
+      "world": 302,
+      "note": "T7 · ~16m left"
+    },
+    "event": {
+      "title": "Star hunt",
+      "x": 3222,
+      "y": 3218,
+      "plane": 0,
+      "world": 302,
+      "startsAtMs": 1800000000000
+    }
+  },
+  "acknowledgedMilestones": ["contract-session:1"],
+  "claimed": true,
+  "memberSecret": "0123456789abcdef0123456789abcdef",
+  "groupName": "Sunday hunt"
+}

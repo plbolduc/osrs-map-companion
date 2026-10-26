@@ -1,0 +1,12 @@
+/*
+ * Auto-provision the JDK this build asks for.
+ *
+ * Lombok uses javac internals, so a newer installed compiler is not interchangeable with the
+ * Java 11 this local build requests. The resolver supplies that toolchain without requiring a
+ * separate manual install. The Hub's standard build supplies its own settings and compiler.
+ */
+plugins {
+	id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+
+rootProject.name = 'osrs-map-companion'

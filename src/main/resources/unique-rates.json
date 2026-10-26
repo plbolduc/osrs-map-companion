@@ -1,0 +1,2137 @@
+{
+  "note": "Generated from data/unique-rates.json in the osrs-stars-map repository. Do not edit here; lib/plugin-contract.test.ts asserts the two stay identical.",
+  "rates": [
+    {
+      "npc": "Aberrant spectre",
+      "item": "Mystic robe bottom (dark)",
+      "oneIn": 512,
+      "page": "Aberrant spectre"
+    },
+    {
+      "npc": "Abyssal demon",
+      "item": "Abyssal dagger",
+      "oneIn": 32000,
+      "page": "Abyssal demon"
+    },
+    {
+      "npc": "Abyssal demon",
+      "item": "Abyssal head",
+      "oneIn": 6000,
+      "page": "Abyssal demon"
+    },
+    {
+      "npc": "Abyssal demon",
+      "item": "Abyssal whip",
+      "oneIn": 512,
+      "page": "Abyssal demon"
+    },
+    {
+      "npc": "Abyssal guardian",
+      "item": "Elemental talisman",
+      "oneIn": 256,
+      "page": "Abyssal guardian"
+    },
+    {
+      "npc": "Abyssal walker",
+      "item": "Elemental talisman",
+      "oneIn": 256,
+      "page": "Abyssal walker"
+    },
+    {
+      "npc": "Adamant dragon",
+      "item": "Draconic visage",
+      "oneIn": 9000,
+      "page": "Adamant dragon"
+    },
+    {
+      "npc": "Adamant dragon",
+      "item": "Dragon limbs",
+      "oneIn": 1000,
+      "page": "Adamant dragon"
+    },
+    {
+      "npc": "Adamant dragon",
+      "item": "Dragon metal slice",
+      "oneIn": 5000,
+      "page": "Adamant dragon"
+    },
+    {
+      "npc": "Afflicted",
+      "item": "Zombie champion scroll",
+      "oneIn": 5000,
+      "page": "Afflicted"
+    },
+    {
+      "npc": "Ancient Wyvern",
+      "item": "Granite boots",
+      "oneIn": 600,
+      "page": "Ancient Wyvern"
+    },
+    {
+      "npc": "Ancient Wyvern",
+      "item": "Granite longsword",
+      "oneIn": 600,
+      "page": "Ancient Wyvern"
+    },
+    {
+      "npc": "Ancient Wyvern",
+      "item": "Wyvern visage",
+      "oneIn": 10000,
+      "page": "Ancient Wyvern"
+    },
+    {
+      "npc": "Aquanite",
+      "item": "Aquanite tendon",
+      "oneIn": 3500,
+      "page": "Aquanite"
+    },
+    {
+      "npc": "Aquanite",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Aquanite"
+    },
+    {
+      "npc": "Araxyte",
+      "item": "Araxyte head",
+      "oneIn": 2000,
+      "page": "Araxyte"
+    },
+    {
+      "npc": "Armoured zombie",
+      "item": "Zombie champion scroll",
+      "oneIn": 5000,
+      "page": "Armoured zombie (Defender of Varrock)"
+    },
+    {
+      "npc": "Artio",
+      "item": "Claws of Callisto",
+      "oneIn": 618,
+      "page": "Artio"
+    },
+    {
+      "npc": "Artio",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Artio"
+    },
+    {
+      "npc": "Artio",
+      "item": "Tyrannical ring",
+      "oneIn": 716,
+      "page": "Artio"
+    },
+    {
+      "npc": "Artio",
+      "item": "Voidwaker hilt",
+      "oneIn": 912,
+      "page": "Artio"
+    },
+    {
+      "npc": "Baby blue dragon",
+      "item": "Tooth half of key (moon key)",
+      "oneIn": 1066,
+      "page": "Baby blue dragon"
+    },
+    {
+      "npc": "Balfrug Kreeyath",
+      "item": "Godsword shard 1",
+      "oneIn": 1524,
+      "page": "Balfrug Kreeyath"
+    },
+    {
+      "npc": "Balfrug Kreeyath",
+      "item": "Godsword shard 2",
+      "oneIn": 1524,
+      "page": "Balfrug Kreeyath"
+    },
+    {
+      "npc": "Balfrug Kreeyath",
+      "item": "Godsword shard 3",
+      "oneIn": 1524,
+      "page": "Balfrug Kreeyath"
+    },
+    {
+      "npc": "Balfrug Kreeyath",
+      "item": "Zamorakian spear",
+      "oneIn": 5376.333333333333,
+      "page": "Balfrug Kreeyath"
+    },
+    {
+      "npc": "Banshee",
+      "item": "Mystic gloves (dark)",
+      "oneIn": 512,
+      "page": "Banshee"
+    },
+    {
+      "npc": "Basilisk",
+      "item": "Basilisk head",
+      "oneIn": 2000,
+      "page": "Basilisk"
+    },
+    {
+      "npc": "Basilisk",
+      "item": "Mystic hat (light)",
+      "oneIn": 512,
+      "page": "Basilisk"
+    },
+    {
+      "npc": "Basilisk Knight",
+      "item": "Basilisk head",
+      "oneIn": 1000,
+      "page": "Basilisk Knight"
+    },
+    {
+      "npc": "Basilisk Knight",
+      "item": "Basilisk jaw",
+      "oneIn": 5000,
+      "page": "Basilisk Knight",
+      "boost": {
+        "when": "slayer-task",
+        "oneIn": 1000
+      }
+    },
+    {
+      "npc": "Basilisk Knight",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Basilisk Knight"
+    },
+    {
+      "npc": "Basilisk Knight",
+      "item": "Mystic hat (light)",
+      "oneIn": 256,
+      "page": "Basilisk Knight"
+    },
+    {
+      "npc": "Berry",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Berry"
+    },
+    {
+      "npc": "Blood Reaver",
+      "item": "Ancient ceremonial boots",
+      "oneIn": 640,
+      "page": "Blood Reaver"
+    },
+    {
+      "npc": "Blood Reaver",
+      "item": "Ancient ceremonial gloves",
+      "oneIn": 640,
+      "page": "Blood Reaver"
+    },
+    {
+      "npc": "Blood Reaver",
+      "item": "Ancient ceremonial legs",
+      "oneIn": 640,
+      "page": "Blood Reaver"
+    },
+    {
+      "npc": "Blood Reaver",
+      "item": "Ancient ceremonial mask",
+      "oneIn": 640,
+      "page": "Blood Reaver"
+    },
+    {
+      "npc": "Blood Reaver",
+      "item": "Ancient ceremonial top",
+      "oneIn": 640,
+      "page": "Blood Reaver"
+    },
+    {
+      "npc": "Body Golem",
+      "item": "Barronite guard",
+      "oneIn": 250,
+      "page": "Body Golem"
+    },
+    {
+      "npc": "Brine rat",
+      "item": "Brine sabre",
+      "oneIn": 512,
+      "page": "Brine rat"
+    },
+    {
+      "npc": "Brutal black dragon",
+      "item": "Draconic visage",
+      "oneIn": 10000,
+      "page": "Brutal black dragon"
+    },
+    {
+      "npc": "Brutal black dragon",
+      "item": "Dragon spear",
+      "oneIn": 512,
+      "page": "Brutal black dragon"
+    },
+    {
+      "npc": "Brutal black dragon",
+      "item": "Uncut dragonstone",
+      "oneIn": 512,
+      "page": "Brutal black dragon"
+    },
+    {
+      "npc": "Brutal blue dragon",
+      "item": "Draconic visage",
+      "oneIn": 10000,
+      "page": "Brutal blue dragon"
+    },
+    {
+      "npc": "Brutal red dragon",
+      "item": "Draconic visage",
+      "oneIn": 10000,
+      "page": "Brutal red dragon"
+    },
+    {
+      "npc": "Cave crawler",
+      "item": "Tooth half of key (moon key)",
+      "oneIn": 1024,
+      "page": "Cave crawler"
+    },
+    {
+      "npc": "Cave goblin",
+      "item": "Goblin champion scroll",
+      "oneIn": 5000,
+      "page": "Cave goblin (monster)"
+    },
+    {
+      "npc": "Cave goblin guard",
+      "item": "Goblin champion scroll",
+      "oneIn": 5000,
+      "page": "Cave goblin guard"
+    },
+    {
+      "npc": "Cave horror",
+      "item": "Black mask (10)",
+      "oneIn": 512,
+      "page": "Cave horror"
+    },
+    {
+      "npc": "Cave horror",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Cave horror"
+    },
+    {
+      "npc": "Cave kraken",
+      "item": "Kraken tentacle",
+      "oneIn": 1200,
+      "page": "Cave kraken"
+    },
+    {
+      "npc": "Cerberus",
+      "item": "Eternal crystal",
+      "oneIn": 520,
+      "page": "Cerberus"
+    },
+    {
+      "npc": "Cerberus",
+      "item": "Jar of Souls",
+      "oneIn": 2000,
+      "page": "Cerberus"
+    },
+    {
+      "npc": "Cerberus",
+      "item": "Pegasian crystal",
+      "oneIn": 520,
+      "page": "Cerberus"
+    },
+    {
+      "npc": "Cerberus",
+      "item": "Primordial crystal",
+      "oneIn": 520,
+      "page": "Cerberus"
+    },
+    {
+      "npc": "Cerberus",
+      "item": "Smouldering stone",
+      "oneIn": 520,
+      "page": "Cerberus"
+    },
+    {
+      "npc": "Chaos Fanatic",
+      "item": "Malediction shard 1",
+      "oneIn": 256,
+      "page": "Chaos Fanatic"
+    },
+    {
+      "npc": "Chaos Fanatic",
+      "item": "Odium shard 1",
+      "oneIn": 256,
+      "page": "Chaos Fanatic"
+    },
+    {
+      "npc": "City guard",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "City guard"
+    },
+    {
+      "npc": "Cockatrice",
+      "item": "Cockatrice head",
+      "oneIn": 1000,
+      "page": "Cockatrice"
+    },
+    {
+      "npc": "Cockatrice",
+      "item": "Mystic boots (light)",
+      "oneIn": 512,
+      "page": "Cockatrice"
+    },
+    {
+      "npc": "Crawling Hand",
+      "item": "Crawling hand (item)",
+      "oneIn": 500,
+      "page": "Crawling Hand"
+    },
+    {
+      "npc": "Crazy archaeologist",
+      "item": "Malediction shard 2",
+      "oneIn": 256,
+      "page": "Crazy archaeologist"
+    },
+    {
+      "npc": "Crazy archaeologist",
+      "item": "Odium shard 2",
+      "oneIn": 256,
+      "page": "Crazy archaeologist"
+    },
+    {
+      "npc": "Cyclops",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Cyclops"
+    },
+    {
+      "npc": "Dad",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Dad"
+    },
+    {
+      "npc": "Dark beast",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Dark beast"
+    },
+    {
+      "npc": "Dark beast",
+      "item": "Dark bow",
+      "oneIn": 512,
+      "page": "Dark beast"
+    },
+    {
+      "npc": "Demonic gorilla",
+      "item": "Ballista limbs",
+      "oneIn": 500,
+      "page": "Demonic gorilla"
+    },
+    {
+      "npc": "Demonic gorilla",
+      "item": "Ballista spring",
+      "oneIn": 500,
+      "page": "Demonic gorilla"
+    },
+    {
+      "npc": "Demonic gorilla",
+      "item": "Heavy frame",
+      "oneIn": 1500,
+      "page": "Demonic gorilla"
+    },
+    {
+      "npc": "Demonic gorilla",
+      "item": "Light frame",
+      "oneIn": 750,
+      "page": "Demonic gorilla"
+    },
+    {
+      "npc": "Demonic gorilla",
+      "item": "Monkey tail",
+      "oneIn": 1500,
+      "page": "Demonic gorilla"
+    },
+    {
+      "npc": "Demonic gorilla",
+      "item": "Zenyte shard",
+      "oneIn": 300,
+      "page": "Demonic gorilla"
+    },
+    {
+      "npc": "Deviant spectre",
+      "item": "Mystic robe bottom (dark)",
+      "oneIn": 512,
+      "page": "Deviant spectre"
+    },
+    {
+      "npc": "Drake",
+      "item": "Dragon knife",
+      "oneIn": 10000,
+      "page": "Drake",
+      "boost": {
+        "when": "slayer-task",
+        "oneIn": 2000
+      }
+    },
+    {
+      "npc": "Drake",
+      "item": "Dragon thrownaxe",
+      "oneIn": 10000,
+      "page": "Drake",
+      "boost": {
+        "when": "slayer-task",
+        "oneIn": 2000
+      }
+    },
+    {
+      "npc": "Drake",
+      "item": "Drake's claw",
+      "oneIn": 2560,
+      "page": "Drake",
+      "boost": {
+        "when": "slayer-task",
+        "oneIn": 512
+      }
+    },
+    {
+      "npc": "Drake",
+      "item": "Drake's tooth",
+      "oneIn": 2560,
+      "page": "Drake",
+      "boost": {
+        "when": "slayer-task",
+        "oneIn": 512
+      }
+    },
+    {
+      "npc": "Dust devil",
+      "item": "Dust battlestaff",
+      "oneIn": 4000,
+      "page": "Dust devil"
+    },
+    {
+      "npc": "Earth warrior",
+      "item": "Earth warrior champion scroll",
+      "oneIn": 5000,
+      "page": "Earth warrior"
+    },
+    {
+      "npc": "Earthen Nagua",
+      "item": "Earthbound tecpatl",
+      "oneIn": 400,
+      "page": "Earthen Nagua"
+    },
+    {
+      "npc": "Elder Chaos druid",
+      "item": "Elder chaos hood",
+      "oneIn": 1419,
+      "page": "Elder Chaos druid"
+    },
+    {
+      "npc": "Elder Chaos druid",
+      "item": "Elder chaos robe",
+      "oneIn": 1419,
+      "page": "Elder Chaos druid"
+    },
+    {
+      "npc": "Elder Chaos druid",
+      "item": "Elder chaos top",
+      "oneIn": 1419,
+      "page": "Elder Chaos druid"
+    },
+    {
+      "npc": "Elder Chaos druid",
+      "item": "Zamorak monk bottom",
+      "oneIn": 354.75,
+      "page": "Elder Chaos druid"
+    },
+    {
+      "npc": "Elder Chaos druid",
+      "item": "Zamorak monk top",
+      "oneIn": 354.75,
+      "page": "Elder Chaos druid"
+    },
+    {
+      "npc": "Enclave guard",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Enclave guard"
+    },
+    {
+      "npc": "Fire giant",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Fire giant"
+    },
+    {
+      "npc": "Fire giant",
+      "item": "Giant champion scroll",
+      "oneIn": 5000,
+      "page": "Fire giant"
+    },
+    {
+      "npc": "Flawed Golem",
+      "item": "Barronite guard",
+      "oneIn": 800,
+      "page": "Flawed Golem"
+    },
+    {
+      "npc": "Flight Kilisa",
+      "item": "Armadyl chainskirt",
+      "oneIn": 16129,
+      "page": "Flight Kilisa"
+    },
+    {
+      "npc": "Flight Kilisa",
+      "item": "Armadyl chestplate",
+      "oneIn": 16129,
+      "page": "Flight Kilisa"
+    },
+    {
+      "npc": "Flight Kilisa",
+      "item": "Armadyl helmet",
+      "oneIn": 16129,
+      "page": "Flight Kilisa"
+    },
+    {
+      "npc": "Flight Kilisa",
+      "item": "Godsword shard 1",
+      "oneIn": 1524,
+      "page": "Flight Kilisa"
+    },
+    {
+      "npc": "Flight Kilisa",
+      "item": "Godsword shard 2",
+      "oneIn": 1524,
+      "page": "Flight Kilisa"
+    },
+    {
+      "npc": "Flight Kilisa",
+      "item": "Godsword shard 3",
+      "oneIn": 1524,
+      "page": "Flight Kilisa"
+    },
+    {
+      "npc": "Flockleader Geerin",
+      "item": "Armadyl chainskirt",
+      "oneIn": 16129,
+      "page": "Flockleader Geerin"
+    },
+    {
+      "npc": "Flockleader Geerin",
+      "item": "Armadyl chestplate",
+      "oneIn": 16129,
+      "page": "Flockleader Geerin"
+    },
+    {
+      "npc": "Flockleader Geerin",
+      "item": "Armadyl helmet",
+      "oneIn": 16129,
+      "page": "Flockleader Geerin"
+    },
+    {
+      "npc": "Flockleader Geerin",
+      "item": "Godsword shard 1",
+      "oneIn": 1524,
+      "page": "Flockleader Geerin"
+    },
+    {
+      "npc": "Flockleader Geerin",
+      "item": "Godsword shard 2",
+      "oneIn": 1524,
+      "page": "Flockleader Geerin"
+    },
+    {
+      "npc": "Flockleader Geerin",
+      "item": "Godsword shard 3",
+      "oneIn": 1524,
+      "page": "Flockleader Geerin"
+    },
+    {
+      "npc": "Frenzied ice troll female",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Frenzied ice troll female"
+    },
+    {
+      "npc": "Frenzied ice troll grunt",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Frenzied ice troll grunt"
+    },
+    {
+      "npc": "Frenzied ice troll male",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Frenzied ice troll male"
+    },
+    {
+      "npc": "Frenzied ice troll runt",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Frenzied ice troll runt"
+    },
+    {
+      "npc": "Frost Crab",
+      "item": "Tooth half of key (moon key)",
+      "oneIn": 1354,
+      "page": "Frost Crab"
+    },
+    {
+      "npc": "Frost dragon",
+      "item": "Draconic visage",
+      "oneIn": 10000,
+      "page": "Frost dragon"
+    },
+    {
+      "npc": "Frost Nagua",
+      "item": "Glacial temotli",
+      "oneIn": 500,
+      "page": "Frost Nagua"
+    },
+    {
+      "npc": "Gargoyle",
+      "item": "Granite maul",
+      "oneIn": 256,
+      "page": "Gargoyle"
+    },
+    {
+      "npc": "Gargoyle",
+      "item": "Mystic robe top (dark)",
+      "oneIn": 512,
+      "page": "Gargoyle"
+    },
+    {
+      "npc": "General Graardor",
+      "item": "Bandos boots",
+      "oneIn": 381,
+      "page": "General Graardor"
+    },
+    {
+      "npc": "General Graardor",
+      "item": "Bandos chestplate",
+      "oneIn": 381,
+      "page": "General Graardor"
+    },
+    {
+      "npc": "General Graardor",
+      "item": "Bandos hilt",
+      "oneIn": 508,
+      "page": "General Graardor"
+    },
+    {
+      "npc": "General Graardor",
+      "item": "Bandos tassets",
+      "oneIn": 381,
+      "page": "General Graardor"
+    },
+    {
+      "npc": "General Graardor",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "General Graardor"
+    },
+    {
+      "npc": "Ghoul",
+      "item": "Ghoul champion scroll",
+      "oneIn": 5000,
+      "page": "Ghoul"
+    },
+    {
+      "npc": "Giant frog",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Giant frog"
+    },
+    {
+      "npc": "Giant Mole",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Giant Mole"
+    },
+    {
+      "npc": "Giant skeleton",
+      "item": "Skeleton champion scroll",
+      "oneIn": 5000,
+      "page": "Giant skeleton (Shadow Dungeon)"
+    },
+    {
+      "npc": "Goblin",
+      "item": "Goblin champion scroll",
+      "oneIn": 5000,
+      "page": "Goblin"
+    },
+    {
+      "npc": "Gorad",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Gorad"
+    },
+    {
+      "npc": "Gorak",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Gorak"
+    },
+    {
+      "npc": "Growler",
+      "item": "Godsword shard 1",
+      "oneIn": 1524,
+      "page": "Growler"
+    },
+    {
+      "npc": "Growler",
+      "item": "Godsword shard 2",
+      "oneIn": 1524,
+      "page": "Growler"
+    },
+    {
+      "npc": "Growler",
+      "item": "Godsword shard 3",
+      "oneIn": 1524,
+      "page": "Growler"
+    },
+    {
+      "npc": "Growler",
+      "item": "Saradomin sword",
+      "oneIn": 5376.333333333333,
+      "page": "Growler"
+    },
+    {
+      "npc": "Gryphon",
+      "item": "Horn of Plenty (empty)",
+      "oneIn": 2500,
+      "page": "Gryphon"
+    },
+    {
+      "npc": "Head Guard",
+      "item": "Rune kiteshield",
+      "oneIn": 512,
+      "page": "Head Guard"
+    },
+    {
+      "npc": "Headless Beast",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Headless Beast"
+    },
+    {
+      "npc": "Hermit crab",
+      "item": "Pillar frag",
+      "oneIn": 426.6666666666667,
+      "page": "Hermit crab"
+    },
+    {
+      "npc": "Hermit crab",
+      "item": "Umbral frag",
+      "oneIn": 1280,
+      "page": "Hermit crab"
+    },
+    {
+      "npc": "Hill Giant",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Hill Giant"
+    },
+    {
+      "npc": "Hill Giant",
+      "item": "Giant champion scroll",
+      "oneIn": 5000,
+      "page": "Hill Giant"
+    },
+    {
+      "npc": "Hydra",
+      "item": "Dragon knife",
+      "oneIn": 10001,
+      "page": "Hydra",
+      "boost": {
+        "when": "slayer-task",
+        "oneIn": 2001
+      }
+    },
+    {
+      "npc": "Hydra",
+      "item": "Dragon thrownaxe",
+      "oneIn": 10000,
+      "page": "Hydra",
+      "boost": {
+        "when": "slayer-task",
+        "oneIn": 2000
+      }
+    },
+    {
+      "npc": "Hydra",
+      "item": "Hydra tail",
+      "oneIn": 5001,
+      "page": "Hydra",
+      "boost": {
+        "when": "slayer-task",
+        "oneIn": 1001
+      }
+    },
+    {
+      "npc": "Ice giant",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Ice giant"
+    },
+    {
+      "npc": "Ice giant",
+      "item": "Giant champion scroll",
+      "oneIn": 5000,
+      "page": "Ice giant"
+    },
+    {
+      "npc": "Ice troll",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Ice troll"
+    },
+    {
+      "npc": "Ice troll female",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Ice troll female"
+    },
+    {
+      "npc": "Ice troll grunt",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Ice troll grunt"
+    },
+    {
+      "npc": "Ice troll male",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Ice troll male"
+    },
+    {
+      "npc": "Ice troll runt",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Ice troll runt"
+    },
+    {
+      "npc": "Icefiend",
+      "item": "Tooth half of key (moon key)",
+      "oneIn": 1373,
+      "page": "Icefiend"
+    },
+    {
+      "npc": "Icelord",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Icelord"
+    },
+    {
+      "npc": "Imp",
+      "item": "Imp champion scroll",
+      "oneIn": 5000,
+      "page": "Imp"
+    },
+    {
+      "npc": "Infernal Mage",
+      "item": "Lava battlestaff",
+      "oneIn": 1000,
+      "page": "Infernal Mage"
+    },
+    {
+      "npc": "Infernal Mage",
+      "item": "Mystic boots (dark)",
+      "oneIn": 512,
+      "page": "Infernal Mage"
+    },
+    {
+      "npc": "Infernal Mage",
+      "item": "Mystic hat (dark)",
+      "oneIn": 512,
+      "page": "Infernal Mage"
+    },
+    {
+      "npc": "Jogre",
+      "item": "Jogre champion scroll",
+      "oneIn": 5000,
+      "page": "Jogre"
+    },
+    {
+      "npc": "K'ril Tsutsaroth",
+      "item": "Staff of the Dead",
+      "oneIn": 508,
+      "page": "K'ril Tsutsaroth"
+    },
+    {
+      "npc": "K'ril Tsutsaroth",
+      "item": "Zamorak hilt",
+      "oneIn": 508,
+      "page": "K'ril Tsutsaroth"
+    },
+    {
+      "npc": "Kalphite Queen",
+      "item": "Jar of Sand",
+      "oneIn": 2000,
+      "page": "Kalphite Queen"
+    },
+    {
+      "npc": "Kalphite Worker",
+      "item": "Ensouled kalphite head",
+      "oneIn": 250,
+      "page": "Kalphite Worker"
+    },
+    {
+      "npc": "Khazard Ogre",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Khazard Ogre"
+    },
+    {
+      "npc": "Killerwatt",
+      "item": "Mystic fire staff",
+      "oneIn": 512,
+      "page": "Killerwatt"
+    },
+    {
+      "npc": "King Black Dragon",
+      "item": "Draconic visage",
+      "oneIn": 5000,
+      "page": "King Black Dragon"
+    },
+    {
+      "npc": "King Black Dragon",
+      "item": "Dragon pickaxe",
+      "oneIn": 1000,
+      "page": "King Black Dragon"
+    },
+    {
+      "npc": "Kraka",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Kraka"
+    },
+    {
+      "npc": "Kraken",
+      "item": "Jar of Dirt",
+      "oneIn": 1000,
+      "page": "Kraken"
+    },
+    {
+      "npc": "Kraken",
+      "item": "Kraken tentacle",
+      "oneIn": 400,
+      "page": "Kraken"
+    },
+    {
+      "npc": "Kraken",
+      "item": "Trident of the Seas (full)",
+      "oneIn": 512,
+      "page": "Kraken"
+    },
+    {
+      "npc": "Kree'arra",
+      "item": "Armadyl chainskirt",
+      "oneIn": 381,
+      "page": "Kree'arra"
+    },
+    {
+      "npc": "Kree'arra",
+      "item": "Armadyl chestplate",
+      "oneIn": 381,
+      "page": "Kree'arra"
+    },
+    {
+      "npc": "Kree'arra",
+      "item": "Armadyl helmet",
+      "oneIn": 381,
+      "page": "Kree'arra"
+    },
+    {
+      "npc": "Kree'arra",
+      "item": "Armadyl hilt",
+      "oneIn": 508,
+      "page": "Kree'arra"
+    },
+    {
+      "npc": "Kree'arra",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Kree'arra"
+    },
+    {
+      "npc": "Kurask",
+      "item": "Kurask head",
+      "oneIn": 3000,
+      "page": "Kurask"
+    },
+    {
+      "npc": "Kurask",
+      "item": "Leaf-bladed battleaxe",
+      "oneIn": 1026,
+      "page": "Kurask"
+    },
+    {
+      "npc": "Kurask",
+      "item": "Leaf-bladed sword",
+      "oneIn": 384,
+      "page": "Kurask"
+    },
+    {
+      "npc": "Kurask",
+      "item": "Mystic robe top (light)",
+      "oneIn": 512,
+      "page": "Kurask"
+    },
+    {
+      "npc": "Lava dragon",
+      "item": "Draconic visage",
+      "oneIn": 10000,
+      "page": "Lava dragon"
+    },
+    {
+      "npc": "Lizard",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Lizard"
+    },
+    {
+      "npc": "Lizardman",
+      "item": "Xeric's talisman (inert)",
+      "oneIn": 250,
+      "page": "Lizardman",
+      "boost": {
+        "when": "kourend-easy-diary",
+        "oneIn": 125
+      }
+    },
+    {
+      "npc": "Lizardman brute",
+      "item": "Xeric's talisman (inert)",
+      "oneIn": 250,
+      "page": "Lizardman brute",
+      "boost": {
+        "when": "kourend-easy-diary",
+        "oneIn": 125
+      }
+    },
+    {
+      "npc": "Lizardman shaman",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Lizardman shaman"
+    },
+    {
+      "npc": "Long-tailed Wyvern",
+      "item": "Granite boots",
+      "oneIn": 2560,
+      "page": "Long-tailed Wyvern"
+    },
+    {
+      "npc": "Long-tailed Wyvern",
+      "item": "Granite longsword",
+      "oneIn": 512,
+      "page": "Long-tailed Wyvern"
+    },
+    {
+      "npc": "Long-tailed Wyvern",
+      "item": "Wyvern visage",
+      "oneIn": 12000,
+      "page": "Long-tailed Wyvern"
+    },
+    {
+      "npc": "Mammoth",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Mammoth"
+    },
+    {
+      "npc": "Mammoth",
+      "item": "Papaya tree seed",
+      "oneIn": 640,
+      "page": "Mammoth"
+    },
+    {
+      "npc": "Mammoth",
+      "item": "Watermelon seed",
+      "oneIn": 320,
+      "page": "Mammoth"
+    },
+    {
+      "npc": "Mammoth",
+      "item": "Wildblood seed",
+      "oneIn": 320,
+      "page": "Mammoth"
+    },
+    {
+      "npc": "Mind Golem",
+      "item": "Barronite guard",
+      "oneIn": 500,
+      "page": "Mind Golem"
+    },
+    {
+      "npc": "Mithril dragon",
+      "item": "Draconic visage",
+      "oneIn": 10000,
+      "page": "Mithril dragon"
+    },
+    {
+      "npc": "Mithril dragon",
+      "item": "Dragon full helm",
+      "oneIn": 32768,
+      "page": "Mithril dragon"
+    },
+    {
+      "npc": "Monkey Zombie",
+      "item": "Zombie champion scroll",
+      "oneIn": 5000,
+      "page": "Monkey Zombie"
+    },
+    {
+      "npc": "Moonlight Cockatrice",
+      "item": "Cockatrice head",
+      "oneIn": 1000,
+      "page": "Moonlight Cockatrice"
+    },
+    {
+      "npc": "Moonlight Cockatrice",
+      "item": "Mystic boots (light)",
+      "oneIn": 512,
+      "page": "Moonlight Cockatrice"
+    },
+    {
+      "npc": "Moss Guardian",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Moss Guardian"
+    },
+    {
+      "npc": "Mountain troll",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Mountain troll"
+    },
+    {
+      "npc": "Ogre",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Ogre"
+    },
+    {
+      "npc": "Ogre chieftain",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Ogre chieftain"
+    },
+    {
+      "npc": "Ogress Shaman",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Ogress Shaman"
+    },
+    {
+      "npc": "Ogress Shaman",
+      "item": "Shaman mask",
+      "oneIn": 1200,
+      "page": "Ogress Shaman"
+    },
+    {
+      "npc": "Ogress Warrior",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Ogress Warrior"
+    },
+    {
+      "npc": "Ogress Warrior",
+      "item": "Shaman mask",
+      "oneIn": 1200,
+      "page": "Ogress Warrior"
+    },
+    {
+      "npc": "Pee Hat",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Pee Hat"
+    },
+    {
+      "npc": "Rock",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Rock (Troll)"
+    },
+    {
+      "npc": "Rune dragon",
+      "item": "Draconic visage",
+      "oneIn": 8000,
+      "page": "Rune dragon"
+    },
+    {
+      "npc": "Rune dragon",
+      "item": "Dragon limbs",
+      "oneIn": 800,
+      "page": "Rune dragon"
+    },
+    {
+      "npc": "Rune dragon",
+      "item": "Dragon metal lump",
+      "oneIn": 5000,
+      "page": "Rune dragon"
+    },
+    {
+      "npc": "Sarachnis",
+      "item": "Jar of Eyes",
+      "oneIn": 2000,
+      "page": "Sarachnis"
+    },
+    {
+      "npc": "Sarachnis",
+      "item": "Sarachnis cudgel",
+      "oneIn": 384,
+      "page": "Sarachnis"
+    },
+    {
+      "npc": "Scorpia",
+      "item": "Malediction shard 3",
+      "oneIn": 256,
+      "page": "Scorpia"
+    },
+    {
+      "npc": "Scorpia",
+      "item": "Odium shard 3",
+      "oneIn": 256,
+      "page": "Scorpia"
+    },
+    {
+      "npc": "Sea Snake Young",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Sea Snake Young"
+    },
+    {
+      "npc": "Sergeant",
+      "item": "Rune kiteshield",
+      "oneIn": 512,
+      "page": "Sergeant (Shayzien)"
+    },
+    {
+      "npc": "Sergeant Grimspike",
+      "item": "Bandos boots",
+      "oneIn": 16256,
+      "page": "Sergeant Grimspike"
+    },
+    {
+      "npc": "Sergeant Grimspike",
+      "item": "Bandos chestplate",
+      "oneIn": 16256,
+      "page": "Sergeant Grimspike"
+    },
+    {
+      "npc": "Sergeant Grimspike",
+      "item": "Bandos tassets",
+      "oneIn": 16256,
+      "page": "Sergeant Grimspike"
+    },
+    {
+      "npc": "Sergeant Grimspike",
+      "item": "Goblin champion scroll",
+      "oneIn": 5000,
+      "page": "Sergeant Grimspike"
+    },
+    {
+      "npc": "Sergeant Grimspike",
+      "item": "Godsword shard 1",
+      "oneIn": 1524,
+      "page": "Sergeant Grimspike"
+    },
+    {
+      "npc": "Sergeant Grimspike",
+      "item": "Godsword shard 2",
+      "oneIn": 1524,
+      "page": "Sergeant Grimspike"
+    },
+    {
+      "npc": "Sergeant Grimspike",
+      "item": "Godsword shard 3",
+      "oneIn": 1524,
+      "page": "Sergeant Grimspike"
+    },
+    {
+      "npc": "Sergeant Steelwill",
+      "item": "Bandos boots",
+      "oneIn": 16256,
+      "page": "Sergeant Steelwill"
+    },
+    {
+      "npc": "Sergeant Steelwill",
+      "item": "Bandos chestplate",
+      "oneIn": 16256,
+      "page": "Sergeant Steelwill"
+    },
+    {
+      "npc": "Sergeant Steelwill",
+      "item": "Bandos tassets",
+      "oneIn": 16256,
+      "page": "Sergeant Steelwill"
+    },
+    {
+      "npc": "Sergeant Steelwill",
+      "item": "Goblin champion scroll",
+      "oneIn": 5000,
+      "page": "Sergeant Steelwill"
+    },
+    {
+      "npc": "Sergeant Steelwill",
+      "item": "Godsword shard 1",
+      "oneIn": 1524,
+      "page": "Sergeant Steelwill"
+    },
+    {
+      "npc": "Sergeant Steelwill",
+      "item": "Godsword shard 2",
+      "oneIn": 1524,
+      "page": "Sergeant Steelwill"
+    },
+    {
+      "npc": "Sergeant Steelwill",
+      "item": "Godsword shard 3",
+      "oneIn": 1524,
+      "page": "Sergeant Steelwill"
+    },
+    {
+      "npc": "Sergeant Strongstack",
+      "item": "Bandos boots",
+      "oneIn": 16256,
+      "page": "Sergeant Strongstack"
+    },
+    {
+      "npc": "Sergeant Strongstack",
+      "item": "Bandos chestplate",
+      "oneIn": 16256,
+      "page": "Sergeant Strongstack"
+    },
+    {
+      "npc": "Sergeant Strongstack",
+      "item": "Bandos tassets",
+      "oneIn": 16256,
+      "page": "Sergeant Strongstack"
+    },
+    {
+      "npc": "Sergeant Strongstack",
+      "item": "Goblin champion scroll",
+      "oneIn": 5000,
+      "page": "Sergeant Strongstack"
+    },
+    {
+      "npc": "Sergeant Strongstack",
+      "item": "Godsword shard 1",
+      "oneIn": 1524,
+      "page": "Sergeant Strongstack"
+    },
+    {
+      "npc": "Sergeant Strongstack",
+      "item": "Godsword shard 2",
+      "oneIn": 1524,
+      "page": "Sergeant Strongstack"
+    },
+    {
+      "npc": "Sergeant Strongstack",
+      "item": "Godsword shard 3",
+      "oneIn": 1524,
+      "page": "Sergeant Strongstack"
+    },
+    {
+      "npc": "Skeletal Wyvern",
+      "item": "Draconic visage",
+      "oneIn": 10000,
+      "page": "Skeletal Wyvern"
+    },
+    {
+      "npc": "Skeletal Wyvern",
+      "item": "Granite legs",
+      "oneIn": 512,
+      "page": "Skeletal Wyvern"
+    },
+    {
+      "npc": "Skeleton brute",
+      "item": "Skeleton champion scroll",
+      "oneIn": 5000,
+      "page": "Skeleton brute"
+    },
+    {
+      "npc": "Skeleton Mage",
+      "item": "Skeleton champion scroll",
+      "oneIn": 5000,
+      "page": "Skeleton Mage"
+    },
+    {
+      "npc": "Skeleton thug",
+      "item": "Skeleton champion scroll",
+      "oneIn": 5000,
+      "page": "Skeleton thug"
+    },
+    {
+      "npc": "Skeleton warlord",
+      "item": "Skeleton champion scroll",
+      "oneIn": 5000,
+      "page": "Skeleton warlord"
+    },
+    {
+      "npc": "Skogre",
+      "item": "Skeleton champion scroll",
+      "oneIn": 5000,
+      "page": "Skogre"
+    },
+    {
+      "npc": "Skogre",
+      "item": "Zombie champion scroll",
+      "oneIn": 5000,
+      "page": "Skogre"
+    },
+    {
+      "npc": "Skotizo",
+      "item": "Uncut onyx",
+      "oneIn": 1000,
+      "page": "Skotizo"
+    },
+    {
+      "npc": "Smoke devil",
+      "item": "Dragon chainbody",
+      "oneIn": 32768,
+      "page": "Smoke devil"
+    },
+    {
+      "npc": "Smoke devil",
+      "item": "Occult necklace",
+      "oneIn": 512,
+      "page": "Smoke devil"
+    },
+    {
+      "npc": "Sorebones",
+      "item": "Zombie champion scroll",
+      "oneIn": 5000,
+      "page": "Sorebones"
+    },
+    {
+      "npc": "Spitting Wyvern",
+      "item": "Granite boots",
+      "oneIn": 2560,
+      "page": "Spitting Wyvern"
+    },
+    {
+      "npc": "Spitting Wyvern",
+      "item": "Granite longsword",
+      "oneIn": 512,
+      "page": "Spitting Wyvern"
+    },
+    {
+      "npc": "Spitting Wyvern",
+      "item": "Wyvern visage",
+      "oneIn": 12000,
+      "page": "Spitting Wyvern"
+    },
+    {
+      "npc": "Starlight",
+      "item": "Godsword shard 1",
+      "oneIn": 1524,
+      "page": "Starlight"
+    },
+    {
+      "npc": "Starlight",
+      "item": "Godsword shard 2",
+      "oneIn": 1524,
+      "page": "Starlight"
+    },
+    {
+      "npc": "Starlight",
+      "item": "Godsword shard 3",
+      "oneIn": 1524,
+      "page": "Starlight"
+    },
+    {
+      "npc": "Starlight",
+      "item": "Saradomin sword",
+      "oneIn": 5376.333333333333,
+      "page": "Starlight"
+    },
+    {
+      "npc": "Stick",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Stick"
+    },
+    {
+      "npc": "Sulphur Nagua",
+      "item": "Sulphur blades",
+      "oneIn": 450,
+      "page": "Sulphur Nagua"
+    },
+    {
+      "npc": "Suqah",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Suqah"
+    },
+    {
+      "npc": "Taloned Wyvern",
+      "item": "Granite boots",
+      "oneIn": 2560,
+      "page": "Taloned Wyvern"
+    },
+    {
+      "npc": "Taloned Wyvern",
+      "item": "Granite longsword",
+      "oneIn": 512,
+      "page": "Taloned Wyvern"
+    },
+    {
+      "npc": "Taloned Wyvern",
+      "item": "Wyvern visage",
+      "oneIn": 12000,
+      "page": "Taloned Wyvern"
+    },
+    {
+      "npc": "Thermonuclear smoke devil",
+      "item": "Dragon chainbody",
+      "oneIn": 2000,
+      "page": "Thermonuclear smoke devil"
+    },
+    {
+      "npc": "Thermonuclear smoke devil",
+      "item": "Jar of Smoke",
+      "oneIn": 2000,
+      "page": "Thermonuclear smoke devil"
+    },
+    {
+      "npc": "Thermonuclear smoke devil",
+      "item": "Occult necklace",
+      "oneIn": 350,
+      "page": "Thermonuclear smoke devil"
+    },
+    {
+      "npc": "Thermonuclear smoke devil",
+      "item": "Shark lure",
+      "oneIn": 285.3333333333333,
+      "page": "Thermonuclear smoke devil"
+    },
+    {
+      "npc": "Thermonuclear smoke devil",
+      "item": "Smoke battlestaff",
+      "oneIn": 512,
+      "page": "Thermonuclear smoke devil"
+    },
+    {
+      "npc": "Thrower Troll",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Thrower Troll"
+    },
+    {
+      "npc": "Tormented Demon",
+      "item": "Burning claw",
+      "oneIn": 501.00200400801606,
+      "page": "Tormented Demon"
+    },
+    {
+      "npc": "Tormented Demon",
+      "item": "Magic longbow (u)",
+      "oneIn": 255,
+      "page": "Tormented Demon"
+    },
+    {
+      "npc": "Tormented Demon",
+      "item": "Tormented synapse",
+      "oneIn": 500,
+      "page": "Tormented Demon"
+    },
+    {
+      "npc": "Tortured gorilla",
+      "item": "Ballista limbs",
+      "oneIn": 5000,
+      "page": "Tortured gorilla"
+    },
+    {
+      "npc": "Tortured gorilla",
+      "item": "Ballista spring",
+      "oneIn": 5000,
+      "page": "Tortured gorilla"
+    },
+    {
+      "npc": "Tortured gorilla",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Tortured gorilla"
+    },
+    {
+      "npc": "Tortured gorilla",
+      "item": "Heavy frame",
+      "oneIn": 15000,
+      "page": "Tortured gorilla"
+    },
+    {
+      "npc": "Tortured gorilla",
+      "item": "Light frame",
+      "oneIn": 7500,
+      "page": "Tortured gorilla"
+    },
+    {
+      "npc": "Tortured gorilla",
+      "item": "Monkey tail",
+      "oneIn": 15000,
+      "page": "Tortured gorilla"
+    },
+    {
+      "npc": "Tortured gorilla",
+      "item": "Zenyte shard",
+      "oneIn": 3000,
+      "page": "Tortured gorilla"
+    },
+    {
+      "npc": "Troll general",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Troll general"
+    },
+    {
+      "npc": "Troll spectator",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Troll spectator"
+    },
+    {
+      "npc": "Tstanon Karlak",
+      "item": "Godsword shard 1",
+      "oneIn": 1524,
+      "page": "Tstanon Karlak"
+    },
+    {
+      "npc": "Tstanon Karlak",
+      "item": "Godsword shard 2",
+      "oneIn": 1524,
+      "page": "Tstanon Karlak"
+    },
+    {
+      "npc": "Tstanon Karlak",
+      "item": "Godsword shard 3",
+      "oneIn": 1524,
+      "page": "Tstanon Karlak"
+    },
+    {
+      "npc": "Tstanon Karlak",
+      "item": "Zamorakian spear",
+      "oneIn": 5376.333333333333,
+      "page": "Tstanon Karlak"
+    },
+    {
+      "npc": "Turoth",
+      "item": "Leaf-bladed sword",
+      "oneIn": 500,
+      "page": "Turoth"
+    },
+    {
+      "npc": "Turoth",
+      "item": "Mystic robe bottom (light)",
+      "oneIn": 512,
+      "page": "Turoth"
+    },
+    {
+      "npc": "Twig",
+      "item": "Curved bone",
+      "oneIn": 5012.5,
+      "page": "Twig"
+    },
+    {
+      "npc": "Twisted Banshee",
+      "item": "Mystic gloves (dark)",
+      "oneIn": 256,
+      "page": "Twisted Banshee"
+    },
+    {
+      "npc": "TzHaar-Hur",
+      "item": "Uncut diamond",
+      "oneIn": 2048,
+      "page": "TzHaar-Hur"
+    },
+    {
+      "npc": "TzHaar-Hur",
+      "item": "Uncut emerald",
+      "oneIn": 256,
+      "page": "TzHaar-Hur"
+    },
+    {
+      "npc": "TzHaar-Ket",
+      "item": "Obsidian cape",
+      "oneIn": 512,
+      "page": "TzHaar-Ket"
+    },
+    {
+      "npc": "TzHaar-Ket",
+      "item": "Toktz-ket-xil",
+      "oneIn": 512,
+      "page": "TzHaar-Ket"
+    },
+    {
+      "npc": "TzHaar-Ket",
+      "item": "Tzhaar-ket-om",
+      "oneIn": 512,
+      "page": "TzHaar-Ket"
+    },
+    {
+      "npc": "TzHaar-Mej",
+      "item": "Obsidian cape",
+      "oneIn": 4096,
+      "page": "TzHaar-Mej"
+    },
+    {
+      "npc": "TzHaar-Mej",
+      "item": "Toktz-mej-tal",
+      "oneIn": 4096,
+      "page": "TzHaar-Mej"
+    },
+    {
+      "npc": "TzHaar-Mej",
+      "item": "Uncut diamond",
+      "oneIn": 2048,
+      "page": "TzHaar-Mej"
+    },
+    {
+      "npc": "TzHaar-Mej",
+      "item": "Uncut emerald",
+      "oneIn": 256,
+      "page": "TzHaar-Mej"
+    },
+    {
+      "npc": "TzHaar-Xil",
+      "item": "Obsidian cape",
+      "oneIn": 341.3333333333333,
+      "page": "TzHaar-Xil"
+    },
+    {
+      "npc": "TzHaar-Xil",
+      "item": "Toktz-xil-ak",
+      "oneIn": 682.6666666666666,
+      "page": "TzHaar-Xil"
+    },
+    {
+      "npc": "TzHaar-Xil",
+      "item": "Toktz-xil-ek",
+      "oneIn": 682.6666666666666,
+      "page": "TzHaar-Xil"
+    },
+    {
+      "npc": "TzHaar-Xil",
+      "item": "Toktz-xil-ul",
+      "oneIn": 512,
+      "page": "TzHaar-Xil"
+    },
+    {
+      "npc": "Undead Druid",
+      "item": "Mask of Ranul",
+      "oneIn": 1000,
+      "page": "Undead Druid"
+    },
+    {
+      "npc": "Undead Druid",
+      "item": "Zombie champion scroll",
+      "oneIn": 5000,
+      "page": "Undead Druid"
+    },
+    {
+      "npc": "Undead one",
+      "item": "Skeleton champion scroll",
+      "oneIn": 5000,
+      "page": "Undead one"
+    },
+    {
+      "npc": "Undead one",
+      "item": "Zombie champion scroll",
+      "oneIn": 5000,
+      "page": "Undead one"
+    },
+    {
+      "npc": "Vampyre Juvinate",
+      "item": "Staff of air",
+      "oneIn": 256,
+      "page": "Vampyre Juvinate"
+    },
+    {
+      "npc": "Vampyre Juvinate",
+      "item": "Staff of earth",
+      "oneIn": 256,
+      "page": "Vampyre Juvinate"
+    },
+    {
+      "npc": "Vorkath",
+      "item": "Draconic visage",
+      "oneIn": 5000,
+      "page": "Vorkath"
+    },
+    {
+      "npc": "Vorkath",
+      "item": "Dragonbone necklace",
+      "oneIn": 1000,
+      "page": "Vorkath"
+    },
+    {
+      "npc": "Vorkath",
+      "item": "Jar of Decay",
+      "oneIn": 3000,
+      "page": "Vorkath"
+    },
+    {
+      "npc": "Vorkath",
+      "item": "Skeletal visage",
+      "oneIn": 5000,
+      "page": "Vorkath"
+    },
+    {
+      "npc": "Vyrewatch",
+      "item": "Emerald bolt tips",
+      "oneIn": 1075.2,
+      "page": "Vyrewatch"
+    },
+    {
+      "npc": "Vyrewatch",
+      "item": "Jade bolt tips",
+      "oneIn": 1792,
+      "page": "Vyrewatch"
+    },
+    {
+      "npc": "Vyrewatch",
+      "item": "Onyx bolt tips",
+      "oneIn": 1792,
+      "page": "Vyrewatch"
+    },
+    {
+      "npc": "Vyrewatch",
+      "item": "Sapphire bolt tips",
+      "oneIn": 1792,
+      "page": "Vyrewatch"
+    },
+    {
+      "npc": "Vyrewatch",
+      "item": "Topaz bolt tips",
+      "oneIn": 1792,
+      "page": "Vyrewatch"
+    },
+    {
+      "npc": "Vyrewatch Sentinel",
+      "item": "Blood shard",
+      "oneIn": 1500,
+      "page": "Vyrewatch Sentinel"
+    },
+    {
+      "npc": "Vyrewatch Sentinel",
+      "item": "Emerald bolt tips",
+      "oneIn": 1041.6,
+      "page": "Vyrewatch Sentinel"
+    },
+    {
+      "npc": "Vyrewatch Sentinel",
+      "item": "Jade bolt tips",
+      "oneIn": 1736,
+      "page": "Vyrewatch Sentinel"
+    },
+    {
+      "npc": "Vyrewatch Sentinel",
+      "item": "Onyx bolt tips",
+      "oneIn": 1736,
+      "page": "Vyrewatch Sentinel"
+    },
+    {
+      "npc": "Vyrewatch Sentinel",
+      "item": "Sapphire bolt tips",
+      "oneIn": 1736,
+      "page": "Vyrewatch Sentinel"
+    },
+    {
+      "npc": "Vyrewatch Sentinel",
+      "item": "Topaz bolt tips",
+      "oneIn": 1736,
+      "page": "Vyrewatch Sentinel"
+    },
+    {
+      "npc": "Wall beast",
+      "item": "Mystic hat (light)",
+      "oneIn": 512,
+      "page": "Wall beast"
+    },
+    {
+      "npc": "Waterfiend",
+      "item": "Mist battlestaff",
+      "oneIn": 3000,
+      "page": "Waterfiend"
+    },
+    {
+      "npc": "Wingman Skree",
+      "item": "Armadyl chainskirt",
+      "oneIn": 16129,
+      "page": "Wingman Skree"
+    },
+    {
+      "npc": "Wingman Skree",
+      "item": "Armadyl chestplate",
+      "oneIn": 16129,
+      "page": "Wingman Skree"
+    },
+    {
+      "npc": "Wingman Skree",
+      "item": "Armadyl helmet",
+      "oneIn": 16129,
+      "page": "Wingman Skree"
+    },
+    {
+      "npc": "Wingman Skree",
+      "item": "Godsword shard 1",
+      "oneIn": 1524,
+      "page": "Wingman Skree"
+    },
+    {
+      "npc": "Wingman Skree",
+      "item": "Godsword shard 2",
+      "oneIn": 1524,
+      "page": "Wingman Skree"
+    },
+    {
+      "npc": "Wingman Skree",
+      "item": "Godsword shard 3",
+      "oneIn": 1524,
+      "page": "Wingman Skree"
+    },
+    {
+      "npc": "Wyrm",
+      "item": "Dragon harpoon",
+      "oneIn": 10000,
+      "page": "Wyrm",
+      "boost": {
+        "when": "slayer-task",
+        "oneIn": 2000
+      }
+    },
+    {
+      "npc": "Wyrm",
+      "item": "Dragon knife",
+      "oneIn": 10000,
+      "page": "Wyrm",
+      "boost": {
+        "when": "slayer-task",
+        "oneIn": 2000
+      }
+    },
+    {
+      "npc": "Wyrm",
+      "item": "Dragon sword",
+      "oneIn": 10000,
+      "page": "Wyrm",
+      "boost": {
+        "when": "slayer-task",
+        "oneIn": 2000
+      }
+    },
+    {
+      "npc": "Wyrm",
+      "item": "Dragon thrownaxe",
+      "oneIn": 10000,
+      "page": "Wyrm",
+      "boost": {
+        "when": "slayer-task",
+        "oneIn": 2000
+      }
+    },
+    {
+      "npc": "Zakl'n Gritch",
+      "item": "Godsword shard 1",
+      "oneIn": 1524,
+      "page": "Zakl'n Gritch"
+    },
+    {
+      "npc": "Zakl'n Gritch",
+      "item": "Godsword shard 2",
+      "oneIn": 1524,
+      "page": "Zakl'n Gritch"
+    },
+    {
+      "npc": "Zakl'n Gritch",
+      "item": "Godsword shard 3",
+      "oneIn": 1524,
+      "page": "Zakl'n Gritch"
+    },
+    {
+      "npc": "Zakl'n Gritch",
+      "item": "Lesser demon champion scroll",
+      "oneIn": 5000,
+      "page": "Zakl'n Gritch"
+    },
+    {
+      "npc": "Zakl'n Gritch",
+      "item": "Zamorakian spear",
+      "oneIn": 5376.333333333333,
+      "page": "Zakl'n Gritch"
+    },
+    {
+      "npc": "Zogre",
+      "item": "Zombie champion scroll",
+      "oneIn": 5000,
+      "page": "Zogre"
+    },
+    {
+      "npc": "Zombie pirate",
+      "item": "Zombie champion scroll",
+      "oneIn": 5000,
+      "page": "Zombie pirate"
+    },
+    {
+      "npc": "Zombie swab",
+      "item": "Zombie champion scroll",
+      "oneIn": 5000,
+      "page": "Zombie swab"
+    },
+    {
+      "npc": "Zulrah",
+      "item": "Jar of Swamp",
+      "oneIn": 3000,
+      "page": "Zulrah"
+    },
+    {
+      "npc": "Zulrah",
+      "item": "Magic fang",
+      "oneIn": 512.2501221299462,
+      "page": "Zulrah",
+      "rolls": 2,
+      "perRollOneIn": 1024
+    },
+    {
+      "npc": "Zulrah",
+      "item": "Magma mutagen",
+      "oneIn": 6553.7500095371015,
+      "page": "Zulrah",
+      "rolls": 2,
+      "perRollOneIn": 13107
+    },
+    {
+      "npc": "Zulrah",
+      "item": "Serpentine visage",
+      "oneIn": 512.2501221299462,
+      "page": "Zulrah",
+      "rolls": 2,
+      "perRollOneIn": 1024
+    },
+    {
+      "npc": "Zulrah",
+      "item": "Tanzanite fang",
+      "oneIn": 512.2501221299462,
+      "page": "Zulrah",
+      "rolls": 2,
+      "perRollOneIn": 1024
+    },
+    {
+      "npc": "Zulrah",
+      "item": "Tanzanite mutagen",
+      "oneIn": 6553.7500095371015,
+      "page": "Zulrah",
+      "rolls": 2,
+      "perRollOneIn": 13107
+    },
+    {
+      "npc": "Zulrah",
+      "item": "Uncut onyx",
+      "oneIn": 512.2501221299462,
+      "page": "Zulrah",
+      "rolls": 2,
+      "perRollOneIn": 1024
+    }
+  ]
+}

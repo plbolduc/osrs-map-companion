@@ -1,0 +1,1622 @@
+/*
+ * Copyright (c) 2026, pbolduc
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+package com.pbolduc.mapcompanion;
+
+import com.google.gson.Gson;
+import com.google.inject.Inject;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridLayout;
+import java.awt.Insets;
+import java.awt.Toolkit;
+import java.io.IOException;
+import java.time.chrono.IsoChronology;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.FormatStyle;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import javax.annotation.Nullable;
+import javax.swing.border.EmptyBorder;
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
+import lombok.extern.slf4j.Slf4j;
+import net.runelite.client.callback.ClientThread;
+import net.runelite.client.config.ConfigManager;
+import net.runelite.client.game.ItemManager;
+import net.runelite.client.ui.ColorScheme;
+import net.runelite.client.ui.PluginPanel;
+import net.runelite.client.util.LinkBrowser;
+
+/**
+ * The sidebar, kept deliberately small.
+ *
+ * <p>Everything interesting about this feature — the ranked slayer locations, the routes, the
+ * party, the meetups — lives on the map, where there is room for it and where it can be read on a
+ * second screen while the game has the first. Reproducing any of that here would mean two versions
+ * of the same answer, drifting.
+ *
+ * <p>So this answers only the questions that belong in the client: is it connected, what is being
+ * shared, and what has the map asked me to look at. Plus the one button that matters — a way to
+ * open the map — and a way to hand a friend the code.
+ *
+ * <p>Status and Open the map come first. Overview holds current facts and group actions; Sharing
+ * holds the group shortcuts and individual opt-ins. Advanced keeps the address, snapshot preview
+ * and reset actions out of the daily view. The connection field takes a complete
+ * RuneLite code or an existing invite; the suffix is internal state rather than a second field.
+ * Once paired, the field folds away until switching or reconnecting needs it.
+ *
+ * <p><b>Reading the clipboard is a button, never a background job.</b> Nothing here looks at the
+ * clipboard unless somebody pressed <i>Paste</i>, which is the same standard the invite button has
+ * always held to in the other direction — copying, not typing into the game.
+ *
+ * <p>Two of the buttons are about trust rather than about the map. <b>Show what's sent</b> prints
+ * the actual snapshot, built by the same code that would post it, because a plugin that claims to
+ * send only what a list says should be willing to show its working. <b>Leave group</b> is the
+ * other half of joining one: it clears the code, forgets the id this installation was known by
+ * along with every credential a map ever issued that id, and drops the group from the remembered
+ * list, so that leaving is a thing a player can do rather than a thing they have to trust was
+ * done.
+ */
+@Slf4j
+public class MapCompanionPanel extends PluginPanel
+{
+	/** Swing's, not ours: this panel is never serialised, and the constant only quiets the warning. */
+	private static final long serialVersionUID = 1L;
+
+	/**
+	 * The sidebar is 225 wide and this panel insets ten either side. Labels are told that width
+	 * explicitly because a JLabel does not wrap on its own — without it a long place name is not
+	 * shortened, it is simply cut off mid-word.
+	 */
+	private static final int TEXT_WIDTH = PluginPanel.PANEL_WIDTH - 30;
+
+	/** The same, inside a card, which takes eight pixels a side for its own inset. */
+	private static final int CARD_TEXT_WIDTH = TEXT_WIDTH - 16;
+
+	/** Long enough for a refused hop to be read before the next tick paints over it. */
+	private static final long HOP_MESSAGE_MS = 4_000L;
+
+	private final MapCompanionConfig config;
+	private final MapCompanionPlugin plugin;
+	private final DestinationState destinationState;
+	private final WorldHopper worldHopper;
+	private final LootLog lootLog;
+	private final DeathWatcher deathWatcher;
+	private final SnapshotBuilder snapshotBuilder;
+	private final ClientThread clientThread;
+	private final ConfigManager configManager;
+	private final MemberIdentity identity;
+	private final Pairing pairing;
+	private final Gson gson;
+	private final DestinationMarker destinationMarker;
+	private final RelayClient relay;
+	private final DirectiveStream directiveStream;
+
+	/* The status card: connection, group and a short summary; the snapshot preview is in Advanced. */
+	private final JLabel dot = new JLabel("●");
+	private final JLabel statusLabel = new JLabel();
+	private final JLabel groupLabel = new JLabel();
+	private final JLabel sharingLabel = new JLabel();
+	private final JButton previewButton = smallButton("Show what's sent");
+
+	/** The one filled button. See the constructor for why it is filled and nothing else is. */
+	private final JButton openMapButton = new JButton("Open the map");
+
+	/*
+	 * What is happening now: what the map asked for, and where you died. Each is a card that is
+	 * hidden while there is nothing in it, and the heading goes with the last of them — see
+	 * {@link #refresh}.
+	 */
+	private final JPanel fromMap = column(ColorScheme.DARK_GRAY_COLOR);
+	private final JLabel destinationName = new JLabel();
+	private final JLabel destinationDetail = new JLabel();
+	private final JPanel destinationActions = row(ColorScheme.DARKER_GRAY_COLOR);
+	private List<JButton> shownDestinationActions = new ArrayList<>();
+	private final JLabel eventWhen = new JLabel();
+	private final JLabel eventTitle = new JLabel();
+	private final JLabel deathLabel = new JLabel();
+	/**
+	 * The map at the tile where you died, which is the question the line above it raises.
+	 *
+	 * <p>Offered whether or not the death spot is shared, because it does not share it: the tile goes
+	 * into the address of a page opened in this reader's own browser, and only when they press this.
+	 * With sharing on, the group's map has the tile already and this is simply the short way to it.
+	 */
+	private final JButton deathMapButton = smallButton("Show on map");
+	private final JComponent destinationSlot;
+	private final JComponent eventSlot;
+	private final JComponent deathSlot;
+
+	/**
+	 * Only ever shown when a destination names a world <i>and</i> the reader has opted in. The hop
+	 * happens because this was pressed and for no other reason — see {@link WorldHopper}.
+	 */
+	private final JButton hopButton = smallButton("");
+
+	/** Hide the destination on this client. Does not tell the relay; see {@link DestinationState}. */
+	private final JButton dismissButton = smallButton("Dismiss");
+
+	/* Drop luck: one monster's card, or every monster tracked. See {@link DropLuckPanel}. */
+	private final JPanel drySection = column(ColorScheme.DARK_GRAY_COLOR);
+	private final DropLuckPanel dropLuck;
+	private final JLabel dropLuckPaused = new JLabel();
+
+	/*
+	 * The group: its invite and its switch when there is one, the join field when there is not.
+	 */
+	private final JLabel groupHeading = sectionHead("Group");
+	private final JPanel groupActions = row(ColorScheme.DARK_GRAY_COLOR);
+	private List<JButton> shownGroupActions = new ArrayList<>();
+	/**
+	 * A size down, like every other button that is not <i>Open the map</i>. At the default size
+	 * these two were as large as the one filled button, so its colour was the only thing marking
+	 * which of the three was the one to press.
+	 */
+	private final JButton copyInviteButton = smallButton("Copy invite");
+	/**
+	 * The remembered groups, as a menu rather than a column of buttons. They were one full-width
+	 * button each under their own heading, which on a player with three groups was four rows to
+	 * answer a question asked once a week. The list is read when the menu opens, so it cannot be
+	 * stale, and the group being posted to is in it, marked and disabled — the answer to "which
+	 * one am I in".
+	 */
+	private final JButton switchButton = smallButton("Switch ▾");
+	private final JButton joinToggle = linkButton("▸ Join another group");
+	private boolean joinOpen = false;
+	private boolean pendingConnectionMessage = false;
+	private final JPanel joinBlock;
+	private final CompanionViews views;
+	private final StarsPanel starsPanel;
+
+	/**
+	 * The join field, and what it says back.
+	 *
+	 * <p>One line of text and two buttons, in the order a player uses them. The message label is
+	 * hidden until there is something to say, because an empty label still takes a line — the same
+	 * lesson the destination card carries a comment about.
+	 */
+	private final JTextField joinField = new JTextField();
+	private final JButton pasteButton = smallButton("Paste");
+	private final JButton joinButton = smallButton("Connect");
+	private final JLabel joinMessage = new JLabel();
+
+	private final SharingControls sharingControls;
+	private final JTextField mapAddress = new JTextField();
+	private String displayedAddress;
+
+	/*
+	 * The reset actions live in Advanced: neither is a thing a player does every session.
+	 */
+	private final JPanel foot = row(ColorScheme.DARK_GRAY_COLOR);
+	private List<JButton> shownFoot = new ArrayList<>();
+	private final JButton leaveButton = smallButton("Leave group");
+	/** Only ever present once there is a log to forget. A log you cannot clear is one you cannot trust. */
+	private final JButton forgetLootButton = smallButton("Forget kill log");
+
+	/**
+	 * Ticks only while the sidebar is open.
+	 *
+	 * <p>Started from {@link #onActivate} and stopped from {@link #onDeactivate} rather than run
+	 * from the constructor forever. A Swing timer holds a strong reference to its listener, so the
+	 * constructor version kept this panel and everything it points at alive after the plugin was
+	 * turned off, and went on recomputing a status line nobody could see.
+	 */
+	private final Timer timer = new Timer(1000, e -> refresh());
+
+	/** When the refusal message may stop being shown. Zero when there is nothing to say. */
+	private long hopMessageUntilMs = 0L;
+
+	/** The world the hop button last said it would go to; a press goes there or nowhere. */
+	private int shownHopWorld;
+
+	/**
+	 * True while the map is being asked for an invite link.
+	 *
+	 * <p>The once-a-second refresh would otherwise re-enable the button under the cursor while the
+	 * request it started is still in flight, which is an invitation to send three of them.
+	 */
+	private boolean copyingInvite = false;
+
+	@Inject
+	private MapCompanionPanel(
+		MapCompanionConfig config,
+		MapCompanionPlugin plugin,
+		DestinationState destinationState,
+		WorldHopper worldHopper,
+		LootLog lootLog,
+		DeathWatcher deathWatcher,
+		SnapshotBuilder snapshotBuilder,
+		ClientThread clientThread,
+		ConfigManager configManager,
+		MemberIdentity identity,
+		Pairing pairing,
+		Gson gson,
+		DestinationMarker destinationMarker,
+		RelayClient relay,
+		DirectiveStream directiveStream,
+		ItemManager itemManager,
+		StarsClient starsClient)
+	{
+		this.config = config;
+		this.plugin = plugin;
+		this.destinationState = destinationState;
+		this.worldHopper = worldHopper;
+		this.lootLog = lootLog;
+		this.deathWatcher = deathWatcher;
+		this.snapshotBuilder = snapshotBuilder;
+		this.clientThread = clientThread;
+		this.configManager = configManager;
+		this.identity = identity;
+		this.pairing = pairing;
+		this.gson = gson;
+		this.destinationMarker = destinationMarker;
+		this.relay = relay;
+		this.directiveStream = directiveStream;
+		this.dropLuck = new DropLuckPanel(lootLog, DropLuckPanel.Pictures.of(itemManager));
+		this.starsPanel = new StarsPanel(starsClient, destinationState, config, clientThread, destinationMarker, this::hopToDestinationWorld);
+		this.sharingControls = new SharingControls(config, ConfigStore.of(configManager));
+
+		setLayout(new BorderLayout());
+		setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+		/*
+		 * No title. RuneLite's sidebar button already names the plugin, and the row it took is the
+		 * one the status card now starts on.
+		 */
+		JPanel body = column(ColorScheme.DARK_GRAY_COLOR);
+
+		/* The status card. Dot beside the sentence, so the state reads at a glance and again in words. */
+		JPanel status = card();
+		JPanel statusRow = new JPanel(new BorderLayout(6, 0));
+		statusRow.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		dot.setFont(dot.getFont().deriveFont(12f));
+		statusRow.add(dot, BorderLayout.WEST);
+		statusLabel.setFont(statusLabel.getFont().deriveFont(12f));
+		statusRow.add(statusLabel, BorderLayout.CENTER);
+		status.add(left(statusRow));
+		groupLabel.setFont(groupLabel.getFont().deriveFont(12f));
+		status.add(left(groupLabel));
+		sharingLabel.setFont(sharingLabel.getFont().deriveFont(11f));
+		sharingLabel.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+		status.add(left(sharingLabel));
+		previewButton.setToolTipText("Print the exact snapshot this plugin would send right now");
+		body.add(status);
+		body.add(gap(6, ColorScheme.DARK_GRAY_COLOR));
+
+		/*
+		 * The one button that matters, in the brand's colour, and the only filled one. It was the
+		 * first of seven identical grey buttons, and a panel where everything is a button of the same
+		 * weight is a panel with no answer to "what do I press".
+		 */
+		openMapButton.setBackground(ColorScheme.BRAND_ORANGE);
+		openMapButton.setForeground(Color.WHITE);
+		body.add(fill(openMapButton, ColorScheme.DARK_GRAY_COLOR));
+		body.add(gap(10, ColorScheme.DARK_GRAY_COLOR));
+
+		/* The connection is reachable from either view, including after changing the server. */
+		joinBlock = buildJoinBlock();
+		body.add(joinBlock);
+		body.add(left(joinMessage));
+		JPanel overview = column(ColorScheme.DARK_GRAY_COLOR);
+		overview.setName("companionOverview");
+
+		/*
+		 * Now: a destination with its hop and dismiss, a meetup, a death. "From the map" named two of
+		 * the three — the death is this client's own observation — so the heading says when rather
+		 * than where from, which is true of all of them.
+		 */
+		fromMap.add(sectionHead("Now"));
+		fromMap.add(gap(3, ColorScheme.DARK_GRAY_COLOR));
+		JPanel destination = card();
+		destinationName.setFont(destinationName.getFont().deriveFont(12f));
+		destination.add(left(destinationName));
+		destinationDetail.setFont(destinationDetail.getFont().deriveFont(11f));
+		destinationDetail.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+		destination.add(left(destinationDetail));
+		destination.add(gap(5, ColorScheme.DARKER_GRAY_COLOR));
+		destination.add(left(destinationActions));
+		destinationSlot = slot(destination);
+		fromMap.add(destinationSlot);
+		JPanel meetup = card();
+		eventWhen.setFont(eventWhen.getFont().deriveFont(12f));
+		meetup.add(left(eventWhen));
+		eventTitle.setFont(eventTitle.getFont().deriveFont(11f));
+		eventTitle.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+		meetup.add(left(eventTitle));
+		eventSlot = slot(meetup);
+		fromMap.add(eventSlot);
+		/*
+		 * The death in the same ink and size as the destination and the meetup above it, with its own
+		 * action, rather than a line of 11px red. Red here says "error", and nothing has gone wrong
+		 * with the plugin; the map's panel keeps red for refusals and prints this line plainly too.
+		 */
+		JPanel death = card();
+		deathLabel.setFont(deathLabel.getFont().deriveFont(12f));
+		death.add(left(deathLabel));
+		death.add(gap(5, ColorScheme.DARKER_GRAY_COLOR));
+		/* The card's width, as Dismiss is in the card above: the same shape for "act on this card". */
+		JPanel deathActions = row(ColorScheme.DARKER_GRAY_COLOR);
+		deathActions.add(deathMapButton);
+		death.add(left(deathActions));
+		deathSlot = slot(death);
+		fromMap.add(deathSlot);
+		fromMap.add(gap(7, ColorScheme.DARK_GRAY_COLOR));
+		overview.add(fromMap);
+
+		/* Drop luck works with no pairing code set, so it sits above everything the group needs. */
+		drySection.add(sectionHead("Drop luck"));
+		drySection.add(gap(3, ColorScheme.DARK_GRAY_COLOR));
+		dropLuckPaused.setFont(dropLuckPaused.getFont().deriveFont(11f));
+		dropLuckPaused.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+		setWrapped(dropLuckPaused, LootLog.PAUSED);
+		drySection.add(left(dropLuckPaused));
+		drySection.add(dropLuck);
+		drySection.add(gap(10, ColorScheme.DARK_GRAY_COLOR));
+		overview.add(drySection);
+
+		overview.add(groupHeading);
+		overview.add(gap(3, ColorScheme.DARK_GRAY_COLOR));
+		overview.add(left(groupActions));
+		overview.add(joinToggle);
+		JPanel sharing = column(ColorScheme.DARK_GRAY_COLOR);
+		sharing.setName("companionSharing");
+		sharing.add(sectionHead("What to share"));
+		sharing.add(sharingControls);
+		views = new CompanionViews(overview, sharing, starsPanel, starsPanel::selected);
+		body.add(views);
+
+		body.add(buildAdvanced());
+
+		openMapButton.addActionListener(e -> LinkBrowser.browse(mapUrl() + "/map?task=companion"));
+		pasteButton.setToolTipText("Read the clipboard. Only ever when you press this.");
+		pasteButton.addActionListener(e -> pasteIntoJoinField());
+		joinButton.addActionListener(e -> joinFromField());
+		copyInviteButton.addActionListener(e -> copyInvite());
+		switchButton.addActionListener(e -> showGroupMenu());
+		joinToggle.addActionListener(e ->
+		{
+			joinOpen = !joinOpen;
+			refresh();
+		});
+		previewButton.addActionListener(e -> showSnapshotPreview());
+		deathMapButton.addActionListener(e -> showDeathOnMap());
+		leaveButton.addActionListener(e -> leaveGroup());
+		hopButton.addActionListener(e -> hopToDestinationWorld());
+		dismissButton.setToolTipText("Hide this destination on this client. The map is not told.");
+		dismissButton.addActionListener(e ->
+		{
+			destinationState.dismiss();
+			destinationMarker.sync();
+			refresh();
+		});
+		forgetLootButton.addActionListener(e ->
+		{
+			lootLog.clear();
+			refresh();
+		});
+
+		add(body, BorderLayout.NORTH);
+
+		refresh();
+	}
+
+	/**
+	 * A second's refresh is enough for a status line, and only while somebody is looking at it.
+	 *
+	 * <p>The plugin does its own work on game ticks; this only reads what that published, so it can
+	 * afford to be lazy, and to stop entirely when the sidebar is closed.
+	 */
+	@Override
+	public void onActivate()
+	{
+		starsPanel.active(true);
+		refresh();
+		timer.start();
+	}
+
+	@Override
+	public void onDeactivate()
+	{
+		starsPanel.active(false);
+		timer.stop();
+	}
+
+	/** Also called when the plugin shuts down, in case the sidebar was never opened or closed. */
+	void stopRefreshing()
+	{
+		starsPanel.active(false);
+		timer.stop();
+	}
+
+	/**
+	 * Pin a child to the left edge of the vertical stack.
+	 *
+	 * <p>A BoxLayout aligns its children by their own alignmentX, and JComponent's default is 0.5 —
+	 * centred. Every row here is a left-edge row, so saying so once per child is what keeps the
+	 * title, the status line and the buttons on the same margin instead of each finding its own.
+	 */
+	private static <T extends JComponent> T left(T component)
+	{
+		component.setAlignmentX(Component.LEFT_ALIGNMENT);
+		return component;
+	}
+
+	private static JPanel gap(int height, Color background)
+	{
+		JPanel spacer = new JPanel();
+		spacer.setBackground(background);
+		spacer.setPreferredSize(new Dimension(1, height));
+		spacer.setMaximumSize(new Dimension(Integer.MAX_VALUE, height));
+		return left(spacer);
+	}
+
+	/** A vertical stack whose children keep the left margin — see {@link #left}. */
+	private static JPanel column(Color background)
+	{
+		JPanel column = new JPanel();
+		column.setLayout(new BoxLayout(column, BoxLayout.Y_AXIS));
+		column.setBackground(background);
+		return left(column);
+	}
+
+	/**
+	 * A block of the darker grey RuneLite's own panels group things with — the loot tracker's
+	 * boxes, the XP tracker's — so a fact and the action that belongs to it read as one thing.
+	 */
+	private static JPanel card()
+	{
+		JPanel card = column(ColorScheme.DARKER_GRAY_COLOR);
+		card.setBorder(new EmptyBorder(7, 8, 7, 8));
+		return card;
+	}
+
+	/**
+	 * A card with the three pixels under it that separate it from the next, in one piece, so that
+	 * hiding a card hides its gap too — a gap left behind by a hidden card is a hole in the column.
+	 */
+	private static JComponent slot(JPanel card)
+	{
+		JPanel slot = new JPanel(new BorderLayout());
+		slot.setBackground(ColorScheme.DARK_GRAY_COLOR);
+		slot.setBorder(new EmptyBorder(0, 0, 3, 0));
+		slot.add(card, BorderLayout.CENTER);
+		return left(slot);
+	}
+
+	/** Buttons side by side, sharing the width equally — however many of them are showing. */
+	private static JPanel row(Color background)
+	{
+		JPanel row = new JPanel(new GridLayout(1, 0, 4, 0));
+		row.setBackground(background);
+		return row;
+	}
+
+	/** One component the full width of the column, at its own height. */
+	private static JPanel fill(JComponent component, Color background)
+	{
+		JPanel holder = new JPanel(new GridLayout(1, 1));
+		holder.setBackground(background);
+		holder.add(component);
+		holder.setMaximumSize(new Dimension(Integer.MAX_VALUE, component.getPreferredSize().height));
+		return left(holder);
+	}
+
+	/** One component at its own width, on the left. */
+	private static JPanel hug(JComponent component, Color background)
+	{
+		JPanel holder = new JPanel(new BorderLayout());
+		holder.setBackground(background);
+		holder.add(component, BorderLayout.WEST);
+		holder.setMaximumSize(new Dimension(Integer.MAX_VALUE, component.getPreferredSize().height));
+		return left(holder);
+	}
+
+	/** A section's name: bold, small and grey, the way the old join heading was. */
+	private static JLabel sectionHead(String text)
+	{
+		JLabel heading = new JLabel(text);
+		heading.setFont(heading.getFont().deriveFont(Font.BOLD, 11f));
+		heading.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+		return left(heading);
+	}
+
+	/** A button a size down, for the actions that sit inside a card or beside a field. */
+	private static JButton smallButton(String text)
+	{
+		JButton button = new JButton(text);
+		button.setFont(button.getFont().deriveFont(11f));
+		button.setMargin(new Insets(1, 6, 1, 6));
+		return button;
+	}
+
+	/** A button that reads as a line of text, for a fold's own opener. */
+	private static JButton linkButton(String text)
+	{
+		JButton button = new JButton(text);
+		button.setFont(button.getFont().deriveFont(11f));
+		button.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+		button.setBorderPainted(false);
+		button.setContentAreaFilled(false);
+		button.setHorizontalAlignment(SwingConstants.LEFT);
+		button.setBorder(BorderFactory.createEmptyBorder(3, 0, 3, 0));
+		button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		return left(button);
+	}
+
+	/** A full-width code field, then Paste and Connect, in the order the reader uses them. */
+	private JPanel buildJoinBlock()
+	{
+		JPanel block = column(ColorScheme.DARK_GRAY_COLOR);
+		block.add(sectionHead("Connection code"));
+		joinField.setToolTipText("Paste your full connection code from the map's Companion panel");
+		joinField.putClientProperty("JTextField.placeholderText", "Connection code");
+		joinField.addActionListener(e -> joinFromField());
+		block.add(fill(joinField, ColorScheme.DARK_GRAY_COLOR));
+		block.add(gap(4, ColorScheme.DARK_GRAY_COLOR));
+		JPanel buttons = row(ColorScheme.DARK_GRAY_COLOR);
+		buttons.add(pasteButton);
+		buttons.add(joinButton);
+		block.add(left(buttons));
+		joinMessage.setFont(joinMessage.getFont().deriveFont(11f));
+		joinMessage.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+		joinMessage.setVisible(false);
+		return left(block);
+	}
+
+	/** The actual address is editable here; there is no second default or explanatory footnote. */
+	private JPanel buildAdvanced()
+	{
+		JPanel contents = column(ColorScheme.DARK_GRAY_COLOR);
+		contents.add(sectionHead("Map address"));
+		mapAddress.setText(config.relayUrl());
+		mapAddress.addActionListener(e -> applyMapAddress());
+		contents.add(fill(mapAddress, ColorScheme.DARK_GRAY_COLOR));
+		JButton apply = smallButton("Apply");
+		apply.addActionListener(e -> applyMapAddress());
+		contents.add(hug(apply, ColorScheme.DARK_GRAY_COLOR));
+		contents.add(gap(8, ColorScheme.DARK_GRAY_COLOR));
+		contents.add(hug(previewButton, ColorScheme.DARK_GRAY_COLOR));
+		contents.add(gap(8, ColorScheme.DARK_GRAY_COLOR));
+		contents.add(left(foot));
+		return SharingControls.fold("Advanced", contents);
+	}
+
+	private boolean applyMapAddress()
+	{
+		String server = Pairing.normalizeServer(mapAddress.getText());
+		if (server == null)
+		{
+			say("Enter an https:// map address without a login, query or fragment.");
+			return false;
+		}
+		mapAddress.setText(server);
+		if (!server.equals(pairing.serverUrl()))
+		{
+			configManager.setConfiguration(MapCompanionConfig.GROUP, MapCompanionConfig.KEY_RELAY_URL, server);
+			joinOpen = true;
+			say("Map address changed. Press Connect.");
+			refresh();
+		}
+		return true;
+	}
+
+	private boolean confirmServer()
+	{
+		return JOptionPane.showOptionDialog(this,
+			"Connect to " + pairing.serverUrl() + "?\n\n"
+			+ MapCompanionConfig.NETWORK_WARNING + ".\n\n"
+			+ "Connecting sends a random member ID, a random key for this\n"
+			+ "RuneLite, your name to show and the connection code.\n"
+			+ "Selected sharing data is sent while logged in and is\n"
+			+ "visible to your group's members.\n\n"
+			+ "You can change sharing or leave the group in this sidebar.",
+			"Connect to the map", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE,
+			null, new Object[]{"Connect", "Cancel"}, "Cancel") == JOptionPane.OK_OPTION;
+	}
+
+	/**
+	 * Read the clipboard, once, because somebody pressed the button.
+	 *
+	 * <p>It fills the field rather than joining, so an accidental press cannot move somebody out of
+	 * the group they are in — and it says what it found, because a paste that silently did nothing
+	 * is indistinguishable from a paste that worked.
+	 */
+	private void pasteIntoJoinField()
+	{
+		String pasted = null;
+		try
+		{
+			Transferable contents = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
+			if (contents != null && contents.isDataFlavorSupported(DataFlavor.stringFlavor))
+			{
+				pasted = (String) contents.getTransferData(DataFlavor.stringFlavor);
+			}
+		}
+		catch (IOException | UnsupportedFlavorException | RuntimeException e)
+		{
+			/** A clipboard held by another application, or holding a file. Not worth a stack trace. */
+			log.debug("could not read the clipboard", e);
+		}
+
+		if (pasted == null || pasted.trim().isEmpty())
+		{
+			say("There is nothing to paste.");
+			return;
+		}
+		joinField.setText(pasted.trim());
+		JoinCode found = JoinCode.parse(pasted);
+		say(found == null
+			? "No connection code found. Copy it from the map's Companion panel."
+			: "Found " + JoinCode.forDisplay(found.code) + ". Press Connect.");
+	}
+
+	/**
+	 * Join whatever is in the field.
+	 *
+	 * <p>Everything that makes this work is in {@link JoinCode}; this is the half that has to be
+	 * honest when it fails. One sentence, naming both things that are accepted, because "invalid
+	 * input" tells somebody holding a Discord message nothing at all.
+	 */
+	private void joinFromField()
+	{
+		if (!applyMapAddress())
+		{
+			return;
+		}
+		String entered = joinField.getText().trim();
+		JoinCode joined = JoinCode.parse(entered.isEmpty() ? pairingCode() : entered);
+		if (joined == null)
+		{
+			say("Paste your connection code from the map's Companion panel.");
+			return;
+		}
+		if (!pairing.connect(joined, this::confirmServer))
+		{
+			say("Connection cancelled.");
+			return;
+		}
+		joinField.setText("");
+		joinOpen = false;
+		say("Connecting to " + pairing.serverLabel() + "… Waiting for the map.");
+		pendingConnectionMessage = true;
+		refresh();
+	}
+
+	/** One line under the join field, hidden when there is nothing to say. */
+	private void say(String message)
+	{
+		pendingConnectionMessage = false;
+		setWrapped(joinMessage, message);
+		joinMessage.setVisible(true);
+	}
+
+	/**
+	 * The remembered groups, as a menu under the button that opened it.
+	 *
+	 * <p>Built at the press rather than kept up to date, because the list is only ever read here:
+	 * the old column of buttons was rebuilt whenever the list or the active code changed so that a
+	 * row would not move under the cursor, and a menu that exists only while it is open has no such
+	 * problem. The group currently being posted to is in it, marked and disabled.
+	 *
+	 * <p>Each group by the name the map last sent for it, beside its code — see {@link #groupLabel}.
+	 */
+	private void showGroupMenu()
+	{
+		String active = pairingCode();
+		JPopupMenu menu = new JPopupMenu();
+		for (String code : pairing.knownCodes())
+		{
+			boolean current = code.equalsIgnoreCase(active);
+			String label = groupLabel(code, pairing.name(code));
+			JMenuItem item = groupMenuItem((current ? "● " : "") + label);
+			if (current)
+			{
+				item.setEnabled(false);
+			}
+			else
+			{
+				item.setToolTipText("Post to this group instead. One group at a time, like a party.");
+				item.addActionListener(e ->
+				{
+					if (!pairing.connect(JoinCode.parse(code), this::confirmServer))
+					{
+						return;
+					}
+					say("Connecting to " + label + "… Waiting for the map.");
+					pendingConnectionMessage = true;
+					refresh();
+				});
+			}
+			menu.add(item);
+		}
+		/*
+		 * Hung from the button's right edge, so it opens into the sidebar. Names made it wider than
+		 * the button, and hung from the left edge the way a column of codes could be, it ran off the
+		 * sidebar's right side.
+		 */
+		menu.show(switchButton, switchButton.getWidth() - menu.getPreferredSize().width, switchButton.getHeight());
+	}
+
+	/**
+	 * One group as the menu says it: "Sunday raids · KQX 482", or the code alone.
+	 *
+	 * <p>The code stays beside the name because it is what the status line prints and what a friend
+	 * is told to type; the name is what a person recognises. A name that is only the code — what the
+	 * map calls an adopted legacy group until its owner names it — is not printed twice, and a group
+	 * the map has not named is its code, which is all this menu used to say about any of them.
+	 */
+	static String groupLabel(String code, @Nullable String name)
+	{
+		String printed = JoinCode.forDisplay(code);
+		if (name == null || name.replace(" ", "").equalsIgnoreCase(code.replace(" ", "")))
+		{
+			return printed;
+		}
+		return name + " · " + printed;
+	}
+
+	/**
+	 * A menu row that shows its words as words.
+	 *
+	 * <p>A Swing menu item renders any text that starts with {@code <html>} as markup, and a group's
+	 * name is whatever its owner typed on the map — so a name could lay out anything inside this
+	 * client, or load an image from anywhere. {@code html.disable} is Swing's own switch for that,
+	 * and it is set before the text because the renderer is chosen when the text is. The wrapped
+	 * labels elsewhere in this panel escape instead ({@link #setWrapped}); a menu row has no width to
+	 * wrap to, so it has no reason to be markup at all.
+	 */
+	static JMenuItem groupMenuItem(String text)
+	{
+		JMenuItem item = new JMenuItem();
+		item.putClientProperty("html.disable", Boolean.TRUE);
+		item.setText(text);
+		return item;
+	}
+
+	/**
+	 * The group as the status line says it: the name alone once the map has sent one, else the code.
+	 *
+	 * <p>Not {@link #groupLabel}'s "name · code". The line is the card's width less the dot, and the
+	 * code is the half of that pair nobody recognises, so on this line it is the tooltip. A name
+	 * that is only the code — an adopted legacy group's, until its owner renames it — is printed as
+	 * the code.
+	 */
+	static String statusGroup(String code, @Nullable String name)
+	{
+		if (name == null || name.trim().isEmpty()
+			|| name.replace(" ", "").equalsIgnoreCase(code.replace(" ", "")))
+		{
+			return JoinCode.forDisplay(code);
+		}
+		return name;
+	}
+
+	/**
+	 * When a meetup is, the way somebody would say it: "Meetup in 45m", "Meetup in 3h 20m", "Meetup
+	 * tomorrow 6:42 AM", then the world when the map named one, " · W444".
+	 *
+	 * <p>It said "Meetup in 1560m", which nobody reads as a time. Under twelve hours this is the
+	 * countdown the map's own meetup card prints. Past that a countdown is the wrong answer: what a
+	 * player needs is the day and the clock in their own zone, which is also what they will say to
+	 * the rest of the group. The day is a weekday within the week and a date past it, as the map's
+	 * feed names its days, because a weekday that could mean either of two weeks is a guess.
+	 *
+	 * <p>The clock counts twelve hours or twenty-four as the reader's locale does, but is written
+	 * from a plain pattern rather than the locale's own: Java's English one now puts a narrow
+	 * no-break space before "AM", and the sidebar's font has no glyph for it.
+	 */
+	static String meetupWhen(long startsAtMs, long nowMs, ZoneId zone, Locale locale, @Nullable Integer world)
+	{
+		long minutes = Math.round((startsAtMs - nowMs) / 60_000.0);
+		String when;
+		if (minutes <= 0)
+		{
+			when = "Meetup now";
+		}
+		else if (minutes < 60)
+		{
+			when = "Meetup in " + minutes + "m";
+		}
+		else if (minutes < 12 * 60)
+		{
+			long rest = minutes % 60;
+			when = "Meetup in " + (minutes / 60) + "h" + (rest == 0 ? "" : " " + rest + "m");
+		}
+		else
+		{
+			ZonedDateTime at = Instant.ofEpochMilli(startsAtMs).atZone(zone);
+			long days = ChronoUnit.DAYS.between(
+							Instant.ofEpochMilli(nowMs).atZone(zone).toLocalDate(), at.toLocalDate());
+			String day = days == 0 ? "today"
+						 : days == 1 ? "tomorrow"
+						 : days < 7 ? at.format(DateTimeFormatter.ofPattern("EEE", Locale.ENGLISH))
+						 : at.format(DateTimeFormatter.ofPattern("d MMM", Locale.ENGLISH));
+			when = "Meetup " + day + " "
+				   + at.format(DateTimeFormatter.ofPattern(clockPattern(locale), Locale.ENGLISH));
+		}
+		return world == null ? when : when + " · W" + world;
+	}
+
+	/** "h:mm a" where the locale's own short time counts twelve hours, "HH:mm" where it counts twenty-four. */
+	static String clockPattern(Locale locale)
+	{
+		String localized = DateTimeFormatterBuilder.getLocalizedDateTimePattern(
+							   null, FormatStyle.SHORT, IsoChronology.INSTANCE, locale);
+		return localized.contains("h") || localized.contains("K") ? "h:mm a" : "HH:mm";
+	}
+
+	/**
+	 * "You died 7m ago", and the floor when it was not the ground, which the map's own panel says
+	 * too: a tile upstairs is a different walk from the one under it.
+	 */
+	static String deathLine(long msAgo, int plane)
+	{
+		long minutes = msAgo / 60_000L;
+		return "You died " + (minutes < 1 ? "just now" : minutes + "m ago")
+			   + (plane > 0 ? " on floor " + plane : "");
+	}
+
+	/** The tile for the tooltip: "3222, 3218", with "(floor 1)" after it when it is upstairs. */
+	static String deathTile(int x, int y, int plane)
+	{
+		return x + ", " + y + (plane > 0 ? " (floor " + plane + ")" : "");
+	}
+
+	/**
+	 * The map's pinned-tile grammar carries the floor as a third coordinate. A death on an upper
+	 * storey cannot be inferred from its x/y, and must not borrow the place or route below it.
+	 */
+	static String deathMapPath(int x, int y, int plane)
+	{
+		return "/map?p=" + x + "," + y + "," + plane;
+	}
+
+	/**
+	 * Open that path in the reader's browser.
+	 *
+	 * <p>The death is read again at the press rather than taken from the label, because it can age
+	 * out between a paint and a click, and a link to a tile the sidebar has just stopped showing
+	 * would be the wrong answer delivered confidently.
+	 */
+	private void showDeathOnMap()
+	{
+		CompanionSnapshot.Death death = deathWatcher.snapshot(System.currentTimeMillis());
+		if (death != null)
+		{
+			LinkBrowser.browse(mapUrl() + deathMapPath(death.tile.x, death.tile.y, death.tile.plane));
+		}
+	}
+
+	private void refresh()
+	{
+		SwingUtilities.invokeLater(() ->
+		{
+			starsPanel.refresh();
+			Health health = plugin.getHealth();
+			String code = pairingCode();
+			boolean paired = !code.isEmpty();
+			boolean ready = paired && pairing.hasServerConsent();
+			if (pendingConnectionMessage && ready && relay.isEverSucceeded())
+			{
+				joinMessage.setVisible(false);
+				pendingConnectionMessage = false;
+			}
+
+			dot.setForeground(health.getColor());
+			dot.setToolTipText(plugin.getStatus()
+							   + " · last post " + ageOf(relay.getLastSuccessMs())
+							   + (directiveStream.isConnected() ? " · stream open" : " · stream closed"));
+			/* Connection and group each get a line; a long server name cannot bury either. */
+			setWrapped(statusLabel,
+					   paired && !ready ? "Press Connect" : health == Health.LIVE && ready ? "Connected" : plugin.getStatus(),
+					   CARD_TEXT_WIDTH - 18);
+			statusLabel.setToolTipText(dot.getToolTipText());
+			setWrapped(groupLabel, paired ? statusGroup(code, pairing.name(code)) : pairing.serverLabel(), CARD_TEXT_WIDTH);
+			groupLabel.setToolTipText(paired ? "Group code " + JoinCode.forDisplay(code) : null);
+
+			/*
+			 * Character fields are separate from membership: all opt-ins off still sends the latter
+			 * after Connect. The tooltip and Advanced preview keep the precise disclosure reachable.
+			 */
+			setWrapped(sharingLabel, ready ? sharingLine() : "Character sharing paused", CARD_TEXT_WIDTH);
+			sharingLabel.setToolTipText(paired ? sharingList() : null);
+
+			RelayResponse.Destination destination = destinationState.getDestination();
+			/*
+			 * Hidden rather than blanked. A label holding a space still takes a line, which is how
+			 * the sidebar ended up with gaps where nothing was ever going to be written — and the
+			 * same goes for a card, whose padding is a line's worth of nothing.
+			 */
+			destinationSlot.setVisible(destination != null);
+			if (destination != null)
+			{
+				setWrapped(destinationName, destination.name, CARD_TEXT_WIDTH);
+				String detail = destinationDetail(destination);
+				destinationDetail.setVisible(!detail.isEmpty());
+				setWrapped(destinationDetail, detail, CARD_TEXT_WIDTH);
+			}
+			updateHopLabel(destination);
+			List<JButton> actions = new ArrayList<>();
+			if (canOfferHop(destination))
+			{
+				actions.add(hopButton);
+			}
+			actions.add(dismissButton);
+			shownDestinationActions = syncRow(destinationActions, actions, shownDestinationActions);
+
+			RelayResponse.Event event = destinationState.getEvent();
+			eventSlot.setVisible(event != null);
+			long now = System.currentTimeMillis();
+			if (event != null)
+			{
+				setWrapped(eventWhen, meetupWhen(event.startsAtMs, now, ZoneId.systemDefault(),
+												 Locale.getDefault(Locale.Category.FORMAT), event.world), CARD_TEXT_WIDTH);
+				setWrapped(eventTitle, event.title, CARD_TEXT_WIDTH);
+			}
+
+			CompanionSnapshot.Death death = deathWatcher.snapshot(now);
+			deathSlot.setVisible(death != null);
+			if (death != null)
+			{
+				setWrapped(deathLabel, deathLine(death.msAgo, death.tile.plane), CARD_TEXT_WIDTH);
+				/**
+				 * The tile moves into the tooltip, as it did on the map's panel: a coordinate pair is
+				 * a fact nobody can act on — there is nowhere in the game to type one — and the button
+				 * under it does the one thing anybody wanted it for.
+				 */
+				deathLabel.setToolTipText(deathTile(death.tile.x, death.tile.y, death.tile.plane));
+				deathMapButton.setToolTipText(config.shareDeath()
+											  ? "Open the map at the tile where you died"
+											  : "Open the map at the tile where you died. Sharing it is off, so it leaves this "
+											  + "client only in the address of the page this opens, and only when you press it.");
+			}
+			/** The heading goes with the last card under it, rather than naming nothing. */
+			fromMap.setVisible(destination != null || event != null || death != null);
+
+			/* Redraws only when its words change, so a click or a search is never painted over. */
+			boolean paused = LootLog.PAUSED.equals(lootLog.summary());
+			dropLuck.refresh();
+			dropLuckPaused.setVisible(paused);
+			drySection.setVisible(paused || dropLuck.hasContent());
+
+			/*
+			 * The group. In one: its invite, and the switch when there is anywhere to switch to. In
+			 * none: the join field outright, and the remembered groups under their own name.
+			 */
+			List<String> known = pairing.knownCodes();
+			boolean others = known.stream().anyMatch(c -> !c.equalsIgnoreCase(code));
+			groupHeading.setVisible(paired);
+			copyInviteButton.setEnabled(paired && pairing.hasServerConsent() && !copyingInvite);
+			switchButton.setText(paired ? "Switch ▾" : "Your groups ▾");
+			List<JButton> groupRow = new ArrayList<>();
+			if (paired)
+			{
+				groupRow.add(copyInviteButton);
+			}
+			if (others)
+			{
+				groupRow.add(switchButton);
+			}
+			shownGroupActions = syncRow(groupActions, groupRow, shownGroupActions);
+			groupActions.setVisible(!groupRow.isEmpty());
+			joinToggle.setVisible(paired);
+			joinToggle.setText(joinOpen ? "▾ Join another group" : "▸ Join another group");
+			joinBlock.setVisible(!paired || !pairing.hasServerConsent() || joinOpen);
+
+			sharingControls.refresh();
+			String configuredAddress = config.relayUrl();
+			if (!java.util.Objects.equals(displayedAddress, configuredAddress))
+			{
+				displayedAddress = configuredAddress;
+				mapAddress.setText(configuredAddress == null ? MapCompanionConfig.DEFAULT_MAP_URL : configuredAddress);
+			}
+
+			List<JButton> footRow = new ArrayList<>();
+			if (paired)
+			{
+				footRow.add(leaveButton);
+			}
+			if (lootLog.hasLog())
+			{
+				footRow.add(forgetLootButton);
+			}
+			shownFoot = syncRow(foot, footRow, shownFoot);
+			foot.setVisible(!footRow.isEmpty());
+		});
+	}
+
+	/**
+	 * Put a row of buttons in one known order, and only touch it when that order changes.
+	 *
+	 * <p>A grid appends, so a button that comes back after being hidden would come back at the end
+	 * of the row instead of where the player last saw it; comparing the whole list and rebuilding
+	 * in one fixed order costs nothing at one refresh a second and keeps the layout still. It was
+	 * one row of seven, which is where the rule was learned; it is three short rows now, each
+	 * beside the facts it acts on, and the rule is the same.
+	 */
+	private static List<JButton> syncRow(JPanel row, List<JButton> wanted, List<JButton> shown)
+	{
+		if (wanted.equals(shown))
+		{
+			return shown;
+		}
+		row.removeAll();
+		for (JButton button : wanted)
+		{
+			row.add(button);
+		}
+		row.setMaximumSize(new Dimension(Integer.MAX_VALUE, row.getPreferredSize().height));
+		row.revalidate();
+		row.repaint();
+		return wanted;
+	}
+
+	/**
+	 * Three things must be true before a hop is even offered: the reader opted in, the destination
+	 * actually names a world, and there is a destination at all. Anything less and the button is
+	 * either unwanted or a no-op.
+	 */
+	private boolean canOfferHop(@Nullable RelayResponse.Destination destination)
+	{
+		return config.enableWorldHop() && destination != null && destination.world != null;
+	}
+
+	/** Label the one button that can act, without disturbing a refusal message still being read. */
+	private void updateHopLabel(@Nullable RelayResponse.Destination destination)
+	{
+		/* A refusal is only known once the client has read the world's type, a tick after the press. */
+		String refused = destination == null || destination.world == null ? null : worldHopper.takeRefusal(destination.world);
+		if (refused != null)
+		{
+			hopButton.setText(refused);
+			hopMessageUntilMs = System.currentTimeMillis() + HOP_MESSAGE_MS;
+			return;
+		}
+		if (!canOfferHop(destination) || System.currentTimeMillis() < hopMessageUntilMs)
+		{
+			return;
+		}
+		hopButton.setText(worldHopper.isHopPending() ? "Hopping…" : "Hop to W" + destination.world);
+		shownHopWorld = destination.world;
+	}
+
+	/**
+	 * Ask to hop, and say so if the client refuses.
+	 *
+	 * <p>This is the only path to {@link WorldHopper#requestHop}, and it starts at a button. The
+	 * map can put a world on the screen; nothing it sends can reach this method.
+	 */
+	private boolean hopToDestinationWorld()
+	{
+		RelayResponse.Destination destination = destinationState.getDestination();
+		if (destination == null || destination.world == null)
+		{
+			return false;
+		}
+		if (shownHopWorld != destination.world)
+		{
+			/*
+			 * The group's destination moved between the label being drawn and the press. Hop only
+			 * to a world the player saw; the next refresh shows the new one.
+			 */
+			return false;
+		}
+		if (!worldHopper.requestHop(destination.world))
+		{
+			/*
+			 * Refused: logged out, or already there. The message is held for a few seconds because
+			 * the refresh above it runs every second and would otherwise erase the explanation
+			 * before it had been read — a button that appears to do nothing, twice over.
+			 */
+			hopButton.setText("Can't hop right now");
+			hopMessageUntilMs = System.currentTimeMillis() + HOP_MESSAGE_MS;
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Show the snapshot that would go out, built by the code that would build it.
+	 *
+	 * <p>Not a description of the wire format and not a second implementation of one: this calls
+	 * {@link SnapshotBuilder} exactly as the game tick does, so anything the toggles let through is
+	 * visible here and anything they do not cannot appear. The README asks a reviewer to read two
+	 * files and believe them; this asks nobody to believe anything.
+	 *
+	 * <p>Built on the client thread because every field in it is live game state, then handed back to
+	 * Swing to be shown.
+	 */
+	private void showSnapshotPreview()
+	{
+		clientThread.invoke(() ->
+		{
+			String json;
+			try
+			{
+				CompanionSnapshot snapshot = snapshotBuilder.build(System.currentTimeMillis());
+				json = snapshot == null
+				? null
+				: gson.newBuilder().setPrettyPrinting().create().toJson(snapshot);
+			}
+			catch (RuntimeException e)
+			{
+				log.debug("could not build a preview snapshot", e);
+				json = null;
+			}
+			String finished = json;
+			SwingUtilities.invokeLater(() -> presentPreview(finished));
+		});
+	}
+
+	private void presentPreview(@Nullable String json)
+	{
+		String header = pairingCode().isEmpty() || !pairing.hasServerConsent()
+						? "Not connected to the selected server, so this is a preview of what would go out if "
+						+ "you pressed Connect.\n\n"
+						: "This is what goes out, every couple of seconds, to " + mapUrl() + ".\n\n";
+		/*
+		 * The body is not quite the whole request, and the difference is a header — so it is
+		 * printed here rather than left as the one thing this window does not show. It stops being
+		 * sent the moment the map says it has connected this installation to a browser.
+		 */
+		String suffix = pairing.suffix();
+		if (suffix != null)
+		{
+			header += "It also carries your RuneLite code, " + pairingCode() + "-" + masked(suffix)
+					  + ", as a header — until the map answers that it has connected your dot to your "
+					  + "browser, after which it is deleted from the settings and never sent again.\n\n";
+		}
+		/*
+		 * Named, never printed. The suffix above is shown by its ends because it is on the reader's own card on
+		 * the map and they may want to check the two agree; this is a standing credential, and a
+		 * window whose whole purpose is to be read — and screenshotted into a Discord channel when
+		 * somebody is asking for help — is the last place to spell one out. Which requests carry it
+		 * and what it proves is the part a reader is owed.
+		 */
+		if (pairing.secret(identity.id()) != null)
+		{
+			header += "It also carries X-Companion-Member-Secret, a credential this group's map "
+					  + "issued to this character, as a header — on this snapshot, on the connection "
+					  + "that receives destinations, and on the one request Copy invite makes. It says "
+					  + "which member of this group you are, so that somebody who was removed cannot "
+					  + "make invites or read the group by knowing your id. It is not shown here and is "
+					  + "never written to a log; Leave group deletes it.\n\n";
+		}
+		/* Named, never printed, for the same reason: it stands in for a pasted code. */
+		header += "It also carries X-Companion-Installation, a random key this RuneLite made for itself, "
+				  + "as a header on this snapshot only. It is how the map lets another account you log into "
+				  + "join a group this one is in, on the same browser, without another code. The map keeps "
+				  + "only a hash of it; Leave group replaces it.\n\n";
+		String body = json == null
+					  ? "Nothing can be built right now: a snapshot is only assembled while you are logged in."
+					  : json;
+
+		JTextArea area = new JTextArea(header + body, 22, 44);
+		area.setEditable(false);
+		area.setLineWrap(true);
+		area.setWrapStyleWord(true);
+		area.setCaretPosition(0);
+		JOptionPane.showMessageDialog(
+			SwingUtilities.getWindowAncestor(this),
+			new JScrollPane(area),
+			"What this plugin sends",
+			JOptionPane.PLAIN_MESSAGE);
+	}
+
+	/**
+	 * Leave, properly.
+	 *
+	 * <p>Clearing the code stops the sending; forgetting the id is the other half, and it is the half
+	 * a player cannot do for themselves. Without it a member who left and came back arrived as the
+	 * same dot they were before — a stable identifier for a person across every group they ever join,
+	 * which is exactly the thing {@link MemberIdentity} is arranged not to create.
+	 *
+	 * <p>The member secrets go with the id rather than with the group, and every one of them goes.
+	 * A secret proves that a particular member id belongs to this installation, so an id that no
+	 * longer exists leaves nothing for any of them to prove — and a credential kept for a member
+	 * nobody can be is the opposite of what this button says. {@link Pairing#leave} does it.
+	 *
+	 * <p>The kill log is deliberately untouched. It is the player's own, it never needed the map, and
+	 * leaving a group is not a reason to throw away a year of counting. It has its own button.
+	 *
+	 * <p>The group also leaves the remembered list, because a one-press way back into a group
+	 * somebody deliberately left is the opposite of what this button says.
+	 */
+	private void leaveGroup()
+	{
+		int answer = JOptionPane.showConfirmDialog(
+						 SwingUtilities.getWindowAncestor(this),
+						 "Clear your pairing code and forget the ids every account on this RuneLite had?\n\n"
+						 + "Friends holding the code stop seeing you. Rejoining later arrives as a new\n"
+						 + "person rather than as you, and needs an invite that still works. This group\n"
+						 + "leaves your list of groups. Your kill log is not touched.",
+						 "Leave group",
+						 JOptionPane.OK_CANCEL_OPTION,
+						 JOptionPane.QUESTION_MESSAGE);
+		if (answer != JOptionPane.OK_OPTION)
+		{
+			return;
+		}
+		/* Clearing the code raises a ConfigChanged, which is what stops the stream and resets the relay. */
+		pairing.leave();
+		identity.forget();
+		destinationState.clear();
+		say("Left the group.");
+		refresh();
+	}
+
+	/**
+	 * A destination's second line: which world, and why — its name is the line above.
+	 *
+	 * <p>The world is the half that matters for a star and the half a place name cannot carry —
+	 * "Rimmington mine" is on every world, and the one somebody scouted is not. Printed, never
+	 * acted on here: the hop is a separate button, offered only when the reader opted in.
+	 */
+	private static String destinationDetail(RelayResponse.Destination destination)
+	{
+		StringBuilder sb = new StringBuilder();
+		if (destination.world != null)
+		{
+			sb.append("W").append(destination.world);
+		}
+		if (destination.note != null && !destination.note.isEmpty())
+		{
+			if (sb.length() > 0)
+			{
+				sb.append(" · ");
+			}
+			sb.append(destination.note);
+		}
+		return sb.toString();
+	}
+
+	/**
+	 * Every kind of data a snapshot can carry, each with whether it is going out — from the same
+	 * settings that gate the fields, in the order the README lists them.
+	 *
+	 * <p>Pets and collection additions ride on drops and levels, so they are off whenever it is,
+	 * whatever their own toggle says — which is what the snapshot does.
+	 */
+	private List<SharedKind> sharedKinds()
+	{
+		List<SharedKind> kinds = new ArrayList<>();
+		/** First, because it is the only one of these that names the account rather than describing it. */
+		kinds.add(new SharedKind("name", config.shareName()));
+		kinds.add(new SharedKind("position", config.sharePosition()));
+		kinds.add(new SharedKind("levels", config.shareSkills()));
+		kinds.add(new SharedKind("activity", config.shareActivity()));
+		kinds.add(new SharedKind("account type", config.shareAccountType()));
+		kinds.add(new SharedKind("quests", config.shareQuests()));
+		kinds.add(new SharedKind("diaries", config.shareDiaries()));
+		kinds.add(new SharedKind("carried items", config.shareCapabilities()));
+		kinds.add(new SharedKind("permanent travel", config.sharePermanentTravel()));
+		kinds.add(new SharedKind("slayer", config.shareSlayer()));
+		kinds.add(new SharedKind("clue", config.shareClue()));
+		kinds.add(new SharedKind("STASH construction", config.shareStash()));
+		kinds.add(new SharedKind("patches", config.shareFarming()));
+		kinds.add(new SharedKind("birdhouses", config.shareBirdhouses()));
+		kinds.add(new SharedKind("hunter rumours", config.shareHunterRumours()));
+		kinds.add(new SharedKind("Mahogany Homes", config.shareMahoganyHomes()));
+		kinds.add(new SharedKind("farming contracts", config.shareFarmingContracts()));
+		kinds.add(new SharedKind("full quest progress", config.shareQuestLog()));
+		kinds.add(new SharedKind("observed loot kills", config.shareLoot()));
+		kinds.add(new SharedKind("drops & levels", config.shareMilestones()));
+		kinds.add(new SharedKind("pets", config.shareMilestones() && config.sharePets()));
+		kinds.add(new SharedKind("collection additions", config.shareMilestones() && config.shareCollectionLog()));
+		kinds.add(new SharedKind("death spot", config.shareDeath()));
+		return kinds;
+	}
+
+	/** A short summary of opt-in character fields, never a claim that membership sends nothing. */
+	private String sharingLine()
+	{
+		List<SharedKind> kinds = sharedKinds();
+		List<String> on = new ArrayList<>();
+		for (SharedKind kind : kinds)
+		{
+			if (kind.on)
+			{
+				on.add(kind.label);
+			}
+		}
+		if (on.isEmpty())
+		{
+			return "Character sharing off";
+		}
+		return on.size() <= 2 ? "Sharing: " + String.join(", ", on) : "Sharing " + on.size() + " character fields";
+	}
+
+	/** The whole list, for the line's tooltip: "Sharing: name, position, …". */
+	private String sharingList()
+	{
+		List<String> on = new ArrayList<>();
+		for (SharedKind kind : sharedKinds())
+		{
+			if (kind.on)
+			{
+				on.add(kind.label);
+			}
+		}
+		return on.isEmpty() ? "Sharing nothing" : "Sharing: " + String.join(", ", on);
+	}
+
+	/** One kind of data, and whether it is going out. */
+	private static final class SharedKind
+	{
+		final String label;
+		final boolean on;
+
+		SharedKind(String label, boolean on)
+		{
+			this.label = label;
+			this.on = on;
+		}
+	}
+
+	/**
+	 * Set a label's text so that it wraps, and only when it changed.
+	 *
+	 * <p>Wrapping a JLabel means handing it HTML, which means the text has to be escaped first.
+	 * Destination names, notes and meetup titles arrive over the network from whoever holds the
+	 * pairing code, and Swing's HTML renderer is a real one: an unescaped image tag in a meetup
+	 * title would have the client fetch a remote address on sight. Escaping is what keeps this a
+	 * label rather than a document.
+	 *
+	 * <p>The equality check is not for speed. Re-setting identical text still fires a property
+	 * change and a repaint, once a second, for as long as the sidebar is open.
+	 *
+	 * <p>The width is an HTML attribute rather than the CSS {@code style='width:195px'} that this
+	 * idiom is usually written with, because the CSS form does not actually constrain the label.
+	 * Measured on the sharing line: styled, it asks for 253 pixels inside a 205-pixel column and
+	 * the last word is cut off; as an attribute it asks for exactly 195 and fits. It wraps either
+	 * way, which is what makes the difference easy to miss — the text is not obviously broken, just
+	 * quietly missing its right-hand edge.
+	 */
+	private static void setWrapped(JLabel label, String text)
+	{
+		setWrapped(label, text, TEXT_WIDTH);
+	}
+
+	/** The same, for a label narrower than the column — inside a card, beside the dot. */
+	private static void setWrapped(JLabel label, String text, int width)
+	{
+		String html = "<html><body width='" + width + "'>" + escape(text) + "</body></html>";
+		if (!html.equals(label.getText()))
+		{
+			label.setText(html);
+		}
+	}
+
+	/**
+	 * How long since a post actually landed, for the tooltip.
+	 *
+	 * <p>The colour of the dot is a summary; this is the sentence that makes a green that
+	 * has not posted in a minute visible as a number rather than a feeling.
+	 */
+	static String ageOf(long lastSuccessMs)
+	{
+		if (lastSuccessMs <= 0L)
+		{
+			return "never";
+		}
+		long ago = System.currentTimeMillis() - lastSuccessMs;
+		if (ago < 2_000L)
+		{
+			return "just now";
+		}
+		if (ago < 60_000L)
+		{
+			return (ago / 1000L) + "s ago";
+		}
+		return (ago / 60_000L) + "m ago";
+	}
+
+	/**
+	 * Enough of a suffix to check against the map's card, not enough to paste. With the group code
+	 * it admits a character to a group, and this window is the one people screenshot for help.
+	 */
+	static String masked(String suffix)
+	{
+		return suffix.length() <= 4 ? "••••" : suffix.substring(0, 2) + "••••" + suffix.substring(suffix.length() - 2);
+	}
+
+	/** Null-safe: names and titles arrive from the map, and Gson leaves an absent field null. */
+	private static String escape(@Nullable String text)
+	{
+		if (text == null)
+		{
+			return "";
+		}
+		return text
+			   .replace("&", "&amp;")
+			   .replace("<", "&lt;")
+			   .replace(">", "&gt;");
+	}
+
+	/**
+	 * Copy an invitation to the clipboard — asking the map for a link that expires, if it can.
+	 *
+	 * <p>The clipboard, not the chat box: a plugin that typed into the game would be generating
+	 * input, which is exactly the line this feature does not cross. Pasting it is the player's own
+	 * action, in whatever channel they choose.
+	 *
+	 * <p><b>Why it asks the map first.</b> A message that spells out the code admits anybody who
+	 * finds it in a Discord channel three months later, and there is nothing the holder of the
+	 * group can do about that short of closing the group. An invite link carries a token the map
+	 * minted, which expires and can be revoked, so the group keeps a way to stop admitting people
+	 * without ending the group. Only the map can mint one.
+	 *
+	 * <p><b>And why the old message is still here.</b> A map that has not shipped that endpoint
+	 * answers this request with a 404, and a friend waiting to be invited is not the person to make
+	 * pay for that. The fallback is today's text, unchanged, and it still works against today's
+	 * server — which is exactly the server that would refuse the request.
+	 *
+	 * <p>The request carries the member secret the map issued this installation, because minting an
+	 * invite is the one thing a member can do that admits a stranger and a member id is not a
+	 * secret. A map that wants one and does not get it refuses, and a refusal here is already
+	 * handled: it is the same null the callback gets from a 404.
+	 */
+	private void copyInvite()
+	{
+		String code = pairingCode();
+		String server = pairing.serverUrl();
+		if (code.isEmpty() || !pairing.hasServerConsent(server, code) || copyingInvite)
+		{
+			return;
+		}
+		/* An invite is asked for as a member, and a member is a character: nobody before login. */
+		String memberId = identity.id();
+		if (memberId == null)
+		{
+			say("Log in to a character to copy an invite.");
+			return;
+		}
+		copyingInvite = true;
+		copyInviteButton.setEnabled(false);
+		copyInviteButton.setText("Asking the map…");
+		relay.requestInvite(server, code, memberId, pairing.secret(server, code, memberId), invite ->
+							SwingUtilities.invokeLater(() -> finishInvite(server, code, invite)));
+	}
+
+	/** Put the invitation on the clipboard, whichever kind of invitation we ended up with. */
+	private void finishInvite(String server, String code, @Nullable RelayClient.Invite invite)
+	{
+		copyingInvite = false;
+		copyInviteButton.setText("Copy invite");
+		copyInviteButton.setEnabled(!pairingCode().isEmpty() && pairing.hasServerConsent());
+		/* An invite arriving after a switch belongs to the old connection, not the current clipboard action. */
+		if (!server.equals(mapUrl()) || !code.equalsIgnoreCase(pairingCode()))
+		{
+			return;
+		}
+
+		boolean linked = invite != null && invite.url != null && !invite.url.isEmpty();
+		/*
+		 * The code is spelled out even on the linked form, because a friend on an older release of
+		 * this plugin still has to type six characters into a settings field, and a message that
+		 * only works for people who already upgraded is not much of an invitation.
+		 */
+		String message = linked
+						 ? "Join my OSRS map: " + invite.url + " — code " + code
+						 : "Join my OSRS map: " + mapUrl() + "/map?join=" + code + "&task=companion"
+						 + " — then install the \"OSRS Map Companion\" RuneLite plugin and enter code " + code;
+
+		try
+		{
+			Toolkit.getDefaultToolkit().getSystemClipboard()
+			.setContents(new StringSelection(message), null);
+		}
+		catch (RuntimeException e)
+		{
+			log.debug("could not copy invite", e);
+			say("Couldn't put the invite on the clipboard.");
+			return;
+		}
+		say("Invite copied."
+			+ (linked ? describeExpiry(invite.expiresAt, System.currentTimeMillis()) : ""));
+	}
+
+	/**
+	 * "It expires in 6 days.", from the instant the map stated — or nothing at all.
+	 *
+	 * <p>Nothing at all is the important half. The expiry is the map's number in the map's units,
+	 * and this only ever prints it: anything that is not a future instant in milliseconds produces
+	 * no sentence rather than a confident wrong one, which is the right way to be wrong about
+	 * somebody else's field.
+	 *
+	 * <p>Package-private so the cases can be pinned without a clipboard or a server.
+	 */
+	static String describeExpiry(@Nullable String expiresAt, long now)
+	{
+		if (expiresAt == null || expiresAt.trim().isEmpty())
+		{
+			return "";
+		}
+		long at;
+		try
+		{
+			at = Long.parseLong(expiresAt.trim());
+		}
+		catch (NumberFormatException e)
+		{
+			return "";
+		}
+		long remaining = at - now;
+		if (remaining <= 0L)
+		{
+			return "";
+		}
+		long days = remaining / 86_400_000L;
+		if (days >= 1L)
+		{
+			return " It expires in " + days + (days == 1L ? " day." : " days.");
+		}
+		long hours = remaining / 3_600_000L;
+		if (hours >= 1L)
+		{
+			return " It expires in " + hours + (hours == 1L ? " hour." : " hours.");
+		}
+		return " It expires within the hour.";
+	}
+
+	private String pairingCode()
+	{
+		return config.pairingCode() == null ? "" : config.pairingCode().trim();
+	}
+
+	private String mapUrl()
+	{
+		String server = pairing.serverUrl();
+		return server == null ? MapCompanionConfig.DEFAULT_MAP_URL : server;
+	}
+}
