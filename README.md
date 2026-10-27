@@ -4,13 +4,19 @@ Connect RuneLite to [osrs-map.com](https://osrs-map.com): follow your character 
 travel around what your account has unlocked, see shooting stars, and share a map with friends.
 
 <p>
+  <img src="docs/mockups/website-group.jpg" width="760" alt="osrs-map.com with the Companion panel open: four friends on world 444, and their dots around Varrock, Falador, Draynor and Al Kharid">
+</p>
+<p>
   <img src="docs/mockups/sharing-sidebar-overview.png" width="240" alt="The sidebar's Overview tab: connected to a group, Open the map, and a Drop luck card for an aberrant spectre">
   <img src="docs/mockups/sharing-sidebar-sharing.png" width="240" alt="The Sharing tab: map presence, progress and travel, tasks and timers, and loot, each chosen separately">
   <img src="docs/mockups/stars-tab-list.png" width="240" alt="The Stars tab: shooting stars by site, world, tier and time left, with filters">
 </p>
 <p>
   <img src="docs/mockups/world-map-pins.png" width="510" alt="Pins on the game's world map: two friends, a quiet friend, a destination and a meetup">
+  <img src="docs/mockups/website-star.png" width="240" alt="A shooting star's card on osrs-map.com: tier 9 on world 302 with 63 minutes left, Send W302 to RuneLite, and the fastest way there">
 </p>
+
+The pictures use made-up characters and stars.
 
 ## What it does
 
