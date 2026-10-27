@@ -77,14 +77,15 @@ Only `RelayClient`, `DirectiveStream` and `StarsClient` construct HTTP requests:
 Requests carry the versioned User-Agent. The address must be https (plain http only on loopback),
 redirects are not followed, and reply bodies are capped at 1 MB. Snapshot and stream failures back
 off; the Stars client also honours Retry-After. Nothing requests the upstream star feed directly.
-The [README disclosure](../README.md#network-disclosure) names every transmitted category and storage policy.
+The README's [What you share](../README.md#what-you-share) names every transmitted category, and
+[Network and storage](network.md) covers credentials and storage.
 
 ### Credentials, client APIs and packaging
 
 Member ids, installation keys and member secrets are random, never account-derived. Secrets are
 scoped by server, group and character, stored in the plugin's RuneLite config, and never displayed
 or logged. Leave group deletes them and resets installation identity. The member id and the
-installation key are per installation, not per server or group, and the README says so. Clipboard
+installation key are per installation, not per server or group, and [Network and storage](network.md) says so. Clipboard
 reads (Paste) and writes (Copy invite, Copy connection code) happen only on a button press; an
 invite link is copied only if it is on the approved map. Meetup notifications use RuneLite's
 `Notifier`, with the title stripped of control characters, cut to 60 characters, and at most one a

@@ -354,15 +354,17 @@ public class MemberSecretTest
 	}
 
 	@Test
-	public void theReadmeSaysWhatItIsAndWhatCarriesIt()
+	public void theNetworkNoteSaysWhatItIsAndWhatCarriesIt()
 	{
 		/** The disclosure and the behaviour change together or the disclosure is wrong in between —
-		 * which is the whole argument of {@code NetworkDisclosureTest}, applied to a header. */
-		String readme = read("README.md").replaceAll("\\s+", " ");
+		 * which is the whole argument of {@code NetworkDisclosureTest}, applied to a header. The
+		 * headers live in docs/network.md rather than the README, which RuneLite publishes to
+		 * players and asked to keep about what the plugin does rather than how it asks. */
+		String readme = read("docs/network.md").replaceAll("\\s+", " ");
 
 		assertTrue("the network disclosure should name the header", readme.contains(HEADER));
 		/* The button is "Leave group" now, two words so it sits beside "Forget kill log" on one
-		 * row; the README names it as it is printed, or a reader looks for a button that is not there. */
+		 * row; the note names it as it is printed, or a reader looks for a button that is not there. */
 		assertTrue("and say that Leave group deletes it",
 				   readme.contains("**Leave group** deletes every one"));
 	}

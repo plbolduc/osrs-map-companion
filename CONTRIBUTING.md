@@ -1,5 +1,18 @@
 <!-- Copyright (c) 2026, pbolduc. All rights reserved. SPDX-License-Identifier: BSD-2-Clause -->
-# Changing the companion
+# Contributing
+
+## Building and running
+
+```sh
+./gradlew clean build -PruneLiteVersion=1.13.4
+./gradlew runClient
+```
+
+On Windows use `gradlew.bat`; PowerShell needs `'-PruneLiteVersion=1.13.4'` quoted. The build
+fetches a Java 11 toolchain, and the Plugin Hub uses its own standard build and client version.
+[Network and storage](docs/network.md) is the full account of what the plugin sends and keeps.
+
+## Changing the companion
 
 Follow [RuneLite's code conventions](https://github.com/runelite/runelite/wiki/Code-Conventions):
 tabs, braces on the next line, braces around conditional bodies, one logical import block, and
@@ -29,9 +42,9 @@ the real reader or callback at the boundary that could go wrong, without needing
 
 Run `./gradlew clean build -PruneLiteVersion=1.13.4`; PowerShell needs the property argument
 quoted, and Windows uses `gradlew.bat`. The version property pins local checks; the Hub controls
-its own compiler and client dependency. The [submission guide](plugin-hub-submission.md) describes
+its own compiler and client dependency. The [submission guide](docs/plugin-hub-submission.md) describes
 that separate build and the release order. The map repository's contract tests and `npm run story`
-exercise the real plugin against a local map. They complement the [logged-in checks](live-checks.md).
+exercise the real plugin against a local map. They complement the [logged-in checks](docs/live-checks.md).
 The build compiles with a Java 11 toolchain that Gradle downloads. Do not compile with a newer JDK
 yourself: Lombok fails on it with an error about javac internals rather than the version.
 
@@ -106,7 +119,7 @@ The normal plugin jar contains only `src/main`; the harness is never shipped to 
 
 `settledReward` commands begin after reward observation and test delivery, not actual game events.
 The fake cannot establish live reward coverage, farming varbit delivery or marker appearance.
-See [reward source coverage](rewards-and-dryness.md) and [live checks](live-checks.md).
+See [reward source coverage](docs/rewards-and-dryness.md) and [live checks](docs/live-checks.md).
 
 ## Farming decoder
 

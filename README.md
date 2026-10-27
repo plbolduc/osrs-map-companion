@@ -1,12 +1,7 @@
 # OSRS Map Companion
 
-A RuneLite plugin for [osrs-map.com](https://osrs-map.com): follow your character, plan travel
-around your unlocks, and share a map with friends.
-
-- Live position, group members, slayer tasks and clue destinations.
-- Farming observations, birdhouses, contracts, quest progress and travel unlocks.
-- Shooting stars, favourite sites and optional website filter sync.
-- Local drop luck, death-location links, destinations and meetup reminders.
+Connect RuneLite to [osrs-map.com](https://osrs-map.com): follow your character on the map, plan
+travel around what your account has unlocked, see shooting stars, and share a map with friends.
 
 <p>
   <img src="docs/mockups/sharing-sidebar-overview.png" width="240" alt="The sidebar's Overview tab: connected to a group, Open the map, and a Drop luck card for an aberrant spectre">
@@ -17,40 +12,49 @@ around your unlocks, and share a map with friends.
   <img src="docs/mockups/world-map-pins.png" width="510" alt="Pins on the game's world map: two friends, a quiet friend, a destination and a meetup">
 </p>
 
-The pictures are the plugin's own panels drawn with made-up data.
+## What it does
 
-**Not yet listed on the Plugin Hub.** The [submission guide](docs/plugin-hub-submission.md)
-and [live-check record](docs/live-checks.md) distinguish completed checks from remaining work.
+- **Your character on the map.** osrs-map.com follows your position, floor and world as you play.
+- **A map for your group.** Friends who share their position appear on the website and, if you
+  turn it on, on the game's own world map in the same colours.
+- **Travel planned around your account.** The map's routes use your quests, diaries, items and
+  transport unlocks, so it suggests the ways you can actually take.
+- **Tasks and timers.** Your slayer task, clue step, hunter rumour, Mahogany Homes job, farming
+  contract, birdhouses and the farm patches you have walked past show on the map.
+- **Shooting stars.** The **Stars** tab lists active stars by site, world, tier and time left, with
+  filters and favourite sites. Pin one to see it on the world map. To get to a star's world, type
+  `::hop` and its world number in chat, for example `::hop 444`.
+- **Drop luck.** How lucky or dry you are on the monster you are killing, in the sidebar and, if
+  you want, as one chat line when a drop lands.
+- **Destinations and meetups.** Places your group sends from the map appear on the world map, with
+  the game's hint arrow once you are close, and a reminder before a meetup starts.
 
-## Setting it up
+## Getting started
 
-1. Install **OSRS Map Companion** from the Plugin Hub once it is listed, or start the
-   [development client](#building-and-running).
-2. Open the map's [Companion panel](https://osrs-map.com/map?task=companion), then create a group
-   or follow a friend's invite.
-3. Press **Copy connection code** on the map, then **Paste → Connect** in the plugin.
-4. Read the server disclosure. Under **Sharing → Map presence → Customise**, enable
-   **Position and world** if you want a dot on the map. Choose other fields individually.
+1. Install **OSRS Map Companion** from the Plugin Hub.
+2. On osrs-map.com, open the [Companion panel](https://osrs-map.com/map?task=companion) and create
+   a group, or follow a friend's invite.
+3. Press **Copy connection code** on the map, then **Paste** and **Connect** in the plugin's
+   sidebar.
+4. Read the server notice. In the **Sharing** tab, turn on **Position and world** under
+   **Map presence** to appear as a dot on the map, and choose anything else you want to share.
 
-Sharing starts off. Joining does not enable it. **Name to show** sets an alias; **Character name**
-and **Last death location** are separate choices. The connection field accepts a full RuneLite
-code, an invite link, a pasted invite message or a bare group code. **Copy invite** copies a
-message to your clipboard; it never types into the game. **Switch** remembers up to eight groups.
+Nothing is shared until you choose it, and joining a group does not turn anything on. **Name to
+show** sets the name your group sees, which does not have to be your character's. **Copy invite**
+copies a message you can send a friend. **Switch** remembers up to eight groups.
 
-## Network disclosure
+In the plugin's settings, **Show destinations from the map**, **Show my group on the world map**
+and **Notify before a meetup** start off. **Drop luck in chat** and **Point the game's arrow at a
+destination** start on; neither sends anything.
 
-**This plugin contacts a third-party server, which receives your IP address.** Requests go to
-**Advanced → Map address**, default `https://osrs-map.com`; it must be https unless the map runs
-on this machine, and redirects are not followed. With no pairing code or no approval
-of the selected server, it makes no requests. First **Connect** discloses that destination;
-changing it pauses requests until you connect there.
+## What you share
 
-While logged in, connecting sends a random member id, your alias, a sender timestamp and pairing
-credentials even with character sharing off. Snapshots are spaced at least two seconds apart;
-an unchanged character normally sends a heartbeat every six seconds, or twenty with the receive
-stream connected. Automatic character sharing stops while logged out.
+**This plugin sends data to osrs-map.com, a third-party server, which receives your IP address.**
+Nothing is sent until you press **Connect** and accept the server notice. While you are connected
+and logged in, the plugin sends a random member id, the name you chose and your group's
+credentials, even with every sharing choice off.
 
-Each enabled category can send:
+Each choice in the **Sharing** tab starts off, and each can send:
 
 - **Name and presence:** the display name of the character you are logged in as; your account type;
   your position, your world and what kind of world it is; whether you are inside an instance and
@@ -74,84 +78,35 @@ Each enabled category can send:
   the tile where you most recently died and its age. Unknown reward details remain absent.
   Large snapshots include a flag saying some of it was left out.
 
-Each character has a random id; account hashes and identifiers derived from your account are
-never transmitted. The full code's suffix travels as `X-Companion-Suffix` until the
-browser link is claimed, then is deleted. `X-Companion-Installation` is a random installation
-key, sent on snapshots so another character can join the same browser's group without another
-paste; with a group code it admits your characters to your groups, so connect only to a map you
-trust. The member id and installation key are the same for every map and group this RuneLite
-connects to until **Leave group**, and the receive stream carries the group code and member id in
-its URL. `X-Companion-Member-Secret` is a random credential for one server, group and character,
-used on snapshots, invites, the receive stream and star-preference sync. It is never displayed
-or logged. **Leave group** deletes every one of these member secrets and replaces the installation
-identity; your local kill log remains.
+Your chat, other players, your bank and inventory, your existing collection log slots, a complete
+loot history and anything derived from your account's identifiers are never sent. **Advanced →
+Show what's sent** shows what would go out right now. The server's operator and your group's
+members can see what you share.
 
-**Show destinations from the map** and **Show my group on the world map** start off. Enabling
-either opens a receive stream; group positions are requested only with the latter. **Copy invite**
-makes one request for an expiring invite. While **Stars** is open, logged in and connected,
-the star list is fetched about once a minute without character or group credentials. Star data
-comes from Star Miners by way of osrs-map.com; the plugin never contacts Star Miners, who do not
-endorse it. **Sync filters
-with website** starts on for that tab: it reads/writes filters and favourite sites every thirty
-seconds and after changes, using the group code, member id and member secret. Mining level and
-skill total filter stars locally. Turn sync off to keep those preferences local.
-The [reviewer guide](docs/plugin-hub-submission.md#network-requests) lists every endpoint and credential.
+osrs-map.com keeps live positions and progress in memory only, with no movement history. Groups,
+the names last shared in them, invites, meetups and group pins are kept. A group's owner can turn
+on an activity feed that keeps up to 200 drop and level announcements for 14 days. See the
+[privacy policy](https://osrs-map.com/privacy). **Leave group** stops sharing and deletes the
+plugin's saved credentials; your kill log stays on your computer.
 
-Raw chat, other players read from the game, bank/inventory contents, existing collection-log slots
-and a complete loot history are never sent. Local game messages provide bounded reward/assignment
-facts only. **Advanced → Show what's sent** previews the current snapshot; credentials are named
-without displaying standing secrets. The server operator and your group's authorised members can
-read what you share.
+Shooting star data comes from Star Miners by way of osrs-map.com. The plugin never contacts Star
+Miners, who do not endorse it.
 
-## Storage and observation limits
+## Good to know
 
-The plugin keeps pairing settings, credentials, preferences, patch observations and a bounded kill
-log in its own RuneLite config group. Kill logs, pins and observations are character-scoped.
-**Forget kill log** clears the current character's counts and pin.
+- Drop luck counts the kills the plugin has seen on normal members worlds, not your lifetime kill
+  count, and only drops with a sourced rate get odds. Activity rewards need RuneLite's
+  **Loot Tracker** plugin. **Forget kill log** clears the current character's counts.
+- Birdhouses need RuneLite's **Time Tracking** plugin. Farm timers are estimates; disease and later
+  visits can change them.
+- After logging in or hopping, check your hunter rumour with the quetzal whistle again; ask an
+  estate agent to see your Mahogany Homes job again.
+- **Show on map** beside a death opens that spot on osrs-map.com in your browser.
 
-On the default map server, live positions and progress stay in temporary memory; there is no stored
-movement history. Group membership, last shared names, invites, meetups and group pins persist.
-An owner may enable a kept activity feed: up to 200 drop/level announcements for 14 days.
-Leaving here stops new sharing; retained announcements expire under the server's
-[privacy policy](https://osrs-map.com/privacy).
+## Help and feedback
 
-Drop luck counts observed loot receipts on normal members worlds, not lifetime KC.
-It pauses on F2P and special worlds; only sourced rates receive odds. Activity rewards require
-RuneLite **Loot Tracker**. Pet and collection announcements have separate switches; collection
-notices also require the game's chat or popup notification.
-See [reward coverage](docs/rewards-and-dryness.md).
-
-Patch timers are estimates; disease and later actions can change them. A farm stop completes only
-after a continuously witnessed empty-to-newly-planted transition. Birdhouses require RuneLite
-**Time Tracking**. Recheck rumours with the whistle after login/hopping; recover a home assignment
-from an estate agent. These task observations expire after two hours or a session change.
-These are covered by tests but not yet confirmed in a live client; see
-[live verification](docs/live-checks.md).
-
-## Client actions
-
-The plugin does not walk, click objects, send chat or hop worlds. A star's or destination's world
-is printed for the game's own world switcher.
-
-Destinations, meetups and consenting members can appear on the game's world map. A destination
-already in the loaded scene may use the game's hint arrow; an existing arrow is preserved.
-Local drop-luck chat and destination hint arrows start on; they do not enable network sharing.
-**Show on map** beside a death opens its tile and floor in a browser URL when pressed,
-including when death sharing is off. The world-map pins, the preserved hint arrow and the death
-link are covered by tests; their live-client checks are still pending.
-
-## Building and running
-
-```sh
-./gradlew clean build -PruneLiteVersion=1.13.4
-./gradlew runClient
-```
-
-On Windows use `gradlew.bat`; PowerShell needs `'-PruneLiteVersion=1.13.4'` quoted.
-The build fetches a Java 11 toolchain. The Plugin Hub uses its own standard build and client version.
-
-[Contributing](docs/contributing.md) covers formatting, the local map and integration harness.
-[Submitting](docs/plugin-hub-submission.md) covers the pinned source commit and review process.
+Found a bug, or have an idea? [Open an issue](https://github.com/plbolduc/osrs-map-companion/issues)
+with what you did and what you expected to happen.
 
 ## Licence
 

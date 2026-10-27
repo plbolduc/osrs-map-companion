@@ -1,6 +1,6 @@
 # Notes for coding agents
 
-Read [`docs/contributing.md`](docs/contributing.md) before changing anything. Its section **Rules a
+Read [`CONTRIBUTING.md`](CONTRIBUTING.md) before changing anything. Its section **Rules a
 change must keep** applies to every change here: what the Plugin Hub allows, which thread owns
 what, what may leave the machine, and how to commit.
 
@@ -10,7 +10,10 @@ what, what may leave the machine, and how to commit.
   prove an id, a varbit or an event order; [`docs/live-checks.md`](docs/live-checks.md) lists
   what still needs checking in game.
 - **The network disclosure is a promise.** If a change sends something new, update the README's
-  *Network disclosure* and [`docs/plugin-hub-submission.md`](docs/plugin-hub-submission.md) in
-  the same commit; `NetworkDisclosureTest` checks the README against `SnapshotBuilder`.
+  *What you share*, [`docs/network.md`](docs/network.md) and
+  [`docs/plugin-hub-submission.md`](docs/plugin-hub-submission.md) in the same commit;
+  `NetworkDisclosureTest` checks the README against `SnapshotBuilder`. The README is published
+  on RuneLite's site at the pinned commit, so it is written for players: how the requests work
+  belongs in `docs/network.md`, and building in `CONTRIBUTING.md`.
 - **Ask before** pushing, opening a Plugin Hub pull request, or anything else that leaves this
   checkout.

@@ -92,7 +92,7 @@ test {
     }
 
     /*
-     * The disclosure test reads README.md and this plugin's own .java files as *text*, and Gradle
+     * The disclosure tests read README.md, docs/network.md and this plugin's own .java files as *text*, and Gradle
      * cannot see that. With only prose changed nothing it declares has moved, so the task is
      * skipped as up to date and the one check that guards the network disclosure passes by not
      * running — which is the same failure the check exists to catch one level up. Declaring both
@@ -100,6 +100,9 @@ test {
      */
     inputs.file('README.md')
         .withPropertyName('readme')
+        .withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.file('docs/network.md')
+        .withPropertyName('networkNote')
         .withPathSensitivity(PathSensitivity.RELATIVE)
     inputs.dir('src/main/java')
         .withPropertyName('mainSourcesAsText')
