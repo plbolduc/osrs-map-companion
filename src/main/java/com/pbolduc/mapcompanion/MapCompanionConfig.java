@@ -43,7 +43,7 @@ import net.runelite.client.config.ConfigSection;
  * approved there. A nickname can label the member without naming an account. Saved choices keep their existing keys so an update does not reset them.
  *
  * <p>Receiving destinations opens the relay stream and is also opt-in. The client section
- * keeps that choice beside the local notification and manual world-hop controls.
+ * keeps that choice beside the local notification controls.
  */
 @ConfigGroup(MapCompanionConfig.GROUP)
 public interface MapCompanionConfig extends Config
@@ -561,20 +561,6 @@ public interface MapCompanionConfig extends Config
 		section = clientSection
 	)
 	default boolean notifyMeetups()
-	{
-		return false;
-	}
-
-	@ConfigItem(
-		keyName = "enableWorldHop",
-		name = "Allow a hop button",
-		description =
-			"Adds a button that hops to the world of a star sent from the map. Off by default, and "
-			+ "it only ever hops when you press it — nothing arriving over the network can move you.",
-		position = 32,
-		section = clientSection
-	)
-	default boolean enableWorldHop()
 	{
 		return false;
 	}

@@ -130,16 +130,15 @@ These are covered by tests but not yet confirmed in a live client; see
 
 ## Client actions
 
-The plugin does not walk, click objects or send chat. **Allow a hop button** starts off and permits
-a world hop only after you press the button, and refuses PvP, high-risk, Deadman and other
-special worlds. Incoming destinations cannot initiate a hop.
+The plugin does not walk, click objects, send chat or hop worlds. A star's or destination's world
+is printed for the game's own world switcher.
 
 Destinations, meetups and consenting members can appear on the game's world map. A destination
 already in the loaded scene may use the game's hint arrow; an existing arrow is preserved.
 Local drop-luck chat and destination hint arrows start on; they do not enable network sharing.
 **Show on map** beside a death opens its tile and floor in a browser URL when pressed,
-including when death sharing is off. The world-map pins, the preserved hint arrow, the hop refusal
-and the death link are covered by tests; their live-client checks are still pending.
+including when death sharing is off. The world-map pins, the preserved hint arrow and the death
+link are covered by tests; their live-client checks are still pending.
 
 ## Building and running
 

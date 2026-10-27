@@ -40,16 +40,12 @@ Three things reviewers ask about first:
   Nothing is crowdsourced and no position is published outside the group. The same answers the
   rule against exposing player information over HTTP: only the logged-in character's own state is
   sent, each field by its own opt-in, and only to the group the player joined.
-- **World hopping.** `hopToWorld` runs only from a button press, behind a setting that starts off.
-  The world number comes from the group's destination, so the press goes only to the world its
-  label showed, which must be in the client's own world list, and PvP, high-risk, Deadman and
-  other special worlds are refused by their type there.
 - **Star data.** The Stars tab shows a list osrs-map.com relays from Star Miners, fetched once a
   minute through the map's own coalesced cache. The plugin never contacts Star Miners, who have
   their own plugin and do not endorse this one.
 
-All character-sharing categories, remote destinations, group markers, meetup notifications and the
-hop button start off. First Connect discloses the destination and IP transmission before any
+All character-sharing categories, remote destinations, group markers, and meetup notifications
+start off. First Connect discloses the destination and IP transmission before any
 request. Server approval and credentials are scoped to the chosen address; changing it pauses
 requests until Connect. No pairing code or no approved server means no network requests.
 Joining with sharing off still sends a random member id, alias, timestamp and connection credentials.
@@ -94,9 +90,7 @@ invite link is copied only if it is on the approved map. Meetup notifications us
 `Notifier`, with the title stripped of control characters, cut to 60 characters, and at most one a
 minute.
 
-The only gameplay action is the opt-in world-hop button, using `openWorldHopper/hopToWorld`.
-Its caller starts in an ActionListener; network messages cannot invoke it, and a world whose type
-is PvP, high-risk, Deadman, seasonal, beta or otherwise special is refused. `StashReader` uses
+The plugin takes no gameplay action. `StashReader` uses
 the read-only `WATSON_STASH_UNIT_CHECK` script used by RuneLite's clue plugin, only with STASH
 sharing enabled, at most once a minute. `DestinationArrow` sets a loaded destination's hint arrow
 without replacing another arrow. Group pins clear on connection loss, logout, group change,
@@ -105,7 +99,7 @@ sharing withdrawal and shutdown; queued old frames are invalidated.
 Reconnects use RuneLite's injected scheduler; focus checks stay within the plugin's search field.
 `shutDown` removes its panel and overlays on the EDT and queues everything a game tick touches on
 the client thread, so a tick already running cannot reopen the stream after the plugin stops.
-The restricted world-hop API requires manual review under RuneLite's
+It uses none of the restricted APIs in RuneLite's
 [current rules](https://github.com/runelite/runelite/wiki/Rejected-or-Rolled-Back-Features).
 
 The standard Hub template compiles/packages `src/main` with Java 11. There are no additional

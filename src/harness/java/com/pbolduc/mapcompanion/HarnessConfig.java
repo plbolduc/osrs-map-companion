@@ -246,12 +246,6 @@ final class HarnessConfig implements MapCompanionConfig
 	}
 
 	@Override
-	public boolean enableWorldHop()
-	{
-		return on("enableWorldHop", MapCompanionConfig.super.enableWorldHop());
-	}
-
-	@Override
 	public boolean dropLuckChat()
 	{
 		return on("dropLuckChat", MapCompanionConfig.super.dropLuckChat());

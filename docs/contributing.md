@@ -39,8 +39,9 @@ yourself: Lombok fails on it with an error about javac internals rather than the
 
 **What the Plugin Hub allows.** No reflection, `Thread.sleep`, `Thread.interrupt`, threads of the
 plugin's own, `KeyboardFocusManager`, or new `OkHttpClient` or `Gson` instances. HTTP clients are
-derived from the injected one through `CompanionHttp.pinnedToServer`. Nothing automates input: the
-only game action is the world hop, and only from a button press. See RuneLite's
+derived from the injected one through `CompanionHttp.pinnedToServer`. Nothing automates input, and the
+plugin takes no game action. It uses none of RuneLite's restricted APIs either — `Client.hopToWorld`
+is one — because a single use puts every future update under manual review. See RuneLite's
 [rejected and restricted features](https://github.com/runelite/runelite/wiki/Rejected-or-Rolled-Back-Features).
 
 **Threads.** Game state is read and changed on the client thread, Swing on the EDT. `shutDown`

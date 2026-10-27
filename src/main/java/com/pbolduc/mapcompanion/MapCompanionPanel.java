@@ -50,6 +50,7 @@ import java.time.temporal.ChronoUnit;
 import java.time.ZonedDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import javax.annotation.Nullable;
@@ -123,13 +124,9 @@ public class MapCompanionPanel extends PluginPanel
 	/** The same, inside a card, which takes eight pixels a side for its own inset. */
 	private static final int CARD_TEXT_WIDTH = TEXT_WIDTH - 16;
 
-	/** Long enough for a refused hop to be read before the next tick paints over it. */
-	private static final long HOP_MESSAGE_MS = 4_000L;
-
 	private final MapCompanionConfig config;
 	private final MapCompanionPlugin plugin;
 	private final DestinationState destinationState;
-	private final WorldHopper worldHopper;
 	private final LootLog lootLog;
 	private final DeathWatcher deathWatcher;
 	private final SnapshotBuilder snapshotBuilder;
@@ -176,12 +173,6 @@ public class MapCompanionPanel extends PluginPanel
 	private final JComponent destinationSlot;
 	private final JComponent eventSlot;
 	private final JComponent deathSlot;
-
-	/**
-	 * Only ever shown when a destination names a world <i>and</i> the reader has opted in. The hop
-	 * happens because this was pressed and for no other reason — see {@link WorldHopper}.
-	 */
-	private final JButton hopButton = smallButton("");
 
 	/** Hide the destination on this client. Does not tell the relay; see {@link DestinationState}. */
 	private final JButton dismissButton = smallButton("Dismiss");
@@ -253,12 +244,6 @@ public class MapCompanionPanel extends PluginPanel
 	 */
 	private final Timer timer = new Timer(1000, e -> refresh());
 
-	/** When the refusal message may stop being shown. Zero when there is nothing to say. */
-	private long hopMessageUntilMs = 0L;
-
-	/** The world the hop button last said it would go to; a press goes there or nowhere. */
-	private int shownHopWorld;
-
 	/**
 	 * True while the map is being asked for an invite link.
 	 *
@@ -272,7 +257,6 @@ public class MapCompanionPanel extends PluginPanel
 		MapCompanionConfig config,
 		MapCompanionPlugin plugin,
 		DestinationState destinationState,
-		WorldHopper worldHopper,
 		LootLog lootLog,
 		DeathWatcher deathWatcher,
 		SnapshotBuilder snapshotBuilder,
@@ -290,7 +274,6 @@ public class MapCompanionPanel extends PluginPanel
 		this.config = config;
 		this.plugin = plugin;
 		this.destinationState = destinationState;
-		this.worldHopper = worldHopper;
 		this.lootLog = lootLog;
 		this.deathWatcher = deathWatcher;
 		this.snapshotBuilder = snapshotBuilder;
@@ -303,7 +286,7 @@ public class MapCompanionPanel extends PluginPanel
 		this.relay = relay;
 		this.directiveStream = directiveStream;
 		this.dropLuck = new DropLuckPanel(lootLog, DropLuckPanel.Pictures.of(itemManager));
-		this.starsPanel = new StarsPanel(starsClient, destinationState, config, clientThread, destinationMarker, this::hopToDestinationWorld);
+		this.starsPanel = new StarsPanel(starsClient, destinationState, clientThread, destinationMarker);
 		this.sharingControls = new SharingControls(config, ConfigStore.of(configManager));
 
 		setLayout(new BorderLayout());
@@ -351,7 +334,7 @@ public class MapCompanionPanel extends PluginPanel
 		overview.setName("companionOverview");
 
 		/*
-		 * Now: a destination with its hop and dismiss, a meetup, a death. "From the map" named two of
+		 * Now: a destination with its dismiss, a meetup, a death. "From the map" named two of
 		 * the three — the death is this client's own observation — so the heading says when rather
 		 * than where from, which is true of all of them.
 		 */
@@ -431,7 +414,6 @@ public class MapCompanionPanel extends PluginPanel
 		previewButton.addActionListener(e -> showSnapshotPreview());
 		deathMapButton.addActionListener(e -> showDeathOnMap());
 		leaveButton.addActionListener(e -> leaveGroup());
-		hopButton.addActionListener(e -> hopToDestinationWorld());
 		dismissButton.setToolTipText("Hide this destination on this client. The map is not told.");
 		dismissButton.addActionListener(e ->
 		{
@@ -985,14 +967,7 @@ public class MapCompanionPanel extends PluginPanel
 				destinationDetail.setVisible(!detail.isEmpty());
 				setWrapped(destinationDetail, detail, CARD_TEXT_WIDTH);
 			}
-			updateHopLabel(destination);
-			List<JButton> actions = new ArrayList<>();
-			if (canOfferHop(destination))
-			{
-				actions.add(hopButton);
-			}
-			actions.add(dismissButton);
-			shownDestinationActions = syncRow(destinationActions, actions, shownDestinationActions);
+			shownDestinationActions = syncRow(destinationActions, Collections.singletonList(dismissButton), shownDestinationActions);
 
 			RelayResponse.Event event = destinationState.getEvent();
 			eventSlot.setVisible(event != null);
@@ -1099,70 +1074,6 @@ public class MapCompanionPanel extends PluginPanel
 		row.revalidate();
 		row.repaint();
 		return wanted;
-	}
-
-	/**
-	 * Three things must be true before a hop is even offered: the reader opted in, the destination
-	 * actually names a world, and there is a destination at all. Anything less and the button is
-	 * either unwanted or a no-op.
-	 */
-	private boolean canOfferHop(@Nullable RelayResponse.Destination destination)
-	{
-		return config.enableWorldHop() && destination != null && destination.world != null;
-	}
-
-	/** Label the one button that can act, without disturbing a refusal message still being read. */
-	private void updateHopLabel(@Nullable RelayResponse.Destination destination)
-	{
-		/* A refusal is only known once the client has read the world's type, a tick after the press. */
-		String refused = destination == null || destination.world == null ? null : worldHopper.takeRefusal(destination.world);
-		if (refused != null)
-		{
-			hopButton.setText(refused);
-			hopMessageUntilMs = System.currentTimeMillis() + HOP_MESSAGE_MS;
-			return;
-		}
-		if (!canOfferHop(destination) || System.currentTimeMillis() < hopMessageUntilMs)
-		{
-			return;
-		}
-		hopButton.setText(worldHopper.isHopPending() ? "Hopping…" : "Hop to W" + destination.world);
-		shownHopWorld = destination.world;
-	}
-
-	/**
-	 * Ask to hop, and say so if the client refuses.
-	 *
-	 * <p>This is the only path to {@link WorldHopper#requestHop}, and it starts at a button. The
-	 * map can put a world on the screen; nothing it sends can reach this method.
-	 */
-	private boolean hopToDestinationWorld()
-	{
-		RelayResponse.Destination destination = destinationState.getDestination();
-		if (destination == null || destination.world == null)
-		{
-			return false;
-		}
-		if (shownHopWorld != destination.world)
-		{
-			/*
-			 * The group's destination moved between the label being drawn and the press. Hop only
-			 * to a world the player saw; the next refresh shows the new one.
-			 */
-			return false;
-		}
-		if (!worldHopper.requestHop(destination.world))
-		{
-			/*
-			 * Refused: logged out, or already there. The message is held for a few seconds because
-			 * the refresh above it runs every second and would otherwise erase the explanation
-			 * before it had been read — a button that appears to do nothing, twice over.
-			 */
-			hopButton.setText("Can't hop right now");
-			hopMessageUntilMs = System.currentTimeMillis() + HOP_MESSAGE_MS;
-			return false;
-		}
-		return true;
 	}
 
 	/**
@@ -1300,7 +1211,7 @@ public class MapCompanionPanel extends PluginPanel
 	 *
 	 * <p>The world is the half that matters for a star and the half a place name cannot carry —
 	 * "Rimmington mine" is on every world, and the one somebody scouted is not. Printed, never
-	 * acted on here: the hop is a separate button, offered only when the reader opted in.
+	 * acted on: hopping is left to the game's own world switcher.
 	 */
 	private static String destinationDetail(RelayResponse.Destination destination)
 	{

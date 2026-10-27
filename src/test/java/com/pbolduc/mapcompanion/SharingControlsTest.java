@@ -64,10 +64,10 @@ public class SharingControlsTest
 			}
 			assertEquals(expected, actual);
 			/*
-			 * 27 data and client choices, and the two that only draw on this client: Drop luck's chat
+			 * 26 data and client choices, and the two that only draw on this client: Drop luck's chat
 			 * line and the destination's hint arrow.
 			 */
-			assertEquals(29, actual.size());
+			assertEquals(28, actual.size());
 			for (String key : actual)
 			{
 				if (key.startsWith("share")) assertFalse("every data choice starts off: " + key, defaultOf(key));
@@ -116,7 +116,6 @@ public class SharingControlsTest
 			assertFalse(config.shareSkills());
 			assertFalse(config.showDestination());
 			assertFalse(config.notifyMeetups());
-			assertFalse(config.enableWorldHop());
 			assertFalse(pairing.hasServerConsent());
 			assertEquals("All 3 selected", ((javax.swing.JLabel) named(controls, "shareCount.presence")).getText());
 			find(controls, "sharePosition").doClick();

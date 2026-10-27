@@ -247,9 +247,6 @@ public class MapCompanionPlugin extends Plugin
 	private DirectiveStream directiveStream;
 
 	@Inject
-	private WorldHopper worldHopper;
-
-	@Inject
 	private MemberIdentity identity;
 
 	/** Package-private, like {@link #milestones}, so {@link #onGroupChanged} has a unit test. */
@@ -465,7 +462,6 @@ public class MapCompanionPlugin extends Plugin
 		destinationState.clear();
 		destinationMarker.remove();
 		destinationArrow.clear();
-		worldHopper.cancel();
 		xpTracker.reset();
 		clueReader.reset();
 		resetRewardDelivery();
@@ -905,8 +901,6 @@ public class MapCompanionPlugin extends Plugin
 
 		trackMovement(now);
 		observeGameState(now);
-		/** Does nothing unless a button press set a target — see {@link WorldHopper}. */
-		worldHopper.onGameTick();
 		/** Before the pairing checks: a destination pinned from the Stars tab needs no group. */
 		destinationArrow.sync();
 		/*

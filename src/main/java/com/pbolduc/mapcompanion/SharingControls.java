@@ -141,7 +141,6 @@ final class SharingControls extends JPanel
 		choice(client, "showGroupOnWorldMap", "Group on the world map", config::showGroupOnWorldMap, "Receive the positions your group already shares and draw them on the world map.");
 		choice(client, "destinationHintArrow", "Hint arrow to a destination", config::destinationHintArrow, "Point the game's own arrow at a destination once it is nearby. Nothing leaves this computer.");
 		choice(client, "notifyMeetups", "Meetup notifications", config::notifyMeetups, "Receive a notification before a meetup starts.");
-		choice(client, "enableWorldHop", "Allow a hop button", config::enableWorldHop, null);
 		choice(client, "dropLuckChat", "Drop luck in chat", config::dropLuckChat, "One chat line when a drop with a known rate lands. Nothing leaves this computer.");
 		add(fold("In the client", client));
 		refresh();
@@ -153,7 +152,7 @@ final class SharingControls extends JPanel
 		box.setName(key);
 		box.setBackground(ColorScheme.DARK_GRAY_COLOR);
 		box.setFont(box.getFont().deriveFont(11f));
-		box.setToolTipText(disclosure == null ? "Hop only when you press the button." : disclosure);
+		box.setToolTipText(disclosure);
 		box.setAlignmentX(Component.LEFT_ALIGNMENT);
 		/* A checkbox chooses data; only Connect may approve a server or start requests. */
 		box.addActionListener(e ->

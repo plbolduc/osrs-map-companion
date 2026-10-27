@@ -37,7 +37,6 @@ import java.awt.Insets;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.BooleanSupplier;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -55,7 +54,8 @@ import net.runelite.client.ui.PluginPanel;
 /**
  * One native, narrow list of landing sites, with their worlds underneath and favourites first.
  * The controls share the website's meanings; expansion and the selected world stay on this
- * screen. Only a button can pin or ask for a hop. No refresh or network callback can hop.
+ * screen. Only a button can pin. A star's world is printed, and hopping is left to
+ * the game's own world switcher.
  *
  * <p>Every child of a vertical stack here is left-aligned and as wide as the column. BoxLayout
  * lines children up by their alignment point, so one centred child among left-aligned ones
@@ -77,10 +77,8 @@ final class StarsPanel extends JPanel
 	private static final int CARD_TEXT = COLUMN - 62;
 	private final StarsClient service;
 	private final DestinationState destinations;
-	private final MapCompanionConfig config;
 	private final ClientThread clientThread;
 	private final DestinationMarker marker;
-	private final BooleanSupplier hop;
 	private final JCheckBox sync = check("Sync filters with website");
 	private final JComboBox<String> tier = new JComboBox<>(new String[]{"T1+", "T2+", "T3+", "T4+", "T5+", "T6+", "T7+", "T8+", "T9+"});
 	private final JToggleButton members = toggle("P2P"), free = toggle("F2P"), safe = toggle("Safe");
@@ -92,18 +90,14 @@ final class StarsPanel extends JPanel
 	private final Set<String> expanded = new HashSet<>();
 	private boolean selected, active, updating;
 	private String rendered;
-	private final JLabel hopFeedback = label("");
-	private long feedbackUntil;
 
-	StarsPanel(StarsClient service, DestinationState destinations, MapCompanionConfig config,
-		ClientThread clientThread, DestinationMarker marker, BooleanSupplier hop)
+	StarsPanel(StarsClient service, DestinationState destinations, ClientThread clientThread,
+		DestinationMarker marker)
 	{
 		this.service = service;
 		this.destinations = destinations;
-		this.config = config;
 		this.clientThread = clientThread;
 		this.marker = marker;
-		this.hop = hop;
 		setName("companionStars");
 		setBackground(ColorScheme.DARK_GRAY_COLOR);
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -165,8 +159,6 @@ final class StarsPanel extends JPanel
 		add(gap(2));
 		add(rows);
 		add(selection);
-		hopFeedback.setVisible(false);
-		add(hopFeedback);
 		add(gap(8));
 		JLabel source = label("Data from Star Miners");
 		source.setHorizontalAlignment(SwingConstants.CENTER);
@@ -229,7 +221,6 @@ final class StarsPanel extends JPanel
 
 	void refresh()
 	{
-		if (System.currentTimeMillis() >= feedbackUntil) hopFeedback.setVisible(false);
 		if (active && selected) service.tick();
 		StarsModel model = service.model;
 		StarsModel.Filters f = model.preferences.filters;
@@ -265,7 +256,7 @@ final class StarsPanel extends JPanel
 		if (!service.eligible() && active) notice = "Log in and connect to your map to see stars.";
 		wrap(status, notice == null ? "Updated " + (model.feed == null ? "—" : age(model.feed.snapshotAgeSeconds * 1000 + elapsed)) + " · estimates" : notice, TEXT);
 		RelayResponse.Destination destination = destinations.getDestination();
-		signature.append(model.selected).append(destination == null ? "" : destination.name + destination.world + destination.x + destination.y).append(config.enableWorldHop());
+		signature.append(model.selected).append(destination == null ? "" : destination.name + destination.world + destination.x + destination.y);
 		if (signature.toString().equals(rendered)) return;
 		rendered = signature.toString();
 		rows.removeAll();
@@ -474,24 +465,6 @@ final class StarsPanel extends JPanel
 				wrap(note, "This location is approximate; open it on the map to pin it.", TEXT);
 				selection.add(note);
 			}
-		}
-		else if (config.enableWorldHop())
-		{
-			JButton hopButton = new JButton("Hop to world " + star.world);
-			hopButton.setName("stars.hop");
-			hopButton.addActionListener(e -> {
-				hopFeedback.setText(hop.getAsBoolean() ? "Hopping…" : "Can't hop right now");
-				feedbackUntil = System.currentTimeMillis() + 4_000;
-				hopFeedback.setVisible(true);
-				revalidate();
-				repaint();
-			}); primary(hopButton); selection.add(fill(hopButton));
-		}
-		else
-		{
-			JLabel off = label("");
-			wrap(off, "Turn on world hopping in the plugin's settings to hop from here.", TEXT);
-			selection.add(off);
 		}
 	}
 

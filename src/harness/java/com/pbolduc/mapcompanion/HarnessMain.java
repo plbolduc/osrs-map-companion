@@ -571,8 +571,8 @@ public final class HarnessMain
 	/**
 	 * One game tick — {@code MapCompanionPlugin.onGameTick}, transcribed.
 	 *
-	 * <p>The parts left out are the ones that draw: the world-map marker, the scene overlay, the
-	 * world hopper and the meetup notification. Everything that decides what goes on the wire is
+	 * <p>The parts left out are the ones that draw: the world-map marker, the scene overlay and the
+	 * meetup notification. Everything that decides what goes on the wire is
 	 * here, in the order the plugin does it.
 	 */
 	private void tick()

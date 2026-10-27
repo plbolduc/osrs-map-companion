@@ -9,7 +9,7 @@ The human performed every login and game action.
 ## Passed in the client
 
 - Character-sharing groups, name and death sharing start off.
-- Remote destinations, group markers, meetup notifications and the hop button start off; no stream opens.
+- Remote destinations, group markers and meetup notifications start off; no stream opens.
 - The map's Copy connection code and the plugin's Paste transfer the full code.
 - First Connect discloses the server, IP transmission, member identity, alias, code and selected sharing.
 - Cancelling Connect sends no snapshots, invites or stream requests.
@@ -68,7 +68,6 @@ often. A clean run is now 443 tests with no failures or skips.
 - [ ] Exercise farming, birdhouses, rumours and contracts on a members character.
 - [ ] With a destination in the loaded scene, see its dot on the minimap as well as the tile.
 - [ ] Carry two clue tiers, read the one in the later slot, and check the map shows that step.
-- [ ] Press the hop button for a PvP or high-risk world; it must refuse and say why.
 - [ ] Kill a few monsters and log out within thirty seconds; the kill log keeps them.
 - [ ] Kill a monster and close RuneLite within thirty seconds; after a restart the kill is there.
 - [ ] Paste a full RuneLite code (with its suffix) into a fresh install; the first post is
