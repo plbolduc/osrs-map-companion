@@ -802,22 +802,10 @@
       "page": "Gryphon"
     },
     {
-      "npc": "Head Guard",
-      "item": "Rune kiteshield",
-      "oneIn": 512,
-      "page": "Head Guard"
-    },
-    {
       "npc": "Headless Beast",
       "item": "Curved bone",
       "oneIn": 5012.5,
       "page": "Headless Beast"
-    },
-    {
-      "npc": "Hermit crab",
-      "item": "Pillar frag",
-      "oneIn": 426.6666666666667,
-      "page": "Hermit crab"
     },
     {
       "npc": "Hermit crab",
@@ -1300,12 +1288,6 @@
       "item": "Curved bone",
       "oneIn": 5012.5,
       "page": "Sea Snake Young"
-    },
-    {
-      "npc": "Sergeant",
-      "item": "Rune kiteshield",
-      "oneIn": 512,
-      "page": "Sergeant (Shayzien)"
     },
     {
       "npc": "Sergeant Grimspike",
