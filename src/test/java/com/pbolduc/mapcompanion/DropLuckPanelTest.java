@@ -61,7 +61,7 @@ public class DropLuckPanelTest
 
 	private String words()
 	{
-		return String.join(" | ", panel.words());
+		return String.join(" | ", SidebarWords.words(panel));
 	}
 
 	@Test
@@ -69,7 +69,7 @@ public class DropLuckPanelTest
 	{
 		panel.refresh();
 		assertFalse(panel.hasContent());
-		assertTrue(panel.words().isEmpty());
+		assertTrue(SidebarWords.words(panel).isEmpty());
 	}
 
 	@Test
@@ -96,16 +96,16 @@ public class DropLuckPanelTest
 		now += 3 * 60 * 60_000L;
 		kill("Abyssal demon", 995);
 		panel.refresh();
-		assertTrue(words(), panel.press("All monsters ›"));
+		assertTrue(words(), SidebarWords.press(panel, "All monsters ›"));
 		String list = words();
 		assertTrue(list, list.contains("2 monsters tracked"));
 		assertTrue(list, list.contains("1 kill · 3 h ago"));
-		assertTrue(panel.press("Gargoyle"));
+		assertTrue(SidebarWords.press(panel, "Gargoyle"));
 		String card = words();
 		assertTrue(card, card.contains("Now killing Abyssal demon"));
 		assertTrue(card, card.contains("‹ All monsters"));
 		assertTrue(card, card.contains("Last killed 3 h ago · 1 recorded kill"));
-		assertTrue(panel.press("Back ›"));
+		assertTrue(SidebarWords.press(panel, "Back ›"));
 		assertTrue(words(), words().contains("Killing now"));
 		/* The sidebar heads this section "Drop luck"; the card under it does not say it again. */
 		assertFalse(words(), words().contains("Drop luck"));
@@ -121,12 +121,12 @@ public class DropLuckPanelTest
 		now += 30 * 60_000L;
 		panel.refresh();
 		assertTrue("not killing anything: the last monster killed", words().contains("Last monster killed"));
-		assertTrue(words(), panel.press("All monsters ›"));
-		assertTrue(panel.press("Abyssal demon"));
-		assertTrue(panel.press("Abyssal whip"));
-		assertTrue(panel.press("Pin"));
-		assertTrue(panel.press("‹ All monsters"));
-		assertTrue(panel.press("Close"));
+		assertTrue(words(), SidebarWords.press(panel, "All monsters ›"));
+		assertTrue(SidebarWords.press(panel, "Abyssal demon"));
+		assertTrue(SidebarWords.press(panel, "Abyssal whip"));
+		assertTrue(SidebarWords.press(panel, "Pin"));
+		assertTrue(SidebarWords.press(panel, "‹ All monsters"));
+		assertTrue(SidebarWords.press(panel, "Close"));
 		String card = words();
 		assertTrue(card, card.contains("Your pinned drop"));
 		assertTrue(card, card.contains("Pinned"));
@@ -138,10 +138,10 @@ public class DropLuckPanelTest
 		kill("Abyssal demon", 995);
 		kill("Gargoyle", 995);
 		panel.refresh();
-		assertTrue(words(), panel.press("All monsters ›"));
+		assertTrue(words(), SidebarWords.press(panel, "All monsters ›"));
 		/* RuneLite's search field asserts it is touched on the event thread, as the sidebar does. */
-		javax.swing.SwingUtilities.invokeAndWait(() -> panel.search("whip"));
-		List<String> found = panel.words();
+		javax.swing.SwingUtilities.invokeAndWait(() -> SidebarWords.search(panel, "whip"));
+		List<String> found = SidebarWords.words(panel);
 		assertTrue(found.toString(), found.contains("1 found"));
 		assertTrue(found.toString(), found.contains("Abyssal demon"));
 		assertFalse(found.toString(), found.contains("Gargoyle"));

@@ -42,7 +42,6 @@ import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -885,77 +884,5 @@ final class DropLuckPanel extends JPanel
 	private static String escape(String text)
 	{
 		return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
-	}
-
-	/** For tests: the words currently laid out, in order. */
-	List<String> words()
-	{
-		List<String> out = new ArrayList<>();
-		collect(this, out);
-		return out;
-	}
-
-	private static void collect(Component component, List<String> out)
-	{
-		if (component instanceof JLabel)
-		{
-			String text = ((JLabel) component).getText();
-			if (text != null && !text.isEmpty())
-			{
-				out.add(text.replaceAll("<[^>]+>", "").replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">"));
-			}
-		}
-		else if (component instanceof JButton)
-		{
-			out.add(((JButton) component).getText());
-		}
-		if (component instanceof java.awt.Container)
-		{
-			for (Component child : ((java.awt.Container) component).getComponents())
-			{
-				collect(child, out);
-			}
-		}
-	}
-
-	/** For tests: press the first component whose words are exactly {@code text}. */
-	boolean press(String text)
-	{
-		return press(this, text);
-	}
-
-	private static boolean press(Component component, String text)
-	{
-		if (component instanceof JButton && text.equals(((JButton) component).getText()))
-		{
-			((JButton) component).doClick();
-			return true;
-		}
-		if (component instanceof JLabel && text.equals(((JLabel) component).getText().replaceAll("<[^>]+>", "")))
-		{
-			MouseEvent click = new MouseEvent(component, MouseEvent.MOUSE_CLICKED, 0, 0, 1, 1, 1, false);
-			for (java.awt.event.MouseListener listener : component.getMouseListeners())
-			{
-				listener.mouseClicked(click);
-			}
-			return true;
-		}
-		if (component instanceof java.awt.Container)
-		{
-			for (Component child : ((java.awt.Container) component).getComponents())
-			{
-				if (press(child, text))
-				{
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	/** For tests: type into the search field. */
-	void search(String text)
-	{
-		search.setText(text);
 	}
 }
