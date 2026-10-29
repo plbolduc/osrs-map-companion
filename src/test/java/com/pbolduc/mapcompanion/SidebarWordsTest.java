@@ -121,14 +121,18 @@ public class SidebarWordsTest
 		assertEquals("Hide the code field", MapCompanionPanel.joinMenuWords(true));
 	}
 
-	/** Before a group the card says one plain thing, in the reader's words rather than this code's. */
+	/**
+	 * Before a group the card says one plain thing, in the reader's words rather than this code's.
+	 * While connected the first line is the group's name: "Connected" became the dot's tooltip when
+	 * the card went from three lines to two, so this asserts the name where it asserted the word.
+	 */
 	@Test
 	public void aFreshInstallIsNotConnectedRatherThanNotPaired()
 	{
-		assertEquals("Not connected", MapCompanionPanel.statusWords(false, false, Health.IDLE, "Not paired"));
-		assertEquals("Press Connect", MapCompanionPanel.statusWords(true, false, Health.WAITING, "Press Connect to choose osrs-map.com"));
-		assertEquals("Connected", MapCompanionPanel.statusWords(true, true, Health.LIVE, "Connected to osrs-map.com"));
-		assertEquals("Logged out", MapCompanionPanel.statusWords(true, true, Health.WAITING, "Logged out"));
+		assertEquals("Not connected", MapCompanionPanel.statusWords(false, false, Health.IDLE, "Not paired", null));
+		assertEquals("Press Connect", MapCompanionPanel.statusWords(true, false, Health.WAITING, "Press Connect to choose osrs-map.com", "Sunday raids"));
+		assertEquals("Sunday raids", MapCompanionPanel.statusWords(true, true, Health.LIVE, "Connected to osrs-map.com", "Sunday raids"));
+		assertEquals("Logged out", MapCompanionPanel.statusWords(true, true, Health.WAITING, "Logged out", "Sunday raids"));
 		assertEquals("Paste your connection code", MapCompanionPanel.JOIN_PLACEHOLDER);
 	}
 
