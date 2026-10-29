@@ -267,6 +267,7 @@ public class MapCompanionPanel extends PluginPanel
 	 * lesson the destination card carries a comment about.
 	 */
 	private final JTextField joinField = new JTextField();
+	static final String JOIN_PLACEHOLDER = "Paste your connection code";
 	private final JButton pasteButton = smallButton("Paste");
 	private final JButton joinButton = smallButton("Connect");
 	private final JLabel joinMessage = new JLabel();
@@ -710,13 +711,20 @@ public class MapCompanionPanel extends PluginPanel
 		return left(button);
 	}
 
-	/** A full-width code field, then Paste and Connect, in the order the reader uses them. */
+	/**
+	 * A full-width code field, then Paste and Connect, in the order the reader uses them.
+	 *
+	 * <p>No heading and no card around it: the placeholder says what goes in the field, and the
+	 * tooltip where it comes from. A heading that repeated the placeholder, the map's address and
+	 * "Character sharing paused" above it were three lines about a connection that did not exist yet.
+	 */
 	private JPanel buildJoinBlock()
 	{
 		JPanel block = column(ColorScheme.DARK_GRAY_COLOR);
-		block.add(sectionHead("Connection code"));
-		joinField.setToolTipText("Paste your full connection code from the map's Companion panel");
-		joinField.putClientProperty("JTextField.placeholderText", "Connection code");
+		joinField.setName("join.field");
+		joinField.setToolTipText("On osrs-map.com, open the Companion panel and press Copy connection code, "
+			+ "or paste a friend's invite");
+		joinField.putClientProperty("JTextField.placeholderText", JOIN_PLACEHOLDER);
 		joinField.addActionListener(e -> joinFromField());
 		block.add(fill(joinField, ColorScheme.DARK_GRAY_COLOR));
 		block.add(gap(4, ColorScheme.DARK_GRAY_COLOR));
@@ -968,6 +976,23 @@ public class MapCompanionPanel extends PluginPanel
 	}
 
 	/**
+	 * The status card's first line. "Not connected" before a group, where the plugin's own word was
+	 * "Not paired": pairing is this code's word for it, and nobody joins a map to be paired.
+	 */
+	static String statusWords(boolean paired, boolean ready, Health health, String status)
+	{
+		if (!paired)
+		{
+			return "Not connected";
+		}
+		if (!ready)
+		{
+			return "Press Connect";
+		}
+		return health == Health.LIVE ? "Connected" : status;
+	}
+
+	/**
 	 * When a meetup is, the way somebody would say it: "Meetup in 45m", "Meetup in 3h 20m", "Meetup
 	 * tomorrow 6:42 AM", then the world when the map named one, " · W444".
 	 *
@@ -1183,18 +1208,25 @@ public class MapCompanionPanel extends PluginPanel
 							   + " · last post " + ageOf(relay.getLastSuccessMs())
 							   + (directiveStream.isConnected() ? " · stream open" : " · stream closed"));
 			/* Connection and group each get a line; a long server name cannot bury either. */
-			setWrapped(statusLabel,
-					   paired && !ready ? "Press Connect" : health == Health.LIVE && ready ? "Connected" : plugin.getStatus(),
-					   CARD_TEXT_WIDTH - 18);
+			setWrapped(statusLabel, statusWords(paired, ready, health, plugin.getStatus()), CARD_TEXT_WIDTH - 18);
 			statusLabel.setToolTipText(dot.getToolTipText());
-			setWrapped(groupLabel, paired ? statusGroup(code, pairing.name(code)) : pairing.serverLabel(), CARD_TEXT_WIDTH);
+			/* Before a group, no second line: the map's address is in Settings, and is not news. */
+			groupLabel.setVisible(paired);
+			if (paired)
+			{
+				setWrapped(groupLabel, statusGroup(code, pairing.name(code)), CARD_TEXT_WIDTH);
+			}
 			groupLabel.setToolTipText(paired ? "Group code " + JoinCode.forDisplay(code) : null);
 
 			/*
 			 * Character fields are separate from membership: all opt-ins off still sends the latter
 			 * after Connect. The tooltip and Advanced preview keep the precise disclosure reachable.
 			 */
-			setWrapped(sharingLabel, ready ? sharingLine() : "Character sharing paused", CARD_TEXT_WIDTH);
+			sharingLabel.setVisible(paired);
+			if (paired)
+			{
+				setWrapped(sharingLabel, ready ? sharingLine() : "Character sharing paused", CARD_TEXT_WIDTH);
+			}
 			sharingLabel.setToolTipText(paired ? sharingList() : null);
 
 			/* The search is the map's, asked as a member: a box that could only say "connect" is not shown. */
