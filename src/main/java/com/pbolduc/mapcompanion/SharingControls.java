@@ -51,6 +51,7 @@ import net.runelite.client.ui.ColorScheme;
  * name, death location and client actions stay separate. Native settings retain their warnings;
  * the sidebar discloses the server once at Connect, before any request. These choices only select
  * which fields may be sent after that approval. Refresh cannot grant approval or change a preference.
+ * The fields and their words are {@link SharingFields}, which the step after a first Connect reads too.
  */
 final class SharingControls extends JPanel
 {
@@ -70,20 +71,9 @@ final class SharingControls extends JPanel
 		setBackground(ColorScheme.DARK_GRAY_COLOR);
 		setAlignmentX(Component.LEFT_ALIGNMENT);
 
-		JPanel presence = column();
-		choice(presence, "sharePosition", "Position and world", config::sharePosition,
-			"Your tile, world and instance type. Shows your dot where its location is known.");
-		choice(presence, "shareActivity", "Training and idle time", config::shareActivity,
-			"The skill last trained, recent experience and time since moving.");
-		choice(presence, "shareAccountType", "Account type", config::shareAccountType,
-			"Your ironman or other account badge.");
-		addGroup("presence", "Map presence", presence);
-
 		JPanel privacy = column();
-		choice(privacy, "shareName", "Character name", config::shareName,
-			"The display name of the character you are logged in as.");
-		choice(privacy, "shareDeath", "Last death location", config::shareDeath,
-			"The tile of your most recent death, forgotten after an hour.");
+		choice(privacy, SharingFields.NAME);
+		choice(privacy, SharingFields.DEATH);
 		JLabel nicknameLabel = new JLabel("Name to show");
 		nicknameLabel.setFont(nicknameLabel.getFont().deriveFont(11f));
 		nicknameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -103,52 +93,34 @@ final class SharingControls extends JPanel
 		});
 		privacy.add(nickname);
 
-		JPanel progress = column();
-		choice(progress, "shareSkills", "Skill levels", config::shareSkills, "Your levels, for usable routes.");
-		choice(progress, "shareQuests", "Travel quest completion", config::shareQuests, "Progress in the quests that unlock travel; no individual steps.");
-		choice(progress, "shareQuestLog", "Full quest progress", config::shareQuestLog, "Started or finished states for the full quest and miniquest log; no individual steps.");
-		choice(progress, "shareDiaries", "Achievement diaries", config::shareDiaries, "Completed tiers and collected rewards; no individual tasks.");
-		choice(progress, "sharePermanentTravel", "Permanent travel and house", config::sharePermanentTravel, "Verified permanent travel unlocks and the town your house is in.");
-		choice(progress, "shareCapabilities", "Carried travel items", config::shareCapabilities, "Derived yes/no travel flags; your inventory is never sent.");
-		choice(progress, "shareStash", "STASH construction", config::shareStash, "Built STASH units; stored equipment is never read.");
-		addGroup("progress", "Progress and travel", progress);
-
-		JPanel tasks = column();
-		choice(tasks, "shareSlayer", "Slayer task", config::shareSlayer, "Your current assignment and remaining count.");
-		choice(tasks, "shareClue", "Clue step", config::shareClue, "Your current clue scroll step.");
-		choice(tasks, "shareFarming", "Farming patches", config::shareFarming, "Patch states you have observed, for planning runs.");
-		choice(tasks, "shareBirdhouses", "Birdhouses", config::shareBirdhouses, "States observed by RuneLite Time Tracking, with their age.");
-		choice(tasks, "shareHunterRumours", "Hunter rumours", config::shareHunterRumours, "The rumour observed after checking a quetzal whistle; recheck after login or hopping.");
-		choice(tasks, "shareMahoganyHomes", "Mahogany Homes", config::shareMahoganyHomes, "The customer and tier observed in dialogue or game messages.");
-		choice(tasks, "shareFarmingContracts", "Farming contracts", config::shareFarmingContracts, "The crop requested by your current Farming Guild contract.");
-		addGroup("tasks", "Tasks and timers", tasks);
-
-		JPanel loot = column();
-		choice(loot, "shareLoot", "Observed kills and drops", config::shareLoot, "Locally observed tracked monster kills and rated drop totals on normal members worlds; not lifetime kill counts.");
-		choice(loot, "shareMilestones", "Notable drops and levels", config::shareMilestones, "Notable observed rewards and real levels. Activity rewards require Loot Tracker.");
-		choice(loot, "sharePets", "Include pet rewards", config::sharePets, "Observed pet rewards while Notable drops and levels is enabled; unknown pets stay unnamed.");
-		choice(loot, "shareCollectionLog", "Include collection additions", config::shareCollectionLog, "New collection notifications while Notable drops and levels is enabled; existing slots are never read.");
-		JLabel dependencies = new JLabel("<html><body width='150'>Pet rewards and collection additions need Notable drops and levels.</body></html>");
-		dependencies.setFont(dependencies.getFont().deriveFont(11f));
-		dependencies.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
-		dependencies.setAlignmentX(Component.LEFT_ALIGNMENT);
-		loot.add(dependencies);
-		addGroup("loot", "Loot and milestones", loot);
+		for (SharingFields.Section section : SharingFields.GROUPS)
+		{
+			JPanel contents = column();
+			for (SharingFields.Field field : section.fields) choice(contents, field);
+			if (section == SharingFields.LOOT)
+			{
+				JLabel dependencies = new JLabel("<html><body width='150'>Pet rewards and collection additions need Notable drops and levels.</body></html>");
+				dependencies.setFont(dependencies.getFont().deriveFont(11f));
+				dependencies.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+				dependencies.setAlignmentX(Component.LEFT_ALIGNMENT);
+				contents.add(dependencies);
+			}
+			addGroup(section.id, section.title, contents);
+		}
 		add(fold("Name and death location", privacy));
 
 		JPanel client = column();
-		choice(client, "showDestination", "Show map destinations", config::showDestination, "Receive destinations and meetup details. Nothing is clicked or walked for you.");
-		choice(client, "showGroupOnWorldMap", "Group on the world map", config::showGroupOnWorldMap, "Receive the positions your group already shares and draw them on the world map.");
-		choice(client, "destinationHintArrow", "Hint arrow to a destination", config::destinationHintArrow, "Point the game's own arrow at a destination once it is nearby. Nothing leaves this computer.");
-		choice(client, MapCompanionConfig.KEY_SHORTEST_PATH, "Draw paths with Shortest Path", config::drawWithShortestPath, "When you follow a route, the Shortest Path plugin draws each walking step. Nothing leaves this computer.");
-		choice(client, "notifyMeetups", "Meetup notifications", config::notifyMeetups, "Receive a notification before a meetup starts.");
-		choice(client, "dropLuckChat", "Drop luck in chat", config::dropLuckChat, "One chat line when a drop with a known rate lands. Nothing leaves this computer.");
+		for (SharingFields.Field field : SharingFields.CLIENT) choice(client, field);
 		add(fold("In the client", client));
 		refresh();
 	}
 
-	private void choice(JPanel parent, String key, String label, BooleanSupplier read, String disclosure)
+	private void choice(JPanel parent, SharingFields.Field field)
 	{
+		String key = field.key;
+		String label = field.label;
+		BooleanSupplier read = () -> field.read.test(config);
+		String disclosure = field.detail;
 		JCheckBox box = new JCheckBox("<html><body width='150'>" + label.replace("&", "&amp;") + "</body></html>");
 		box.setName(key);
 		box.setBackground(ColorScheme.DARK_GRAY_COLOR);

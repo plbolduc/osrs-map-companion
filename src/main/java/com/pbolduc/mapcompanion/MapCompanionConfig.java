@@ -58,6 +58,14 @@ public interface MapCompanionConfig extends Config
 		"This feature submits your IP address to a 3rd-party server not controlled or verified by RuneLite developers";
 
 	/**
+	 * What the map keeps of a drop or a level, said beside the choice that sends one. A group made
+	 * on the map keeps two weeks of its members' notable drops and levels unless its owner turns
+	 * that off, so the choice and the step after Connect say so rather than leave it to the
+	 * privacy page.
+	 */
+	String FEED_KEPT = "Your group keeps the last two weeks.";
+
+	/**
 	 * Connection and sharing keys that must be recognised by configuration listeners.
 	 *
 	 * <p>Named constants because {@link MapCompanionPlugin} has to recognise them in a
@@ -454,7 +462,7 @@ public interface MapCompanionConfig extends Config
 			"Announce notable NPC and supported activity rewards, and real levels. Collection items "
 			+ "and a small curated exception list qualify; repeated supplies do not. Activity and chest "
 			+ "rewards require RuneLite's Loot Tracker. Pets and collection additions also have their "
-			+ "own switches below. Nothing is queued while unpaired or logged out.",
+			+ "own switches below. Nothing is queued while unpaired or logged out. " + FEED_KEPT,
 		position = 21,
 		warning = NETWORK_WARNING,
 		section = lootSection

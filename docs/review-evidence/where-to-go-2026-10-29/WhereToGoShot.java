@@ -164,9 +164,17 @@ public class WhereToGoShot
 		pairing.rememberSecret("KQX482", identity.id(), "K7PQ2M3XABCDEFGHJKMNPQRSTVWXYZ23");
 		set(plugin, "status", "Connected");
 		set(plugin, "health", Health.LIVE);
-		config.set("sharePosition", true);
-		config.set("shareSkills", true);
-		config.set("showDestination", true);
+		if (!state.startsWith("connect"))
+		{
+			config.set("sharePosition", true);
+			config.set("shareSkills", true);
+			config.set("showDestination", true);
+		}
+		else
+		{
+			set(plugin, "status", "Waiting for the map");
+			set(plugin, "health", Health.WAITING);
+		}
 		Scenes.fill(state, injector, config);
 		return injector.getInstance(MapCompanionPanel.class);
 	}
@@ -259,7 +267,9 @@ public class WhereToGoShot
 		holder.paint(graphics);
 		graphics.dispose();
 		ImageIO.write(image, "png", new File(path));
-		System.out.println(path + " 225x" + height + " preferredWidth=" + panel.getPreferredSize().width);
+		Object step = panel instanceof MapCompanionPanel ? get(panel, "recommendedSharing") : null;
+		String stepHeight = step != null && ((JComponent) step).isVisible() ? " step=" + ((JComponent) step).getHeight() + "px" : "";
+		System.out.println(path + " 225x" + height + " preferredWidth=" + panel.getPreferredSize().width + stepHeight);
 	}
 
 	/** Run the panel's private refresh now, then drain what it queued on the event thread. */
@@ -318,6 +328,20 @@ public class WhereToGoShot
 				set(client, "pendingTimer", null);
 				set(client, "result", new SearchClient.Result("bank", hits, null, null, false));
 				search.refresh();
+			}
+			if (state.startsWith("connect"))
+			{
+				/* The step a first Connect offers, as joinFromField leaves the panel after the notice. */
+				Method say = MapCompanionPanel.class.getDeclaredMethod("say", String.class);
+				say.setAccessible(true);
+				Pairing pairing = (Pairing) get(panel, "pairing");
+				say.invoke(panel, "Connecting to " + pairing.serverLabel() + "… Waiting for the map.");
+				((RecommendedSharing) get(panel, "recommendedSharing")).offer(pairing.serverLabel());
+				if (state.equals("connect-customise"))
+				{
+					named(panel, "recommended.customise").doClick();
+					named(panel, "recommended.shareQuestLog").doClick();
+				}
 			}
 			if (state.equals("meetup"))
 			{

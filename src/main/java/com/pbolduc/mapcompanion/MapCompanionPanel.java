@@ -262,6 +262,8 @@ public class MapCompanionPanel extends PluginPanel
 	private final JLabel joinMessage = new JLabel();
 
 	private final SharingControls sharingControls;
+	/** The step after a first Connect: the recommended set, ticked, and one press. See {@link RecommendedSharing}. */
+	private final RecommendedSharing recommendedSharing;
 	private final JTextField mapAddress = new JTextField();
 	private String displayedAddress;
 
@@ -347,6 +349,7 @@ public class MapCompanionPanel extends PluginPanel
 		this.dropLuck = new DropLuckPanel(lootLog, DropLuckPanel.Pictures.of(itemManager));
 		this.starsPanel = new StarsPanel(starsClient, destinationState, clientThread, destinationMarker, routePress, this::mapUrl);
 		this.sharingControls = new SharingControls(config, ConfigStore.of(configManager));
+		this.recommendedSharing = new RecommendedSharing(config, ConfigStore.of(configManager), this::refresh);
 
 		setLayout(new BorderLayout());
 		setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -389,6 +392,7 @@ public class MapCompanionPanel extends PluginPanel
 		joinBlock = buildJoinBlock();
 		body.add(joinBlock);
 		body.add(left(joinMessage));
+		body.add(recommendedSharing);
 		JPanel overview = column(ColorScheme.DARK_GRAY_COLOR);
 		overview.setName("companionOverview");
 		/* First, because "where is it and how do I get there" is the question the map answers best. */
@@ -803,7 +807,7 @@ public class MapCompanionPanel extends PluginPanel
 			say("Paste your connection code from the map's Companion panel.");
 			return;
 		}
-		if (!pairing.connect(joined, this::confirmServer))
+		if (!connect(joined))
 		{
 			say("Connection cancelled.");
 			return;
@@ -813,6 +817,13 @@ public class MapCompanionPanel extends PluginPanel
 		say("Connecting to " + pairing.serverLabel() + "… Waiting for the map.");
 		pendingConnectionMessage = true;
 		refresh();
+	}
+
+	/** Connect, then offer the recommended set if this was a first Connect to the map. */
+	private boolean connect(JoinCode joined)
+	{
+		return RecommendedSharing.connect(pairing, joined, this::confirmServer, config,
+			() -> recommendedSharing.offer(pairing.serverLabel()));
 	}
 
 	/** One line under the join field, hidden when there is nothing to say. */
@@ -851,7 +862,7 @@ public class MapCompanionPanel extends PluginPanel
 				item.setToolTipText("Post to this group instead. One group at a time, like a party.");
 				item.addActionListener(e ->
 				{
-					if (!pairing.connect(JoinCode.parse(code), this::confirmServer))
+					if (!connect(JoinCode.parse(code)))
 					{
 						return;
 					}
@@ -1291,6 +1302,11 @@ public class MapCompanionPanel extends PluginPanel
 			joinToggle.setVisible(paired);
 			joinToggle.setText(joinOpen ? "▾ Join another group" : "▸ Join another group");
 			joinBlock.setVisible(!paired || !pairing.hasServerConsent() || joinOpen);
+			/* Offered for the group just joined; leaving it, or a changed map, takes the offer away. */
+			if (!ready)
+			{
+				recommendedSharing.withdraw();
+			}
 
 			sharingControls.refresh();
 			String configuredAddress = config.relayUrl();
