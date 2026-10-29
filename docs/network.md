@@ -34,6 +34,14 @@ position sharing is on, because a route from where you stand is what the press a
 flight at a time, and none before the wait the map last asked for: its `Retry-After`, and at least
 five seconds between presses that reached it. The map plans with both tiles and keeps neither.
 
+**Draw paths with Shortest Path** (on) talks to the Shortest Path plugin, if it is installed,
+with RuneLite's plugin messages, which stay inside this client. While a route is shown it asks
+`getTarget` every few seconds, which only reads what Shortest Path is drawing. On a route you chose
+to follow, by pressing **Follow** or **Reroute**, it sends `path` with the current walking step's
+start, your tile, and its end; it sends nothing for a teleport or a ride. It sends `clear` only for
+a path it set, and only once Shortest Path's answer still names that path. It never sends
+Shortest Path's `config`. A destination that merely arrives, a friend's included, sends nothing.
+
 ## Identity and credentials
 
 Each character has a random id; account hashes and identifiers derived from your account are

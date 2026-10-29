@@ -107,6 +107,13 @@ A route's steps are numbered `MapPin`s on the world map; like every pin here, a 
 map. Group pins clear on connection loss, logout, group change, sharing withdrawal and shutdown;
 queued old frames are invalidated.
 
+`ShortestPath` posts RuneLite `PluginMessage`s to the Shortest Path plugin in namespace
+`shortestpath`, inside the client: `getTarget` to learn whether it is installed and what it draws,
+`path` with `start` and `target` for the current walking step of a route the player pressed Follow
+or Reroute on, and `clear` for a path this plugin set and Shortest Path still shows. Nothing goes
+during a teleport or ride step, for a destination that merely arrived, or with the setting off, and
+Shortest Path's `config` override is never sent. Drawing a path is information; nothing walks.
+
 Reconnects use RuneLite's injected scheduler; focus checks stay within the plugin's search field.
 `shutDown` removes its panel and overlays on the EDT and queues everything a game tick touches on
 the client thread, so a tick already running cannot reopen the stream after the plugin stops.

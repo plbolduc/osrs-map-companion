@@ -129,6 +129,19 @@ The website plan's second session, once the routes in the game are built: a memb
 - [ ] **The arrow follows the step.** With the current step's end in the loaded scene, the game's
       arrow points there rather than at the destination; it moves on as each step is reached, and a
       quest's arrow set first is left alone.
+- [ ] **Shortest Path, installed.** With it running, Follow appears beside Reroute. A received
+      destination draws nothing in it until Follow is pressed. On a teleport step it shows nothing
+      new; on reaching the landing it draws the walk from your tile to the step's end, and the
+      sidebar says Shortest Path is drawing it. Note whether the path still follows you as you
+      walk, since this sends a `start`, and whether it ever adds a teleport of its own to a
+      walking step (the owner's reason for not sending `config` yet).
+- [ ] **Shortest Path keeps its own target.** Set a target of your own in Shortest Path while
+      following: the sidebar stops following and says why, and finishing the walk does not clear
+      your target. Press Stop while it draws one of ours: that path is cleared.
+- [ ] **Shortest Path, not installed.** Without it, no Follow button and nothing about it in the
+      sidebar; the steps and pins still work.
+- [ ] **Three buttons fit.** Follow, Reroute and Dismiss sit on one row in the 225px sidebar
+      without cutting a word.
 
 ## Farming procedure
 

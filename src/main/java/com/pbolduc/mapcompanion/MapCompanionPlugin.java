@@ -63,6 +63,7 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ClientShutdown;
 import net.runelite.client.events.ConfigChanged;
+import net.runelite.client.events.PluginMessage;
 import net.runelite.client.events.RuneScapeProfileChanged;
 import net.runelite.client.events.ServerNpcLoot;
 import net.runelite.client.Notifier;
@@ -236,6 +237,9 @@ public class MapCompanionPlugin extends Plugin
 
 	@Inject
 	private DestinationRoute destinationRoute;
+
+	@Inject
+	private ShortestPath shortestPath;
 
 	@Inject
 	private OverlayManager overlayManager;
@@ -464,6 +468,7 @@ public class MapCompanionPlugin extends Plugin
 		/* Cleared before the pins go, so a stream frame's queued sync cannot redraw one. */
 		destinationState.clear();
 		destinationRoute.clear();
+		shortestPath.shutDown();
 		destinationMarker.remove();
 		destinationArrow.clear();
 		xpTracker.reset();
@@ -672,6 +677,13 @@ public class MapCompanionPlugin extends Plugin
 		assignmentReader.onSessionEnded();
 		pickpocketTick = -1;
 		dirty = true;
+	}
+
+	/** Shortest Path's answers to {@link ShortestPath}'s questions, forwarded from here for the reason above. */
+	@Subscribe
+	public void onPluginMessage(PluginMessage event)
+	{
+		shortestPath.onPluginMessage(event);
 	}
 
 	@Subscribe
@@ -917,6 +929,8 @@ public class MapCompanionPlugin extends Plugin
 		/* The step pins follow the step; unchanged, this compares one string and returns. */
 		destinationMarker.sync();
 		destinationArrow.sync();
+		shortestPath.tick(client.getTickCount(), destinationRoute.view(), config.drawWithShortestPath(),
+			DestinationRoute.standing(client), () -> destinationRoute.stopFollowing(ShortestPath.TAKEN_OVER));
 		/*
 		 * The task counter, so a kill can be matched to the counter it moved — see TaskKills — and the
 		 * collection vocabulary's retry, which drop luck needs whether or not rewards are shared.

@@ -140,6 +140,7 @@ final class SharingControls extends JPanel
 		choice(client, "showDestination", "Show map destinations", config::showDestination, "Receive destinations and meetup details. Nothing is clicked or walked for you.");
 		choice(client, "showGroupOnWorldMap", "Group on the world map", config::showGroupOnWorldMap, "Receive the positions your group already shares and draw them on the world map.");
 		choice(client, "destinationHintArrow", "Hint arrow to a destination", config::destinationHintArrow, "Point the game's own arrow at a destination once it is nearby. Nothing leaves this computer.");
+		choice(client, MapCompanionConfig.KEY_SHORTEST_PATH, "Draw paths with Shortest Path", config::drawWithShortestPath, "When you follow a route, the Shortest Path plugin draws each walking step. Nothing leaves this computer.");
 		choice(client, "notifyMeetups", "Meetup notifications", config::notifyMeetups, "Receive a notification before a meetup starts.");
 		choice(client, "dropLuckChat", "Drop luck in chat", config::dropLuckChat, "One chat line when a drop with a known rate lands. Nothing leaves this computer.");
 		add(fold("In the client", client));

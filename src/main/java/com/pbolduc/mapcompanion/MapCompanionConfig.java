@@ -73,6 +73,7 @@ public interface MapCompanionConfig extends Config
 	String KEY_SHARE_MILESTONES = "shareMilestones";
 	String KEY_SHARE_PETS = "sharePets";
 	String KEY_SHARE_COLLECTION = "shareCollectionLog";
+	String KEY_SHORTEST_PATH = "drawWithShortestPath";
 
 	@ConfigSection(
 		name = "Map presence",
@@ -546,6 +547,21 @@ public interface MapCompanionConfig extends Config
 		section = clientSection
 	)
 	default boolean destinationHintArrow()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = KEY_SHORTEST_PATH,
+		name = "Draw paths with Shortest Path",
+		description =
+			"When you follow a route the map sent, have the Shortest Path plugin, if you have it, draw each "
+			+ "walking step. It is sent nothing for a teleport or a ride, and a destination somebody sends "
+			+ "never changes its path until you press Follow or Reroute.",
+		position = 36,
+		section = clientSection
+	)
+	default boolean drawWithShortestPath()
 	{
 		return true;
 	}

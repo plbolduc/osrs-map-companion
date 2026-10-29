@@ -262,4 +262,10 @@ final class HarnessConfig implements MapCompanionConfig
 	{
 		return on("destinationHintArrow", MapCompanionConfig.super.destinationHintArrow());
 	}
+
+	@Override
+	public boolean drawWithShortestPath()
+	{
+		return on(MapCompanionConfig.KEY_SHORTEST_PATH, MapCompanionConfig.super.drawWithShortestPath());
+	}
 }

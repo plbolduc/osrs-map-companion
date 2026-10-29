@@ -46,6 +46,9 @@ import net.runelite.client.ui.ColorScheme;
  * named above its steps, and the others the map offered fold behind one line, as the card's closed
  * row folds them — a press on one shows its steps instead.
  *
+ * <p>When Shortest Path is drawing a step's walk for this route, a line under the steps says so, so
+ * the line on the ground is never taken for this plugin's own drawing.
+ *
  * <p>Every string here was typed by somebody in the group or built from what they sent, so each
  * goes through {@link MapCompanionPanel#setWrapped}, which escapes before Swing reads markup.
  * Rebuilt only when what it says changes: the sidebar refreshes every second, and a rebuild under
@@ -68,6 +71,9 @@ final class RouteStepsView extends JPanel
 	private final JButton others = MapCompanionPanel.linkButton("");
 	private final JPanel otherWays = MapCompanionPanel.column(ColorScheme.DARKER_GRAY_COLOR);
 	private final JLabel message = label(11f, AHEAD);
+	private final JLabel drawn = label(11f, AHEAD);
+	@Nullable
+	private String drawnLine;
 	private boolean open;
 	@Nullable
 	private String said;
@@ -87,6 +93,7 @@ final class RouteStepsView extends JPanel
 		add(MapCompanionPanel.left(arrived));
 		add(others);
 		add(otherWays);
+		add(MapCompanionPanel.left(drawn));
 		add(MapCompanionPanel.left(message));
 		setBorder(new EmptyBorder(5, 0, 0, 0));
 		others.addActionListener(e ->
@@ -94,7 +101,7 @@ final class RouteStepsView extends JPanel
 			open = !open;
 			DestinationRoute.View view = shown;
 			said = null;
-			show(view);
+			show(view, drawnLine);
 		});
 		setVisible(false);
 	}
@@ -102,7 +109,14 @@ final class RouteStepsView extends JPanel
 	/** Say this route, or nothing. */
 	void show(@Nullable DestinationRoute.View view)
 	{
-		String words = view == null ? null : words(view);
+		show(view, null);
+	}
+
+	/** @param shortestPath what Shortest Path is drawing for it, in words, or null */
+	void show(@Nullable DestinationRoute.View view, @Nullable String shortestPath)
+	{
+		drawnLine = shortestPath;
+		String words = view == null ? null : words(view) + "|" + shortestPath;
 		if (words != null && words.equals(said))
 		{
 			return;
@@ -149,6 +163,9 @@ final class RouteStepsView extends JPanel
 			pick.addActionListener(e -> choose.accept(index));
 			otherWays.add(pick);
 		}
+
+		drawn.setVisible(shortestPath != null);
+		MapCompanionPanel.setWrapped(drawn, shortestPath == null ? "" : shortestPath, WIDTH);
 
 		String status = view.rerouting ? "Planning from where you stand…" : view.message;
 		message.setVisible(status != null);
@@ -217,6 +234,24 @@ final class RouteStepsView extends JPanel
 	static String otherLine(RelayResponse.RouteOption way)
 	{
 		return wayLine(way) + (way.best ? " · best" : "") + (way.blocked ? " · not yet" : "");
+	}
+
+	/**
+	 * What Shortest Path is doing for a followed route: drawing this step's walk, or waiting for the
+	 * next walk. Null when the route is not followed or there is no Shortest Path to draw with.
+	 */
+	@Nullable
+	static String shortestPathLine(DestinationRoute.View view, boolean available, int drawing)
+	{
+		if (!view.following || !available || view.arrived())
+		{
+			return null;
+		}
+		if (drawing == view.step + 1)
+		{
+			return "Shortest Path is drawing the walk for step " + drawing + ".";
+		}
+		return "Shortest Path draws each walk when you reach it.";
 	}
 
 	/** Everything this view would say, so an unchanged second does not rebuild it. */
