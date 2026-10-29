@@ -359,7 +359,7 @@ public class MapCompanionPanel extends PluginPanel
 		this.routePress = routePress;
 		this.clueReader = clueReader;
 		this.searchPanel = new SearchPanel(searchClient, routePress, sprites);
-		this.groupPanel = new GroupPanel(destinationState, groupState, routePress, meetupClient, config);
+		this.groupPanel = new GroupPanel(destinationState, groupState, routePress, meetupClient, config, sprites);
 		this.routeSteps = new RouteStepsView(way ->
 		{
 			destinationRoute.choose(way);

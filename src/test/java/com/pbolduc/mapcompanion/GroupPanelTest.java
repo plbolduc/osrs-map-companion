@@ -110,7 +110,40 @@ public class GroupPanelTest
 			});
 		MeetupClient meetups = new MeetupClient(http("{\"eventId\":\"star-hunt\",\"answer\":\"going\"}"), new Gson(),
 			MeetupClientTest.game(false), now(), pairing, identity, destinations, group, link -> { });
-		return new GroupPanel(destinations, group, press, meetups, config);
+		return new GroupPanel(destinations, group, press, meetups, config, pictures);
+	}
+
+	/** What the panel asked the game's sprites for, by the label it asked for. */
+	private final List<String> drawn = new CopyOnWriteArrayList<>();
+	private final GameSprites pictures = new GameSprites(null, null, null)
+	{
+		@Override
+		void item(javax.swing.JLabel label, int itemId, int box)
+		{
+			drawn.add(label.getName() + " item " + itemId);
+		}
+
+		@Override
+		void skill(javax.swing.JLabel label, String name, int box)
+		{
+			drawn.add(label.getName() + " skill " + name);
+		}
+	};
+
+	/**
+	 * A friend's news carries its own picture, as the website's friend rows do: the item a drop
+	 * names, the skill a level names, and nothing for a quest, which has neither.
+	 */
+	@Test
+	public void aFriendsNewsAsksForTheItemOrTheSkillItNames() throws Exception
+	{
+		AtomicReference<GroupPanel> panel = new AtomicReference<>();
+		SwingUtilities.invokeAndWait(() -> panel.set(panel()));
+		social();
+		SwingUtilities.invokeAndWait(() -> panel.get().refresh(true));
+		assertTrue(drawn.toString(), drawn.contains("group.news.cara skill Woodcutting"));
+		assertTrue(drawn.toString(), drawn.contains("group.news.dax item 4151"));
+		assertFalse(drawn.toString(), drawn.stream().anyMatch(d -> d.startsWith("group.news.rob")));
 	}
 
 	private void social() throws Exception

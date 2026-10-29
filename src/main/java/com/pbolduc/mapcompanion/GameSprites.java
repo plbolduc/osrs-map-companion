@@ -28,12 +28,15 @@ package com.pbolduc.mapcompanion;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.awt.image.BufferedImage;
+import java.util.Locale;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
+import net.runelite.api.Skill;
 import net.runelite.client.game.ItemManager;
+import net.runelite.client.game.SkillIconManager;
 import net.runelite.client.game.SpriteManager;
 import net.runelite.client.util.AsyncBufferedImage;
 import net.runelite.client.util.ImageUtil;
@@ -58,12 +61,37 @@ class GameSprites
 	private final ItemManager items;
 	@Nullable
 	private final SpriteManager sprites;
+	@Nullable
+	private final SkillIconManager skills;
 
 	@Inject
-	GameSprites(@Nullable ItemManager items, @Nullable SpriteManager sprites)
+	GameSprites(@Nullable ItemManager items, @Nullable SpriteManager sprites, @Nullable SkillIconManager skills)
 	{
 		this.items = items;
 		this.sprites = sprites;
+		this.skills = skills;
+	}
+
+	/**
+	 * A skill's small icon, the one the game draws beside a level, by the skill's name as the map
+	 * words it ("Woodcutting"). A name that is no skill gets no picture.
+	 */
+	void skill(JLabel label, String name, int box)
+	{
+		if (skills == null || name == null)
+		{
+			return;
+		}
+		Skill skill;
+		try
+		{
+			skill = Skill.valueOf(name.trim().toUpperCase(Locale.ROOT));
+		}
+		catch (IllegalArgumentException notASkill)
+		{
+			return;
+		}
+		show(label, skills.getSkillImage(skill, true), box);
 	}
 
 	/** An item's sprite, shrunk to fit {@code box} square when it is larger, on {@code label}. */
