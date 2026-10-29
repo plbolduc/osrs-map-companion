@@ -59,7 +59,7 @@ public class SlayerTaskReader
 	private final Client client;
 
 	@Inject
-	private SlayerTaskReader(Client client)
+	SlayerTaskReader(Client client)
 	{
 		this.client = client;
 	}
