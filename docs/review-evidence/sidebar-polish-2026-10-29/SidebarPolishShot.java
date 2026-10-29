@@ -64,7 +64,7 @@ import okhttp3.OkHttpClient;
 public class SidebarPolishShot
 {
 	static final List<String> STATES = Arrays.asList("fresh", "fresh-log", "connect", "home", "group", "settings",
-		"stars", "search", "search-whip", "death", "meetup", "dropluck", "status");
+		"stars", "stars-filters", "search", "search-whip", "death", "meetup", "dropluck", "status");
 
 	static HarnessGame game;
 
@@ -364,7 +364,7 @@ public class SidebarPolishShot
 			}
 			expand(panel, "Advanced");
 		}
-		if (state.equals("stars"))
+		if (state.startsWith("stars"))
 		{
 			StarsPanel stars = (StarsPanel) get(panel, "starsPanel");
 			StarsClient client = (StarsClient) get(stars, "service");
@@ -382,6 +382,10 @@ public class SidebarPolishShot
 					press(panel, "stars.expand." + site.key);
 					press(panel, "stars.world." + site.worlds.get(0).id);
 				}
+			}
+			if (state.equals("stars-filters"))
+			{
+				press(panel, "stars.filters");
 			}
 		}
 		if (state.startsWith("search"))

@@ -526,3 +526,9 @@ its tooltip with the last post and the stream, so the first line is the group's 
 what is shared, *Sharing position, levels*, with the gear at the end of the first. While it is not,
 the first line says what is happening — *Connecting…*, *Logged out*, a refusal — and the second is
 the group's name. The connect step is 532px.
+
+### Stars
+
+*Sync filters with website* and *Mining 72 · Skill total 1620* sat above the list as daily
+controls, though both are set once. They are now the first rows of ⋯ More filters. *Selected world*
+stays at the top.

@@ -114,8 +114,6 @@ final class StarsPanel extends JPanel
 		 */
 		add(selection);
 		sync.setName("stars.sync");
-		add(fill(sync));
-		add(gap(4));
 
 		/* The tier picker keeps the width its longest value needs; the three chips share the rest. */
 		JPanel controls = new JPanel(new GridBagLayout());
@@ -146,7 +144,14 @@ final class StarsPanel extends JPanel
 		filters.getAccessibleContext().setAccessibleName("More filters");
 		filters.setName("stars.filters");
 
+		/*
+		 * Sync and the levels the list is filtered by are set once, so they sit with the other
+		 * filters set once rather than above the list as daily controls.
+		 */
 		more.setBorder(BorderFactory.createEmptyBorder(6, 0, 0, 0));
+		more.add(fill(sync));
+		more.add(levels);
+		more.add(gap(6));
 		more.add(heading("Hide"));
 		more.add(wilderness);
 		more.add(pvp);
@@ -158,7 +163,6 @@ final class StarsPanel extends JPanel
 		add(more);
 
 		add(gap(6));
-		add(levels);
 		JPanel summary = new JPanel(new BorderLayout());
 		summary.setBackground(getBackground());
 		summary.add(order, BorderLayout.WEST);
