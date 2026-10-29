@@ -16,8 +16,9 @@ what, what may leave the machine, and how to commit.
   on RuneLite's site at the pinned commit, so it is written for players: how the requests work
   belongs in `docs/network.md`, and building in `CONTRIBUTING.md`.
 - **The history is public, so a pull request made here is clean before it is pushed.** Commits
-  follow CONTRIBUTING's *Commits*. A pull request is one change a reviewer can read in one
-  sitting, and every commit in it builds and passes on its own. Fixups are folded into the commit
+  follow CONTRIBUTING's *Commits*. Every commit is one change a reviewer can read in one sitting,
+  and builds and passes on its own. A pull request may carry several related commits; unrelated
+  work does not ride along. Fixups are folded into the commit
   they fix before the first push, because GitHub keeps every commit a pull request ever showed. A
   pushed branch is not rewritten without the owner's say. These are merged with *Rebase and
   merge*, keeping the line straight; an outside contributor's pull request is squashed instead.
