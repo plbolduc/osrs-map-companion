@@ -71,8 +71,10 @@ import net.runelite.client.ui.ColorScheme;
  * nobody; the <i>On my way</i> answer is the press that does. The four answers are the map's own
  * and answer for the browser this member is bound to.
  *
- * <p><b>Meet here</b> opens a short form under the meetups: a title, a day and a time. It makes the
- * meetup at the tile and world the player stands on and copies its link.
+ * <p><b>Meet here</b>, on the Meetups heading, opens a short form under the meetups: a title, a day
+ * and a time. It makes the meetup at the tile and world the player stands on and copies its link.
+ * It is a link on the heading rather than a button of its own under the cards, so the heading is
+ * drawn whenever the group is, with or without a meetup to head.
  *
  * <p>Every string was typed by somebody in the group and goes through
  * {@link MapCompanionPanel#setWrapped}, which escapes before Swing reads markup. The rows are
@@ -100,7 +102,7 @@ final class GroupPanel extends JPanel
 	private final JPanel friends = MapCompanionPanel.column(ColorScheme.DARK_GRAY_COLOR);
 	private final JLabel meetupsHead = MapCompanionPanel.left(new JLabel("Meetups"));
 	private final JPanel meetupCards = MapCompanionPanel.column(ColorScheme.DARK_GRAY_COLOR);
-	private final JButton meetHere = MapCompanionPanel.smallButton("Meet here…");
+	private final JButton meetHere = MapCompanionPanel.linkButton("Meet here…");
 	private final JLabel meetSaid = new JLabel();
 	private final JPanel form = MapCompanionPanel.column(ColorScheme.DARKER_GRAY_COLOR);
 	private final JTextField title = new JTextField();
@@ -130,19 +132,21 @@ final class GroupPanel extends JPanel
 		setName("companionGroup");
 		meetupsHead.setFont(meetupsHead.getFont().deriveFont(java.awt.Font.BOLD, 11f));
 		meetupsHead.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
-		meetupsHead.setBorder(new EmptyBorder(4, 0, 3, 0));
 		add(friends);
-		add(meetupsHead);
-		add(meetupCards);
 		meetHere.setName("group.meetHere");
+		meetHere.setForeground(ColorScheme.BRAND_ORANGE);
+		meetHere.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
 		meetHere.setToolTipText("Make a meetup where you stand, on this world, and copy its link for your clan chat or Discord");
 		meetHere.addActionListener(e -> openForm(!formOpen));
-		JPanel meetRow = new JPanel(new java.awt.BorderLayout());
-		meetRow.setBackground(ColorScheme.DARK_GRAY_COLOR);
-		meetRow.add(meetHere, java.awt.BorderLayout.WEST);
-		meetRow.setBorder(new EmptyBorder(2, 0, 4, 0));
-		meetRow.setMaximumSize(new java.awt.Dimension(Integer.MAX_VALUE, meetHere.getPreferredSize().height + 6));
-		add(MapCompanionPanel.left(meetRow));
+		JPanel head = new JPanel(new java.awt.BorderLayout());
+		head.setName("group.meetupsHead");
+		head.setBackground(ColorScheme.DARK_GRAY_COLOR);
+		head.add(meetupsHead, java.awt.BorderLayout.WEST);
+		head.add(meetHere, java.awt.BorderLayout.EAST);
+		head.setBorder(new EmptyBorder(4, 0, 3, 0));
+		head.setMaximumSize(new java.awt.Dimension(Integer.MAX_VALUE, head.getPreferredSize().height));
+		add(MapCompanionPanel.left(head));
+		add(meetupCards);
 		buildForm();
 		add(form);
 		add(MapCompanionPanel.left(line(meetSaid)));
@@ -316,8 +320,6 @@ final class GroupPanel extends JPanel
 			}
 		}
 		meetupCards.removeAll();
-		boolean anyMeetups = events != null && !events.isEmpty();
-		meetupsHead.setVisible(anyMeetups);
 		if (events != null)
 		{
 			for (RelayResponse.Meetup meetup : events)

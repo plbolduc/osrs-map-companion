@@ -52,6 +52,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
@@ -266,6 +267,42 @@ public class GroupPanelTest
 		until(() -> sent.size() == 2);
 		assertEquals("Route goes to the route endpoint and answers nothing", "/api/companion/route",
 			sent.get(1).url().encodedPath());
+	}
+
+	/** Meet here is on the Meetups heading, which is drawn with no meetup under it, so the press is always there. */
+	@Test
+	public void meetHereIsOnTheMeetupsHeadingEvenWithNoMeetup() throws Exception
+	{
+		AtomicReference<GroupPanel> panel = new AtomicReference<>();
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.set(panel());
+			panel.get().refresh(true);
+			Component head = namedComponent(panel.get(), "group.meetupsHead");
+			assertNotNull(head);
+			assertTrue("the heading is drawn with nothing under it", head.isVisible());
+			assertSame("Meet here is the heading's own link", head, named(panel.get(), "group.meetHere").getParent());
+		});
+	}
+
+	private static Component namedComponent(Container parent, String name)
+	{
+		for (Component child : parent.getComponents())
+		{
+			if (name.equals(child.getName()))
+			{
+				return child;
+			}
+			if (child instanceof Container)
+			{
+				Component found = namedComponent((Container) child, name);
+				if (found != null)
+				{
+					return found;
+				}
+			}
+		}
+		return null;
 	}
 
 	@Test
