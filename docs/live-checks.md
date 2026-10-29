@@ -147,6 +147,15 @@ The website plan's second session, once the routes in the game are built: a memb
       stops. Pick one: the destination's card fills with its steps, Shortest Path draws the first
       walk, and the list folds. Type *abysal whip* and see *Did you mean*. Clear the box while a
       search is out: nothing comes back. Check RuneLite's log holds nothing that was typed.
+- [ ] **Route on a clue.** With *Share clue* off, read a coordinate clue and a beginner map: the
+      clue card appears under *Now* with Route, and Route fills the destination's card. A step that
+      is words shows no Route. Nothing about the clue reaches the map's member page.
+- [ ] **Route back.** Die somewhere ordinary with *Share death* off, respawn and press Route back.
+      Then, if convenient, die at a boss fought in an instance (Vorkath, Zulrah): note where the
+      route goes. The map's half decides whether it is the boss's way in.
+- [ ] **Route on a star and a meetup.** In Stars, a precise site's Route sits beside Pin
+      destination without cutting a word; an approximate one shows Open on map. A meetup's Route
+      prints its world in the destination's line and nobody in the group is told.
 
 ## Farming procedure
 

@@ -83,7 +83,9 @@ construct HTTP requests:
   JSON is the destination's tile and the player's own tile, sent on the press even with position
   sharing off; the README says so. The answer replaces the sidebar's steps. Nothing is walked.
   `RoutePress` sends the same request for a pick from **Search**, with the row's id as the target,
-  under the same one-at-a-time rule and wait; its answer becomes the destination. Nothing is walked.
+  and for **Route** beside the carried clue, the last death, a star and a meetup, with that tile as
+  the target. A clue or death tile that is not shared leaves only in that request. Same
+  one-at-a-time rule and wait; the answer becomes the destination. Nothing is walked.
 - **GET /api/companion/search** — the sidebar's search box, while connected: about 350ms after the
   last key or on Enter, two to sixty-four characters, one in flight, and nothing before a
   `Retry-After` has passed. Same three headers; the query is the `q` parameter and is never logged.

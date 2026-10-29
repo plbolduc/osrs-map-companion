@@ -97,6 +97,15 @@ public class ClueReader
 	 */
 	private int openingScrollItemId = -1;
 
+	/**
+	 * The clue as the last read found it, for the sidebar's clue card and its Route. Written on the
+	 * client thread by {@link #read} and read on Swing's, so it is one immutable reading behind a
+	 * volatile field. It is read whether or not the clue is shared: the snapshot carries it only with
+	 * <i>Share clue</i>, and a Route press sends its tile once, in the request that asks for the way.
+	 */
+	@Nullable
+	private volatile CompanionSnapshot.Clue current;
+
 	@Inject
 	ClueReader(Client client)
 	{
@@ -105,6 +114,7 @@ public class ClueReader
 
 	public void reset()
 	{
+		current = null;
 		lastStepText = null;
 		mapTile = null;
 		lastScrollItemId = -1;
@@ -219,7 +229,29 @@ public class ClueReader
 		clue.itemId = scrollId;
 		clue.mapTile = mapTile;
 		clue.coordTile = lastStepText == null ? null : parseCoordinate(lastStepText);
+		current = clue;
 		return clue;
+	}
+
+	/** The clue as last read on the client thread, or null. Any thread; see {@link #current}. */
+	@Nullable
+	CompanionSnapshot.Clue current()
+	{
+		return current;
+	}
+
+	/**
+	 * Where a Route press for this clue goes: the coordinate's dig spot or the beginner map's tile,
+	 * or null for a step that is words, which the map cannot yet be asked about from here.
+	 */
+	@Nullable
+	static CompanionSnapshot.Tile routeTile(@Nullable CompanionSnapshot.Clue clue)
+	{
+		if (clue == null)
+		{
+			return null;
+		}
+		return clue.coordTile != null ? clue.coordTile : clue.mapTile;
 	}
 
 	private boolean carried(int itemId)

@@ -70,6 +70,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.game.ItemManager;
@@ -169,10 +170,34 @@ public class MapCompanionPanel extends PluginPanel
 	 * With sharing on, the group's map has the tile already and this is simply the short way to it.
 	 */
 	private final JButton deathMapButton = smallButton("Show on map");
+	/**
+	 * The way back from where you stand. With the death spot not shared, its tile leaves this client
+	 * only in this request, once per press, and the map plans with it and keeps nothing.
+	 */
+	private final JButton deathRouteButton = smallButton("Route back");
+	private final JLabel deathSaid = new JLabel();
+	private final JPanel deathActions = row(ColorScheme.DARKER_GRAY_COLOR);
+	private List<JButton> shownDeathActions = new ArrayList<>();
+	private final JPanel clueActions = row(ColorScheme.DARKER_GRAY_COLOR);
+	/*
+	 * The clue being carried: its tier, its step in a few words, and Route when the step names a tile
+	 * — a coordinate's dig spot or a beginner map's. RuneLite's clue plugin draws the tile and the
+	 * arrow already; what this adds is which teleport.
+	 */
+	private final JLabel clueTitle = new JLabel();
+	private final JLabel clueDetail = new JLabel();
+	private final JButton clueRouteButton = smallButton("Route");
+	private final JLabel clueSaid = new JLabel();
+	private final JComponent clueSlot;
+	private final JButton eventRouteButton = smallButton("Route");
+	private final JLabel eventSaid = new JLabel();
 	private final JComponent destinationSlot;
 	private final JComponent eventSlot;
 	private final JComponent deathSlot;
 	private final JComponent searchGap;
+	/** Route, pressed beside anything in the sidebar; see {@link RoutePress}. */
+	private final RoutePress routePress;
+	private final ClueReader clueReader;
 
 	/** Hide the destination on this client. Does not tell the relay; see {@link DestinationState}. */
 	private final JButton dismissButton = smallButton("Dismiss");
@@ -287,7 +312,8 @@ public class MapCompanionPanel extends PluginPanel
 		RouteClient routeClient,
 		ShortestPath shortestPath,
 		SearchClient searchClient,
-		RoutePress routePress)
+		RoutePress routePress,
+		ClueReader clueReader)
 	{
 		this.config = config;
 		this.plugin = plugin;
@@ -305,6 +331,8 @@ public class MapCompanionPanel extends PluginPanel
 		this.directiveStream = directiveStream;
 		this.destinationRoute = destinationRoute;
 		this.shortestPath = shortestPath;
+		this.routePress = routePress;
+		this.clueReader = clueReader;
 		this.searchPanel = new SearchPanel(searchClient, routePress);
 		this.routeSteps = new RouteStepsView(way ->
 		{
@@ -312,7 +340,7 @@ public class MapCompanionPanel extends PluginPanel
 			refresh();
 		});
 		this.dropLuck = new DropLuckPanel(lootLog, DropLuckPanel.Pictures.of(itemManager));
-		this.starsPanel = new StarsPanel(starsClient, destinationState, clientThread, destinationMarker);
+		this.starsPanel = new StarsPanel(starsClient, destinationState, clientThread, destinationMarker, routePress, this::mapUrl);
 		this.sharingControls = new SharingControls(config, ConfigStore.of(configManager));
 
 		setLayout(new BorderLayout());
@@ -387,6 +415,11 @@ public class MapCompanionPanel extends PluginPanel
 		eventTitle.setFont(eventTitle.getFont().deriveFont(11f));
 		eventTitle.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
 		meetup.add(left(eventTitle));
+		meetup.add(gap(5, ColorScheme.DARKER_GRAY_COLOR));
+		JPanel eventActions = row(ColorScheme.DARKER_GRAY_COLOR);
+		eventActions.add(eventRouteButton);
+		meetup.add(left(eventActions));
+		meetup.add(left(said(eventSaid)));
 		eventSlot = slot(meetup);
 		fromMap.add(eventSlot);
 		/*
@@ -399,11 +432,23 @@ public class MapCompanionPanel extends PluginPanel
 		death.add(left(deathLabel));
 		death.add(gap(5, ColorScheme.DARKER_GRAY_COLOR));
 		/* The card's width, as Dismiss is in the card above: the same shape for "act on this card". */
-		JPanel deathActions = row(ColorScheme.DARKER_GRAY_COLOR);
 		deathActions.add(deathMapButton);
 		death.add(left(deathActions));
+		death.add(left(said(deathSaid)));
 		deathSlot = slot(death);
 		fromMap.add(deathSlot);
+		JPanel clue = card();
+		clueTitle.setFont(clueTitle.getFont().deriveFont(12f));
+		clue.add(left(clueTitle));
+		clueDetail.setFont(clueDetail.getFont().deriveFont(11f));
+		clueDetail.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+		clue.add(left(clueDetail));
+		clue.add(gap(5, ColorScheme.DARKER_GRAY_COLOR));
+		clueActions.add(clueRouteButton);
+		clue.add(left(clueActions));
+		clue.add(left(said(clueSaid)));
+		clueSlot = slot(clue);
+		fromMap.add(clueSlot);
 		fromMap.add(gap(7, ColorScheme.DARK_GRAY_COLOR));
 		overview.add(fromMap);
 
@@ -444,6 +489,12 @@ public class MapCompanionPanel extends PluginPanel
 		});
 		previewButton.addActionListener(e -> showSnapshotPreview());
 		deathMapButton.addActionListener(e -> showDeathOnMap());
+		deathRouteButton.addActionListener(e -> routeToDeath());
+		clueRouteButton.addActionListener(e -> routeToClue());
+		eventRouteButton.addActionListener(e -> routeToMeetup());
+		clueRouteButton.setToolTipText("Plan the way to this step from where you stand. The tile goes to the map in this "
+			+ "request only, whether or not you share your clue; the map plans with it and does not keep it.");
+		eventRouteButton.setToolTipText("Plan the way to this meetup from where you stand. Nobody is told you are coming.");
 		leaveButton.addActionListener(e -> leaveGroup());
 		rerouteButton.setToolTipText("Plan the way again from where you stand. Sends your tile to the map once; "
 									 + "the map plans with it and does not keep it.");
@@ -948,6 +999,106 @@ public class MapCompanionPanel extends PluginPanel
 	}
 
 	/**
+	 * A Route button and the line under it, from what its last press said: "Planning…" while the map
+	 * answers, its refusal in the line, and pressable only when a press would be sent.
+	 */
+	private void routeState(JButton button, JLabel line, String source, String label, boolean ready)
+	{
+		RoutePress.Said said = routePress.said(source);
+		boolean planning = said != null && said.planning;
+		button.setText(planning ? "Planning…" : label);
+		button.setEnabled(ready && !planning && routePress.ready());
+		String message = said == null ? null : said.message;
+		line.setVisible(message != null);
+		if (message != null)
+		{
+			setWrapped(line, message, CARD_TEXT_WIDTH);
+		}
+	}
+
+	/** The line a press's refusal is said in, under the buttons it came from. */
+	private static JLabel said(JLabel line)
+	{
+		line.setFont(line.getFont().deriveFont(11f));
+		line.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+		line.setBorder(new EmptyBorder(4, 0, 0, 0));
+		line.setVisible(false);
+		return line;
+	}
+
+	/** "Hard clue", from the tier the scroll's own name gives. */
+	static String clueTitle(@Nullable String tier)
+	{
+		if (tier == null || tier.isEmpty())
+		{
+			return "Clue scroll";
+		}
+		return Character.toUpperCase(tier.charAt(0)) + tier.substring(1) + " clue";
+	}
+
+	/**
+	 * The step in a few words: where a Route goes, or the scroll's own words cut to two lines. A step
+	 * that is words has no Route here yet, because the map is asked by tile and this one names none.
+	 */
+	static String clueDetail(CompanionSnapshot.Clue clue)
+	{
+		if (clue.coordTile != null)
+		{
+			return "Coordinate · dig at " + clue.coordTile.x + ", " + clue.coordTile.y;
+		}
+		if (clue.mapTile != null)
+		{
+			return "Beginner map · dig where it shows";
+		}
+		if (clue.text != null && !clue.text.isEmpty())
+		{
+			String text = clue.text.length() <= 80 ? clue.text : clue.text.substring(0, 79).trim() + "…";
+			return text + " · open the map for this step";
+		}
+		return "Read the scroll to see its step";
+	}
+
+	/** Route to the clue's tile, read again at the press: the scroll may have changed since the paint. */
+	private void routeToClue()
+	{
+		CompanionSnapshot.Clue clue = clueReader.current();
+		CompanionSnapshot.Tile tile = ClueReader.routeTile(clue);
+		if (tile != null)
+		{
+			routePress.press(RoutePress.Target.tile("clue", new WorldPoint(tile.x, tile.y, tile.plane),
+				clueTitle(clue.tier), null, clue.coordTile != null ? "Coordinate" : "Beginner map"));
+		}
+		refresh();
+	}
+
+	/** The way back to where you died, read again at the press, as Show on map reads it. */
+	private void routeToDeath()
+	{
+		long now = System.currentTimeMillis();
+		CompanionSnapshot.Death death = deathWatcher.snapshot(now);
+		if (death != null)
+		{
+			routePress.press(RoutePress.Target.tile("death", new WorldPoint(death.tile.x, death.tile.y, death.tile.plane),
+				"Where you died", null, deathLine(death.msAgo, death.tile.plane)));
+		}
+		refresh();
+	}
+
+	/** The way to the meetup, with its world and when it starts in the card's words. Nobody is told. */
+	private void routeToMeetup()
+	{
+		RelayResponse.Event event = destinationState.getEvent();
+		if (event != null)
+		{
+			routePress.press(RoutePress.Target.tile("meetup", new WorldPoint(event.x, event.y, event.plane),
+				event.title == null ? "Meetup" : event.title, event.world,
+				meetupWhen(event.startsAtMs, System.currentTimeMillis(), ZoneId.systemDefault(),
+					Locale.getDefault(Locale.Category.FORMAT), null)));
+		}
+		refresh();
+	}
+
+	/**
 	 * Open that path in the reader's browser.
 	 *
 	 * <p>The death is read again at the press rather than taken from the label, because it can age
@@ -1051,6 +1202,7 @@ public class MapCompanionPanel extends PluginPanel
 				setWrapped(eventWhen, meetupWhen(event.startsAtMs, now, ZoneId.systemDefault(),
 												 Locale.getDefault(Locale.Category.FORMAT), event.world), CARD_TEXT_WIDTH);
 				setWrapped(eventTitle, event.title, CARD_TEXT_WIDTH);
+				routeState(eventRouteButton, eventSaid, "meetup", "Route", ready);
 			}
 
 			CompanionSnapshot.Death death = deathWatcher.snapshot(now);
@@ -1068,9 +1220,32 @@ public class MapCompanionPanel extends PluginPanel
 											  ? "Open the map at the tile where you died"
 											  : "Open the map at the tile where you died. Sharing it is off, so it leaves this "
 											  + "client only in the address of the page this opens, and only when you press it.");
+				deathRouteButton.setToolTipText(config.shareDeath()
+					? "Plan the way back from where you stand"
+					: "Plan the way back from where you stand. Sharing it is off, so the tile goes to the map in "
+					+ "this request only, and the map plans with it and does not keep it.");
+				List<JButton> deathRow = new ArrayList<>();
+				deathRow.add(deathMapButton);
+				if (ready)
+				{
+					deathRow.add(deathRouteButton);
+				}
+				shownDeathActions = syncRow(deathActions, deathRow, shownDeathActions);
+				routeState(deathRouteButton, deathSaid, "death", "Route back", ready);
+			}
+
+			CompanionSnapshot.Clue clue = clueReader.current();
+			clueSlot.setVisible(clue != null && paired);
+			if (clue != null && paired)
+			{
+				setWrapped(clueTitle, clueTitle(clue.tier), CARD_TEXT_WIDTH);
+				setWrapped(clueDetail, clueDetail(clue), CARD_TEXT_WIDTH);
+				boolean routable = ClueReader.routeTile(clue) != null;
+				clueActions.setVisible(routable);
+				routeState(clueRouteButton, clueSaid, "clue", "Route", ready && routable);
 			}
 			/** The heading goes with the last card under it, rather than naming nothing. */
-			fromMap.setVisible(destination != null || event != null || death != null);
+			fromMap.setVisible(destination != null || event != null || death != null || (clue != null && paired));
 
 			/* Redraws only when its words change, so a click or a search is never painted over. */
 			boolean paused = LootLog.PAUSED.equals(lootLog.summary());

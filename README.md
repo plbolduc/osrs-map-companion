@@ -92,6 +92,11 @@ it and does not keep it.
 answers with places and keeps nothing. Picking a result sends the tile you are standing on, as
 Reroute does, so the way is planned from there.
 
+**Route**, beside your clue, your last death, a star or a meetup, sends the tile you are standing on
+and the tile it goes to, once per press. That includes your clue's tile and where you died when you
+do not share them: they leave in that one request and the map plans with them and keeps neither.
+Your clue is read in this client whether or not you share it, so the sidebar can offer Route.
+
 Your chat, other players, your bank and inventory, your existing collection log slots, a complete
 loot history and anything derived from your account's identifiers are never sent. **Advanced →
 Show what's sent** shows what would go out right now. The server's operator and your group's

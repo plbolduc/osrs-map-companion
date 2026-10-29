@@ -774,11 +774,14 @@ public class MapCompanionPlugin extends Plugin
 	 * Which scroll the next clue interface belongs to. Read only, never changed or consumed: this
 	 * is the menu entry the player already chose, and it is how the interface is told apart when
 	 * scrolls of several tiers are carried.
+	 *
+	 * <p>The clue is read whether or not it is shared, because the sidebar's clue card offers Route
+	 * either way. The snapshot carries it only with <i>Share clue</i>; see {@link ClueReader#current}.
 	 */
 	@Subscribe
 	public void onMenuOptionClicked(MenuOptionClicked event)
 	{
-		if (config.shareClue() && "Read".equals(event.getMenuOption()) && event.getItemId() > 0)
+		if ("Read".equals(event.getMenuOption()) && event.getItemId() > 0)
 		{
 			clueReader.onScrollRead(event.getItemId());
 		}
@@ -788,7 +791,7 @@ public class MapCompanionPlugin extends Plugin
 	@Subscribe
 	public void onItemContainerChanged(ItemContainerChanged event)
 	{
-		if (config.shareClue() && client.getGameState() == GameState.LOGGED_IN
+		if (client.getGameState() == GameState.LOGGED_IN
 			&& event.getContainerId() == net.runelite.api.gameval.InventoryID.INV)
 		{
 			clueReader.read();
@@ -888,10 +891,6 @@ public class MapCompanionPlugin extends Plugin
 	@Subscribe
 	public void onWidgetLoaded(WidgetLoaded event)
 	{
-		if (!config.shareClue())
-		{
-			return;
-		}
 		/** Read on the client thread, because the widget tree is game state. */
 		clientThread.invokeLater(() ->
 		{
@@ -903,7 +902,10 @@ public class MapCompanionPlugin extends Plugin
 			{
 				clueReader.onMapWidget(event.getGroupId());
 			}
-			dirty = true;
+			if (config.shareClue())
+			{
+				dirty = true;
+			}
 		});
 	}
 
@@ -1581,6 +1583,8 @@ public class MapCompanionPlugin extends Plugin
 		birdhouseReader.onSessionResumed(now);
 		questReader.onSessionResumed(now);
 		assignmentReader.observe(now);
+		/* The sidebar's clue card reads the last reading; a scroll dropped or finished goes with it. */
+		clueReader.read();
 		if (config.shareFarming())
 		{
 			farmingObserver.observe(now, currentRegionId());

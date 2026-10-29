@@ -386,3 +386,12 @@ own, *Item · dropped by 3*. A misspelling is one line, *Did you mean abyssal wh
 for it. A pick plans the way and fills the destination's card, so the list folds as soon as one is
 pressed; typing or Enter opens it again. One line under the box says *Searching…*, *Planning the
 way there…* or the map's refusal.
+
+### Route beside a clue, a death, a star and a meetup
+
+Step 8. Each card under *Now* that names a place gains the way there, planned from where you stand:
+**Route back** beside the death's *Show on map*, **Route** on the meetup's card, and a clue card,
+*Hard clue* over *Coordinate · dig at 2896, 3119*, whose Route appears when the step names a tile.
+In Stars, Route sits beside *Pin destination* for a precise site; an approximate one has **Open on
+map** there instead. While the map answers the button reads *Planning…*, and a refusal is one line
+under it. The answer fills the destination's card, as a pick from Search does.
