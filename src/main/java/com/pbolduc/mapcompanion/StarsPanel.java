@@ -79,6 +79,8 @@ final class StarsPanel extends JPanel
 	private final DestinationState destinations;
 	private final ClientThread clientThread;
 	private final DestinationMarker marker;
+	private final RoutePress press;
+	private final java.util.function.Supplier<String> mapUrl;
 	private final JCheckBox sync = check("Sync filters with website");
 	private final JComboBox<String> tier = new JComboBox<>(new String[]{"T1+", "T2+", "T3+", "T4+", "T5+", "T6+", "T7+", "T8+", "T9+"});
 	private final JToggleButton members = toggle("P2P"), free = toggle("F2P"), safe = toggle("Safe");
@@ -92,8 +94,10 @@ final class StarsPanel extends JPanel
 	private String rendered;
 
 	StarsPanel(StarsClient service, DestinationState destinations, ClientThread clientThread,
-		DestinationMarker marker)
+		DestinationMarker marker, RoutePress press, java.util.function.Supplier<String> mapUrl)
 	{
+		this.press = press;
+		this.mapUrl = mapUrl;
 		this.service = service;
 		this.destinations = destinations;
 		this.clientThread = clientThread;
@@ -257,6 +261,8 @@ final class StarsPanel extends JPanel
 		wrap(status, notice == null ? "Updated " + (model.feed == null ? "—" : age(model.feed.snapshotAgeSeconds * 1000 + elapsed)) + " · estimates" : notice, TEXT);
 		RelayResponse.Destination destination = destinations.getDestination();
 		signature.append(model.selected).append(destination == null ? "" : destination.name + destination.world + destination.x + destination.y);
+		RoutePress.Said said = press.said(SOURCE);
+		signature.append(press.ready()).append(said == null ? "" : said.planning + "|" + said.message);
 		if (signature.toString().equals(rendered)) return;
 		rendered = signature.toString();
 		rows.removeAll();
@@ -458,15 +464,65 @@ final class StarsPanel extends JPanel
 				clientThread.invokeLater(marker::sync);
 				rendered = null;
 				refresh();
-			}); primary(pin); selection.add(fill(pin));
+			}); primary(pin);
+			/*
+			 * Beside the pin, the way there: by the star's own tile, which is the one the game draws.
+			 * A site whose tile is a guess gets the map instead, which can say where it might be.
+			 */
+			JPanel actions = new JPanel(new java.awt.GridLayout(1, 0, 4, 0));
+			actions.setBackground(getBackground());
+			actions.add(pin);
+			if (star.precise)
+			{
+				RoutePress.Said said = press.said(SOURCE);
+				boolean planning = said != null && said.planning;
+				JButton route = new JButton(planning ? "Planning…" : "Route");
+				route.setName("stars.route");
+				route.setFont(route.getFont().deriveFont(11f));
+				route.setMargin(new Insets(4, 4, 4, 4));
+				route.setEnabled(star.left(elapsed) > 0 && !planning && press.ready());
+				route.setToolTipText("Plan the way to this star from where you stand. The world is printed in the steps; "
+					+ "hopping is left to the game's world switcher.");
+				route.addActionListener(e ->
+				{
+					long now = service.model.elapsed();
+					press.press(RoutePress.Target.tile(SOURCE, new net.runelite.api.coords.WorldPoint(star.x, star.y, star.plane),
+						star.name, star.world, "T" + star.tier(now) + " · " + StarsModel.minutes(star.left(now)) + " left"));
+					rendered = null;
+					refresh();
+				});
+				actions.add(route);
+			}
+			else
+			{
+				JButton open = new JButton("Open on map");
+				open.setName("stars.open");
+				open.setFont(open.getFont().deriveFont(11f));
+				open.setMargin(new Insets(4, 4, 4, 4));
+				open.setToolTipText("This site's tile is approximate. Open the map, which shows where it might be.");
+				open.addActionListener(e -> net.runelite.client.util.LinkBrowser.browse(mapUrl.get() + "/map?q="
+					+ java.net.URLEncoder.encode(star.name, java.nio.charset.StandardCharsets.UTF_8)));
+				actions.add(open);
+			}
+			selection.add(fill(actions));
 			if (!star.precise)
 			{
 				JLabel note = label("");
 				wrap(note, "This location is approximate; open it on the map to pin it.", TEXT);
 				selection.add(note);
 			}
+			RoutePress.Said said = press.said(SOURCE);
+			if (said != null && said.message != null)
+			{
+				JLabel line = label("");
+				wrap(line, said.message, TEXT);
+				selection.add(line);
+			}
 		}
 	}
+
+	/** Which Route button a press came from, so its answer is said beside it. */
+	static final String SOURCE = "star";
 
 	private static void primary(JButton button)
 	{

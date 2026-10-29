@@ -43,6 +43,16 @@ query is in the request's address, which the map leaves out of its logs; the plu
 types. A pick is one `POST /api/companion/route` with the row's id and the tile you stand on, under
 Reroute's rules, and its answer becomes the destination, as a destination the map sent would.
 
+**Route** beside the clue being carried, the last death, a star in the Stars tab or a meetup is the
+same request with a tile as its target: the clue's dig spot or beginner map, the death's tile, the
+star's tile, the meetup's. A clue or a death that is not shared leaves only in that request, once
+per press; the map plans with it and keeps nothing. A clue whose step is words names no tile and
+offers no Route yet. A death inside a boss's instance is recorded as the tile its arena is copied
+from, and the map decides whether that route goes to the boss's way in. A star whose tile is
+approximate offers **Open on map** instead, which opens the map's search for the site's name in
+your browser and sends this client nothing. The clue is now read whether or not *Share clue* is on,
+so the sidebar has it to offer; the snapshot still carries it only with that choice.
+
 **Draw paths with Shortest Path** (on) talks to the Shortest Path plugin, if it is installed,
 with RuneLite's plugin messages, which stay inside this client. While a route is shown it asks
 `getTarget` every few seconds, which only reads what Shortest Path is drawing. On a route you chose
