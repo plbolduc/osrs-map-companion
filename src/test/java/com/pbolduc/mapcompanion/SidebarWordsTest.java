@@ -113,6 +113,17 @@ public class SidebarWordsTest
 		assertEquals("KQX 482", MapCompanionPanel.statusGroup("KQX482", "KQX 482"));
 	}
 
+	/** Before a group the card says one plain thing, in the reader's words rather than this code's. */
+	@Test
+	public void aFreshInstallIsNotConnectedRatherThanNotPaired()
+	{
+		assertEquals("Not connected", MapCompanionPanel.statusWords(false, false, Health.IDLE, "Not paired"));
+		assertEquals("Press Connect", MapCompanionPanel.statusWords(true, false, Health.WAITING, "Press Connect to choose osrs-map.com"));
+		assertEquals("Connected", MapCompanionPanel.statusWords(true, true, Health.LIVE, "Connected to osrs-map.com"));
+		assertEquals("Logged out", MapCompanionPanel.statusWords(true, true, Health.WAITING, "Logged out"));
+		assertEquals("Paste your connection code", MapCompanionPanel.JOIN_PLACEHOLDER);
+	}
+
 	@Test
 	public void aDeathSaysWhenAndWhichFloorWithTheTileBehindAHover()
 	{

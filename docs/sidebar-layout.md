@@ -482,3 +482,11 @@ sends where its tables name one, or else by the item's exact name in the client'
 The box is a plain field, so it can say *Search places, people, items* while empty, and item rows
 have their own *Items* heading: they were drawn under the last source's, so *Bank filler* read as
 one more counter under *Sold at*. Their line no longer starts *Item ·*.
+
+### Before a group is joined
+
+The status card says *Not connected* beside its dot, and nothing under it: the map's address was the
+second line and *Character sharing paused* the third, about a connection that did not exist yet.
+Then Open the map, and the code field with no heading over it, its placeholder *Paste your
+connection code* and its tooltip saying where the code comes from; with a kill log, Drop luck
+follows. A fresh install is 130px where it was 221.
