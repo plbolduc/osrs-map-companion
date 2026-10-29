@@ -229,6 +229,8 @@ public class GroupPanelTest
 		SwingUtilities.invokeAndWait(() ->
 		{
 			panel.get().refresh(true);
+			/* Named for the game's world map it draws on; the website's buttons say Open website. */
+			assertEquals("World map", named(panel.get(), "group.show.cara").getText());
 			named(panel.get(), "group.show.cara").doClick();
 		});
 		assertTrue(group.shown("cara"));

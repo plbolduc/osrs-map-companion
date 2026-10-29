@@ -173,7 +173,12 @@ public class MapCompanionPanel extends PluginPanel
 	 * into the address of a page opened in this reader's own browser, and only when they press this.
 	 * With sharing on, the group's map has the tile already and this is simply the short way to it.
 	 */
-	private final JButton deathMapButton = smallButton("Show on map");
+	private final JButton deathMapButton = smallButton(OPEN_WEBSITE);
+	/**
+	 * Every button that opens the browser says so. "Show on map" opened the website here and drew on
+	 * the game's world map on a friend's card, one label for two maps; the game's map is "World map".
+	 */
+	static final String OPEN_WEBSITE = "Open website";
 	/**
 	 * The way back from where you stand. With the death spot not shared, its tile leaves this client
 	 * only in this request, once per press, and the map plans with it and keeps nothing.
@@ -1150,7 +1155,7 @@ public class MapCompanionPanel extends PluginPanel
 		refresh();
 	}
 
-	/** The way back to where you died, read again at the press, as Show on map reads it. */
+	/** The way back to where you died, read again at the press, as Open website reads it. */
 	private void routeToDeath()
 	{
 		long now = System.currentTimeMillis();

@@ -498,3 +498,11 @@ Home hung under the card. Now the status card says it once, nothing is drawn und
 is up, and its intro is one line: *Ticked is what the map uses. Change any of it later in
 Settings.* The one press, every field named, *What each one sends* and *kept two weeks* are as they
 were. 738px to 544.
+
+### Which map a button opens
+
+*Show on map* opened the website on the death card and drew on the game's world map on a friend's.
+Every button that opens the browser now says **Open website** — the death's, and an approximate
+star site's, which said *Open on map* — and a friend's says **World map** (*Show on world map* does
+not fit beside Route), *Hide on map* once pressed, and *On world map* while the whole group layer is
+on.

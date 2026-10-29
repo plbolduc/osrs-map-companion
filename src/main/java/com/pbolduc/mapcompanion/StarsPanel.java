@@ -506,7 +506,7 @@ final class StarsPanel extends JPanel
 			}
 			else
 			{
-				JButton open = new JButton("Open on map");
+				JButton open = new JButton(MapCompanionPanel.OPEN_WEBSITE);
 				open.setName("stars.open");
 				open.setFont(open.getFont().deriveFont(11f));
 				open.setMargin(new Insets(4, 4, 4, 4));

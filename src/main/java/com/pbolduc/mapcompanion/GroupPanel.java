@@ -63,7 +63,7 @@ import net.runelite.client.ui.ColorScheme;
  * because online and world are the game's to say; where they are, <i>near</i> a landmark as the map
  * words it, and <i>Near you</i>; their newest level or drop. Then <b>Route</b>, once, to where they
  * stand now — pressed again it reads <b>Reroute</b> and asks again, and nothing follows them on its
- * own — and <b>Show on map</b>, which draws that friend's dot while the world-map group layer is
+ * own — and <b>World map</b>, which draws that friend's dot on the game's world map while its group layer is
  * off. A friend who shares no position shows a name and presence and nothing else.
  *
  * <p><b>A meetup</b> says its title, when in the player's own clock with a countdown, where in
@@ -88,6 +88,8 @@ final class GroupPanel extends JPanel
 	private static final Color IDLE = new Color(250, 204, 21);
 	private static final Color OFFLINE = new Color(113, 113, 122);
 	private static final Color CHOSEN = new Color(117, 94, 52);
+	/** A friend's button for the game's own world map; "Show on world map" does not fit beside Route. */
+	static final String WORLD_MAP = "World map";
 
 	private final transient DestinationState destinations;
 	private final transient GroupState group;
@@ -416,7 +418,11 @@ final class GroupPanel extends JPanel
 		}
 		boolean layer = config.showGroupOnWorldMap();
 		boolean shown = group.shown(row.id);
-		JButton map = MapCompanionPanel.smallButton(layer ? "On the map" : shown ? "Hide on map" : "Show on map");
+		/*
+		 * Named for the map it draws on. "Show on map" meant the game's world map here and the website
+		 * on the death card; the website's buttons say Open website, and this one says which map.
+		 */
+		JButton map = MapCompanionPanel.smallButton(layer ? "On world map" : shown ? "Hide on map" : WORLD_MAP);
 		map.setName("group.show." + row.id);
 		map.setEnabled(!layer && ready);
 		map.setToolTipText(layer ? "Your whole group is on the world map already"

@@ -132,7 +132,8 @@ Miners, who do not endorse it.
   visits can change them.
 - After logging in or hopping, check your hunter rumour with the quetzal whistle again; ask an
   estate agent to see your Mahogany Homes job again.
-- **Show on map** beside a death opens that spot on osrs-map.com in your browser.
+- **Open website** beside a death, or beside a star whose spot is approximate, opens it on
+  osrs-map.com in your browser. **World map** beside a friend draws them on the game's own map.
 
 ## Help and feedback
 
