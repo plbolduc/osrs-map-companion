@@ -63,7 +63,7 @@ star's tile, the meetup's. A clue or a death that is not shared leaves only in t
 per press; the map plans with it and keeps nothing. A clue whose step is words names no tile and
 offers no Route yet. A death inside a boss's instance is recorded as the tile its arena is copied
 from, and the map decides whether that route goes to the boss's way in. A star whose tile is
-approximate offers **Open on map** instead, which opens the map's search for the site's name in
+approximate offers **Open website** instead, which opens the map's search for the site's name in
 your browser and sends this client nothing. The clue is now read whether or not *Share clue* is on,
 so the sidebar has it to offer; the snapshot still carries it only with that choice.
 
@@ -72,7 +72,7 @@ with their name, colour, presence, *near*, *Near you* and newest news, arrives o
 reply and stream frame and is shown whatever the destination setting; `events`, the week's meetups
 with their answers, is shown only with **Show destinations from the map**, as the single `event`
 always was. A map that sends neither leaves the sidebar as it was. Neither carries a tile.
-**Show on map** beside a friend, or **Route** to a friend whose position this client has not been
+**World map** beside a friend, or **Route** to a friend whose position this client has not been
 sent, opens the receive stream with `members=1`, the same question *Show my group on the world map*
 asks, and draws only that friend; it sends nothing of yours. A Route to a friend goes once to the
 tile in their dot, under Reroute's rules, and never into an instance.

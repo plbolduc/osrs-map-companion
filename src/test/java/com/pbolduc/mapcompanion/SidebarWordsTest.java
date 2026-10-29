@@ -134,9 +134,11 @@ public class SidebarWordsTest
 		assertEquals("3222, 3218 (floor 1)", MapCompanionPanel.deathTile(3222, 3218, 1));
 	}
 
+	/** The death card's button opens the website and says so; "Show on map" also meant the game's map. */
 	@Test
 	public void showOnMapPinsTheTileInTheMapsOwnGrammar()
 	{
+		assertEquals("Open website", MapCompanionPanel.OPEN_WEBSITE);
 		/* An explicit ground floor matters too: it must not resolve to a named place upstairs. */
 		assertEquals("/map?p=3222,3218,0", MapCompanionPanel.deathMapPath(3222, 3218, 0));
 		assertEquals("/map?p=2272,4058,2", MapCompanionPanel.deathMapPath(2272, 4058, 2));

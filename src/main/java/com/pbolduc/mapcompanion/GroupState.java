@@ -40,7 +40,7 @@ import javax.annotation.Nullable;
  * What this sidebar holds about the group beyond what the map last said: whose dot the player
  * asked to see, a Route to a friend waiting for that friend's position, and answers just given.
  *
- * <p><b>Show on map</b> draws one friend's dot while the world-map group layer is off. Their tile is
+ * <p><b>World map</b> draws one friend's dot while the world-map group layer is off. Their tile is
  * in {@link RelayResponse.MemberDot}, which the held stream carries only when asked for
  * ({@code members=1}), so a friend shown, or a friend being routed to, is what makes the stream ask —
  * see {@link #wantsPositions}. Nothing follows a friend: a Route goes once to where they stood when

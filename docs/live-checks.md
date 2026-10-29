@@ -64,7 +64,7 @@ often. A clean run is now 443 tests with no failures or skips.
 - [ ] Recover after an unavailable map; switch groups with a snapshot outstanding and confirm the
       old reply cannot affect the new connection.
 - [ ] Replace a clue scroll and compare charged versus uncharged jewellery capabilities.
-- [ ] Verify an upstairs death's Show on map opens the correct tile and floor.
+- [ ] Verify an upstairs death's Open website opens the correct tile and floor.
 - [ ] Exercise farming, birdhouses, rumours and contracts on a members character.
 - [ ] On a members character with **Slayer task** sharing on, check the map names the task as the
       game's slayer helper does: an ordinary task, a Konar task with its area, and a boss task.
@@ -154,10 +154,10 @@ The website plan's second session, once the routes in the game are built: a memb
       Then, if convenient, die at a boss fought in an instance (Vorkath, Zulrah): note where the
       route goes. The map's half decides whether it is the boss's way in.
 - [ ] **Route on a star and a meetup.** In Stars, a precise site's Route sits beside Pin
-      destination without cutting a word; an approximate one shows Open on map. A meetup's Route
+      destination without cutting a word; an approximate one shows Open website. A meetup's Route
       prints its world in the destination's line and nobody in the group is told.
 - [ ] **Friends.** With two characters in one group and the group layer off, the other appears
-      under Group with their disc, presence dot, *near* and news. Show on map draws only them; Route
+      under Group with their disc, presence dot, *near* and news. World map draws only them; Route
       asks for their position, then fills the destination's card once and does not follow them.
       Pressed again it reads Reroute. A friend in a raid has no Route.
 - [ ] **Meetups.** Answer a meetup from the sidebar and see the same answer on that member's browser
