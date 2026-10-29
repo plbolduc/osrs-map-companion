@@ -27,6 +27,7 @@ package com.pbolduc.mapcompanion;
 
 import com.google.gson.Gson;
 import java.lang.reflect.Proxy;
+import java.util.Arrays;
 import net.runelite.api.Client;
 import net.runelite.api.WorldView;
 import net.runelite.api.coords.WorldPoint;
@@ -91,7 +92,8 @@ public class DestinationArrowTest
 	private final HarnessStore store = new HarnessStore();
 	private final HarnessConfig config = new HarnessConfig(store, "http://localhost");
 	private final DestinationState state = new DestinationState(new Gson());
-	private final DestinationArrow arrows = new DestinationArrow(client, config, state);
+	private final DestinationRoute route = new DestinationRoute();
+	private final DestinationArrow arrows = new DestinationArrow(client, config, state, route);
 
 	private void destination(int x, int y)
 	{
@@ -141,6 +143,66 @@ public class DestinationArrowTest
 		WorldPoint quest = new WorldPoint(3210, 3210, 0);
 		arrow = quest;
 		state.dismiss();
+		arrows.sync();
+		assertEquals(quest, arrow);
+	}
+
+	/** A teleport to (3230,3230), a walk to (3250,3240), then the destination itself at (3260,3250). */
+	private void routed()
+	{
+		RelayResponse.Destination d = DestinationRouteTest.destination("Bank", DestinationRouteTest.route("item:glory", Arrays.asList(
+			DestinationRouteTest.step("method", "Amulet of glory", false, 3230, 3230, null),
+			DestinationRouteTest.step("arrival-walk", "Walk 20 tiles", true, 3250, 3240, 0),
+			DestinationRouteTest.step("arrival-walk", "Walk 14 tiles to the bank", true, 3260, 3250, 0))));
+		d.x = 3260;
+		d.y = 3250;
+		d.plane = 0;
+		state.selectLocal(d);
+		route.sync(state.getDestination());
+	}
+
+	@Test
+	public void pointsWhereTheRouteGoesNextRatherThanPastIt()
+	{
+		routed();
+		arrows.sync();
+		assertEquals("the first step's end, not the destination beyond it", new WorldPoint(3230, 3230, 0), arrow);
+		route.advance(new WorldPoint(3231, 3229, 0));
+		arrows.sync();
+		assertEquals("its own arrow moves on with the step", new WorldPoint(3250, 3240, 0), arrow);
+		route.advance(new WorldPoint(3250, 3240, 0));
+		arrows.sync();
+		assertEquals(new WorldPoint(3260, 3250, 0), arrow);
+		route.advance(new WorldPoint(3260, 3250, 0));
+		arrows.sync();
+		assertEquals("arrived: the destination", new WorldPoint(3260, 3250, 0), arrow);
+	}
+
+	@Test
+	public void aStepOutsideTheLoadedSceneIsNoReasonToPointAtTheDestination()
+	{
+		routed();
+		route.sync(null);
+		RelayResponse.Destination d = DestinationRouteTest.destination("Bank", DestinationRouteTest.route("item:glory", Arrays.asList(
+			DestinationRouteTest.step("method", "Amulet of glory", false, 3087, 3496, null),
+			DestinationRouteTest.step("arrival-walk", "Walk to the bank", true, 3260, 3250, 0))));
+		d.x = 3260;
+		d.y = 3250;
+		d.plane = 0;
+		state.selectLocal(d);
+		route.sync(state.getDestination());
+		arrows.sync();
+		assertNull("Edgeville is not loaded, and the bank in the scene is not the way to go", arrow);
+	}
+
+	@Test
+	public void movingOnNeverTakesAnArrowSomebodyElseSet()
+	{
+		routed();
+		WorldPoint quest = new WorldPoint(3210, 3210, 0);
+		arrow = quest;
+		arrows.sync();
+		route.advance(new WorldPoint(3230, 3230, 0));
 		arrows.sync();
 		assertEquals(quest, arrow);
 	}

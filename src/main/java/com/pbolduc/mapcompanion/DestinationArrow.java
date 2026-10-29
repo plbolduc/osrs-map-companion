@@ -46,6 +46,11 @@ import net.runelite.api.coords.WorldPoint;
  * plugins set them too, and there is one. So this sets the arrow only when there is none, clears
  * it only while it is still the one this set, and forgets it the moment anything else replaces it.
  * Client thread only: the arrow is game state.
+ *
+ * <p>When the destination came with its route, the arrow points where the player is headed next —
+ * the current step's end — rather than at the destination past it: on a route whose first step is a
+ * teleport, the destination in the loaded scene is not the way to go. It moves to the next step as
+ * each is reached, and to the destination once there is no step ahead with a tile.
  */
 @Singleton
 public class DestinationArrow
@@ -53,17 +58,19 @@ public class DestinationArrow
 	private final Client client;
 	private final MapCompanionConfig config;
 	private final DestinationState state;
+	private final DestinationRoute route;
 
 	/** The point this class set and believes is still showing, or null. */
 	@Nullable
 	private WorldPoint ours;
 
 	@Inject
-	DestinationArrow(Client client, MapCompanionConfig config, DestinationState state)
+	DestinationArrow(Client client, MapCompanionConfig config, DestinationState state, DestinationRoute route)
 	{
 		this.client = client;
 		this.config = config;
 		this.state = state;
+		this.route = route;
 	}
 
 	/** Bring the arrow in line with the destination. Called on the game tick. */
@@ -111,12 +118,19 @@ public class DestinationArrow
 		{
 			return null;
 		}
+		WorldPoint aim = new WorldPoint(destination.x, destination.y, destination.plane);
+		DestinationRoute.View steps = route.view();
+		if (steps != null && steps.key.equals(DestinationRoute.keyOf(destination)))
+		{
+			WorldPoint next = steps.next();
+			aim = next == null ? aim : next;
+		}
 		WorldView view = client.getTopLevelWorldView();
-		if (view == null || view.getPlane() != destination.plane
-			|| !WorldPoint.isInScene(view, destination.x, destination.y))
+		if (view == null || view.getPlane() != aim.getPlane()
+			|| !WorldPoint.isInScene(view, aim.getX(), aim.getY()))
 		{
 			return null;
 		}
-		return new WorldPoint(destination.x, destination.y, destination.plane);
+		return aim;
 	}
 }

@@ -101,9 +101,11 @@ minute.
 
 The plugin takes no gameplay action. `StashReader` uses
 the read-only `WATSON_STASH_UNIT_CHECK` script used by RuneLite's clue plugin, only with STASH
-sharing enabled, at most once a minute. `DestinationArrow` sets a loaded destination's hint arrow
-without replacing another arrow. Group pins clear on connection loss, logout, group change,
-sharing withdrawal and shutdown; queued old frames are invalidated.
+sharing enabled, at most once a minute. `DestinationArrow` sets the hint arrow on a loaded
+destination, or on the end of the current step of its route, without replacing another arrow.
+A route's steps are numbered `MapPin`s on the world map; like every pin here, a click pans the
+map. Group pins clear on connection loss, logout, group change, sharing withdrawal and shutdown;
+queued old frames are invalidated.
 
 Reconnects use RuneLite's injected scheduler; focus checks stay within the plugin's search field.
 `shutDown` removes its panel and overlays on the EDT and queues everything a game tick touches on

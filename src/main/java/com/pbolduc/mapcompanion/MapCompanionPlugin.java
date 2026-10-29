@@ -914,6 +914,8 @@ public class MapCompanionPlugin extends Plugin
 		{
 			destinationRoute.advance(DestinationRoute.standing(client));
 		}
+		/* The step pins follow the step; unchanged, this compares one string and returns. */
+		destinationMarker.sync();
 		destinationArrow.sync();
 		/*
 		 * The task counter, so a kill can be matched to the counter it moved — see TaskKills — and the

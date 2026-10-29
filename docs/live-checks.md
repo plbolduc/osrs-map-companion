@@ -123,6 +123,12 @@ The website plan's second session, once the routes in the game are built: a memb
       raid's rooms they do not.
 - [ ] **Reroute.** Walk away from the route and press Reroute: the steps are planned from where
       you stand and the first is marked. Press it again at once: the sidebar says to wait.
+- [ ] **Step pins.** The world map shows a numbered pin at each step's end, with the sidebar's
+      numbers; only the current one holds the map's edge when panned away, the ones behind it fade,
+      and the last step leaves the destination's own pin uncovered. All go with Dismiss.
+- [ ] **The arrow follows the step.** With the current step's end in the loaded scene, the game's
+      arrow points there rather than at the destination; it moves on as each step is reached, and a
+      quest's arrow set first is left alone.
 
 ## Farming procedure
 
