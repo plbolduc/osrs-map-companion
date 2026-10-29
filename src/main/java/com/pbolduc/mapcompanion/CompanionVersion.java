@@ -37,7 +37,7 @@ package com.pbolduc.mapcompanion;
  */
 final class CompanionVersion
 {
-	static final String VERSION = "1.2.0";
+	static final String VERSION = "1.3.0";
 
 	/** How every request this plugin makes identifies itself. */
 	static final String USER_AGENT = "osrs-map-companion/" + VERSION + " (RuneLite plugin)";
