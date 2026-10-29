@@ -230,6 +230,9 @@ public class MapCompanionPanel extends PluginPanel
 	private final JPanel drySection = column(ColorScheme.DARK_GRAY_COLOR);
 	private final DropLuckPanel dropLuck;
 	private final JLabel dropLuckPaused = new JLabel();
+	/** Drop luck's heading, given up while the card's own first row says it (see DropLuckPanel.namesItself). */
+	private final JLabel dryHeading = sectionHead(DropLuckPanel.HEADING);
+	private final JPanel dryHeadingGap = gap(3, ColorScheme.DARK_GRAY_COLOR);
 
 	/*
 	 * The group: its invite and its switch when there is one, the join field when there is not.
@@ -493,8 +496,8 @@ public class MapCompanionPanel extends PluginPanel
 		overview.add(fromMap);
 
 		/* Drop luck works with no pairing code set, so it sits above everything the group needs. */
-		drySection.add(sectionHead("Drop luck"));
-		drySection.add(gap(3, ColorScheme.DARK_GRAY_COLOR));
+		drySection.add(dryHeading);
+		drySection.add(dryHeadingGap);
 		dropLuckPaused.setFont(dropLuckPaused.getFont().deriveFont(11f));
 		dropLuckPaused.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
 		setWrapped(dropLuckPaused, LootLog.PAUSED);
@@ -1367,6 +1370,9 @@ public class MapCompanionPanel extends PluginPanel
 			boolean paused = LootLog.PAUSED.equals(lootLog.summary());
 			dropLuck.refresh();
 			dropLuckPaused.setVisible(paused);
+			boolean headed = !paused && dropLuck.namesItself();
+			dryHeading.setVisible(!headed);
+			dryHeadingGap.setVisible(!headed);
 			drySection.setVisible(paused || dropLuck.hasContent());
 
 			/*
