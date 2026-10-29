@@ -34,6 +34,15 @@ position sharing is on, because a route from where you stand is what the press a
 flight at a time, and none before the wait the map last asked for: its `Retry-After`, and at least
 five seconds between presses that reached it. The map plans with both tiles and keeps neither.
 
+**Search**, at the top of Overview while connected, asks `GET /api/companion/search?q=` with the
+same three credentials, about 350ms after the last key or at once on Enter, and never for fewer than
+two characters. One is in flight at a time: a query typed meanwhile waits for it, and the older
+answer is dropped if the box has moved on. Clearing the box cancels the call. A `Retry-After` is
+honoured by asking nothing until it has passed, and a failure without one waits ten seconds. The
+query is in the request's address, which the map leaves out of its logs; the plugin logs nothing it
+types. A pick is one `POST /api/companion/route` with the row's id and the tile you stand on, under
+Reroute's rules, and its answer becomes the destination, as a destination the map sent would.
+
 **Draw paths with Shortest Path** (on) talks to the Shortest Path plugin, if it is installed,
 with RuneLite's plugin messages, which stay inside this client. While a route is shown it asks
 `getTarget` every few seconds, which only reads what Shortest Path is drawing. On a route you chose

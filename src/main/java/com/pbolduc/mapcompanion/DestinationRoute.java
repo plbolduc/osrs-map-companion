@@ -78,6 +78,11 @@ public class DestinationRoute
 	/** Changes when a route or an explicit Follow/Reroute replaces the path being drawn. */
 	private long revision;
 	private boolean rerouting;
+	/**
+	 * A press of Route somewhere in the sidebar is on its way ({@link RoutePress}). It shares the
+	 * one-at-a-time rule and the wait with Reroute, because the map counts both against one member.
+	 */
+	private boolean pressing;
 	@Nullable
 	private String message;
 	private long nextRerouteMs;
@@ -291,7 +296,7 @@ public class DestinationRoute
 	@Nullable
 	synchronized Ticket beginReroute(long now)
 	{
-		if (route == null || target == null || rerouting)
+		if (route == null || target == null || rerouting || pressing)
 		{
 			return null;
 		}
@@ -334,6 +339,60 @@ public class DestinationRoute
 			chosen = best(answer);
 			step = 0;
 		}
+	}
+
+	/**
+	 * Start a press of Route, or say why not: the same rule as {@link #beginReroute}, one question at
+	 * a time and none before the map's own wait is over.
+	 *
+	 * @return null when the press may go, else the sentence to show beside the button
+	 */
+	@Nullable
+	synchronized String beginPress(long now)
+	{
+		if (pressing || rerouting)
+		{
+			return RoutePress.ONE_AT_A_TIME;
+		}
+		if (now < nextRerouteMs)
+		{
+			return "The map asked to wait. Try again in " + ((nextRerouteMs - now + 999) / 1000) + "s.";
+		}
+		pressing = true;
+		return null;
+	}
+
+	/** A press's answer landed, or failed; the wait the map asked for is the member's either way. */
+	synchronized void finishPress(long nextAllowedMs)
+	{
+		pressing = false;
+		nextRerouteMs = Math.max(nextRerouteMs, nextAllowedMs);
+	}
+
+	/** Whether a press of Route would be sent now, for enabling its button. */
+	synchronized boolean pressReady(long now)
+	{
+		return !pressing && !rerouting && now >= nextRerouteMs;
+	}
+
+	/**
+	 * Show a route the player asked for with a press here, as the destination's own, and follow it.
+	 *
+	 * <p>The destination is the one {@link DestinationState#selectLocal} now holds, so the next tick's
+	 * {@link #sync} finds the same place with the same route and keeps both, the step it is on and
+	 * the following. Following is on because the press was the player's own, as Follow and Reroute
+	 * are; a destination that merely arrives still never draws in Shortest Path.
+	 */
+	synchronized void adoptPressed(RelayResponse.Destination destination)
+	{
+		key = keyOf(destination);
+		target = new WorldPoint(destination.x, destination.y, destination.plane);
+		generation++;
+		rerouted = false;
+		rerouting = false;
+		message = null;
+		adopt(destination.route);
+		following = route != null;
 	}
 
 	/** Forget everything: a group left, a lifetime ended. */

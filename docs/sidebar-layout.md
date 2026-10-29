@@ -375,3 +375,14 @@ of `docs/plan-where-to-go-for-a-task.md` in `osrs-stars-map`.
   Shortest Path is drawing one, *Shortest Path is drawing the walk for step 2.*, so its line on the
   ground is never taken for this plugin's. Reroute follows too, being your own press; a
   destination that merely arrives never does.
+
+### Search, at the top of Overview
+
+Step 6 of the same plan. A box at the top of Overview while connected, as the drop-luck list's own
+box is drawn, and under it up to eight places in the website's order, each with the website's
+grey line and the effort it measured, *Bank · 2nd floor · ~40 tiles*. An item's sources carry the
+website's *Sold at* or *Dropped by* heading, and a name a partial query could mean is a row of its
+own, *Item · dropped by 3*. A misspelling is one line, *Did you mean abyssal whip?*, which searches
+for it. A pick plans the way and fills the destination's card, so the list folds as soon as one is
+pressed; typing or Enter opens it again. One line under the box says *Searching…*, *Planning the
+way there…* or the map's refusal.

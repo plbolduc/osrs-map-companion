@@ -142,6 +142,11 @@ The website plan's second session, once the routes in the game are built: a memb
       sidebar; the steps and pins still work.
 - [ ] **Three buttons fit.** Follow, Reroute and Dismiss sit on one row in the 225px sidebar
       without cutting a word.
+- [ ] **Search.** Connected, type *bank* in the box at the top of Overview: the rows match the
+      website's dropdown for the same word, in its order, and nothing is asked until the typing
+      stops. Pick one: the destination's card fills with its steps, Shortest Path draws the first
+      walk, and the list folds. Type *abysal whip* and see *Did you mean*. Clear the box while a
+      search is out: nothing comes back. Check RuneLite's log holds nothing that was typed.
 
 ## Farming procedure
 
