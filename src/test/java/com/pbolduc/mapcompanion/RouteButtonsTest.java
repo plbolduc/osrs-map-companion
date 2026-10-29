@@ -84,6 +84,7 @@ public class RouteButtonsTest
 			.replaceAll("\\s+", " ");
 		assertTrue(readme.contains("**Route**, beside your clue, your last death, a star or a meetup, sends the tile you are standing on and the tile it goes to"));
 		assertTrue(readme.contains("That includes your clue's tile and where you died when you do not share them"));
-		assertTrue(readme.contains("**Search**, at the top of Overview once you are connected, sends what you type to the map"));
+		/* Home is the tab that was Overview; the README follows the sidebar's own name for it. */
+		assertTrue(readme.contains("**Search**, at the top of Home once you are connected, sends what you type to the map"));
 	}
 }

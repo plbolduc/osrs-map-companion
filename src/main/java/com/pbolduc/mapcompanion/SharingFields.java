@@ -33,7 +33,7 @@ import java.util.function.Predicate;
 /**
  * Every sharing choice the sidebar offers, by its setting key and in the words the sidebar uses.
  *
- * <p>Two places name these: the Sharing tab, one checkbox each, and the step after a first
+ * <p>Two places name these: Settings, one checkbox each, and the step after a first
  * Connect, which lists what one press will share. Both read this list, so the step cannot name a
  * field differently from the checkbox that later turns it off, and a field cannot be added to a
  * group in one without the other. The keys are the existing settings; nothing here is stored.
@@ -61,7 +61,7 @@ final class SharingFields
 		}
 	}
 
-	/** A group of fields with one shortcut, as the Sharing tab draws it. */
+	/** A group of fields with one shortcut, as Settings draws it. */
 	static final class Section
 	{
 		final String id;
@@ -128,7 +128,7 @@ final class SharingFields
 		field(MapCompanionConfig.KEY_SHARE_COLLECTION, "Include collection additions", MapCompanionConfig::shareCollectionLog,
 			"New collection notifications while Notable drops and levels is enabled; existing slots are never read."));
 
-	/** The four groups, in the order both the Sharing tab and the Connect step draw them. */
+	/** The four groups, in the order both Settings and the Connect step draw them. */
 	static final List<Section> GROUPS = Collections.unmodifiableList(Arrays.asList(PRESENCE, PROGRESS, TASKS, LOOT));
 
 	static final Field NAME = field(MapCompanionConfig.KEY_SHARE_NAME, "Character name", MapCompanionConfig::shareName,

@@ -7,9 +7,10 @@ travel around what your account has unlocked, see shooting stars, and share a ma
   <img src="docs/mockups/website-group.jpg" width="760" alt="osrs-map.com with the Companion panel open: four friends on world 444, and their dots around Varrock, Falador, Draynor and Al Kharid">
 </p>
 <p>
-  <img src="docs/mockups/sharing-sidebar-overview.png" width="240" alt="The sidebar's Overview tab: connected to a group, Open the map, and a Drop luck card for an aberrant spectre">
-  <img src="docs/mockups/sharing-sidebar-sharing.png" width="240" alt="The Sharing tab: map presence, progress and travel, tasks and timers, and loot, each chosen separately">
-  <img src="docs/mockups/stars-tab-list.png" width="240" alt="The Stars tab: shooting stars by site, world, tier and time left, with filters">
+  <img src="docs/mockups/sidebar-home.png" width="185" alt="The sidebar's Home tab: connected to a group, Open the map, and a Drop luck card for an aberrant spectre">
+  <img src="docs/mockups/sidebar-group.png" width="185" alt="The Group tab: three friends with where they are and their news, and a meetup with its four answers">
+  <img src="docs/mockups/stars-tab-list.png" width="185" alt="The Stars tab: a picked world at the top, then shooting stars by site, world, tier and time left, with filters">
+  <img src="docs/mockups/sidebar-settings.png" width="185" alt="Settings, behind the gear: map presence, progress and travel, tasks and timers, and loot, each chosen separately">
 </p>
 <p>
   <img src="docs/mockups/world-map-pins.png" width="510" alt="Pins on the game's world map: two friends, a quiet friend, a destination and a meetup">
@@ -44,7 +45,7 @@ The pictures use made-up characters and stars.
    sidebar.
 4. Read the server notice. The sidebar then lists what the map uses, ticked, and names every
    field: press **Share what's ticked**, or **Customise** to choose field by field first, or
-   **Not now** to share nothing yet. The **Sharing** tab changes any of it later.
+   **Not now** to share nothing yet. **Settings**, behind the gear, changes any of it later.
 
 Nothing is shared until you choose it, and joining a group does not turn anything on. With
 **Character name** ticked your group sees it; untick it and **Name to show instead** sets what they
@@ -94,7 +95,7 @@ on until you press, and you can untick any of it first. Each choice can send:
 once per press and whatever you share, so the map can plan the way from there. The map plans with
 it and does not keep it.
 
-**Search**, at the top of Overview once you are connected, sends what you type to the map, which
+**Search**, at the top of Home once you are connected, sends what you type to the map, which
 answers with places and keeps nothing. Picking a result sends the tile you are standing on, as
 Reroute does, so the way is planned from there.
 
@@ -109,8 +110,8 @@ once per press, to make a meetup your group can see. Answering a meetup (**Going
 you: Route to a meetup tells nobody you are coming.
 
 Your chat, other players, your bank and inventory, your existing collection log slots, a complete
-loot history and anything derived from your account's identifiers are never sent. **Advanced →
-Show what's sent** shows what would go out right now. The server's operator and your group's
+loot history and anything derived from your account's identifiers are never sent. **Settings →
+Advanced → Show what's sent** shows what would go out right now. The server's operator and your group's
 members can see what you share.
 
 osrs-map.com keeps live positions and progress in memory only, with no movement history. Groups,

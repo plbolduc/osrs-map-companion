@@ -90,9 +90,11 @@ import net.runelite.client.util.LinkBrowser;
  * shared, and what has the map asked me to look at. Plus the one button that matters — a way to
  * open the map — and a way to hand a friend the code.
  *
- * <p>Status and Open the map come first. Overview holds current facts and group actions; Sharing
- * holds the group shortcuts and individual opt-ins. Advanced keeps the address, snapshot preview
- * and reset actions out of the daily view. The connection field takes a complete
+ * <p>Status and Open the map come first, then three tabs ({@link CompanionViews}): Home holds the
+ * search, what is happening now and Drop luck; Group the friends, the meetups and the group's own
+ * buttons; Stars the star list. Settings is a page behind the gear on the status card
+ * ({@link SidebarPages}): every sharing choice, then Advanced, which keeps the address, the snapshot
+ * preview and the reset actions out of the way even there. The connection field takes a complete
  * RuneLite code or an existing invite; the suffix is internal state rather than a second field.
  * Once paired, the field folds away until switching or reconnecting needs it.
  *
@@ -145,6 +147,8 @@ public class MapCompanionPanel extends PluginPanel
 	private final JLabel groupLabel = new JLabel();
 	private final JLabel sharingLabel = new JLabel();
 	private final JButton previewButton = smallButton("Show what's sent");
+	/** Settings, as a page in place of this one. See {@link SidebarPages}. */
+	private final JButton gearButton = new JButton(SidebarIcons.gear());
 
 	/** The one filled button. See the constructor for why it is filled and nothing else is. */
 	private final JButton openMapButton = new JButton("Open the map");
@@ -212,9 +216,9 @@ public class MapCompanionPanel extends PluginPanel
 	 */
 	private final JButton followButton = smallButton("Follow");
 	private final ShortestPath shortestPath;
-	/** The map's search, at the top of Overview while paired. */
+	/** The map's search, at the top of Home while paired. */
 	private final SearchPanel searchPanel;
-	/** Each friend's row, the week's meetups and Meet here, under the Group heading. */
+	/** Each friend's row, the week's meetups and Meet here: the Group tab. */
 	private final GroupPanel groupPanel;
 
 	/* Drop luck: one monster's card, or every monster tracked. See {@link DropLuckPanel}. */
@@ -225,7 +229,6 @@ public class MapCompanionPanel extends PluginPanel
 	/*
 	 * The group: its invite and its switch when there is one, the join field when there is not.
 	 */
-	private final JLabel groupHeading = sectionHead("Group");
 	private final JPanel groupActions = row(ColorScheme.DARK_GRAY_COLOR);
 	private List<JButton> shownGroupActions = new ArrayList<>();
 	/**
@@ -242,11 +245,18 @@ public class MapCompanionPanel extends PluginPanel
 	 * one am I in".
 	 */
 	private final JButton switchButton = smallButton("Switch ▾");
+	/**
+	 * The same menu before a group is joined, under the code field: the tabs are not drawn then,
+	 * and a player who left one group may still be remembered in others.
+	 */
+	private final JButton knownGroupsButton = smallButton("Your groups ▾");
+	private final JPanel knownGroupsRow;
 	private final JButton joinToggle = linkButton("▸ Join another group");
 	private boolean joinOpen = false;
 	private boolean pendingConnectionMessage = false;
 	private final JPanel joinBlock;
 	private final CompanionViews views;
+	private final SidebarPages pages;
 	private final StarsPanel starsPanel;
 
 	/**
@@ -359,6 +369,7 @@ public class MapCompanionPanel extends PluginPanel
 		 * one the status card now starts on.
 		 */
 		JPanel body = column(ColorScheme.DARK_GRAY_COLOR);
+		body.setName("companionDaily");
 
 		/* The status card. Dot beside the sentence, so the state reads at a glance and again in words. */
 		JPanel status = card();
@@ -368,6 +379,15 @@ public class MapCompanionPanel extends PluginPanel
 		statusRow.add(dot, BorderLayout.WEST);
 		statusLabel.setFont(statusLabel.getFont().deriveFont(12f));
 		statusRow.add(statusLabel, BorderLayout.CENTER);
+		gearButton.setName("companion.settings");
+		gearButton.setToolTipText("Settings: what you share, the map address and Show what's sent");
+		gearButton.getAccessibleContext().setAccessibleName("Settings");
+		gearButton.setBorderPainted(false);
+		gearButton.setContentAreaFilled(false);
+		gearButton.setFocusPainted(false);
+		gearButton.setBorder(new EmptyBorder(0, 4, 0, 0));
+		gearButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		statusRow.add(gearButton, BorderLayout.EAST);
 		status.add(left(statusRow));
 		groupLabel.setFont(groupLabel.getFont().deriveFont(12f));
 		status.add(left(groupLabel));
@@ -388,13 +408,18 @@ public class MapCompanionPanel extends PluginPanel
 		body.add(fill(openMapButton, ColorScheme.DARK_GRAY_COLOR));
 		body.add(gap(10, ColorScheme.DARK_GRAY_COLOR));
 
-		/* The connection is reachable from either view, including after changing the server. */
+		/* The connection is reachable from every tab, including after changing the server. */
 		joinBlock = buildJoinBlock();
 		body.add(joinBlock);
 		body.add(left(joinMessage));
+		knownGroupsRow = row(ColorScheme.DARK_GRAY_COLOR);
+		knownGroupsRow.add(knownGroupsButton);
+		knownGroupsRow.setBorder(new EmptyBorder(4, 0, 0, 0));
+		knownGroupsRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, knownGroupsButton.getPreferredSize().height + 4));
+		body.add(left(knownGroupsRow));
 		body.add(recommendedSharing);
 		JPanel overview = column(ColorScheme.DARK_GRAY_COLOR);
-		overview.setName("companionOverview");
+		overview.setName("companionHome");
 		/* First, because "where is it and how do I get there" is the question the map answers best. */
 		overview.add(searchPanel);
 		searchGap = gap(8, ColorScheme.DARK_GRAY_COLOR);
@@ -472,26 +497,30 @@ public class MapCompanionPanel extends PluginPanel
 		drySection.add(gap(10, ColorScheme.DARK_GRAY_COLOR));
 		overview.add(drySection);
 
-		overview.add(groupHeading);
-		overview.add(gap(3, ColorScheme.DARK_GRAY_COLOR));
-		overview.add(groupPanel);
-		overview.add(left(groupActions));
-		overview.add(joinToggle);
-		JPanel sharing = column(ColorScheme.DARK_GRAY_COLOR);
-		sharing.setName("companionSharing");
-		sharing.add(sectionHead("What to share"));
-		sharing.add(sharingControls);
-		views = new CompanionViews(overview, sharing, starsPanel, starsPanel::selected);
+		JPanel group = column(ColorScheme.DARK_GRAY_COLOR);
+		group.setName("companionGroupView");
+		group.add(groupPanel);
+		group.add(gap(4, ColorScheme.DARK_GRAY_COLOR));
+		group.add(left(groupActions));
+		group.add(joinToggle);
+		views = new CompanionViews(overview, group, starsPanel, starsPanel::selected);
 		body.add(views);
 
-		body.add(buildAdvanced());
+		JPanel settings = column(ColorScheme.DARK_GRAY_COLOR);
+		settings.add(sectionHead("What you share"));
+		settings.add(sharingControls);
+		settings.add(gap(4, ColorScheme.DARK_GRAY_COLOR));
+		settings.add(buildAdvanced());
+		pages = new SidebarPages(body, settings);
 
 		openMapButton.addActionListener(e -> LinkBrowser.browse(mapUrl() + "/map?task=companion"));
 		pasteButton.setToolTipText("Read the clipboard. Only ever when you press this.");
 		pasteButton.addActionListener(e -> pasteIntoJoinField());
 		joinButton.addActionListener(e -> joinFromField());
 		copyInviteButton.addActionListener(e -> copyInvite());
-		switchButton.addActionListener(e -> showGroupMenu());
+		switchButton.addActionListener(e -> showGroupMenu(switchButton));
+		knownGroupsButton.addActionListener(e -> showGroupMenu(knownGroupsButton));
+		gearButton.addActionListener(e -> pages.open(true));
 		joinToggle.addActionListener(e ->
 		{
 			joinOpen = !joinOpen;
@@ -532,7 +561,7 @@ public class MapCompanionPanel extends PluginPanel
 			refresh();
 		});
 
-		add(body, BorderLayout.NORTH);
+		add(pages, BorderLayout.NORTH);
 
 		refresh();
 	}
@@ -732,6 +761,8 @@ public class MapCompanionPanel extends PluginPanel
 			configManager.setConfiguration(MapCompanionConfig.GROUP, MapCompanionConfig.KEY_RELAY_URL, server);
 			joinOpen = true;
 			say("Map address changed. Press Connect.");
+			/* The field and the line that asks for it are on the daily page. */
+			pages.open(false);
 			refresh();
 		}
 		return true;
@@ -844,7 +875,7 @@ public class MapCompanionPanel extends PluginPanel
 	 *
 	 * <p>Each group by the name the map last sent for it, beside its code — see {@link #groupLabel}.
 	 */
-	private void showGroupMenu()
+	private void showGroupMenu(JButton anchor)
 	{
 		String active = pairingCode();
 		JPopupMenu menu = new JPopupMenu();
@@ -878,7 +909,7 @@ public class MapCompanionPanel extends PluginPanel
 		 * the button, and hung from the left edge the way a column of codes could be, it ran off the
 		 * sidebar's right side.
 		 */
-		menu.show(switchButton, switchButton.getWidth() - menu.getPreferredSize().width, switchButton.getHeight());
+		menu.show(anchor, anchor.getWidth() - menu.getPreferredSize().width, anchor.getHeight());
 	}
 
 	/**
@@ -1280,14 +1311,17 @@ public class MapCompanionPanel extends PluginPanel
 			 */
 			List<String> known = pairing.knownCodes();
 			boolean others = known.stream().anyMatch(c -> !c.equalsIgnoreCase(code));
-			groupHeading.setVisible(paired);
+			/* The tabs are a member's: before a group is joined, Home is the whole page. */
+			views.tabsShown(ready);
+			List<RelayResponse.RosterRow> roster = destinationState.getRoster();
+			views.groupCount(ready && roster != null ? roster.size() : 0);
 			groupPanel.setVisible(ready);
 			if (ready)
 			{
 				groupPanel.refresh(true);
 			}
 			copyInviteButton.setEnabled(paired && pairing.hasServerConsent() && !copyingInvite);
-			switchButton.setText(paired ? "Switch ▾" : "Your groups ▾");
+			knownGroupsRow.setVisible(!paired && !known.isEmpty());
 			List<JButton> groupRow = new ArrayList<>();
 			if (paired)
 			{
@@ -1483,6 +1517,7 @@ public class MapCompanionPanel extends PluginPanel
 		identity.forget();
 		destinationState.clear();
 		say("Left the group.");
+		pages.open(false);
 		refresh();
 	}
 

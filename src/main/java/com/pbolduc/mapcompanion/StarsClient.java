@@ -326,7 +326,7 @@ final class StarsClient
 					long delay = retryDelay(close.header("Retry-After"));
 					if (close.isRedirect())
 					{
-						finish(null, "This map address redirects. Check Advanced → Map address.", 300_000);
+						finish(null, "This map address redirects. Check Settings → Advanced → Map address.", 300_000);
 						return;
 					}
 					if (!close.isSuccessful() && !(preference && close.code() == 409))

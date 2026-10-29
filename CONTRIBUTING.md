@@ -119,7 +119,7 @@ perform game actions yourself. IntelliJ also has checked-in Run client, Run clie
 All tests configurations under `.run`. All tests is headless; the client configurations are not.
 
 To test the map connection, run the map project (osrs-map.com's source, which is not public) with
-its fixture star feed and an isolated database, then set **Advanced → Map address** to its
+its fixture star feed and an isolated database, then set **Settings → Advanced → Map address** to its
 localhost URL. The first Connect still requires server approval. Never use an upstream write endpoint or increase upstream feed polling for a test.
 
 ## Integration harness

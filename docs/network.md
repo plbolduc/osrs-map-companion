@@ -8,7 +8,7 @@ requests carry it, what identifies a member, and what is kept. The
 
 ## Requests
 
-Requests go to **Advanced → Map address**, default `https://osrs-map.com`; it must be https
+Requests go to **Settings → Advanced → Map address**, default `https://osrs-map.com`; it must be https
 unless the map runs on this machine, and redirects are not followed. With no pairing code or no
 approval of the selected server, the plugin makes no requests. First **Connect** discloses that
 destination; changing it pauses requests until you connect there.
@@ -22,8 +22,8 @@ stream connected. Automatic character sharing stops while logged out.
 **Show my group on the world map** start off. After the server notice, the sidebar shows a row each for the
 four sharing groups, the character name and those two drawing choices, all ticked, and *Where you
 died* unticked, with a line saying the drawing choices open one connection. *What each one sends*,
-a fold under the rows, names every field and describes the receive stream in full. **Share what's ticked** writes exactly the ticked settings, as the Sharing tab's group
-shortcuts do, and is the only thing in the step that changes anything: ticking, **Customise** and
+a fold under the rows, names every field and describes the receive stream in full. **Share what's ticked** writes exactly the ticked settings, as the group shortcuts in Settings
+do, and is the only thing in the step that changes anything: ticking, **Customise** and
 **Not now** write nothing, and nothing in the step makes a request. It follows only a Connect that
 showed the notice, which runs once per map, and only while every choice it could turn on is still
 off, so a player who connected before, or chose first, is never offered it. Meetup notifications
@@ -45,7 +45,7 @@ position sharing is on, because a route from where you stand is what the press a
 flight at a time, and none before the wait the map last asked for: its `Retry-After`, and at least
 five seconds between presses that reached it. The map plans with both tiles and keeps neither.
 
-**Search**, at the top of Overview while connected, asks `GET /api/companion/search?q=` with the
+**Search**, at the top of Home while connected, asks `GET /api/companion/search?q=` with the
 same three credentials, about 350ms after the last key or at once on Enter, and never for fewer than
 two characters. One is in flight at a time: a query typed meanwhile waits for it, and the older
 answer is dropped if the box has moved on. Clearing the box cancels the call. A `Retry-After` is
@@ -104,7 +104,7 @@ used on snapshots, invites, the receive stream and star-preference sync. It is n
 or logged. **Leave group** deletes every one of these member secrets and replaces the installation
 identity; your local kill log remains.
 
-Local game messages provide bounded reward and assignment facts only. **Advanced → Show what's
+Local game messages provide bounded reward and assignment facts only. **Settings → Advanced → Show what's
 sent** previews the current snapshot; credentials are named without displaying standing secrets.
 
 ## Storage
