@@ -32,6 +32,14 @@ final class Sprites
 		ITEMS.put(3853, "games-necklace-8");
 		ITEMS.put(2722, "clue-scroll-hard");
 		ITEMS.put(4151, "abyssal-whip");
+		ITEMS.put(net.runelite.api.gameval.ItemID.MYSTIC_ROBE_BOTTOM_DARK, "mystic-robe-bottom-dark");
+	}
+
+	/** The same item sprite that the live client's ItemManager supplies to Drop luck. */
+	static BufferedImage itemImage(int itemId)
+	{
+		String name = ITEMS.get(itemId);
+		return name == null ? null : read(System.getenv("OSRS_MAP_PUBLIC"), "osrs-items/1x/" + name + ".png");
 	}
 
 	static void bind(Binder binder)

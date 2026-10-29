@@ -41,6 +41,8 @@ import okhttp3.OkHttpClient;
  * the last polish pass changed: a fresh install with and without a kill log, the step after a first
  * Connect, a busy Home, the Group tab, Settings with Advanced open, Stars with a world picked, the
  * search answering "bank" and "whip", the death and clue cards, a meetup, and Drop luck alone.
+ * The README also uses route (with Shortest Path present), settings-closed, search-whip-card
+ * and dropluck-card (the real sections without the panel's surrounding controls).
  * Synthetic local state and made-up names; no game account and no network — the map address is a
  * port nothing listens on.
  *
@@ -63,8 +65,8 @@ import okhttp3.OkHttpClient;
  */
 public class SidebarPolishShot
 {
-	static final List<String> STATES = Arrays.asList("fresh", "fresh-log", "connect", "home", "group", "settings",
-		"stars", "stars-filters", "search", "search-whip", "death", "meetup", "dropluck", "status");
+	static final List<String> STATES = Arrays.asList("fresh", "fresh-log", "connect", "home", "route", "group", "settings", "settings-closed",
+		"stars", "stars-filters", "search", "search-whip", "search-whip-card", "death", "meetup", "dropluck", "dropluck-card", "status");
 
 	static HarnessGame game;
 
@@ -80,7 +82,9 @@ public class SidebarPolishShot
 			SwingUtilities.invokeAndWait(() -> call(() -> after(state, panel[0])));
 			SwingUtilities.invokeAndWait(() -> call(() -> refresh(panel[0])));
 			SwingUtilities.invokeAndWait(() -> { });
-			SwingUtilities.invokeAndWait(() -> call(() -> shoot(panel[0], args[0] + "/" + state + ".png")));
+			SwingUtilities.invokeAndWait(() -> call(() -> shoot(state.equals("dropluck-card")
+				? (JComponent) get(panel[0], "drySection") : state.equals("search-whip-card")
+				? (JComponent) get(panel[0], "searchPanel") : panel[0], args[0] + "/" + state + ".png")));
 		}
 		System.exit(0);
 	}
@@ -114,7 +118,37 @@ public class SidebarPolishShot
 		ConfigManager configManager = (ConfigManager) allocate(ConfigManager.class);
 		DestinationMarker marker = (DestinationMarker) allocate(DestinationMarker.class);
 		net.runelite.client.game.ItemManager itemManager = (net.runelite.client.game.ItemManager) allocate(net.runelite.client.game.ItemManager.class);
-		LootLog lootLog = new LootLog(game.client(), store, gson);
+		/*
+		 * The real client's collection catalog resolves a rated item that has not dropped yet.
+		 * This scene supplies that one name/id without claiming a complete collection catalog.
+		 */
+		LootLog lootLog = new LootLog(game.client(), store, gson, new LootLog.NotableItems()
+		{
+			@Override
+			public boolean ready()
+			{
+				return false;
+			}
+
+			@Override
+			public boolean notable(int itemId)
+			{
+				return false;
+			}
+
+			@Override
+			public boolean pet(int itemId)
+			{
+				return false;
+			}
+
+			@Override
+			public Integer idFor(String name)
+			{
+				return "Mystic robe bottom (dark)".equals(name)
+					? net.runelite.api.gameval.ItemID.MYSTIC_ROBE_BOTTOM_DARK : null;
+			}
+		});
 		Pairing pairing = new Pairing(store, gson, config::relayUrl);
 		Injector injector = Guice.createInjector(new AbstractModule()
 		{
@@ -167,7 +201,10 @@ public class SidebarPolishShot
 			config.set("showDestination", true);
 		}
 		Scenes.fill(state, injector, config, lootLog);
-		return injector.getInstance(MapCompanionPanel.class);
+		MapCompanionPanel panel = injector.getInstance(MapCompanionPanel.class);
+		/* Drop luck uses its own picture seam, separate from the other panels' GameSprites. */
+		set(get(panel, "dropLuck"), "pictures", (DropLuckPanel.Pictures) (id, loaded) -> Sprites.itemImage(id));
+		return panel;
 	}
 
 	/** What each state puts in the collaborators before the panel is built. */
@@ -182,6 +219,12 @@ public class SidebarPolishShot
 				death(injector, config);
 				social(destinations, false);
 			}
+			if (state.equals("route"))
+			{
+				route(injector, destinations);
+				/* The README shows Follow as it appears with the optional Shortest Path plugin installed. */
+				set(injector.getInstance(ShortestPath.class), "installed", true);
+			}
 			if (state.equals("group") || state.equals("meetup"))
 			{
 				social(destinations, state.equals("meetup"));
@@ -190,7 +233,7 @@ public class SidebarPolishShot
 			{
 				death(injector, config);
 			}
-			if (state.equals("home") || state.equals("fresh-log") || state.equals("dropluck"))
+			if (state.equals("home") || state.equals("fresh-log") || state.startsWith("dropluck"))
 			{
 				loot(log);
 			}
@@ -232,6 +275,10 @@ public class SidebarPolishShot
 			String social = new String(Files.readAllBytes(Paths.get("src/test/resources/contract/stream.json")), StandardCharsets.UTF_8);
 			RelayResponse.StreamDirective directive = new Gson().fromJson(social, RelayResponse.StreamDirective.class);
 			long now = System.currentTimeMillis();
+			/* The released client produces levels and drops; quest announcements await their reader. */
+			directive.roster.get(2).news.kind = "level";
+			directive.roster.get(2).news.title = "Mining 72";
+			directive.roster.get(2).news.skill = "Mining";
 			directive.roster.get(0).news.atMs = now - 5 * 60_000L;
 			directive.roster.get(1).news.atMs = now - 9 * 60_000L;
 			directive.roster.get(2).news.atMs = now - 41 * 60_000L;
@@ -356,13 +403,16 @@ public class SidebarPolishShot
 			group.openForm(true);
 			group.title().setText("Barrows run");
 		}
-		if (state.equals("settings"))
+		if (state.startsWith("settings"))
 		{
 			if (!press(panel, "companion.settings"))
 			{
 				press(panel, "companionView.sharing");
 			}
-			expand(panel, "Advanced");
+			if (state.equals("settings"))
+			{
+				expand(panel, "Advanced");
+			}
 		}
 		if (state.startsWith("stars"))
 		{

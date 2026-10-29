@@ -1,61 +1,113 @@
 # OSRS Map Companion
 
-Connect RuneLite to [osrs-map.com](https://osrs-map.com): follow your character on the map, plan
-travel around what your account has unlocked, see shooting stars, and share a map with friends.
+Bring [osrs-map.com](https://osrs-map.com)'s routes, search and shooting stars into RuneLite,
+and see your character and friends on the website.
+
+[Getting started](#getting-started) · [Search](#search-for-a-place-or-item) ·
+[Slayer](#slayer-on-the-website) · [Sailing](#sailing-on-the-website) ·
+[What's new](https://osrs-map.com/whats-new)
+
+## Routes in RuneLite
 
 <p>
-  <img src="docs/mockups/website-group.jpg" width="760" alt="osrs-map.com with the Companion panel open: four friends on world 444, and their dots around Varrock, Falador, Draynor and Al Kharid">
+  <img src="docs/mockups/sidebar-route.png" width="300" alt="A route to Lumbridge Castle bank in the real plugin sidebar: numbered steps, the current walk highlighted, and Follow, Reroute and Dismiss">
 </p>
+
+Send a place from the website or pick a search result, and the sidebar lists the way there.
+Each step gets a numbered pin on the game's world map; the game's arrow points at the current
+step when it is in the loaded area.
+
+With **Shortest Path** installed, press **Follow** to draw each walking step as you reach it.
+**Reroute** plans again from where you stand. The website uses the progress and travel choices
+you share to suggest routes around your account's quests, diaries, items and transport unlocks.
+
+You can also plan a route to a friend, a meetup or a precise star site, back to where you died,
+and to coordinate clues and recognised beginner map clues.
+
+## Search for a place or item
+
 <p>
-  <img src="docs/mockups/sidebar-home.png" width="185" alt="The sidebar's Home tab: connected to a group, Open the map, and a Drop luck card for an aberrant spectre">
-  <img src="docs/mockups/sidebar-group.png" width="185" alt="The Group tab: three friends with where they are and their news, and a meetup with its four answers">
-  <img src="docs/mockups/stars-tab-list.png" width="185" alt="The Stars tab: a picked world at the top, then shooting stars by site, world, tier and time left, with filters">
-  <img src="docs/mockups/sidebar-settings.png" width="185" alt="Settings, behind the gear: map presence, progress and travel, tasks and timers, and loot, each chosen separately">
+  <img src="docs/mockups/sidebar-search.png" width="300" alt="Searching for whip: Abyssal demon and Abyssal Sire under Dropped by, and the Abyssal whip under Items">
 </p>
+
+Search for banks, shops, NPCs, monsters and items from **Home**. An item can show the monsters
+that drop it and the shops that sell it. Pick a place, monster or shop to plan the way there.
+Results use the game's map icons and item sprites.
+
+## Friends and meetups
+
 <p>
-  <img src="docs/mockups/world-map-pins.png" width="510" alt="Pins on the game's world map: two friends, a quiet friend, a destination and a meetup">
-  <img src="docs/mockups/website-star.png" width="240" alt="A shooting star's card on osrs-map.com: tier 9 on world 302 with 63 minutes left, Send W302 to RuneLite, and the fastest way there">
+  <img src="docs/mockups/sidebar-group.png" width="300" alt="The Group tab: friends' locations, a Woodcutting level and an Abyssal whip drop, then a star-hunt meetup with Route and four answers">
 </p>
+
+**Group** shows your friends' locations and latest levels and drops. Friends who share
+their position appear on the website and, if you enable it, on RuneLite's world map in the same
+colours. **Route** plans the way to a friend's current position.
+
+Create a meetup with **Meet here…**, see who is coming, and answer **Going**, **Maybe**, **Can't**
+or **On my way**. You can turn on a reminder before it starts.
+
+## Shooting stars
+
+<p>
+  <img src="docs/mockups/stars-tab-list.png" width="300" alt="The Stars tab: Rimmington mine selected, tier and world filters, stars grouped by site, and Pin destination and Route buttons">
+</p>
+
+**Stars** lists active stars by site, world, tier and estimated time left. Filter by tier and
+world type, save favourite sites, and optionally sync your filters and favourites with the website.
+Pick a precise site to pin it on the world map or plan a route there.
+
+To change worlds, type `::hop` and the world, for example `::hop 444`.
+
+## Drop luck
+
+<p>
+  <img src="docs/mockups/sidebar-drop-luck.png" width="300" alt="Drop luck for an Aberrant spectre: 1,300 recorded kills without the selected robe bottom, a Very dry verdict, and the chance over the next 100 kills">
+</p>
+
+See how lucky or dry you are on the monster you are killing, with sourced drop odds, a dry-streak
+comparison and the chance over your next kills. **All monsters** opens your recorded history.
+Optional chat lines report your luck when a drop lands. Drop luck also works without connecting
+to the website.
+
+## Your character on the website
+
+The website follows your character's position, floor and world as you play. See your slayer task,
+clue step, hunter rumour, Mahogany Homes job and farming contract on the map, alongside birdhouse
+timers and the farm patches you have visited.
+
+## Slayer on the website
+
+<p>
+  <img src="docs/mockups/website-slayer.jpg" width="360" alt="The website's Slayer panel for 143 Aberrant spectres: ranked places, monster variants, access requirements and controls for the list">
+</p>
+
+Share your task to compare ranked places to do it and the other monsters that count.
+See access requirements, filter out Wilderness or unusable places, and send your chosen place
+to RuneLite to follow the route there.
+
+## Sailing on the website
+
+<p>
+  <img src="docs/mockups/website-sailing.jpg" width="360" alt="Port Sarim's task board on the website: courier tasks ranked by XP per sailed tile, then bounty tasks ranked for the whole trip and hunt">
+</p>
+
+Open a port task board on osrs-map.com to compare courier and bounty jobs, their levels and XP.
+Couriers are ranked by XP per sailed tile; bounties account for the sail out and back and the
+expected hunting. A bounty's pin opens the creature on the map.
 
 The pictures use made-up characters and stars.
-
-## What it does
-
-- **Your character on the map.** osrs-map.com follows your position, floor and world as you play.
-- **A map for your group.** Friends who share their position appear on the website and, if you
-  turn it on, on the game's own world map in the same colours.
-- **Travel planned around your account.** The map's routes use your quests, diaries, items and
-  transport unlocks, so it suggests the ways you can actually take.
-- **Tasks and timers.** Your slayer task, clue step, hunter rumour, Mahogany Homes job, farming
-  contract, birdhouses and the farm patches you have walked past show on the map.
-- **Shooting stars.** The **Stars** tab lists active stars by site, world, tier and time left, with
-  filters and favourite sites. Pin one to see it on the world map. To get to a star's world, type
-  `::hop` and its world number in chat, for example `::hop 444`.
-- **Drop luck.** How lucky or dry you are on the monster you are killing, in the sidebar and, if
-  you want, as one chat line when a drop lands.
-- **Destinations and meetups.** Places your group sends from the map appear on the world map, with
-  the game's hint arrow once you are close, and a reminder before a meetup starts.
 
 ## Getting started
 
 1. Install **OSRS Map Companion** from the Plugin Hub.
 2. On osrs-map.com, open the [Companion panel](https://osrs-map.com/map?task=companion) and create
-   a group, or follow a friend's invite.
+   a group, or follow a friend's invite. You can use a group on your own.
 3. Press **Copy connection code** on the map, then **Paste** and **Connect** in the plugin's
    sidebar.
-4. Read the server notice. The sidebar then lists what the map uses, ticked, and names every
-   field: press **Share what's ticked**, or **Customise** to choose field by field first, or
-   **Not now** to share nothing yet. **Settings**, behind the gear, changes any of it later.
-
-Nothing is shared until you choose it, and joining a group does not turn anything on. With
-**Character name** ticked your group sees it; untick it and **Name to show instead** sets what they
-see, or Member if you leave it empty. **Copy invite**
-copies a message you can send a friend. **Switch** remembers up to eight groups, and joins another.
-
-In the plugin's settings, **Show destinations from the map**, **Show my group on the world map**
-and **Notify before a meetup** start off; the step after Connect ticks the first two for you to
-confirm. **Drop luck in chat** and **Point the game's arrow at a destination** start on; neither
-sends anything.
+4. Read the server notice. Press **Share what's ticked**, or **Customise** to choose field by
+   field first, or **Not now** to share nothing yet. The gear opens **Settings** whenever you
+   want to change your choices.
 
 ## What you share
 
@@ -63,6 +115,13 @@ sends anything.
 Nothing is sent until you press **Connect** and accept the server notice. While you are connected
 and logged in, the plugin sends a random member id, the name you chose and your group's
 credentials, even with every sharing choice off.
+
+<details>
+<summary>Full sharing details and settings</summary>
+
+<p>
+  <img src="docs/mockups/sidebar-settings.png" width="300" alt="Settings with its four sharing categories, Name and death location, In the client and Advanced; Advanced is closed">
+</p>
 
 Every choice starts off. After the server notice, one press of **Share what's ticked** turns on
 everything below except where you died, and draws destinations, meetups and your group on the
@@ -122,6 +181,18 @@ sharing and deletes the plugin's saved credentials; your kill log stays on your 
 
 Shooting star data comes from Star Miners by way of osrs-map.com. The plugin never contacts Star
 Miners, who do not endorse it.
+
+Nothing is shared until you choose it, and joining a group does not turn anything on. With
+**Character name** ticked your group sees it; untick it and **Name to show instead** sets what they
+see, or Member if you leave it empty. **Copy invite** copies a message you can send a friend.
+**Switch** remembers up to eight groups, and joins another.
+
+In the plugin's settings, **Show destinations from the map**, **Show my group on the world map**
+and **Notify before a meetup** start off; the step after Connect ticks the first two for you to
+confirm. **Drop luck in chat** and **Point the game's arrow at a destination** start on; neither
+sends anything.
+
+</details>
 
 ## Good to know
 
