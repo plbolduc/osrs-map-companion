@@ -79,13 +79,14 @@ public class RelayClientRefusalsTest
 		assertEquals("You were removed from this group.", RelayClient.permanentReason(410, "removed"));
 	}
 
+	/** The address lives in Settings now, under its Advanced fold, so the sentence names the whole way there. */
 	@Test
 	public void aRedirectNamesTheAddressToUseInstead()
 	{
 		okhttp3.HttpUrl asked = okhttp3.HttpUrl.get("https://www.example.test/api/companion/snapshot");
-		assertEquals("This map address redirects to https://example.test. Enter that under Advanced → Map address.",
+		assertEquals("This map address redirects to https://example.test. Enter that under Settings → Advanced → Map address.",
 			RelayClient.redirectMessage(asked, "https://example.test/api/companion/snapshot?x=1"));
-		assertEquals("This map address redirects to https://www.example.test:8443. Enter that under Advanced → Map address.",
+		assertEquals("This map address redirects to https://www.example.test:8443. Enter that under Settings → Advanced → Map address.",
 			RelayClient.redirectMessage(asked, "https://www.example.test:8443/api/companion/snapshot"));
 		assertTrue(RelayClient.redirectMessage(asked, null).startsWith("This map address redirects."));
 	}

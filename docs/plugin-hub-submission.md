@@ -56,7 +56,7 @@ saying those two open one connection. *What each one sends*, one tap below the r
 press, names every field in the sidebar's own words and the receive stream in full (one held
 connection carrying the group code and member id). *Where you died* is offered unticked; meetup
 notifications are not offered. One press, **Share what's ticked**, writes exactly those existing
-settings, as the Sharing tab's group shortcuts do: the press is the opt-in, and nothing turns on
+settings, as the group shortcuts in Settings do: the press is the opt-in, and nothing turns on
 without it. Ticking, **Customise** and **Not now** write nothing. The step follows only a Connect
 that showed the notice and only while every choice it offers is still off, so an update changes no
 existing player's settings and opens no stream for them. `RecommendedSharing` is the step;

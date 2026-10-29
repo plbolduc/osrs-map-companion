@@ -55,17 +55,17 @@ import net.runelite.client.ui.ColorScheme;
  * character name and the two things this client draws from the map, all ticked, one short row each
  * so the press is in reach without scrolling. Every field and the one stream they open are named in
  * <i>What each one sends</i>, one tap below the rows, and pressing <i>Share what's ticked</i> writes
- * those settings exactly as the Sharing tab's group shortcuts write them. Until then nothing is
+ * those settings exactly as the group shortcuts in Settings write them. Until then nothing is
  * stored: ticking, unticking and <i>Customise</i> change this step and nothing else, and <i>Not
  * now</i> leaves every setting as it was.
  *
  * <p><b>Who sees it.</b> Only a Connect that showed the server notice, which is the first Connect
  * to that map, and only while every choice it offers is still off. A player who connected before
  * this version approved their server already, so an update never shows them the step, and one who
- * chose anything in the Sharing tab first keeps their own choices. RuneLite writes every default
+ * chose anything in Settings first keeps their own choices. RuneLite writes every default
  * into the profile when a plugin loads, so "never set" cannot be read back; "still at its default"
  * is the only test that holds on a real client. The step is never remembered: a closed client
- * simply does not offer it again, and the Sharing tab holds every choice.
+ * simply does not offer it again, and Settings holds every choice.
  *
  * <p><b>What it may share.</b> {@link #KEYS} is a list written out rather than read from the
  * groups, so a field added to a group later joins the press only when somebody adds it here, in the
@@ -135,7 +135,7 @@ final class RecommendedSharing extends JPanel
 		MapCompanionPanel.setWrapped(title, "Choose what to share", TEXT);
 		card.add(title);
 		JLabel intro = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
-		MapCompanionPanel.setWrapped(intro, "Ticked is what the map uses. One press shares it, and the Sharing tab "
+		MapCompanionPanel.setWrapped(intro, "Ticked is what the map uses. One press shares it, and Settings "
 			+ "changes any of it later.", TEXT);
 		card.add(intro);
 		card.add(gap(6));
@@ -179,7 +179,7 @@ final class RecommendedSharing extends JPanel
 		JButton share = new JButton("Share what's ticked");
 		share.setName("recommended.share");
 		share.setFont(share.getFont().deriveFont(12f));
-		share.setToolTipText("Turn on the ticked settings, as the Sharing tab's group shortcuts do. Nothing else changes.");
+		share.setToolTipText("Turn on the ticked settings, as the group shortcuts in Settings do. Nothing else changes.");
 		share.addActionListener(e -> share());
 		JPanel shareRow = new JPanel(new GridLayout(1, 1));
 		shareRow.setBackground(BACK);
@@ -197,7 +197,7 @@ final class RecommendedSharing extends JPanel
 		links.add(customise);
 		JButton skip = MapCompanionPanel.linkButton("Not now");
 		skip.setName("recommended.skip");
-		skip.setToolTipText("Share nothing yet. Every choice stays off until you turn it on under Sharing.");
+		skip.setToolTipText("Share nothing yet. Every choice stays off until you turn it on in Settings.");
 		skip.addActionListener(e -> close());
 		links.add(skip);
 		links.setMaximumSize(new Dimension(Integer.MAX_VALUE, links.getPreferredSize().height));

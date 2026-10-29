@@ -449,3 +449,25 @@ minute in fives, defaulting to half an hour from now, and **Make meetup**, which
 `docs/review-evidence/where-to-go-2026-10-29/WhereToGoShot.java` paints the real panel in each of
 these states (steps 5a, 6, 8 and 9) at 225px with made-up names; how to run it is in its docblock.
 No picture is committed yet; step 12 takes the README's.
+
+## Home, Group and Stars, with Settings behind a gear, 29 October 2026
+
+Status: **built**, on `claude/sidebar-polish`, one commit per item. The review and the owner's
+picks are `docs/plan-last-polish-pass.md` and its `plugin-findings.md` in `osrs-stars-map`; this
+section says what each item changed here, in the order they landed. The sections above are kept as
+they were written, so where they say *Overview* and *the Sharing tab*, read Home and Settings.
+
+`docs/review-evidence/sidebar-polish-2026-10-29/SidebarPolishShot.java` paints the real panel in
+every state below at 225px, against this branch or the commit before it; how to run it is in its
+docblock.
+
+### The structure
+
+The tabs are **Home · Group · Stars**. Home is the search, *Now* and Drop luck. Group is the
+friends, the meetups and the group's own buttons, and its tab counts the friends, *Group · 3*.
+**Settings** is a page behind a gear on the status card, with an arrow back at its top: *What you
+share*, then the **Advanced** fold with the map address, *Show what's sent*, *Leave group* and
+*Forget kill log*. Advanced no longer hangs under every tab. Before a group is joined the tabs are
+not drawn and Home is the page, because Group and Stars both ask the map as a member. The gear and
+the arrow are drawn, not loaded, as the destination's dot is. On the busy state Home is 819px where
+Overview was 1,243.

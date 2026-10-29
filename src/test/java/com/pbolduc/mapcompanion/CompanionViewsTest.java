@@ -28,6 +28,9 @@ package com.pbolduc.mapcompanion;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
@@ -35,11 +38,55 @@ import javax.swing.SwingUtilities;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-/** Switching views must keep choices alive without reserving a hidden settings page's height. */
+/**
+ * The tabs and the Settings page keep what is open without reserving a hidden page's height.
+ *
+ * <p>Rewritten when Sharing stopped being a tab and became the Settings page behind the gear: the
+ * partial sharing choice and the open Customise this test always kept now survive leaving that page
+ * and coming back, and the tabs are Home, Group and Stars.
+ */
 public class CompanionViewsTest
 {
 	@Test
-	public void overviewStaysShortAndSwitchingPreservesPartialSharing() throws Exception
+	public void homeStaysShortAndTheGroupTabCountsItsFriends() throws Exception
+	{
+		SwingUtilities.invokeAndWait(() ->
+		{
+			JPanel home = sized(30);
+			JPanel group = sized(400);
+			JPanel stars = sized(600);
+			List<Boolean> starsShown = new ArrayList<>();
+			CompanionViews views = new CompanionViews(home, group, stars, starsShown::add);
+			int quiet = views.getPreferredSize().height;
+			assertTrue("a hidden tab reserves no height", quiet < 100);
+			assertTrue(home.isVisible());
+			assertFalse(group.isVisible());
+
+			views.groupCount(3);
+			JToggleButton groupTab = (JToggleButton) named(views, "companionView.group");
+			assertEquals("Group · 3", groupTab.getText());
+			groupTab.doClick();
+			assertTrue(group.isVisible());
+			assertFalse(home.isVisible());
+			assertTrue(views.getPreferredSize().height > quiet);
+
+			((JToggleButton) named(views, "companionView.stars")).doClick();
+			assertEquals(Boolean.TRUE, starsShown.get(starsShown.size() - 1));
+			views.groupCount(0);
+			assertEquals("Group", groupTab.getText());
+
+			/* Before a group is joined there are no tabs, and Home is the page whichever was open. */
+			views.tabsShown(false);
+			assertFalse(named(views, "companionView.home").getParent().isVisible());
+			assertTrue(home.isVisible());
+			assertFalse(stars.isVisible());
+			assertEquals(Boolean.FALSE, starsShown.get(starsShown.size() - 1));
+			assertEquals(CompanionViews.View.HOME, views.selected());
+		});
+	}
+
+	@Test
+	public void settingsTakesThePageAndGivesItBackWithChoicesKept() throws Exception
 	{
 		SwingUtilities.invokeAndWait(() ->
 		{
@@ -50,25 +97,28 @@ public class CompanionViewsTest
 				String value = store.get(key);
 				if ("true".equals(value) || "false".equals(value)) config.set(key, Boolean.parseBoolean(value));
 			});
-			JPanel overview = new JPanel();
-			overview.setPreferredSize(new Dimension(205, 30));
+			JPanel daily = sized(30);
 			SharingControls sharing = new SharingControls(config, store);
-			CompanionViews views = new CompanionViews(overview, sharing);
-			int quietHeight = views.getPreferredSize().height;
-			assertTrue(overview.isVisible());
-			assertFalse(sharing.isVisible());
-			assertTrue(quietHeight < 100);
-			((JToggleButton) named(views, "companionView.sharing")).doClick();
-			assertFalse(overview.isVisible());
-			assertTrue(sharing.isVisible());
-			assertTrue(views.getPreferredSize().height > quietHeight);
+			SidebarPages pages = new SidebarPages(daily, sharing);
+			int quiet = pages.getPreferredSize().height;
+			assertTrue(daily.isVisible());
+			assertFalse(pages.settingsOpen());
+			assertTrue("the closed Settings page reserves no height", quiet < 100);
+
+			pages.open(true);
+			assertFalse(daily.isVisible());
+			assertTrue(pages.settingsOpen());
+			assertTrue(pages.getPreferredSize().height > quiet);
 			((JCheckBox) named(sharing, "sharePosition")).doClick();
-			((javax.swing.JButton) named(sharing, "customise.presence")).doClick();
-			((JToggleButton) named(views, "companionView.overview")).doClick();
-			assertEquals(quietHeight, views.getPreferredSize().height);
+			((JButton) named(sharing, "customise.presence")).doClick();
+
+			((JButton) named(pages, "settings.back")).doClick();
+			assertTrue(daily.isVisible());
+			assertEquals(quiet, pages.getPreferredSize().height);
 			sharing.refresh();
-			assertFalse("refresh cannot select another view", sharing.isVisible());
-			((JToggleButton) named(views, "companionView.sharing")).doClick();
+			assertFalse("refresh cannot open the page", pages.settingsOpen());
+
+			pages.open(true);
 			assertTrue(config.sharePosition());
 			assertFalse(config.shareActivity());
 			assertFalse(config.shareName());
@@ -76,6 +126,13 @@ public class CompanionViewsTest
 			assertEquals("indeterminate", ((JCheckBox) named(sharing, "shareGroup.presence")).getClientProperty("JButton.selectedState"));
 			assertNull(store.get(Pairing.KEY_SERVER_CONSENT));
 		});
+	}
+
+	private static JPanel sized(int height)
+	{
+		JPanel panel = new JPanel();
+		panel.setPreferredSize(new Dimension(205, height));
+		return panel;
 	}
 
 	private static Component named(Container parent, String name)

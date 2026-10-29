@@ -43,7 +43,7 @@ import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.components.IconTextField;
 
 /**
- * Search the map from the sidebar: a box at the top of Overview and up to eight places under it.
+ * Search the map from the sidebar: a box at the top of Home and up to eight places under it.
  *
  * <p>A pick asks for the way there ({@link RoutePress}) and the answer fills the destination's card
  * below, exactly as a destination the map sent does, so the list folds away as soon as one is

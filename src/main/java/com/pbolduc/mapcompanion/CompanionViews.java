@@ -29,6 +29,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.Insets;
+import java.util.function.Consumer;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -37,73 +38,68 @@ import javax.swing.JToggleButton;
 import net.runelite.client.ui.ColorScheme;
 
 /**
- * Daily facts and sharing settings use the same narrow column at different times.
- * Only the visible view contributes height: a CardLayout or ordinary tabbed pane would reserve
- * the tallest settings page's space even on a quiet Overview. Both views stay alive, so switching
- * changes neither a sharing choice nor an open Customise section.
+ * The sidebar's three tabs, in three words: Home, what you are doing now; Group, your friends and
+ * meetups, with how many there are in its name; Stars.
+ *
+ * <p>Settings is not a tab. It is set once, at the press after Connect, and then rarely, so it sits
+ * behind the gear on the status card ({@link SidebarPages}), as RuneLite's own plugins keep their
+ * configuration out of their panels. A tab of its own spent a third of the strip on it every day.
+ *
+ * <p>Only the visible view contributes height: a CardLayout or an ordinary tabbed pane would
+ * reserve the tallest view's space even on a quiet Home. Every view stays alive, so switching loses
+ * nothing typed or opened. Before a group is joined the strip is not drawn and Home is the page:
+ * Group and Stars both ask the map as a member, so before then they could only say "connect".
  */
 final class CompanionViews extends JPanel
 {
 	private static final long serialVersionUID = 1L;
-	private final JPanel overview;
-	private final JPanel sharing;
-	private final JPanel stars;
-	private final java.util.function.Consumer<Boolean> starsVisibility;
-	private final JToggleButton overviewTab = tab("Overview", "overview");
-	private final JToggleButton sharingTab = tab("Sharing", "sharing");
-	private final JToggleButton starsTab = tab("Stars", "stars");
 
-	CompanionViews(JPanel overview, JPanel sharing)
+	enum View
 	{
-		this(overview, sharing, null, on ->
-		{
-		});
+		HOME,
+		GROUP,
+		STARS
 	}
 
-	CompanionViews(JPanel overview, JPanel sharing, JPanel stars, java.util.function.Consumer<Boolean> starsVisibility)
+	private final JPanel home;
+	private final JPanel group;
+	private final JPanel stars;
+	private final Consumer<Boolean> starsVisibility;
+	private final JPanel tabs = new JPanel(new GridLayout(1, 3, 3, 0));
+	private final JToggleButton homeTab = tab("Home", "home");
+	private final JToggleButton groupTab = tab("Group", "group");
+	private final JToggleButton starsTab = tab("Stars", "stars");
+	private View selected = View.HOME;
+
+	CompanionViews(JPanel home, JPanel group, JPanel stars, Consumer<Boolean> starsVisibility)
 	{
-		this.overview = overview;
-		this.sharing = sharing;
+		this.home = home;
+		this.group = group;
 		this.stars = stars;
 		this.starsVisibility = starsVisibility;
 		setLayout(new BorderLayout());
 		setBackground(ColorScheme.DARK_GRAY_COLOR);
 		setAlignmentX(Component.LEFT_ALIGNMENT);
-		JPanel tabs = new JPanel(new GridLayout(1, stars == null ? 2 : 3, 3, 0));
 		tabs.setBackground(ColorScheme.DARK_GRAY_COLOR);
 		tabs.setBorder(BorderFactory.createEmptyBorder(0, 0, 8, 0));
 		ButtonGroup selection = new ButtonGroup();
-		selection.add(overviewTab);
-		selection.add(sharingTab);
-		tabs.add(overviewTab);
-		tabs.add(sharingTab);
-		if (stars != null)
+		for (JToggleButton tab : new JToggleButton[]{homeTab, groupTab, starsTab})
 		{
-			selection.add(starsTab);
-			tabs.add(starsTab);
+			selection.add(tab);
+			tabs.add(tab);
 		}
 		add(tabs, BorderLayout.NORTH);
 		JPanel content = new JPanel();
 		content.setBackground(ColorScheme.DARK_GRAY_COLOR);
 		content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
-		content.add(overview);
-		content.add(sharing);
-		if (stars != null) content.add(stars);
+		content.add(home);
+		content.add(group);
+		content.add(stars);
 		add(content, BorderLayout.CENTER);
-		overviewTab.addActionListener(e -> selectView(false));
-		sharingTab.addActionListener(e -> selectView(true));
-		starsTab.addActionListener(e -> {
-			overview.setVisible(false);
-			sharing.setVisible(false);
-			stars.setVisible(true);
-			overviewTab.setSelected(false);
-			sharingTab.setSelected(false);
-			starsTab.setSelected(true);
-			starsVisibility.accept(true);
-			revalidate();
-			repaint();
-		});
-		selectView(false);
+		homeTab.addActionListener(e -> select(View.HOME));
+		groupTab.addActionListener(e -> select(View.GROUP));
+		starsTab.addActionListener(e -> select(View.STARS));
+		select(View.HOME);
 	}
 
 	private static JToggleButton tab(String text, String id)
@@ -116,19 +112,50 @@ final class CompanionViews extends JPanel
 		return button;
 	}
 
-	private void selectView(boolean showSharing)
+	void select(View view)
 	{
-		overview.setVisible(!showSharing);
-		sharing.setVisible(showSharing);
-		overviewTab.setSelected(!showSharing);
-		sharingTab.setSelected(showSharing);
-		if (stars != null)
-		{
-			stars.setVisible(false);
-			starsTab.setSelected(false);
-			starsVisibility.accept(false);
-		}
+		selected = view;
+		home.setVisible(view == View.HOME);
+		group.setVisible(view == View.GROUP);
+		stars.setVisible(view == View.STARS);
+		homeTab.setSelected(view == View.HOME);
+		groupTab.setSelected(view == View.GROUP);
+		starsTab.setSelected(view == View.STARS);
+		starsVisibility.accept(view == View.STARS);
 		revalidate();
 		repaint();
+	}
+
+	View selected()
+	{
+		return selected;
+	}
+
+	/**
+	 * Draw the strip, or leave Home as the whole page. Taking the strip away goes back to Home, so
+	 * leaving a group from Stars does not leave the reader on a tab they can no longer reach.
+	 */
+	void tabsShown(boolean shown)
+	{
+		if (shown == tabs.isVisible())
+		{
+			return;
+		}
+		tabs.setVisible(shown);
+		if (!shown)
+		{
+			select(View.HOME);
+		}
+		revalidate();
+	}
+
+	/** "Group · 3", the friends the map lists; "Group" while it lists none. */
+	void groupCount(int friends)
+	{
+		String text = friends > 0 ? "Group · " + friends : "Group";
+		if (!text.equals(groupTab.getText()))
+		{
+			groupTab.setText(text);
+		}
 	}
 }

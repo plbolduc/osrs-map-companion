@@ -76,7 +76,7 @@ final class RouteClient
 	static final String NOT_FOUND = "The map has no way to plan to this place.";
 	static final String UNREACHABLE = "The map could not be reached.";
 	static final String FAILED = "The map could not plan a route just now.";
-	static final String REDIRECTS = "This map address redirects. Check Advanced → Map address.";
+	static final String REDIRECTS = "This map address redirects. Check Settings → Advanced → Map address.";
 	static final String UNREADABLE = "The map returned unreadable data.";
 
 	private final OkHttpClient http;

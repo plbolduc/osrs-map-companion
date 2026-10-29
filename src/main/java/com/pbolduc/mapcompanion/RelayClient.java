@@ -435,12 +435,12 @@ public class RelayClient
 		HttpUrl target = location == null ? null : requested.resolve(location);
 		if (target == null)
 		{
-			return "This map address redirects. Enter the address it points to under Advanced → Map address.";
+			return "This map address redirects. Enter the address it points to under Settings → Advanced → Map address.";
 		}
 		/* The origin only: the path is this plugin's own, and a full URL from a server is not ours to print. */
 		String origin = target.scheme() + "://" + target.host()
 			+ (target.port() == HttpUrl.defaultPort(target.scheme()) ? "" : ":" + target.port());
-		return "This map address redirects to " + origin + ". Enter that under Advanced → Map address.";
+		return "This map address redirects to " + origin + ". Enter that under Settings → Advanced → Map address.";
 	}
 
 	private void recordTransient(String message, long now)
