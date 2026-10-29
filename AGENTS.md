@@ -15,5 +15,7 @@ what, what may leave the machine, and how to commit.
   `NetworkDisclosureTest` checks the README against `SnapshotBuilder`. The README is published
   on RuneLite's site at the pinned commit, so it is written for players: how the requests work
   belongs in `docs/network.md`, and building in `CONTRIBUTING.md`.
+- **The history and the README are public.** Commits, pull requests and the README follow
+  CONTRIBUTING's *Commits*, *Pull requests* and *The README is the Plugin Hub page*.
 - **Ask before** pushing, opening a Plugin Hub pull request, or anything else that leaves this
   checkout.
