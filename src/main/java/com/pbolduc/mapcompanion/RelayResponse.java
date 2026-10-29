@@ -89,6 +89,77 @@ public class RelayResponse
 	{
 		public Destination destination;
 		public Event event;
+		/**
+		 * The other members of the group, one row each, worded on the map by the website's own rules:
+		 * {@code buildRoster}'s order, *near* a landmark, *Near you*, the newest news. Null from a map
+		 * that sends none, which is today's sidebar exactly; an empty list is a group of one. No tile
+		 * is in it — tiles stay in {@link MemberDot}, for members who share their position. Read
+		 * leniently by {@link SocialWire}, so a bad row costs that row and not the reply.
+		 */
+		@JsonAdapter(SocialWire.LenientRoster.class)
+		public List<RosterRow> roster;
+		/**
+		 * Every meetup within the week, soonest first, each with its roll-up. Null from a map that
+		 * sends none, which leaves {@link #event} — still sent beside it — as the only meetup shown.
+		 */
+		@JsonAdapter(SocialWire.LenientMeetups.class)
+		public List<Meetup> events;
+	}
+
+	/** One other member, as the website's Members list says them. */
+	public static class RosterRow
+	{
+		public String id;
+		public String name;
+		/** Their disc's colour, {@code #rrggbb}: the same person as their dot on the world map. */
+		public String colour;
+		/** {@code online}, {@code idle} or {@code offline}: drawn as a small dot, never printed. */
+		public String presence;
+		public Integer world;
+		/** Where they are in words, "near Lumbridge Castle", or absent for a member who shares no position. */
+		public String near;
+		/** Within a hundred tiles of you on your world; absent otherwise. */
+		public Boolean nearYou;
+		/** A position the map draws, not in a copy of a place, and fresh: the only kind Route may go to. */
+		public boolean routable;
+		/** Their newest level or drop while the group keeps its feed, worded by the feed's own titles. */
+		public News news;
+	}
+
+	public static class News
+	{
+		public String kind;
+		public String title;
+		public long atMs;
+		public String skill;
+	}
+
+	/** A meetup as the group's card lists it. */
+	public static class Meetup
+	{
+		/** The group's row id, which an answer names. */
+		public String id;
+		public String title;
+		public int x;
+		public int y;
+		public int plane;
+		public Integer world;
+		public long startsAtMs;
+		public String near;
+		/** The card's roll-up: going, on my way, maybe, can't, then arrived. */
+		public List<MeetupAnswer> who;
+		/** This member's own answer, as the browser it is bound to gave it; absent when none. */
+		public String mine;
+	}
+
+	public static class MeetupAnswer
+	{
+		public String name;
+		public String colour;
+		/** {@code going}, {@code maybe}, {@code no}, {@code on_my_way}, or {@code arrived}. */
+		public String answer;
+		/** The face that is the reader's own. */
+		public Boolean you;
 	}
 
 	/**

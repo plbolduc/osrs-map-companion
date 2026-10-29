@@ -29,6 +29,8 @@ import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.ConfigSection;
+import net.runelite.client.config.Range;
+import net.runelite.client.config.Units;
 
 /**
  * The plugin's settings and the player's choices about sharing.
@@ -570,8 +572,8 @@ public interface MapCompanionConfig extends Config
 		keyName = "notifyMeetups",
 		name = "Notify before a meetup",
 		description =
-			"Raise a RuneLite notification a couple of minutes before a meetup starts, so one does not "
-			+ "pass while the sidebar is closed.",
+			"Raise a RuneLite notification before each of your group's meetups starts, as many minutes "
+			+ "ahead as the setting below says, so one does not pass while the sidebar is closed.",
 		position = 31,
 		warning = NETWORK_WARNING,
 		section = clientSection
@@ -579,6 +581,23 @@ public interface MapCompanionConfig extends Config
 	default boolean notifyMeetups()
 	{
 		return false;
+	}
+
+	@Range(
+		min = 1,
+		max = 120
+	)
+	@Units(Units.MINUTES)
+	@ConfigItem(
+		keyName = "meetupReminderMinutes",
+		name = "Minutes before a meetup",
+		description = "How long before a meetup starts the notification above is raised.",
+		position = 32,
+		section = clientSection
+	)
+	default int meetupReminderMinutes()
+	{
+		return 5;
 	}
 
 	@ConfigItem(

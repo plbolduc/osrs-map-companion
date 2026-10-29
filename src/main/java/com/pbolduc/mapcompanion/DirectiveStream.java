@@ -138,6 +138,13 @@ public class DirectiveStream
 	/** True while a stream is actually delivering, which is what lets the heartbeat relax. */
 	@Getter
 	private volatile boolean connected = false;
+	/** A keep-alive proves unchanged positions are still the live stream's answer. */
+	private volatile long lastReadAtMs;
+
+	long lastReadAtMs()
+	{
+		return lastReadAtMs;
+	}
 
 	/**
 	 * Package-private rather than private, for the reason {@link RelayClient}'s is: a test can hand
@@ -235,6 +242,7 @@ public class DirectiveStream
 		generation++;
 		running.set(false);
 		connected = false;
+		lastReadAtMs = 0L;
 		activeKey = null;
 		Future<?> pending = reconnectTask;
 		reconnectTask = null;
@@ -378,6 +386,14 @@ public class DirectiveStream
 		{
 			/* A frame is one group's dots; a line this long is a server that never sent a newline. */
 			String line = source.readUtf8LineStrict(MAX_LINE_BYTES);
+			synchronized (this)
+			{
+				if (!isCurrent(streamGeneration))
+				{
+					return;
+				}
+				lastReadAtMs = System.currentTimeMillis();
+			}
 			if (!heard)
 			{
 				/*

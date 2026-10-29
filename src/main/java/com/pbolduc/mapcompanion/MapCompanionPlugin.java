@@ -152,12 +152,6 @@ public class MapCompanionPlugin extends Plugin
 	private static final Set<String> CONNECTION_KEYS = Collections.unmodifiableSet(new HashSet<>(
 			Arrays.asList(MapCompanionConfig.KEY_PAIRING_CODE, MapCompanionConfig.KEY_RELAY_URL)));
 
-	/** How long before a meetup to raise a notification, and how long after to stop bothering. */
-	private static final long MEETUP_NOTICE_MS = 2 * 60_000L;
-
-	/** Notices for a meetup that keeps changing are spaced by at least this. */
-	private static final long MEETUP_NOTICE_SPACING_MS = 60_000L;
-	private long meetupNoticeAtMs;
 
 	/**
 	 * "You pick the guard's pocket." — the line that means the loot about to arrive is not a kill.
@@ -241,6 +235,13 @@ public class MapCompanionPlugin extends Plugin
 	@Inject
 	private ShortestPath shortestPath;
 
+	/** Whose dot the player asked to see, and a Route to a friend waiting for their position. */
+	@Inject
+	private GroupState groupState;
+
+	@Inject
+	private RoutePress routePress;
+
 	@Inject
 	private OverlayManager overlayManager;
 
@@ -298,8 +299,8 @@ public class MapCompanionPlugin extends Plugin
 	 */
 	private String lastSentFingerprint = null;
 
-	/** The meetup already announced, so one notification is one notification. */
-	private String notifiedEventKey = null;
+	/** The meetups already announced, so one notification is one notification. Game tick only. */
+	final MeetupReminder meetupReminder = new MeetupReminder();
 
 	/**
 	 * Set by the map's reply the first time it accepts this installation's RuneLite code.
@@ -482,7 +483,7 @@ public class MapCompanionPlugin extends Plugin
 		questReader.onSessionEnded();
 		assignmentReader.onSessionEnded();
 		lastPosition = null;
-		notifiedEventKey = null;
+		meetupReminder.clear();
 		pickpocketTick = -1;
 		lastProfile = null;
 		lastSentFingerprint = null;
@@ -1003,26 +1004,41 @@ public class MapCompanionPlugin extends Plugin
 		 * re-established without any other machinery.
 		 */
 		boolean showGroup = config.showGroupOnWorldMap();
-		if (config.showDestination() || showGroup)
+		/*
+		 * A friend the player chose to show, or is routing to, needs their dot, and dots come only on
+		 * a stream that asks for them; that is the whole of what this adds to the stream.
+		 */
+		boolean friends = groupState.wantsPositions(now);
+		boolean positions = showGroup || friends;
+		if (config.showDestination() || positions)
 		{
 			directiveStream.start(
 				server,
 				code,
 				memberId,
 				pairing.secret(server, code, memberId),
-				showGroup,
+				positions,
 				directive ->
 			{
 				/** Each half only while its own setting is on; the stream may be open for the other. */
+				destinationState.acceptSocial(directive, config.showDestination());
 				if (config.showDestination())
 				{
 					destinationState.accept(directive);
 					destinationMarker.sync();
 				}
+				long at = System.currentTimeMillis();
+				groupState.dots(directive.members, at);
 				if (config.showGroupOnWorldMap())
 				{
 					groupMarkers.show(directive.members);
 				}
+				else if (directive.members != null)
+				{
+					/* Only the friends asked for, while the group layer is off. */
+					groupMarkers.show(groupState.shownDots(directive.members));
+				}
+				routeToArrivedFriend(directive.members, at);
 			});
 		}
 		else
@@ -1030,7 +1046,7 @@ public class MapCompanionPlugin extends Plugin
 			/** Turned off mid-session: close the connection rather than leaving it listening. */
 			stopStream();
 		}
-		if (!showGroup || !directiveStream.isConnected())
+		if (!positions || !directiveStream.isConnected())
 		{
 			/**
 			 * Nobody is drawn from a connection that is not delivering. The next frame of a stream
@@ -1038,6 +1054,7 @@ public class MapCompanionPlugin extends Plugin
 			 */
 			groupMarkers.clear();
 		}
+		groupState.stream(positions && directiveStream.isConnected(), directiveStream.lastReadAtMs());
 
 		destinationMarker.sync();
 
@@ -1101,6 +1118,7 @@ public class MapCompanionPlugin extends Plugin
 			}
 			noteIssuedSecret(server, code, postedAs, response.memberSecret);
 			noteGroupName(server, code, response.groupName);
+			destinationState.acceptSocial(response.directive, config.showDestination());
 			if (config.showDestination())
 			{
 				destinationState.accept(response.directive);
@@ -1140,7 +1158,7 @@ public class MapCompanionPlugin extends Plugin
 		destinationState.clear();
 		destinationMarker.remove();
 		groupMarkers.clear();
-		notifiedEventKey = null;
+		meetupReminder.clear();
 		suffixClaimed = false;
 		dirty = true;
 	}
@@ -1152,6 +1170,7 @@ public class MapCompanionPlugin extends Plugin
 	private void stopStream()
 	{
 		directiveStream.stop();
+		groupState.stream(false, 0L);
 		groupMarkers.clear();
 	}
 
@@ -1456,48 +1475,32 @@ public class MapCompanionPlugin extends Plugin
 	}
 
 	/**
-	 * Say something once when a meetup is about to start.
-	 *
-	 * <p>A countdown that only exists in the sidebar is a countdown you miss, because the sidebar is
-	 * shut and the game is on the other screen. This is the one moment the plugin is allowed to
-	 * interrupt, it uses RuneLite's own notifier to do it, and it still does not act: a notification
-	 * is a sentence, and walking there remains the player's own business.
+	 * Say once when a meetup is about to start, through RuneLite's own notifier, and only with
+	 * <i>Notify before a meetup</i> on. {@link MeetupReminder} holds the rule.
 	 */
 	private void maybeNotifyMeetup(long now)
 	{
-		RelayResponse.Event event = destinationState.getEvent();
-		if (event == null)
+		List<String> due = meetupReminder.due(
+			MeetupReminder.of(destinationState.getEvents(), destinationState.getEvent()), now,
+			config.notifyMeetups(), config.meetupReminderMinutes());
+		for (String line : due)
 		{
-			notifiedEventKey = null;
-			return;
+			notifier.notify(line);
 		}
-		if (!config.notifyMeetups())
-		{
-			return;
-		}
+	}
 
-		String key = event.startsAtMs + "|" + event.title;
-		if (key.equals(notifiedEventKey))
+	/**
+	 * A Route to a friend that was waiting for their position, now that a frame brought positions.
+	 * Once, to where they stand in it; never into an instance. OkHttp's thread; the press hands
+	 * itself to the client thread.
+	 */
+	private void routeToArrivedFriend(@Nullable List<RelayResponse.MemberDot> members, long now)
+	{
+		RelayResponse.MemberDot dot = groupState.arrived(members, now);
+		if (dot != null && !dot.instance)
 		{
-			return;
+			routePress.press(GroupState.routeTarget(dot, destinationState.getRoster()));
 		}
-		long until = event.startsAtMs - now;
-		/** Only around the start: an hour early is not a reminder, and long past is not news. */
-		if (until > MEETUP_NOTICE_MS || until < -MEETUP_NOTICE_MS)
-		{
-			return;
-		}
-
-		if (now - meetupNoticeAtMs < MEETUP_NOTICE_SPACING_MS)
-		{
-			/* Any member can edit the meetup; editing it every tick must not ring every tick. */
-			return;
-		}
-		notifiedEventKey = key;
-		meetupNoticeAtMs = now;
-		long minutes = Math.max(0L, Math.round(until / 60_000.0));
-		notifier.notify("Meetup: " + safeTitle(event.title)
-						+ (minutes <= 0 ? " is starting" : " starts in " + minutes + "m"));
 	}
 
 	/**

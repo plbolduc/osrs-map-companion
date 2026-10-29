@@ -53,6 +53,24 @@ approximate offers **Open on map** instead, which opens the map's search for the
 your browser and sends this client nothing. The clue is now read whether or not *Share clue* is on,
 so the sidebar has it to offer; the snapshot still carries it only with that choice.
 
+**The Group section** is read from what the map already sends: `roster`, one row per other member
+with their name, colour, presence, *near*, *Near you* and newest news, arrives on every snapshot
+reply and stream frame and is shown whatever the destination setting; `events`, the week's meetups
+with their answers, is shown only with **Show destinations from the map**, as the single `event`
+always was. A map that sends neither leaves the sidebar as it was. Neither carries a tile.
+**Show on map** beside a friend, or **Route** to a friend whose position this client has not been
+sent, opens the receive stream with `members=1`, the same question *Show my group on the world map*
+asks, and draws only that friend; it sends nothing of yours. A Route to a friend goes once to the
+tile in their dot, under Reroute's rules, and never into an instance.
+
+The meetup answers are `PUT /api/companion/event/answer` with the meetup's id and one of `going`,
+`maybe`, `no` and `on_my_way`; **Meet here** is `PUT /api/companion/event` with a title, the start
+time, the tile you stand on and your world, and copies the link the map answers with after checking
+it is a path on the map address. Both carry the group code, member id and member secret, one at a
+time, and none before a `Retry-After` has passed. Neither is ever sent without a press.
+**Notify before a meetup** (off) raises one RuneLite notification per meetup, the chosen number of
+minutes before it starts; it reads only what the map already sent.
+
 **Draw paths with Shortest Path** (on) talks to the Shortest Path plugin, if it is installed,
 with RuneLite's plugin messages, which stay inside this client. While a route is shown it asks
 `getTarget` every few seconds, which only reads what Shortest Path is drawing. On a route you chose

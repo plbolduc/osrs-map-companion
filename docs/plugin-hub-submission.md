@@ -56,8 +56,8 @@ Joining with sharing off still sends a random member id, alias, timestamp and co
 ### Network requests
 
 All paths use **Map address** (`https://osrs-map.com` by default); clipboard contents cannot change it.
-Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RouteClient`, `RoutePress` and `SearchClient`
-construct HTTP requests:
+Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RouteClient`, `RoutePress`, `SearchClient` and
+`MeetupClient` construct HTTP requests:
 
 - **POST /api/companion/snapshot** — logged-in state changes, at least two seconds apart, plus
   six-second idle heartbeats (twenty seconds with a stream). JSON comes from `SnapshotBuilder`;
@@ -68,8 +68,9 @@ construct HTTP requests:
   headers; random member id in JSON. A failure copies a plain-text invite message.
 - **GET /api/companion/stream** — SSE while destinations or group markers are enabled and logged in.
   Group code and member id are the `code` and `for` query parameters; the member secret is a
-  header. `members=1` is added only for group markers. Receives destinations, meetups and the
-  requested members; never initiates gameplay.
+  header. `members=1` is added only for group markers, or for a friend the player pressed **Show on
+  map** or **Route** beside. Receives destinations, meetups, the group's roster and the requested
+  members; never initiates gameplay.
 - **GET /api/companion/stars** — while Stars is open, logged in and connected; normally once a
   minute, respecting a longer feed interval. No character/group credentials.
 - **GET /api/companion/star-preferences** and **PUT** to the same path — only with Stars open and
@@ -86,13 +87,19 @@ construct HTTP requests:
   and for **Route** beside the carried clue, the last death, a star and a meetup, with that tile as
   the target. A clue or death tile that is not shared leaves only in that request. Same
   one-at-a-time rule and wait; the answer becomes the destination. Nothing is walked.
+- **PUT /api/companion/event/answer** — one press of a meetup's answer (**Going**, **Maybe**,
+  **Can't**, **On my way**, **Say on my way**). JSON is the meetup's id and the answer. Headers:
+  `X-Companion-Code`, `X-Companion-Member`, `X-Companion-Member-Secret`.
+- **PUT /api/companion/event** — one **Meet here** press. JSON is a title, a start time, the player's
+  tile and world; the same headers. The path the map answers with is checked and copied to the
+  clipboard. One meetup write at a time, and none before `Retry-After` has passed.
 - **GET /api/companion/search** — the sidebar's search box, while connected: about 350ms after the
   last key or on Enter, two to sixty-four characters, one in flight, and nothing before a
   `Retry-After` has passed. Same three headers; the query is the `q` parameter and is never logged.
 
 Requests carry the versioned User-Agent. The address must be https (plain http only on loopback),
 redirects are not followed, and reply bodies are capped at 1 MB. Snapshot and stream failures back
-off; the Stars, Reroute, route-press and search clients also honour Retry-After. Nothing requests the upstream star feed directly.
+off; the Stars, Reroute, route-press, search and meetup clients also honour Retry-After. Nothing requests the upstream star feed directly.
 The README's [What you share](../README.md#what-you-share) names every transmitted category, and
 [Network and storage](network.md) covers credentials and storage.
 

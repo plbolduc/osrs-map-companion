@@ -105,6 +105,44 @@ public class WireContractTest
 	}
 
 	/**
+	 * The group's friends and meetups, in the shape the map describes in {@code lib/contract/social.json}:
+	 * the fixtures carry that description as it stands, on the reply and on the stream alike, and
+	 * this holds the plugin to reading every leaf of it as what it is.
+	 */
+	@Test
+	public void theFixturesCarryTheMapsFriendsAndMeetups() throws IOException
+	{
+		for (Path fixture : new Path[]{REPLY, STREAM})
+		{
+			String committed = new String(Files.readAllBytes(fixture), StandardCharsets.UTF_8);
+			RelayResponse.Directive directive = fixture == REPLY
+				? new Gson().fromJson(committed, RelayResponse.class).directive
+				: new Gson().fromJson(committed, RelayResponse.StreamDirective.class);
+			assertEquals(3, directive.roster.size());
+			RelayResponse.RosterRow cara = directive.roster.get(0);
+			assertEquals("cara", cara.id);
+			assertEquals("#f472b6", cara.colour);
+			assertEquals("online", cara.presence);
+			assertEquals("near Lumbridge Castle", cara.near);
+			assertEquals(Boolean.TRUE, cara.nearYou);
+			assertTrue(cara.routable);
+			assertEquals("Woodcutting 80", cara.news.title);
+			assertEquals("Abyssal whip", directive.roster.get(1).news.title);
+			assertEquals("a friend who shares no position has no world and no landmark", null, directive.roster.get(2).near);
+
+			assertEquals(1, directive.events.size());
+			RelayResponse.Meetup hunt = directive.events.get(0);
+			assertEquals("star-hunt", hunt.id);
+			assertEquals(Integer.valueOf(302), hunt.world);
+			assertEquals(1800003600000L, hunt.startsAtMs);
+			assertEquals("maybe", hunt.mine);
+			assertEquals(4, hunt.who.size());
+			assertEquals("arrived", hunt.who.get(3).answer);
+			assertEquals(Boolean.TRUE, hunt.who.get(1).you);
+		}
+	}
+
+	/**
 	 * A destination's route, in the shape the map describes in {@code lib/contract/destination-route.json}.
 	 *
 	 * <p>The fixture carries that description as it stands, and the map's contract test holds the two
