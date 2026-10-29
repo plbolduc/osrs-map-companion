@@ -34,14 +34,15 @@ import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import javax.swing.Icon;
 import net.runelite.client.ui.ColorScheme;
 
 /**
- * The sidebar's own small marks — the gear that opens Settings and the arrow that leaves it —
- * drawn rather than loaded.
+ * The sidebar's own small marks — the gear that opens Settings, the arrow that leaves it, the
+ * search box's magnifier and the minimap's character dot — drawn rather than loaded.
  *
  * <p>Drawn for the reason the destination's dot and the friends' discs are: a bundled picture is
  * one more file for a reviewer to account for, and RuneLite's own config icons belong to the
@@ -91,6 +92,55 @@ final class SidebarIcons
 				chevron.lineTo(10.5, 13.5);
 				g.setStroke(new BasicStroke(2.2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 				g.draw(chevron);
+			}
+		};
+	}
+
+	/** A magnifier, for a search box drawn as a plain field so it can say what it searches. */
+	static Icon magnifier()
+	{
+		return new Mark()
+		{
+			@Override
+			void draw(Graphics2D g)
+			{
+				g.setStroke(new BasicStroke(1.8f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+				g.draw(new Ellipse2D.Double(2.5, 2.5, 8, 8));
+				g.draw(new Line2D.Double(9.5, 9.5, 13.5, 13.5));
+			}
+		};
+	}
+
+	/**
+	 * The minimap's yellow dot, which is how the game marks a character, for a search row about one.
+	 * The game has no sprite for it to load: the client draws the dot itself.
+	 */
+	static Icon characterDot()
+	{
+		return new Icon()
+		{
+			@Override
+			public void paintIcon(Component c, Graphics g, int x, int y)
+			{
+				Graphics2D g2 = (Graphics2D) g.create();
+				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+				g2.setColor(Color.BLACK);
+				g2.fillOval(x + 3, y + 3, 10, 10);
+				g2.setColor(new Color(0xFF, 0xFF, 0x00));
+				g2.fillOval(x + 4, y + 4, 8, 8);
+				g2.dispose();
+			}
+
+			@Override
+			public int getIconWidth()
+			{
+				return SIZE;
+			}
+
+			@Override
+			public int getIconHeight()
+			{
+				return SIZE;
 			}
 		};
 	}

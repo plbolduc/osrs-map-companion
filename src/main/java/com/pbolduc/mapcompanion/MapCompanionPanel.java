@@ -329,7 +329,8 @@ public class MapCompanionPanel extends PluginPanel
 		RoutePress routePress,
 		ClueReader clueReader,
 		GroupState groupState,
-		MeetupClient meetupClient)
+		MeetupClient meetupClient,
+		GameSprites sprites)
 	{
 		this.config = config;
 		this.plugin = plugin;
@@ -349,7 +350,7 @@ public class MapCompanionPanel extends PluginPanel
 		this.shortestPath = shortestPath;
 		this.routePress = routePress;
 		this.clueReader = clueReader;
-		this.searchPanel = new SearchPanel(searchClient, routePress);
+		this.searchPanel = new SearchPanel(searchClient, routePress, sprites);
 		this.groupPanel = new GroupPanel(destinationState, groupState, routePress, meetupClient, config);
 		this.routeSteps = new RouteStepsView(way ->
 		{

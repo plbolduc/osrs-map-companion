@@ -110,10 +110,15 @@ final class SearchClient
 	static final class Item
 	{
 		String id;
+		/** The game's id for the item, where the map's tables name one; it picks the sprite and nothing else. */
+		Integer itemId;
 		String name;
 		int droppedBy;
 		int soldAt;
 	}
+
+	/** The heading item rows sit under, so they are never read as one more shop or monster above them. */
+	static final String ITEMS = "Items";
 
 	/** One thing the list shows: a place, or an item routed to its nearest source. */
 	static final class Hit
@@ -122,20 +127,34 @@ final class SearchClient
 		final String name;
 		/** The grey line under the name, in the website's words. */
 		final String line;
-		/** "Sold at" or "Dropped by" for an item's sources; null for the ordinary rows. */
+		/** "Sold at", "Dropped by" or {@link #ITEMS}; null for the ordinary rows. */
 		@Nullable
 		final String section;
 		/** Where the row stood, kept for a destination the map names no tile for. Null for an item. */
 		@Nullable
 		final int[] tile;
+		/** The map's kind for a place — {@code bank}, {@code monster} — which picks its icon; null for an item. */
+		@Nullable
+		final String kind;
+		/** An item's game id, for its sprite; null for a place, or an item the map names no id for. */
+		@Nullable
+		final Integer itemId;
 
 		Hit(String id, String name, String line, @Nullable String section, @Nullable int[] tile)
+		{
+			this(id, name, line, section, tile, null, null);
+		}
+
+		Hit(String id, String name, String line, @Nullable String section, @Nullable int[] tile,
+			@Nullable String kind, @Nullable Integer itemId)
 		{
 			this.id = id;
 			this.name = name;
 			this.line = line;
 			this.section = section;
 			this.tile = tile;
+			this.kind = kind;
+			this.itemId = itemId;
 		}
 	}
 
@@ -482,7 +501,8 @@ final class SearchClient
 				int plane = row.plane == null ? 0 : row.plane;
 				boolean onMap = row.x > 0 && row.y > 0 && row.x <= 16_383 && row.y <= 16_383 && plane >= 0 && plane <= 3;
 				String section = "Places".equals(row.section) ? null : RouteWire.text(row.section, 20);
-				hits.add(new Hit(id, name, rowLine(row), section, onMap ? new int[]{row.x, row.y, plane} : null));
+				String kind = RouteWire.text(row.kind, 20);
+				hits.add(new Hit(id, name, rowLine(row), section, onMap ? new int[]{row.x, row.y, plane} : null, kind, null));
 			}
 		}
 		if (answer.items != null)
@@ -497,7 +517,8 @@ final class SearchClient
 					continue;
 				}
 				items++;
-				hits.add(new Hit(id, name, itemLine(item), null, null));
+				Integer itemId = item.itemId != null && item.itemId > 0 ? item.itemId : null;
+				hits.add(new Hit(id, name, itemLine(item), ITEMS, null, null, itemId));
 			}
 		}
 		return hits;
@@ -519,19 +540,22 @@ final class SearchClient
 		return sb.toString();
 	}
 
-	/** "Item · dropped by 3 · sold at 1": a name a partial query could mean, routed to its nearest source. */
+	/**
+	 * "Dropped by 3 · sold at 1": what picking a name a partial query could mean would answer. It no
+	 * longer starts "Item ·", because the row sits under the Items heading that says so.
+	 */
 	static String itemLine(Item item)
 	{
-		StringBuilder sb = new StringBuilder("Item");
+		StringBuilder sb = new StringBuilder();
 		if (item.droppedBy > 0)
 		{
-			sb.append(" · dropped by ").append(item.droppedBy);
+			sb.append("dropped by ").append(item.droppedBy);
 		}
 		if (item.soldAt > 0)
 		{
-			sb.append(" · sold at ").append(item.soldAt);
+			sb.append(sb.length() > 0 ? " · " : "").append("sold at ").append(item.soldAt);
 		}
-		return sb.toString();
+		return sb.length() == 0 ? "" : Character.toUpperCase(sb.charAt(0)) + sb.substring(1);
 	}
 
 	/** An id the route endpoint would accept: non-empty, short, and no control bytes. */
