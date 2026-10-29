@@ -44,8 +44,9 @@ import net.runelite.api.Client;
  * at all, which the map renders as "can't map this task yet". Between a wrong answer and an honest
  * gap, this feature always takes the gap.
  *
- * <p>The varbit and varplayer ids come from {@code runelite-api}'s generated constants rather than
- * being written here as numbers, so they move with the client rather than with this repository.
+ * <p>The varbit and varplayer ids are literals in {@link VarbitIds} and {@link VarPlayerIds}, each
+ * asserted against {@code runelite-api}'s generated constant by {@code VarbitIdsTest}; the database
+ * tables and columns {@link SlayerTaskNames} reads are the client's constants themselves.
  */
 @Singleton
 public class SlayerTaskReader
