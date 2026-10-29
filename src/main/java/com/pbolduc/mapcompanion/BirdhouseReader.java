@@ -45,7 +45,7 @@ public class BirdhouseReader
 	private final java.util.function.Function<String, String> stored;
 	private final SessionSettle settle = new SessionSettle(15_000L);
 	private static final String[] IDS = {"meadow-north", "meadow-south", "valley-north", "valley-south"};
-	private static final int[] VARPS = {1626, 1627, 1628, 1629};
+	static final int[] VARPS = {1626, 1627, 1628, 1629};
 
 	@Inject
 	BirdhouseReader(ConfigManager config)

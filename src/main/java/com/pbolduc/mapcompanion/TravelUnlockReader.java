@@ -57,7 +57,7 @@ public class TravelUnlockReader
 		"rowboat-vatrachos-island", "rowboat-anglers-retreat", "rowboat-tear-of-the-soul",
 		"rowboat-ynysdail", "rowboat-buccaneers-haven", "necropolis-obelisk"
 	};
-	private static final int[] BITS = {
+	static final int[] BITS = {
 		2869, 2870, 2871, 2872, 11175, 11176, 11177, 11178, 19540, 19541, 19543,
 		18351, 18355, 18356, 18370, 18371, 13839
 	};
@@ -66,6 +66,13 @@ public class TravelUnlockReader
 		"quetzal-colossal-wyrm-remains", "quetzal-cam-torum", "quetzal-salvager-overlook"
 	};
 	private static final int[] MASKS = {256, 16384, 128, 64, 32, 2048};
+	/** The quetzal landings unlocked, one bit per landing in {@code MASKS}. */
+	static final int QUETZALS_UNLOCKED_VARP = 4182;
+	/** Hero is rank 9 or higher. The client's gameval names this {@code COLOSSEUM_HIGHEST_WAVE}. */
+	static final int COLOSSEUM_GLORY_VARBIT = 11410;
+	/** Barbarian Assault's tutorial, finished at 11; gameval's {@code BARBASSAULT_ARENANEWB}. */
+	static final int BA_TUTORIAL_VARBIT = 3264;
+	static final int HOUSE_LOCATION_VARBIT = 2187;
 
 	@Inject
 	TravelUnlockReader(Client client)
@@ -102,7 +109,7 @@ public class TravelUnlockReader
 		int quetzals;
 		try
 		{
-			quetzals = client.getVarpValue(4182); // QUETZALS_UNLOCKED
+			quetzals = client.getVarpValue(QUETZALS_UNLOCKED_VARP);
 		}
 		catch (RuntimeException ex)
 		{
@@ -115,12 +122,12 @@ public class TravelUnlockReader
 				out.put(QUETZALS[i], (quetzals & MASKS[i]) != 0);
 			}
 		}
-		int hero = bit(11410); // COLOSSEUM_GLORY_RANK, Hero is rank 9 or higher.
+		int hero = bit(COLOSSEUM_GLORY_VARBIT);
 		if (hero >= 0)
 		{
 			out.put("colosseum-hero-title", hero > 8);
 		}
-		int tutorial = bit(3264); // BA_TUTORIAL, finished at 11.
+		int tutorial = bit(BA_TUTORIAL_VARBIT);
 		if (tutorial >= 0 && tutorial <= 11)
 		{
 			out.put("barbarian-assault-tutorial", tutorial == 11);
@@ -131,7 +138,7 @@ public class TravelUnlockReader
 	@Nullable
 	public String house(long nowMs)
 	{
-		return settle.settled(nowMs) ? houseFrom(bit(2187)) : null;
+		return settle.settled(nowMs) ? houseFrom(bit(HOUSE_LOCATION_VARBIT)) : null;
 	}
 
 	@Nullable

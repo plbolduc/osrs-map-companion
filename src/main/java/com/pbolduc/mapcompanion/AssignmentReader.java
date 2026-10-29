@@ -66,7 +66,7 @@ public class AssignmentReader
 	private static final List<String> RUMOURS = names("assignment-rumours.txt");
 	private static final List<String> HOMES = names("assignment-homes.txt");
 	private static final String[] HUNTERS = {"Wolf", "Teco", "Aco", "Cervus", "Ornus", "Gilman"};
-	private static final int[] HUNTER_IDS = {13126, 13125, 13124, 13123, 13122, 13121};
+	static final int[] HUNTER_IDS = {13126, 13125, 13124, 13123, 13122, 13121};
 	private static final Pattern HOME_ASSIGNED = Pattern.compile("(\\w+) Contract: Go see (\\w+)[ ,][\\w\\s,-]*\\.");
 	private static final Pattern HOME_DIALOG = Pattern.compile("(?:Please could you g|G)o see (\\w+)[ ,][\\w\\s,-]*[?.] You can get another job once you have furnished \\w* home\\.");
 	private static final Pattern HOME_REMINDER = Pattern.compile("You're currently on an? (\\w+) Contract\\. Go see (\\w+)[ ,][\\w\\s,-]*\\. You can get another job once you have furnished \\w* home\\.");
