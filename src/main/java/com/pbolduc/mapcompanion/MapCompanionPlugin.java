@@ -235,6 +235,9 @@ public class MapCompanionPlugin extends Plugin
 	DestinationArrow destinationArrow;
 
 	@Inject
+	private DestinationRoute destinationRoute;
+
+	@Inject
 	private OverlayManager overlayManager;
 
 	@Inject
@@ -460,6 +463,7 @@ public class MapCompanionPlugin extends Plugin
 		stopStream();
 		/* Cleared before the pins go, so a stream frame's queued sync cannot redraw one. */
 		destinationState.clear();
+		destinationRoute.clear();
 		destinationMarker.remove();
 		destinationArrow.clear();
 		xpTracker.reset();
@@ -901,7 +905,15 @@ public class MapCompanionPlugin extends Plugin
 
 		trackMovement(now);
 		observeGameState(now);
-		/** Before the pairing checks: a destination pinned from the Stars tab needs no group. */
+		/**
+		 * Before the pairing checks: a destination pinned from the Stars tab needs no group, and a
+		 * route already received is followed whether or not the next post can be made.
+		 */
+		destinationRoute.sync(DestinationSceneOverlay.shown(config, destinationState));
+		if (destinationRoute.hasRoute())
+		{
+			destinationRoute.advance(DestinationRoute.standing(client));
+		}
 		destinationArrow.sync();
 		/*
 		 * The task counter, so a kill can be matched to the counter it moved — see TaskKills — and the

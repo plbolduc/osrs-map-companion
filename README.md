@@ -84,6 +84,10 @@ Each choice in the **Sharing** tab starts off, and each can send:
   the tile where you most recently died and its age. Unknown reward details remain absent.
   Large snapshots include a flag saying some of it was left out.
 
+**Reroute**, under the steps of a destination the map sent, sends the tile you are standing on,
+once per press and whatever you share, so the map can plan the way from there. The map plans with
+it and does not keep it.
+
 Your chat, other players, your bank and inventory, your existing collection log slots, a complete
 loot history and anything derived from your account's identifiers are never sent. **Advanced →
 Show what's sent** shows what would go out right now. The server's operator and your group's
