@@ -49,6 +49,7 @@ import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import net.runelite.api.gameval.SpriteID;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
@@ -68,6 +69,8 @@ final class StarsPanel extends JPanel
 {
 	private static final long serialVersionUID = 1L;
 	private static final Color GOLD = new Color(237, 189, 100);
+	/** The world switcher's stars, at their own size. */
+	private static final int WORLD_STAR = 14;
 	private static final Color PICKED = new Color(68, 59, 43);
 	private static final Color EDGE = new Color(65, 65, 65);
 	private static final Color MUTED = new Color(160, 160, 160);
@@ -647,6 +650,19 @@ final class StarsPanel extends JPanel
 		button.setBorder(BorderFactory.createEmptyBorder(1, 0, 1, 0));
 		button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		return button;
+	}
+
+	/**
+	 * The game's own world-switcher stars on the P2P and F2P chips, as the website's chips carry them:
+	 * the gold star a members world shows and the silver one a free world shows. The words stay, so
+	 * a chip still says what it filters with no picture loaded.
+	 */
+	void pictures(GameSprites sprites)
+	{
+		members.setIconTextGap(3);
+		free.setIconTextGap(3);
+		sprites.sprite(members, SpriteID.WorldswitcherStars.MEMBERS, WORLD_STAR);
+		sprites.sprite(free, SpriteID.WorldswitcherStars.FREE, WORLD_STAR);
 	}
 
 	private static JToggleButton toggle(String text)
