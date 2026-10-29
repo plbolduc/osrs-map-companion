@@ -139,8 +139,20 @@ public class DestinationState
 		lastRemoteFingerprint = null;
 	}
 
+	/**
+	 * The place, without its route. The map ranks a route after the place is sent, so one
+	 * destination arrives first bare and then with steps; counted as two, the second would bring
+	 * back a destination the player dismissed and replace a star they had just pinned.
+	 */
 	private String fingerprint(RelayResponse.Destination dest)
 	{
-		return gson.toJson(dest);
+		RelayResponse.Destination place = new RelayResponse.Destination();
+		place.x = dest.x;
+		place.y = dest.y;
+		place.plane = dest.plane;
+		place.name = dest.name;
+		place.world = dest.world;
+		place.note = dest.note;
+		return gson.toJson(place);
 	}
 }

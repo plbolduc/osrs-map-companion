@@ -57,7 +57,8 @@ import org.junit.Test;
  * here into the real {@link RelayResponse}. The map's {@code lib/plugin-contract.test.ts} reads
  * the same two files from this repository: it runs the snapshot through its normalizer and
  * asserts nothing is dropped, and it asserts its own reply carries every key the reply fixture
- * does. That replaces the map reading these {@code .java} files with regular expressions, which
+ * does, and that a destination's {@code route} is the one it describes. That replaces the map
+ * reading these {@code .java} files with regular expressions, which
  * broke on formatting and could not see a field it did not already know to look for.
  *
  * <p>Both checks here are about completeness, because an incomplete fixture proves nothing: a
@@ -101,6 +102,41 @@ public class WireContractTest
 		assertTrue(reply.claimed);
 		assertEquals("Sunday hunt", reply.groupName);
 		assertEquals(Integer.valueOf(302), reply.directive.destination.world);
+	}
+
+	/**
+	 * A destination's route, in the shape the map describes in {@code lib/contract/destination-route.json}.
+	 *
+	 * <p>The fixture carries that description as it stands, and the map's contract test holds the two
+	 * to each other leaf for leaf; this holds the plugin to reading every leaf of it as what it is —
+	 * the walk that has no floor reads as no floor, not as one, and the unpriced way as unpriced.
+	 */
+	@Test
+	public void theReplyFixtureCarriesTheMapsRoute() throws IOException
+	{
+		String committed = new String(Files.readAllBytes(REPLY), StandardCharsets.UTF_8);
+		RelayResponse.Route route = new Gson().fromJson(committed, RelayResponse.class).directive.destination.route;
+		assertEquals("shared", route.origin);
+		assertEquals(2, route.options.size());
+		RelayResponse.RouteOption best = route.options.get(0);
+		assertTrue(best.best);
+		assertEquals(Integer.valueOf(52), best.tiles);
+		assertEquals("method", best.steps.get(0).slot);
+		assertEquals("Standard spellbook", best.steps.get(0).detail);
+		assertEquals(Arrays.asList("Ten seconds to cast, and a combat hit stops it"), best.steps.get(0).notes);
+		assertTrue("a teleport is not a walk", !best.steps.get(0).walk);
+		assertTrue(best.steps.get(1).walk);
+		assertEquals(Integer.valueOf(2), best.steps.get(1).at.plane);
+		RelayResponse.RouteOption walk = route.options.get(1);
+		assertTrue(!walk.best);
+		assertEquals(null, walk.tiles);
+		assertEquals(null, walk.steps.get(0).at.plane);
+		assertEquals(3208, walk.steps.get(0).at.x);
+
+		String streamed = new String(Files.readAllBytes(STREAM), StandardCharsets.UTF_8);
+		RelayResponse.StreamDirective frame = new Gson().fromJson(streamed, RelayResponse.StreamDirective.class);
+		assertEquals("the stream carries the same route the reply does",
+					 new Gson().toJson(route), new Gson().toJson(frame.destination.route));
 	}
 
 	@Test
