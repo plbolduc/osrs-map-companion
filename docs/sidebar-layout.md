@@ -513,3 +513,8 @@ They were three loose rows under the meetups: *Meet here…*, *Copy invite*, and
 group*. *Meet here…* is now a link on the *Meetups* heading, which is drawn with or without a meetup
 under it; *Copy invite* sits beside *Switch ▾*, which is always there; and *Join another group…* is
 the menu's last row, under a rule, reading *Hide the code field* while the field is open.
+
+### A meetup's Route
+
+A meetup was three rows of buttons: Route, then the four answers two by two. Route now sits beside
+the title, and the four answers keep their grid. A meetup card is 146px where it was 186.
