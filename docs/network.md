@@ -26,6 +26,14 @@ filters with website** starts on for that tab: it reads and writes filters and f
 every thirty seconds and after changes, using the group code, member id and member secret. Mining
 level and skill total filter stars locally. Turn sync off to keep those preferences local.
 
+A destination can carry the map's way there, step by step; reading it sends nothing, and the
+sidebar moves its steps on from your position in the game without telling the map. **Reroute**
+under those steps makes one `POST /api/companion/route` per press, with the group code, member id
+and member secret. It carries the destination's tile and the tile you stand on, whether or not
+position sharing is on, because a route from where you stand is what the press asks for. One is in
+flight at a time, and none before the wait the map last asked for: its `Retry-After`, and at least
+five seconds between presses that reached it. The map plans with both tiles and keeps neither.
+
 ## Identity and credentials
 
 Each character has a random id; account hashes and identifiers derived from your account are

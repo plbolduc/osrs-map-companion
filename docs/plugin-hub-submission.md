@@ -56,7 +56,7 @@ Joining with sharing off still sends a random member id, alias, timestamp and co
 ### Network requests
 
 All paths use **Map address** (`https://osrs-map.com` by default); clipboard contents cannot change it.
-Only `RelayClient`, `DirectiveStream` and `StarsClient` construct HTTP requests:
+Only `RelayClient`, `DirectiveStream`, `StarsClient` and `RouteClient` construct HTTP requests:
 
 - **POST /api/companion/snapshot** — logged-in state changes, at least two seconds apart, plus
   six-second idle heartbeats (twenty seconds with a stream). JSON comes from `SnapshotBuilder`;
@@ -76,10 +76,15 @@ Only `RelayClient`, `DirectiveStream` and `StarsClient` construct HTTP requests:
   Reads every thirty seconds; changes can trigger a write sooner. Headers:
   `X-Companion-Code`, `X-Companion-Member`, `X-Companion-Member-Secret`.
   JSON contains filters, favourite sites and a revision. Mining level and total remain local.
+- **POST /api/companion/route** — one **Reroute** press, under the steps of a destination the
+  map sent. One in flight, and none before the wait the map last asked for (Retry-After, at least
+  five seconds). Headers: `X-Companion-Code`, `X-Companion-Member`, `X-Companion-Member-Secret`.
+  JSON is the destination's tile and the player's own tile, sent on the press even with position
+  sharing off; the README says so. The answer replaces the sidebar's steps. Nothing is walked.
 
 Requests carry the versioned User-Agent. The address must be https (plain http only on loopback),
 redirects are not followed, and reply bodies are capped at 1 MB. Snapshot and stream failures back
-off; the Stars client also honours Retry-After. Nothing requests the upstream star feed directly.
+off; the Stars and Reroute clients also honour Retry-After. Nothing requests the upstream star feed directly.
 The README's [What you share](../README.md#what-you-share) names every transmitted category, and
 [Network and storage](network.md) covers credentials and storage.
 

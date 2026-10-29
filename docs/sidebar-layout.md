@@ -350,3 +350,20 @@ The picture is the real `MapPin` at three times its size on the world map's parc
 from `docs/review-evidence/world-map-2026-10-12/PinShot.java`; compile it beside the plugin's own
 classes (`build/classes/java/main`) and the harness classpath above. A running client is still the
 check for where the pins sit among the game's own icons, and is in the submission guide's list.
+
+## The way there, step by step
+
+Status: **built**, on `claude/where-to-go`, and not yet seen in a real client. It is steps 5a to 5c
+of `docs/plan-where-to-go-for-a-task.md` in `osrs-stars-map`.
+
+- **Under the destination's name**, when the map sent a route: the way being followed and its
+  length in run tiles, *Lumbridge Home Teleport · 52 tiles*, then its steps in the card's own words,
+  numbered as the website numbers them, each with the detail and notes the card prints under it.
+- **The current step** is marked with ▸ and drawn bold and white; the steps behind it go grey. It
+  moves on when you stand within four tiles of where it ends, on its floor. Inside a raid's rooms
+  nothing moves, because the tile there is not a place.
+- **The other ways** fold behind one line, *▸ 2 other ways*, as the card's closed row folds them.
+  Pressing one shows its steps instead; the best one says so.
+- **Reroute** sits beside **Dismiss**, and plans again from where you stand. While the answer is
+  on its way the card says *Planning from where you stand…*, and a refusal is one plain sentence
+  under the steps. A route ranked from no position says so above the steps.

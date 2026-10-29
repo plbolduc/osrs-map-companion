@@ -107,6 +107,23 @@ steps wait on these readings (`osrs-stars-map/docs/plan-where-to-go-for-a-task.m
 - [ ] **If convenient: a ladder.** Count the game ticks a ladder climb takes. The map's routes
       charge 2.
 
+## The routes session
+
+The website plan's second session, once the routes in the game are built: a members character,
+`./gradlew runClient`, and a local map whose card can *Send to RuneLite* with its steps.
+
+- [ ] **The steps arrive.** Send a destination from a card with a route. The steps appear under
+      the destination's card in the card's own words, the first one marked; the other ways fold
+      behind one line, and pressing one shows its steps.
+- [ ] **A teleport moves the mark on.** Take the first step's teleport. The landing is within four
+      tiles of the step's tile and the next step is marked; note any landing that scatters further.
+- [ ] **A floor is its own.** On a route with a staircase, the climb is marked done only upstairs,
+      not standing at its foot or under its top.
+- [ ] **Instances.** In a boss lair copied whole (Vorkath, Zulrah) the steps move on; inside a
+      raid's rooms they do not.
+- [ ] **Reroute.** Walk away from the route and press Reroute: the steps are planned from where
+      you stand and the first is marked. Press it again at once: the sidebar says to wait.
+
 ## Farming procedure
 
 With Farming patches enabled and the map's farm run open:

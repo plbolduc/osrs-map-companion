@@ -50,7 +50,6 @@ import java.time.temporal.ChronoUnit;
 import java.time.ZonedDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import javax.annotation.Nullable;
@@ -122,7 +121,7 @@ public class MapCompanionPanel extends PluginPanel
 	private static final int TEXT_WIDTH = PluginPanel.PANEL_WIDTH - 30;
 
 	/** The same, inside a card, which takes eight pixels a side for its own inset. */
-	private static final int CARD_TEXT_WIDTH = TEXT_WIDTH - 16;
+	static final int CARD_TEXT_WIDTH = TEXT_WIDTH - 16;
 
 	private final MapCompanionConfig config;
 	private final MapCompanionPlugin plugin;
@@ -176,6 +175,11 @@ public class MapCompanionPanel extends PluginPanel
 
 	/** Hide the destination on this client. Does not tell the relay; see {@link DestinationState}. */
 	private final JButton dismissButton = smallButton("Dismiss");
+	/** The way there, step by step, when the map sent one. */
+	private final RouteStepsView routeSteps;
+	private final DestinationRoute destinationRoute;
+	/** Ask the map for the way again from where the player stands. See {@link RouteClient}. */
+	private final JButton rerouteButton = smallButton("Reroute");
 
 	/* Drop luck: one monster's card, or every monster tracked. See {@link DropLuckPanel}. */
 	private final JPanel drySection = column(ColorScheme.DARK_GRAY_COLOR);
@@ -269,7 +273,9 @@ public class MapCompanionPanel extends PluginPanel
 		RelayClient relay,
 		DirectiveStream directiveStream,
 		ItemManager itemManager,
-		StarsClient starsClient)
+		StarsClient starsClient,
+		DestinationRoute destinationRoute,
+		RouteClient routeClient)
 	{
 		this.config = config;
 		this.plugin = plugin;
@@ -285,6 +291,12 @@ public class MapCompanionPanel extends PluginPanel
 		this.destinationMarker = destinationMarker;
 		this.relay = relay;
 		this.directiveStream = directiveStream;
+		this.destinationRoute = destinationRoute;
+		this.routeSteps = new RouteStepsView(way ->
+		{
+			destinationRoute.choose(way);
+			refresh();
+		});
 		this.dropLuck = new DropLuckPanel(lootLog, DropLuckPanel.Pictures.of(itemManager));
 		this.starsPanel = new StarsPanel(starsClient, destinationState, clientThread, destinationMarker);
 		this.sharingControls = new SharingControls(config, ConfigStore.of(configManager));
@@ -346,6 +358,7 @@ public class MapCompanionPanel extends PluginPanel
 		destinationDetail.setFont(destinationDetail.getFont().deriveFont(11f));
 		destinationDetail.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
 		destination.add(left(destinationDetail));
+		destination.add(routeSteps);
 		destination.add(gap(5, ColorScheme.DARKER_GRAY_COLOR));
 		destination.add(left(destinationActions));
 		destinationSlot = slot(destination);
@@ -414,6 +427,13 @@ public class MapCompanionPanel extends PluginPanel
 		previewButton.addActionListener(e -> showSnapshotPreview());
 		deathMapButton.addActionListener(e -> showDeathOnMap());
 		leaveButton.addActionListener(e -> leaveGroup());
+		rerouteButton.setToolTipText("Plan the way again from where you stand. Sends your tile to the map once; "
+									 + "the map plans with it and does not keep it.");
+		rerouteButton.addActionListener(e ->
+		{
+			routeClient.reroute();
+			refresh();
+		});
 		dismissButton.setToolTipText("Hide this destination on this client. The map is not told.");
 		dismissButton.addActionListener(e ->
 		{
@@ -467,7 +487,7 @@ public class MapCompanionPanel extends PluginPanel
 	 * centred. Every row here is a left-edge row, so saying so once per child is what keeps the
 	 * title, the status line and the buttons on the same margin instead of each finding its own.
 	 */
-	private static <T extends JComponent> T left(T component)
+	static <T extends JComponent> T left(T component)
 	{
 		component.setAlignmentX(Component.LEFT_ALIGNMENT);
 		return component;
@@ -483,7 +503,7 @@ public class MapCompanionPanel extends PluginPanel
 	}
 
 	/** A vertical stack whose children keep the left margin — see {@link #left}. */
-	private static JPanel column(Color background)
+	static JPanel column(Color background)
 	{
 		JPanel column = new JPanel();
 		column.setLayout(new BoxLayout(column, BoxLayout.Y_AXIS));
@@ -553,7 +573,7 @@ public class MapCompanionPanel extends PluginPanel
 	}
 
 	/** A button a size down, for the actions that sit inside a card or beside a field. */
-	private static JButton smallButton(String text)
+	static JButton smallButton(String text)
 	{
 		JButton button = new JButton(text);
 		button.setFont(button.getFont().deriveFont(11f));
@@ -562,7 +582,7 @@ public class MapCompanionPanel extends PluginPanel
 	}
 
 	/** A button that reads as a line of text, for a fold's own opener. */
-	private static JButton linkButton(String text)
+	static JButton linkButton(String text)
 	{
 		JButton button = new JButton(text);
 		button.setFont(button.getFont().deriveFont(11f));
@@ -967,7 +987,19 @@ public class MapCompanionPanel extends PluginPanel
 				destinationDetail.setVisible(!detail.isEmpty());
 				setWrapped(destinationDetail, detail, CARD_TEXT_WIDTH);
 			}
-			shownDestinationActions = syncRow(destinationActions, Collections.singletonList(dismissButton), shownDestinationActions);
+			/* Only the route of the destination on the card: for a tick after a change they can differ. */
+			DestinationRoute.View route = destinationRoute.view();
+			boolean steps = destination != null && route != null && route.hasRoute()
+				&& route.key.equals(DestinationRoute.keyOf(destination));
+			routeSteps.show(steps ? route : null);
+			List<JButton> destinationRow = new ArrayList<>();
+			if (steps)
+			{
+				destinationRow.add(rerouteButton);
+				rerouteButton.setEnabled(ready && !route.rerouting && System.currentTimeMillis() >= route.nextRerouteMs);
+			}
+			destinationRow.add(dismissButton);
+			shownDestinationActions = syncRow(destinationActions, destinationRow, shownDestinationActions);
 
 			RelayResponse.Event event = destinationState.getEvent();
 			eventSlot.setVisible(event != null);
@@ -1339,7 +1371,7 @@ public class MapCompanionPanel extends PluginPanel
 	}
 
 	/** The same, for a label narrower than the column — inside a card, beside the dot. */
-	private static void setWrapped(JLabel label, String text, int width)
+	static void setWrapped(JLabel label, String text, int width)
 	{
 		String html = "<html><body width='" + width + "'>" + escape(text) + "</body></html>";
 		if (!html.equals(label.getText()))
