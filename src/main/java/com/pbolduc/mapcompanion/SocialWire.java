@@ -192,6 +192,7 @@ final class SocialWire
 				news.title = title;
 				news.atMs = row.news.atMs;
 				news.skill = RouteWire.text(row.news.skill, 20);
+				news.itemId = row.news.itemId != null && row.news.itemId > 0 ? row.news.itemId : null;
 				clean.news = news;
 			}
 		}

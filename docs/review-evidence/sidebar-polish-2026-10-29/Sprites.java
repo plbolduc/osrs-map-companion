@@ -37,7 +37,7 @@ final class Sprites
 	static void bind(Binder binder)
 	{
 		String root = System.getenv("OSRS_MAP_PUBLIC");
-		binder.bind(GameSprites.class).toInstance(new GameSprites(null, null)
+		binder.bind(GameSprites.class).toInstance(new GameSprites(null, null, null)
 		{
 			@Override
 			void item(JLabel label, int itemId, int box)
@@ -61,6 +61,12 @@ final class Sprites
 				/* The combat tab's crossed swords is the one sprite the website keeps under a name of its own. */
 				show(label, read(root, spriteId == net.runelite.api.gameval.SpriteID.SideIcons.COMBAT
 					? "osrs-icons/1x/skill-combat.png" : "osrs-icons/cache/" + spriteId + ".png"), box);
+			}
+
+			@Override
+			void skill(JLabel label, String name, int box)
+			{
+				show(label, read(root, "osrs-icons/1x/skill-" + name.toLowerCase() + ".png"), box);
 			}
 		});
 	}

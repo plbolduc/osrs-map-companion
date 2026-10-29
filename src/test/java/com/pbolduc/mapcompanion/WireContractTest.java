@@ -127,7 +127,9 @@ public class WireContractTest
 			assertEquals(Boolean.TRUE, cara.nearYou);
 			assertTrue(cara.routable);
 			assertEquals("Woodcutting 80", cara.news.title);
+			assertEquals("Woodcutting", cara.news.skill);
 			assertEquals("Abyssal whip", directive.roster.get(1).news.title);
+			assertEquals("a drop names its item, whose sprite the news line draws", Integer.valueOf(4151), directive.roster.get(1).news.itemId);
 			assertEquals("a friend who shares no position has no world and no landmark", null, directive.roster.get(2).near);
 
 			assertEquals(1, directive.events.size());
@@ -333,7 +335,9 @@ public class WireContractTest
 	/**
 	 * Every public instance field of this plugin's own classes is non-null, walking into nested
 	 * objects, lists and maps. For a list of one class, a field counts as set when any element
-	 * sets it — which is how the two kinds of milestone share one class.
+	 * sets it — which is how the two kinds of milestone share one class — and that holds at every
+	 * depth: a friend's news is a level for one friend and a drop for the next, so its skill and its
+	 * item are each vouched for by whichever friend's news has one.
 	 */
 	private static void assertEveryFieldSet(String path, Object value)
 	{
@@ -375,21 +379,30 @@ public class WireContractTest
 			}
 			for (Field field : publicFields(first.getClass()))
 			{
-				boolean setSomewhere = false;
+				List<String> unsetInEvery = null;
 				for (Object item : items)
 				{
 					if (read(field, item) != null)
 					{
-						setSomewhere = true;
 						List<String> nested = new ArrayList<>();
 						collectUnset(path + "[]." + field.getName(), read(field, item), nested);
-						missing.addAll(nested);
-						break;
+						if (unsetInEvery == null)
+						{
+							unsetInEvery = nested;
+						}
+						else
+						{
+							unsetInEvery.retainAll(nested);
+						}
 					}
 				}
-				if (!setSomewhere)
+				if (unsetInEvery == null)
 				{
 					missing.add(path + "[]." + field.getName());
+				}
+				else
+				{
+					missing.addAll(unsetInEvery);
 				}
 			}
 			return;

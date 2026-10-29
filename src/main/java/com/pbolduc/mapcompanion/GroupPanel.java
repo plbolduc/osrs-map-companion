@@ -92,12 +92,15 @@ final class GroupPanel extends JPanel
 	private static final Color CHOSEN = new Color(117, 94, 52);
 	/** A friend's button for the game's own world map; "Show on world map" does not fit beside Route. */
 	static final String WORLD_MAP = "World map";
+	/** A news line's picture: the game's 16px skill icons, and an item's sprite shrunk to match. */
+	private static final int NEWS_PICTURE = 16;
 
 	private final transient DestinationState destinations;
 	private final transient GroupState group;
 	private final transient RoutePress press;
 	private final transient MeetupClient meetups;
 	private final transient MapCompanionConfig config;
+	private final transient GameSprites sprites;
 
 	private final JPanel friends = MapCompanionPanel.column(ColorScheme.DARK_GRAY_COLOR);
 	private final JLabel meetupsHead = MapCompanionPanel.left(new JLabel("Meetups"));
@@ -119,13 +122,14 @@ final class GroupPanel extends JPanel
 	private boolean ready;
 
 	GroupPanel(DestinationState destinations, GroupState group, RoutePress press, MeetupClient meetups,
-		MapCompanionConfig config)
+		MapCompanionConfig config, GameSprites sprites)
 	{
 		this.destinations = destinations;
 		this.group = group;
 		this.press = press;
 		this.meetups = meetups;
 		this.config = config;
+		this.sprites = sprites;
 		setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.Y_AXIS));
 		setBackground(ColorScheme.DARK_GRAY_COLOR);
 		MapCompanionPanel.left(this);
@@ -394,7 +398,23 @@ final class GroupPanel extends JPanel
 		if (row.news != null)
 		{
 			JLabel news = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
-			MapCompanionPanel.setWrapped(news, row.news.title + " · " + ago(now - row.news.atMs), WIDTH);
+			news.setName("group.news." + row.id);
+			/*
+			 * The news's own picture, as the website's friend rows draw it: the item a drop or reward
+			 * names, else the skill a level names. A quest or a diary has neither and stays words.
+			 */
+			boolean pictured = row.news.itemId != null || row.news.skill != null;
+			MapCompanionPanel.setWrapped(news, row.news.title + " · " + ago(now - row.news.atMs),
+				pictured ? WIDTH - NEWS_PICTURE - 5 : WIDTH);
+			news.setIconTextGap(5);
+			if (row.news.itemId != null)
+			{
+				sprites.item(news, row.news.itemId, NEWS_PICTURE);
+			}
+			else if (row.news.skill != null)
+			{
+				sprites.skill(news, row.news.skill, NEWS_PICTURE);
+			}
 			card.add(MapCompanionPanel.left(news));
 		}
 		boolean positioned = row.routable || row.near != null;

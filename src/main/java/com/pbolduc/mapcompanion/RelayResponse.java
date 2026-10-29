@@ -131,7 +131,10 @@ public class RelayResponse
 		public String kind;
 		public String title;
 		public long atMs;
+		/** For a level, the skill's name, whose icon the news line draws. */
 		public String skill;
+		/** For a drop or a reward the game identified, the item, whose sprite the news line draws. */
+		public Integer itemId;
 	}
 
 	/** A meetup as the group's card lists it. */
