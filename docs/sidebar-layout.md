@@ -518,3 +518,11 @@ the menu's last row, under a rule, reading *Hide the code field* while the field
 
 A meetup was three rows of buttons: Route, then the four answers two by two. Route now sits beside
 the title, and the four answers keep their grid. A meetup card is 146px where it was 186.
+
+### The status card
+
+Three lines became two. While the map is being fed the dot's green is *Connected*, said in words in
+its tooltip with the last post and the stream, so the first line is the group's name and the second
+what is shared, *Sharing position, levels*, with the gear at the end of the first. While it is not,
+the first line says what is happening — *Connecting…*, *Logged out*, a refusal — and the second is
+the group's name. The connect step is 532px.

@@ -1001,10 +1001,12 @@ public class MapCompanionPanel extends PluginPanel
 	}
 
 	/**
-	 * The status card's first line. "Not connected" before a group, where the plugin's own word was
-	 * "Not paired": pairing is this code's word for it, and nobody joins a map to be paired.
+	 * The status card's first line, beside the dot: the group's name while the map is being fed,
+	 * and otherwise what the connection is doing. "Not connected" before a group, where the plugin's
+	 * own word was "Not paired": pairing is this code's word for it, and nobody joins a map to be
+	 * paired. "Connected" is the dot's colour and tooltip rather than a line of its own.
 	 */
-	static String statusWords(boolean paired, boolean ready, Health health, String status)
+	static String statusWords(boolean paired, boolean ready, Health health, String status, @Nullable String group)
 	{
 		if (!paired)
 		{
@@ -1014,7 +1016,7 @@ public class MapCompanionPanel extends PluginPanel
 		{
 			return "Press Connect";
 		}
-		return health == Health.LIVE ? "Connected" : status;
+		return health == Health.LIVE && group != null ? group : status;
 	}
 
 	/**
@@ -1227,14 +1229,23 @@ public class MapCompanionPanel extends PluginPanel
 			dot.setToolTipText(plugin.getStatus()
 							   + " · last post " + ageOf(relay.getLastSuccessMs())
 							   + (directiveStream.isConnected() ? " · stream open" : " · stream closed"));
-			/* Connection and group each get a line; a long server name cannot bury either. */
-			setWrapped(statusLabel, statusWords(paired, ready, health, plugin.getStatus()), CARD_TEXT_WIDTH - 18);
-			statusLabel.setToolTipText(dot.getToolTipText());
+			/*
+			 * Two lines. While the map is being fed, the dot's green says connected, and its tooltip says
+			 * it in words with the last post, so the first line is the group's name and the second what
+			 * is shared. Otherwise the first line is what is wrong or awaited, and the group's name is
+			 * the second, because which group a "Connecting…" is for still matters.
+			 */
+			boolean live = ready && health == Health.LIVE;
+			String group = paired ? statusGroup(code, pairing.name(code)) : null;
+			setWrapped(statusLabel, statusWords(paired, ready, health, plugin.getStatus(), group),
+				CARD_TEXT_WIDTH - 18 - SidebarIcons.SIZE - 4);
+			statusLabel.setToolTipText(live ? "Group code " + JoinCode.forDisplay(code) + " · " + dot.getToolTipText()
+				: dot.getToolTipText());
 			/* Before a group, no second line: the map's address is in Settings, and is not news. */
-			groupLabel.setVisible(paired);
-			if (paired)
+			groupLabel.setVisible(paired && !live);
+			if (paired && !live)
 			{
-				setWrapped(groupLabel, statusGroup(code, pairing.name(code)), CARD_TEXT_WIDTH);
+				setWrapped(groupLabel, group, CARD_TEXT_WIDTH);
 			}
 			groupLabel.setToolTipText(paired ? "Group code " + JoinCode.forDisplay(code) : null);
 
@@ -1242,10 +1253,10 @@ public class MapCompanionPanel extends PluginPanel
 			 * Character fields are separate from membership: all opt-ins off still sends the latter
 			 * after Connect. The tooltip and Advanced preview keep the precise disclosure reachable.
 			 */
-			sharingLabel.setVisible(paired);
-			if (paired)
+			sharingLabel.setVisible(live);
+			if (live)
 			{
-				setWrapped(sharingLabel, ready ? sharingLine() : "Character sharing paused", CARD_TEXT_WIDTH);
+				setWrapped(sharingLabel, sharingLine(), CARD_TEXT_WIDTH);
 			}
 			sharingLabel.setToolTipText(paired ? sharingList() : null);
 
@@ -1654,7 +1665,7 @@ public class MapCompanionPanel extends PluginPanel
 		{
 			return "Character sharing off";
 		}
-		return on.size() <= 2 ? "Sharing: " + String.join(", ", on) : "Sharing " + on.size() + " character fields";
+		return on.size() <= 2 ? "Sharing " + String.join(", ", on) : "Sharing " + on.size() + " character fields";
 	}
 
 	/** The whole list, for the line's tooltip: "Sharing: name, position, …". */
