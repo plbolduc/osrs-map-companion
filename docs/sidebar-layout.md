@@ -532,3 +532,12 @@ the group's name. The connect step is 532px.
 *Sync filters with website* and *Mining 72 · Skill total 1620* sat above the list as daily
 controls, though both are set once. They are now the first rows of ⋯ More filters. *Selected world*
 stays at the top.
+
+### Drop luck's heading
+
+The section's heading took a row of its own over a row that was empty on the left: the card's
+eyebrow says *Last monster killed* or *Your pinned drop*, and nothing while the card is the monster
+being killed or one opened from the list. In that empty place the card now says *Drop luck* itself,
+beside *All monsters ›*, and the sidebar drops its own heading. With words in the eyebrow, under the
+*Now killing* bar, or while counting is paused, the heading stays where it was. The card's wording is
+unchanged.

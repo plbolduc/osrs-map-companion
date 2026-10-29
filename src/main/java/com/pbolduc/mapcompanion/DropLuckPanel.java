@@ -32,6 +32,7 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -86,6 +87,9 @@ final class DropLuckPanel extends JPanel
 	private static final int ROW_TEXT_WIDTH = WIDTH - 16 - 36 - 46;
 	private static final int TEXT_WIDTH = WIDTH - 16;
 
+	/** The section's name, as the sidebar heads its others. */
+	static final String HEADING = "Drop luck";
+
 	private static final Color LUCKY = new Color(0x4ade80);
 	private static final Color DRY = new Color(0xf59e0b);
 	private static final Color VERY_DRY = new Color(0xf87171);
@@ -125,6 +129,8 @@ final class DropLuckPanel extends JPanel
 	}
 
 	private View view = View.CARD;
+	/** Whether the card's own head row says "Drop luck"; see {@link #namesItself}. */
+	private boolean namesItself;
 	/** The monster opened from the list; null means "the default one" — see DropLuckView. */
 	@Nullable
 	private String opened;
@@ -169,6 +175,17 @@ final class DropLuckPanel extends JPanel
 				redrawResults();
 			}
 		});
+	}
+
+	/**
+	 * Whether this panel's first row says "Drop luck", so the sidebar's own heading over it would say
+	 * it twice. The card's head row has an eyebrow on the left — "Last monster killed" — which is
+	 * empty while the card is the monster being killed or one opened from the list; there the
+	 * section's name takes the empty place, beside All monsters, rather than a row of its own above.
+	 */
+	boolean namesItself()
+	{
+		return namesItself;
 	}
 
 	/** Whether there is anything to show at all; the companion panel hides the section otherwise. */
@@ -258,6 +275,7 @@ final class DropLuckPanel extends JPanel
 
 	private void build(List<LootLog.Monster> monsters, @Nullable String current, @Nullable String[] pin, long now)
 	{
+		namesItself = false;
 		if (monsters.isEmpty())
 		{
 			revalidate();
@@ -274,7 +292,8 @@ final class DropLuckPanel extends JPanel
 			opened = null;
 			shown = DropLuckView.defaultMonster(monsters, current, pin);
 		}
-		if (now0 != null && (view == View.LIST || shown == null || !shown.npc.equals(now0.npc)))
+		boolean bar = now0 != null && (view == View.LIST || shown == null || !shown.npc.equals(now0.npc));
+		if (bar)
 		{
 			add(nowBar(now0));
 			add(gap(6));
@@ -285,7 +304,7 @@ final class DropLuckPanel extends JPanel
 		}
 		else if (shown != null)
 		{
-			buildCard(shown, now0 != null && now0.npc.equals(shown.npc), pin, now);
+			buildCard(shown, now0 != null && now0.npc.equals(shown.npc), pin, now, !bar);
 		}
 		revalidate();
 		repaint();
@@ -309,12 +328,20 @@ final class DropLuckPanel extends JPanel
 		return fill(bar);
 	}
 
-	private void buildCard(LootLog.Monster monster, boolean isNow, @Nullable String[] pin, long now)
+	private void buildCard(LootLog.Monster monster, boolean isNow, @Nullable String[] pin, long now, boolean first)
 	{
 		boolean pinnedHere = pin != null && monster.npc.equalsIgnoreCase(pin[0]);
 		JPanel head = new JPanel(new BorderLayout());
 		head.setBackground(ColorScheme.DARK_GRAY_COLOR);
-		head.add(small(DropLuckView.eyebrow(opened != null, isNow, pinnedHere), ColorScheme.LIGHT_GRAY_COLOR), BorderLayout.WEST);
+		String eyebrow = DropLuckView.eyebrow(opened != null, isNow, pinnedHere);
+		/* Only as the first row: under the Now killing bar it would name the section halfway down it. */
+		namesItself = first && eyebrow.isEmpty();
+		JLabel left = small(namesItself ? HEADING : eyebrow, ColorScheme.LIGHT_GRAY_COLOR);
+		if (namesItself)
+		{
+			left.setFont(left.getFont().deriveFont(Font.BOLD, 11f));
+		}
+		head.add(left, BorderLayout.WEST);
 		head.add(link(opened != null ? "‹ All monsters" : "All monsters ›", () ->
 		{
 			view = View.LIST;

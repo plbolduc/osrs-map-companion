@@ -104,11 +104,17 @@ public class DropLuckPanelTest
 		String card = words();
 		assertTrue(card, card.contains("Now killing Abyssal demon"));
 		assertTrue(card, card.contains("‹ All monsters"));
+		assertFalse("under the Now killing bar the card's head is not the section's first row", panel.namesItself());
 		assertTrue(card, card.contains("Last killed 3 h ago · 1 recorded kill"));
 		assertTrue(SidebarWords.press(panel, "Back ›"));
 		assertTrue(words(), words().contains("Killing now"));
-		/* The sidebar heads this section "Drop luck"; the card under it does not say it again. */
-		assertFalse(words(), words().contains("Drop luck"));
+		/*
+		 * Still said once, now by the card: its eyebrow is empty while it is the monster being killed,
+		 * so "Drop luck" moved into that place beside All monsters and the sidebar drops its own
+		 * heading over it (namesItself). Before, the sidebar said it and this card did not.
+		 */
+		assertTrue(words(), words().startsWith("Drop luck | All monsters ›"));
+		assertTrue(panel.namesItself());
 	}
 
 	@Test
@@ -121,6 +127,7 @@ public class DropLuckPanelTest
 		now += 30 * 60_000L;
 		panel.refresh();
 		assertTrue("not killing anything: the last monster killed", words().contains("Last monster killed"));
+		assertFalse("an eyebrow with words keeps the sidebar's own heading", panel.namesItself());
 		assertTrue(words(), SidebarWords.press(panel, "All monsters ›"));
 		assertTrue(SidebarWords.press(panel, "Abyssal demon"));
 		assertTrue(SidebarWords.press(panel, "Abyssal whip"));
