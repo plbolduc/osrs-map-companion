@@ -247,7 +247,8 @@ public class MapCompanionPanel extends PluginPanel
 	 * button each under their own heading, which on a player with three groups was four rows to
 	 * answer a question asked once a week. The list is read when the menu opens, so it cannot be
 	 * stale, and the group being posted to is in it, marked and disabled — the answer to "which
-	 * one am I in".
+	 * one am I in". Joining another group is the menu's last row rather than a fold of its own
+	 * under the buttons: it is the same question, asked less often still.
 	 */
 	private final JButton switchButton = smallButton("Switch ▾");
 	/**
@@ -256,7 +257,6 @@ public class MapCompanionPanel extends PluginPanel
 	 */
 	private final JButton knownGroupsButton = smallButton("Your groups ▾");
 	private final JPanel knownGroupsRow;
-	private final JButton joinToggle = linkButton("▸ Join another group");
 	private boolean joinOpen = false;
 	private final JPanel joinBlock;
 	private final CompanionViews views;
@@ -508,7 +508,6 @@ public class MapCompanionPanel extends PluginPanel
 		group.add(groupPanel);
 		group.add(gap(4, ColorScheme.DARK_GRAY_COLOR));
 		group.add(left(groupActions));
-		group.add(joinToggle);
 		views = new CompanionViews(overview, group, starsPanel, starsPanel::selected);
 		body.add(views);
 
@@ -527,11 +526,6 @@ public class MapCompanionPanel extends PluginPanel
 		switchButton.addActionListener(e -> showGroupMenu(switchButton));
 		knownGroupsButton.addActionListener(e -> showGroupMenu(knownGroupsButton));
 		gearButton.addActionListener(e -> pages.open(true));
-		joinToggle.addActionListener(e ->
-		{
-			joinOpen = !joinOpen;
-			refresh();
-		});
 		previewButton.addActionListener(e -> showSnapshotPreview());
 		deathMapButton.addActionListener(e -> showDeathOnMap());
 		deathRouteButton.addActionListener(e -> routeToDeath());
@@ -923,12 +917,33 @@ public class MapCompanionPanel extends PluginPanel
 			}
 			menu.add(item);
 		}
+		if (!active.isEmpty())
+		{
+			menu.addSeparator();
+			JMenuItem another = groupMenuItem(joinMenuWords(joinOpen));
+			another.setToolTipText("Paste another group's connection code or invite");
+			another.addActionListener(e ->
+			{
+				joinOpen = !joinOpen;
+				refresh();
+			});
+			menu.add(another);
+		}
 		/*
 		 * Hung from the button's right edge, so it opens into the sidebar. Names made it wider than
 		 * the button, and hung from the left edge the way a column of codes could be, it ran off the
 		 * sidebar's right side.
 		 */
 		menu.show(anchor, anchor.getWidth() - menu.getPreferredSize().width, anchor.getHeight());
+	}
+
+	/**
+	 * The groups menu's last row: it opens the code field above the tabs, and while that is open it
+	 * closes it again, as the fold it replaced did.
+	 */
+	static String joinMenuWords(boolean open)
+	{
+		return open ? "Hide the code field" : "Join another group…";
 	}
 
 	/**
@@ -1344,11 +1359,10 @@ public class MapCompanionPanel extends PluginPanel
 			drySection.setVisible(paused || dropLuck.hasContent());
 
 			/*
-			 * The group. In one: its invite, and the switch when there is anywhere to switch to. In
-			 * none: the join field outright, and the remembered groups under their own name.
+			 * The group. In one: its invite beside the groups menu, which also joins another. In
+			 * none: the join field outright, and the remembered groups under it.
 			 */
 			List<String> known = pairing.knownCodes();
-			boolean others = known.stream().anyMatch(c -> !c.equalsIgnoreCase(code));
 			/*
 			 * The tabs are a member's: before a group is joined, Home is the whole page. While the step
 			 * after a first Connect is up it is the page, with nothing under it to scroll past.
@@ -1369,14 +1383,13 @@ public class MapCompanionPanel extends PluginPanel
 			{
 				groupRow.add(copyInviteButton);
 			}
-			if (others)
+			if (paired)
 			{
+				/* Always, now that it also holds Join another group. */
 				groupRow.add(switchButton);
 			}
 			shownGroupActions = syncRow(groupActions, groupRow, shownGroupActions);
 			groupActions.setVisible(!groupRow.isEmpty());
-			joinToggle.setVisible(paired);
-			joinToggle.setText(joinOpen ? "▾ Join another group" : "▸ Join another group");
 			joinBlock.setVisible(!paired || !pairing.hasServerConsent() || joinOpen);
 			/* Offered for the group just joined; leaving it, or a changed map, takes the offer away. */
 			if (!ready)

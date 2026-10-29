@@ -506,3 +506,10 @@ Every button that opens the browser now says **Open website** — the death's, a
 star site's, which said *Open on map* — and a friend's says **World map** (*Show on world map* does
 not fit beside Route), *Hide on map* once pressed, and *On world map* while the whole group layer is
 on.
+
+### The group's buttons
+
+They were three loose rows under the meetups: *Meet here…*, *Copy invite*, and *▸ Join another
+group*. *Meet here…* is now a link on the *Meetups* heading, which is drawn with or without a meetup
+under it; *Copy invite* sits beside *Switch ▾*, which is always there; and *Join another group…* is
+the menu's last row, under a rule, reading *Hide the code field* while the field is open.
