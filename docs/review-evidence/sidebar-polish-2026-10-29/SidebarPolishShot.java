@@ -330,11 +330,20 @@ public class SidebarPolishShot
 	{
 		if (state.equals("connect"))
 		{
-			Method say = MapCompanionPanel.class.getDeclaredMethod("say", String.class);
-			say.setAccessible(true);
 			Pairing pairing = (Pairing) get(panel, "pairing");
-			say.invoke(panel, "Connecting to " + pairing.serverLabel() + "… Waiting for the map.");
-			set(panel, "pendingConnectionMessage", true);
+			try
+			{
+				/* Before the pass, a Connect also said it was waiting under the field; after it, only the card does. */
+				set(panel, "pendingConnectionMessage", true);
+				Method say = MapCompanionPanel.class.getDeclaredMethod("say", String.class);
+				say.setAccessible(true);
+				say.invoke(panel, "Connecting to " + pairing.serverLabel() + "… Waiting for the map.");
+				set(panel, "pendingConnectionMessage", true);
+			}
+			catch (NoSuchFieldException after)
+			{
+				/* The panel says nothing under the field after a Connect. */
+			}
 			((RecommendedSharing) get(panel, "recommendedSharing")).offer(pairing.serverLabel());
 		}
 		if (state.equals("group") || state.equals("meetup"))

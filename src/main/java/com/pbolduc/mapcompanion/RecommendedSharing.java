@@ -86,6 +86,12 @@ final class RecommendedSharing extends JPanel
 		MapCompanionConfig.KEY_SHARE_NAME,
 		"showDestination", "showGroupOnWorldMap"));
 
+	/**
+	 * Two short sentences over the rows. The press under them says what one press does, so the
+	 * intro no longer says it too; what it keeps is where to change it afterwards.
+	 */
+	static final String INTRO = "Ticked is what the map uses. Change any of it later in Settings.";
+
 	/** The stream the two drawing choices open, in one line under them. */
 	static final String STREAM_SHORT = "Opens one connection while you're logged in.";
 
@@ -135,8 +141,7 @@ final class RecommendedSharing extends JPanel
 		MapCompanionPanel.setWrapped(title, "Choose what to share", TEXT);
 		card.add(title);
 		JLabel intro = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
-		MapCompanionPanel.setWrapped(intro, "Ticked is what the map uses. One press shares it, and Settings "
-			+ "changes any of it later.", TEXT);
+		MapCompanionPanel.setWrapped(intro, INTRO, TEXT);
 		card.add(intro);
 		card.add(gap(6));
 

@@ -253,7 +253,6 @@ public class MapCompanionPanel extends PluginPanel
 	private final JPanel knownGroupsRow;
 	private final JButton joinToggle = linkButton("▸ Join another group");
 	private boolean joinOpen = false;
-	private boolean pendingConnectionMessage = false;
 	private final JPanel joinBlock;
 	private final CompanionViews views;
 	private final SidebarPages pages;
@@ -854,8 +853,7 @@ public class MapCompanionPanel extends PluginPanel
 		}
 		joinField.setText("");
 		joinOpen = false;
-		say("Connecting to " + pairing.serverLabel() + "… Waiting for the map.");
-		pendingConnectionMessage = true;
+		quiet();
 		refresh();
 	}
 
@@ -869,9 +867,17 @@ public class MapCompanionPanel extends PluginPanel
 	/** One line under the join field, hidden when there is nothing to say. */
 	private void say(String message)
 	{
-		pendingConnectionMessage = false;
 		setWrapped(joinMessage, message);
 		joinMessage.setVisible(true);
+	}
+
+	/**
+	 * Nothing to say under the field. A Connect used to say "Connecting to … Waiting for the map."
+	 * here while the status card said the same beside its dot; the card says it, once.
+	 */
+	private void quiet()
+	{
+		joinMessage.setVisible(false);
 	}
 
 	/**
@@ -906,8 +912,7 @@ public class MapCompanionPanel extends PluginPanel
 					{
 						return;
 					}
-					say("Connecting to " + label + "… Waiting for the map.");
-					pendingConnectionMessage = true;
+					quiet();
 					refresh();
 				});
 			}
@@ -1197,11 +1202,6 @@ public class MapCompanionPanel extends PluginPanel
 			String code = pairingCode();
 			boolean paired = !code.isEmpty();
 			boolean ready = paired && pairing.hasServerConsent();
-			if (pendingConnectionMessage && ready && relay.isEverSucceeded())
-			{
-				joinMessage.setVisible(false);
-				pendingConnectionMessage = false;
-			}
 
 			dot.setForeground(health.getColor());
 			dot.setToolTipText(plugin.getStatus()
@@ -1344,8 +1344,12 @@ public class MapCompanionPanel extends PluginPanel
 			 */
 			List<String> known = pairing.knownCodes();
 			boolean others = known.stream().anyMatch(c -> !c.equalsIgnoreCase(code));
-			/* The tabs are a member's: before a group is joined, Home is the whole page. */
+			/*
+			 * The tabs are a member's: before a group is joined, Home is the whole page. While the step
+			 * after a first Connect is up it is the page, with nothing under it to scroll past.
+			 */
 			views.tabsShown(ready);
+			views.setVisible(!recommendedSharing.isVisible());
 			List<RelayResponse.RosterRow> roster = destinationState.getRoster();
 			views.groupCount(ready && roster != null ? roster.size() : 0);
 			groupPanel.setVisible(ready);

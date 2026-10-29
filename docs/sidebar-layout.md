@@ -490,3 +490,11 @@ second line and *Character sharing paused* the third, about a connection that di
 Then Open the map, and the code field with no heading over it, its placeholder *Paste your
 connection code* and its tooltip saying where the code comes from; with a kill log, Drop luck
 follows. A fresh install is 130px where it was 221.
+
+### The step after Connect
+
+It said *Waiting for the map* twice, once beside the dot and once under the field, and the tabs and
+Home hung under the card. Now the status card says it once, nothing is drawn under the card while it
+is up, and its intro is one line: *Ticked is what the map uses. Change any of it later in
+Settings.* The one press, every field named, *What each one sends* and *kept two weeks* are as they
+were. 738px to 544.
