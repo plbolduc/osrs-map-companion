@@ -91,12 +91,6 @@ the map knows must stay in that list.
 reading the diff for. One concern per commit, and formatting never mixed with behaviour. The
 history is public, so commit under your GitHub noreply address.
 
-**Pull requests.** One change a reviewer can read in one sitting, and nothing beside it. Every
-commit builds and passes on its own. Fixups are folded into the commit they fix before the first
-push, because GitHub keeps every commit a pull request ever showed. A pushed branch is not
-rewritten without the owner's say. Nothing local goes in: no scratch scripts, research dumps,
-machine paths, pairing codes or keys.
-
 **The README is the Plugin Hub page.** RuneLite publishes it at the pinned commit, so it is the
 first thing a player reads about the plugin. Keep it short and plain: what the plugin does in a
 sentence, pictures before paragraphs, and the details in `docs/`. A change that alters what a
