@@ -125,6 +125,8 @@ public class MapCompanionPanel extends PluginPanel
 
 	/** The same, inside a card, which takes eight pixels a side for its own inset. */
 	static final int CARD_TEXT_WIDTH = TEXT_WIDTH - 16;
+	/** The clue scroll's sprite beside the card's title, at the size the inventory draws it. */
+	private static final int CLUE_PICTURE = 32;
 
 	private final MapCompanionConfig config;
 	private final MapCompanionPlugin plugin;
@@ -207,6 +209,10 @@ public class MapCompanionPanel extends PluginPanel
 	/** Route, pressed beside anything in the sidebar; see {@link RoutePress}. */
 	private final RoutePress routePress;
 	private final ClueReader clueReader;
+	private final GameSprites sprites;
+	/** The scroll whose sprite the clue card shows, so a refresh asks for it once rather than every second. */
+	@Nullable
+	private Integer shownClueScroll;
 
 	/** Hide the destination on this client. Does not tell the relay; see {@link DestinationState}. */
 	private final JButton dismissButton = smallButton("Dismiss");
@@ -358,6 +364,7 @@ public class MapCompanionPanel extends PluginPanel
 		this.shortestPath = shortestPath;
 		this.routePress = routePress;
 		this.clueReader = clueReader;
+		this.sprites = sprites;
 		this.searchPanel = new SearchPanel(searchClient, routePress, sprites);
 		this.groupPanel = new GroupPanel(destinationState, groupState, routePress, meetupClient, config, sprites);
 		this.routeSteps = new RouteStepsView(way ->
@@ -1357,7 +1364,19 @@ public class MapCompanionPanel extends PluginPanel
 			clueSlot.setVisible(clue != null && paired);
 			if (clue != null && paired)
 			{
-				setWrapped(clueTitle, clueTitle(clue.tier), CARD_TEXT_WIDTH);
+				/* The scroll's own sprite beside its tier, as the game draws it in the inventory. */
+				Integer scroll = clue.itemId != null && clue.itemId > 0 ? clue.itemId : null;
+				if (!java.util.Objects.equals(scroll, shownClueScroll))
+				{
+					shownClueScroll = scroll;
+					clueTitle.setIcon(null);
+					clueTitle.setIconTextGap(6);
+					if (scroll != null)
+					{
+						sprites.item(clueTitle, scroll, CLUE_PICTURE);
+					}
+				}
+				setWrapped(clueTitle, clueTitle(clue.tier), scroll != null ? CARD_TEXT_WIDTH - CLUE_PICTURE - 6 : CARD_TEXT_WIDTH);
 				setWrapped(clueDetail, clueDetail(clue), CARD_TEXT_WIDTH);
 				boolean routable = ClueReader.routeTile(clue) != null;
 				clueActions.setVisible(routable);
