@@ -66,6 +66,10 @@ often. A clean run is now 443 tests with no failures or skips.
 - [ ] Replace a clue scroll and compare charged versus uncharged jewellery capabilities.
 - [ ] Verify an upstairs death's Show on map opens the correct tile and floor.
 - [ ] Exercise farming, birdhouses, rumours and contracts on a members character.
+- [ ] On a members character with **Slayer task** sharing on, check the map names the task as the
+      game's slayer helper does: an ordinary task, a Konar task with its area, and a boss task.
+      The names come from the client's database by value; until this is seen, no build has read
+      one for real.
 - [ ] With a destination in the loaded scene, see its dot on the minimap as well as the tile.
 - [ ] Carry two clue tiers, read the one in the later slot, and check the map shows that step.
 - [ ] Kill a few monsters and log out within thirty seconds; the kill log keeps them.
