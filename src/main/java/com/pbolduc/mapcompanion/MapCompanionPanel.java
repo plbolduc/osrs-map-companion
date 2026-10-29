@@ -523,6 +523,17 @@ public class MapCompanionPanel extends PluginPanel
 		body.add(views);
 
 		JPanel settings = column(ColorScheme.DARK_GRAY_COLOR);
+		/*
+		 * Where an update's changes are written down, the same page the once-per-version chat line
+		 * names: RuneLite shows no changelog, and the README carries only the latest few lines.
+		 */
+		JButton whatsNew = linkButton("What's new in " + CompanionVersion.VERSION + " ›");
+		whatsNew.setName("settings.whatsNew");
+		whatsNew.setForeground(ColorScheme.BRAND_ORANGE);
+		whatsNew.setToolTipText("Open the map's What's new page, where every update is written down");
+		whatsNew.addActionListener(e -> LinkBrowser.browse(mapUrl() + "/whats-new"));
+		settings.add(left(whatsNew));
+		settings.add(gap(4, ColorScheme.DARK_GRAY_COLOR));
 		settings.add(sectionHead("What you share"));
 		settings.add(sharingControls);
 		settings.add(gap(4, ColorScheme.DARK_GRAY_COLOR));
