@@ -24,16 +24,16 @@ import okhttp3.OkHttpClient;
 
 /**
  * Paints the real MapCompanionPanel at 225px wide with RuneLite's own look and feel, in the states
- * the where-to-go plan's steps 5a, 6, 8 and 9 added: a destination with its steps, the search box
- * with results, the Group section with three friends, the meetups with their answers, and the
- * death card's Route back. Synthetic local state and made-up names; no game account or network.
+ * the where-to-go plan's steps 5a, 6, 8, 9 and 9d added: a destination with its steps, the search box
+ * with results, the Group section with three friends, the meetups with their answers, the
+ * death card's Route back, and the step after a first Connect, folded and with Customise open. Synthetic local state and made-up names; no game account or network.
  *
  * Built like sharing-sidebar-2026-10-11/SidebarShot.java, whose helpers it copies rather than
  * imports, because that one still names a world-hop class this branch no longer has. Reproduce
  * from the plugin root after `gradlew harnessJar`, with the harness classpath and that folder's
  * logback.xml (docs/sidebar-layout.md has the PowerShell and shell forms):
  *
- *   javac -proc:none --release 11 -cp $cp -d build/where-shot-classes docs/review-evidence/where-to-go-2026-10-29/WhereToGoShot.java
+ *   javac -proc:none -encoding UTF-8 --release 11 -cp $cp -d build/where-shot-classes docs/review-evidence/where-to-go-2026-10-29/WhereToGoShot.java
  *   java -Djava.awt.headless=true -Dlogback.configurationFile=... -cp "build/where-shot-classes;$cp" com.pbolduc.mapcompanion.WhereToGoShot <out>
  */
 public class WhereToGoShot
@@ -284,7 +284,7 @@ public class WhereToGoShot
 	{
 		SwingUtilities.invokeAndWait(RuneLiteLAF::setup);
 		List<String> states = args.length > 1 ? Arrays.asList(args).subList(1, args.length)
-			: Arrays.asList("route", "search", "death", "star", "group", "meetup");
+			: Arrays.asList("route", "search", "death", "star", "group", "meetup", "connect", "connect-customise");
 		for (String state : states)
 		{
 			MapCompanionPanel[] panel = new MapCompanionPanel[1];

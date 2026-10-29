@@ -218,6 +218,7 @@ today, by writing their existing setting keys. A new field in a future version s
 An empty group shows Off, a full group shows All N selected, and a partial group shows a native
 dash with N of M selected. Pressing a partial group's checkbox selects its remaining fields;
 pressing a full group's checkbox clears them. Customise only opens the individual choices.
+The one press at Connect, below, is these shortcuts run once with every group ticked.
 Switching tabs preserves both choices and open sections. Hidden Sharing does not reserve its
 expanded height in Overview.
 
@@ -350,6 +351,36 @@ The picture is the real `MapPin` at three times its size on the world map's parc
 from `docs/review-evidence/world-map-2026-10-12/PinShot.java`; compile it beside the plugin's own
 classes (`build/classes/java/main`) and the harness classpath above. A running client is still the
 check for where the pins sit among the game's own icons, and is in the submission guide's list.
+
+## The one press at Connect
+
+Status: **built**, on `claude/where-to-go`, step 9d of `docs/plan-where-to-go-for-a-task.md` in
+`osrs-stars-map`, and not yet seen in a real client. Every setting still starts off; the press is
+the opt-in.
+
+After the server notice of a first Connect, a card under the connecting line, *Choose what to
+share*:
+
+- the four groups as bold checkboxes, all ticked, each with a grey line naming its fields in the
+  Sharing tab's words, *Position and world · Training and idle time · Account type*. The line names
+  only what is ticked, so it always says what the press will send; a partial group shows the dash.
+  Under *Loot and milestones*: *Your group keeps the last two weeks.*
+- *Character name*, ticked, and *Where you died*, not, each with what it sends.
+- *Drawn in this client*: *Show map destinations* and *Group on the world map*, ticked, then the
+  stream they open in one sentence.
+- which map it all goes to, then **Share what's ticked** across the card, and *Customise* and
+  *Not now* as links. Customise swaps each line for a checkbox per field, with the two-weeks line
+  under *Notable drops and levels*; it reads *Fewer details* while open.
+
+Ticking anything in the card, Customise and Not now write nothing. The press writes the ticked
+settings that are off, the way a group's checkbox does, then folds the card; the status card's
+sharing line is the answer. The card follows only a Connect that showed the notice and only while
+every choice it offers is still off, and it is never remembered, so an update or a restart never
+brings it back. Leaving the group takes it away.
+
+At 225px the card is 887px tall folded and 1,253px with Customise open, so the sidebar scrolls to
+the press; it shows once. `WhereToGoShot` paints both, as the states `connect` and
+`connect-customise`, pointed at a port nothing listens on.
 
 ## The way there, step by step
 
