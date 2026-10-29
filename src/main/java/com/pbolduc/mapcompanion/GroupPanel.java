@@ -63,12 +63,12 @@ import net.runelite.client.ui.ColorScheme;
  * because online and world are the game's to say; where they are, <i>near</i> a landmark as the map
  * words it, and <i>Near you</i>; their newest level or drop. Then <b>Route</b>, once, to where they
  * stand now — pressed again it reads <b>Reroute</b> and asks again, and nothing follows them on its
- * own — and <b>World map</b>, which draws that friend's dot on the game's world map while its group layer is
- * off. A friend who shares no position shows a name and presence and nothing else.
+ * own — and <b>World map</b>, which draws that friend's dot on the game's world map while its
+ * group layer is off. A friend who shares no position shows a name and presence and nothing else.
  *
- * <p><b>A meetup</b> says its title, when in the player's own clock with a countdown, where in
- * words with its world, and who is coming as their discs. <b>Route</b> plans the way and tells
- * nobody; the <i>On my way</i> answer is the press that does. The four answers are the map's own
+ * <p><b>A meetup</b> says its title, with <b>Route</b> beside it, when in the player's own clock
+ * with a countdown, where in words with its world, and who is coming as their discs. Route plans
+ * the way and tells nobody; the <i>On my way</i> answer is the press that does. The four answers are the map's own
  * and answer for the browser this member is bound to.
  *
  * <p><b>Meet here</b>, on the Meetups heading, opens a short form under the meetups: a title, a day
@@ -470,9 +470,36 @@ final class GroupPanel extends JPanel
 	{
 		JPanel card = card();
 		card.setName("group.meetup." + meetup.id);
+		String source = source(meetup);
+		RoutePress.Said said = press.said(source);
+		boolean planning = said != null && said.planning;
+		JButton route = MapCompanionPanel.smallButton(planning ? "Planning…" : "Route");
+		route.setName("group.meetupRoute." + meetup.id);
+		route.setEnabled(ready && !planning && press.ready());
+		route.setToolTipText("Plan the way to this meetup from where you stand. Nobody is told you are coming.");
+		route.addActionListener(e ->
+		{
+			press.press(RoutePress.Target.tile(source, new WorldPoint(meetup.x, meetup.y, meetup.plane), meetup.title,
+				meetup.world, when(meetup.startsAtMs, System.currentTimeMillis(), ZoneId.systemDefault(),
+					Locale.getDefault(Locale.Category.FORMAT))));
+			drawn = null;
+			refresh(ready);
+		});
+		/*
+		 * Route beside the title rather than on a row of its own over the answers: a meetup was three
+		 * rows of buttons, and the title's line had room for one.
+		 */
+		JPanel top = new JPanel(new java.awt.BorderLayout(4, 0));
+		top.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		JLabel name = label(12f, Color.WHITE);
-		MapCompanionPanel.setWrapped(name, meetup.title, WIDTH);
-		card.add(MapCompanionPanel.left(name));
+		MapCompanionPanel.setWrapped(name, meetup.title, WIDTH - route.getPreferredSize().width - 4);
+		top.add(name, java.awt.BorderLayout.CENTER);
+		JPanel hug = new JPanel(new java.awt.BorderLayout());
+		hug.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		hug.add(route, java.awt.BorderLayout.NORTH);
+		top.add(hug, java.awt.BorderLayout.EAST);
+		top.setMaximumSize(new java.awt.Dimension(Integer.MAX_VALUE, top.getPreferredSize().height));
+		card.add(MapCompanionPanel.left(top));
 		JLabel when = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
 		MapCompanionPanel.setWrapped(when, when(meetup.startsAtMs, now, ZoneId.systemDefault(),
 			Locale.getDefault(Locale.Category.FORMAT)), WIDTH);
@@ -494,28 +521,9 @@ final class GroupPanel extends JPanel
 			card.add(MapCompanionPanel.left(who));
 		}
 		String mine = group.mine(meetup, now);
-		String source = source(meetup);
-		RoutePress.Said said = press.said(source);
-		boolean planning = said != null && said.planning;
-		JPanel actions = actions();
-		JButton route = MapCompanionPanel.smallButton(planning ? "Planning…" : "Route");
-		route.setName("group.meetupRoute." + meetup.id);
-		route.setEnabled(ready && !planning && press.ready());
-		route.setToolTipText("Plan the way to this meetup from where you stand. Nobody is told you are coming.");
-		route.addActionListener(e ->
-		{
-			press.press(RoutePress.Target.tile(source, new WorldPoint(meetup.x, meetup.y, meetup.plane), meetup.title,
-				meetup.world, when(meetup.startsAtMs, System.currentTimeMillis(), ZoneId.systemDefault(),
-					Locale.getDefault(Locale.Category.FORMAT))));
-			drawn = null;
-			refresh(ready);
-		});
-		actions.add(route);
 		MeetupClient.Said answer = meetups.said("answer:" + meetup.id);
 		boolean sending = answer != null && answer.sending;
 		card.add(gap(5));
-		card.add(MapCompanionPanel.left(actions));
-		card.add(gap(4));
 		JPanel answers = new JPanel(new GridLayout(2, 2, 4, 4));
 		answers.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		for (String option : SocialWire.ANSWERS)

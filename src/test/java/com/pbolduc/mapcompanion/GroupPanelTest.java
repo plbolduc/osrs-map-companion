@@ -263,7 +263,14 @@ public class GroupPanelTest
 		assertEquals("/api/companion/event/answer", request.url().encodedPath());
 		assertEquals("{\"eventId\":\"star-hunt\",\"answer\":\"no\"}", MeetupClientTest.body(request).toString());
 
-		SwingUtilities.invokeAndWait(() -> named(panel.get(), "group.meetupRoute.star-hunt").doClick());
+		SwingUtilities.invokeAndWait(() ->
+		{
+			/* Route is on the title's line, the card's first row, rather than a row of its own. */
+			Container card = (Container) namedComponent(panel.get(), "group.meetup.star-hunt");
+			Component route = named(panel.get(), "group.meetupRoute.star-hunt");
+			assertTrue(javax.swing.SwingUtilities.isDescendingFrom(route, card.getComponent(0)));
+			named(panel.get(), "group.meetupRoute.star-hunt").doClick();
+		});
 		until(() -> sent.size() == 2);
 		assertEquals("Route goes to the route endpoint and answers nothing", "/api/companion/route",
 			sent.get(1).url().encodedPath());
