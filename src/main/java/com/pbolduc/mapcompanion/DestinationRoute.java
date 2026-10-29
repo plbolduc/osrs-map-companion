@@ -75,10 +75,18 @@ public class DestinationRoute
 	private int step;
 	/** Bumped whenever the route stops belonging to what a Reroute in flight asked about. */
 	private long generation;
+	/** Changes when a route or an explicit Follow/Reroute replaces the path being drawn. */
+	private long revision;
 	private boolean rerouting;
 	@Nullable
 	private String message;
 	private long nextRerouteMs;
+	/**
+	 * The player asked to follow this route: pressed Follow, or Reroute. Only then is Shortest Path
+	 * drawn on, because a destination that merely arrived — a friend's included — must never replace
+	 * the target the player gave it themselves.
+	 */
+	private boolean following;
 
 	/** One moment of the route, for the sidebar and the pins. Never changes after it is made. */
 	static final class View
@@ -98,10 +106,14 @@ public class DestinationRoute
 		@Nullable
 		final String message;
 		final long nextRerouteMs;
+		final boolean following;
+		final long revision;
 
 		View(String key, WorldPoint target, List<RelayResponse.RouteOption> ways, int chosen, int step, @Nullable String origin,
-			boolean rerouted, boolean rerouting, @Nullable String message, long nextRerouteMs)
+			boolean rerouted, boolean rerouting, @Nullable String message, long nextRerouteMs, boolean following, long revision)
 		{
+			this.revision = revision;
+			this.following = following;
 			this.key = key;
 			this.target = target;
 			this.ways = ways;
@@ -198,6 +210,7 @@ public class DestinationRoute
 			generation++;
 			rerouted = false;
 			rerouting = false;
+			following = false;
 			message = null;
 			adopt(destination == null ? null : destination.route);
 			return;
@@ -211,6 +224,7 @@ public class DestinationRoute
 
 	private void adopt(@Nullable RelayResponse.Route incoming)
 	{
+		revision++;
 		route = incoming;
 		received = incoming == null ? "" : signature(incoming);
 		chosen = best(incoming);
@@ -236,6 +250,27 @@ public class DestinationRoute
 		}
 		step = next;
 		return true;
+	}
+
+	/** Follow this route, or stop. The player's own press; see {@link #following}. */
+	synchronized void follow(boolean on)
+	{
+		following = on && route != null;
+		if (following)
+		{
+			revision++;
+		}
+		message = null;
+	}
+
+	/** Stop following because something else took Shortest Path over, and say so. */
+	synchronized void stopFollowing(String why)
+	{
+		if (following)
+		{
+			following = false;
+			message = why;
+		}
 	}
 
 	/** Show another of the ways, from its first step. The player's own press. */
@@ -291,8 +326,11 @@ public class DestinationRoute
 		message = why;
 		if (answer != null)
 		{
+			revision++;
 			route = answer;
 			rerouted = true;
+			/* Reroute is a press of the player's own, as Follow is. */
+			following = true;
 			chosen = best(answer);
 			step = 0;
 		}
@@ -307,6 +345,7 @@ public class DestinationRoute
 		received = null;
 		rerouted = false;
 		rerouting = false;
+		following = false;
 		message = null;
 		chosen = 0;
 		step = 0;
@@ -329,7 +368,8 @@ public class DestinationRoute
 		List<RelayResponse.RouteOption> ways = route == null
 			? Collections.<RelayResponse.RouteOption>emptyList()
 			: Collections.unmodifiableList(route.options);
-		return new View(key, target, ways, chosen, step, route == null ? null : route.origin, rerouted, rerouting, message, nextRerouteMs);
+		return new View(key, target, ways, chosen, step, route == null ? null : route.origin, rerouted, rerouting,
+			message, nextRerouteMs, following, revision);
 	}
 
 	/**

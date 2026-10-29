@@ -180,6 +180,12 @@ public class MapCompanionPanel extends PluginPanel
 	private final DestinationRoute destinationRoute;
 	/** Ask the map for the way again from where the player stands. See {@link RouteClient}. */
 	private final JButton rerouteButton = smallButton("Reroute");
+	/**
+	 * Follow this route with Shortest Path, or stop. The only door to Shortest Path besides Reroute,
+	 * so a destination that merely arrives never draws on the player's own path.
+	 */
+	private final JButton followButton = smallButton("Follow");
+	private final ShortestPath shortestPath;
 
 	/* Drop luck: one monster's card, or every monster tracked. See {@link DropLuckPanel}. */
 	private final JPanel drySection = column(ColorScheme.DARK_GRAY_COLOR);
@@ -275,7 +281,8 @@ public class MapCompanionPanel extends PluginPanel
 		ItemManager itemManager,
 		StarsClient starsClient,
 		DestinationRoute destinationRoute,
-		RouteClient routeClient)
+		RouteClient routeClient,
+		ShortestPath shortestPath)
 	{
 		this.config = config;
 		this.plugin = plugin;
@@ -292,6 +299,7 @@ public class MapCompanionPanel extends PluginPanel
 		this.relay = relay;
 		this.directiveStream = directiveStream;
 		this.destinationRoute = destinationRoute;
+		this.shortestPath = shortestPath;
 		this.routeSteps = new RouteStepsView(way ->
 		{
 			destinationRoute.choose(way);
@@ -432,6 +440,12 @@ public class MapCompanionPanel extends PluginPanel
 		rerouteButton.addActionListener(e ->
 		{
 			routeClient.reroute();
+			refresh();
+		});
+		followButton.addActionListener(e ->
+		{
+			DestinationRoute.View route = destinationRoute.view();
+			destinationRoute.follow(route == null || !route.following);
 			refresh();
 		});
 		dismissButton.setToolTipText("Hide this destination on this client. The map is not told.");
@@ -991,8 +1005,18 @@ public class MapCompanionPanel extends PluginPanel
 			DestinationRoute.View route = destinationRoute.view();
 			boolean steps = destination != null && route != null && route.hasRoute()
 				&& route.key.equals(DestinationRoute.keyOf(destination));
-			routeSteps.show(steps ? route : null);
+			boolean drawable = steps && config.drawWithShortestPath() && shortestPath.installed() && !route.arrived();
+			routeSteps.show(steps ? route : null,
+				steps ? RouteStepsView.shortestPathLine(route, drawable, shortestPath.drawing()) : null);
 			List<JButton> destinationRow = new ArrayList<>();
+			if (drawable)
+			{
+				followButton.setText(route.following ? "Stop" : "Follow");
+				followButton.setToolTipText(route.following
+					? "Stop drawing this route with Shortest Path, and clear the path it drew"
+					: "Have Shortest Path draw each walking step of this route. It is sent nothing for a teleport or a ride.");
+				destinationRow.add(followButton);
+			}
 			if (steps)
 			{
 				destinationRow.add(rerouteButton);
