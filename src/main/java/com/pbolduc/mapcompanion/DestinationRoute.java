@@ -85,6 +85,8 @@ public class DestinationRoute
 	{
 		/** The destination it belongs to; see {@link #keyOf}. */
 		final String key;
+		/** That destination's own tile, where its own pin already stands. */
+		final WorldPoint target;
 		final List<RelayResponse.RouteOption> ways;
 		final int chosen;
 		/** The current step of the chosen way; its step count once arrived. */
@@ -97,10 +99,11 @@ public class DestinationRoute
 		final String message;
 		final long nextRerouteMs;
 
-		View(String key, List<RelayResponse.RouteOption> ways, int chosen, int step, @Nullable String origin,
+		View(String key, WorldPoint target, List<RelayResponse.RouteOption> ways, int chosen, int step, @Nullable String origin,
 			boolean rerouted, boolean rerouting, @Nullable String message, long nextRerouteMs)
 		{
 			this.key = key;
+			this.target = target;
 			this.ways = ways;
 			this.chosen = chosen;
 			this.step = step;
@@ -138,6 +141,24 @@ public class DestinationRoute
 		{
 			List<RelayResponse.RouteStep> steps = steps();
 			return step < steps.size() ? steps.get(step) : null;
+		}
+
+		/**
+		 * Where the player is headed next: the current step's end, or the end of the first step after
+		 * it that names one. Null once arrived, or when nothing ahead names a tile.
+		 */
+		@Nullable
+		WorldPoint next()
+		{
+			List<RelayResponse.RouteStep> steps = steps();
+			for (int i = step; i < steps.size(); i++)
+			{
+				if (steps.get(i).at != null)
+				{
+					return point(steps.get(i).at);
+				}
+			}
+			return null;
 		}
 	}
 
@@ -308,7 +329,7 @@ public class DestinationRoute
 		List<RelayResponse.RouteOption> ways = route == null
 			? Collections.<RelayResponse.RouteOption>emptyList()
 			: Collections.unmodifiableList(route.options);
-		return new View(key, ways, chosen, step, route == null ? null : route.origin, rerouted, rerouting, message, nextRerouteMs);
+		return new View(key, target, ways, chosen, step, route == null ? null : route.origin, rerouted, rerouting, message, nextRerouteMs);
 	}
 
 	/**

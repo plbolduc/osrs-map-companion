@@ -32,7 +32,7 @@ final class TestDestinationMarker extends DestinationMarker
 
 	TestDestinationMarker()
 	{
-		super(null, null, null, null);
+		super(null, null, null, null, null);
 	}
 
 	@Override
