@@ -35,6 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import net.runelite.client.config.ConfigItem;
 import org.junit.Test;
@@ -185,6 +186,33 @@ public class SharingControlsTest
 			assertFalse(find(controls, "sharePosition").isSelected());
 			assertNull(find(controls, "shareGroup.presence").getClientProperty("JButton.selectedState"));
 			assertNull(store.get("sharePosition"));
+		});
+	}
+
+	/** The box is only what the group sees while the name is off, so only then is it there. */
+	@Test
+	public void theNameBoxShowsOnlyWhileTheCharacterNameIsOff() throws Exception
+	{
+		SwingUtilities.invokeAndWait(() ->
+		{
+			HarnessStore store = new HarnessStore();
+			HarnessConfig config = new HarnessConfig(store, MapCompanionConfig.DEFAULT_MAP_URL);
+			config.nickname("Me");
+			SharingControls controls = new SharingControls(config, store);
+			JTextField box = (JTextField) named(controls, "nickname");
+			assertTrue(box.isVisible());
+			/* A saved "Me" is the map's word for none, so the box shows it as empty. */
+			assertEquals("", box.getText());
+
+			config.set(MapCompanionConfig.KEY_SHARE_NAME, true);
+			controls.refresh();
+			assertFalse(box.isVisible());
+
+			config.nickname("Scout");
+			config.set(MapCompanionConfig.KEY_SHARE_NAME, false);
+			controls.refresh();
+			assertTrue(box.isVisible());
+			assertEquals("Scout", box.getText());
 		});
 	}
 

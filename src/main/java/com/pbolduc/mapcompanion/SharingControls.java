@@ -52,6 +52,8 @@ import net.runelite.client.ui.ColorScheme;
  * the sidebar discloses the server once at Connect, before any request. These choices only select
  * which fields may be sent after that approval. Refresh cannot grant approval or change a preference.
  * The fields and their words are {@link SharingFields}, which the step after a first Connect reads too.
+ * The name box shows only while the character name is off, because only then is it what the group
+ * sees (see {@code SnapshotBuilder.nickname}).
  */
 final class SharingControls extends JPanel
 {
@@ -61,6 +63,8 @@ final class SharingControls extends JPanel
 	private final List<Choice> choices = new ArrayList<>();
 	private final List<Group> groups = new ArrayList<>();
 	private final JTextField nickname = new JTextField();
+	private final JLabel nicknameLabel = new JLabel("Name to show instead");
+	private final JLabel nicknameHint = new JLabel("Leave it empty to show as Member.");
 	private String displayedNickname;
 
 	SharingControls(MapCompanionConfig config, ConfigStore store)
@@ -74,14 +78,13 @@ final class SharingControls extends JPanel
 		JPanel privacy = column();
 		choice(privacy, SharingFields.NAME);
 		choice(privacy, SharingFields.DEATH);
-		JLabel nicknameLabel = new JLabel("Name to show");
 		nicknameLabel.setFont(nicknameLabel.getFont().deriveFont(11f));
 		nicknameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 		privacy.add(nicknameLabel);
-		nickname.setText(config.nickname());
+		nickname.setName("nickname");
 		nickname.setMaximumSize(new Dimension(Integer.MAX_VALUE, nickname.getPreferredSize().height));
 		nickname.setAlignmentX(Component.LEFT_ALIGNMENT);
-		nickname.setToolTipText("An alias shown instead of your character name. Saves on Enter or when you leave the field.");
+		nickname.setToolTipText("What your group sees beside your dot. Saves on Enter or when you leave the field.");
 		nickname.addActionListener(e -> saveNickname());
 		nickname.addFocusListener(new FocusAdapter()
 		{
@@ -92,6 +95,10 @@ final class SharingControls extends JPanel
 			}
 		});
 		privacy.add(nickname);
+		nicknameHint.setFont(nicknameHint.getFont().deriveFont(11f));
+		nicknameHint.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+		nicknameHint.setAlignmentX(Component.LEFT_ALIGNMENT);
+		privacy.add(nicknameHint);
 
 		for (SharingFields.Section section : SharingFields.GROUPS)
 		{
@@ -144,11 +151,16 @@ final class SharingControls extends JPanel
 			choice.box.setSelected(choice.read.getAsBoolean());
 		}
 		for (Group group : groups) group.refresh();
-		if (!java.util.Objects.equals(displayedNickname, config.nickname()))
+		String alias = SnapshotBuilder.alias(config);
+		if (!alias.equals(displayedNickname))
 		{
-			displayedNickname = config.nickname();
-			nickname.setText(displayedNickname);
+			displayedNickname = alias;
+			nickname.setText(alias);
 		}
+		boolean ownName = !config.shareName();
+		nicknameLabel.setVisible(ownName);
+		nickname.setVisible(ownName);
+		nicknameHint.setVisible(ownName);
 	}
 
 	/** A group is a shortcut over today's known fields, never a persisted permission of its own. */
@@ -167,7 +179,7 @@ final class SharingControls extends JPanel
 	private void saveNickname()
 	{
 		String requested = nickname.getText().trim();
-		if (!requested.equals(config.nickname()))
+		if (!requested.equals(SnapshotBuilder.alias(config)))
 		{
 			store.set("nickname", requested);
 		}
