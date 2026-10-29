@@ -250,6 +250,8 @@ public class RecommendedSharingTest
 			assertTrue("the stream is said on the card", closed.contains(RecommendedSharing.STREAM_SHORT));
 			assertTrue("the map it goes to", closed.contains("Sent to osrs-map.com while you're logged in; your group sees it."));
 			assertTrue("What each one sends is on the card", closed.contains("What each one sends"));
+			assertTrue("and where to change it later", closed.contains(RecommendedSharing.INTRO));
+			assertTrue(RecommendedSharing.INTRO.endsWith("later in Settings."));
 			assertFalse("the field lists wait in the fold", closed.contains(RecommendedSharing.STREAM));
 		});
 	}
