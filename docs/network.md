@@ -19,10 +19,10 @@ an unchanged character normally sends a heartbeat every six seconds, or twenty w
 stream connected. Automatic character sharing stops while logged out.
 
 **The step after a first Connect.** Every sharing setting, **Show destinations from the map** and
-**Show my group on the world map** start off. After the server notice, the sidebar shows the four
-sharing groups with each field named, the character name and those two drawing choices, all
-ticked, and *Where you died* unticked; it says that the two drawing choices open the receive
-stream. **Share what's ticked** writes exactly the ticked settings, as the Sharing tab's group
+**Show my group on the world map** start off. After the server notice, the sidebar shows a row each for the
+four sharing groups, the character name and those two drawing choices, all ticked, and *Where you
+died* unticked, with a line saying the drawing choices open one connection. *What each one sends*,
+a fold under the rows, names every field and describes the receive stream in full. **Share what's ticked** writes exactly the ticked settings, as the Sharing tab's group
 shortcuts do, and is the only thing in the step that changes anything: ticking, **Customise** and
 **Not now** write nothing, and nothing in the step makes a request. It follows only a Connect that
 showed the notice, which runs once per map, and only while every choice it could turn on is still

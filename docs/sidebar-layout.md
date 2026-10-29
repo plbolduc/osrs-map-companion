@@ -359,18 +359,21 @@ Status: **built**, on `claude/where-to-go`, step 9d of `docs/plan-where-to-go-fo
 the opt-in.
 
 After the server notice of a first Connect, a card under the connecting line, *Choose what to
-share*:
+share*, with one short row per choice:
 
-- the four groups as bold checkboxes, all ticked, each with a grey line naming its fields in the
-  Sharing tab's words, *Position and world · Training and idle time · Account type*. The line names
-  only what is ticked, so it always says what the press will send; a partial group shows the dash.
-  Under *Loot and milestones*: *Your group keeps the last two weeks.*
-- *Character name*, ticked, and *Where you died*, not, each with what it sends.
-- *Drawn in this client*: *Show map destinations* and *Group on the world map*, ticked, then the
-  stream they open in one sentence.
-- which map it all goes to, then **Share what's ticked** across the card, and *Customise* and
-  *Not now* as links. Customise swaps each line for a checkbox per field, with the two-weeks line
-  under *Notable drops and levels*; it reads *Fewer details* while open.
+- the four groups as bold checkboxes, all ticked; the loot row reads *Loot and milestones · kept
+  two weeks*. A partial group shows the dash.
+- *Character name*, ticked, and *Where you died*, not.
+- *Drawn in this client*: *Show map destinations* and *Group on the world map*, ticked, and under
+  them *Opens one connection while you're logged in.*
+- *▸ What each one sends*, a fold holding each row's name over what it sends: the groups' fields in
+  the Sharing tab's words, *Position and world · Training and idle time · Account type*, naming only
+  what is ticked so it always says what the press will send; *Your group keeps the last two
+  weeks.* under the loot fields; and the receive stream in full.
+- *Sent to osrs-map.com while you're logged in; your group sees it.*, then **Share what's ticked**
+  across the card, and *Customise* and *Not now* as links. Customise shows a checkbox per field
+  under each row, with the two-weeks line under *Notable drops and levels*; it reads *Fewer
+  details* while open.
 
 Ticking anything in the card, Customise and Not now write nothing. The press writes the ticked
 settings that are off, the way a group's checkbox does, then folds the card; the status card's
@@ -378,9 +381,9 @@ sharing line is the answer. The card follows only a Connect that showed the noti
 every choice it offers is still off, and it is never remembered, so an update or a restart never
 brings it back. Leaving the group takes it away.
 
-At 225px the card is 887px tall folded and 1,253px with Customise open, so the sidebar scrolls to
-the press; it shows once. `WhereToGoShot` paints both, as the states `connect` and
-`connect-customise`, pointed at a port nothing listens on.
+At 225px the card is 443px tall with the fold closed, so the press is in reach without scrolling;
+953px with *What each one sends* open and 1,015px with Customise. `WhereToGoShot` paints the three
+as `connect`, `connect-fold-open` and `connect-customise`, pointed at a port nothing listens on.
 
 ## The way there, step by step
 

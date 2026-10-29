@@ -52,8 +52,9 @@ import net.runelite.client.ui.ColorScheme;
  *
  * <p>Every sharing setting still starts off, and RuneLite's warning stays on each one. What this
  * adds is the press: after the server notice, a new player is shown the four sharing groups, their
- * character name and the two things this client draws from the map, all ticked, with every field
- * named and the one stream they open said in words, and pressing <i>Share what's ticked</i> writes
+ * character name and the two things this client draws from the map, all ticked, one short row each
+ * so the press is in reach without scrolling. Every field and the one stream they open are named in
+ * <i>What each one sends</i>, one tap below the rows, and pressing <i>Share what's ticked</i> writes
  * those settings exactly as the Sharing tab's group shortcuts write them. Until then nothing is
  * stored: ticking, unticking and <i>Customise</i> change this step and nothing else, and <i>Not
  * now</i> leaves every setting as it was.
@@ -85,7 +86,10 @@ final class RecommendedSharing extends JPanel
 		MapCompanionConfig.KEY_SHARE_NAME,
 		"showDestination", "showGroupOnWorldMap"));
 
-	/** The stream the two drawing choices open, in the words the step prints under them. */
+	/** The stream the two drawing choices open, in one line under them. */
+	static final String STREAM_SHORT = "Opens one connection while you're logged in.";
+
+	/** The same stream in full, in the fold under the rows. */
 	static final String STREAM = "Either one opens the map's receive stream: one connection, held open while you "
 		+ "are logged in, that brings destinations, meetups and your group's positions. It carries your group "
 		+ "code and member id, and nothing about your character.";
@@ -98,6 +102,8 @@ final class RecommendedSharing extends JPanel
 	private static final int TEXT = MapCompanionPanel.CARD_TEXT_WIDTH;
 	private static final int INDENT = 20;
 	private static final Color BACK = ColorScheme.DARKER_GRAY_COLOR;
+	/** The loot row's own reminder, short enough to sit on the row; the fold says it in full. */
+	static final String LOOT_ROW = SharingFields.LOOT.title + " · kept two weeks";
 
 	private final MapCompanionConfig config;
 	private final ConfigStore store;
@@ -134,27 +140,38 @@ final class RecommendedSharing extends JPanel
 		card.add(intro);
 		card.add(gap(6));
 
+		/*
+		 * One short row per choice, so the press is in reach without scrolling, and what each row
+		 * sends one tap below them in the fold: nothing is hidden before the press.
+		 */
+		JPanel details = column();
+		details.setName("recommended.details");
 		for (SharingFields.Section section : SharingFields.GROUPS)
 		{
-			Group group = new Group(section);
+			Group group = new Group(section, details);
 			groups.add(group);
 			card.add(group.panel);
 		}
-		card.add(single(SharingFields.NAME, SharingFields.NAME.detail));
-		card.add(single(SharingFields.DEATH, DEATH_DETAIL));
-		card.add(gap(6));
+		card.add(single(SharingFields.NAME, SharingFields.NAME.detail, details));
+		card.add(single(SharingFields.DEATH, DEATH_DETAIL, details));
+		card.add(gap(4));
 
 		JLabel drawn = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
 		drawn.setFont(drawn.getFont().deriveFont(Font.BOLD));
 		drawn.setText("Drawn in this client");
 		card.add(drawn);
-		card.add(single(SharingFields.DESTINATIONS, DESTINATIONS_DETAIL));
-		card.add(single(SharingFields.GROUP_ON_WORLD_MAP, GROUP_DETAIL));
-		JLabel stream = indented(label(11f, ColorScheme.LIGHT_GRAY_COLOR));
-		stream.setName("recommended.stream");
-		MapCompanionPanel.setWrapped(stream, STREAM, TEXT - INDENT);
-		card.add(stream);
-		card.add(gap(6));
+		card.add(single(SharingFields.DESTINATIONS, DESTINATIONS_DETAIL, details));
+		card.add(single(SharingFields.GROUP_ON_WORLD_MAP, GROUP_DETAIL, details));
+		JLabel opens = indented(label(11f, ColorScheme.LIGHT_GRAY_COLOR));
+		opens.setName("recommended.opens");
+		MapCompanionPanel.setWrapped(opens, STREAM_SHORT, TEXT - INDENT);
+		card.add(opens);
+		JLabel stream = detailLine("recommended.stream", STREAM);
+		details.add(heading("The connection"));
+		details.add(stream);
+		card.add(gap(4));
+		card.add(fold(details));
+		card.add(gap(4));
 
 		where.setName("recommended.where");
 		card.add(where);
@@ -250,8 +267,7 @@ final class RecommendedSharing extends JPanel
 			box.getValue().setSelected(KEYS.contains(box.getKey()));
 		}
 		customise(false);
-		MapCompanionPanel.setWrapped(where, "What is ticked goes to " + server + " with the updates this plugin "
-			+ "sends while you are logged in, and your group's members see it.", TEXT);
+		MapCompanionPanel.setWrapped(where, "Sent to " + server + " while you're logged in; your group sees it.", TEXT);
 		refreshGroups();
 		setVisible(true);
 		revalidate();
@@ -307,18 +323,55 @@ final class RecommendedSharing extends JPanel
 		for (Group group : groups) group.refresh();
 	}
 
-	/** A choice of its own: a checkbox in the group's weight and the line saying what it sends. */
-	private JPanel single(SharingFields.Field field, String detail)
+	/** A choice of its own: a row in the group's weight, and what it sends in the fold. */
+	private JPanel single(SharingFields.Field field, String detail, JPanel details)
 	{
 		JPanel panel = column();
-		panel.setBorder(BorderFactory.createEmptyBorder(3, 0, 3, 0));
+		panel.setBorder(BorderFactory.createEmptyBorder(1, 0, 1, 0));
 		JCheckBox box = box(field, 12f);
 		box.setFont(box.getFont().deriveFont(Font.BOLD));
 		panel.add(box);
-		JLabel line = indented(label(11f, ColorScheme.LIGHT_GRAY_COLOR));
-		MapCompanionPanel.setWrapped(line, detail, TEXT - INDENT);
-		panel.add(line);
+		details.add(heading(field.label));
+		details.add(detailLine("recommended.detail." + field.key, detail));
 		return panel;
+	}
+
+	/** The fold under the rows: what each one sends, and the stream in full. */
+	private JPanel fold(JPanel details)
+	{
+		JPanel panel = column();
+		JButton toggle = MapCompanionPanel.linkButton("▸ What each one sends");
+		toggle.setName("recommended.detailsToggle");
+		details.setBorder(BorderFactory.createEmptyBorder(0, 0, 4, 0));
+		details.setVisible(false);
+		toggle.addActionListener(e ->
+		{
+			details.setVisible(!details.isVisible());
+			toggle.setText((details.isVisible() ? "▾ " : "▸ ") + "What each one sends");
+			revalidate();
+			repaint();
+		});
+		panel.add(toggle);
+		panel.add(details);
+		return panel;
+	}
+
+	/** A row's name in the fold, small and bold, over the line that says what it sends. */
+	private static JLabel heading(String text)
+	{
+		JLabel heading = label(11f, Color.WHITE);
+		heading.setFont(heading.getFont().deriveFont(Font.BOLD));
+		heading.setBorder(BorderFactory.createEmptyBorder(4, 0, 0, 0));
+		MapCompanionPanel.setWrapped(heading, text, TEXT);
+		return heading;
+	}
+
+	private static JLabel detailLine(String name, String text)
+	{
+		JLabel line = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
+		line.setName(name);
+		MapCompanionPanel.setWrapped(line, text, TEXT);
+		return line;
 	}
 
 	private JCheckBox box(SharingFields.Field field, float size)
@@ -371,8 +424,8 @@ final class RecommendedSharing extends JPanel
 	}
 
 	/**
-	 * One sharing group: its shortcut, then either the fields a press would share, named in a line,
-	 * or under Customise a checkbox each. The line names only what is ticked, so it always says
+	 * One sharing group: its row, a checkbox each under Customise, and in the fold the fields a
+	 * press would share, named in a line. The line names only what is ticked, so it always says
 	 * exactly what the press will send.
 	 */
 	private final class Group
@@ -380,17 +433,18 @@ final class RecommendedSharing extends JPanel
 		final SharingFields.Section section;
 		final JPanel panel = column();
 		final JCheckBox master;
-		final JLabel summary = indented(label(11f, ColorScheme.LIGHT_GRAY_COLOR));
+		final JLabel summary = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
 		final JPanel options = column();
 		final List<JCheckBox> members = new ArrayList<>();
-		/* What a group keeps, under the loot line folded and under Drops and levels' own box open. */
-		JLabel kept;
 
-		Group(SharingFields.Section section)
+		Group(SharingFields.Section section, JPanel details)
 		{
 			this.section = section;
-			panel.setBorder(BorderFactory.createEmptyBorder(3, 0, 3, 0));
-			master = new JCheckBox(section.title);
+			panel.setBorder(BorderFactory.createEmptyBorder(1, 0, 1, 0));
+			/* The loot row's reminder wraps under its title in the grey of a note, rather than being cut. */
+			master = new JCheckBox(section != SharingFields.LOOT ? section.title
+				: "<html><body width='" + (TEXT - 30) + "'>" + SharingFields.LOOT.title
+				+ " <font color='#a5a5a5'>· kept two weeks</font></body></html>");
 			master.setName("recommended.group." + section.id);
 			master.setBackground(BACK);
 			master.setFont(master.getFont().deriveFont(Font.BOLD, 12f));
@@ -403,7 +457,8 @@ final class RecommendedSharing extends JPanel
 			});
 			panel.add(master);
 			summary.setName("recommended.summary." + section.id);
-			panel.add(summary);
+			details.add(heading(section.title));
+			details.add(summary);
 			options.setBorder(BorderFactory.createEmptyBorder(0, INDENT, 0, 0));
 			for (SharingFields.Field field : section.fields)
 			{
@@ -420,20 +475,14 @@ final class RecommendedSharing extends JPanel
 			panel.add(options);
 			if (section == SharingFields.LOOT)
 			{
-				/* Beside Drops and levels, because that is the field a group's feed is made of. */
-				kept = keptLine("recommended.kept", INDENT, TEXT - INDENT);
-				panel.add(kept);
+				/* In full beside the loot fields; the row itself says "kept two weeks". */
+				details.add(keptLine("recommended.kept", 0, TEXT));
 			}
 		}
 
 		void customise(boolean open)
 		{
 			options.setVisible(open);
-			summary.setVisible(!open);
-			if (kept != null)
-			{
-				kept.setVisible(!open);
-			}
 		}
 
 		JLabel keptLine(String name, int left, int width)
@@ -454,7 +503,7 @@ final class RecommendedSharing extends JPanel
 			}
 			master.setSelected(on.size() == members.size());
 			master.putClientProperty("JButton.selectedState", !on.isEmpty() && on.size() < members.size() ? "indeterminate" : null);
-			MapCompanionPanel.setWrapped(summary, on.isEmpty() ? "Nothing from this group" : String.join(" · ", on), TEXT - INDENT);
+			MapCompanionPanel.setWrapped(summary, on.isEmpty() ? "Nothing from this group" : String.join(" · ", on), TEXT);
 		}
 	}
 }

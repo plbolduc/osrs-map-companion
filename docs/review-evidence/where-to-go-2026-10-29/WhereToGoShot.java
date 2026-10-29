@@ -26,7 +26,8 @@ import okhttp3.OkHttpClient;
  * Paints the real MapCompanionPanel at 225px wide with RuneLite's own look and feel, in the states
  * the where-to-go plan's steps 5a, 6, 8, 9 and 9d added: a destination with its steps, the search box
  * with results, the Group section with three friends, the meetups with their answers, the
- * death card's Route back, and the step after a first Connect, folded and with Customise open. Synthetic local state and made-up names; no game account or network.
+ * death card's Route back, and the step after a first Connect: closed, with What each one sends
+ * open, and with Customise open. Synthetic local state and made-up names; no game account or network.
  *
  * Built like sharing-sidebar-2026-10-11/SidebarShot.java, whose helpers it copies rather than
  * imports, because that one still names a world-hop class this branch no longer has. Reproduce
@@ -284,7 +285,7 @@ public class WhereToGoShot
 	{
 		SwingUtilities.invokeAndWait(RuneLiteLAF::setup);
 		List<String> states = args.length > 1 ? Arrays.asList(args).subList(1, args.length)
-			: Arrays.asList("route", "search", "death", "star", "group", "meetup", "connect", "connect-customise");
+			: Arrays.asList("route", "search", "death", "star", "group", "meetup", "connect", "connect-fold-open", "connect-customise");
 		for (String state : states)
 		{
 			MapCompanionPanel[] panel = new MapCompanionPanel[1];
@@ -337,6 +338,10 @@ public class WhereToGoShot
 				Pairing pairing = (Pairing) get(panel, "pairing");
 				say.invoke(panel, "Connecting to " + pairing.serverLabel() + "… Waiting for the map.");
 				((RecommendedSharing) get(panel, "recommendedSharing")).offer(pairing.serverLabel());
+				if (state.equals("connect-fold-open"))
+				{
+					named(panel, "recommended.detailsToggle").doClick();
+				}
 				if (state.equals("connect-customise"))
 				{
 					named(panel, "recommended.customise").doClick();
