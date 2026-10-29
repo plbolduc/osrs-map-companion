@@ -163,6 +163,12 @@ The website plan's second session, once the routes in the game are built: a memb
 - [ ] **Meetups.** Answer a meetup from the sidebar and see the same answer on that member's browser
       on the website; On my way is one of the four. Meet here on W302 makes a
       meetup at your tile whose copied link opens on the map; inside an instance it refuses.
+- [ ] **The one press at Connect.** On a fresh RuneLite profile, the first Connect shows the notice
+      and then the step, with every group, the name and both drawing choices ticked and *Where you
+      died* not; it fits 225px with no cut word. Customise, untick a field, then Not now: the
+      Sharing tab still shows everything off. Connect to a new local map again and press Share
+      what's ticked: the Sharing tab shows the four groups full, the receive stream opens, *Where
+      you died* and *Notify before a meetup* stay off. Restart RuneLite and reconnect: no step.
 - [ ] **The reminder.** With *Notify before a meetup* on and the minutes set to 2, a meetup two
       minutes off raises one RuneLite notification and no second one; with it off, none.
 

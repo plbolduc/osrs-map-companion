@@ -18,8 +18,19 @@ credentials even with character sharing off. Snapshots are spaced at least two s
 an unchanged character normally sends a heartbeat every six seconds, or twenty with the receive
 stream connected. Automatic character sharing stops while logged out.
 
-**Show destinations from the map** and **Show my group on the world map** start off. Enabling
-either opens a receive stream; group positions are requested only with the latter. **Copy invite**
+**The step after a first Connect.** Every sharing setting, **Show destinations from the map** and
+**Show my group on the world map** start off. After the server notice, the sidebar shows the four
+sharing groups with each field named, the character name and those two drawing choices, all
+ticked, and *Where you died* unticked; it says that the two drawing choices open the receive
+stream. **Share what's ticked** writes exactly the ticked settings, as the Sharing tab's group
+shortcuts do, and is the only thing in the step that changes anything: ticking, **Customise** and
+**Not now** write nothing, and nothing in the step makes a request. It follows only a Connect that
+showed the notice, which runs once per map, and only while every choice it could turn on is still
+off, so a player who connected before, or chose first, is never offered it. Meetup notifications
+are not in it.
+
+Enabling either drawing choice opens a receive stream; group positions are requested only with
+the latter. **Copy invite**
 makes one request for an expiring invite. While **Stars** is open, logged in and connected,
 the star list is fetched about once a minute without character or group credentials. **Sync
 filters with website** starts on for that tab: it reads and writes filters and favourite sites
@@ -104,7 +115,10 @@ log in its own RuneLite config group. Kill logs, pins and observations are chara
 
 On the default map server, live positions and progress stay in temporary memory; there is no stored
 movement history. Group membership, last shared names, invites, meetups and group pins persist.
-An owner may enable a kept activity feed: up to 200 drop/level announcements for 14 days.
+A new group keeps an activity feed of its members' notable drops, levels, quests and diaries:
+up to 200 entries for 14 days. Its owner can turn this off, and a group made before 29 October 2026
+keeps the setting it had. *Drops and levels* and the step after Connect say *Your group keeps the
+last two weeks.*
 Leaving stops new sharing; retained announcements expire under the server's
 [privacy policy](https://osrs-map.com/privacy).
 

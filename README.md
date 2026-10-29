@@ -42,16 +42,18 @@ The pictures use made-up characters and stars.
    a group, or follow a friend's invite.
 3. Press **Copy connection code** on the map, then **Paste** and **Connect** in the plugin's
    sidebar.
-4. Read the server notice. In the **Sharing** tab, turn on **Position and world** under
-   **Map presence** to appear as a dot on the map, and choose anything else you want to share.
+4. Read the server notice. The sidebar then lists what the map uses, ticked, and names every
+   field: press **Share what's ticked**, or **Customise** to choose field by field first, or
+   **Not now** to share nothing yet. The **Sharing** tab changes any of it later.
 
 Nothing is shared until you choose it, and joining a group does not turn anything on. **Name to
 show** sets the name your group sees, which does not have to be your character's. **Copy invite**
 copies a message you can send a friend. **Switch** remembers up to eight groups.
 
 In the plugin's settings, **Show destinations from the map**, **Show my group on the world map**
-and **Notify before a meetup** start off. **Drop luck in chat** and **Point the game's arrow at a
-destination** start on; neither sends anything.
+and **Notify before a meetup** start off; the step after Connect ticks the first two for you to
+confirm. **Drop luck in chat** and **Point the game's arrow at a destination** start on; neither
+sends anything.
 
 ## What you share
 
@@ -60,7 +62,10 @@ Nothing is sent until you press **Connect** and accept the server notice. While 
 and logged in, the plugin sends a random member id, the name you chose and your group's
 credentials, even with every sharing choice off.
 
-Each choice in the **Sharing** tab starts off, and each can send:
+Every choice starts off. After the server notice, one press of **Share what's ticked** turns on
+everything below except where you died, and draws destinations, meetups and your group on the
+world map, which keeps one connection open to the map while you are logged in. Nothing is turned
+on until you press, and you can untick any of it first. Each choice can send:
 
 - **Name and presence:** the display name of the character you are logged in as; your account type;
   your position, your world and what kind of world it is; whether you are inside an instance and
@@ -108,10 +113,10 @@ Show what's sent** shows what would go out right now. The server's operator and 
 members can see what you share.
 
 osrs-map.com keeps live positions and progress in memory only, with no movement history. Groups,
-the names last shared in them, invites, meetups and group pins are kept. A group's owner can turn
-on an activity feed that keeps up to 200 drop and level announcements for 14 days. See the
-[privacy policy](https://osrs-map.com/privacy). **Leave group** stops sharing and deletes the
-plugin's saved credentials; your kill log stays on your computer.
+the names last shared in them, invites, meetups and group pins are kept. A new group keeps two
+weeks of its members' notable drops, levels, quests and diaries, up to 200 entries; its owner can
+turn this off. See the [privacy policy](https://osrs-map.com/privacy). **Leave group** stops
+sharing and deletes the plugin's saved credentials; your kill log stays on your computer.
 
 Shooting star data comes from Star Miners by way of osrs-map.com. The plugin never contacts Star
 Miners, who do not endorse it.

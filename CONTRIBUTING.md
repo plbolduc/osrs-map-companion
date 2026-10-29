@@ -68,6 +68,12 @@ and every reply is read with a size limit. Anything the map sends, a name, a tit
 typed by someone in the group: escape it, strip tags, cap its length, and check that a link is on
 the approved map. Never raise a request rate; failures back off.
 
+**Sharing defaults.** A sharing setting's default stays off, and so do the two that open the
+receive stream. The one press at Connect (`RecommendedSharing`) is the opt-in, and it names every
+field it shares and the stream it opens. A field joins its list, `RecommendedSharing.KEYS`, only
+with its own line in the README's *What you share*, `docs/network.md` and the reviewer notes, in the
+same commit; `RecommendedSharingTest` fails on a group field the list does not name.
+
 **Answers sent with confidence.** For a moment after a login or a world hop every varbit reads
 zero. A reader that cannot know yet sends nothing, never "none", "not started" or "carrying
 nothing". `SessionSettle` holds that rule; use it rather than writing another.

@@ -42,16 +42,28 @@ Three things reviewers ask about first:
   category, to a group both joined with a code; the same consent shape as RuneLite's Party.
   Nothing is crowdsourced and no position is published outside the group. The same answers the
   rule against exposing player information over HTTP: only the logged-in character's own state is
-  sent, each field by its own opt-in, and only to the group the player joined.
+  sent, each field only once the player has chosen it, and only to the group the player joined.
 - **Star data.** The Stars tab shows a list osrs-map.com relays from Star Miners, fetched once a
   minute through the map's own coalesced cache. The plugin never contacts Star Miners, who have
   their own plugin and do not endorse this one.
 
-All character-sharing categories, remote destinations, group markers, and meetup notifications
-start off. First Connect discloses the destination and IP transmission before any
-request. Server approval and credentials are scoped to the chosen address; changing it pauses
-requests until Connect. No pairing code or no approved server means no network requests.
-Joining with sharing off still sends a random member id, alias, timestamp and connection credentials.
+**Defaults, and the one press at Connect.** Every character-sharing setting, remote destinations,
+group markers and meetup notifications still default to off in the config, each with the
+third-party warning. First Connect discloses the destination and IP transmission before any
+request. After that notice, and only then, the sidebar shows one step: the four sharing groups,
+each with every field named in the sidebar's own words, the character name, and destinations and
+group markers, all ticked, with a sentence saying those two open the receive stream (one held
+connection carrying the group code and member id). *Where you died* is offered unticked; meetup
+notifications are not offered. One press, **Share what's ticked**, writes exactly those existing
+settings, as the Sharing tab's group shortcuts do: the press is the opt-in, and nothing turns on
+without it. Ticking, **Customise** and **Not now** write nothing. The step follows only a Connect
+that showed the notice and only while every choice it offers is still off, so an update changes no
+existing player's settings and opens no stream for them. `RecommendedSharing` is the step;
+`RecommendedSharingTest` holds it to these sentences.
+
+Server approval and credentials are scoped to the chosen address; changing it pauses requests
+until Connect. No pairing code or no approved server means no network requests. Joining with
+sharing off still sends a random member id, alias, timestamp and connection credentials.
 
 ### Network requests
 
@@ -142,6 +154,16 @@ and connection pool; the only change is that redirects are refused, plus a read 
 stream. `java.lang.reflect.Type` appears only as Gson's `TypeToken`. The map's own source, where its
 contract tests and browser story live, is not public. Tests, the integration harness and
 screenshot tools are outside `src/main`. Bundled third-party notices accompany their resources.
+
+## Changes since the approved submission
+
+Say these in the description of the next Hub update, as changes from what was approved:
+
+- **One press at Connect** (above): the recommended set is offered after the server notice and
+  shared only on the player's press, which names every field and the receive stream it opens. No
+  config default changed.
+- The routes, Search, Route buttons, friends and meetups listed under *Network requests*, each a
+  press of the player's own.
 
 ## Before submission
 
