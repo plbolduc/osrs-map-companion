@@ -161,7 +161,7 @@ The website plan's second session, once the routes in the game are built: a memb
       asks for their position, then fills the destination's card once and does not follow them.
       Pressed again it reads Reroute. A friend in a raid has no Route.
 - [ ] **Meetups.** Answer a meetup from the sidebar and see the same answer on that member's browser
-      on the website. Say on my way appears only while it is unanswered. Meet here on W302 makes a
+      on the website; On my way is one of the four. Meet here on W302 makes a
       meetup at your tile whose copied link opens on the map; inside an instance it refuses.
 - [ ] **The reminder.** With *Notify before a meetup* on and the minutes set to 2, a meetup two
       minutes off raises one RuneLite notification and no second one; with it off, none.

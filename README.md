@@ -99,7 +99,7 @@ Your clue is read in this client whether or not you share it, so the sidebar can
 
 **Meet here** sends the title and time you choose, the tile you are standing on and your world,
 once per press, to make a meetup your group can see. Answering a meetup (**Going**, **Maybe**,
-**Can't**, **On my way** or **Say on my way**) sends that answer, once per press. Nothing answers for
+**Can't** or **On my way**) sends that answer, once per press. Nothing answers for
 you: Route to a meetup tells nobody you are coming.
 
 Your chat, other players, your bank and inventory, your existing collection log slots, a complete

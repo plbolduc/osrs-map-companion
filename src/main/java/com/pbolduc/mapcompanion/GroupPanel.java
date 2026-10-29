@@ -68,8 +68,8 @@ import net.runelite.client.ui.ColorScheme;
  *
  * <p><b>A meetup</b> says its title, when in the player's own clock with a countdown, where in
  * words with its world, and who is coming as their discs. <b>Route</b> plans the way and tells
- * nobody; <i>Say on my way</i> beside it, on a meetup not answered yet, is the one press that does.
- * The four answers are the map's own and answer for the browser this member is bound to.
+ * nobody; the <i>On my way</i> answer is the press that does. The four answers are the map's own
+ * and answer for the browser this member is bound to.
  *
  * <p><b>Meet here</b> opens a short form under the meetups: a title, a day and a time. It makes the
  * meetup at the tile and world the player stands on and copies its link.
@@ -505,15 +505,6 @@ final class GroupPanel extends JPanel
 		actions.add(route);
 		MeetupClient.Said answer = meetups.said("answer:" + meetup.id);
 		boolean sending = answer != null && answer.sending;
-		if (mine == null)
-		{
-			JButton coming = MapCompanionPanel.smallButton("Say on my way");
-			coming.setName("group.onMyWay." + meetup.id);
-			coming.setEnabled(ready && !sending && meetups.ready());
-			coming.setToolTipText("Tell the group you are on your way. Only this press says so; Route tells nobody.");
-			coming.addActionListener(e -> answer(meetup.id, "on_my_way"));
-			actions.add(coming);
-		}
 		card.add(gap(5));
 		card.add(MapCompanionPanel.left(actions));
 		card.add(gap(4));

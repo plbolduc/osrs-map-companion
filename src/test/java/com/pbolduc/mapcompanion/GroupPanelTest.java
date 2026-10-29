@@ -242,14 +242,18 @@ public class GroupPanelTest
 		assertFalse("a friend shown in one group is not asked for in the next", group.shown("cara"));
 	}
 
+	/** On my way is one of the four answers; there is no second button that says it. */
 	@Test
-	public void theAnswerButtonsSendTheMapsWordsAndOnMyWayIsAPress() throws Exception
+	public void theAnswerButtonsSendTheMapsWordsAndRouteAnswersNothing() throws Exception
 	{
 		AtomicReference<GroupPanel> panel = new AtomicReference<>();
 		SwingUtilities.invokeAndWait(() -> panel.set(panel()));
 		social();
 		SwingUtilities.invokeAndWait(() -> panel.get().refresh(true));
-		assertNull("answered maybe already, so no Say on my way", named(panel.get(), "group.onMyWay.star-hunt"));
+		for (String answer : SocialWire.ANSWERS)
+		{
+			assertNotNull(answer, named(panel.get(), "group.answer.star-hunt." + answer));
+		}
 		SwingUtilities.invokeAndWait(() -> named(panel.get(), "group.answer.star-hunt.no").doClick());
 		until(() -> sent.size() == 1);
 		Request request = sent.get(0);

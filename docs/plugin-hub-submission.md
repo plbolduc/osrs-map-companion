@@ -88,7 +88,7 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RouteClient`, `RoutePress
   the target. A clue or death tile that is not shared leaves only in that request. Same
   one-at-a-time rule and wait; the answer becomes the destination. Nothing is walked.
 - **PUT /api/companion/event/answer** — one press of a meetup's answer (**Going**, **Maybe**,
-  **Can't**, **On my way**, **Say on my way**). JSON is the meetup's id and the answer. Headers:
+  **Can't**, **On my way**). JSON is the meetup's id and the answer. Headers:
   `X-Companion-Code`, `X-Companion-Member`, `X-Companion-Member-Secret`.
 - **PUT /api/companion/event** — one **Meet here** press. JSON is a title, a start time, the player's
   tile and world; the same headers. The path the map answers with is checked and copied to the
