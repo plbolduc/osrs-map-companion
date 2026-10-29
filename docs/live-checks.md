@@ -77,6 +77,36 @@ often. A clean run is now 443 tests with no failures or skips.
 - [ ] Paste a full RuneLite code (with its suffix) into a fresh install; the first post is
       accepted and the map links the dot to the browser without a second paste.
 
+## The members session for the where-to-go plan
+
+One session on a members character, run with `./gradlew runClient`, which starts RuneLite with
+this plugin and the developer tools. Several of these read game variables the plugin does not
+read yet. The Var Inspector (developer tools) shows them changing, so the readers are written
+from what the game did rather than from a guess. Record each value seen. The website plan's
+steps wait on these readings (`osrs-stars-map/docs/plan-where-to-go-for-a-task.md`,
+*Order of work*).
+
+- [ ] **Slayer task name.** With *Slayer task* sharing on, the map names an ordinary task, a
+      boss task if one is assigned, and a Konar task's area.
+- [ ] **Port task slots.** Take a courier task at a port task board and note
+      `PORT_TASK_SLOT_0_ID` (19574): is it the task's id in the map's `data/port-tasks.json`?
+      Collect the crates and watch `..._CARGO_TAKEN`, then deliver and watch `..._DELIVERED`.
+      An empty slot should read 0. Take a bounty task and watch `BOUNTY_TASK_ITEM_COUNTER_1`
+      (14662) count down as the parts drop.
+- [ ] **Where the boat is.** Note `SAILING_BOAT_1_PORT` (19260) where the boat is moored. Dock
+      at another port and note it again, to learn how the value names a dock. Note
+      `SAILING_BOAT_1_TELEPORT_FOCUS` (19270) for a boat with and without a teleportation focus,
+      and `SAILING_BOARDED_BOAT_LAST_DOCK` (19145) after docking.
+- [ ] **The Colosseum unlock.** The plugin reads varbit 11410 for the Colosseum's travel unlock.
+      The client calls it `COLOSSEUM_HIGHEST_WAVE`, where the code says glory rank. Note its
+      value beside what the game shows.
+- [ ] **Farming.** The farming items above, and a herb patch replanted while the map's farm run
+      is open: the stop should tick.
+- [ ] **If convenient: a death in an instance.** Note whether a gravestone appears. The map
+      offers *Route back* only where one is left.
+- [ ] **If convenient: a ladder.** Count the game ticks a ladder climb takes. The map's routes
+      charge 2.
+
 ## Farming procedure
 
 With Farming patches enabled and the map's farm run open:
