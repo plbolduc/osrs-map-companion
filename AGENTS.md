@@ -15,5 +15,12 @@ what, what may leave the machine, and how to commit.
   `NetworkDisclosureTest` checks the README against `SnapshotBuilder`. The README is published
   on RuneLite's site at the pinned commit, so it is written for players: how the requests work
   belongs in `docs/network.md`, and building in `CONTRIBUTING.md`.
+- **The history is public, so a pull request made here is clean before it is pushed.** Commits
+  follow CONTRIBUTING's *Commits*. A pull request is one change a reviewer can read in one
+  sitting, and every commit in it builds and passes on its own. Fixups are folded into the commit
+  they fix before the first push, because GitHub keeps every commit a pull request ever showed. A
+  pushed branch is not rewritten without the owner's say. These are merged with *Rebase and
+  merge*, keeping the line straight; an outside contributor's pull request is squashed instead.
+- **The README is the Plugin Hub page:** CONTRIBUTING's section of that name.
 - **Ask before** pushing, opening a Plugin Hub pull request, or anything else that leaves this
   checkout.

@@ -91,6 +91,12 @@ the map knows must stay in that list.
 reading the diff for. One concern per commit, and formatting never mixed with behaviour. The
 history is public, so commit under your GitHub noreply address.
 
+**The README is the Plugin Hub page.** RuneLite publishes it at the pinned commit, so it is the
+first thing a player reads about the plugin. Keep it short and plain: what the plugin does in a
+sentence, pictures before paragraphs, and the details in `docs/`. A change that alters what a
+player sees updates its picture in the same pull request, and pictures use made-up characters.
+Before every Hub release, read it top to bottom as a player who has never heard of the map.
+
 ## Local development
 
 `./gradlew runClient` starts RuneLite with this plugin loaded and assertions enabled. Log in and
