@@ -64,6 +64,11 @@ public class DestinationState
 	/** A pin chosen here survives unchanged group heartbeats; a new map destination replaces it. */
 	private volatile RelayResponse.Destination localDestination;
 	private volatile String lastRemoteFingerprint;
+	/**
+	 * Counts {@link #clear}s: a group left, a lifetime ended. A route asked for before one is the old
+	 * group's answer, and {@link RoutePress} drops it by this.
+	 */
+	private volatile long generation;
 
 	public synchronized void selectLocal(RelayResponse.Destination selected)
 	{
@@ -73,6 +78,11 @@ public class DestinationState
 	}
 
 	public boolean hasLocalDestination() { return localDestination != null; }
+
+	long generation()
+	{
+		return generation;
+	}
 
 	@Inject
 	DestinationState(Gson gson)
@@ -132,6 +142,7 @@ public class DestinationState
 
 	public synchronized void clear()
 	{
+		generation++;
 		destination = null;
 		event = null;
 		dismissedFingerprint = null;

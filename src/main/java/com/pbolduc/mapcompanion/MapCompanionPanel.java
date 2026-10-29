@@ -172,6 +172,7 @@ public class MapCompanionPanel extends PluginPanel
 	private final JComponent destinationSlot;
 	private final JComponent eventSlot;
 	private final JComponent deathSlot;
+	private final JComponent searchGap;
 
 	/** Hide the destination on this client. Does not tell the relay; see {@link DestinationState}. */
 	private final JButton dismissButton = smallButton("Dismiss");
@@ -186,6 +187,8 @@ public class MapCompanionPanel extends PluginPanel
 	 */
 	private final JButton followButton = smallButton("Follow");
 	private final ShortestPath shortestPath;
+	/** The map's search, at the top of Overview while paired. */
+	private final SearchPanel searchPanel;
 
 	/* Drop luck: one monster's card, or every monster tracked. See {@link DropLuckPanel}. */
 	private final JPanel drySection = column(ColorScheme.DARK_GRAY_COLOR);
@@ -282,7 +285,9 @@ public class MapCompanionPanel extends PluginPanel
 		StarsClient starsClient,
 		DestinationRoute destinationRoute,
 		RouteClient routeClient,
-		ShortestPath shortestPath)
+		ShortestPath shortestPath,
+		SearchClient searchClient,
+		RoutePress routePress)
 	{
 		this.config = config;
 		this.plugin = plugin;
@@ -300,6 +305,7 @@ public class MapCompanionPanel extends PluginPanel
 		this.directiveStream = directiveStream;
 		this.destinationRoute = destinationRoute;
 		this.shortestPath = shortestPath;
+		this.searchPanel = new SearchPanel(searchClient, routePress);
 		this.routeSteps = new RouteStepsView(way ->
 		{
 			destinationRoute.choose(way);
@@ -352,6 +358,10 @@ public class MapCompanionPanel extends PluginPanel
 		body.add(left(joinMessage));
 		JPanel overview = column(ColorScheme.DARK_GRAY_COLOR);
 		overview.setName("companionOverview");
+		/* First, because "where is it and how do I get there" is the question the map answers best. */
+		overview.add(searchPanel);
+		searchGap = gap(8, ColorScheme.DARK_GRAY_COLOR);
+		overview.add(searchGap);
 
 		/*
 		 * Now: a destination with its dismiss, a meetup, a death. "From the map" named two of
@@ -986,6 +996,14 @@ public class MapCompanionPanel extends PluginPanel
 			 */
 			setWrapped(sharingLabel, ready ? sharingLine() : "Character sharing paused", CARD_TEXT_WIDTH);
 			sharingLabel.setToolTipText(paired ? sharingList() : null);
+
+			/* The search is the map's, asked as a member: a box that could only say "connect" is not shown. */
+			searchPanel.setVisible(ready);
+			searchGap.setVisible(ready);
+			if (ready)
+			{
+				searchPanel.refresh();
+			}
 
 			RelayResponse.Destination destination = destinationState.getDestination();
 			/*

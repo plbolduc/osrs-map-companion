@@ -88,6 +88,10 @@ Each choice in the **Sharing** tab starts off, and each can send:
 once per press and whatever you share, so the map can plan the way from there. The map plans with
 it and does not keep it.
 
+**Search**, at the top of Overview once you are connected, sends what you type to the map, which
+answers with places and keeps nothing. Picking a result sends the tile you are standing on, as
+Reroute does, so the way is planned from there.
+
 Your chat, other players, your bank and inventory, your existing collection log slots, a complete
 loot history and anything derived from your account's identifiers are never sent. **Advanced →
 Show what's sent** shows what would go out right now. The server's operator and your group's
