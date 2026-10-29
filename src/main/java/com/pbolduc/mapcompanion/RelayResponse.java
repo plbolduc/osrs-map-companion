@@ -25,6 +25,7 @@
  */
 package com.pbolduc.mapcompanion;
 
+import com.google.gson.annotations.JsonAdapter;
 import java.util.List;
 
 /**
@@ -146,6 +147,70 @@ public class RelayResponse
 		public Integer world;
 		/** One short line of why, in the sender's words: "T7 · ~16m left". */
 		public String note;
+		/**
+		 * The map's ways there, each step by step in the website's own words, or null.
+		 *
+		 * <p>Null is today's destination exactly: a pin, an arrow and a line in the sidebar. The map
+		 * sends it once a route is ranked, which can be a few seconds after the place itself, so the
+		 * same destination can arrive without one and then with one. Read leniently by
+		 * {@link RouteWire}: a route this build cannot read is dropped and the destination kept.
+		 */
+		@JsonAdapter(RouteWire.Lenient.class)
+		public Route route;
+	}
+
+	/**
+	 * A route as the map hands it to the game, from a destination or from a press of Reroute.
+	 *
+	 * <p>The website's travel engine ranks it; this plugin computes nothing about the way and
+	 * prints what it was told. The shape is the map's {@code lib/route-wire.ts}, and its contract
+	 * test holds this class to it.
+	 */
+	public static class Route
+	{
+		/**
+		 * Where it was ranked from, by its source and never its tile: {@code shared}, the position
+		 * this member shares; {@code request}, the tile a Reroute press sent; or null, from nowhere,
+		 * which the sidebar says rather than pretending the first walk starts where you are.
+		 */
+		public String origin;
+		/** The card's ways in its order, the best of them always among them. */
+		public List<RouteOption> options;
+	}
+
+	public static class RouteOption
+	{
+		/** The transport's id: stable, and what a later press could name. */
+		public String id;
+		public String label;
+		public boolean best;
+		/** A way the account cannot take yet, kept in its place as the card keeps it. */
+		public boolean blocked;
+		/** The whole trip in run tiles, a tick worth two, or null where the ranking priced none. */
+		public Integer tiles;
+		public List<RouteStep> steps;
+	}
+
+	public static class RouteStep
+	{
+		/** What the step is — a teleport, a ride, a walk — as a word; see the map's journey steps. */
+		public String slot;
+		public String title;
+		public String detail;
+		/** The words under the row on the card: a Wilderness warning, a ride's asks, a note. */
+		public List<String> notes;
+		/** A walking row: the only kind Shortest Path is ever aimed at. */
+		public boolean walk;
+		/** Where the step ends, or null for a step that has words and no pin. */
+		public RouteTile at;
+	}
+
+	/** A step's far end. No floor means the ground floor, as the map's own tiles read it. */
+	public static class RouteTile
+	{
+		public int x;
+		public int y;
+		public Integer plane;
 	}
 
 	public static class Event

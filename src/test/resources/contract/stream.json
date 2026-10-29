@@ -5,7 +5,62 @@
     "plane": 0,
     "name": "Lumbridge",
     "world": 302,
-    "note": "T7 · ~16m left"
+    "note": "T7 · ~16m left",
+    "route": {
+      "origin": "shared",
+      "options": [
+        {
+          "id": "spell:lumbridge-home-teleport",
+          "label": "Lumbridge Home Teleport",
+          "best": true,
+          "blocked": false,
+          "tiles": 52,
+          "steps": [
+            {
+              "slot": "method",
+              "title": "Lumbridge Home Teleport",
+              "detail": "Standard spellbook",
+              "notes": [
+                "Ten seconds to cast, and a combat hit stops it"
+              ],
+              "at": {
+                "x": 3222,
+                "y": 3218,
+                "plane": 0
+              }
+            },
+            {
+              "slot": "arrival-walk",
+              "title": "Walk 12 tiles to the bank",
+              "walk": true,
+              "at": {
+                "x": 3208,
+                "y": 3220,
+                "plane": 2
+              }
+            }
+          ]
+        },
+        {
+          "id": "walk",
+          "label": "Walk",
+          "best": false,
+          "blocked": false,
+          "tiles": null,
+          "steps": [
+            {
+              "slot": "walk-leg",
+              "title": "Walk 140 tiles",
+              "walk": true,
+              "at": {
+                "x": 3208,
+                "y": 3220
+              }
+            }
+          ]
+        }
+      ]
+    }
   },
   "event": {
     "title": "Star hunt",
