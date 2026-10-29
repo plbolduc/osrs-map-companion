@@ -31,6 +31,7 @@ import java.awt.image.BufferedImage;
 import java.util.Locale;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
+import javax.swing.AbstractButton;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
@@ -146,6 +147,16 @@ class GameSprites
 		sprites.getSpriteAsync(spriteId, 0, (Consumer<BufferedImage>) image -> show(label, image, box));
 	}
 
+	/** The same, on a button: a filter chip that carries the game's own mark beside its word. */
+	void sprite(AbstractButton button, int spriteId, int box)
+	{
+		if (sprites == null || spriteId <= 0)
+		{
+			return;
+		}
+		sprites.getSpriteAsync(spriteId, 0, (Consumer<BufferedImage>) image -> show(button, image, box));
+	}
+
 	/** Set on the event thread, at the sprite's own size when it fits, so pixel art stays crisp. */
 	static void show(JLabel label, @Nullable BufferedImage image, int box)
 	{
@@ -155,6 +166,16 @@ class GameSprites
 		}
 		BufferedImage fitted = fit(image, box);
 		SwingUtilities.invokeLater(() -> label.setIcon(new ImageIcon(fitted)));
+	}
+
+	static void show(AbstractButton button, @Nullable BufferedImage image, int box)
+	{
+		if (image == null)
+		{
+			return;
+		}
+		BufferedImage fitted = fit(image, box);
+		SwingUtilities.invokeLater(() -> button.setIcon(new ImageIcon(fitted)));
 	}
 
 	static BufferedImage fit(BufferedImage image, int box)

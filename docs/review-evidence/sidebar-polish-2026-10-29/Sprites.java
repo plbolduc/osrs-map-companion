@@ -63,6 +63,35 @@ final class Sprites
 					? "osrs-icons/1x/skill-combat.png" : "osrs-icons/cache/" + spriteId + ".png"), box);
 			}
 
+			/**
+			 * The world switcher's two stars are not among the website's files, so the renderer paints
+			 * a stand-in of their colour and size. The client draws the game's own sprite.
+			 */
+			@Override
+			void sprite(javax.swing.AbstractButton button, int spriteId, int box)
+			{
+				boolean members = spriteId == net.runelite.api.gameval.SpriteID.WorldswitcherStars.MEMBERS;
+				boolean free = spriteId == net.runelite.api.gameval.SpriteID.WorldswitcherStars.FREE;
+				if (!members && !free)
+				{
+					return;
+				}
+				BufferedImage star = new BufferedImage(13, 13, BufferedImage.TYPE_INT_ARGB);
+				java.awt.Graphics2D g = star.createGraphics();
+				g.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
+				java.awt.Polygon shape = new java.awt.Polygon();
+				for (int i = 0; i < 10; i++)
+				{
+					double r = i % 2 == 0 ? 6.4 : 2.7;
+					double a = Math.PI / 2 + i * Math.PI / 5;
+					shape.addPoint((int) Math.round(6.5 + r * Math.cos(a)), (int) Math.round(6.5 - r * Math.sin(a)));
+				}
+				g.setColor(members ? new java.awt.Color(0xF5C542) : new java.awt.Color(0xC9CDD3));
+				g.fillPolygon(shape);
+				g.dispose();
+				show(button, star, box);
+			}
+
 			@Override
 			void skill(JLabel label, String name, int box)
 			{

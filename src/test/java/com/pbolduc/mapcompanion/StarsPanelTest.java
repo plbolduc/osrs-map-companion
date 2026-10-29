@@ -32,6 +32,7 @@ import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
 import net.runelite.client.callback.ClientThread;
 import okhttp3.OkHttpClient;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -59,6 +60,31 @@ public class StarsPanelTest
 			((JToggleButton) named(stars, "stars.filters")).doClick();
 			assertTrue(showing(sync, stars));
 		});
+	}
+
+	/** P2P and F2P carry the world switcher's own members and free stars, and keep their words. */
+	@Test
+	public void theWorldChipsAskForTheGamesOwnMembersAndFreeStars() throws Exception
+	{
+		java.util.Map<String, Integer> asked = new java.util.concurrent.ConcurrentHashMap<>();
+		SwingUtilities.invokeAndWait(() ->
+		{
+			HarnessStore store = new HarnessStore();
+			StarsClient service = new StarsClient(new OkHttpClient(), new Gson(), null, new ClientThread(),
+				new HarnessConfig(store, MapCompanionConfig.DEFAULT_MAP_URL), new Pairing(store, new Gson()),
+				new MemberIdentity(store), store);
+			StarsPanel stars = new StarsPanel(service, null, null, null, null, () -> MapCompanionConfig.DEFAULT_MAP_URL);
+			stars.pictures(new GameSprites(null, null, null)
+			{
+				@Override
+				void sprite(javax.swing.AbstractButton button, int spriteId, int box)
+				{
+					asked.put(button.getText(), spriteId);
+				}
+			});
+		});
+		assertEquals(Integer.valueOf(net.runelite.api.gameval.SpriteID.WorldswitcherStars.MEMBERS), asked.get("P2P"));
+		assertEquals(Integer.valueOf(net.runelite.api.gameval.SpriteID.WorldswitcherStars.FREE), asked.get("F2P"));
 	}
 
 	/** Visible, and every ancestor up to the panel visible too. */
