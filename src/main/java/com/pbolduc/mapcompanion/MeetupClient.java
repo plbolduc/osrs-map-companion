@@ -51,7 +51,7 @@ import okhttp3.Response;
  * <p><b>Answering.</b> {@code PUT /api/companion/event/answer} with the meetup's id and one of the
  * map's four answers, under the member's own headers. The map writes it for the browser this member
  * is bound to, so one person has one answer on both screens. Only ever a press: Route to a meetup
- * says nothing to anybody, and <i>Say on my way</i> beside it is a button, never a side effect.
+ * says nothing to anybody, and <i>On my way</i> is an answer pressed like the other three.
  *
  * <p><b>Meet here.</b> {@code PUT /api/companion/event} with a title, a time, and the tile and
  * world the player is on — the same body a browser sends, made into the same immutable

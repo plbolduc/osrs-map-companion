@@ -407,8 +407,8 @@ layer on, Show on map reads *On the map* and is not pressable.
 
 Then *Meetups*: each with its title, *Today 7:42 PM · in 1h 20m*, *near Lumbridge Castle · W302*,
 who is coming as discs (solid for coming or here, a ring for maybe, faint for can't) with *1 here ·
-1 coming · 1 maybe*, **Route**, *Say on my way* while unanswered, and the four answers in a two-by-two
-grid with this member's own filled. A map that sends no `events` leaves the one meetup under *Now*,
+1 coming · 1 maybe*, **Route**, and the four answers in a two-by-two grid with this member's own
+filled. *On my way* is one of the four, and Route beside them tells nobody. A map that sends no `events` leaves the one meetup under *Now*,
 as before. **Meet here…** opens a form under them: a title, a day of the coming week, an hour and a
 minute in fives, defaulting to half an hour from now, and **Make meetup**, which copies the link.
 
