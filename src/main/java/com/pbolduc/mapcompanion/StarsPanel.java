@@ -34,6 +34,7 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Rectangle;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -47,6 +48,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
@@ -106,6 +108,11 @@ final class StarsPanel extends JPanel
 		setBackground(ColorScheme.DARK_GRAY_COLOR);
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		setAlignmentX(Component.LEFT_ALIGNMENT);
+		/*
+		 * The picked world first, above the filters: its Pin destination and Route are what a pick is
+		 * for, and under a list of a dozen sites they were a scroll away from every row but the last.
+		 */
+		add(selection);
 		sync.setName("stars.sync");
 		add(fill(sync));
 		add(gap(4));
@@ -162,7 +169,6 @@ final class StarsPanel extends JPanel
 		add(status);
 		add(gap(2));
 		add(rows);
-		add(selection);
 		add(gap(8));
 		JLabel source = label("Data from Star Miners");
 		source.setHorizontalAlignment(SwingConstants.CENTER);
@@ -267,6 +273,7 @@ final class StarsPanel extends JPanel
 		rendered = signature.toString();
 		rows.removeAll();
 		selection.removeAll();
+		selection.setBorder(null);
 		if (model.feed == null)
 		{
 			if (service.message == null) rows.add(label("Loading stars…"));
@@ -413,13 +420,17 @@ final class StarsPanel extends JPanel
 		service.model.selected = star.id;
 		rendered = null;
 		refresh();
+		/* A pick far down the list scrolls up to its actions; one already in view stays put. */
+		SwingUtilities.invokeLater(() -> selection.scrollRectToVisible(new Rectangle(0, 0, selection.getWidth(), selection.getHeight())));
 	}
 
 	private void selection(StarsModel.Star star, long elapsed, RelayResponse.Destination destination)
 	{
 		boolean pinned = destination != null && destination.world != null && destination.world == star.world
 			&& destination.x == star.x && destination.y == star.y;
-		selection.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, EDGE), BorderFactory.createEmptyBorder(6, 0, 0, 0)));
+		selection.setBorder(BorderFactory.createCompoundBorder(
+			BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(0, 0, 8, 0), BorderFactory.createMatteBorder(0, 0, 1, 0, EDGE)),
+			BorderFactory.createEmptyBorder(0, 0, 8, 0)));
 		JPanel title = new JPanel(new BorderLayout());
 		title.setBackground(getBackground());
 		title.add(heading(pinned ? "Pinned destination" : "Selected world"), BorderLayout.CENTER);
