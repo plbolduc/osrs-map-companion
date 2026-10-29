@@ -72,6 +72,15 @@ the approved map. Never raise a request rate; failures back off.
 zero. A reader that cannot know yet sends nothing, never "none", "not started" or "carrying
 nothing". `SessionSettle` holds that rule; use it rather than writing another.
 
+**Game ids.** Every game id the plugin reads (a varbit, a varp, an NPC, an item, a database table
+or column) is either the client's own `net.runelite.api.gameval` constant or a literal asserted
+equal to one in `VarbitIdsTest` or `GameIdsTest`, added in the same commit as the literal.
+`GameIdsTest` also fails on a client call handed a bare number. A database row is found by value
+with `getDBRowsByValue`, then read with `getDBTableField`. A varp or varbit holds a column's
+value, never a row id, so passing it as a row reads some other row, and the guard around the read
+turns that into silence. `SlayerTaskReaderTest` keeps a fake database whose row ids differ from
+its values for that reason.
+
 **Saved state.** RuneLite syncs config and announces every write to every plugin, so large values
 are written in batches: the kill log at most every thirty seconds. Every way a session ends must
 write what is pending: logout, a character switch, `shutDown`, and `ClientShutdown`, because

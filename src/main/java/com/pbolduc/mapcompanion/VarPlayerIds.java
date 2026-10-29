@@ -35,13 +35,14 @@ package com.pbolduc.mapcompanion;
  * file, and a reviewer can see the entire set of game variables this plugin reads without reading
  * the rest of it.
  *
- * <p><b>Before shipping against a new client release</b>, replace the literals below with the
- * corresponding {@code net.runelite.api.gameval.VarPlayerID} constants and let the compiler check
- * them — literals are used here so that this repository builds against a range of client versions,
- * but a constant that the client itself defines is always the better reference.
+ * <p><b>Each literal is asserted.</b> Literals let this repository build against a range of client
+ * releases, and the price is that the compiler checks none of them. {@code VarbitIdsTest} compares
+ * every one with its {@code net.runelite.api.gameval.VarPlayerID} constant, so a new id here gets
+ * its line there in the same commit: the rule in CONTRIBUTING's <i>Rules a change must keep</i>.
  *
- * <p>The failure mode if one of these is wrong is bounded by design: {@link SlayerTaskReader}
- * returns null when it cannot resolve a name, and the map shows no task rather than the wrong one.
+ * <p>A wrong one fails quietly by design: {@link SlayerTaskReader} returns null when it cannot
+ * resolve a name, and the map shows no task rather than the wrong one. That quiet is why the
+ * assertion is a test and not a step someone remembers before a release.
  */
 final class VarPlayerIds
 {
