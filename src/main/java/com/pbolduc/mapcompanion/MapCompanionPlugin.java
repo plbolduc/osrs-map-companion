@@ -178,6 +178,9 @@ public class MapCompanionPlugin extends Plugin
 	private MapCompanionConfig config;
 
 	@Inject
+	private ConfigManager configManager;
+
+	@Inject
 	private RelayClient relay;
 
 	@Inject
@@ -568,6 +571,24 @@ public class MapCompanionPlugin extends Plugin
 			.build());
 	}
 
+	/** This version's one line, on the first login after an update; see {@link UpdateNotice}. */
+	private void announceUpdate()
+	{
+		boolean usedBefore = config.pairingCode() != null && !config.pairingCode().trim().isEmpty();
+		String line = UpdateNotice.due(ConfigStore.of(configManager), usedBefore);
+		if (line == null)
+		{
+			return;
+		}
+		chatMessageManager.queue(QueuedMessage.builder()
+			.type(ChatMessageType.GAMEMESSAGE)
+			.runeLiteFormattedMessage(new ChatMessageBuilder()
+				.append(ChatColorType.HIGHLIGHT).append("OSRS Map Companion " + CompanionVersion.VERSION + ": ")
+				.append(ChatColorType.NORMAL).append(line + " " + UpdateNotice.WHERE)
+				.build())
+			.build());
+	}
+
 	/** Only the observer's named core activity sources qualify; NPC forwarding is ignored there. */
 	@Subscribe
 	public void onLootReceived(LootReceived event)
@@ -837,6 +858,7 @@ public class MapCompanionPlugin extends Plugin
 		else if (state == GameState.LOGGED_IN)
 		{
 			dirty = true;
+			announceUpdate();
 		}
 		else
 		{
