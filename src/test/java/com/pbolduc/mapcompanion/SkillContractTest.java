@@ -48,9 +48,10 @@ import org.junit.Test;
  * restores the constant, or adds a skill after the last one — would change what this plugin reports
  * with no change on our side and nothing failing anywhere.
  *
- * <p>Almost every version-sensitive constant in this plugin is transcribed and unverifiable without
- * a running game: {@code VarbitIds}, {@code VarPlayerIds}, {@code DbTables}. This one is different,
- * because the client is on the test classpath and can simply be asked. So it is asked.
+ * <p>The plugin's other version-sensitive constants are game ids, and {@code VarbitIdsTest} and
+ * {@code GameIdsTest} assert those against the client's own names. This one is a shape rather than a
+ * number, but the client is on the test classpath and can be asked about it just the same. So it is
+ * asked.
  */
 public class SkillContractTest
 {
