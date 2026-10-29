@@ -224,30 +224,65 @@ public class RecommendedSharingTest
 		});
 	}
 
+	/**
+	 * The closed card is one row per choice, so the press is in reach; every field and the stream
+	 * in full are one tap below, in What each one sends. Rewritten when the card was made compact:
+	 * the field lists moved from under the rows into the fold, word for word.
+	 */
 	@Test
-	public void theStepNamesEveryFieldItSharesAndTheStreamItOpens() throws Exception
+	public void theClosedCardNamesEveryChoiceAndTheStreamItOpens() throws Exception
 	{
 		SwingUtilities.invokeAndWait(() ->
 		{
 			Fixture fixture = new Fixture();
 			fixture.step.offer("osrs-map.com");
-			String folded = visibleText(fixture.step);
-			for (SharingFields.Field field : RecommendedSharing.all())
+			String closed = visibleText(fixture.step);
+			for (SharingFields.Section section : SharingFields.GROUPS)
 			{
-				assertTrue("the step names " + field.key + " as \"" + field.label + "\"", folded.contains(field.label));
+				assertTrue("the card has a row for " + section.title, closed.contains(section.title));
 			}
-			assertTrue("the stream is named", folded.contains(RecommendedSharing.STREAM));
-			assertTrue(folded.contains("receive stream"));
-			assertTrue("beside Drops and levels", folded.contains(MapCompanionConfig.FEED_KEPT));
-			assertTrue("the map it goes to", folded.contains("osrs-map.com"));
+			for (SharingFields.Field field : new SharingFields.Field[]{SharingFields.NAME, SharingFields.DEATH,
+				SharingFields.DESTINATIONS, SharingFields.GROUP_ON_WORLD_MAP})
+			{
+				assertTrue("the card has a row for " + field.key, closed.contains(field.label));
+			}
+			assertTrue(closed.contains(RecommendedSharing.LOOT_ROW));
+			assertTrue("the stream is said on the card", closed.contains(RecommendedSharing.STREAM_SHORT));
+			assertTrue("the map it goes to", closed.contains("Sent to osrs-map.com while you're logged in; your group sees it."));
+			assertTrue("What each one sends is on the card", closed.contains("What each one sends"));
+			assertFalse("the field lists wait in the fold", closed.contains(RecommendedSharing.STREAM));
+		});
+	}
 
-			click(fixture.step, "recommended.customise");
+	@Test
+	public void theFoldNamesEveryFieldItSharesAndTheStreamInFull() throws Exception
+	{
+		SwingUtilities.invokeAndWait(() ->
+		{
+			Fixture fixture = new Fixture();
+			fixture.step.offer("osrs-map.com");
+			click(fixture.step, "recommended.detailsToggle");
 			String open = visibleText(fixture.step);
 			for (SharingFields.Field field : RecommendedSharing.all())
 			{
-				assertTrue("Customise has a box for " + field.key, open.contains(field.label));
+				assertTrue("the fold names " + field.key + " as \"" + field.label + "\"", open.contains(field.label));
 			}
-			assertTrue(open.contains(MapCompanionConfig.FEED_KEPT));
+			assertTrue(open.contains(RecommendedSharing.STREAM));
+			assertTrue(open.contains("receive stream"));
+			assertTrue("beside Drops and levels", open.contains(MapCompanionConfig.FEED_KEPT));
+			assertTrue(open.contains(RecommendedSharing.DEATH_DETAIL));
+			assertTrue(open.contains(RecommendedSharing.DESTINATIONS_DETAIL));
+			assertTrue(open.contains(RecommendedSharing.GROUP_DETAIL));
+			assertTrue("opening the fold writes nothing", fixture.written.isEmpty());
+
+			click(fixture.step, "recommended.customise");
+			String customised = visibleText(fixture.step);
+			for (SharingFields.Field field : RecommendedSharing.all())
+			{
+				assertNotNull("Customise has a box for " + field.key, named(fixture.step, "recommended." + field.key));
+				assertTrue(field.key, customised.contains(field.label));
+			}
+			assertTrue(fixture.written.isEmpty());
 		});
 	}
 

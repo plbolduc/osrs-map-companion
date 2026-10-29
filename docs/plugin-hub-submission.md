@@ -50,9 +50,10 @@ Three things reviewers ask about first:
 **Defaults, and the one press at Connect.** Every character-sharing setting, remote destinations,
 group markers and meetup notifications still default to off in the config, each with the
 third-party warning. First Connect discloses the destination and IP transmission before any
-request. After that notice, and only then, the sidebar shows one step: the four sharing groups,
-each with every field named in the sidebar's own words, the character name, and destinations and
-group markers, all ticked, with a sentence saying those two open the receive stream (one held
+request. After that notice, and only then, the sidebar shows one step: a row each for the four
+sharing groups, the character name, and destinations and group markers, all ticked, with a line
+saying those two open one connection. *What each one sends*, one tap below the rows and before the
+press, names every field in the sidebar's own words and the receive stream in full (one held
 connection carrying the group code and member id). *Where you died* is offered unticked; meetup
 notifications are not offered. One press, **Share what's ticked**, writes exactly those existing
 settings, as the Sharing tab's group shortcuts do: the press is the opt-in, and nothing turns on
