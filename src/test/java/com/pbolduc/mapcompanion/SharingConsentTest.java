@@ -81,6 +81,31 @@ public class SharingConsentTest
 		assertFalse(fixture.sent().getAsJsonObject("member").has("characterName"));
 	}
 
+	/**
+	 * One choice decides what the group sees. The map lets any nickname but "Me" win over the
+	 * character name, so a ticked name sends "Me" whatever the box holds, and an empty box sends
+	 * "Me" rather than a placeholder that would read as somebody's chosen name.
+	 */
+	@Test
+	public void theGroupSeesTheCharacterNameOrTheAliasNeverAnAliasOverTheName()
+	{
+		Fixture fixture = new Fixture();
+		fixture.config.nickname("Scout");
+		fixture.config.set(MapCompanionConfig.KEY_SHARE_NAME, true);
+		JsonObject member = fixture.sent().getAsJsonObject("member");
+		assertEquals("Me", member.get("nick").getAsString());
+		assertEquals("Example", member.get("characterName").getAsString());
+
+		fixture.config.set(MapCompanionConfig.KEY_SHARE_NAME, false);
+		assertEquals("Scout", fixture.sent().getAsJsonObject("member").get("nick").getAsString());
+
+		for (String none : new String[]{"", "   ", " Me "})
+		{
+			fixture.config.nickname(none);
+			assertEquals("'" + none + "'", "Me", fixture.sent().getAsJsonObject("member").get("nick").getAsString());
+		}
+	}
+
 	@Test
 	public void everyRemoteFeatureStartsOffAndCarriesTheRequiredWarning() throws Exception
 	{

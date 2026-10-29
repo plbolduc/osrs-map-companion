@@ -153,15 +153,14 @@ public interface MapCompanionConfig extends Config
 		keyName = "nickname",
 		name = "Name to show",
 		description =
-			"What friends sharing your code see beside your dot. It takes precedence over your "
-			+ "character name, so it is also how to appear as something other than your name "
-			+ "while the name toggle is on.",
+			"What your group sees beside your dot while Show my character name to the group is "
+			+ "off. Leave it empty to show as Member.",
 		position = 2,
 		section = presenceSection
 	)
 	default String nickname()
 	{
-		return "Me";
+		return "";
 	}
 
 	@ConfigItem(
@@ -182,8 +181,8 @@ public interface MapCompanionConfig extends Config
 		description =
 			"Send the display name of the character you are logged in as, so friends holding your "
 			+ "code see who each dot is. Only ever the name — nothing is looked up by it, and "
-			+ "nothing is sent while you are logged out. Leave it off and your nickname is all "
-			+ "they get.",
+			+ "nothing is sent while you are logged out. Leave it off and they see your Name to "
+			+ "show, or Member.",
 		position = 9,
 		warning = NETWORK_WARNING,
 		section = presenceSection

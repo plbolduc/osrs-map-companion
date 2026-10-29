@@ -46,8 +46,9 @@ The pictures use made-up characters and stars.
    field: press **Share what's ticked**, or **Customise** to choose field by field first, or
    **Not now** to share nothing yet. The **Sharing** tab changes any of it later.
 
-Nothing is shared until you choose it, and joining a group does not turn anything on. **Name to
-show** sets the name your group sees, which does not have to be your character's. **Copy invite**
+Nothing is shared until you choose it, and joining a group does not turn anything on. With
+**Character name** ticked your group sees it; untick it and **Name to show instead** sets what they
+see, or Member if you leave it empty. **Copy invite**
 copies a message you can send a friend. **Switch** remembers up to eight groups.
 
 In the plugin's settings, **Show destinations from the map**, **Show my group on the world map**

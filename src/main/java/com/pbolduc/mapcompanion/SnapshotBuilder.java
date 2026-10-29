@@ -341,19 +341,31 @@ public class SnapshotBuilder
 		return CHARACTER_NAME.matcher(cleaned).matches() ? cleaned : null;
 	}
 
-	private String nickname()
+	/**
+	 * The nickname the map reads as none (its {@code DEFAULT_NICKNAME}), so it labels the member
+	 * by their shared character name, else "Member". Any other value wins over the name, so an
+	 * empty box sends this rather than a placeholder of its own.
+	 */
+	static final String NO_NICKNAME = "Me";
+
+	/** The alias the player typed, or "" for none, a saved {@link #NO_NICKNAME} included. */
+	static String alias(MapCompanionConfig config)
 	{
 		String nick = config.nickname();
-		if (nick == null || nick.trim().isEmpty())
-		{
-			/**
-			 * Never falls back to the RuneScape name. The point of a nickname is that the account
-			 * behind it stays the player's own business, and a default that quietly leaked it would
-			 * undo the whole arrangement.
-			 */
-			return "Someone";
-		}
-		return nick.trim();
+		String trimmed = nick == null ? "" : nick.trim();
+		return trimmed.equals(NO_NICKNAME) ? "" : trimmed;
+	}
+
+	/**
+	 * The alias only while the character name is not shared. One choice decides what the group
+	 * sees, so a name ticked to be shown is never sent only to be hidden behind an alias. Never
+	 * falls back to the RuneScape name either: that travels as {@code characterName} under its own
+	 * toggle, or not at all.
+	 */
+	private String nickname()
+	{
+		String alias = alias(config);
+		return config.shareName() || alias.isEmpty() ? NO_NICKNAME : alias;
 	}
 
 	/**
