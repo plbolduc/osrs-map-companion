@@ -25,6 +25,7 @@
  */
 package com.pbolduc.mapcompanion;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -35,12 +36,14 @@ import javax.annotation.Nullable;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import net.runelite.api.coords.WorldPoint;
+import net.runelite.api.gameval.SpriteID;
 import net.runelite.client.ui.ColorScheme;
-import net.runelite.client.ui.components.IconTextField;
 
 /**
  * Search the map from the sidebar: a box at the top of Home and up to eight places under it.
@@ -55,6 +58,16 @@ import net.runelite.client.ui.components.IconTextField;
  *
  * <p>The rows are rebuilt only when what they say changes, as the drop-luck list is, because a
  * rebuild under the pointer eats the click and the sidebar refreshes every second.
+ *
+ * <p><b>No type filter.</b> Eight rows already come sorted by kind — a bare kind word is ordered by
+ * distance, an item splits into <i>Sold at</i> and <i>Dropped by</i> — and the website's six chips
+ * need two rows at this width. What tells a row's kind at a glance is the game's own icon beside it
+ * instead: the world map's for a bank, a ride, a patch, a mine or a shop, its combat icon for a
+ * monster, the minimap's yellow dot for a character, and an item's own sprite. All of it is the
+ * client's ({@link GameSprites}); nothing is fetched.
+ *
+ * <p>The box is a plain field rather than RuneLite's icon field because only a plain field takes the
+ * look and feel's placeholder, and an empty box should say what it searches.
  */
 final class SearchPanel extends JPanel
 {
@@ -62,9 +75,15 @@ final class SearchPanel extends JPanel
 	private static final int WIDTH = MapCompanionPanel.CARD_TEXT_WIDTH;
 	static final String SOURCE = "search";
 
+	/** A row's picture column: the widest sprite it holds, an item's, fitted to this square. */
+	static final int PICTURE = 24;
+	static final String PLACEHOLDER = "Search places, people, items";
+
 	private final transient SearchClient search;
 	private final transient RoutePress press;
-	private final IconTextField box = new IconTextField();
+	@Nullable
+	private final transient GameSprites sprites;
+	private final JTextField box = new JTextField();
 	private final JPanel rows = MapCompanionPanel.column(ColorScheme.DARK_GRAY_COLOR);
 	private final JLabel status = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
 	/** The list is folded once a pick is pressed; typing or Enter opens it again. */
@@ -72,18 +91,20 @@ final class SearchPanel extends JPanel
 	@Nullable
 	private String drawn;
 
-	SearchPanel(SearchClient search, RoutePress press)
+	SearchPanel(SearchClient search, RoutePress press, @Nullable GameSprites sprites)
 	{
 		this.search = search;
 		this.press = press;
+		this.sprites = sprites;
 		setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.Y_AXIS));
 		setBackground(ColorScheme.DARK_GRAY_COLOR);
 		MapCompanionPanel.left(this);
 		setName("companionSearch");
 		box.setName("search.box");
-		box.setIcon(IconTextField.Icon.SEARCH);
+		box.putClientProperty("JTextField.placeholderText", PLACEHOLDER);
+		box.putClientProperty("JTextField.leadingIcon", SidebarIcons.magnifier());
+		box.putClientProperty("JTextField.showClearButton", true);
 		box.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-		box.setHoverBackgroundColor(ColorScheme.DARKER_GRAY_HOVER_COLOR);
 		box.setPreferredSize(new Dimension(MapCompanionPanel.CARD_TEXT_WIDTH + 16, 28));
 		box.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28));
 		box.setToolTipText("Search the map: a place, a character, a monster or an item. A pick plans the way there.");
@@ -113,7 +134,6 @@ final class SearchPanel extends JPanel
 			folded = false;
 			search.enter(box.getText());
 		});
-		box.addClearListener(search::clear);
 		add(box);
 		add(rows);
 		add(MapCompanionPanel.left(status));
@@ -129,7 +149,7 @@ final class SearchPanel extends JPanel
 	}
 
 	/** The text in the box, for the panel's own test. */
-	IconTextField box()
+	JTextField box()
 	{
 		return box;
 	}
@@ -201,21 +221,33 @@ final class SearchPanel extends JPanel
 		return sb.toString();
 	}
 
-	/** One place: its name, and the website's grey line under it. The whole row is the button. */
+	/** One place: its picture, its name, and the website's grey line under it. The whole row is the button. */
 	private JPanel row(SearchClient.Hit hit)
 	{
-		JPanel row = MapCompanionPanel.column(ColorScheme.DARKER_GRAY_COLOR);
+		JPanel row = new JPanel(new BorderLayout(6, 0));
+		row.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		row.setName("search.row");
 		row.setBorder(new EmptyBorder(4, 8, 4, 8));
+		JLabel picture = new JLabel();
+		picture.setName("search.picture");
+		picture.setHorizontalAlignment(SwingConstants.CENTER);
+		picture.setVerticalAlignment(SwingConstants.TOP);
+		picture.setPreferredSize(new Dimension(PICTURE, PICTURE));
+		picture(picture, hit);
+		row.add(picture, BorderLayout.WEST);
+		JPanel words = MapCompanionPanel.column(ColorScheme.DARKER_GRAY_COLOR);
+		words.setOpaque(false);
+		int width = WIDTH - PICTURE - 6;
 		JLabel name = label(12f, Color.WHITE);
-		MapCompanionPanel.setWrapped(name, hit.name, WIDTH);
-		row.add(MapCompanionPanel.left(name));
+		MapCompanionPanel.setWrapped(name, hit.name, width);
+		words.add(MapCompanionPanel.left(name));
 		if (!hit.line.isEmpty())
 		{
 			JLabel line = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
-			MapCompanionPanel.setWrapped(line, hit.line, WIDTH);
-			row.add(MapCompanionPanel.left(line));
+			MapCompanionPanel.setWrapped(line, hit.line, width);
+			words.add(MapCompanionPanel.left(line));
 		}
+		row.add(words, BorderLayout.CENTER);
 		row.setToolTipText("Plan the way to " + hit.name);
 		row.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		row.addMouseListener(new MouseAdapter()
@@ -244,6 +276,68 @@ final class SearchPanel extends JPanel
 		slot.add(row);
 		slot.setMaximumSize(new Dimension(Integer.MAX_VALUE, slot.getPreferredSize().height));
 		return MapCompanionPanel.left(slot);
+	}
+
+	/** The row's picture, from the game: an item's sprite, a world-map icon, or the character dot. */
+	private void picture(JLabel picture, SearchClient.Hit hit)
+	{
+		if ("npc".equals(hit.kind))
+		{
+			picture.setIcon(SidebarIcons.characterDot());
+			return;
+		}
+		if (sprites == null)
+		{
+			return;
+		}
+		if (hit.itemId != null)
+		{
+			sprites.item(picture, hit.itemId, PICTURE);
+			return;
+		}
+		if (SearchClient.ITEMS.equals(hit.section))
+		{
+			sprites.itemNamed(picture, hit.name, PICTURE);
+			return;
+		}
+		int sprite = spriteFor(hit.kind, hit.section);
+		if (sprite > 0)
+		{
+			sprites.sprite(picture, sprite, PICTURE);
+		}
+	}
+
+	/**
+	 * The world map's icon for a row, by the map's kind for it, or 0 for none. A row under
+	 * <i>Sold at</i> is a shop of some kind, and the map does not say which, so it is the general
+	 * store's sign rather than a guess at the axe shop's. A town or a point of interest has no one
+	 * icon, so it has none.
+	 */
+	static int spriteFor(@Nullable String kind, @Nullable String section)
+	{
+		if ("Sold at".equals(section))
+		{
+			return SpriteID.Mapfunction.GENERAL_STORE;
+		}
+		if (kind == null)
+		{
+			return 0;
+		}
+		switch (kind)
+		{
+			case "bank":
+				return SpriteID.Mapfunction.BANK;
+			case "transport":
+				return SpriteID.Mapfunction.TRANSPORTATION;
+			case "farming_patch":
+				return SpriteID.Mapfunction.FARMING_PATCH;
+			case "star_site":
+				return SpriteID.Mapfunction.MINING_SITE;
+			case "monster":
+				return SpriteID.SideIcons.COMBAT;
+			default:
+				return 0;
+		}
 	}
 
 	/** A pick: the way there, by the row's id, which the map resolves as its own search did. */

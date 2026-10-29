@@ -53,6 +53,9 @@ honoured by asking nothing until it has passed, and a failure without one waits 
 query is in the request's address, which the map leaves out of its logs; the plugin logs nothing it
 types. A pick is one `POST /api/companion/route` with the row's id and the tile you stand on, under
 Reroute's rules, and its answer becomes the destination, as a destination the map sent would.
+Each row's picture is the game's own, from the client's sprite cache: the map's kind for a row picks
+a world-map icon, and an item's `itemId`, where the map names one, picks its sprite. No picture is
+ever fetched from the map or anywhere else.
 
 **Route** beside the clue being carried, the last death, a star in the Stars tab or a meetup is the
 same request with a tile as its target: the clue's dig spot or beginner map, the death's tile, the

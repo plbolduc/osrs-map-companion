@@ -1,0 +1,27 @@
+{
+  "rows": [
+    {
+      "id": "monster:Abyssal demon",
+      "kind": "monster",
+      "name": "Abyssal demon",
+      "line": "Slayer Tower",
+      "x": 3417,
+      "y": 3566,
+      "plane": 2,
+      "spawnCount": 6,
+      "effortTiles": 210,
+      "section": "Dropped by"
+    }
+  ],
+  "items": [
+    {
+      "id": "item:Feather",
+      "itemId": 314,
+      "name": "Feather",
+      "droppedBy": 12,
+      "soldAt": 9
+    }
+  ],
+  "suggestion": "abyssal whip",
+  "origin": "shared"
+}

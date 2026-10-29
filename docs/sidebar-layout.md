@@ -471,3 +471,14 @@ share*, then the **Advanced** fold with the map address, *Show what's sent*, *Le
 not drawn and Home is the page, because Group and Stars both ask the map as a member. The gear and
 the arrow are drawn, not loaded, as the destination's dot is. On the busy state Home is 819px where
 Overview was 1,243.
+
+### Search
+
+No type filter: eight rows already come sorted by kind, and the website's six chips need two rows
+at 205px. Each row has the game's own icon beside it instead — the world map's for a bank, a ride, a
+patch, a mine and, under *Sold at*, the general store's sign; the combat tab's for a monster; the
+minimap's yellow dot, drawn, for a character; and an item's own sprite, by the `itemId` the map now
+sends where its tables name one, or else by the item's exact name in the client's own price table.
+The box is a plain field, so it can say *Search places, people, items* while empty, and item rows
+have their own *Items* heading: they were drawn under the last source's, so *Bank filler* read as
+one more counter under *Sold at*. Their line no longer starts *Item ·*.

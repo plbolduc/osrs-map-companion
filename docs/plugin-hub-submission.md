@@ -109,6 +109,7 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RouteClient`, `RoutePress
 - **GET /api/companion/search** — the sidebar's search box, while connected: about 350ms after the
   last key or on Enter, two to sixty-four characters, one in flight, and nothing before a
   `Retry-After` has passed. Same three headers; the query is the `q` parameter and is never logged.
+  The rows' icons are the client's own sprites (`SpriteManager`, `ItemManager`); no image is downloaded.
 
 Requests carry the versioned User-Agent. The address must be https (plain http only on loopback),
 redirects are not followed, and reply bodies are capped at 1 MB. Snapshot and stream failures back
