@@ -82,5 +82,86 @@
       "instance": true,
       "stale": true
     }
+  ],
+  "roster": [
+    {
+      "id": "cara",
+      "name": "Cara",
+      "colour": "#f472b6",
+      "presence": "online",
+      "world": 302,
+      "near": "near Lumbridge Castle",
+      "nearYou": true,
+      "routable": true,
+      "news": {
+        "kind": "level",
+        "title": "Woodcutting 80",
+        "atMs": 1799999700000,
+        "skill": "Woodcutting"
+      }
+    },
+    {
+      "id": "dax",
+      "name": "Dax",
+      "colour": "#fb7185",
+      "presence": "idle",
+      "world": 330,
+      "near": "in an instance",
+      "routable": false,
+      "news": {
+        "kind": "npc_drop",
+        "title": "Abyssal whip",
+        "atMs": 1799999460000,
+        "itemId": 4151
+      }
+    },
+    {
+      "id": "rob",
+      "name": "Rob",
+      "colour": "#f472b6",
+      "presence": "offline",
+      "routable": false,
+      "news": {
+        "kind": "quest",
+        "title": "Quest · Dragon Slayer I",
+        "atMs": 1799998800000
+      }
+    }
+  ],
+  "events": [
+    {
+      "id": "star-hunt",
+      "title": "Star hunt",
+      "x": 3222,
+      "y": 3218,
+      "plane": 0,
+      "world": 302,
+      "startsAtMs": 1800003600000,
+      "near": "near Lumbridge Castle",
+      "who": [
+        {
+          "name": "Rob",
+          "colour": "#f472b6",
+          "answer": "on_my_way"
+        },
+        {
+          "name": "Sunday",
+          "colour": "#38bdf8",
+          "answer": "maybe",
+          "you": true
+        },
+        {
+          "name": "Dax",
+          "colour": "#fb7185",
+          "answer": "no"
+        },
+        {
+          "name": "Cara",
+          "colour": "#f472b6",
+          "answer": "arrived"
+        }
+      ],
+      "mine": "maybe"
+    }
   ]
 }

@@ -214,6 +214,8 @@ public class MapCompanionPanel extends PluginPanel
 	private final ShortestPath shortestPath;
 	/** The map's search, at the top of Overview while paired. */
 	private final SearchPanel searchPanel;
+	/** Each friend's row, the week's meetups and Meet here, under the Group heading. */
+	private final GroupPanel groupPanel;
 
 	/* Drop luck: one monster's card, or every monster tracked. See {@link DropLuckPanel}. */
 	private final JPanel drySection = column(ColorScheme.DARK_GRAY_COLOR);
@@ -313,7 +315,9 @@ public class MapCompanionPanel extends PluginPanel
 		ShortestPath shortestPath,
 		SearchClient searchClient,
 		RoutePress routePress,
-		ClueReader clueReader)
+		ClueReader clueReader,
+		GroupState groupState,
+		MeetupClient meetupClient)
 	{
 		this.config = config;
 		this.plugin = plugin;
@@ -334,6 +338,7 @@ public class MapCompanionPanel extends PluginPanel
 		this.routePress = routePress;
 		this.clueReader = clueReader;
 		this.searchPanel = new SearchPanel(searchClient, routePress);
+		this.groupPanel = new GroupPanel(destinationState, groupState, routePress, meetupClient, config);
 		this.routeSteps = new RouteStepsView(way ->
 		{
 			destinationRoute.choose(way);
@@ -465,6 +470,7 @@ public class MapCompanionPanel extends PluginPanel
 
 		overview.add(groupHeading);
 		overview.add(gap(3, ColorScheme.DARK_GRAY_COLOR));
+		overview.add(groupPanel);
 		overview.add(left(groupActions));
 		overview.add(joinToggle);
 		JPanel sharing = column(ColorScheme.DARK_GRAY_COLOR);
@@ -1194,7 +1200,11 @@ public class MapCompanionPanel extends PluginPanel
 			destinationRow.add(dismissButton);
 			shownDestinationActions = syncRow(destinationActions, destinationRow, shownDestinationActions);
 
-			RelayResponse.Event event = destinationState.getEvent();
+			/*
+			 * The one meetup under Now is the map's older word for the next meetup. A map that sends the
+			 * week's meetups shows them all under Group instead, with their answers, so Now leaves it out.
+			 */
+			RelayResponse.Event event = destinationState.getEvents() == null ? destinationState.getEvent() : null;
 			eventSlot.setVisible(event != null);
 			long now = System.currentTimeMillis();
 			if (event != null)
@@ -1260,6 +1270,11 @@ public class MapCompanionPanel extends PluginPanel
 			List<String> known = pairing.knownCodes();
 			boolean others = known.stream().anyMatch(c -> !c.equalsIgnoreCase(code));
 			groupHeading.setVisible(paired);
+			groupPanel.setVisible(ready);
+			if (ready)
+			{
+				groupPanel.refresh(true);
+			}
 			copyInviteButton.setEnabled(paired && pairing.hasServerConsent() && !copyingInvite);
 			switchButton.setText(paired ? "Switch ▾" : "Your groups ▾");
 			List<JButton> groupRow = new ArrayList<>();

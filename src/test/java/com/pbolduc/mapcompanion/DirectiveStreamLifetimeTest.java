@@ -200,6 +200,35 @@ public class DirectiveStreamLifetimeTest
 		}
 	}
 
+	@Test
+	public void aKeepAliveRenewsLivenessWithoutDeliveringAFrame() throws Exception
+	{
+		Pipe pipe = new Pipe(4096);
+		AtomicInteger frames = new AtomicInteger();
+		OkHttpClient client = new OkHttpClient.Builder().addInterceptor(chain -> reply(chain, 200, body(pipe))).build();
+		DirectiveStream stream = new DirectiveStream(client, new Gson(),
+			(action, delay) -> new FutureTask<>(action, null));
+		try
+		{
+			start(stream, ignored -> frames.incrementAndGet());
+			await(stream::isConnected);
+			assertEquals(0L, stream.lastReadAtMs());
+			okio.BufferedSink writer = Okio.buffer(pipe.sink());
+			writer.writeUtf8(": ping\n\n");
+			writer.flush();
+			await(() -> stream.lastReadAtMs() > 0L);
+			assertEquals(0, frames.get());
+			stream.stop();
+			assertEquals(0L, stream.lastReadAtMs());
+		}
+		finally
+		{
+			stream.stop();
+			pipe.sink().close();
+			client.dispatcher().executorService().shutdown();
+		}
+	}
+
 	private static void start(DirectiveStream stream, java.util.function.Consumer<RelayResponse.Directive> callback)
 	{
 		stream.start("https://example.invalid", "ABC234", "member", null, callback);

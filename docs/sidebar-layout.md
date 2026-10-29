@@ -395,3 +395,23 @@ Step 8. Each card under *Now* that names a place gains the way there, planned fr
 In Stars, Route sits beside *Pin destination* for a precise site; an approximate one has **Open on
 map** there instead. While the map answers the button reads *Planning…*, and a refusal is one line
 under it. The answer fills the destination's card, as a pick from Search does.
+
+### Friends and meetups under Group
+
+Step 9, from `plan-companion-social.md`. Under the Group heading, one card per other member: their
+disc in their map colour with presence as a dot in its corner, never as words; *near Lumbridge
+Castle · Near you*; their newest news, *Woodcutting 80 · 5m ago*; then **Route** and **Show on map**
+for a friend whose position the map draws. A friend sharing no position is a name and a dot. Route
+reads *Finding…* while their position is asked for, *Planning…*, then *Reroute*. With the group
+layer on, Show on map reads *On the map* and is not pressable.
+
+Then *Meetups*: each with its title, *Today 7:42 PM · in 1h 20m*, *near Lumbridge Castle · W302*,
+who is coming as discs (solid for coming or here, a ring for maybe, faint for can't) with *1 here ·
+1 coming · 1 maybe*, **Route**, *Say on my way* while unanswered, and the four answers in a two-by-two
+grid with this member's own filled. A map that sends no `events` leaves the one meetup under *Now*,
+as before. **Meet here…** opens a form under them: a title, a day of the coming week, an hour and a
+minute in fives, defaulting to half an hour from now, and **Make meetup**, which copies the link.
+
+`docs/review-evidence/where-to-go-2026-10-29/WhereToGoShot.java` paints the real panel in each of
+these states (steps 5a, 6, 8 and 9) at 225px with made-up names; how to run it is in its docblock.
+No picture is committed yet; step 12 takes the README's.

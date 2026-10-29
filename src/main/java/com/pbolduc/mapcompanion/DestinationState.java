@@ -59,6 +59,16 @@ public class DestinationState
 	@Getter
 	private volatile RelayResponse.Event event;
 
+	/**
+	 * The group's other members and its week of meetups, from the same directive. Null while the map
+	 * sends none, which is today's sidebar: no friends list, and the single {@link #event} as the
+	 * meetup. See {@link #acceptSocial}.
+	 */
+	@Getter
+	private volatile java.util.List<RelayResponse.RosterRow> roster;
+	@Getter
+	private volatile java.util.List<RelayResponse.Meetup> events;
+
 	/** Gson of the destination the player hid. Null when nothing is dismissed. */
 	private volatile String dismissedFingerprint;
 	/** A pin chosen here survives unchanged group heartbeats; a new map destination replaces it. */
@@ -124,6 +134,36 @@ public class DestinationState
 	}
 
 	/**
+	 * The friends and the meetups a directive carries, kept apart from {@link #accept} because they
+	 * are read on a different condition: the roster whenever the map sends one, since it is the group
+	 * the panel already shows and no setting receives it, and the meetups only while destinations and
+	 * meetups are shown, as the single meetup always was.
+	 *
+	 * <p>A directive without them leaves them as they were rather than clearing them. The held stream
+	 * and the snapshot reply both carry a directive, and a map that has the roster on one and not the
+	 * other must not make the list flicker; a group change clears them through {@link #clear}.
+	 */
+	public synchronized void acceptSocial(@Nullable RelayResponse.Directive directive, boolean meetups)
+	{
+		if (directive == null)
+		{
+			return;
+		}
+		if (directive.roster != null)
+		{
+			roster = java.util.Collections.unmodifiableList(directive.roster);
+		}
+		if (!meetups)
+		{
+			events = null;
+		}
+		else if (directive.events != null)
+		{
+			events = java.util.Collections.unmodifiableList(directive.events);
+		}
+	}
+
+	/**
 	 * Hide the current destination on this client only.
 	 *
 	 * <p>Does not talk to the relay. The next identical directive is dropped; a new one shows.
@@ -145,6 +185,8 @@ public class DestinationState
 		generation++;
 		destination = null;
 		event = null;
+		roster = null;
+		events = null;
 		dismissedFingerprint = null;
 		localDestination = null;
 		lastRemoteFingerprint = null;

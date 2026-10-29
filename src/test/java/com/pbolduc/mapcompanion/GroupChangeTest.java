@@ -126,16 +126,22 @@ public class GroupChangeTest
 												+ "\"event\":{\"id\":\"old-meetup\",\"title\":\"Old group\"}}",
 												RelayResponse.Directive.class);
 		plugin.destinationState.accept(directive);
-		java.lang.reflect.Field notified = MapCompanionPlugin.class.getDeclaredField("notifiedEventKey");
-		notified.setAccessible(true);
-		notified.set(plugin, "old-meetup");
+		/*
+		 * The reminder now watches every meetup of the week rather than one, so what it has said is a
+		 * set held by MeetupReminder instead of a single key; the rule is unchanged: a group change
+		 * forgets it.
+		 */
+		long start = System.currentTimeMillis() + 60_000L;
+		assertTrue(plugin.meetupReminder.due(java.util.Collections.singletonList(
+			new MeetupReminder.Upcoming("old-meetup", "Old group", start)), start - 60_000L, true, 5).size() == 1);
+		assertTrue(plugin.meetupReminder.said("old-meetup", start, "Old group"));
 
 		plugin.pairing.join(JoinCode.parse("DEF567"));
 		plugin.onGroupChanged();
 
 		assertNull(plugin.destinationState.getDestination());
 		assertNull(plugin.destinationState.getEvent());
-		assertNull(notified.get(plugin));
+		assertTrue(!plugin.meetupReminder.said("old-meetup", start, "Old group"));
 		assertTrue(((TestDestinationMarker) plugin.destinationMarker).removed);
 	}
 

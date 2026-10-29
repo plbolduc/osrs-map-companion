@@ -97,6 +97,11 @@ and the tile it goes to, once per press. That includes your clue's tile and wher
 do not share them: they leave in that one request and the map plans with them and keeps neither.
 Your clue is read in this client whether or not you share it, so the sidebar can offer Route.
 
+**Meet here** sends the title and time you choose, the tile you are standing on and your world,
+once per press, to make a meetup your group can see. Answering a meetup (**Going**, **Maybe**,
+**Can't**, **On my way** or **Say on my way**) sends that answer, once per press. Nothing answers for
+you: Route to a meetup tells nobody you are coming.
+
 Your chat, other players, your bank and inventory, your existing collection log slots, a complete
 loot history and anything derived from your account's identifiers are never sent. **Advanced →
 Show what's sent** shows what would go out right now. The server's operator and your group's

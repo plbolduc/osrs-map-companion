@@ -156,6 +156,27 @@ The website plan's second session, once the routes in the game are built: a memb
 - [ ] **Route on a star and a meetup.** In Stars, a precise site's Route sits beside Pin
       destination without cutting a word; an approximate one shows Open on map. A meetup's Route
       prints its world in the destination's line and nobody in the group is told.
+- [ ] **Friends.** With two characters in one group and the group layer off, the other appears
+      under Group with their disc, presence dot, *near* and news. Show on map draws only them; Route
+      asks for their position, then fills the destination's card once and does not follow them.
+      Pressed again it reads Reroute. A friend in a raid has no Route.
+- [ ] **Meetups.** Answer a meetup from the sidebar and see the same answer on that member's browser
+      on the website. Say on my way appears only while it is unanswered. Meet here on W302 makes a
+      meetup at your tile whose copied link opens on the map; inside an instance it refuses.
+- [ ] **The reminder.** With *Notify before a meetup* on and the minutes set to 2, a meetup two
+      minutes off raises one RuneLite notification and no second one; with it off, none.
+
+## Route review follow-up
+
+- [ ] From Lumbridge Castle's bank, route to the ground floor, then to another tile on the
+      bank's own floor. The first lists both climbs down; the second stays upstairs.
+- [ ] Reroute during a walking step. Shortest Path must draw the new waypoint even when it is
+      still the first step. Disable the companion immediately after selecting a different
+      Shortest Path target: that newer path must remain. With the companion's path still selected,
+      disabling it clears that path after checking who owns it.
+- [ ] Leave two group members standing still for two minutes with group dots enabled, then Route
+      to the other member. It must start immediately from the held position. Disconnect the stream
+      and confirm its old positions are not used on a replacement connection before a new frame.
 
 ## Farming procedure
 
