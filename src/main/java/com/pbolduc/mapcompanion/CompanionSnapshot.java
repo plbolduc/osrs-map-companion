@@ -205,6 +205,7 @@ public class CompanionSnapshot
 	{
 		public String name;
 		public String detail;
+		/** Active work, or "return" when its rare part or farming crop is ready to hand in. */
 		public String state;
 		public long observedMsAgo;
 	}

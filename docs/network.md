@@ -18,6 +18,10 @@ credentials even with character sharing off. Snapshots are spaced at least two s
 an unchanged character normally sends a heartbeat every six seconds, or twenty with the receive
 stream connected. Automatic character sharing stops while logged out.
 
+With **Farming contracts** shared, the crop and patch kind remain on the snapshot when the
+contract is complete, with state `return` instead of `active`. This means ready to hand in to
+Guildmaster Jane; an absent or unreadable contract remains unknown. The existing setting guards both states.
+
 **The step after a first Connect.** Every sharing setting, **Show destinations from the map** and
 **Show my group on the world map** start off. After the server notice, the sidebar shows a row each for the
 four sharing groups, the character name and those two drawing choices, all ticked, and *Where you
