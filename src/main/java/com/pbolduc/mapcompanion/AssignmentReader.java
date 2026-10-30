@@ -227,7 +227,8 @@ public class AssignmentReader
 		}
 		try
 		{
-			if (client.getVarbitValue(VarbitID.FARMGUILD_CONTRACT_COMPLETE) != 0)
+			int complete = client.getVarbitValue(VarbitID.FARMGUILD_CONTRACT_COMPLETE);
+			if (complete != 0 && complete != 1)
 			{
 				return null;
 			}
@@ -241,7 +242,10 @@ public class AssignmentReader
 				if (produce.getContractVarbitValue() == value)
 				{
 					String crop = String.valueOf(produce.getPatchImplementation()).toLowerCase(Locale.ROOT).replace('_', ' ');
-					return assignment(produce.getName(), crop);
+					CompanionSnapshot.Assignment contract = assignment(produce.getName(), crop);
+					// The shared assignment vocabulary calls work ready to hand in "return".
+					contract.state = complete == 1 ? "return" : "active";
+					return contract;
 				}
 			}
 		}

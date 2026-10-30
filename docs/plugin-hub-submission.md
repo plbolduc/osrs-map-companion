@@ -161,6 +161,8 @@ screenshot tools are outside `src/main`. Bundled third-party notices accompany t
 
 Say these in the description of the next Hub update, as changes from what was approved:
 
+- Completed farming contracts remain visible under the existing sharing choice, with the same
+  assignment's `state: "return"`, so the website can point back to Guildmaster Jane.
 - **One press at Connect** (above): the recommended set is offered after the server notice and
   shared only on the player's press, which names every field and the receive stream it opens. No
   config default changed.

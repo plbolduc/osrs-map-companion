@@ -121,6 +121,13 @@ public class AssignmentReaderTest
 		assertEquals("Snapdragon", reader.farming(25_000).name);
 		assertEquals("herb", reader.farming(25_000).detail);
 		bits.put(VarbitID.FARMGUILD_CONTRACT_COMPLETE, 1);
+		// A completed crop still needs handing in; it is not the absence of a contract.
+		assertEquals("Snapdragon", reader.farming(25_000).name);
+		assertEquals("return", reader.farming(25_000).state);
+		enabled.put("farm", false);
+		assertNull(reader.farming(25_000));
+		enabled.put("farm", true);
+		bits.put(VarbitID.FARMGUILD_CONTRACT_COMPLETE, -1);
 		assertNull(reader.farming(25_000));
 		bits.put(VarbitID.FARMGUILD_CONTRACT_COMPLETE, 0);
 		bits.put(VarbitID.FARMGUILD_CONTRACT_TYPE, 100_000);
