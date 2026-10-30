@@ -20,7 +20,7 @@ coverage or guarantee RuneLite approval.
    warning=This plugin sends your IP address and selected character data, including your name, world, position and progress, to a third-party map server not controlled or verified by RuneLite developers.
    ```
 
-4. Open a PR titled **osrs-map-companion: initial submission**, using the reviewer notes below.
+4. Open a PR titled **osrs-map-companion: update to 1.3.0**, using the reviewer notes below.
    Include the actual validation results and outstanding live checks.
 5. Address reviewer feedback in the plugin repository, then update `commit=` in the same Hub PR.
 
