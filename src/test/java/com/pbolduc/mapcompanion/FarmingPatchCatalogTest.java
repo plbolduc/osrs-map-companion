@@ -61,7 +61,7 @@ public class FarmingPatchCatalogTest
 		 * The count is asserted so that dropping a row while adding one cannot pass unnoticed. The
 		 * map's own contract test is what checks that these are the same twenty-four ids it draws.
 		 */
-		assertEquals(48, ids.size());
+		assertEquals(99, ids.size());
 	}
 
 	@Test

@@ -62,9 +62,10 @@ public class FarmingPatchReferenceTest
 		}
 		boolean matches(FarmingPatchCatalog.Patch expected, WorldPoint point) throws ReflectiveOperationException
 		{
-			if (point.getPlane() != 0 && !expected.kind.equals("SEAWEED"))
+			if (point.getPlane() != 0 && !expected.kind.equals("SEAWEED")
+				&& !(expected.kind.equals("CORAL") && point.getPlane() == 1))
 			{
-				return false;    // Intentional ground-floor-only observation.
+				return false;    // Only ground floor, seaweed and the coral nursery's own floor.
 			}
 			for (Object region : (Collection<?>) regions.invoke(world, point))
 			{
@@ -91,8 +92,9 @@ public class FarmingPatchReferenceTest
 			for (int region : patch.regions)
 				for (int dx : new int[] {0, 7, 31, 63})
 					for (int dy : new int[] {0, 7, 31, 63})
+						for (int plane : new int[] {0, 1, 2, 3})
 					{
-						WorldPoint point = new WorldPoint((region >> 8) * 64 + dx, (region & 255) * 64 + dy, 0);
+							WorldPoint point = new WorldPoint((region >> 8) * 64 + dx, (region & 255) * 64 + dy, plane);
 						assertEquals(patch.id + " at " + point, reference.matches(patch, point), patch.isLocal(point));
 					}
 	}
@@ -126,6 +128,25 @@ public class FarmingPatchReferenceTest
 		{
 			WorldPoint point = new WorldPoint(3056, y, 0);
 			assertEquals(reference.matches(herb, point), herb.isLocal(point));
+		}
+	}
+
+	@Test
+	public void newPatchBoundaryTilesAgreeWithTheClient() throws Exception
+	{
+		Reference reference = new Reference();
+		for (FarmingPatchCatalog.Patch patch : FarmingPatchCatalog.PATCHES)
+		{
+			if (!patch.id.startsWith("fossil-island-") && !patch.id.equals("port-sarim-spirit-tree"))
+			{
+				continue;
+			}
+			for (int[] xy : new int[][] {{3056, 3271}, {3056, 3272}, {3753, 3867}, {3753, 3868}, {3753, 3870}, {3753, 3871}, {3728, 3829}, {3728, 3830}, {3729, 3832}, {3746, 3831}, {3747, 3833}})
+				for (int plane : new int[] {0, 1})
+				{
+					WorldPoint point = new WorldPoint(xy[0], xy[1], plane);
+					assertEquals(patch.id + " at " + point, reference.matches(patch, point), patch.isLocal(point));
+				}
 		}
 	}
 }

@@ -75,6 +75,8 @@ to the website.
 The website follows your character's position, floor and world as you play. See your slayer task,
 clue step, hunter rumour, Mahogany Homes job and farming contract on the map, alongside birdhouse
 timers and the farm patches you have visited.
+Patch tracking includes hops, bushes, hardwood and spirit trees, cactus and the Guild's
+special patches, alongside herbs, allotments, flowers and trees.
 Completed farming contracts point back to Guildmaster Jane to hand them in.
 
 ## Slayer on the website
@@ -143,7 +145,8 @@ on until you press, and you can untick any of it first. Each choice can send:
   your Mahogany Homes customer and tier; the crop requested by your farming contract and whether
   it is ready to hand in;
   birdhouse states and observation ages; the state of farming patches you have walked past,
-  including crop, stages, observation age, estimated growth windows and witnessed replant receipts.
+  including crop, stages, observation age, estimated growth windows and witnessed replant receipts
+  for the 99 patches supported by RuneLite's crop tracker (including grapes, coral and seaweed).
 - **Loot:** observed loot kills for every monster, how long ago each was last killed, notable drop
   counts and observation baselines, kills since a drop, slayer-task/diary rate conditions, the
   monster currently being killed and your pinned drop. Completeness flags identify omitted history.

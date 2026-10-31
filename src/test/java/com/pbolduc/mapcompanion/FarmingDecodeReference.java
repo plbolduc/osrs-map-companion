@@ -38,6 +38,10 @@ import java.util.List;
  */
 final class FarmingDecodeReference
 {
+	static final String[] KINDS = {"HERB", "TREE", "FRUIT_TREE", "ALLOTMENT", "FLOWER", "SEAWEED", "CACTUS", "HOPS", "HARDWOOD_TREE", "BUSH", "BELLADONNA", "SPIRIT_TREE", "CORAL", "CALQUAT", "GRAPES", "MUSHROOM", "HESPORI", "ANIMA", "CELASTRUS", "REDWOOD", "CRYSTAL_TREE"};
+	/** Pinned source census: a missing branch must fail even if a few weeds still decode. */
+	private static final int[] ROW_COUNTS = {237, 246, 256, 256, 256, 256, 256, 256, 256, 256, 256, 64, 256, 256, 16, 256, 10, 256, 256, 53, 12};
+
 	static List<String> rows() throws ReflectiveOperationException
 	{
 		Class<?> implementation = Class.forName("net.runelite.client.plugins.timetracking.farming.PatchImplementation");
@@ -51,8 +55,9 @@ final class FarmingDecodeReference
 		stateMethod.setAccessible(true);
 		stageMethod.setAccessible(true);
 		List<String> rows = new ArrayList<>();
-		for (String kind : new String[] {"HERB", "TREE", "FRUIT_TREE", "ALLOTMENT", "FLOWER", "SEAWEED"})
+		for (int kindIndex = 0; kindIndex < KINDS.length; kindIndex++)
 		{
+			String kind = KINDS[kindIndex];
 			Object crop = implementation.getField(kind).get(null);
 			int before = rows.size();
 			for (int value = 0; value < 256; value++)
@@ -70,7 +75,7 @@ final class FarmingDecodeReference
 						 + "|" + stageMethod.invoke(decoded) + "|" + stages + "|" + minutes);
 			}
 			System.out.println(kind + ": " + (rows.size() - before) + " values");
-			if (rows.size() - before < 150)
+			if (rows.size() - before != ROW_COUNTS[kindIndex])
 			{
 				throw new IllegalStateException("Collapsed farming decode for " + kind);
 			}
@@ -81,10 +86,10 @@ final class FarmingDecodeReference
 	public static void main(String[] args) throws Exception
 	{
 		List<String> rows = rows();
-		String header = "# Derived from RuneLite 1.12.39 PatchImplementation / Produce; BSD-2-Clause, see farming-LICENSE.txt.\n"
+		String header = "# Derived from RuneLite 1.13.4 PatchImplementation / Produce; BSD-2-Clause, see farming-LICENSE.txt.\n"
 						+ "# crop|value|state|produce|stage|stages|growthMinutes\n";
 		Files.write(Paths.get("src/main/resources/farming-crops.txt"),
 					(header + String.join("\n", rows) + "\n").getBytes(StandardCharsets.UTF_8));
-		System.out.println("Wrote " + rows.size() + " decoded values for six crop kinds; review the source version and diff before publishing.");
+		System.out.println("Wrote " + rows.size() + " decoded values for " + KINDS.length + " crop kinds; review the source version and diff before publishing.");
 	}
 }

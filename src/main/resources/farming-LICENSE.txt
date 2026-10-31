@@ -1,5 +1,5 @@
-The farming crop table and region/slot definitions derive from RuneLite 1.12.36:
-https://github.com/runelite/runelite/tree/runelite-parent-1.12.36/runelite-client/src/main/java/net/runelite/client/plugins/timetracking/farming
+The farming crop table and region/slot definitions derive from RuneLite 1.13.4:
+https://github.com/runelite/runelite/tree/runelite-parent-1.13.4/runelite-client/src/main/java/net/runelite/client/plugins/timetracking/farming
 
 PatchImplementation.java: Copyright (c) 2019 Abex
 FarmingWorld.java: Copyright (c) 2018, NotFoxtrot <https://github.com/NotFoxtrot>

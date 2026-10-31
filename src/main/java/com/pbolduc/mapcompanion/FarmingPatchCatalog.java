@@ -35,9 +35,9 @@ import static net.runelite.api.gameval.VarbitID.*;
  * The region selects the meaning of a farming transmit slot. Falador and Catherby both use D
  * for herbs; reading D everywhere and assigning it to both sites invents another person's run.
  *
- * <p>These slot/region pairs and the two boundary exceptions are transcribed from RuneLite
- * 1.12.36 FarmingWorld (see farming-LICENSE.txt). Only ground-floor observations are accepted;
- * checking an upstairs varbit is unnecessary for witnessing a replant. Site ids are the map's
+ * <p>These slot/region pairs and boundary exceptions are transcribed from RuneLite
+ * 1.13.4 FarmingWorld (see farming-LICENSE.txt). Only ground-floor observations are accepted;
+ * seaweed and the coral nursery's own floor are the exceptions. Site ids are the map's
  * permanent wire ids, including its separate Catherby/White Wolf Mountain sites.
  */
 final class FarmingPatchCatalog
@@ -59,7 +59,8 @@ final class FarmingPatchCatalog
 
 		boolean isLocal(WorldPoint location)
 		{
-			if (location == null || (location.getPlane() != 0 && !kind.equals("SEAWEED")))
+			if (location == null || (location.getPlane() != 0 && !kind.equals("SEAWEED")
+				&& !(kind.equals("CORAL") && location.getPlane() == 1)))
 			{
 				return false;
 			}
@@ -72,6 +73,24 @@ final class FarmingPatchCatalog
 			if (!matched)
 			{
 				return false;
+			}
+			if (id.equals("port-sarim-spirit-tree"))
+			{
+				return location.getY() < 3272;
+			}
+			if (id.startsWith("fossil-island-"))
+			{
+				// RuneLite excludes these stairs: a different floor's slots arrive a tick early.
+				int x = location.getX();
+				int y = location.getY();
+				if (x == 3753 && y >= 3868 && y <= 3870)
+				{
+					return false;
+				}
+				if ((x == 3729 || x == 3728 || x == 3747 || x == 3746) && y >= 3830 && y <= 3832)
+				{
+					return false;
+				}
 			}
 			if ((id.startsWith("falador-") && !kind.equals("TREE")))
 			{
@@ -148,7 +167,58 @@ final class FarmingPatchCatalog
 			new Patch("tree-gnome-village-fruit-tree", "FRUIT_TREE", FARMING_TRANSMIT_A, 9777, 10033),
 			new Patch("lletya-fruit-tree", "FRUIT_TREE", FARMING_TRANSMIT_A, 9265, 11103),
 			new Patch("farming-guild-fruit-tree", "FRUIT_TREE", FARMING_TRANSMIT_K, 4922, 5177, 5178, 5179, 4921, 4923, 4665, 4666, 4667),
-			new Patch("kastori-fruit-tree", "FRUIT_TREE", FARMING_TRANSMIT_B, 5423, 5167, 5424)
+			new Patch("kastori-fruit-tree", "FRUIT_TREE", FARMING_TRANSMIT_B, 5423, 5167, 5424),
+			new Patch("al-kharid-cactus", "CACTUS", FARMING_TRANSMIT_A, 13106, 13362, 13105),
+			new Patch("aldarin-hops", "HOPS", FARMING_TRANSMIT_A, 5421, 5165, 5166, 5422, 5677, 5678),
+			new Patch("anglers-retreat-hardwood", "HARDWOOD_TREE", FARMING_TRANSMIT_A, 9770),
+			new Patch("ardougne-bush", "BUSH", FARMING_TRANSMIT_A, 10290, 10546),
+			new Patch("auburnvale-belladonna", "BELLADONNA", FARMING_TRANSMIT_B, 5427, 5428, 5684),
+			new Patch("locus-oasis-hardwood", "HARDWOOD_TREE", FARMING_TRANSMIT_A, 6702, 6446),
+			new Patch("brimhaven-spirit-tree", "SPIRIT_TREE", FARMING_TRANSMIT_B, 11058, 11057),
+			new Patch("champions-guild-bush", "BUSH", FARMING_TRANSMIT_A, 12596),
+			new Patch("draynor-manor-belladonna", "BELLADONNA", FARMING_TRANSMIT_A, 12340),
+			new Patch("entrana-hops", "HOPS", FARMING_TRANSMIT_A, 11060, 11316),
+			new Patch("etceteria-bush", "BUSH", FARMING_TRANSMIT_A, 10300),
+			new Patch("etceteria-spirit-tree", "SPIRIT_TREE", FARMING_TRANSMIT_B, 10300),
+			new Patch("fossil-island-east-hardwood", "HARDWOOD_TREE", FARMING_TRANSMIT_A, 14651, 14907, 14908, 15164, 14652, 14906, 14650, 15162, 15163),
+			new Patch("fossil-island-middle-hardwood", "HARDWOOD_TREE", FARMING_TRANSMIT_B, 14651, 14907, 14908, 15164, 14652, 14906, 14650, 15162, 15163),
+			new Patch("fossil-island-west-hardwood", "HARDWOOD_TREE", FARMING_TRANSMIT_C, 14651, 14907, 14908, 15164, 14652, 14906, 14650, 15162, 15163),
+			new Patch("great-conch-east-coral", "CORAL", FARMING_TRANSMIT_A, 12581, 12325, 12326, 12327, 12580, 12582, 12583, 12836, 12837, 12838, 12839, 13092, 13093, 13194),
+			new Patch("great-conch-west-coral", "CORAL", FARMING_TRANSMIT_B, 12581, 12325, 12326, 12327, 12580, 12582, 12583, 12836, 12837, 12838, 12839, 13092, 13093, 13194),
+			new Patch("great-conch-calquat", "CALQUAT", FARMING_TRANSMIT_C, 12581, 12325, 12326, 12327, 12580, 12582, 12583, 12836, 12837, 12838, 12839, 13092, 13093, 13194),
+			new Patch("harmony-allotment", "ALLOTMENT", FARMING_TRANSMIT_A, 15148),
+			new Patch("kastori-calquat", "CALQUAT", FARMING_TRANSMIT_A, 5423, 5167, 5424),
+			new Patch("hosidius-spirit-tree", "SPIRIT_TREE", FARMING_TRANSMIT_F, 6967, 6711),
+			new Patch("hosidius-east-1-grape", "GRAPES", FARMING_TRANSMIT_A1, 7223),
+			new Patch("hosidius-east-2-grape", "GRAPES", FARMING_TRANSMIT_A2, 7223),
+			new Patch("hosidius-east-3-grape", "GRAPES", FARMING_TRANSMIT_B1, 7223),
+			new Patch("hosidius-east-4-grape", "GRAPES", FARMING_TRANSMIT_B2, 7223),
+			new Patch("hosidius-east-5-grape", "GRAPES", FARMING_TRANSMIT_C1, 7223),
+			new Patch("hosidius-east-6-grape", "GRAPES", FARMING_TRANSMIT_C2, 7223),
+			new Patch("hosidius-west-1-grape", "GRAPES", FARMING_TRANSMIT_D1, 7223),
+			new Patch("hosidius-west-2-grape", "GRAPES", FARMING_TRANSMIT_D2, 7223),
+			new Patch("hosidius-west-3-grape", "GRAPES", FARMING_TRANSMIT_E1, 7223),
+			new Patch("hosidius-west-4-grape", "GRAPES", FARMING_TRANSMIT_E2, 7223),
+			new Patch("hosidius-west-5-grape", "GRAPES", FARMING_TRANSMIT_F1, 7223),
+			new Patch("hosidius-west-6-grape", "GRAPES", FARMING_TRANSMIT_F2, 7223),
+			new Patch("lumbridge-hops", "HOPS", FARMING_TRANSMIT_A, 12851),
+			new Patch("morytania-mushroom", "MUSHROOM", FARMING_TRANSMIT_A, 13622, 13878),
+			new Patch("port-sarim-spirit-tree", "SPIRIT_TREE", FARMING_TRANSMIT_A, 12082, 12083),
+			new Patch("rimmington-bush", "BUSH", FARMING_TRANSMIT_A, 11570, 11826),
+			new Patch("seers-village-hops", "HOPS", FARMING_TRANSMIT_A, 10551, 10550),
+			new Patch("tai-bwo-wannai-calquat", "CALQUAT", FARMING_TRANSMIT_A, 11056),
+			new Patch("yanille-hops", "HOPS", FARMING_TRANSMIT_A, 10288),
+			new Patch("farming-guild-hespori", "HESPORI", FARMING_TRANSMIT_J, 5021),
+			new Patch("farming-guild-bush", "BUSH", FARMING_TRANSMIT_B, 4922, 5177, 5178, 5179, 4921, 4923, 4665, 4666, 4667),
+			new Patch("farming-guild-cactus", "CACTUS", FARMING_TRANSMIT_F, 4922, 5177, 5178, 5179, 4921, 4923, 4665, 4666, 4667),
+			new Patch("farming-guild-spirit-tree", "SPIRIT_TREE", FARMING_TRANSMIT_A, 4922, 5177, 5178, 5179, 4921, 4923, 4665, 4666, 4667),
+			new Patch("farming-guild-anima", "ANIMA", FARMING_TRANSMIT_M, 4922, 5177, 5178, 5179, 4921, 4923, 4665, 4666, 4667),
+			new Patch("farming-guild-celastrus", "CELASTRUS", FARMING_TRANSMIT_L, 4922, 5177, 5178, 5179, 4921, 4923, 4665, 4666, 4667),
+			new Patch("farming-guild-redwood", "REDWOOD", FARMING_TRANSMIT_I, 4922, 5177, 5178, 5179, 4921, 4923, 4665, 4666, 4667),
+			new Patch("prifddinas-north-allotment", "ALLOTMENT", FARMING_TRANSMIT_A, 13151, 12895, 12894, 13150, 12994, 12993, 12737, 12738, 12126, 12127, 13250),
+			new Patch("prifddinas-south-allotment", "ALLOTMENT", FARMING_TRANSMIT_B, 13151, 12895, 12894, 13150, 12994, 12993, 12737, 12738, 12126, 12127, 13250),
+			new Patch("prifddinas-flower", "FLOWER", FARMING_TRANSMIT_C, 13151, 12895, 12894, 13150, 12994, 12993, 12737, 12738, 12126, 12127, 13250),
+			new Patch("prifddinas-crystal", "CRYSTAL_TREE", FARMING_TRANSMIT_E, 13151, 12895, 12894, 13150, 12994, 12993, 12737, 12738, 12126, 12127, 13250)
 		));
 
 	private FarmingPatchCatalog() {}
