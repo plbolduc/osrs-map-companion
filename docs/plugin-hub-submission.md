@@ -31,6 +31,13 @@ The warning belongs in the Hub manifest. The root `runelite-plugin.properties` d
 
 ## Reviewer notes
 
+The next update expands the existing **Farming patches** choice to all 99 crop patches in
+RuneLite 1.13.4's Time Tracking catalogue, excluding compost bins. The decoder is bundled data
+with source attribution and a full parity check; it does not call another plugin's internals.
+The existing cadence, consent, byte cap and local empty-to-newly-planted receipt rule remain.
+Extra region/floor/boundary tests check slot reuse; the new readers still need a members-client
+visit as listed in [Live checks](live-checks.md#farming-procedure).
+
 OSRS Map Companion shares selected character state with a private group on osrs-map.com, supports
 map destinations and shooting stars, and keeps local drop-luck counts. It reads only the local
 character's game state. Other members' positions come from their consenting installations via the map.

@@ -22,6 +22,13 @@ With **Farming contracts** shared, the crop and patch kind remain on the snapsho
 contract is complete, with state `return` instead of `active`. This means ready to hand in to
 Guildmaster Jane; an absent or unreadable contract remains unknown. The existing setting guards both states.
 
+**Farming patches** covers the 99 crop patches in RuneLite 1.13.4's Time Tracking catalogue,
+excluding compost bins. This includes the additional hops, bushes, hardwood, spirit trees,
+cactus, special Guild crops, calquat, belladonna, mushrooms, grapes, crystal trees, Hespori and
+coral. The same setting, snapshot cadence and local replant evidence apply to every kind.
+Off-surface patches can be observed even where the website's surface run planner cannot visit.
+The snapshot byte cap is unchanged: it drops older observations first and flags omitted details.
+
 **The step after a first Connect.** Every sharing setting, **Show destinations from the map** and
 **Show my group on the world map** start off. After the server notice, the sidebar shows a row each for the
 four sharing groups, the character name and those two drawing choices, all ticked, and *Where you

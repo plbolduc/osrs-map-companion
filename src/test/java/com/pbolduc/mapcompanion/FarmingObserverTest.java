@@ -247,16 +247,26 @@ public class FarmingObserverTest
 	@Test
 	public void allSupportedPresetsHaveLocalReplantCoverage()
 	{
-		assertEquals(48, FarmingPatchCatalog.PATCHES.size());
+		assertEquals(99, FarmingPatchCatalog.PATCHES.size());
 		for (FarmingPatchCatalog.Patch definition : FarmingPatchCatalog.PATCHES)
 		{
 			observer.resetProfile();
 			store.values.clear();
 			int region = definition.regions[0];
 			WorldPoint position = new WorldPoint((region >> 8) * 64 + 32, (region & 255) * 64 + 32, 0);
+			if (definition.kind.equals("CORAL"))
+			{
+				position = new WorldPoint(3297, 8861, 1); // The nursery's stored floor, from the map's patch table.
+			}
 			assertTrue(definition.id, definition.isLocal(position));
-			settle(position, 3);
-			read(position, definition.kind.equals("HERB") || definition.kind.equals("SEAWEED") ? 4 : definition.kind.equals("ALLOTMENT") ? 6 : 8);
+			// First-stage values transcribed from the pinned RuneLite decoder. Arrival is not work.
+			int planted = definition.kind.equals("GRAPES") ? 2
+				: definition.kind.equals("BUSH") ? 5 : definition.kind.equals("ALLOTMENT") ? 6
+				: java.util.Arrays.asList("HERB", "SEAWEED", "HOPS", "BELLADONNA", "CORAL", "CALQUAT", "MUSHROOM", "HESPORI").contains(definition.kind) ? 4 : 8;
+			settle(position, planted);
+			assertNull(definition.id, patch(definition.id).completionId);
+			read(position, 0);
+			read(position, planted);
 			assertNotNull(definition.id, patch(definition.id).completionId);
 		}
 	}

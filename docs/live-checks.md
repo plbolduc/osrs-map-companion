@@ -196,6 +196,10 @@ With Farming patches enabled and the map's farm run open:
 4. Disable sharing, replant and re-enable it; repeat across a hop or logout. Unobserved actions
    remain unconfirmed; reconnect cannot replay a completion.
 5. Switch RuneScape characters. History belongs to its character; returning cannot invent a receipt.
+6. Repeat arrival, harvest-only and replant with hops, a bush, hardwood, a spirit tree, cactus
+   and each special Guild crop. Check Fossil Island's excluded ladder/stair tiles and Port
+   Sarim's 3272 boundary. Grapes, calquat, belladonna, mushrooms, Prifddinas, Hespori and coral
+   now have source-checked readers too; coral must be seen on the nursery's own floor.
 
 The bundled decoder is compared against RuneLite by automated tests. Growth windows assume healthy
 ordinary cycles and are measured relative to the observation; disease, boosts and later actions
