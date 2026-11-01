@@ -51,6 +51,8 @@ sighting, labelled as such. Personal stops say **Visited** when you reach them.
 **Reroute** reorders what remains from where you stand; **End run** clears the run.
 **Pause route** keeps the itinerary, and **Follow** resumes it. A route you choose yourself
 pauses the run. With Shortest Path installed, its walking legs can be drawn as you reach them.
+Runs live in the map server's memory. If that server restarts, the old run ends and **Start run**
+can make a new one in the same client session.
 
 ## Friends and meetups
 

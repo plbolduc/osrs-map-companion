@@ -82,6 +82,11 @@ its stop ordinals, not the underlying receipts or inventory. Birdhouse progress 
 existing read-only Time Tracking settings and requires a fresh seeded sighting after the run
 was received. Custom stops are visited, never marked as a confirmed replant.
 The receiver rejects old revisions, old character channels and callbacks from ended connections.
+`relayEpoch` on replies/stream frames, and `X-Companion-Relay-Epoch` on End's 204 response,
+identify the lifetime of that relay's memory. It is a random public process marker, not a
+credential or a character identifier. A server restart clears the lost itinerary and resets
+its counters locally; delayed frames from the retired process remain rejected. The marker is
+received on existing requests, with no additional polling or outgoing character field.
 
 **Search**, at the top of Home while connected, asks `GET /api/companion/search?q=` with the
 same three credentials, about 350ms after the last key or at once on Enter, and never for fewer than

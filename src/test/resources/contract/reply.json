@@ -1,6 +1,7 @@
 {
   "pollIntervalMs": 2000,
   "directive": {
+    "relayEpoch": "contract-relay-epoch",
     "destination": {
       "x": 3222,
       "y": 3218,

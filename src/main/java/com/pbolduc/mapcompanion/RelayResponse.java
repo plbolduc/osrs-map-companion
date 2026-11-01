@@ -87,6 +87,9 @@ public class RelayResponse
 
 	public static class Directive
 	{
+		/** Public relay-memory lifetime; its counters start again after the server restarts. */
+		@JsonAdapter(DirectiveEpoch.Lenient.class)
+		public String relayEpoch;
 		public Destination destination;
 		public Event event;
 		/** The member's own ordered farm run; a malformed one cannot cost the rest of the reply. */

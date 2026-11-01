@@ -78,9 +78,16 @@ final class FarmRunClient
 		final boolean planning;
 		final String message;
 		final long lifetime;
+		final long runGeneration;
 
 		Said(boolean planning, @Nullable String message, long lifetime)
 		{
+			this(planning, message, lifetime, -1);
+		}
+
+		Said(boolean planning, @Nullable String message, long lifetime, long runGeneration)
+		{
+			this.runGeneration = runGeneration;
 			this.planning = planning;
 			this.message = message;
 			this.lifetime = lifetime;
@@ -162,7 +169,8 @@ final class FarmRunClient
 	Said said()
 	{
 		Said current = said;
-		return current != null && current.lifetime == destinations.generation() ? current : null;
+		return current != null && current.lifetime == destinations.generation()
+			   && (current.runGeneration < 0 || state.current(current.runGeneration)) ? current : null;
 	}
 
 	/** Client thread, including the local stop; nothing reads a game tile in a network callback. */
@@ -319,23 +327,29 @@ final class FarmRunClient
 			}
 			if (ticket.end)
 			{
+				String epoch = close.header("X-Companion-Relay-Epoch");
+				if (DirectiveEpoch.clean(epoch) == null)
+				{
+					finish(ticket, null, 0, RouteClient.UNREADABLE, next);
+					return;
+				}
 				String removed = close.header("X-Companion-Run-Revision");
 				long removalRevision = removed == null ? 0 : Long.parseLong(removed);
 				if (removalRevision < 0 || removalRevision > 9_007_199_254_740_991L)
 				{
 					removalRevision = 0;
 				}
-				finish(ticket, null, removalRevision, null, next);
+				finish(ticket, null, removalRevision, epoch, null, next);
 				return;
 			}
 			RelayResponse.Directive answer = gson.fromJson(
 												 CompanionHttp.readBounded(close.body(), CompanionHttp.MAX_REPLY_BYTES), RelayResponse.Directive.class);
-			if (answer == null || answer.run == null || answer.runRevision <= 0)
+			if (answer == null || answer.run == null || answer.runRevision <= 0 || answer.relayEpoch == null)
 			{
 				finish(ticket, null, 0, "The map returned no readable run.", next);
 				return;
 			}
-			finish(ticket, answer.run, answer.runRevision, null, next);
+			finish(ticket, answer.run, answer.runRevision, answer.relayEpoch, null, next);
 		}
 		catch (IOException | RuntimeException unreadable)
 		{
@@ -343,8 +357,14 @@ final class FarmRunClient
 		}
 	}
 
+	private void finish(Ticket ticket, @Nullable RelayResponse.FarmRun run, long revision,
+						@Nullable String why, long next)
+	{
+		finish(ticket, run, revision, null, why, next);
+	}
+
 	private synchronized void finish(Ticket ticket, @Nullable RelayResponse.FarmRun run, long revision,
-									 @Nullable String why, long next)
+									 @Nullable String epoch, @Nullable String why, long next)
 	{
 		if (active != ticket)
 		{
@@ -362,13 +382,22 @@ final class FarmRunClient
 		}
 		if (run != null)
 		{
-			state.acceptPlannedFor(ticket.member, run, revision, System.currentTimeMillis());
+			if (!state.acceptPlannedFor(ticket.member, epoch, run, revision, System.currentTimeMillis()))
+			{
+				said = null;
+				return;
+			}
 		}
-		else if (ticket.end && revision > 0)
+		else if (ticket.end && why == null)
 		{
-			state.acceptFor(ticket.member, null, revision, System.currentTimeMillis());
+			if (!state.acceptFor(ticket.member, epoch, null, revision, System.currentTimeMillis()))
+			{
+				said = null;
+				return;
+			}
 		}
-		said = new Said(false, why == null ? ticket.end ? "Run ended." : "Run ready." : why, ticket.lifetime);
+		said = new Said(false, why == null ? ticket.end ? "Run ended." : "Run ready." : why, ticket.lifetime,
+						why == null && run != null ? state.generation() : -1);
 	}
 
 	/** A connection or profile ended. A cancelled reply must not release a newer press's gate. */

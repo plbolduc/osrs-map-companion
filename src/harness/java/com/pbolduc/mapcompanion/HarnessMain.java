@@ -672,7 +672,7 @@ public final class HarnessMain
 				if (config.showDestination())
 				{
 					destinationState.accept(directive);
-					farmRunState.acceptFor(streamedMember, directive.run, directive.runRevision, System.currentTimeMillis());
+					farmRunState.acceptFor(streamedMember, directive.relayEpoch, directive.run, directive.runRevision, System.currentTimeMillis());
 					emit("directive", describe(directive));
 				}
 				if (config.showGroupOnWorldMap() && directive.members != null)
@@ -761,7 +761,7 @@ public final class HarnessMain
 				destinationState.accept(response.directive);
 				if (response.directive != null)
 				{
-					farmRunState.acceptFor(snapshot.member.id, response.directive.run, response.directive.runRevision, System.currentTimeMillis());
+					farmRunState.acceptFor(snapshot.member.id, response.directive.relayEpoch, response.directive.run, response.directive.runRevision, System.currentTimeMillis());
 				}
 			}
 			Map<String, Object> event = new LinkedHashMap<>();

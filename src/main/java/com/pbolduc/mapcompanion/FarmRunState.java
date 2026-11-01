@@ -62,6 +62,7 @@ final class FarmRunState
 	private long changedAt;
 	private boolean following;
 	private String dismissedId;
+	private final DirectiveEpoch epoch = new DirectiveEpoch();
 	/** End may be pressed before an initial plan's id has reached either channel. */
 	private boolean endingUnknown;
 	private List<String> carried;
@@ -146,22 +147,49 @@ final class FarmRunState
 		}
 	}
 
-	synchronized void acceptFor(String incomingMember, @Nullable RelayResponse.FarmRun incoming, long incomingRevision, long now)
+	synchronized boolean acceptFor(String incomingMember, @Nullable String incomingEpoch, @Nullable RelayResponse.FarmRun incoming, long incomingRevision, long now)
 	{
-		if (incomingMember != null && incomingMember.equals(member))
+		if (!scope(incomingMember, incomingEpoch))
 		{
-			accept(incoming, incomingRevision, now);
+			return false;
 		}
+		accept(incoming, incomingRevision, now);
+		return true;
+	}
+
+	private boolean scope(String incomingMember, @Nullable String incomingEpoch)
+	{
+		if (incomingMember == null || !incomingMember.equals(member))
+		{
+			return false;
+		}
+		DirectiveEpoch.Seen seen = epoch.accept(incomingEpoch);
+		if (seen == DirectiveEpoch.Seen.INVALID)
+		{
+			return false;
+		}
+		if (seen == DirectiveEpoch.Seen.NEW)
+		{
+			forgetRun();
+			revision = 0;
+			dismissedId = null;
+		}
+		return true;
 	}
 
 	/** An explicit new plan's reply can replace a cancelled initial plan even after a failed End. */
-	synchronized void acceptPlannedFor(String incomingMember, RelayResponse.FarmRun incoming, long incomingRevision, long now)
+	synchronized boolean acceptPlannedFor(String incomingMember, @Nullable String incomingEpoch, RelayResponse.FarmRun incoming, long incomingRevision, long now)
 	{
-		if (incomingMember != null && incomingMember.equals(member) && incomingRevision > revision)
+		if (!scope(incomingMember, incomingEpoch))
+		{
+			return false;
+		}
+		if (incomingRevision > revision)
 		{
 			endingUnknown = false;
 			accept(incoming, incomingRevision, now);
 		}
+		return true;
 	}
 
 	synchronized void accept(@Nullable RelayResponse.FarmRun incoming, long incomingRevision, long now)
@@ -364,6 +392,7 @@ final class FarmRunState
 		forgetRun();
 		revision = 0;
 		dismissedId = null;
+		epoch.clear();
 		endingUnknown = false;
 		member = null;
 	}

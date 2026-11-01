@@ -52,6 +52,7 @@ import org.junit.Test;
 public class FarmRunClientTest
 {
 	private static final String SECRET = "K7PQ2M3XABCDEFGHJKMNPQRSTVWXYZ23";
+	private static final String EPOCH = "contract-relay-epoch";
 	private final Gson gson = new Gson();
 	private final HarnessStore store = new HarnessStore();
 	private final Pairing pairing = new Pairing(store, gson);
@@ -88,6 +89,7 @@ public class FarmRunClientTest
 			}
 			Response.Builder reply = new Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1)
 			.code(status.get()).message("").body(ResponseBody.create(MediaType.get("application/json"), answer.get()));
+			reply.header("X-Companion-Relay-Epoch", EPOCH);
 			if (retry.get() != null) reply.header("Retry-After", retry.get());
 			if (removedRevision.get() != null) reply.header("X-Companion-Run-Revision", removedRevision.get());
 			if (status.get() == 302) reply.header("Location", "https://elsewhere.invalid/");
@@ -123,6 +125,7 @@ public class FarmRunClientTest
 	private void readyAnswer() throws Exception
 	{
 		RelayResponse.Directive reply = new RelayResponse.Directive();
+		reply.relayEpoch = EPOCH;
 		reply.run = example();
 		reply.runRevision = 1;
 		answer.set(gson.toJson(reply));
@@ -187,7 +190,7 @@ public class FarmRunClientTest
 		connect();
 		readyAnswer();
 		RelayResponse.FarmRun run = example();
-		state.acceptFor(identity.id(), run, 1, System.currentTimeMillis() - 1_000);
+		state.acceptFor(identity.id(), EPOCH, run, 1, System.currentTimeMillis() - 1_000);
 		state.observe(null, null, null, System.currentTimeMillis());
 		CompanionSnapshot.Patch patch = new CompanionSnapshot.Patch();
 		patch.id = "falador-herb";
@@ -245,7 +248,7 @@ public class FarmRunClientTest
 		assertTrue(entered.await(3, TimeUnit.SECONDS));
 		status.set(204);
 		client.end();
-		state.acceptFor(identity.id(), example(), 1, System.currentTimeMillis());
+		state.acceptFor(identity.id(), EPOCH, example(), 1, System.currentTimeMillis());
 		assertNull("a delayed stream frame is refused before End has returned", state.view());
 		long until = System.currentTimeMillis() + 3_000;
 		while (sent.size() < 2 && System.currentTimeMillis() < until)
@@ -270,11 +273,11 @@ public class FarmRunClientTest
 		client.end();
 		settled(client);
 		assertFalse(state.ending());
-		state.acceptFor(identity.id(), example(), 7, System.currentTimeMillis());
+		state.acceptFor(identity.id(), EPOCH, example(), 7, System.currentTimeMillis());
 		assertNull(state.view());
 		RelayResponse.FarmRun next = example();
 		next.id = "a-new-run-after-end";
-		state.acceptFor(identity.id(), next, 9, System.currentTimeMillis());
+		state.acceptFor(identity.id(), EPOCH, next, 9, System.currentTimeMillis());
 		assertEquals(next.id, state.view().run.id);
 	}
 
@@ -303,6 +306,20 @@ public class FarmRunClientTest
 	}
 
 	@Test
+	public void anAcknowledgedServerRestartRetiresTheOldRunReadyMessage() throws Exception
+	{
+		connect();
+		readyAnswer();
+		FarmRunClient client = client();
+		client.start("birdhouses");
+		settled(client);
+		assertEquals("Run ready.", client.said().message);
+		state.acceptFor(identity.id(), "second-server-epoch", null, 0, System.currentTimeMillis());
+		assertNull(state.view());
+		assertNull(client.said());
+	}
+
+	@Test
 	public void anOldReplyCannotPutARunOnAnotherConnection() throws Exception
 	{
 		connect();
@@ -326,7 +343,7 @@ public class FarmRunClientTest
 	{
 		connect();
 		RelayResponse.FarmRun run = example();
-		state.acceptFor(identity.id(), run, 1, System.currentTimeMillis());
+		state.acceptFor(identity.id(), EPOCH, run, 1, System.currentTimeMillis());
 		status.set(204);
 		FarmRunClient client = client();
 		client.end();
@@ -335,7 +352,7 @@ public class FarmRunClientTest
 		Request request = sent.get(0);
 		assertEquals("DELETE", request.method());
 		assertEquals(run.id, request.url().queryParameter("run"));
-		state.acceptFor(identity.id(), run, 2, System.currentTimeMillis());
+		state.acceptFor(identity.id(), EPOCH, run, 2, System.currentTimeMillis());
 		assertNull("an already queued reroute cannot undo local End", state.view());
 	}
 }

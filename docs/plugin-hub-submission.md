@@ -125,6 +125,9 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RouteClient`, `RoutePress
   It also ends locally immediately. The map keeps a run privately in memory for up to three hours.
   The 204 reply carries `X-Companion-Run-Revision`, preventing a delayed initial-plan stream frame
   from reviving it even if the removal frame was missed.
+  A public `relayEpoch` in replies/stream frames (and `X-Companion-Relay-Epoch` on End)
+  scopes those counters to the server's memory lifetime, so a server restart cannot strand
+  a client behind its former counter. No new request or outgoing character data.
   Reply/stream frames carry the itinerary and revision; no extra polling. The snapshot advertises
   `runReceiverVersion: 1` only with destinations enabled. Local replant observation while a run
   is active does not bypass the existing farming snapshot sharing choice; a checklist's local

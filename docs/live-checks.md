@@ -227,6 +227,9 @@ continuously witnessed empty-to-newly-planted transition mints a stable completi
       Show what's sent has no farming block. Reroute sends only its done/visited ordinals.
 - [ ] Switch characters, groups and server addresses with a stream and a Start in flight.
       The replacement character never sees the old run. End and shutdown remove its numbered pins.
+- [ ] Leave the client connected through a local map-server restart. Its lost run disappears;
+      Start makes another immediately after the ordinary press wait, without reconnecting the
+      plugin. A delayed old-process heartbeat cannot restore the old run or Run ready message.
 
 Automated reader, protocol and concurrency tests complement these checks. A fake client cannot
 establish the events a real game session emits or verify every marker visually.
