@@ -168,7 +168,8 @@ The pictures use made-up characters and stars.
 
 1. Install **OSRS Map Companion** from the Plugin Hub and open its sidebar.
 2. Press **Connect**. The plugin makes a group for you, called *Our group*; you can use it on your
-   own, and rename it with **Switch ▾ → Rename group…** under **Group**.
+   own, and rename it with **Rename group…** under its name, or **Switch ▾ → Rename group…** under
+   **Group**.
 3. Press **Share what's ticked**, or **Customise** to choose field by field first, or **Not now** to
    share nothing yet. The gear opens **Settings** whenever you want to change your choices.
 4. To play with friends, press **Copy invite** under **Group** and send it. A friend pastes it into

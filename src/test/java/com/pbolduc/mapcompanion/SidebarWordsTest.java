@@ -130,6 +130,21 @@ public class SidebarWordsTest
 	}
 
 	/**
+	 * And the status card says it too, while the group still has the name Connect gave it: the moment
+	 * a new group most wants a name. Once named, or to a member who does not run it, the card is quiet.
+	 */
+	@Test
+	public void theStatusCardOffersRenameOnlyWhileTheRunnersGroupIsUnnamed()
+	{
+		assertEquals("Our group", MapCompanionPanel.STARTING_NAME);
+		assertTrue(MapCompanionPanel.offersRename(true, true, "Our group"));
+		assertFalse("named already", MapCompanionPanel.offersRename(true, true, "Sunday raids"));
+		assertFalse("does not run it", MapCompanionPanel.offersRename(true, false, "Our group"));
+		assertFalse("no group", MapCompanionPanel.offersRename(false, true, "Our group"));
+		assertFalse("no name heard yet", MapCompanionPanel.offersRename(true, true, null));
+	}
+
+	/**
 	 * Before a group the card says one plain thing, in the reader's words rather than this code's.
 	 * While connected the first line is the group's name: "Connected" became the dot's tooltip when
 	 * the card went from three lines to two, so this asserts the name where it asserted the word.
