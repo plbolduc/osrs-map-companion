@@ -356,6 +356,37 @@ public class Pairing
 		return scopedKey(server, code) + "#" + memberId;
 	}
 
+	/**
+	 * A member of this installation the group has issued a secret to, preferring {@code current}, or
+	 * null when it has issued none.
+	 *
+	 * <p>For <i>Open the map</i>, which acts as the player rather than as a character, on the login
+	 * screen, where no character is logged in to name one. Any of them will do: the map binds every
+	 * character of an installation to the browser one of them opens.
+	 */
+	@Nullable
+	public String memberWithSecret(@Nullable String server, String code, @Nullable String current)
+	{
+		if (server == null || code.isEmpty())
+		{
+			return null;
+		}
+		if (secret(server, code, current) != null)
+		{
+			return current;
+		}
+		String prefix = scopedKey(server, code) + "#";
+		String found = null;
+		for (Map.Entry<String, String> held : secrets().entrySet())
+		{
+			if (held.getKey().startsWith(prefix) && JoinCode.isWellFormedSecret(held.getValue()))
+			{
+				found = held.getKey().substring(prefix.length());
+			}
+		}
+		return found;
+	}
+
 	@Nullable
 	public String suffix(String server, String code)
 	{

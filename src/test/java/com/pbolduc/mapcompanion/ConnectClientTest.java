@@ -48,7 +48,8 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 /**
- * Connect, Join and Open map, as the map's two doors answer them, read the way the sidebar reads them.
+ * Connect, Join and Open the map, as the map's two doors answer them, read the way the sidebar reads
+ * them.
  */
 public class ConnectClientTest
 {
@@ -78,7 +79,7 @@ public class ConnectClientTest
 		return answer.get(5, TimeUnit.SECONDS);
 	}
 
-	/** And Open map's link, or null for the plain map. */
+	/** And Open the map's link, or null for the plain map. */
 	private static String url(Consumer<Consumer<String>> ask) throws Exception
 	{
 		CompletableFuture<String> answer = new CompletableFuture<>();
