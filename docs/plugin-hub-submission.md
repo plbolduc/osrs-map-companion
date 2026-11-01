@@ -164,7 +164,8 @@ the read-only `WATSON_STASH_UNIT_CHECK` script used by RuneLite's clue plugin, o
 sharing enabled, at most once a minute. `DestinationArrow` sets the hint arrow on a loaded
 destination, or on the end of the current step of its route, without replacing another arrow.
 A route's steps are numbered `MapPin`s on the world map; like every pin here, a click pans the
-map. Group pins clear on connection loss, logout, group change, sharing withdrawal and shutdown;
+map. A voyage's sail is the one route drawn as a line, by `VoyageMapOverlay`, because Shortest Path
+has no row for sailing a player's own boat. Group pins clear on connection loss, logout, group change, sharing withdrawal and shutdown;
 queued old frames are invalidated.
 
 `ShortestPath` posts RuneLite `PluginMessage`s to the Shortest Path plugin in namespace
@@ -202,6 +203,9 @@ Say these in the description of the next Hub update, as changes from what was ap
   Connect: each boat's slot, dock id and dock name from the game's `SailingDock` table, and its
   teleport focus. Nothing for an unsettled login, while aboard, or for an unreadable slot; boat
   names are read only as evidence a slot holds a boat and never sent.
+- Voyages: a route's board, sail and dock steps tick from the deck and the boats' ports, read
+  locally and never sent, and the sail's line is drawn on the world map by `VoyageMapOverlay`
+  after the world map interface. Shortest Path is never given a voyage; no input is automated.
 - Completed farming contracts remain visible under the existing sharing choice, with the same
   assignment's `state: "return"`, so the website can point back to Guildmaster Jane.
 - **One press at Connect** (above): the recommended set is offered after the server notice and

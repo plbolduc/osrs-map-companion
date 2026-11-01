@@ -27,7 +27,9 @@ package com.pbolduc.mapcompanion;
 
 import com.google.inject.Singleton;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import javax.annotation.Nullable;
 import net.runelite.api.Client;
@@ -49,6 +51,15 @@ import net.runelite.api.coords.WorldPoint;
  * plans again from where they stand. Inside an instance the tile is trusted only where the instance
  * is one place copied whole, see {@link #standing}.
  *
+ * <p><b>A voyage is ticked by the game, not by a tile.</b> Its rows say what the player does on a
+ * boat, and a boat's deck is no tile of the map, so {@link #done} asks the game instead: <i>Board</i>
+ * is done when the player stands on a deck; <i>Sail to …</i> when, still aboard, they are within a
+ * mooring's reach of where it docks; <i>Dock at …</i> when they have stepped ashore at its end, or
+ * when one of their boats now reads moored at that port where it did not before they boarded, which
+ * is what settles a voyage whose landing is on another floor. A later row of a voyage that is done
+ * passes the rows before it, so a deck the client would not report never strands the list. The
+ * game's own last-dock varbit is deliberately unused until a live client has shown when it changes.
+ *
  * <p><b>One destination, one route.</b> The route belongs to the place it was sent with, told apart
  * by the same fields {@link DestinationState} tells places apart by. A new place starts over; the
  * same place gaining its route a moment after it arrived keeps the step it is on; and once the
@@ -63,6 +74,49 @@ public class DestinationRoute
 {
 	/** How close counts as there: a teleport's landing scatters by a tile or two. */
 	static final int REACHED = 4;
+	/**
+	 * How close a boat counts as arrived at a mooring: the map's own match radius between a mooring's
+	 * name and its pin, which no two moorings come within sixty tiles of.
+	 */
+	static final int MOORED = 15;
+
+	/**
+	 * What the game says about the player's boats this tick: whether they stand on a deck, and each
+	 * boat's port by slot from {@link BoatReader}, or null where it cannot say. Read here whether or
+	 * not the boats are shared, to follow a voyage; nothing of it is sent.
+	 */
+	static final class Sailing
+	{
+		static final Sailing ASHORE_UNKNOWN = new Sailing(false, null);
+
+		final boolean aboard;
+		@Nullable
+		final Map<Integer, String> moored;
+
+		Sailing(boolean aboard, @Nullable Map<Integer, String> moored)
+		{
+			this.aboard = aboard;
+			this.moored = moored;
+		}
+
+		/** The ports the boats read, by slot; a boat at no dock or with no name is left out. */
+		static Sailing of(boolean aboard, @Nullable List<CompanionSnapshot.Boat> boats)
+		{
+			if (boats == null)
+			{
+				return new Sailing(aboard, null);
+			}
+			Map<Integer, String> moored = new HashMap<>();
+			for (CompanionSnapshot.Boat boat : boats)
+			{
+				if (boat.port != null)
+				{
+					moored.put(boat.slot, boat.port);
+				}
+			}
+			return new Sailing(aboard, moored);
+		}
+	}
 
 	private String key;
 	@Nullable
@@ -92,6 +146,12 @@ public class DestinationRoute
 	 * the target the player gave it themselves.
 	 */
 	private boolean following;
+	/** Where the boats were moored on the last tick ashore before this voyage docked; see {@link #done}. */
+	@Nullable
+	private Map<Integer, String> ashore;
+	/** The port the chosen way boards a boat at, while no boat reads moored there. */
+	@Nullable
+	private String boatAway;
 
 	/** One moment of the route, for the sidebar and the pins. Never changes after it is made. */
 	static final class View
@@ -113,10 +173,24 @@ public class DestinationRoute
 		final long nextRerouteMs;
 		final boolean following;
 		final long revision;
+		/**
+		 * The mooring the way boards a boat at, when the boats have been read since and none is there
+		 * any more: a voyage planned from where the boat was. Reroute plans from where it is.
+		 */
+		@Nullable
+		final String boatAway;
 
 		View(String key, WorldPoint target, List<RelayResponse.RouteOption> ways, int chosen, int step, @Nullable String origin,
 			boolean rerouted, boolean rerouting, @Nullable String message, long nextRerouteMs, boolean following, long revision)
 		{
+			this(key, target, ways, chosen, step, origin, rerouted, rerouting, message, nextRerouteMs, following, revision, null);
+		}
+
+		View(String key, WorldPoint target, List<RelayResponse.RouteOption> ways, int chosen, int step, @Nullable String origin,
+			boolean rerouted, boolean rerouting, @Nullable String message, long nextRerouteMs, boolean following, long revision,
+			@Nullable String boatAway)
+		{
+			this.boatAway = boatAway;
 			this.revision = revision;
 			this.following = following;
 			this.key = key;
@@ -234,6 +308,8 @@ public class DestinationRoute
 		received = incoming == null ? "" : signature(incoming);
 		chosen = best(incoming);
 		step = 0;
+		ashore = null;
+		boatAway = null;
 	}
 
 	/**
@@ -244,17 +320,63 @@ public class DestinationRoute
 	 */
 	synchronized boolean advance(@Nullable WorldPoint where)
 	{
-		if (route == null || where == null)
+		return advance(where, Sailing.ASHORE_UNKNOWN);
+	}
+
+	/**
+	 * Move on if the current step is done, asking the game about a voyage's rows.
+	 *
+	 * @return whether the current step changed
+	 */
+	synchronized boolean advance(@Nullable WorldPoint where, Sailing sailing)
+	{
+		if (route == null)
 		{
 			return false;
 		}
-		int next = next(route.options.get(chosen).steps, step, where);
+		RelayResponse.RouteOption way = route.options.get(chosen);
+		int next = where == null && !sailing.aboard ? step : next(way.steps, step, where, sailing, ashore, way.voyage);
+		int dock = firstSlot(way.steps, RouteWire.DOCK);
+		/* Kept only before the boat docks, and after the step is judged, so a landing compares with the boarding. */
+		if (!sailing.aboard && sailing.moored != null && next <= (dock < 0 ? way.steps.size() : dock))
+		{
+			ashore = sailing.moored;
+		}
+		boatAway = boatAway(way, next, sailing);
 		if (next == step)
 		{
 			return false;
 		}
 		step = next;
 		return true;
+	}
+
+	/**
+	 * The port a way boards the player's own boat at, when the boats read ashore are known and none
+	 * of them is there, while the boarding is still ahead. Null otherwise, including for a way whose
+	 * voyage boards no known boat, which has no {@code board} row.
+	 */
+	@Nullable
+	static String boatAway(RelayResponse.RouteOption way, int step, Sailing sailing)
+	{
+		int board = firstSlot(way.steps, RouteWire.BOARD);
+		if (board < 0 || step > board || way.voyage == null || sailing.aboard || sailing.moored == null)
+		{
+			return null;
+		}
+		return sailing.moored.containsValue(way.voyage.from) ? null : way.voyage.from;
+	}
+
+	private static int firstSlot(List<RelayResponse.RouteStep> steps, String slot)
+	{
+		for (int i = 0; i < steps.size(); i++)
+		{
+			if (slot.equals(steps.get(i).slot))
+			{
+				return i;
+			}
+		}
+		return -1;
 	}
 
 	/** Follow this route, or stop. The player's own press; see {@link #following}. */
@@ -285,6 +407,7 @@ public class DestinationRoute
 		{
 			chosen = way;
 			step = 0;
+			boatAway = null;
 		}
 	}
 
@@ -338,6 +461,8 @@ public class DestinationRoute
 			following = true;
 			chosen = best(answer);
 			step = 0;
+			ashore = null;
+			boatAway = null;
 		}
 	}
 
@@ -408,6 +533,8 @@ public class DestinationRoute
 		message = null;
 		chosen = 0;
 		step = 0;
+		ashore = null;
+		boatAway = null;
 		generation++;
 	}
 
@@ -428,7 +555,7 @@ public class DestinationRoute
 			? Collections.<RelayResponse.RouteOption>emptyList()
 			: Collections.unmodifiableList(route.options);
 		return new View(key, target, ways, chosen, step, route == null ? null : route.origin, rerouted, rerouting,
-			message, nextRerouteMs, following, revision);
+			message, nextRerouteMs, following, revision, boatAway);
 	}
 
 	/**
@@ -437,6 +564,19 @@ public class DestinationRoute
 	 */
 	static int next(List<RelayResponse.RouteStep> steps, int current, WorldPoint where)
 	{
+		return next(steps, current, where, Sailing.ASHORE_UNKNOWN, null, null);
+	}
+
+	/**
+	 * The same rule with a voyage's evidence: a row of a voyage is done by {@link #done}, and one not
+	 * yet done is passed by a later row of the same voyage that is.
+	 *
+	 * @param where where the player stands, or null where that cannot be known
+	 * @param ashore the boats' ports read before boarding, or null
+	 */
+	static int next(List<RelayResponse.RouteStep> steps, int current, @Nullable WorldPoint where, Sailing sailing,
+		@Nullable Map<Integer, String> ashore, @Nullable RelayResponse.Voyage voyage)
+	{
 		if (current >= steps.size())
 		{
 			return current;
@@ -444,7 +584,7 @@ public class DestinationRoute
 		int last = -1;
 		for (int i = steps.size() - 1; i >= current; i--)
 		{
-			if (steps.get(i).at != null)
+			if (steps.get(i).at != null || RouteWire.voyageSlot(steps.get(i).slot))
 			{
 				last = i;
 				break;
@@ -454,19 +594,80 @@ public class DestinationRoute
 		{
 			return current;
 		}
-		if (reached(steps.get(last).at, where))
+		if (done(steps.get(last), where, sailing, ashore, voyage))
 		{
 			return last + 1;
 		}
 		for (int i = current; i < last; i++)
 		{
-			RelayResponse.RouteTile at = steps.get(i).at;
-			if (at != null)
+			RelayResponse.RouteStep step = steps.get(i);
+			boolean voyageRow = RouteWire.voyageSlot(step.slot);
+			if (step.at == null && !voyageRow)
 			{
-				return reached(at, where) ? i + 1 : current;
+				continue;
 			}
+			if (done(step, where, sailing, ashore, voyage))
+			{
+				return i + 1;
+			}
+			for (int j = i + 1; voyageRow && j < last && RouteWire.voyageSlot(steps.get(j).slot); j++)
+			{
+				if (done(steps.get(j), where, sailing, ashore, voyage))
+				{
+					return j + 1;
+				}
+			}
+			return current;
 		}
 		return current;
+	}
+
+	/**
+	 * Whether one row is done: by its tile for every row but a voyage's, which the game says; see the
+	 * class comment. Static and plain so each rule is pinned by a test without a client.
+	 */
+	static boolean done(RelayResponse.RouteStep step, @Nullable WorldPoint where, Sailing sailing,
+		@Nullable Map<Integer, String> ashore, @Nullable RelayResponse.Voyage voyage)
+	{
+		if (RouteWire.BOARD.equals(step.slot))
+		{
+			return sailing.aboard;
+		}
+		if (RouteWire.SAIL.equals(step.slot))
+		{
+			return sailing.aboard && where != null && step.at != null
+				&& Math.abs(where.getX() - step.at.x) <= MOORED && Math.abs(where.getY() - step.at.y) <= MOORED;
+		}
+		if (RouteWire.DOCK.equals(step.slot))
+		{
+			if (sailing.aboard)
+			{
+				return false;
+			}
+			if (where != null && step.at != null && reached(step.at, where))
+			{
+				return true;
+			}
+			return voyage != null && voyage.to != null && mooredAnew(voyage.to, ashore, sailing.moored);
+		}
+		return where != null && step.at != null && reached(step.at, where);
+	}
+
+	/** A boat now reads moored at {@code port} that did not before the voyage boarded. */
+	static boolean mooredAnew(String port, @Nullable Map<Integer, String> before, @Nullable Map<Integer, String> now)
+	{
+		if (before == null || now == null)
+		{
+			return false;
+		}
+		for (Map.Entry<Integer, String> boat : now.entrySet())
+		{
+			if (port.equals(boat.getValue()) && !port.equals(before.get(boat.getKey())))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** Within {@link #REACHED} tiles each way, on the step's own floor; no floor is the ground floor. */

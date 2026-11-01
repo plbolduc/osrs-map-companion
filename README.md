@@ -25,6 +25,16 @@ you share to suggest routes around your account's quests, diaries, items and tra
 You can also plan a route to a friend, a meetup or a precise star site, back to where you died,
 and to coordinate clues and recognised beginner map clues.
 
+<p>
+  <img src="docs/mockups/sidebar-voyage.png" width="300" alt="A voyage in the plugin sidebar: the walk to Port Sarim done, Board your boat at Port Sarim, Sail to Catherby current with its Sailing level marked unmet, then Dock at Catherby">
+</p>
+
+A voyage in your own boat is its own steps: board your boat, sail, and dock, where the boat then
+stays. They tick when you step on deck, reach the far mooring and step ashore, the sail is drawn
+as a line on the world map, and the docking mooring's Sailing level and quests show under it.
+Shortest Path draws only the walks. With **Boats and moorings** shared, voyages start where your
+boats are.
+
 ## Search for a place or item
 
 <p>
