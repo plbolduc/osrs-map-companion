@@ -122,6 +122,10 @@ The website plan's second session, once the routes in the game are built: a memb
 - [ ] **The steps arrive.** Send a destination from a card with a route. The steps appear under
       the destination's card in the card's own words, the first one marked; the other ways fold
       behind one line, and pressing one shows its steps.
+- [ ] **Step pictures.** A route whose steps use an item (a games necklace, a tablet) and a spell
+      (Lumbridge Home Teleport) shows each one's picture before its number, at 16px, as the
+      card's sprite for that row: the item's sprite from the item cache and the spell's icon from
+      the sprite cache. A walk's row has none. The renderer used the website's copies of the art.
 - [ ] **A teleport moves the mark on.** Take the first step's teleport. The landing is within four
       tiles of the step's tile and the next step is marked; note any landing that scatters further.
 - [ ] **A floor is its own.** On a route with a staircase, the climb is marked done only upstairs,

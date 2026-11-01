@@ -54,7 +54,9 @@ import javax.annotation.Nullable;
  * it again here because the text is typed by somebody in the group and drawn by this client.
  *
  * <p>A step's kind is any short lowercase word rather than a list of the ones known today, as on
- * the map: a kind added there tomorrow is printed here rather than dropped.
+ * the map: a kind added there tomorrow is printed here rather than dropped. So is a step's picture an
+ * id rather than a list: the map names the item or the spell, and an id the client's cache has no
+ * picture for draws nothing.
  */
 final class RouteWire
 {
@@ -68,6 +70,8 @@ final class RouteWire
 	private static final int MAX_NOTE = 200;
 	/** The game's tile space, overworld and the underground beside it. */
 	private static final int MAX_COORDINATE = 16_383;
+	/** Above every item and sprite id the game has: a bound, as on the map, not a list of ids. */
+	static final int MAX_GAME_ID = 1_000_000;
 	private static final Pattern SLOT = Pattern.compile("[a-z][a-z-]{0,31}");
 
 	private RouteWire()
@@ -238,8 +242,18 @@ final class RouteWire
 		}
 		clean.notes = notes.isEmpty() ? null : notes;
 		clean.walk = step.walk;
+		/* One picture a step, the item before the spell: decoration, so a bad id costs only itself. */
+		clean.itemId = gameId(step.itemId);
+		clean.spriteId = clean.itemId == null ? gameId(step.spriteId) : null;
 		clean.at = tile(step.at);
 		return clean;
+	}
+
+	/** A positive id under the bound, or null. */
+	@Nullable
+	static Integer gameId(@Nullable Integer id)
+	{
+		return id != null && id > 0 && id <= MAX_GAME_ID ? id : null;
 	}
 
 	/** A step's end on the map and on one of the four floors, or null: the words stay, the pin goes. */

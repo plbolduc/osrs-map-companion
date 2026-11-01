@@ -55,6 +55,8 @@ and member secret. It carries the destination's tile and the tile you stand on, 
 position sharing is on, because a route from where you stand is what the press asks for. One is in
 flight at a time, and none before the wait the map last asked for: its `Retry-After`, and at least
 five seconds between presses that reached it. The map plans with both tiles and keeps neither.
+A teleport step's picture is the game's own, from the client's sprite cache: the step names an
+item's `itemId` or a spell icon's `spriteId`, and no picture is fetched from the map or elsewhere.
 
 **Quest and diary announcements.** With *Drops and levels* on, a quest or achievement diary tier
 finished while logged in rides the next snapshot as an announcement: the quest's name, or the

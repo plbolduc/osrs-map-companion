@@ -45,12 +45,28 @@ import org.junit.Test;
  * What the destination's card says about a route the map sent, read off the real components.
  *
  * <p>The reply fixture's own route: Lumbridge Home Teleport then a walk upstairs to the bank, with
- * walking all the way as the other way.
+ * walking all the way and a Lumbridge tablet as the other ways. The tablet is there so the fixture
+ * carries an item's picture beside the spell's, which is why there are two other ways.
  */
 public class RouteStepsViewTest
 {
 	private final DestinationRoute route = new DestinationRoute();
-	private final RouteStepsView view = new RouteStepsView(route::choose);
+	/** What the view asked the client's cache for, in order: "item 8008", "sprite 356". */
+	private final List<String> asked = new ArrayList<>();
+	private final RouteStepsView view = new RouteStepsView(route::choose, new GameSprites(null, null, null)
+	{
+		@Override
+		void item(JLabel label, int itemId, int box)
+		{
+			asked.add("item " + itemId + " at " + box);
+		}
+
+		@Override
+		void sprite(JLabel label, int spriteId, int box)
+		{
+			asked.add("sprite " + spriteId + " at " + box);
+		}
+	});
 
 	private void receive() throws IOException
 	{
@@ -65,7 +81,7 @@ public class RouteStepsViewTest
 		receive();
 		assertEquals(
 			"Lumbridge Home Teleport · 52 tiles | ▸ 1. Lumbridge Home Teleport | Standard spellbook"
-			+ " | Ten seconds to cast, and a combat hit stops it | 2. Walk 12 tiles to the bank | ▸ 1 other way",
+			+ " | Ten seconds to cast, and a combat hit stops it | 2. Walk 12 tiles to the bank | ▸ 2 other ways",
 			shown());
 	}
 
@@ -86,12 +102,44 @@ public class RouteStepsViewTest
 	public void anotherWayShowsItsOwnSteps() throws IOException
 	{
 		receive();
-		assertTrue(SidebarWords.press(view, "▸ 1 other way"));
-		assertTrue(shown(), shown().endsWith("▾ 1 other way | Walk"));
+		assertTrue(SidebarWords.press(view, "▸ 2 other ways"));
+		assertTrue(shown(), shown().endsWith("▾ 2 other ways | Walk | Lumbridge tablet · 58 tiles"));
 		assertTrue(SidebarWords.press(view, "Walk"));
 		view.show(route.view());
 		assertTrue(shown(), shown().startsWith("Walk | ▸ 1. Walk 140 tiles"));
 		assertTrue("the best way is now the other one", shown().contains("Lumbridge Home Teleport · 52 tiles · best"));
+	}
+
+	/** The spell's icon on its step, the tablet's sprite on its own, and a walk's row left as words. */
+	@Test
+	public void drawsTheGamesPictureOfWhatToClick() throws IOException
+	{
+		receive();
+		assertEquals(java.util.Collections.singletonList("sprite 356 at " + RouteStepsView.PICTURE), asked);
+		List<JLabel> titles = stepTitles();
+		assertTrue("the teleport's row holds a place for its picture", titles.get(0).getIcon() != null);
+		assertEquals("the walk's row has none", null, titles.get(1).getIcon());
+
+		assertTrue(SidebarWords.press(view, "▸ 2 other ways"));
+		asked.clear();
+		assertTrue(SidebarWords.press(view, "Lumbridge tablet · 58 tiles"));
+		view.show(route.view());
+		assertEquals(java.util.Collections.singletonList("item 8008 at " + RouteStepsView.PICTURE), asked);
+	}
+
+	@Test
+	public void drawsWordsAloneWithoutTheClientsPictures() throws IOException
+	{
+		RouteStepsView bare = new RouteStepsView(route::choose);
+		String reply = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "contract", "reply.json")), StandardCharsets.UTF_8);
+		route.sync(new Gson().fromJson(reply, RelayResponse.class).directive.destination);
+		bare.show(route.view());
+		List<JLabel> labels = new ArrayList<>();
+		collectLabels(bare, labels);
+		for (JLabel label : labels)
+		{
+			assertEquals(label.getText(), null, label.getIcon());
+		}
 	}
 
 	@Test
@@ -102,6 +150,37 @@ public class RouteStepsViewTest
 		route.sync(DestinationRouteTest.destination("Al Kharid bank", nowhere));
 		view.show(route.view());
 		assertTrue(shown(), shown().contains("Planned without your position. Reroute plans from where you stand."));
+	}
+
+	/** Each step's numbered line, in order. */
+	private List<JLabel> stepTitles()
+	{
+		List<JLabel> labels = new ArrayList<>();
+		collectLabels(view, labels);
+		List<JLabel> titles = new ArrayList<>();
+		for (JLabel label : labels)
+		{
+			if (label.getText().replaceAll("<[^>]+>", "").matches("(▸ )?[0-9]+[.] .*"))
+			{
+				titles.add(label);
+			}
+		}
+		return titles;
+	}
+
+	private static void collectLabels(Component component, List<JLabel> out)
+	{
+		if (component instanceof JLabel && component.isVisible() && ((JLabel) component).getText() != null)
+		{
+			out.add((JLabel) component);
+		}
+		if (component instanceof Container)
+		{
+			for (Component child : ((Container) component).getComponents())
+			{
+				collectLabels(child, out);
+			}
+		}
 	}
 
 	/** The words on screen: visible labels and buttons only, markup taken out. */

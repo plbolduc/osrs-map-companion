@@ -46,6 +46,7 @@
           "notes": [
             "Bring the ring."
           ],
+          "itemId": 13126,
           "at": {
             "x": 3052,
             "y": 3291
@@ -82,6 +83,7 @@
         {
           "slot": "method",
           "title": "Use Catherby tablet",
+          "itemId": 24961,
           "at": {
             "x": 2801,
             "y": 3449
@@ -135,17 +137,28 @@
         "plane": 0
       },
       "patchIds": [],
-      "method": null,
+      "method": "Draynor Manor Teleport",
       "item": null,
-      "costTiles": 20,
+      "costTiles": 128,
       "steps": [
         {
-          "slot": "walk-leg",
-          "title": "Walk 20 tiles",
+          "slot": "method",
+          "title": "Use Draynor Manor Teleport",
+          "spriteId": 1253,
+          "at": {
+            "x": 3108,
+            "y": 3352
+          }
+        },
+        {
+          "slot": "arrival-walk",
+          "title": "Walk 109t south",
+          "detail": "To My bank",
           "walk": true,
           "at": {
             "x": 3094,
-            "y": 3243
+            "y": 3243,
+            "plane": 0
           }
         }
       ],

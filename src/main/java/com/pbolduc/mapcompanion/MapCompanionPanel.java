@@ -381,7 +381,7 @@ public class MapCompanionPanel extends PluginPanel
 		{
 			destinationRoute.choose(way);
 			refresh();
-		});
+		}, sprites);
 		this.dropLuck = new DropLuckPanel(lootLog, DropLuckPanel.Pictures.of(itemManager));
 		this.starsPanel = new StarsPanel(starsClient, destinationState, clientThread, destinationMarker, routePress, this::mapUrl);
 		this.starsPanel.pictures(sprites);

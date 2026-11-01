@@ -374,6 +374,13 @@ public class RelayResponse
 		public List<String> notes;
 		/** A walking row: the only kind Shortest Path is ever aimed at. */
 		public boolean walk;
+		/**
+		 * The game's own picture for the step, where the card's sprite is an item or a spell: the item
+		 * clicked, by its item id, or the spell cast, by its icon's sprite id. One at most, and null
+		 * on a walk, a ride or a teleport the map names no id for, which is drawn as words alone.
+		 */
+		public Integer itemId;
+		public Integer spriteId;
 		/** Where the step ends, or null for a step that has words and no pin. */
 		public RouteTile at;
 	}

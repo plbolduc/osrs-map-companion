@@ -393,6 +393,9 @@ of `docs/plan-where-to-go-for-a-task.md` in `osrs-stars-map`.
 - **Under the destination's name**, when the map sent a route: the way being followed and its
   length in run tiles, *Lumbridge Home Teleport · 52 tiles*, then its steps in the card's own words,
   numbered as the website numbers them, each with the detail and notes the card prints under it.
+- **A teleport step's picture** sits before its number: the item's sprite or the spell's icon, at
+  16px, as the card's sprite for that row. The map sends the game's id for it and the client's own
+  cache draws it; a walk, a ride, or a teleport the map has no id for stays words alone.
 - **The current step** is marked with ▸ and drawn bold and white; the steps behind it go grey. It
   moves on when you stand within four tiles of where it ends, on its floor. Inside a raid's rooms
   nothing moves, because the tile there is not a place.

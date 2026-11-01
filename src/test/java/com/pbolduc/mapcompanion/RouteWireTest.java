@@ -112,6 +112,29 @@ public class RouteWireTest
 		assertNull("the origin it does not know is from nowhere", read.origin);
 	}
 
+	/** A picture is decoration: one a step, the item before the spell, and an id that is no id costs only itself. */
+	@Test
+	public void keepsOnePictureAStepAndDropsAnIdThatIsNone()
+	{
+		String route = "{\"options\":[{\"id\":\"x\",\"label\":\"X\",\"best\":true,\"steps\":["
+			+ "{\"slot\":\"method\",\"title\":\"Item\",\"itemId\":3853},"
+			+ "{\"slot\":\"method\",\"title\":\"Spell\",\"spriteId\":356},"
+			+ "{\"slot\":\"method\",\"title\":\"Both\",\"itemId\":8008,\"spriteId\":356},"
+			+ "{\"slot\":\"method\",\"title\":\"None\",\"itemId\":-1,\"spriteId\":0},"
+			+ "{\"slot\":\"method\",\"title\":\"Too far\",\"itemId\":" + (RouteWire.MAX_GAME_ID + 1) + "}]}]}";
+		java.util.List<RelayResponse.RouteStep> steps = gson.fromJson(reply(route), RelayResponse.class).directive.destination.route.options.get(0).steps;
+		assertEquals(Integer.valueOf(3853), steps.get(0).itemId);
+		assertNull(steps.get(0).spriteId);
+		assertEquals(Integer.valueOf(356), steps.get(1).spriteId);
+		assertNull(steps.get(1).itemId);
+		assertEquals(Integer.valueOf(8008), steps.get(2).itemId);
+		assertNull("one picture a step, and the item wins", steps.get(2).spriteId);
+		assertNull(steps.get(3).itemId);
+		assertNull(steps.get(3).spriteId);
+		assertNull(steps.get(4).itemId);
+		assertEquals("the step itself stays", "Too far", steps.get(4).title);
+	}
+
 	@Test
 	public void keepsTheBestWayAndAtMostFour()
 	{

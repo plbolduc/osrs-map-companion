@@ -157,7 +157,7 @@ public class WireContractTest
 		String committed = new String(Files.readAllBytes(REPLY), StandardCharsets.UTF_8);
 		RelayResponse.Route route = new Gson().fromJson(committed, RelayResponse.class).directive.destination.route;
 		assertEquals("shared", route.origin);
-		assertEquals(2, route.options.size());
+		assertEquals(3, route.options.size());
 		RelayResponse.RouteOption best = route.options.get(0);
 		assertTrue(best.best);
 		assertEquals(Integer.valueOf(52), best.tiles);
@@ -165,6 +165,9 @@ public class WireContractTest
 		assertEquals("Standard spellbook", best.steps.get(0).detail);
 		assertEquals(Arrays.asList("Ten seconds to cast, and a combat hit stops it"), best.steps.get(0).notes);
 		assertTrue("a teleport is not a walk", !best.steps.get(0).walk);
+		assertEquals("a spell's picture is its icon's sprite", Integer.valueOf(356), best.steps.get(0).spriteId);
+		assertEquals("and not an item", null, best.steps.get(0).itemId);
+		assertEquals("a walk has no picture", null, best.steps.get(1).spriteId);
 		assertTrue(best.steps.get(1).walk);
 		assertEquals(Integer.valueOf(2), best.steps.get(1).at.plane);
 		RelayResponse.RouteOption walk = route.options.get(1);
@@ -172,6 +175,9 @@ public class WireContractTest
 		assertEquals(null, walk.tiles);
 		assertEquals(null, walk.steps.get(0).at.plane);
 		assertEquals(3208, walk.steps.get(0).at.x);
+		RelayResponse.RouteStep tablet = route.options.get(2).steps.get(0);
+		assertEquals("an item's picture is its sprite", Integer.valueOf(8008), tablet.itemId);
+		assertEquals(null, tablet.spriteId);
 
 		String streamed = new String(Files.readAllBytes(STREAM), StandardCharsets.UTF_8);
 		RelayResponse.StreamDirective frame = new Gson().fromJson(streamed, RelayResponse.StreamDirective.class);
