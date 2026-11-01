@@ -118,7 +118,9 @@ final class SharingFields
 		field("shareMahoganyHomes", "Mahogany Homes", MapCompanionConfig::shareMahoganyHomes,
 			"The customer and tier observed in dialogue or game messages."),
 		field("shareFarmingContracts", "Farming contracts", MapCompanionConfig::shareFarmingContracts,
-			"The crop requested by your current Farming Guild contract."));
+			"The crop requested by your current Farming Guild contract."),
+		field("sharePortTasks", "Port tasks", MapCompanionConfig::sharePortTasks,
+			"Your Sailing port task slots and their counters; cargo is never read."));
 
 	static final Section LOOT = new Section("loot", "Loot and milestones",
 		field("shareLoot", "Observed kills and drops", MapCompanionConfig::shareLoot,

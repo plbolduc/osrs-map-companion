@@ -193,6 +193,12 @@ final class HarnessConfig implements MapCompanionConfig
 	}
 
 	@Override
+	public boolean sharePortTasks()
+	{
+		return on("sharePortTasks", MapCompanionConfig.super.sharePortTasks());
+	}
+
+	@Override
 	public boolean shareQuestLog()
 	{
 		return on("shareQuestLog", MapCompanionConfig.super.shareQuestLog());

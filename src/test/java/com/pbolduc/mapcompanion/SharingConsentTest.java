@@ -129,7 +129,7 @@ public class SharingConsentTest
 				remoteFeatures++;
 			}
 		}
-		assertEquals(27, remoteFeatures);
+		assertEquals(28, remoteFeatures);
 	}
 
 	private static final class Fixture

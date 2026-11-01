@@ -22,6 +22,14 @@ With **Farming contracts** shared, the crop and patch kind remain on the snapsho
 contract is complete, with state `return` instead of `active`. This means ready to hand in to
 Guildmaster Jane; an absent or unreadable contract remains unknown. The existing setting guards both states.
 
+**Port tasks** sends all five Sailing task slots, slot 0 first, each as `courier`, `bounty`,
+`empty`, `locked` or `unknown`. A held task carries the game's task id and its own counters:
+crates collected and delivered for a courier, parts still owed for a bounty. `unknown` is a slot
+whose value names no row this client can read, and stays distinct from `empty`. Nothing is sent for
+fifteen seconds after a login or a hop, while every varbit still reads zero. Task names, ports and
+crate counts are read from the client's tables for the sidebar and are not sent; the map has the
+same table. Cargo itself, and anything else in the hold, is never read.
+
 **Farming patches** covers the 99 crop patches in RuneLite 1.13.4's Time Tracking catalogue,
 excluding compost bins. This includes the additional hops, bushes, hardwood, spirit trees,
 cactus, special Guild crops, calquat, belladonna, mushrooms, grapes, crystal trees, Hespori and
