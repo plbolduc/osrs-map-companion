@@ -85,13 +85,17 @@ import net.runelite.client.util.LinkBrowser;
  * This panel presents those answers and local progress; it owns no second ranking or travel
  * table that could drift from the map. Pairing and sharing choices stay in the same sidebar.
  *
- * <p>Status and Open the map come first, then three tabs ({@link CompanionViews}): Home holds the
- * search, farm runs, Slayer, what is happening now and Drop luck; Group the friends, the meetups and the group's own
- * buttons; Stars the star list. Settings is a page behind the gear on the status card
- * ({@link SidebarPages}): every sharing choice, then Advanced, which keeps the address, the snapshot
- * preview and the reset actions out of the way even there. The connection field takes a complete
- * RuneLite code or an existing invite; the suffix is internal state rather than a second field.
- * Once paired, the field folds away until switching or reconnecting needs it.
+ * <p>Status and the one orange button come first, then three tabs ({@link CompanionViews}): Home
+ * holds the search, farm runs, Slayer, what is happening now and Drop luck; Group the friends, the
+ * meetups and the group's own buttons; Stars the star list. Settings is a page behind the gear on the
+ * status card ({@link SidebarPages}): every sharing choice, then Advanced, which keeps the address,
+ * the snapshot preview and the reset actions out of the way even there.
+ *
+ * <p><b>The plugin is enough on its own.</b> Before a group the orange button is <i>Connect</i>, which
+ * makes one for the player ({@link ConnectClient}), and the field under it takes a friend's invite, a
+ * RuneLite code from the map or an old code. Once connected the button is <i>Open map</i>, which opens
+ * the website already in the group as this player. The field folds away until switching or
+ * reconnecting needs it.
  *
  * <p><b>Reading the clipboard is a button, never a background job.</b> Nothing here looks at the
  * clipboard unless somebody pressed <i>Paste</i>, which is the same standard the invite button has
@@ -147,8 +151,20 @@ public class MapCompanionPanel extends PluginPanel
 	/** Settings, as a page in place of this one. See {@link SidebarPages}. */
 	private final JButton gearButton = new JButton(SidebarIcons.gear());
 
-	/** The one filled button. See the constructor for why it is filled and nothing else is. */
-	private final JButton openMapButton = new JButton("Open the map");
+	/**
+	 * The one filled button. See the constructor for why it is filled and nothing else is.
+	 *
+	 * <p><i>Connect</i> until the plugin is in a group, and <i>Open map</i> after: the one thing to
+	 * press is a different thing before and after, and two orange buttons would answer "what do I
+	 * press" with two answers.
+	 */
+	private final JButton openMapButton = new JButton(OPEN_MAP);
+	static final String CONNECT = "Connect";
+	static final String OPEN_MAP = "Open the map";
+	/** Asks for groups and links; see {@link ConnectClient}. */
+	private final ConnectClient connectClient;
+	/** True while Connect, Join or Open map is waiting on the map, so a second press sends nothing. */
+	private boolean asking = false;
 
 	/*
 	 * What is happening now: what the map asked for, and where you died. Each is a card that is
@@ -281,10 +297,12 @@ public class MapCompanionPanel extends PluginPanel
 	 * lesson the destination card carries a comment about.
 	 */
 	private final JTextField joinField = new JTextField();
-	static final String JOIN_PLACEHOLDER = "Paste your connection code";
+	static final String JOIN_PLACEHOLDER = "Paste an invite or code";
 	private final JButton pasteButton = smallButton("Paste");
-	private final JButton joinButton = smallButton("Connect");
+	private final JButton joinButton = smallButton("Join");
 	private final JLabel joinMessage = new JLabel();
+	/** Over the field, before a group: the orange button makes one, and this is the other way in. */
+	private final JLabel joinHeading = sectionHead("Have an invite?");
 
 	private final SharingControls sharingControls;
 	/** The step after a first Connect: the recommended set, ticked, and one press. See {@link RecommendedSharing}. */
@@ -351,9 +369,11 @@ public class MapCompanionPanel extends PluginPanel
 		FarmRunState farmRunState,
 		FarmRunClient farmRunClient,
 		SlayerPanel slayerPanel,
-		PortTasksPanel portTasksPanel)
+		PortTasksPanel portTasksPanel,
+		ConnectClient connectClient)
 	{
 		this.config = config;
+		this.connectClient = connectClient;
 		this.plugin = plugin;
 		this.destinationState = destinationState;
 		this.lootLog = lootLog;
@@ -556,7 +576,8 @@ public class MapCompanionPanel extends PluginPanel
 		settings.add(buildAdvanced());
 		pages = new SidebarPages(body, settings);
 
-		openMapButton.addActionListener(e -> LinkBrowser.browse(mapUrl() + "/map?task=companion"));
+		openMapButton.setName("companion.orange");
+		openMapButton.addActionListener(e -> pressOrange());
 		pasteButton.setToolTipText("Read the clipboard. Only ever when you press this.");
 		pasteButton.addActionListener(e -> pasteIntoJoinField());
 		joinButton.addActionListener(e -> joinFromField());
@@ -748,18 +769,22 @@ public class MapCompanionPanel extends PluginPanel
 	}
 
 	/**
-	 * A full-width code field, then Paste and Connect, in the order the reader uses them.
+	 * A full-width field, then Paste and Join, in the order the reader uses them.
 	 *
-	 * <p>No heading and no card around it: the placeholder says what goes in the field, and the
-	 * tooltip where it comes from. A heading that repeated the placeholder, the map's address and
-	 * "Character sharing paused" above it were three lines about a connection that did not exist yet.
+	 * <p>One small heading, and only before a group: the orange button above it now makes a group,
+	 * so the field is the <i>other</i> way in, and "Have an invite?" is what says which of the two a
+	 * friend's message is for. The placeholder says what goes in the field and the tooltip where it
+	 * comes from.
 	 */
 	private JPanel buildJoinBlock()
 	{
 		JPanel block = column(ColorScheme.DARK_GRAY_COLOR);
+		block.add(joinHeading);
+		block.add(gap(3, ColorScheme.DARK_GRAY_COLOR));
 		joinField.setName("join.field");
-		joinField.setToolTipText("On osrs-map.com, open the Companion panel and press Copy connection code, "
-			+ "or paste a friend's invite");
+		joinField.setToolTipText("Paste the invite a friend sent you, or a connection code from the map's Companion panel");
+		joinButton.setName("join.button");
+		joinButton.setToolTipText("Join the group this invite or code is for");
 		joinField.putClientProperty("JTextField.placeholderText", JOIN_PLACEHOLDER);
 		joinField.addActionListener(e -> joinFromField());
 		block.add(fill(joinField, ColorScheme.DARK_GRAY_COLOR));
@@ -828,6 +853,202 @@ public class MapCompanionPanel extends PluginPanel
 	}
 
 	/**
+	 * Connect's one dialog: the server notice, and the new group's name under it.
+	 *
+	 * <p>One dialog rather than two, because making a group and agreeing to talk to the map are one
+	 * press for the player. The notice is the same words {@link #confirmServer} shows, plus the
+	 * sentence that says a group is being made; the name is filled in already, so a player who plays
+	 * alone and never invites anybody presses Connect and nothing else. Returns the name, or null when
+	 * the player cancelled — and cancelling sends nothing.
+	 */
+	@Nullable
+	private String confirmStart()
+	{
+		JTextField name = new JTextField(DEFAULT_GROUP_NAME, 18);
+		name.setName("connect.name");
+		JPanel form = new JPanel(new BorderLayout(0, 6));
+		form.add(new JLabel("<html>Connect to " + escape(pairing.serverUrl()) + "?<br><br>"
+			+ escape(MapCompanionConfig.NETWORK_WARNING) + ".<br><br>"
+			+ "This makes a group for you on the map. Play alone, or<br>"
+			+ "invite friends with Copy invite. Connecting sends a random<br>"
+			+ "member ID, a random key for this RuneLite and your name to show.<br>"
+			+ "Selected sharing data is sent while logged in and is<br>"
+			+ "visible to your group's members.<br><br>"
+			+ "Group name, which friends you invite will see:</html>"), BorderLayout.CENTER);
+		form.add(name, BorderLayout.SOUTH);
+		name.addAncestorListener(new javax.swing.event.AncestorListener()
+		{
+			/** Into the field, so a name can be typed straight away; Connect is still the default. */
+			@Override
+			public void ancestorAdded(javax.swing.event.AncestorEvent event)
+			{
+				name.selectAll();
+			}
+
+			@Override
+			public void ancestorRemoved(javax.swing.event.AncestorEvent event)
+			{
+			}
+
+			@Override
+			public void ancestorMoved(javax.swing.event.AncestorEvent event)
+			{
+			}
+		});
+		int chose = JOptionPane.showOptionDialog(this, form, "Connect to the map", JOptionPane.OK_CANCEL_OPTION,
+			JOptionPane.WARNING_MESSAGE, null, new Object[]{"Connect", "Cancel"}, "Connect");
+		if (chose != JOptionPane.OK_OPTION)
+		{
+			return null;
+		}
+		String typed = name.getText().replaceAll("\\s+", " ").trim();
+		return typed.isEmpty() ? DEFAULT_GROUP_NAME : typed.substring(0, Math.min(typed.length(), Pairing.MAX_GROUP_NAME));
+	}
+
+	/**
+	 * What a group made by Connect is called until somebody names it — the map's own default, so a
+	 * name left as it was and a name the map supplied are the same name. It reads true to its maker
+	 * and to everyone they invite, which "My group" would not.
+	 */
+	static final String DEFAULT_GROUP_NAME = "Our group";
+
+	/**
+	 * The orange button: Connect before a group, Open map after.
+	 *
+	 * <p>Connect with a code already set — a changed map address, say — connects to that code again
+	 * rather than making another group: "Connect" always means "connect me", and only a player with
+	 * no group at all is given a new one.
+	 */
+	private void pressOrange()
+	{
+		String code = pairingCode();
+		if (!code.isEmpty() && pairing.hasServerConsent())
+		{
+			openMap();
+		}
+		else if (!code.isEmpty())
+		{
+			joinFromField();
+		}
+		else
+		{
+			startGroup();
+		}
+	}
+
+	/** Connect with no group: the notice and a name, then the map makes the group. */
+	private void startGroup()
+	{
+		if (asking || !applyMapAddress())
+		{
+			return;
+		}
+		String server = pairing.serverUrl();
+		String name = confirmStart();
+		if (name == null)
+		{
+			say("Connection cancelled.");
+			return;
+		}
+		ask(server);
+		connectClient.start(server, identity.installationKey(), name.equals(DEFAULT_GROUP_NAME) ? null : name,
+			outcome -> SwingUtilities.invokeLater(() -> finishConnect(server, outcome)));
+	}
+
+	/** Join with a friend's invite: the notice if this map has none yet, then the map spends the invite. */
+	private void joinWithInvite(JoinCode invited)
+	{
+		if (asking)
+		{
+			return;
+		}
+		String server = pairing.serverUrl();
+		if (!pairing.noticeAccepted(server) && !confirmServer())
+		{
+			say("Connection cancelled.");
+			return;
+		}
+		ask(server);
+		connectClient.join(server, identity.installationKey(), invited.code, invited.invite,
+			outcome -> SwingUtilities.invokeLater(() -> finishConnect(server, outcome)));
+	}
+
+	/** The button and the line under the field while the map is asked. */
+	private void ask(String server)
+	{
+		asking = true;
+		say("Connecting to " + server.replaceFirst("^https?://", "") + "…");
+		refresh();
+	}
+
+	/**
+	 * The map's answer to Connect or Join, on Swing's thread: keep the code as if it had been pasted,
+	 * or say why not.
+	 *
+	 * <p>The notice was accepted before anything was sent, so the code is connected with a notice
+	 * that answers yes — which is also what lets {@link RecommendedSharing} offer the sharing step to a
+	 * player meeting this map for the first time. An answer that arrives after the map address has
+	 * changed is for a map the player has left, and is dropped.
+	 */
+	private void finishConnect(String server, ConnectClient.Outcome outcome)
+	{
+		asking = false;
+		if (!server.equals(pairing.serverUrl()))
+		{
+			quiet();
+			refresh();
+			return;
+		}
+		if (outcome.joined == null)
+		{
+			say(outcome.message != null ? outcome.message : ConnectClient.FAILED);
+			refresh();
+			return;
+		}
+		if (!RecommendedSharing.connect(pairing, outcome.joined, () -> true, config,
+			() -> recommendedSharing.offer(pairing.serverLabel())))
+		{
+			say(ConnectClient.FAILED);
+			refresh();
+			return;
+		}
+		pairing.rememberName(outcome.joined.code, outcome.name);
+		joinField.setText("");
+		joinOpen = false;
+		quiet();
+		pages.open(false);
+		refresh();
+	}
+
+	/**
+	 * Open map: the website, already in the group as this player.
+	 *
+	 * <p>The map is asked for a one-time link ({@link ConnectClient#link}) and the browser opens it;
+	 * anything short of a link — logged out, no secret yet, a legacy group, the map unreachable —
+	 * opens the plain map, which is what this button always did.
+	 */
+	private void openMap()
+	{
+		String server = pairing.serverUrl();
+		String code = pairingCode();
+		String member = identity.id();
+		String secret = member == null ? null : pairing.secret(server, code, member);
+		if (asking || server == null || member == null || secret == null)
+		{
+			LinkBrowser.browse(mapUrl() + "/map?task=companion");
+			return;
+		}
+		asking = true;
+		refresh();
+		connectClient.link(server, code, member, secret, url -> SwingUtilities.invokeLater(() ->
+		{
+			asking = false;
+			LinkBrowser.browse(url != null ? url : mapUrl() + "/map?task=companion");
+			refresh();
+		}));
+	}
+
+	/**
 	 * Read the clipboard, once, because somebody pressed the button.
 	 *
 	 * <p>It fills the field rather than joining, so an accidental press cannot move somebody out of
@@ -859,8 +1080,9 @@ public class MapCompanionPanel extends PluginPanel
 		joinField.setText(pasted.trim());
 		JoinCode found = JoinCode.parse(pasted);
 		say(found == null
-			? "No connection code found. Copy it from the map's Companion panel."
-			: "Found " + JoinCode.forDisplay(found.code) + ". Press Connect.");
+			? "No invite or code found. Ask a friend in the group for an invite."
+			: found.invite != null ? "Found an invite to " + JoinCode.forDisplay(found.code) + ". Press Join."
+			: "Found " + JoinCode.forDisplay(found.code) + ". Press Join.");
 	}
 
 	/**
@@ -868,7 +1090,8 @@ public class MapCompanionPanel extends PluginPanel
 	 *
 	 * <p>Everything that makes this work is in {@link JoinCode}; this is the half that has to be
 	 * honest when it fails. One sentence, naming both things that are accepted, because "invalid
-	 * input" tells somebody holding a Discord message nothing at all.
+	 * input" tells somebody holding a Discord message nothing at all. An invite goes to the map to be
+	 * spent ({@link #joinWithInvite}); a RuneLite code or an old code is kept as it is.
 	 */
 	private void joinFromField()
 	{
@@ -880,7 +1103,14 @@ public class MapCompanionPanel extends PluginPanel
 		JoinCode joined = JoinCode.parse(entered.isEmpty() ? pairingCode() : entered);
 		if (joined == null)
 		{
-			say("Paste your connection code from the map's Companion panel.");
+			say(pairingCode().isEmpty()
+				? "Paste the invite a friend sent you, or press Connect to start your own group."
+				: "Paste an invite, or the connection code from the map's Companion panel.");
+			return;
+		}
+		if (joined.invite != null)
+		{
+			joinWithInvite(joined);
 			return;
 		}
 		if (!connect(joined))
@@ -1459,6 +1689,15 @@ public class MapCompanionPanel extends PluginPanel
 			shownGroupActions = syncRow(groupActions, groupRow, shownGroupActions);
 			groupActions.setVisible(!groupRow.isEmpty());
 			joinBlock.setVisible(!paired || !pairing.hasServerConsent() || joinOpen);
+			/* "Have an invite?" says which way in the field is; once in a group it is only Join another. */
+			joinHeading.setVisible(!paired);
+			joinButton.setEnabled(!asking);
+			openMapButton.setText(asking ? (ready ? "Opening…" : "Connecting…") : ready ? OPEN_MAP : CONNECT);
+			openMapButton.setEnabled(!asking);
+			openMapButton.setToolTipText(ready
+				? "Open " + pairing.serverLabel() + " in your browser, already in your group as you"
+				: paired ? "Connect to this group again"
+				: "Make a group for you on " + pairing.serverLabel() + ". Play alone, or invite friends to it.");
 			/* Offered for the group just joined; leaving it, or a changed map, takes the offer away. */
 			if (!ready)
 			{
@@ -1881,6 +2120,20 @@ public class MapCompanionPanel extends PluginPanel
 							SwingUtilities.invokeLater(() -> finishInvite(server, code, invite)));
 	}
 
+	/**
+	 * What Copy invite puts on the clipboard: what to do with it, then the link.
+	 *
+	 * <p>Both ways in are named, because a friend meets the message in a chat window and may be
+	 * holding either a browser or RuneLite: pasted into this plugin's sidebar the invite is spent
+	 * there ({@link JoinCode} reads the link out of the whole message), and opened in a browser it
+	 * joins the map. The link comes last, so a chat client that links what it recognises ends the
+	 * link where the link ends.
+	 */
+	static String inviteMessage(String url)
+	{
+		return "Join my group on the OSRS map: paste this into OSRS Map Companion in RuneLite, or open " + url;
+	}
+
 	/** Put the invitation on the clipboard, whichever kind of invitation we ended up with. */
 	private void finishInvite(String server, String code, @Nullable RelayClient.Invite invite)
 	{
@@ -1894,13 +2147,9 @@ public class MapCompanionPanel extends PluginPanel
 		}
 
 		boolean linked = invite != null && invite.url != null && !invite.url.isEmpty();
-		/*
-		 * The code is spelled out even on the linked form, because a friend on an older release of
-		 * this plugin still has to type six characters into a settings field, and a message that
-		 * only works for people who already upgraded is not much of an invitation.
-		 */
+		/* The plain-text form is for a map too old to mint a link, where the code alone still admits. */
 		String message = linked
-						 ? "Join my OSRS map: " + invite.url + " — code " + code
+						 ? inviteMessage(invite.url)
 						 : "Join my OSRS map: " + mapUrl() + "/map?join=" + code + "&task=companion"
 						 + " — then install the \"OSRS Map Companion\" RuneLite plugin and enter code " + code;
 

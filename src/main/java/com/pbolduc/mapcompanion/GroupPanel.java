@@ -322,6 +322,10 @@ final class GroupPanel extends JPanel
 			{
 				friends.add(friend(row, destinationKey, now));
 			}
+			if (roster.isEmpty())
+			{
+				friends.add(alone());
+			}
 		}
 		meetupCards.removeAll();
 		if (events != null)
@@ -375,6 +379,26 @@ final class GroupPanel extends JPanel
 	private static void appendSaid(StringBuilder sb, @Nullable RoutePress.Said said)
 	{
 		sb.append(said == null ? "" : said.planning + "|" + said.message + "|" + said.key);
+	}
+
+	/**
+	 * A group of one: what the tab is for, said where the friends will be.
+	 *
+	 * <p>Most groups start this way now, because Connect makes one for a player alone. An empty tab
+	 * reads as "nothing works"; this reads as "nobody yet", and names the button under it that
+	 * changes that. Gone the moment a friend's row arrives.
+	 */
+	static final String ALONE = "Just you so far. Copy invite and send it to a friend; they paste it into "
+		+ "their sidebar and appear here and on your map.";
+
+	private JPanel alone()
+	{
+		JPanel card = card();
+		card.setName("group.alone");
+		JLabel words = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
+		MapCompanionPanel.setWrapped(words, ALONE, WIDTH);
+		card.add(MapCompanionPanel.left(words));
+		return slot(card);
 	}
 
 	/** One friend: their disc and name, where they are, their news, and the two buttons. */

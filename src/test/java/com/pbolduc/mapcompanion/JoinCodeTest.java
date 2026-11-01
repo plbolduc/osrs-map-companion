@@ -168,6 +168,48 @@ public class JoinCodeTest
 		JoinCode parsed = JoinCode.parse(message);
 		assertNotNull(parsed);
 		assertEquals("ABC234", parsed.code);
+		/** A token that is not one the map mints is not taken for one. */
+		assertNull(parsed.invite);
+	}
+
+	/**
+	 * The key a friend's invite carries, read out of the link so the sidebar can spend it itself —
+	 * which is what lets a friend join from RuneLite without opening the map first.
+	 */
+	@Test
+	public void takesTheInviteTokenOutOfAFriendsLink()
+	{
+		JoinCode parsed = JoinCode.parse("https://osrs-map.com/map?join=ABC234&i=K7PQ2M3XABCDEFGH&task=companion");
+		assertNotNull(parsed);
+		assertEquals("ABC234", parsed.code);
+		assertEquals("K7PQ2M3XABCDEFGH", parsed.invite);
+		assertNull(parsed.suffix);
+
+		/** First as easily as last, and whatever a chat client did to its case. */
+		JoinCode first = JoinCode.parse("osrs-map.com/map?i=k7pq2m3xabcdefgh&join=abc234");
+		assertEquals("K7PQ2M3XABCDEFGH", first.invite);
+		assertEquals("ABC234", first.code);
+	}
+
+	/** And out of the whole message Copy invite writes, which names it beside the words around it. */
+	@Test
+	public void takesTheInviteOutOfTheMessageCopyInviteWrites()
+	{
+		String message = MapCompanionPanel.inviteMessage("https://osrs-map.com/map?join=ABC234&i=K7PQ2M3XABCDEFGH&task=companion");
+		JoinCode parsed = JoinCode.parse(message);
+		assertNotNull(parsed);
+		assertEquals("ABC234", parsed.code);
+		assertEquals("K7PQ2M3XABCDEFGH", parsed.invite);
+	}
+
+	/** Only a link's own parameter is a key: sixteen letters anywhere else in a message are words. */
+	@Test
+	public void findsNoInviteOutsideALink()
+	{
+		assertNull(JoinCode.parse("ABC234-K7PQ2M3X").invite);
+		assertNull(JoinCode.parse("ABC234 i=K7PQ2M3XABCDEFGH").invite);
+		assertNull(JoinCode.parse("https://osrs-map.com/map?join=ABC234&fi=K7PQ2M3XABCDEFGH").invite);
+		assertNull(JoinCode.parse("https://osrs-map.com/map?join=ABC234&i=K7PQ2M3XABCDEFGHJ").invite);
 	}
 
 	@Test

@@ -13,6 +13,22 @@ unless the map runs on this machine, and redirects are not followed. With no pai
 approval of the selected server, the plugin makes no requests. First **Connect** discloses that
 destination; changing it pauses requests until you connect there.
 
+**Connect and Join.** With no group, **Connect** shows the server notice with a name for the group,
+and only after it is accepted makes one `POST /api/companion/connect`. That request carries this
+RuneLite's random installation key and the name, or nothing when the name was left as it was. The
+map makes a group whose maker is this installation and answers with a connection code, which the
+plugin keeps exactly as a pasted one. **Join** with a pasted invite makes the same request with the
+group code and the invite's token instead of a name; the notice comes first if this map has not had
+it. Neither request carries character data, a member id or a secret, and neither is retried: a
+refusal is printed under the field.
+
+**Open the map.** While connected and logged in, **Open the map** makes one `POST /api/companion/link` with
+the group code, member id and member secret, and opens the link the map answers with: the map's own
+page, with a one-time token in the URL fragment, which the browser does not send to the map. The
+token is good for ten minutes and once. The map adds that browser to the group as this member, and
+as the group's owner when this RuneLite made the group. A link on another site or in another shape
+is not opened, and with no answer the plain map opens instead, which needs no request.
+
 While logged in, connecting sends a random member id, your alias, a sender timestamp and pairing
 credentials even with character sharing off. Snapshots are spaced at least two seconds apart;
 an unchanged character normally sends a heartbeat every six seconds, or twenty with the receive
@@ -199,11 +215,12 @@ Each character has a random id; account hashes and identifiers derived from your
 never transmitted. The full code's suffix travels as `X-Companion-Suffix` until the
 browser link is claimed, then is deleted. `X-Companion-Installation` is a random installation
 key, sent on snapshots so another character can join the same browser's group without another
-paste; with a group code it admits your characters to your groups, so connect only to a map you
-trust. The member id and installation key are the same for every map and group this RuneLite
-connects to until **Leave group**, and the receive stream carries the group code and member id in
-its URL. `X-Companion-Member-Secret` is a random credential for one server, group and character,
-used on snapshots, invites, the receive stream and star-preference sync. It is never displayed
+paste, and on **Connect** and **Join**, where it names the RuneLite that made or joined a group; with
+a group code it admits your characters to your groups, so connect only to a map you trust. The
+member id and installation key are the same for every map and group this RuneLite connects to until
+**Leave group**, and the receive stream carries the group code and member id in its URL.
+`X-Companion-Member-Secret` is a random credential for one server, group and character, used on
+snapshots, invites, the receive stream, star-preference sync and **Open the map**. It is never displayed
 or logged. **Leave group** deletes every one of these member secrets and replaces the installation
 identity; your local kill log remains.
 

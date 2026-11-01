@@ -76,8 +76,18 @@ sharing off still sends a random member id, alias, timestamp and connection cred
 ### Network requests
 
 All paths use **Map address** (`https://osrs-map.com` by default); clipboard contents cannot change it.
-Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RouteClient`, `RoutePress`, `SearchClient` and
-`MeetupClient` and `FarmRunClient` construct HTTP requests:
+Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RouteClient`, `RoutePress`, `SearchClient`,
+`MeetupClient`, `FarmRunClient` and `ConnectClient` construct HTTP requests:
+
+- **POST /api/companion/connect** — one **Connect** press with no group, after the server notice and
+  its group-name field, or one **Join** press with a pasted invite (the notice first if this map has
+  not had it). Header: `X-Companion-Installation`. JSON is the typed group name, or the group code
+  and the invite's token from the pasted link. No character data, member id or secret. The answer
+  is a connection code, kept exactly as a pasted one; a refusal is printed. One at a time, no retry.
+- **POST /api/companion/link** — one **Open the map** press while connected and logged in. Headers:
+  `X-Companion-Code`, `X-Companion-Member`, `X-Companion-Member-Secret`. The answer is a one-time
+  link, opened with RuneLite's `LinkBrowser` only if it is the approved map's own page with the
+  token in the URL fragment; otherwise the plain map opens. Never retried.
 
 - **POST /api/companion/snapshot** — logged-in state changes, at least two seconds apart, plus
   six-second idle heartbeats (twenty seconds with a stream). JSON comes from `SnapshotBuilder`;
@@ -221,6 +231,9 @@ Say these in the description of the next Hub update, as changes from what was ap
   config default changed.
 - The routes, Search, Route buttons, friends and meetups listed under *Network requests*, each a
   press of the player's own.
+- **Connect without the website**: Connect makes a group after the same server notice, Join takes
+  a friend's pasted invite, and Open the map opens the website already in the group. Two requests,
+  `connect` and `link` above, each a press. Nothing is sent before Connect and the notice, as before.
 
 ## Before submission
 

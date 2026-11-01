@@ -106,6 +106,19 @@ public final class JoinCode
 	private static final Pattern LINK = Pattern.compile(
 											"JOIN=(" + CH + "{" + CODE_LENGTH + "})(?!" + NOT_ADJACENT + ")");
 
+	/** The length of an invite's token: the map's {@code INVITE_TOKEN_LENGTH}. */
+	static final int INVITE_LENGTH = 16;
+
+	/**
+	 * The token beside the code in an invite link, {@code &i=…}: what actually admits somebody.
+	 *
+	 * <p>Read only from a paste that is a link, because it only means anything beside a link's code,
+	 * and only as a parameter — {@code ?} or {@code &} before it — so a sixteen-character run of
+	 * letters elsewhere in a message is never taken for a key.
+	 */
+	private static final Pattern INVITE = Pattern.compile(
+		"[?&]I=(" + CH + "{" + INVITE_LENGTH + "})(?!" + NOT_ADJACENT + ")");
+
 	/** The words this plugin's own invite message uses: "…— code ABC234". */
 	private static final Pattern LABELLED = Pattern.compile(
 			"CODE\\s*[:=]?\\s*(" + CH + "{" + CODE_LENGTH + "})(?!" + NOT_ADJACENT + ")");
@@ -166,10 +179,25 @@ public final class JoinCode
 	@Nullable
 	public final String suffix;
 
+	/**
+	 * Sixteen characters, or null when the paste was not an invite link.
+	 *
+	 * <p>The key a friend's invite carries. With it the plugin asks the map to let this RuneLite in
+	 * ({@link ConnectClient#join}); without it a code joins only a group that still admits by code.
+	 */
+	@Nullable
+	public final String invite;
+
 	private JoinCode(String code, @Nullable String suffix)
+	{
+		this(code, suffix, null);
+	}
+
+	private JoinCode(String code, @Nullable String suffix, @Nullable String invite)
 	{
 		this.code = code;
 		this.suffix = suffix;
+		this.invite = invite;
 	}
 
 	/**
@@ -195,7 +223,13 @@ public final class JoinCode
 		{
 			return new JoinCode(full.group(1), full.group(2));
 		}
-		for (Pattern pattern : new Pattern[] {LINK, LABELLED, BARE})
+		Matcher link = LINK.matcher(text);
+		if (link.find())
+		{
+			Matcher invite = INVITE.matcher(text);
+			return new JoinCode(link.group(1), null, invite.find() ? invite.group(1) : null);
+		}
+		for (Pattern pattern : new Pattern[] {LABELLED, BARE})
 		{
 			Matcher matcher = pattern.matcher(text);
 			if (matcher.find())
