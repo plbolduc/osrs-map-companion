@@ -51,7 +51,7 @@ Results use the game's map icons and item sprites.
 ## Farm runs in RuneLite
 
 <p>
-  <img src="docs/mockups/sidebar-farm-run.png" width="300" alt="A farm run in the real sidebar: a bank checklist, numbered stops with Done and Visited kept separate, the current leg's steps, and Pause route, Reroute and End run">
+  <img src="docs/mockups/sidebar-farm-run.png" width="300" alt="A farm run in the real sidebar: a bank checklist, numbered stops with Done and Visited kept separate, the current leg's steps under This leg, and Pause, Reroute and End run buttons">
 </p>
 
 Build a run on the website and press **Send run to RuneLite**, or choose a preset, **Ready now**,
@@ -152,7 +152,7 @@ expected hunting. A bounty's pin opens the creature on the map.
 ## Port tasks in RuneLite
 
 <p>
-  <img src="docs/mockups/sidebar-port-tasks.png" width="225" alt="A port-task run in the RuneLite Port tasks card: Port Khazard done, Ardougne next with its crates to deliver, then the osprey hunt and Brimhaven's task board, and the current leg's steps from boarding the boat to the ledger table">
+  <img src="docs/mockups/sidebar-port-tasks.png" width="225" alt="A port-task run in the RuneLite Port tasks card: Port Khazard done, Ardougne next with its crates to deliver, then the osprey hunt and Brimhaven's task board, and under This leg the steps from boarding the boat to the ledger table">
 </p>
 
 Share your port tasks to list the ones you hold in Home: the crates still to collect and where
