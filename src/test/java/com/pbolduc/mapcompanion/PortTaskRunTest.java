@@ -270,6 +270,8 @@ public class PortTaskRunTest
 		assertEquals("1. Port Khazard", leg.name);
 		RelayResponse.RouteOption way = leg.route.options.get(0);
 		assertEquals("Sail from Port Sarim", way.label);
+		// The Sail step says the sailed distance; the leg's run-tile cost would contradict it.
+		assertNull(way.tiles);
 		assertEquals("Port Khazard", way.voyage.to);
 		assertEquals(state.view().run.stops.get(0).voyage.line.length, way.voyage.line.length);
 	}
