@@ -183,6 +183,29 @@ public class RoutePressTest
 		assertEquals(Integer.valueOf(302), shown.world);
 	}
 
+	/**
+	 * A clue step that is words goes as the clue, read by the map's own clue table, and the card
+	 * takes the place the map names rather than the scroll's tier.
+	 */
+	@Test
+	public void aClueThatIsWordsTravelsAsTheClueAndTakesTheMapsName() throws Exception
+	{
+		connect();
+		RoutePress press = press(200, ANSWER.replace("\"name\":\"Abyssal demon\"", "\"name\":\"Digsite\""), null);
+		CompanionSnapshot.Clue clue = new CompanionSnapshot.Clue();
+		clue.tier = "hard";
+		clue.text = "Dance in the Digsite.";
+		clue.itemId = 2722;
+		press.press(RoutePress.Target.clue("clue", clue, "Hard clue", "Hard clue"));
+		settle(press, "clue");
+		assertEquals("{\"clue\":{\"tier\":\"hard\",\"text\":\"Dance in the Digsite.\",\"itemId\":2722}}",
+			body(sent.get(0)).get("target").toString());
+		RelayResponse.Destination shown = destinations.getDestination();
+		assertEquals("the place the words lead to", "Digsite", shown.name);
+		assertEquals("Hard clue", shown.note);
+		assertEquals(3408, shown.x);
+	}
+
 	@Test
 	public void aDestinationThatMerelyArrivesIsNeverFollowed()
 	{

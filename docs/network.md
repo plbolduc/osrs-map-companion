@@ -186,8 +186,10 @@ ever fetched from the map or anywhere else.
 **Route** beside the clue being carried, the last death, a star in the Stars tab or a meetup is the
 same request with a tile as its target: the clue's dig spot or beginner map, the death's tile, the
 star's tile, the meetup's. A clue or a death that is not shared leaves only in that request, once
-per press; the map plans with it and keeps nothing. A clue whose step is words names no tile and
-offers no Route yet. A death inside a boss's instance is recorded as the tile its arena is copied
+per press; the map plans with it and keeps nothing. A clue whose step is words names no tile, so
+its Route sends the clue as the snapshot carries it, `{ clue: { tier, text, itemId } }`, and the
+map places it with its own clue table; the words leave only in that request, whether or not
+**Share clue** is on. A death inside a boss's instance is recorded as the tile its arena is copied
 from, and the map decides whether that route goes to the boss's way in. A star whose tile is
 approximate offers **Open website** instead, which opens the map's search for the site's name in
 your browser and sends this client nothing. The clue is now read whether or not *Share clue* is on,

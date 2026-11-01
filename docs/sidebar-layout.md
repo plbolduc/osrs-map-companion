@@ -592,6 +592,15 @@ a link coloured as *Meet here…* is, and *Switch ▾* and its menu are unchange
 the map's `DEFAULT_RUNELITE_GROUP_NAME`; if the two ever differ, the link stops showing and the menu
 still renames.
 
+### Clues by their words
+
+The clue card offered Route only for a coordinate or a beginner map, and told a step in words to
+open the website. The map's route door has placed a clue from its words since 29 October, and the
+where-to-go plan listed the plugin's half as left out. A worded step now shows its words and Route,
+and the press sends the clue as the snapshot carries it; the card takes the name of the place the
+map reads from the words, and an emote's way goes by its STASH unit first. A step with a tile still
+goes as that tile, so the words leave only when they are what the map needs.
+
 ### Outside the sidebar
 
 *Route here* on a right-click of the game's world map, the step being walked in a small box over

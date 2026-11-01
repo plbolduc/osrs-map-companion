@@ -128,7 +128,8 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RouteClient`, `RoutePress
   sharing off; the README says so. The answer replaces the sidebar's steps. Nothing is walked.
   `RoutePress` sends the same request for a pick from **Search**, with the row's id as the target,
   and for **Route** beside the carried clue, the last death, a star and a meetup, with that tile as
-  the target. A clue or death tile that is not shared leaves only in that request. Same
+  the target; a clue step that is words goes as the clue itself, its tier, words and scroll item id.
+  A clue or death that is not shared leaves only in that request. Same
   one-at-a-time rule and wait; the answer becomes the destination. Nothing is walked. **Route here**
   on a right-click of the world map sends it too, with the clicked tile as the target.
 - **PUT /api/companion/event/answer** — one press of a meetup's answer (**Going**, **Maybe**,
@@ -258,6 +259,10 @@ Say these in the description of the next Hub update, as changes from what was ap
   outline around the travel items a running farm run's checklist names and the player is not
   carrying, matched by the same local rule as the checklist. It moves, hides and resizes nothing,
   reads no bank contents beyond the items it is asked to draw, and sends nothing.
+- **Clue steps by their words**: Route beside a clue whose step is words, an anagram or an emote,
+  now sends the clue itself, its tier, words and scroll item id, in that one request, whether or not
+  *Share clue* is on; the map places the step with its own clue table. Before, only a coordinate's
+  or a beginner map's tile was sent, and a worded step offered no Route.
 
 ## Before submission
 
