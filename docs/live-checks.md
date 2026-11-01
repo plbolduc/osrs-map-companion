@@ -93,10 +93,20 @@ steps wait on these readings (`osrs-stars-map/docs/plan-where-to-go-for-a-task.m
       Collect the crates and watch `..._CARGO_TAKEN`, then deliver and watch `..._DELIVERED`.
       An empty slot should read 0. Take a bounty task and watch `BOUNTY_TASK_ITEM_COUNTER_1`
       (14662) count down as the parts drop.
-- [ ] **Where the boat is.** Note `SAILING_BOAT_1_PORT` (19260) where the boat is moored. Dock
-      at another port and note it again, to learn how the value names a dock. Note
-      `SAILING_BOAT_1_TELEPORT_FOCUS` (19270) for a boat with and without a teleportation focus,
-      and `SAILING_BOARDED_BOAT_LAST_DOCK` (19145) after docking.
+- [ ] **Where the boat is (`BoatReader`, built from the game's scripts, not yet seen live).** The
+      encodings are sourced (the map's `docs/review-evidence/sailing-reader-sources-2026-10-30.md`):
+      a stored port is a `SailingDock` `dock_id` value joined by value, 253–255 are lost, capsized
+      and bottled, and the focus is 0, 1 or 2. What only a client can show:
+      - with *Boats and moorings* on, the map names the port each boat is moored at, after a login
+        and after a hop, and never before the 15-second settle;
+      - a boat moored at Port Sarim (dock id 0) is read as a boat: its owned flag, or a name part,
+        is set. If neither is, the reader takes that slot for empty, and Port Sarim voyages start
+        nowhere for that player;
+      - a slot with no boat reads all zeros, so it is left out rather than sent;
+      - while standing on a deck no boats are sent. Watch `SAILING_BOAT_n_PORT` while at sea: if
+        it keeps the port the boat left until it docks, the reader could keep sending while aboard;
+      - `SAILING_BOAT_1_TELEPORT_FOCUS` (19270) reads 0, 1 and 2 for no focus, a teleportation
+        focus and a greater one.
 - [ ] **The Colosseum unlock.** The plugin reads varbit 11410 for the Colosseum's travel unlock.
       The client calls it `COLOSSEUM_HIGHEST_WAVE`, where the code says glory rank. Note its
       value beside what the game shows.

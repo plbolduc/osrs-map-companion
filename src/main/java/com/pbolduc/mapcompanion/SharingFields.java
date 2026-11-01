@@ -102,7 +102,9 @@ final class SharingFields
 		field("shareCapabilities", "Carried travel items", MapCompanionConfig::shareCapabilities,
 			"Derived yes/no travel flags; your inventory is never sent."),
 		field("shareStash", "STASH construction", MapCompanionConfig::shareStash,
-			"Built STASH units; stored equipment is never read."));
+			"Built STASH units; stored equipment is never read."),
+		field("shareBoats", "Boats and moorings", MapCompanionConfig::shareBoats,
+			"Where each boat is moored and its teleport focus, so voyages start at your boat; boat names are never sent."));
 
 	static final Section TASKS = new Section("tasks", "Tasks and timers",
 		field("shareSlayer", "Slayer task", MapCompanionConfig::shareSlayer, "Your current assignment and remaining count."),

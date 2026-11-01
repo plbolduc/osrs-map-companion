@@ -103,6 +103,11 @@ public class CompanionSnapshot
 	public Map<String, Boolean> travelUnlocks;
 	/** Outside-house destination only, never the contents of a private house. */
 	public String house;
+	/**
+	 * Each boat, where it is moored and its teleport focus, from {@link BoatReader}; null when that
+	 * reader cannot vouch for a reading, which the map reads as "not told" rather than "no boats".
+	 */
+	public List<Boat> boats;
 	/** Construction only; missing ids have no reading. */
 	public Map<Integer, Boolean> stashUnits;
 	public List<Birdhouse> birdhouses;
@@ -190,6 +195,20 @@ public class CompanionSnapshot
 			this.id = id;
 			this.nick = nick;
 		}
+	}
+
+	/**
+	 * One boat: its slot, the {@code SailingDock} column value its stored port holds and that row's
+	 * name, and its focus as none, teleport or greater. Dock and port are absent for a boat at no
+	 * dock (lost, capsized or bottled); a port absent beside a dock is a value the table could not
+	 * name. A focus the game's check does not name is absent. The boat's own name is never sent.
+	 */
+	public static class Boat
+	{
+		public int slot;
+		public Integer dock;
+		public String port;
+		public String focus;
 	}
 
 	public static class Tile
