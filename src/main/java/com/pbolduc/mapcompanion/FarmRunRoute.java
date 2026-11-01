@@ -190,7 +190,9 @@ final class FarmRunRoute
 			way.id = "farm-stop-" + stop.n;
 			way.label = stop.method == null ? "Walk" : stop.method;
 			way.best = true;
-			way.tiles = stop.costTiles;
+			// A voyage's cost mixes its walks with the sail in run tiles, and its Sail step already says
+			// the sailed distance, so a second, larger figure on the heading would read as a contradiction.
+			way.tiles = stop.voyage == null ? stop.costTiles : null;
 			way.steps = stop.steps;
 			// A port-task leg's voyage: drawn on the world map and ticked by the deck, as a destination's is.
 			way.voyage = stop.voyage;
