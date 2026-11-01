@@ -208,6 +208,7 @@ public class MapCompanionPanel extends PluginPanel
 	private final FarmRunState farmRunState;
 	private final FarmRunClient farmRunClient;
 	private final SlayerPanel slayerPanel;
+	private final PortTasksPanel portTasksPanel;
 	private final ClueReader clueReader;
 	private final GameSprites sprites;
 	/** The scroll whose sprite the clue card shows, so a refresh asks for it once rather than every second. */
@@ -349,7 +350,8 @@ public class MapCompanionPanel extends PluginPanel
 		FarmRunRoute farmRunRoute,
 		FarmRunState farmRunState,
 		FarmRunClient farmRunClient,
-		SlayerPanel slayerPanel)
+		SlayerPanel slayerPanel,
+		PortTasksPanel portTasksPanel)
 	{
 		this.config = config;
 		this.plugin = plugin;
@@ -373,6 +375,7 @@ public class MapCompanionPanel extends PluginPanel
 		this.farmRunState = farmRunState;
 		this.farmRunClient = farmRunClient;
 		this.slayerPanel = slayerPanel;
+		this.portTasksPanel = portTasksPanel;
 		this.clueReader = clueReader;
 		this.sprites = sprites;
 		this.searchPanel = new SearchPanel(searchClient, routePress, sprites);
@@ -453,6 +456,7 @@ public class MapCompanionPanel extends PluginPanel
 		overview.add(searchGap);
 		overview.add(farmRunPanel);
 		overview.add(slayerPanel);
+		overview.add(portTasksPanel);
 
 		/*
 		 * Now: a destination with its dismiss, a meetup, a death. "From the map" named two of
@@ -1299,6 +1303,7 @@ public class MapCompanionPanel extends PluginPanel
 			searchGap.setVisible(ready);
 			farmRunPanel.refresh(ready);
 			slayerPanel.refresh(ready);
+			portTasksPanel.refresh();
 			if (ready)
 			{
 				searchPanel.refresh();

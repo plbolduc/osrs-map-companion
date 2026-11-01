@@ -198,8 +198,8 @@ Say these in the description of the next Hub update, as changes from what was ap
 - Completed farming contracts remain visible under the existing sharing choice, with the same
   assignment's `state: "return"`, so the website can point back to Guildmaster Jane.
 - Port tasks: a new sharing choice, off by default and in the one press at Connect, sending the
-  five Sailing task slots and their counters as disclosed above. No request, poll or game action
-  is added.
+  five Sailing task slots and their counters as disclosed above. Home lists the tasks held, from
+  the local reading. No request, poll or game action is added.
 - **One press at Connect** (above): the recommended set is offered after the server notice and
   shared only on the player's press, which names every field and the receive stream it opens. No
   config default changed.
