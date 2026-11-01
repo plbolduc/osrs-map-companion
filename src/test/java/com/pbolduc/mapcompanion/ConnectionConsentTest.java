@@ -52,6 +52,23 @@ public class ConnectionConsentTest
 		assertFalse(pairing.hasServerConsent());
 	}
 
+	/**
+	 * Connect and an invite ask the map for a group before there is one to connect to, so the notice
+	 * is asked about by map alone: accepted once for a map, it is not shown again for another group
+	 * on it, and a different map is a different notice.
+	 */
+	@Test
+	public void theNoticeIsAcceptedPerMapBeforeAnyGroupIsAskedFor()
+	{
+		HarnessStore store = new HarnessStore();
+		Pairing pairing = new Pairing(store, new Gson());
+		assertFalse(pairing.noticeAccepted(pairing.serverUrl()));
+		assertFalse(pairing.noticeAccepted(null));
+		assertTrue(pairing.connect(JoinCode.parse("ABC234-K7PQ2M3X"), () -> true));
+		assertTrue(pairing.noticeAccepted(pairing.serverUrl()));
+		assertFalse(pairing.noticeAccepted("http://localhost:3000"));
+	}
+
 	@Test
 	public void approvalIsRememberedButEachChangedDestinationNeedsConnect()
 	{
