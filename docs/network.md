@@ -56,6 +56,18 @@ position sharing is on, because a route from where you stand is what the press a
 flight at a time, and none before the wait the map last asked for: its `Retry-After`, and at least
 five seconds between presses that reached it. The map plans with both tiles and keeps neither.
 
+**Quest and diary announcements.** With *Drops and levels* on, a quest or achievement diary tier
+finished while logged in rides the next snapshot as an announcement: the quest's name, or the
+diary's region and tier, with a random id, retried until the map names it, like a drop. Each kind
+also needs its own choice: **Full quest progress** for any quest, **Quest completion** for the 49
+travel quests, **Achievement diaries** for a tier. Announcements are built from those choices'
+existing readings, so watching adds no client reads beyond them and no requests. Only a change
+the plugin saw happen is announced: the first reading after a login, a world hop, a lost game
+connection, a change of character or group, or one of those choices turned back on is a new
+baseline, and nothing done before it is announced. Quest starts, single diary tasks and the
+Recipe for Disaster subquests are never announced. The map keeps a quest only under a name its
+own quest list carries.
+
 **Farm runs.** With **Show destinations from the map** enabled, snapshots include the plumbing
 field `runReceiverVersion: 1`. It contains no character data and is omitted with that setting off.
 The website offers Send run only for a fresh, compatible receiver belonging to its own reader.

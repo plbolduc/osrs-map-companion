@@ -102,6 +102,13 @@ steps wait on these readings (`osrs-stars-map/docs/plan-where-to-go-for-a-task.m
       value beside what the game shows.
 - [ ] **Farming.** The farming items above, and a herb patch replanted while the map's farm run
       is open: the stop should tick.
+- [ ] **A quest and a diary tier announced.** With *Drops and levels*, *Full quest progress* and
+      *Achievement diaries* on, log in: nothing already done is announced. Finish a short quest:
+      the group's feed shows it within about thirty seconds, once. Finish a diary tier's last task:
+      the feed shows that tier, once, and nothing when its reward is claimed. Hop worlds and log
+      out and in: nothing is announced. Note whether the tier's completion varbit moves on the
+      last task or on claiming, and, if a Karamja easy, medium or hard tier is to hand, what its
+      flag reads between the last task and the reward: only a change from 0 to 2 is announced.
 - [ ] **If convenient: a death in an instance.** Note whether a gravestone appears. The map
       offers *Route back* only where one is left.
 - [ ] **If convenient: a ladder.** Count the game ticks a ladder climb takes. The map's routes

@@ -45,6 +45,9 @@ import net.runelite.api.HashTable;
 import net.runelite.api.ItemComposition;
 import net.runelite.api.NPCComposition;
 import net.runelite.api.Player;
+import net.runelite.api.Quest;
+import net.runelite.api.QuestState;
+import net.runelite.api.ScriptID;
 import net.runelite.api.Skill;
 import net.runelite.api.WidgetNode;
 import net.runelite.api.WorldType;
@@ -83,7 +86,7 @@ final class HarnessGame
 	static final Set<String> ANSWERED = Collections.unmodifiableSet(new LinkedHashSet<>(java.util.Arrays.asList(
 			"getGameState", "getLocalPlayer", "getWorld", "getWorldType", "getVarbitValue", "getVarpValue",
 			"getRealSkillLevel", "getTickCount", "getPlane", "getItemDefinition", "getComponentTable",
-			"getDBRowsByValue", "getDBTableField",
+			"getDBRowsByValue", "getDBTableField", "runScript", "getIntStack",
 			"getName", "getWorldLocation", "getLocalLocation")));
 
 	private final Map<Integer, Integer> varbits = new HashMap<>();
@@ -91,6 +94,38 @@ final class HarnessGame
 	private final Map<Skill, Integer> levels = new EnumMap<>(Skill.class);
 	private final Map<String, Integer> dbRows = new HashMap<>();
 	private final Map<String, Object[]> dbFields = new HashMap<>();
+
+	/**
+	 * Quest id to what the client's quest-status script leaves on the stack for it: 2 finished, 1 not
+	 * started, 0 started — the three {@code Quest.getState} tells apart. Only quests the story set;
+	 * any other leaves an empty stack, which the reader turns into unknown, as it would a failed
+	 * script.
+	 */
+	private final Map<Integer, Integer> quests = new HashMap<>();
+
+	/** The stack the last script left. Guarded by {@link #quests}. */
+	private int[] intStack = new int[0];
+
+	/** An explicit quest state, read back through the real {@code Quest.getState}. */
+	void setQuest(Quest quest, QuestState state)
+	{
+		synchronized (quests)
+		{
+			quests.put(quest.getId(), state == QuestState.FINISHED ? 2 : state == QuestState.NOT_STARTED ? 1 : 0);
+		}
+	}
+
+	/** Answers the quest-status script with what {@link #setQuest} said, and nothing else. */
+	private void runScript(Object[] args)
+	{
+		Object[] script = args != null && args.length == 1 && args[0] instanceof Object[] ? (Object[]) args[0] : args;
+		synchronized (quests)
+		{
+			Integer held = script != null && script.length == 2 && Integer.valueOf(ScriptID.QUEST_STATUS_GET).equals(script[0])
+						   ? quests.get(script[1]) : null;
+			intStack = held == null ? new int[0] : new int[] {held};
+		}
+	}
 
 	/** Only explicit fixture values; the row id deliberately need not equal the column value. */
 	void setDbValue(int table, int column, int value, int row, int nameColumn, Object name)
@@ -236,6 +271,18 @@ final class HarnessGame
 		answers.put("getWorldType", args -> worldTypes == null ? null : EnumSet.copyOf(worldTypes));
 		answers.put("getVarbitValue", args -> read(varbits, args));
 		answers.put("getVarpValue", args -> read(varps, args));
+		answers.put("runScript", args ->
+		{
+			runScript(args);
+			return null;
+		});
+		answers.put("getIntStack", args ->
+		{
+			synchronized (quests)
+			{
+				return intStack.clone();
+			}
+		});
 		answers.put("getDBRowsByValue", args ->
 		{
 			synchronized (dbRows)

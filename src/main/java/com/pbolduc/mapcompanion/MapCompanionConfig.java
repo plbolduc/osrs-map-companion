@@ -461,7 +461,9 @@ public interface MapCompanionConfig extends Config
 			"Announce notable NPC and supported activity rewards, and real levels. Collection items "
 			+ "and a small curated exception list qualify; repeated supplies do not. Activity and chest "
 			+ "rewards require RuneLite's Loot Tracker. Pets and collection additions also have their "
-			+ "own switches below. Nothing is queued while unpaired or logged out. " + FEED_KEPT,
+			+ "own switches below. A quest or diary tier you finish while logged in is announced too when "
+			+ "its own quest or diary choice is on; nothing done before is. Nothing is queued while "
+			+ "unpaired or logged out. " + FEED_KEPT,
 		position = 21,
 		warning = NETWORK_WARNING,
 		section = lootSection

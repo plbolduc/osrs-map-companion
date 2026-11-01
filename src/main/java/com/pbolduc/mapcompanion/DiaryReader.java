@@ -88,7 +88,7 @@ public class DiaryReader
 	private static final long SETTLE_MS = 15_000L;
 
 	/** Easy, medium, hard, elite — the order every id table below is written in. */
-	private static final String[] TIERS = {"easy", "medium", "hard", "elite"};
+	static final String[] TIERS = {"easy", "medium", "hard", "elite"};
 
 	/** The two answers that are not a tier. Spelled as {@code lib/companion-progress.ts} spells them. */
 	static final String NONE = "none";
@@ -183,6 +183,58 @@ public class DiaryReader
 	public Map<String, String> readRewards(long nowMs)
 	{
 		return read(nowMs, false);
+	}
+
+	/**
+	 * Each tier's own completion flag per region, or null while the session settles.
+	 *
+	 * <p>For {@link CompletionWatcher}, which has to say which tier was just finished, and
+	 * {@link #readCompleted} cannot tell it: that answers the run of tiers from easy up, so finishing
+	 * medium with hard already done moves it from easy to hard in one step, and announcing the tier
+	 * it moved to would name one nobody finished. Per tier, {@code TRUE} is done, {@code FALSE} is a
+	 * plain zero, and null is a flag that could not be read or holds a value this file cannot defend
+	 * — Karamja's 1 — which is neither, so a change out of it is never news.
+	 */
+	@Nullable
+	public Map<String, Boolean[]> readTiers(long nowMs)
+	{
+		if (!settle.settled(nowMs))
+		{
+			return null;
+		}
+		Map<String, Boolean[]> out = new LinkedHashMap<>();
+		for (Region region : REGIONS)
+		{
+			int[] values = new int[region.completion.length];
+			for (int i = 0; i < values.length; i++)
+			{
+				values[i] = value(region.completion[i]);
+			}
+			out.put(region.name, tierFlags(values, region.completeAt));
+		}
+		return out;
+	}
+
+	/** One region's flags as {@link #readTiers} reports them. Static so its cases need no client. */
+	static Boolean[] tierFlags(int[] values, int[] completeAt)
+	{
+		Boolean[] flags = new Boolean[Math.min(values.length, TIERS.length)];
+		for (int i = 0; i < flags.length; i++)
+		{
+			if (values[i] == UNREADABLE)
+			{
+				flags[i] = null;
+			}
+			else if (values[i] >= completeAt[i])
+			{
+				flags[i] = Boolean.TRUE;
+			}
+			else
+			{
+				flags[i] = values[i] == 0 ? Boolean.FALSE : null;
+			}
+		}
+		return flags;
 	}
 
 	@Nullable

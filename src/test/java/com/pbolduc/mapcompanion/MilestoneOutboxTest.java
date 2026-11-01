@@ -59,6 +59,47 @@ public class MilestoneOutboxTest
 	}
 
 	@Test
+	public void aQuestOrDiaryTierIsDeliveredLikeAnyOtherEvent()
+	{
+		MilestoneOutbox outbox = new MilestoneOutbox();
+		outbox.quest("Dragon Slayer I", 1_000L);
+		outbox.diary("Varrock", "hard", 1_500L);
+		List<CompanionSnapshot.Milestone> batch = outbox.take(2_000L);
+		assertEquals(2, batch.size());
+		CompanionSnapshot.Milestone quest = batch.get(0);
+		assertEquals("quest", quest.kind);
+		assertEquals("Dragon Slayer I", quest.quest);
+		assertEquals(1_000L, quest.msAgo);
+		assertEquals(null, quest.region);
+		assertEquals(null, quest.level);
+		CompanionSnapshot.Milestone diary = batch.get(1);
+		assertEquals("diary", diary.kind);
+		assertEquals("Varrock", diary.region);
+		assertEquals("hard", diary.tier);
+		assertEquals(null, diary.quest);
+
+		/** Retried with the same ids until named, then gone: the map's dedup is keyed on them. */
+		List<CompanionSnapshot.Milestone> retry = outbox.take(30_000L);
+		assertEquals(quest.id, retry.get(0).id);
+		assertEquals(diary.id, retry.get(1).id);
+		outbox.acknowledge(Arrays.asList(quest.id, diary.id));
+		assertTrue(outbox.take(31_000L).isEmpty());
+	}
+
+	@Test
+	public void aQuestOrTierTheMapCouldNotReadIsNeverQueued()
+	{
+		MilestoneOutbox outbox = new MilestoneOutbox();
+		outbox.quest(null, 1_000L);
+		outbox.quest(" ", 1_000L);
+		outbox.quest("Dragon\nSlayer", 1_000L);
+		outbox.quest(String.join("", Collections.nCopies(81, "x")), 1_000L);
+		outbox.diary("Varrock", "master", 1_000L);
+		outbox.diary(null, "easy", 1_000L);
+		assertEquals(0, outbox.pendingCount());
+	}
+
+	@Test
 	public void anAgeIsMeasuredFromWhenItHappened()
 	{
 		MilestoneOutbox outbox = new MilestoneOutbox();

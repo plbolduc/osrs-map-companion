@@ -83,6 +83,9 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RouteClient`, `RoutePress
   six-second idle heartbeats (twenty seconds with a stream). JSON comes from `SnapshotBuilder`;
   each character field is gated independently. With Share Slayer task enabled it also sends
   the list's ranking order, Wilderness filter and delivery receipt (`slayerPreferences`).
+  With *Drops and levels* and the matching quest or diary choice on, `milestones` can carry a
+  quest's name or a diary's region and tier, only for a completion the plugin watched change
+  while logged in; never one already done at login, after a hop or after re-enabling sharing.
   Its ranked places arrive on the existing member directive, only until acknowledged;
   this adds no poll or stream. Headers: `X-Companion-Code`, optional
   `X-Companion-Member-Secret`, `X-Companion-Installation`, and `X-Companion-Suffix`

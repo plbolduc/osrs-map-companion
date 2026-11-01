@@ -28,6 +28,7 @@ package com.pbolduc.mapcompanion;
 import com.google.inject.Singleton;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.HashSet;
@@ -100,6 +101,8 @@ public class MilestoneOutbox
 	static final String KIND_NPC_DROP = "npc_drop";
 	static final String KIND_LEVEL = "level";
 	static final String KIND_REWARD = "reward";
+	static final String KIND_QUEST = "quest";
+	static final String KIND_DIARY = "diary";
 
 	private static final class Pending
 	{
@@ -117,6 +120,9 @@ public class MilestoneOutbox
 		Boolean collectionNew;
 		String skill;
 		int level;
+		String quest;
+		String region;
+		String tier;
 
 		Pending(String kind, int sequence, long atMs)
 		{
@@ -207,6 +213,43 @@ public class MilestoneOutbox
 		enqueue(event, nowMs);
 	}
 
+	/**
+	 * A whole quest finished while {@link CompletionWatcher} watched, under the map's name for it.
+	 *
+	 * <p>The caller owns "watched", as it owns "real" for a level. The map keeps a quest only under a
+	 * name its own quest list carries, and names any other in its acknowledgement, so a quest it does
+	 * not know is answered once and dropped rather than retried for five minutes.
+	 */
+	public synchronized void quest(String quest, long nowMs)
+	{
+		if (!plainName(quest))
+		{
+			return;
+		}
+		Pending event = new Pending(KIND_QUEST, ++sequence, nowMs);
+		event.quest = quest;
+		enqueue(event, nowMs);
+	}
+
+	/** A whole diary tier finished while watched: the region as the diary tab names it, and the tier. */
+	public synchronized void diary(String region, String tier, long nowMs)
+	{
+		if (!plainName(region) || !Arrays.asList(DiaryReader.TIERS).contains(tier))
+		{
+			return;
+		}
+		Pending event = new Pending(KIND_DIARY, ++sequence, nowMs);
+		event.region = region;
+		event.tier = tier;
+		enqueue(event, nowMs);
+	}
+
+	/** What the map accepts as a name: present, at most eighty characters, nothing unprintable. */
+	private static boolean plainName(String name)
+	{
+		return name != null && !name.trim().isEmpty() && name.length() <= 80 && !name.matches(".*[\\p{Cntrl}].*");
+	}
+
 	/** What to put on the next post, oldest first, or an empty list when there is nothing. */
 	public synchronized List<CompanionSnapshot.Milestone> take(long nowMs)
 	{
@@ -239,6 +282,9 @@ public class MilestoneOutbox
 			}
 			wire.skill = event.skill;
 			wire.level = KIND_LEVEL.equals(event.kind) ? event.level : null;
+			wire.quest = event.quest;
+			wire.region = event.region;
+			wire.tier = event.tier;
 			batch.add(wire);
 		}
 		return batch;
