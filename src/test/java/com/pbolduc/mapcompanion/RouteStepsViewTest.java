@@ -45,8 +45,9 @@ import org.junit.Test;
  * What the destination's card says about a route the map sent, read off the real components.
  *
  * <p>The reply fixture's own route: Lumbridge Home Teleport then a walk upstairs to the bank, with
- * walking all the way and a Lumbridge tablet as the other ways. The tablet is there so the fixture
- * carries an item's picture beside the spell's, which is why there are two other ways.
+ * walking all the way, a Lumbridge tablet and a voyage from Port Sarim as the other ways. The
+ * tablet is there so the fixture carries an item's picture beside the spell's, and the voyage so it
+ * carries a sail's rows and its docking gate.
  */
 public class RouteStepsViewTest
 {
@@ -81,7 +82,7 @@ public class RouteStepsViewTest
 		receive();
 		assertEquals(
 			"Lumbridge Home Teleport · 52 tiles | ▸ 1. Lumbridge Home Teleport | Standard spellbook"
-			+ " | Ten seconds to cast, and a combat hit stops it | 2. Walk 12 tiles to the bank | ▸ 2 other ways",
+			+ " | Ten seconds to cast, and a combat hit stops it | 2. Walk 12 tiles to the bank | ▸ 3 other ways",
 			shown());
 	}
 
@@ -102,8 +103,8 @@ public class RouteStepsViewTest
 	public void anotherWayShowsItsOwnSteps() throws IOException
 	{
 		receive();
-		assertTrue(SidebarWords.press(view, "▸ 2 other ways"));
-		assertTrue(shown(), shown().endsWith("▾ 2 other ways | Walk | Lumbridge tablet · 58 tiles"));
+		assertTrue(SidebarWords.press(view, "▸ 3 other ways"));
+		assertTrue(shown(), shown().endsWith("▾ 3 other ways | Walk | Lumbridge tablet · 58 tiles | Docking point · 1340 tiles"));
 		assertTrue(SidebarWords.press(view, "Walk"));
 		view.show(route.view());
 		assertTrue(shown(), shown().startsWith("Walk | ▸ 1. Walk 140 tiles"));
@@ -120,7 +121,7 @@ public class RouteStepsViewTest
 		assertTrue("the teleport's row holds a place for its picture", titles.get(0).getIcon() != null);
 		assertEquals("the walk's row has none", null, titles.get(1).getIcon());
 
-		assertTrue(SidebarWords.press(view, "▸ 2 other ways"));
+		assertTrue(SidebarWords.press(view, "▸ 3 other ways"));
 		asked.clear();
 		assertTrue(SidebarWords.press(view, "Lumbridge tablet · 58 tiles"));
 		view.show(route.view());
@@ -140,6 +141,18 @@ public class RouteStepsViewTest
 		{
 			assertEquals(label.getText(), null, label.getIcon());
 		}
+	}
+
+	/** The fixture's voyage: its three rows, and the docking mooring's gate under the one that sails. */
+	@Test
+	public void aVoyageSaysItsGateUnderTheSail() throws IOException
+	{
+		receive();
+		assertTrue(SidebarWords.press(view, "▸ 3 other ways"));
+		assertTrue(SidebarWords.press(view, "Docking point · 1340 tiles"));
+		view.show(route.view());
+		assertTrue(shown(), shown().contains("2. Board your boat at Port Sarim | 3. Sail to Catherby | About 650 tiles"
+			+ " | ✓ 20 Sailing | 4. Dock at Catherby | Your boat stays there"));
 	}
 
 	@Test

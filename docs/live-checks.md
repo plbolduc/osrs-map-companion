@@ -107,6 +107,23 @@ steps wait on these readings (`osrs-stars-map/docs/plan-where-to-go-for-a-task.m
         it keeps the port the boat left until it docks, the reader could keep sending while aboard;
       - `SAILING_BOAT_1_TELEPORT_FOCUS` (19270) reads 0, 1 and 2 for no focus, a teleportation
         focus and a greater one.
+- [ ] **Following a voyage (`DestinationRoute`, built and tested, not yet seen live).** Send a
+      place across the water with *Boats and moorings* on, press **Follow**, and sail it:
+      - *Board your boat* ticks on stepping onto the deck, not at the gangplank. The deck test is
+        the one `WorldTiles` already uses to place a sailing friend;
+      - *Sail to …* ticks with the boat alongside the far mooring, within 15 tiles of its pin while
+        still aboard. Note how far from the pin the boat actually lies when docked;
+      - *Dock at …* ticks on stepping ashore at the pier. Note the order the game sends things in:
+        whether the boat's stored port (`SAILING_BOAT_n_PORT`) changes on docking or only on
+        disembarking, and whether the player's tile leaves the deck before or after it changes.
+        The port evidence settles a landing on another floor, so its timing matters;
+      - `SAILING_BOARDED_BOAT_LAST_DOCK` (19145): note it before boarding, at sea and after
+        docking. The follower deliberately does not read it; if it changes exactly when the boat
+        docks, it could tick *Sail to …* more reliably than distance;
+      - the voyage's line on the world map follows the sail, Shortest Path draws nothing during
+        it, and the hint arrow points at the far mooring once it is in the loaded scene;
+      - move the boat elsewhere after the route arrives: the sidebar says the boat is no longer at
+        the boarding port, and **Reroute** boards it where it is.
 - [ ] **The Colosseum unlock.** The plugin reads varbit 11410 for the Colosseum's travel unlock.
       The client calls it `COLOSSEUM_HIGHEST_WAVE`, where the code says glory rank. Note its
       value beside what the game shows.
