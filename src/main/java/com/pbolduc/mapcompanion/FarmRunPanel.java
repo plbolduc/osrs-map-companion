@@ -75,7 +75,7 @@ final class FarmRunPanel extends JPanel
 	private final JButton reroute = MapCompanionPanel.linkButton("Reroute");
 	private final JButton end = MapCompanionPanel.linkButton("End run");
 	private final JPanel actions = new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 0, 0));
-	private final RouteStepsView steps = new RouteStepsView(ignored -> {});
+	private final RouteStepsView steps;
 	private final JLabel message = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
 	private boolean bringOpen;
 	private String shown;
@@ -85,6 +85,7 @@ final class FarmRunPanel extends JPanel
 	FarmRunPanel(FarmRunState state, FarmRunClient client, FarmRunRoute follower, DestinationRoute routes,
 				 ShortestPath shortest, GameSprites sprites, MapCompanionConfig config)
 	{
+		this.steps = new RouteStepsView(ignored -> {}, sprites);
 		this.state = state;
 		this.client = client;
 		this.follower = follower;

@@ -27,9 +27,11 @@ package com.pbolduc.mapcompanion;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.function.IntConsumer;
 import javax.annotation.Nullable;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -46,6 +48,11 @@ import net.runelite.client.ui.ColorScheme;
  * named above its steps, and the others the map offered fold behind one line, as the card's closed
  * row folds them — a press on one shows its steps instead.
  *
+ * <p>A teleport step carries the game's own picture of what to click, as the website's card hangs its
+ * sprite on the same row: the item's sprite from {@link GameSprites#item}, the spell's icon from
+ * {@link GameSprites#sprite}, by the id the map sent. Both come from this client's cache, never from
+ * the map; a step the map names no id for is words alone, as it always was.
+ *
  * <p>When Shortest Path is drawing a step's walk for this route, a line under the steps says so, so
  * the line on the ground is never taken for this plugin's own drawing.
  *
@@ -60,10 +67,17 @@ final class RouteStepsView extends JPanel
 	private static final int WIDTH = MapCompanionPanel.CARD_TEXT_WIDTH;
 	/** Where a step's detail starts: under its words, past its number. */
 	private static final int INDENT = 14;
+	/** A step's picture: the size the website's chips draw a sprite, and the friends list's news. */
+	static final int PICTURE = 16;
+	private static final int PICTURE_GAP = 5;
+	/** The picture's place while the client's cache answers. */
+	private static final ImageIcon NO_PICTURE_YET = new ImageIcon(new BufferedImage(PICTURE, PICTURE, BufferedImage.TYPE_INT_ARGB));
 	private static final Color DONE = ColorScheme.MEDIUM_GRAY_COLOR;
 	private static final Color AHEAD = ColorScheme.LIGHT_GRAY_COLOR;
 
 	private final transient IntConsumer choose;
+	@Nullable
+	private final transient GameSprites sprites;
 	private final JLabel way = label(11f, AHEAD);
 	private final JLabel origin = label(11f, AHEAD);
 	private final JPanel steps = MapCompanionPanel.column(ColorScheme.DARKER_GRAY_COLOR);
@@ -83,7 +97,17 @@ final class RouteStepsView extends JPanel
 	/** @param choose shows another of the ways, by its place in the map's list */
 	RouteStepsView(IntConsumer choose)
 	{
+		this(choose, null);
+	}
+
+	/**
+	 * @param choose shows another of the ways, by its place in the map's list
+	 * @param sprites the client's pictures for a step's item or spell, or null to draw words alone
+	 */
+	RouteStepsView(IntConsumer choose, @Nullable GameSprites sprites)
+	{
 		this.choose = choose;
+		this.sprites = sprites;
 		setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.Y_AXIS));
 		setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		MapCompanionPanel.left(this);
@@ -146,7 +170,7 @@ final class RouteStepsView extends JPanel
 		List<RelayResponse.RouteStep> list = view.steps();
 		for (int i = 0; i < list.size(); i++)
 		{
-			steps.add(step(i, list.get(i), i < view.step ? -1 : i == view.step ? 0 : 1));
+			steps.add(step(i, list.get(i), i < view.step ? -1 : i == view.step ? 0 : 1, sprites));
 		}
 
 		arrived.setVisible(view.arrived());
@@ -183,11 +207,11 @@ final class RouteStepsView extends JPanel
 	}
 
 	/**
-	 * One step: its number and words, then what the card prints under it.
+	 * One step: its picture, number and words, then what the card prints under it.
 	 *
 	 * @param place negative behind the current step, zero for it, positive ahead of it
 	 */
-	private static JComponent step(int index, RelayResponse.RouteStep step, int place)
+	private static JComponent step(int index, RelayResponse.RouteStep step, int place, @Nullable GameSprites sprites)
 	{
 		JPanel row = MapCompanionPanel.column(ColorScheme.DARKER_GRAY_COLOR);
 		row.setBorder(new EmptyBorder(3, 0, 0, 0));
@@ -197,27 +221,47 @@ final class RouteStepsView extends JPanel
 			title.setFont(title.getFont().deriveFont(Font.BOLD));
 			title.setToolTipText("The step you are on");
 		}
-		MapCompanionPanel.setWrapped(title, stepLine(index, step, place == 0), WIDTH);
+		/*
+		 * The words are laid out at once beside an empty slot of the picture's width, and the picture
+		 * fills it when the client's cache answers, so the row never reflows under the pointer.
+		 */
+		boolean pictured = sprites != null && (step.itemId != null || step.spriteId != null);
+		int beside = pictured ? PICTURE + PICTURE_GAP : 0;
+		if (pictured)
+		{
+			title.setIconTextGap(PICTURE_GAP);
+			title.setIcon(NO_PICTURE_YET);
+			if (step.itemId != null)
+			{
+				sprites.item(title, step.itemId, PICTURE);
+			}
+			else
+			{
+				sprites.sprite(title, step.spriteId, PICTURE);
+			}
+		}
+		MapCompanionPanel.setWrapped(title, stepLine(index, step, place == 0), WIDTH - beside);
 		row.add(MapCompanionPanel.left(title));
 		if (step.detail != null)
 		{
-			row.add(under(step.detail, place));
+			row.add(under(step.detail, place, beside));
 		}
 		if (step.notes != null)
 		{
 			for (String note : step.notes)
 			{
-				row.add(under(note, place));
+				row.add(under(note, place, beside));
 			}
 		}
 		return row;
 	}
 
-	private static JLabel under(String text, int place)
+	/** A line under a step, past its number and, on a step with a picture, past the picture too. */
+	private static JLabel under(String text, int place, int beside)
 	{
 		JLabel label = label(11f, place < 0 ? DONE : AHEAD);
-		label.setBorder(new EmptyBorder(0, INDENT, 0, 0));
-		MapCompanionPanel.setWrapped(label, text, WIDTH - INDENT);
+		label.setBorder(new EmptyBorder(0, INDENT + beside, 0, 0));
+		MapCompanionPanel.setWrapped(label, text, WIDTH - INDENT - beside);
 		return MapCompanionPanel.left(label);
 	}
 
@@ -272,7 +316,7 @@ final class RouteStepsView extends JPanel
 			sb.append(option.id).append(';').append(option.label).append(';').append(option.steps.size()).append(';');
 			for (RelayResponse.RouteStep step : option.steps)
 			{
-				sb.append(step.title).append(';');
+				sb.append(step.title).append(';').append(step.itemId).append(';').append(step.spriteId).append(';');
 			}
 		}
 		return sb.toString();
