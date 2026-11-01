@@ -1055,6 +1055,8 @@ public class MapCompanionPlugin extends Plugin
 		{
 			farmRunState.carried(capabilityEvaluator.evaluate());
 			farmRunState.observe(farmingObserver.observations(now), birdhouseReader.read(now), DestinationRoute.standing(client), now);
+			/* A port-task run's stops tick by the slots read this tick, and by nothing else. */
+			farmRunState.observePorts(config.sharePortTasks() ? portTaskReader.latest() : null);
 		}
 		farmRunRoute.sync();
 		/**

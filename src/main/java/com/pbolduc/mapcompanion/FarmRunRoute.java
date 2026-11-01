@@ -192,6 +192,8 @@ final class FarmRunRoute
 			way.best = true;
 			way.tiles = stop.costTiles;
 			way.steps = stop.steps;
+			// A port-task leg's voyage: drawn on the world map and ticked by the deck, as a destination's is.
+			way.voyage = stop.voyage;
 			destination.route = new RelayResponse.Route();
 			// Legs after the first start at the preceding stop, not at a shared/requested position.
 			destination.route.options = Collections.singletonList(way);

@@ -48,6 +48,10 @@ import javax.annotation.Nullable;
  * <p>A bad run must not lose a pairing secret or a reward acknowledgement beside it. The field's
  * adapter consumes the whole value before decoding and leaves unreadable runs absent. Patch ids
  * describe evidence, not game actions. Unknown ids are kept but cannot produce local receipts.
+ *
+ * <p>One kind is not a farm run: {@code port-tasks}, the Sailing port tasks this character holds.
+ * Its stops carry task ticks instead of patch ids, and the voyage each leg sails. A tick naming a
+ * counter this build does not know is dropped rather than read as some other counter.
  */
 final class FarmRunWire
 {
@@ -57,6 +61,13 @@ final class FarmRunWire
 	static final int MAX_PATCH_IDS = 16;
 	private static final Pattern ID = Pattern.compile("[A-Za-z0-9_-]{4,64}");
 	private static final Pattern PATCH = Pattern.compile("[a-z0-9]+(?:-[a-z0-9]+)*");
+	/** The one run kind that is not a farm run: the Sailing port tasks this character holds. */
+	static final String PORT_TASKS = "port-tasks";
+	static final List<String> KINDS = Arrays.asList("sent", "ready-now", "preset", "birdhouses", "contract", PORT_TASKS);
+	/** The slot counters a port-task stop is ticked by; see {@link RelayResponse.RunTask}. */
+	static final List<String> COUNTERS = Arrays.asList("taken", "delivered", "remaining", "held");
+	/** Five task slots, each served at most twice at one port: a pickup and a drop-off. */
+	static final int MAX_TICKS = 10;
 
 	/** A malformed counter is unknown, not a reason to lose the surrounding pairing reply. */
 	public static final class Revision implements TypeAdapterFactory
@@ -141,7 +152,7 @@ final class FarmRunWire
 	static RelayResponse.FarmRun normalize(@Nullable RelayResponse.FarmRun run)
 	{
 		if (run == null || run.id == null || !ID.matcher(run.id).matches() || run.stops == null
-			|| !Arrays.asList("sent", "ready-now", "preset", "birdhouses", "contract").contains(run.kind)
+			|| !KINDS.contains(run.kind)
 			|| run.startedAtMs <= 0 || run.startedAtMs > 9_007_199_254_740_991L)
 		{
 			return null;
@@ -231,7 +242,20 @@ final class FarmRunWire
 		clean.method = RouteWire.text(stop.method, 120);
 		clean.item = RouteWire.text(stop.item, 80);
 		clean.costTiles = Math.max(0, stop.costTiles);
-		boolean tracked = !clean.patchIds.isEmpty() || clean.birdhouseId != null;
+		clean.tasks = new ArrayList<>();
+		if (stop.tasks != null)
+		{
+			for (RelayResponse.RunTask tick : stop.tasks)
+			{
+				RelayResponse.RunTask kept = tick(tick);
+				if (kept != null && clean.tasks.size() < MAX_TICKS)
+				{
+					clean.tasks.add(kept);
+				}
+			}
+		}
+		clean.voyage = RouteWire.voyage(stop.voyage);
+		boolean tracked = !clean.patchIds.isEmpty() || clean.birdhouseId != null || !clean.tasks.isEmpty();
 		clean.done = stop.done && tracked;
 		clean.visited = stop.visited && !tracked;
 		clean.steps = new ArrayList<>();
@@ -246,6 +270,25 @@ final class FarmRunWire
 				}
 			}
 		}
+		return clean;
+	}
+
+	@Nullable
+	private static RelayResponse.RunTask tick(@Nullable RelayResponse.RunTask tick)
+	{
+		String text = tick == null ? null : RouteWire.text(tick.text, 120);
+		if (text == null || tick.slot < 0 || tick.slot >= PortTaskReader.SLOT_IDS.length || tick.taskId <= 0 || tick.taskId > 100_000
+			|| !COUNTERS.contains(tick.counter) || tick.n < 0 || tick.n > 255)
+		{
+			return null;
+		}
+		RelayResponse.RunTask clean = new RelayResponse.RunTask();
+		clean.slot = tick.slot;
+		clean.taskId = tick.taskId;
+		clean.counter = tick.counter;
+		clean.n = tick.n;
+		clean.ends = tick.ends;
+		clean.text = text;
 		return clean;
 	}
 

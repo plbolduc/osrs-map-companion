@@ -1,0 +1,508 @@
+{
+  "id": "pT7rUn4Sea9x",
+  "kind": "port-tasks",
+  "name": "Port tasks",
+  "startedAtMs": 1793001600000,
+  "bring": [],
+  "stops": [
+    {
+      "n": 1,
+      "name": "Port Khazard",
+      "tile": {
+        "x": 2684,
+        "y": 3164,
+        "plane": 1
+      },
+      "patchIds": [],
+      "method": "Sail from Port Sarim",
+      "item": null,
+      "costTiles": 1230,
+      "steps": [
+        {
+          "slot": "via",
+          "title": "Use Rat Pits Minigame Teleport",
+          "detail": "4: Port Sarim",
+          "at": {
+            "x": 3018,
+            "y": 3231
+          }
+        },
+        {
+          "slot": "boarding-walk",
+          "title": "Walk 61t south-east",
+          "detail": "To Port Sarim",
+          "walk": true,
+          "at": {
+            "x": 3051,
+            "y": 3192
+          }
+        },
+        {
+          "slot": "board",
+          "title": "Board your boat at Port Sarim",
+          "at": {
+            "x": 3051,
+            "y": 3192
+          }
+        },
+        {
+          "slot": "sail",
+          "title": "Sail to Port Khazard",
+          "detail": "About 513 tiles",
+          "at": {
+            "x": 2686,
+            "y": 3161
+          }
+        },
+        {
+          "slot": "dock",
+          "title": "Dock at Port Khazard",
+          "detail": "Your boat stays there",
+          "at": {
+            "x": 2686,
+            "y": 3161
+          }
+        },
+        {
+          "slot": "arrival-walk",
+          "title": "Walk 3t north-west",
+          "detail": "To Port Khazard's ledger table",
+          "walk": true,
+          "at": {
+            "x": 2684,
+            "y": 3164,
+            "plane": 1
+          }
+        }
+      ],
+      "done": true,
+      "tasks": [
+        {
+          "slot": 1,
+          "taskId": 84,
+          "counter": "delivered",
+          "n": 3,
+          "ends": true,
+          "text": "Deliver 3 crates · Port Khazard fruit delivery"
+        },
+        {
+          "slot": 2,
+          "taskId": 121,
+          "counter": "taken",
+          "n": 3,
+          "text": "Collect 3 crates · Ardougne sand delivery for Ardougne"
+        }
+      ],
+      "voyage": {
+        "from": "Port Sarim",
+        "to": "Port Khazard",
+        "line": [
+          [
+            3051,
+            3192
+          ],
+          [
+            3051,
+            3150
+          ],
+          [
+            3004,
+            3103
+          ],
+          [
+            2979,
+            3103
+          ],
+          [
+            2978,
+            3147
+          ],
+          [
+            2960,
+            3165
+          ],
+          [
+            2947,
+            3165
+          ],
+          [
+            2928,
+            3184
+          ],
+          [
+            2920,
+            3184
+          ],
+          [
+            2908,
+            3196
+          ],
+          [
+            2872,
+            3196
+          ],
+          [
+            2868,
+            3200
+          ],
+          [
+            2864,
+            3200
+          ],
+          [
+            2860,
+            3204
+          ],
+          [
+            2852,
+            3204
+          ],
+          [
+            2848,
+            3208
+          ],
+          [
+            2811,
+            3209
+          ],
+          [
+            2808,
+            3212
+          ],
+          [
+            2805,
+            3212
+          ],
+          [
+            2778,
+            3239
+          ],
+          [
+            2772,
+            3239
+          ],
+          [
+            2766,
+            3245
+          ],
+          [
+            2755,
+            3245
+          ],
+          [
+            2751,
+            3249
+          ],
+          [
+            2716,
+            3249
+          ],
+          [
+            2687,
+            3220
+          ],
+          [
+            2688,
+            3159
+          ],
+          [
+            2684,
+            3159
+          ],
+          [
+            2686,
+            3161
+          ]
+        ],
+        "gates": [
+          {
+            "text": "30 Sailing",
+            "tier": "met"
+          }
+        ]
+      }
+    },
+    {
+      "n": 2,
+      "name": "Ardougne",
+      "tile": {
+        "x": 2668,
+        "y": 3266,
+        "plane": 1
+      },
+      "patchIds": [],
+      "method": "Sail from Port Khazard",
+      "item": null,
+      "costTiles": 223,
+      "steps": [
+        {
+          "slot": "boarding-walk",
+          "title": "Walk 3t south-east",
+          "detail": "To Port Khazard",
+          "walk": true,
+          "at": {
+            "x": 2686,
+            "y": 3161
+          }
+        },
+        {
+          "slot": "board",
+          "title": "Board your boat at Port Khazard",
+          "at": {
+            "x": 2686,
+            "y": 3161
+          }
+        },
+        {
+          "slot": "sail",
+          "title": "Sail to Ardougne",
+          "detail": "About 108 tiles",
+          "at": {
+            "x": 2672,
+            "y": 3265
+          }
+        },
+        {
+          "slot": "dock",
+          "title": "Dock at Ardougne",
+          "detail": "Your boat stays there",
+          "at": {
+            "x": 2672,
+            "y": 3265
+          }
+        },
+        {
+          "slot": "arrival-walk",
+          "title": "Walk 4t west",
+          "detail": "To Ardougne's ledger table",
+          "walk": true,
+          "at": {
+            "x": 2668,
+            "y": 3266,
+            "plane": 1
+          }
+        }
+      ],
+      "tasks": [
+        {
+          "slot": 2,
+          "taskId": 121,
+          "counter": "delivered",
+          "n": 3,
+          "ends": true,
+          "text": "Deliver 3 crates · Ardougne sand delivery"
+        }
+      ],
+      "voyage": {
+        "from": "Port Khazard",
+        "to": "Ardougne",
+        "line": [
+          [
+            2686,
+            3161
+          ],
+          [
+            2688,
+            3163
+          ],
+          [
+            2687,
+            3246
+          ],
+          [
+            2670,
+            3263
+          ],
+          [
+            2672,
+            3265
+          ]
+        ],
+        "gates": [
+          {
+            "text": "28 Sailing",
+            "tier": "met"
+          }
+        ]
+      }
+    },
+    {
+      "n": 3,
+      "name": "Osprey",
+      "tile": {
+        "x": 2706,
+        "y": 3173,
+        "plane": 0
+      },
+      "patchIds": [],
+      "method": "Sail from Ardougne",
+      "item": null,
+      "costTiles": 184,
+      "steps": [
+        {
+          "slot": "boarding-walk",
+          "title": "Walk 4t east",
+          "detail": "To Ardougne",
+          "walk": true,
+          "at": {
+            "x": 2672,
+            "y": 3265
+          }
+        },
+        {
+          "slot": "board",
+          "title": "Board your boat at Ardougne",
+          "at": {
+            "x": 2672,
+            "y": 3265
+          }
+        },
+        {
+          "slot": "sail",
+          "title": "Sail out to Osprey",
+          "detail": "90 tiles at sea",
+          "at": {
+            "x": 2706,
+            "y": 3173
+          }
+        }
+      ],
+      "tasks": [
+        {
+          "slot": 3,
+          "taskId": 466,
+          "counter": "remaining",
+          "n": 0,
+          "text": "Osprey feather · 9 of 15 still owed"
+        }
+      ],
+      "voyage": {
+        "from": "Ardougne",
+        "line": [
+          [
+            2672,
+            3265
+          ],
+          [
+            2670,
+            3262
+          ],
+          [
+            2680,
+            3252
+          ],
+          [
+            2681,
+            3198
+          ],
+          [
+            2706,
+            3173
+          ]
+        ]
+      }
+    },
+    {
+      "n": 4,
+      "name": "Brimhaven task board",
+      "tile": {
+        "x": 2765,
+        "y": 3227,
+        "plane": 1
+      },
+      "patchIds": [],
+      "method": "Sail on from the osprey",
+      "item": null,
+      "costTiles": 263,
+      "steps": [
+        {
+          "slot": "sail",
+          "title": "Sail to Brimhaven",
+          "detail": "About 128 tiles",
+          "at": {
+            "x": 2758,
+            "y": 3229,
+            "plane": 0
+          }
+        },
+        {
+          "slot": "dock",
+          "title": "Dock at Brimhaven",
+          "detail": "Your boat stays there",
+          "at": {
+            "x": 2758,
+            "y": 3229,
+            "plane": 0
+          }
+        },
+        {
+          "slot": "arrival-walk",
+          "title": "Walk 7t east",
+          "detail": "To Brimhaven's task board",
+          "walk": true,
+          "at": {
+            "x": 2765,
+            "y": 3227,
+            "plane": 1
+          }
+        }
+      ],
+      "tasks": [
+        {
+          "slot": 3,
+          "taskId": 466,
+          "counter": "held",
+          "n": 0,
+          "ends": true,
+          "text": "Hand in · Brimhaven osprey bounty"
+        }
+      ],
+      "voyage": {
+        "from": "Osprey",
+        "to": "Brimhaven",
+        "line": [
+          [
+            2706,
+            3173
+          ],
+          [
+            2706,
+            3180
+          ],
+          [
+            2687,
+            3199
+          ],
+          [
+            2687,
+            3220
+          ],
+          [
+            2708,
+            3221
+          ],
+          [
+            2735,
+            3248
+          ],
+          [
+            2751,
+            3249
+          ],
+          [
+            2752,
+            3229
+          ],
+          [
+            2755,
+            3226
+          ],
+          [
+            2758,
+            3229
+          ]
+        ]
+      }
+    }
+  ]
+}
