@@ -172,6 +172,11 @@ public class MapCompanionPanel extends PluginPanel
 	 * {@link #refresh}.
 	 */
 	private final JPanel fromMap = column(ColorScheme.DARK_GRAY_COLOR);
+	/**
+	 * What there is to start, under what is happening: the farm run, Slayer and port tasks. Each card
+	 * hides while it has nothing to offer, and the heading goes with the last of them.
+	 */
+	private final JPanel tasks = column(ColorScheme.DARK_GRAY_COLOR);
 	private final JLabel destinationName = new JLabel();
 	private final JLabel destinationDetail = new JLabel();
 	private final JPanel destinationActions = row(ColorScheme.DARKER_GRAY_COLOR);
@@ -474,9 +479,6 @@ public class MapCompanionPanel extends PluginPanel
 		overview.add(searchPanel);
 		searchGap = gap(8, ColorScheme.DARK_GRAY_COLOR);
 		overview.add(searchGap);
-		overview.add(farmRunPanel);
-		overview.add(slayerPanel);
-		overview.add(portTasksPanel);
 
 		/*
 		 * Now: a destination with its dismiss, a meetup, a death. "From the map" named two of
@@ -538,6 +540,15 @@ public class MapCompanionPanel extends PluginPanel
 		fromMap.add(clueSlot);
 		fromMap.add(gap(7, ColorScheme.DARK_GRAY_COLOR));
 		overview.add(fromMap);
+
+		/* Under Now, as the last polish pass placed them: what is happening comes before what to start. */
+		tasks.add(sectionHead("Tasks"));
+		tasks.add(gap(3, ColorScheme.DARK_GRAY_COLOR));
+		tasks.add(farmRunPanel);
+		tasks.add(slayerPanel);
+		tasks.add(portTasksPanel);
+		tasks.add(gap(7, ColorScheme.DARK_GRAY_COLOR));
+		overview.add(tasks);
 
 		/* Drop luck works with no pairing code set, so it sits above everything the group needs. */
 		drySection.add(dryHeading);
@@ -1560,6 +1571,7 @@ public class MapCompanionPanel extends PluginPanel
 			farmRunPanel.refresh(ready);
 			slayerPanel.refresh(ready);
 			portTasksPanel.refresh(ready);
+			tasks.setVisible(farmRunPanel.isVisible() || slayerPanel.isVisible() || portTasksPanel.isVisible());
 			if (ready)
 			{
 				searchPanel.refresh();

@@ -549,3 +549,17 @@ being killed or one opened from the list. In that empty place the card now says 
 beside *All monsters ›*, and the sidebar drops its own heading. With words in the eyebrow, under the
 *Now killing* bar, or while counting is paused, the heading stays where it was. The card's wording is
 unchanged.
+
+## The RuneLite pass, 1 November 2026
+
+A review of the sidebar as built, after the plugin stopped needing the website first, asked what
+RuneLite offers that the plugin did not use and what the pictures showed was off. Each change below
+was checked first against the decisions already written down here and in `osrs-stars-map`; three
+proposals were dropped for that reason, and are named at the end.
+
+### Tasks under Now
+
+The last polish pass placed the task cards on Home "under a *Tasks* heading, below Now, one card
+each", and the owner took that pick. They were built above Now, so an idle farm run's picker sat
+between the search and the route being walked. Home is now the search, *Now*, *Tasks* and Drop luck.
+The *Tasks* heading hides with the last visible card, as *Now*'s does.
