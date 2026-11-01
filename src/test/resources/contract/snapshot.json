@@ -194,5 +194,11 @@
     "msSinceLastDrop": 1500
   },
   "idleMs": 0,
-  "sentAtMs": 1800000000000
+  "sentAtMs": 1800000000000,
+  "slayerPreferences": {
+    "v": 1,
+    "order": "best",
+    "hideWilderness": true,
+    "seenRevision": 0
+  }
 }

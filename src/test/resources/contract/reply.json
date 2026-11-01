@@ -309,7 +309,129 @@
         }
       ]
     },
-    "runRevision": 1
+    "runRevision": 1,
+    "slayerOptions": {
+      "taskName": "Gargoyles",
+      "areaName": "Slayer Tower",
+      "order": "best",
+      "hideWilderness": true,
+      "rows": [
+        {
+          "id": "slayer:Gargoyles#1:3432,9937,3",
+          "rank": 1,
+          "name": "Slayer Tower (basement)",
+          "kinds": [
+            "Gargoyle"
+          ],
+          "labels": [
+            "Safespot",
+            "Aggressive"
+          ],
+          "tier": "met",
+          "bestForYou": true,
+          "target": {
+            "x": 3432,
+            "y": 9937,
+            "plane": 3
+          },
+          "asks": [
+            {
+              "text": "75 Slayer",
+              "tier": "met",
+              "skill": "Slayer"
+            }
+          ]
+        },
+        {
+          "id": "slayer:Gargoyles#0:3439,3542,2",
+          "rank": 2,
+          "name": "Slayer Tower (top floor)",
+          "kinds": [
+            "Gargoyle"
+          ],
+          "labels": [
+            "Safespot",
+            "Aggressive"
+          ],
+          "tier": "met",
+          "bestForYou": false,
+          "target": {
+            "x": 3439,
+            "y": 3542,
+            "plane": 2
+          },
+          "asks": [
+            {
+              "text": "75 Slayer",
+              "tier": "met",
+              "skill": "Slayer"
+            }
+          ]
+        },
+        {
+          "id": "slayer:Gargoyles#2:1697,4575,0",
+          "rank": 3,
+          "name": "Slayer Tower (roof)",
+          "kinds": [
+            "Gargoyle"
+          ],
+          "labels": [
+            "Multi · the wiki's rate names no area attack",
+            "Aggressive"
+          ],
+          "tier": "met",
+          "bestForYou": false,
+          "target": {
+            "x": 1697,
+            "y": 4575,
+            "plane": 0
+          },
+          "asks": [
+            {
+              "text": "75 Slayer",
+              "tier": "met",
+              "skill": "Slayer"
+            }
+          ]
+        }
+      ],
+      "ranked": 3,
+      "hiddenWilderness": 0,
+      "kinds": [
+        {
+          "name": "Gargoyle",
+          "facts": "lvl 111 · 105 XP · Slayer 75",
+          "best": "Slayer Tower (basement)"
+        }
+      ],
+      "bosses": [
+        {
+          "name": "Dawn",
+          "entrance": {
+            "x": 3429,
+            "y": 3555,
+            "plane": 0
+          },
+          "where": "with Dusk, on the Slayer Tower's roof"
+        },
+        {
+          "name": "Dusk",
+          "entrance": {
+            "x": 3429,
+            "y": 3555,
+            "plane": 0
+          },
+          "where": "with Dawn, on the Slayer Tower's roof"
+        }
+      ],
+      "rate": "30k",
+      "page": "Slayer task/Gargoyles",
+      "note": "Only Slayer Tower counts for this task.",
+      "notes": [
+        "Only Slayer Tower counts for this task."
+      ]
+    },
+    "slayerRevision": 1
   },
   "acknowledgedMilestones": [
     "contract-session:1"

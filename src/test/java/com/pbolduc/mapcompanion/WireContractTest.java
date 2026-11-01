@@ -198,6 +198,7 @@ public class WireContractTest
 	{
 		CompanionSnapshot s = new CompanionSnapshot();
 		s.runReceiverVersion = 1;
+		s.slayerPreferences = new CompanionSnapshot.SlayerPreferences();
 		s.member = new CompanionSnapshot.Member("b3f1c2d4-0000-4000-8000-000000000000", "Zezima");
 		s.member.characterName = "Zezima";
 		s.accountType = "gim";

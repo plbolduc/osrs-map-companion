@@ -56,7 +56,10 @@ public class CompanionSnapshot
 	public int v = 1;
 	/** Protocol support while remote destinations are enabled; no character observation is in it. */
 	public Integer runReceiverVersion;
+	/** Ranking choices and receipt only while Share Slayer task is enabled. */
+	public SlayerPreferences slayerPreferences;
 	public Member member;
+
 	public String accountType;
 	public Integer world;
 	public List<String> worldFlags;
@@ -150,6 +153,14 @@ public class CompanionSnapshot
 	public Long idleMs;
 	/** Debug only. The relay's own receipt time is what every age is measured from. */
 	public long sentAtMs;
+
+	public static class SlayerPreferences
+	{
+		public int v = 1;
+		public String order = "best";
+		public boolean hideWilderness = true;
+		public long seenRevision;
+	}
 
 	public static class Member
 	{

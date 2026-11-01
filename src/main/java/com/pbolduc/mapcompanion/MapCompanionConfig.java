@@ -608,6 +608,28 @@ public interface MapCompanionConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "slayerOrder",
+		name = "Slayer order",
+		description = "The sidebar's kept ranking choice",
+		hidden = true
+	)
+	default String slayerOrder()
+	{
+		return "best";
+	}
+
+	@ConfigItem(
+		keyName = "slayerHideWilderness",
+		name = "Hide Wilderness Slayer places",
+		description = "The sidebar's kept filter",
+		hidden = true
+	)
+	default boolean slayerHideWilderness()
+	{
+		return true;
+	}
+
+	@ConfigItem(
 		keyName = "dropLuckChat",
 		name = "Drop luck in chat",
 		description =

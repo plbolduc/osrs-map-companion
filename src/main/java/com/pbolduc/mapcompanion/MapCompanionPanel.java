@@ -81,17 +81,12 @@ import net.runelite.client.util.LinkBrowser;
 /**
  * The sidebar, kept deliberately small.
  *
- * <p>Everything interesting about this feature — the ranked slayer locations, the routes, the
- * party, the meetups — lives on the map, where there is room for it and where it can be read on a
- * second screen while the game has the first. Reproducing any of that here would mean two versions
- * of the same answer, drifting.
- *
- * <p>So this answers only the questions that belong in the client: is it connected, what is being
- * shared, and what has the map asked me to look at. Plus the one button that matters — a way to
- * open the map — and a way to hand a friend the code.
+ * <p>The server supplies ranked Slayer places and routes using the website's own functions.
+ * This panel presents those answers and local progress; it owns no second ranking or travel
+ * table that could drift from the map. Pairing and sharing choices stay in the same sidebar.
  *
  * <p>Status and Open the map come first, then three tabs ({@link CompanionViews}): Home holds the
- * search, what is happening now and Drop luck; Group the friends, the meetups and the group's own
+ * search, farm runs, Slayer, what is happening now and Drop luck; Group the friends, the meetups and the group's own
  * buttons; Stars the star list. Settings is a page behind the gear on the status card
  * ({@link SidebarPages}): every sharing choice, then Advanced, which keeps the address, the snapshot
  * preview and the reset actions out of the way even there. The connection field takes a complete
@@ -212,6 +207,7 @@ public class MapCompanionPanel extends PluginPanel
 	private final FarmRunRoute farmRunRoute;
 	private final FarmRunState farmRunState;
 	private final FarmRunClient farmRunClient;
+	private final SlayerPanel slayerPanel;
 	private final ClueReader clueReader;
 	private final GameSprites sprites;
 	/** The scroll whose sprite the clue card shows, so a refresh asks for it once rather than every second. */
@@ -352,7 +348,8 @@ public class MapCompanionPanel extends PluginPanel
 		FarmRunPanel farmRunPanel,
 		FarmRunRoute farmRunRoute,
 		FarmRunState farmRunState,
-		FarmRunClient farmRunClient)
+		FarmRunClient farmRunClient,
+		SlayerPanel slayerPanel)
 	{
 		this.config = config;
 		this.plugin = plugin;
@@ -375,6 +372,7 @@ public class MapCompanionPanel extends PluginPanel
 		this.farmRunRoute = farmRunRoute;
 		this.farmRunState = farmRunState;
 		this.farmRunClient = farmRunClient;
+		this.slayerPanel = slayerPanel;
 		this.clueReader = clueReader;
 		this.sprites = sprites;
 		this.searchPanel = new SearchPanel(searchClient, routePress, sprites);
@@ -454,6 +452,7 @@ public class MapCompanionPanel extends PluginPanel
 		searchGap = gap(8, ColorScheme.DARK_GRAY_COLOR);
 		overview.add(searchGap);
 		overview.add(farmRunPanel);
+		overview.add(slayerPanel);
 
 		/*
 		 * Now: a destination with its dismiss, a meetup, a death. "From the map" named two of
@@ -1299,6 +1298,7 @@ public class MapCompanionPanel extends PluginPanel
 			searchPanel.setVisible(ready);
 			searchGap.setVisible(ready);
 			farmRunPanel.refresh(ready);
+			slayerPanel.refresh(ready);
 			if (ready)
 			{
 				searchPanel.refresh();

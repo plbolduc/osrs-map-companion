@@ -114,6 +114,7 @@ public class NetworkDisclosureTest
 
 		PLUMBING.put("member", "the container; its own fields are disclosed one at a time");
 		PLUMBING.put("runReceiverVersion", "software protocol support, only while remote destinations are enabled; no game data");
+		DISCLOSED.put("slayerPreferences", "the Slayer list's order, Wilderness filter and delivery receipt");
 		PLUMBING.put("sentAtMs", "the sender's clock, which the map replaces with its own");
 	}
 
@@ -210,7 +211,7 @@ public class NetworkDisclosureTest
 		expected.put("Clue", "coordTile, itemId, mapTile, text, tier");
 		expected.put("CompanionSnapshot", "accountType, activeSkill, birdhouses, capabilities, clue, death, "
 					 + "detailsTruncated, diaries, diaryRewards, farming, farmingContract, house, hunterRumour, idleMs, instanceLayout, instanced, loot, mahoganyHome, member, "
-					 + "milestones, pos, questLog, questStates, questsCompleted, runReceiverVersion, sentAtMs, skills, slayer, stashUnits, travelUnlocks, v, world, worldFlags");
+					 + "milestones, pos, questLog, questStates, questsCompleted, runReceiverVersion, sentAtMs, skills, slayer, slayerPreferences, stashUnits, travelUnlocks, v, world, worldFlags");
 		expected.put("Death", "msAgo, tile");
 		expected.put("Drop", "boostedSinceLast, boostedWatched, item, killsAtLast, obtained, trackedSinceKill");
 		expected.put("Farming", "patches, progressVersion");
@@ -223,6 +224,7 @@ public class NetworkDisclosureTest
 		expected.put("Patch", "completedMsAgo, completionId, id, observedMsAgo, produce, readyInMaxMs, readyInMinMs, stagesLeft, state");
 		expected.put("RewardSource", "kind, name");
 		expected.put("Slayer", "areaName, remaining, taskName");
+		expected.put("SlayerPreferences", "hideWilderness, order, seenRevision, v");
 		expected.put("Tile", "plane, x, y");
 
 		assertEquals("the shape of the wire changed. Every field here leaves the player's machine, so "

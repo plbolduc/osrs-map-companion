@@ -239,6 +239,9 @@ public class MapCompanionPlugin extends Plugin
 	private FarmRunState farmRunState;
 
 	@Inject
+	private SlayerState slayerState;
+
+	@Inject
 	private FarmRunClient farmRunClient;
 
 	@Inject
@@ -480,6 +483,7 @@ public class MapCompanionPlugin extends Plugin
 	{
 		farmRunClient.clear();
 		farmRunState.clear();
+		slayerState.clear();
 		lootLog.flush();
 		relay.reset();
 		stopStream();
@@ -705,6 +709,7 @@ public class MapCompanionPlugin extends Plugin
 		// Old member replies and frames must not deliver a previous character's run.
 		farmRunClient.clear();
 		farmRunState.bind(null);
+		slayerState.clear();
 		milestones.reset();
 		xpTracker.reset();
 		deathWatcher.clear();
@@ -748,6 +753,14 @@ public class MapCompanionPlugin extends Plugin
 			return;
 		}
 		String key = event.getKey();
+		if (key.equals("shareSlayer") && !config.shareSlayer())
+		{
+			slayerState.clear();
+		}
+		if (key.equals("slayerOrder") || key.equals("slayerHideWilderness"))
+		{
+			slayerState.choices(config.slayerOrder(), config.slayerHideWilderness());
+		}
 		if (MapCompanionConfig.KEY_SHARE_MILESTONES.equals(key)
 			|| MapCompanionConfig.KEY_SHARE_PETS.equals(key)
 			|| MapCompanionConfig.KEY_SHARE_COLLECTION.equals(key))
@@ -1075,6 +1088,10 @@ public class MapCompanionPlugin extends Plugin
 			{
 				/** Each half only while its own setting is on; the stream may be open for the other. */
 				destinationState.acceptSocial(directive, config.showDestination());
+				if (config.shareSlayer())
+				{
+					slayerState.accept(memberId, directive, System.currentTimeMillis());
+				}
 				if (config.showDestination())
 				{
 					destinationState.accept(directive);
@@ -1173,6 +1190,10 @@ public class MapCompanionPlugin extends Plugin
 			noteIssuedSecret(server, code, postedAs, response.memberSecret);
 			noteGroupName(server, code, response.groupName);
 			destinationState.acceptSocial(response.directive, config.showDestination());
+			if (config.shareSlayer())
+			{
+				slayerState.accept(postedAs, response.directive, System.currentTimeMillis());
+			}
 			if (config.showDestination())
 			{
 				destinationState.accept(response.directive);
@@ -1213,6 +1234,7 @@ public class MapCompanionPlugin extends Plugin
 	{
 		farmRunClient.clear();
 		farmRunState.clear();
+		slayerState.clear();
 		pairing.clearStaleSuffix();
 		resetRewardDelivery();
 		destinationState.clear();

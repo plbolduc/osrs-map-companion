@@ -35,6 +35,7 @@ final class TestFarmRuns
 {
 	static FarmRunState attach(MapCompanionPlugin plugin)
 	{
+		set(plugin, "slayerState", new SlayerState());
 		FarmRunState state = new FarmRunState();
 		DestinationRoute route = new DestinationRoute();
 		HarnessGame game = new HarnessGame();

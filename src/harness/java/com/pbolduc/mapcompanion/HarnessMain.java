@@ -142,6 +142,8 @@ public final class HarnessMain
 	private final SnapshotFingerprint snapshotFingerprint;
 	private final DestinationState destinationState;
 	private final FarmRunState farmRunState;
+	private final SlayerState slayerState;
+	private final RoutePress routePress;
 	private final FarmRunClient farmRunClient;
 	private final FarmRunRoute farmRunRoute;
 	private final DestinationRoute destinationRoute;
@@ -151,6 +153,7 @@ public final class HarnessMain
 	private final XpTracker xpTracker;
 	private final ClueReader clueReader;
 	private final DiaryReader diaryReader;
+	private final QuestReader questReader;
 	private final FarmingObserver farmingObserver;
 	private final LootLog lootLog;
 	private final MemberIdentity identity;
@@ -227,6 +230,8 @@ public final class HarnessMain
 		this.snapshotFingerprint = injector.getInstance(SnapshotFingerprint.class);
 		this.destinationState = injector.getInstance(DestinationState.class);
 		this.farmRunState = injector.getInstance(FarmRunState.class);
+		this.slayerState = injector.getInstance(SlayerState.class);
+		this.routePress = injector.getInstance(RoutePress.class);
 		this.farmRunClient = injector.getInstance(FarmRunClient.class);
 		this.farmRunRoute = injector.getInstance(FarmRunRoute.class);
 		this.destinationRoute = injector.getInstance(DestinationRoute.class);
@@ -236,6 +241,7 @@ public final class HarnessMain
 		this.xpTracker = injector.getInstance(XpTracker.class);
 		this.clueReader = injector.getInstance(ClueReader.class);
 		this.diaryReader = injector.getInstance(DiaryReader.class);
+		this.questReader = injector.getInstance(QuestReader.class);
 		this.farmingObserver = injector.getInstance(FarmingObserver.class);
 		this.lootLog = injector.getInstance(LootLog.class);
 		this.identity = injector.getInstance(MemberIdentity.class);
@@ -380,6 +386,7 @@ public final class HarnessMain
 				identity.forget();
 				farmRunClient.clear();
 				farmRunState.clear();
+				slayerState.clear();
 				destinationState.clear();
 				break;
 			case "tick":
@@ -416,6 +423,28 @@ public final class HarnessMain
 				onConfigChanged(text(command, "key", ""));
 				dirty = true;
 				break;
+			case "slayer":
+				game.setDbValue(net.runelite.api.gameval.DBTableID.SlayerTask.ID,
+					net.runelite.api.gameval.DBTableID.SlayerTask.COL_ID, 7, 9007,
+					net.runelite.api.gameval.DBTableID.SlayerTask.COL_NAME_UPPERCASE, text(command, "name", "Dust Devils"));
+				game.setVarp(VarPlayerIds.SLAYER_TARGET, 7);
+				game.setVarp(VarPlayerIds.SLAYER_COUNT, number(command, "remaining", 100));
+				game.setVarp(VarPlayerIds.SLAYER_AREA, 0);
+				dirty = true;
+				break;
+			case "slayerOrder":
+				store.set("slayerOrder", text(command, "order", "best"));
+				dirty = true;
+				break;
+			case "routeSlayer":
+				SlayerState.View slayer = slayerState.view(System.currentTimeMillis());
+				if (slayer.options != null && !slayer.options.rows.isEmpty())
+				{
+					RelayResponse.SlayerSpot spot = slayer.options.rows.stream().filter(row -> row.bestForYou).findFirst().orElse(slayer.options.rows.get(0));
+					routePress.press(RoutePress.Target.place(spot.id, spot.id, spot.name,
+						new WorldPoint(spot.target.x, spot.target.y, spot.target.plane), null));
+				}
+				break;
 			case "copyInvite":
 				copyInvite();
 				break;
@@ -447,6 +476,7 @@ public final class HarnessMain
 		clueReader.reset();
 		farmingObserver.onSessionEnded();
 		diaryReader.onSessionEnded();
+		questReader.onSessionEnded();
 		lastPosition = null;
 		lastSentFingerprint = null;
 		directiveStream.stop();
@@ -574,6 +604,10 @@ public final class HarnessMain
 	 */
 	private void onConfigChanged(String key)
 	{
+		if (key.equals("shareSlayer") && !config.shareSlayer())
+		{
+			slayerState.clear();
+		}
 		if (MapCompanionConfig.KEY_SHARE_MILESTONES.equals(key)
 			|| MapCompanionConfig.KEY_SHARE_PETS.equals(key)
 			|| MapCompanionConfig.KEY_SHARE_COLLECTION.equals(key))
@@ -584,6 +618,7 @@ public final class HarnessMain
 		{
 			farmRunClient.clear();
 			farmRunState.clear();
+			slayerState.clear();
 			relay.reset();
 			directiveStream.stop();
 			lastSentFingerprint = null;
@@ -669,6 +704,10 @@ public final class HarnessMain
 			String streamedMember = identity.id();
 			directiveStream.start(config.relayUrl(), code, streamedMember, pairing.secret(streamedMember), showGroup, directive ->
 			{
+				if (config.shareSlayer())
+				{
+					slayerState.accept(streamedMember, directive, System.currentTimeMillis());
+				}
 				if (config.showDestination())
 				{
 					destinationState.accept(directive);
@@ -756,6 +795,10 @@ public final class HarnessMain
 				toldNameCode = code;
 				toldName = response.groupName;
 			}
+			if (config.shareSlayer())
+			{
+				slayerState.accept(postedAs, response.directive, System.currentTimeMillis());
+			}
 			if (config.showDestination())
 			{
 				destinationState.accept(response.directive);
@@ -838,6 +881,7 @@ public final class HarnessMain
 		farmingObserver.onSessionResumed(now);
 		birdhouseReader.onSessionResumed(now);
 		diaryReader.onSessionResumed(now);
+		questReader.onSessionResumed(now);
 		if (config.shareFarming() || farmRunState.active())
 		{
 			farmingObserver.observe(now, game.where().getRegionID());
@@ -924,6 +968,13 @@ public final class HarnessMain
 			run.put("revision", farm.revision);
 		}
 		state.put("farmRun", farm == null ? null : run);
+		SlayerState.View slayer = slayerState.view(System.currentTimeMillis());
+		Map<String, Object> task = new LinkedHashMap<>();
+		task.put("task", slayer.task);
+		task.put("remaining", slayer.remaining);
+		task.put("options", slayer.options);
+		task.put("seenRevision", slayerState.preferences().seenRevision);
+		state.put("slayer", task);
 		String line = wire.toJson(state);
 		if (line.equals(lastStateLine))
 		{

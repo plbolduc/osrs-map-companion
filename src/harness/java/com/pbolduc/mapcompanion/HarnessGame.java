@@ -83,11 +83,29 @@ final class HarnessGame
 	static final Set<String> ANSWERED = Collections.unmodifiableSet(new LinkedHashSet<>(java.util.Arrays.asList(
 			"getGameState", "getLocalPlayer", "getWorld", "getWorldType", "getVarbitValue", "getVarpValue",
 			"getRealSkillLevel", "getTickCount", "getPlane", "getItemDefinition", "getComponentTable",
+			"getDBRowsByValue", "getDBTableField",
 			"getName", "getWorldLocation", "getLocalLocation")));
 
 	private final Map<Integer, Integer> varbits = new HashMap<>();
 	private final Map<Integer, Integer> varps = new HashMap<>();
 	private final Map<Skill, Integer> levels = new EnumMap<>(Skill.class);
+	private final Map<String, Integer> dbRows = new HashMap<>();
+	private final Map<String, Object[]> dbFields = new HashMap<>();
+
+	/** Only explicit fixture values; the row id deliberately need not equal the column value. */
+	void setDbValue(int table, int column, int value, int row, int nameColumn, Object name)
+	{
+		synchronized (dbRows)
+		{
+			String key = table + ":" + column + ":0:" + value;
+			if (!dbRows.containsKey(key) && dbRows.size() >= 32)
+			{
+				throw new IllegalArgumentException("Too many fixture DB rows");
+			}
+			dbRows.put(key, row);
+			dbFields.put(row + ":" + nameColumn + ":0", new Object[]{name});
+		}
+	}
 	/** Item ids the story has named, so the kill log can recognise a drop by the name the game gives it. */
 	private final Map<Integer, String> itemNames = new LinkedHashMap<>();
 
@@ -218,6 +236,22 @@ final class HarnessGame
 		answers.put("getWorldType", args -> worldTypes == null ? null : EnumSet.copyOf(worldTypes));
 		answers.put("getVarbitValue", args -> read(varbits, args));
 		answers.put("getVarpValue", args -> read(varps, args));
+		answers.put("getDBRowsByValue", args ->
+		{
+			synchronized (dbRows)
+			{
+				Integer row = dbRows.get(args[0] + ":" + args[1] + ":" + args[2] + ":" + args[3]);
+				return row == null ? null : Collections.singletonList(row);
+			}
+		});
+		answers.put("getDBTableField", args ->
+		{
+			synchronized (dbRows)
+			{
+				Object[] field = dbFields.get(args[0] + ":" + args[1] + ":" + args[2]);
+				return field == null ? null : field.clone();
+			}
+		});
 		answers.put("getRealSkillLevel", args -> args[0] instanceof Skill ? level((Skill) args[0]) : 0);
 		answers.put("getTickCount", args -> tickCount);
 		answers.put("getPlane", args -> where.getPlane());

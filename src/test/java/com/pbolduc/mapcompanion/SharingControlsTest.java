@@ -58,7 +58,7 @@ public class SharingControlsTest
 			for (Method method : MapCompanionConfig.class.getDeclaredMethods())
 			{
 				ConfigItem item = method.getAnnotation(ConfigItem.class);
-				if (item != null && method.getReturnType() == boolean.class)
+				if (item != null && !item.hidden() && method.getReturnType() == boolean.class)
 				{
 					expected.add(item.keyName());
 				}
@@ -158,7 +158,8 @@ public class SharingControlsTest
 				for (Method method : MapCompanionConfig.class.getDeclaredMethods())
 				{
 					ConfigItem item = method.getAnnotation(ConfigItem.class);
-					if (item == null || method.getReturnType() != boolean.class) continue;
+					// Hidden Slayer list preferences are owned by the task card, not sharing controls.
+					if (item == null || item.hidden() || method.getReturnType() != boolean.class) continue;
 					assertEquals(item.keyName(), selected.contains(item.keyName()) || defaultOf(item.keyName()), find(controls, item.keyName()).isSelected());
 					assertEquals(item.keyName(), selected.contains(item.keyName()) ? "true" : null, store.get(item.keyName()));
 				}
@@ -231,7 +232,8 @@ public class SharingControlsTest
 			for (Method method : MapCompanionConfig.class.getDeclaredMethods())
 			{
 				ConfigItem item = method.getAnnotation(ConfigItem.class);
-				if (item == null || method.getReturnType() != boolean.class) continue;
+				// Hidden Slayer list preferences are owned by the task card, not sharing controls.
+				if (item == null || item.hidden() || method.getReturnType() != boolean.class) continue;
 				JCheckBox box = find(controls, item.keyName());
 				assertNotNull(box);
 				boolean flipped = !defaultOf(item.keyName());
