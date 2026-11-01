@@ -114,12 +114,19 @@ public class SidebarWordsTest
 		assertEquals("KQX 482", MapCompanionPanel.statusGroup("KQX482", "KQX 482"));
 	}
 
-	/** Joining another group is the groups menu's last row, and closes the field it opened. */
+	/** Joining another group is a row of the groups menu, and closes the field it opened. */
 	@Test
 	public void theGroupsMenuJoinsAnotherGroupAndClosesItsField()
 	{
 		assertEquals("Join another group…", MapCompanionPanel.joinMenuWords(false));
 		assertEquals("Hide the code field", MapCompanionPanel.joinMenuWords(true));
+	}
+
+	/** Renaming is the groups menu's last row, for whoever the map says runs the group. */
+	@Test
+	public void theGroupsMenuRenamesTheGroup()
+	{
+		assertEquals("Rename group…", MapCompanionPanel.RENAME);
 	}
 
 	/**

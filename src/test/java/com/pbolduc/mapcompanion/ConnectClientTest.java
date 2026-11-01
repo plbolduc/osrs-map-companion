@@ -48,8 +48,8 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 /**
- * Connect, Join and Open the map, as the map's two doors answer them, read the way the sidebar reads
- * them.
+ * Connect, Join, Open the map and Rename group, as the map's three doors answer them, read the way
+ * the sidebar reads them.
  */
 public class ConnectClientTest
 {
@@ -168,6 +168,40 @@ public class ConnectClientTest
 		ConnectClient client = client(201, "{}");
 		ConnectClient.Outcome outcome = outcome(done -> client.start(MAP, "not-a-key", done));
 		assertNull(outcome.joined);
+		assertTrue(sent.isEmpty());
+	}
+
+	/**
+	 * Rename group: the member's own headers and the name, and the name the map answers with is the
+	 * one kept. A name the map did not take is never kept, and a refusal is the map's own sentence.
+	 */
+	@Test
+	public void renameSendsTheNameAsTheMemberAndKeepsOnlyWhatTheMapTook() throws Exception
+	{
+		ConnectClient client = client(200, "{\"code\":\"ABC234\",\"name\":\"Sunday raids\"}");
+		ConnectClient.Outcome outcome = outcome(done -> client.rename(MAP, "ABC234", "zezima", SECRET, "Sunday raids", done));
+		assertEquals("Sunday raids", outcome.name);
+		assertNull(outcome.joined);
+		Request request = sent.get(0);
+		assertEquals("PATCH", request.method());
+		assertEquals(MAP + "/api/companion/group", request.url().toString());
+		assertEquals("ABC234", request.header("X-Companion-Code"));
+		assertEquals("zezima", request.header("X-Companion-Member"));
+		assertEquals(SECRET, request.header("X-Companion-Member-Secret"));
+		assertEquals("Sunday raids", body(request).get("name").getAsString());
+
+		ConnectClient refused = client(403, "{\"reason\":\"not_owner\",\"error\":\"Only an owner of this group can do that.\"}");
+		ConnectClient.Outcome no = outcome(done -> refused.rename(MAP, "ABC234", "zezima", SECRET, "Mine now", done));
+		assertNull(no.name);
+		assertEquals("Only an owner of this group can do that.", no.message);
+	}
+
+	/** No secret means a request certain to be refused, so none is sent. */
+	@Test
+	public void renameAsksNothingWithoutASecret() throws Exception
+	{
+		ConnectClient client = client(200, "{}");
+		assertNull(outcome(done -> client.rename(MAP, "ABC234", "zezima", null, "Sunday raids", done)).name);
 		assertTrue(sent.isEmpty());
 	}
 

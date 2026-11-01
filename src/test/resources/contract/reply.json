@@ -548,5 +548,6 @@
   ],
   "claimed": true,
   "memberSecret": "0123456789abcdef0123456789abcdef",
-  "groupName": "Sunday hunt"
+  "groupName": "Sunday hunt",
+  "groupOwner": true
 }

@@ -90,6 +90,8 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RouteClient`, `RoutePress
   `X-Companion-Code`, `X-Companion-Member`, `X-Companion-Member-Secret`. The answer is a one-time
   link, opened with RuneLite's `LinkBrowser` only if it is the approved map's own page with the
   token in the URL fragment; otherwise the plain map opens. Never retried.
+- **PATCH /api/companion/group** — one **Rename group…** press, offered only when the map's reply said
+  this member may (`groupOwner`). The same three headers; JSON is the new name. No retry.
 
 - **POST /api/companion/snapshot** — logged-in state changes, at least two seconds apart, plus
   six-second idle heartbeats (twenty seconds with a stream). JSON comes from `SnapshotBuilder`;
@@ -231,9 +233,10 @@ Say these in the description of the next Hub update, as changes from what was ap
   config default changed.
 - The routes, Search, Route buttons, friends and meetups listed under *Network requests*, each a
   press of the player's own.
-- **Connect without the website**: Connect makes a group, Join takes a friend's pasted invite, and
-  Open the map opens the website already in the group. Two requests, `connect` and `link` above,
-  each a press. Nothing is sent before Connect, as before.
+- **Connect without the website**: Connect makes a group, Join takes a friend's pasted invite, Open
+  the map opens the website already in the group, and the group's maker can rename it. Three
+  requests, `connect`, `link` and the group `PATCH` above, each a press. Nothing is sent before
+  Connect, as before.
 - **One warning, at install**: no setting carries a warning of its own any more, because the
   manifest's install warning satisfies RuneLite's rule on its own. A changed map address is still
   asked about by name before anything is sent to it.
