@@ -122,7 +122,8 @@ final class SharingFields
 		field("shareLoot", "Observed kills and drops", MapCompanionConfig::shareLoot,
 			"Locally observed tracked monster kills and rated drop totals on normal members worlds; not lifetime kill counts."),
 		field(MapCompanionConfig.KEY_SHARE_MILESTONES, "Notable drops and levels", MapCompanionConfig::shareMilestones,
-			"Notable observed rewards and real levels. Activity rewards require Loot Tracker. " + MapCompanionConfig.FEED_KEPT),
+			"Notable observed rewards and real levels, and quests and diary tiers finished while you play, "
+			+ "if those are shared. Activity rewards require Loot Tracker. " + MapCompanionConfig.FEED_KEPT),
 		field(MapCompanionConfig.KEY_SHARE_PETS, "Include pet rewards", MapCompanionConfig::sharePets,
 			"Observed pet rewards while Notable drops and levels is enabled; unknown pets stay unnamed."),
 		field(MapCompanionConfig.KEY_SHARE_COLLECTION, "Include collection additions", MapCompanionConfig::shareCollectionLog,

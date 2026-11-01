@@ -387,7 +387,7 @@ public class CompanionSnapshot
 		/** Which run of the plugin this belongs to. New on a restart and on a character change. */
 		public String session;
 		public int sequence;
-		/** npc_drop (legacy) | level | reward */
+		/** npc_drop (legacy) | level | reward | quest | diary */
 		public String kind;
 		public long msAgo;
 
@@ -405,6 +405,13 @@ public class CompanionSnapshot
 		/** level. */
 		public String skill;
 		public Integer level;
+
+		/** quest: the quest's name, as the map's quest list spells it. */
+		public String quest;
+
+		/** diary: the region as the game's diary tab names it, and easy, medium, hard or elite. */
+		public String region;
+		public String tier;
 	}
 
 	public static class RewardSource

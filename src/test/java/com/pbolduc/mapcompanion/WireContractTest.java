@@ -251,6 +251,8 @@ public class WireContractTest
 		outbox.npcDrop("Abyssal demon", "Abyssal whip", 4151, 1, 1_000L);
 		outbox.reward(new RewardObservation("item", "Abyssal whip", 4151, 1, "npc", "Abyssal demon", true, 1_000L), 1_000L);
 		outbox.levelUp("Mining", 72, 2_000L);
+		outbox.quest("Dragon Slayer I", 3_000L);
+		outbox.diary("Varrock", "hard", 3_000L);
 		List<CompanionSnapshot.Milestone> milestones = outbox.take(5_000L);
 		for (CompanionSnapshot.Milestone m : milestones)
 		{

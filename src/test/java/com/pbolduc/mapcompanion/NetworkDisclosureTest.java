@@ -107,7 +107,8 @@ public class NetworkDisclosureTest
 		DISCLOSED.put("birdhouses", "birdhouse states and observation ages");
 		DISCLOSED.put("farming", "the state of farming patches you have walked past");
 		DISCLOSED.put("loot", "observed loot kills for every monster, how long ago each was last killed");
-		DISCLOSED.put("milestones", "an announcement of a notable reward or a real level gained");
+		DISCLOSED.put("milestones", "an announcement of a notable reward, a real level gained, or a quest or "
+					  + "achievement diary tier finished while the plugin watched");
 		DISCLOSED.put("death", "the tile where you most recently died");
 		/** Set by {@link SnapshotTrimmer} rather than the builder, and disclosed all the same. */
 		DISCLOSED.put("detailsTruncated", "a flag saying some of it was left out");
@@ -218,7 +219,7 @@ public class NetworkDisclosureTest
 		expected.put("Loot", "current, currentOnTask, npcs, pinned");
 		expected.put("Member", "characterName, id, nick");
 		expected.put("Milestone", "collectionNew, id, item, itemId, kind, level, msAgo, npc, quantity, "
-					 + "rewardType, sequence, session, skill, source");
+					 + "quest, region, rewardType, sequence, session, skill, source, tier");
 		expected.put("Npc", "drops, dropsComplete, kills, lastKillMsAgo, npc, ratedKey");
 		expected.put("Pin", "item, npc");
 		expected.put("Patch", "completedMsAgo, completionId, id, observedMsAgo, produce, readyInMaxMs, readyInMinMs, stagesLeft, state");

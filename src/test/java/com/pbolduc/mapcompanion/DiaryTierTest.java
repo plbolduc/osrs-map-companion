@@ -148,5 +148,20 @@ public class DiaryTierTest
 		reader.onSessionResumed(0);
 
 		assertEquals("none", reader.readCompleted(60_000).get("Kourend & Kebos"));
+		/** Per tier, for announcing the one that moved: medium and hard done, easy plainly not. */
+		assertEquals(java.util.Arrays.asList(false, true, true, false),
+					 java.util.Arrays.asList(reader.readTiers(60_000).get("Kourend & Kebos")));
+		reader.onSessionEnded();
+		org.junit.Assert.assertNull("a hop says nothing until it settles", reader.readTiers(60_000));
+	}
+
+	@Test
+	public void eachTierIsDoneNotDoneOrDoubt()
+	{
+		assertEquals(java.util.Arrays.asList(true, false, null, false), java.util.Arrays.asList(
+			DiaryReader.tierFlags(new int[] {1, 0, DiaryReader.UNREADABLE, 0}, AT_ONE)));
+		/** Karamja's 1 is neither, so a change out of it can never be announced as a finish. */
+		assertEquals(java.util.Arrays.asList(null, true, false, true), java.util.Arrays.asList(
+			DiaryReader.tierFlags(new int[] {1, 2, 0, 1}, KARAMJA)));
 	}
 }

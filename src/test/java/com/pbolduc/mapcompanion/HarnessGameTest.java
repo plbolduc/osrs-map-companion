@@ -72,15 +72,32 @@ public class HarnessGameTest
 	private static final Set<String> EXPECTED = new LinkedHashSet<>(Arrays.asList(
 			"getGameState", "getLocalPlayer", "getWorld", "getWorldType", "getVarbitValue", "getVarpValue",
 			"getRealSkillLevel", "getTickCount", "getPlane", "getItemDefinition", "getComponentTable",
-			"getDBRowsByValue", "getDBTableField",
+			"getDBRowsByValue", "getDBTableField", "runScript", "getIntStack",
 			"getName", "getWorldLocation", "getLocalLocation"));
 
 	@Test
-	public void answersExactlyTheseSixteenMethods()
+	public void answersExactlyTheseEighteenMethods()
 	{
 		assertEquals(EXPECTED, HarnessGame.ANSWERED);
-		// DB values are explicit Slayer input, not inferred or simulated game state.
-		assertEquals(16, HarnessGame.ANSWERED.size());
+		// DB values are explicit Slayer input, and quest states explicit quest input: neither is
+		// inferred or simulated game state.
+		assertEquals(18, HarnessGame.ANSWERED.size());
+	}
+
+	/** A quest is what the story set, read through the real {@code Quest.getState}, or unknown. */
+	@Test
+	public void repeatsOnlyExplicitQuestStates()
+	{
+		HarnessGame game = new HarnessGame();
+		QuestReader reader = new QuestReader(game.client());
+		reader.onSessionResumed(0);
+		game.setQuest(net.runelite.api.Quest.DRAGON_SLAYER_I, net.runelite.api.QuestState.IN_PROGRESS);
+		java.util.Map<String, String> log = reader.readLog(60_000);
+		assertEquals("in_progress", log.get("Dragon Slayer I"));
+		assertEquals("nobody set it, so nothing is claimed", "unknown", log.get("Cook's Assistant"));
+		game.setQuest(net.runelite.api.Quest.DRAGON_SLAYER_I, net.runelite.api.QuestState.FINISHED);
+		reader.clearLog();
+		assertEquals("finished", reader.readLog(60_000).get("Dragon Slayer I"));
 	}
 
 	@Test

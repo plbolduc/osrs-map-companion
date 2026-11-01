@@ -291,6 +291,9 @@ public class MapCompanionPlugin extends Plugin
 	/** Guarded by rewardObserver, including the handoff from settled observations to the outbox. */
 	private RewardContext rewardContext;
 
+	/** Package-private so a test can watch a quest being finished; see {@link #announceCompletions}. */
+	final CompletionWatcher completions = new CompletionWatcher();
+
 	@Inject
 	private CollectionItemCatalog collectionItems;
 
@@ -711,6 +714,7 @@ public class MapCompanionPlugin extends Plugin
 		farmRunState.bind(null);
 		slayerState.clear();
 		milestones.reset();
+		completions.reset();
 		xpTracker.reset();
 		deathWatcher.clear();
 		clueReader.reset();
@@ -760,6 +764,18 @@ public class MapCompanionPlugin extends Plugin
 		if (key.equals("slayerOrder") || key.equals("slayerHideWilderness"))
 		{
 			slayerState.choices(config.slayerOrder(), config.slayerHideWilderness());
+		}
+		/*
+		 * A quest or diary finished while its sharing choice was off was watched by nobody allowed to
+		 * say so; forgetting the baseline here makes the next reading, after it is back on, a new one.
+		 */
+		if (key.equals("shareQuests") || key.equals("shareQuestLog"))
+		{
+			completions.forgetQuests();
+		}
+		if (key.equals("shareDiaries"))
+		{
+			completions.forgetDiaries();
 		}
 		if (MapCompanionConfig.KEY_SHARE_MILESTONES.equals(key)
 			|| MapCompanionConfig.KEY_SHARE_PETS.equals(key)
@@ -854,6 +870,15 @@ public class MapCompanionPlugin extends Plugin
 	public void onGameStateChanged(GameStateChanged event)
 	{
 		GameState state = event.getGameState();
+		if (state == GameState.LOGIN_SCREEN || state == GameState.HOPPING || state == GameState.CONNECTION_LOST)
+		{
+			/*
+			 * The readings either side of any of these are not one watched stretch of play, so the
+			 * next is a new baseline. A lost connection has no other reset of its own: the game comes
+			 * back to the same session, and whatever its quest log says then was not seen happening.
+			 */
+			completions.reset();
+		}
 		if (state == GameState.LOGIN_SCREEN || state == GameState.HOPPING)
 		{
 			rewardObserver.reset();
@@ -980,6 +1005,7 @@ public class MapCompanionPlugin extends Plugin
 			}
 		}
 		observeGameState(now);
+		announceCompletions(now);
 		if (farmRunState.active())
 		{
 			farmRunState.carried(capabilityEvaluator.evaluate());
@@ -1262,6 +1288,7 @@ public class MapCompanionPlugin extends Plugin
 		{
 			rewardObserver.reset();
 			milestones.reset();
+			completions.reset();
 			rewardContext = null;
 		}
 	}
@@ -1274,6 +1301,7 @@ public class MapCompanionPlugin extends Plugin
 		{
 			rewardObserver.reset();
 			milestones.reset();
+			completions.reset();
 		}
 		rewardContext = current;
 		if (!current.enabled || current.code.isEmpty() || client.getGameState() != GameState.LOGGED_IN)
@@ -1360,6 +1388,62 @@ public class MapCompanionPlugin extends Plugin
 			if (!context.sameAs(new RewardContext(config)))
 			{
 				activeRewardContext();
+			}
+		}
+	}
+
+	/**
+	 * Queue the quests and diary tiers finished since the last tick, while sharing allows it.
+	 *
+	 * <p>Read from what the snapshot already reads, so watching costs nothing new: the full quest log
+	 * with <i>Full quest progress</i>, the travel quests with <i>Quest completion</i> alone, both
+	 * cached for thirty seconds, and the diary flags with <i>Achievement diaries</i>. Each needs its
+	 * own choice and <i>Drops and levels</i>, which is the choice to announce at all and to have the
+	 * group's feed keep it. With either off, nothing is watched, so turning it on starts from a new
+	 * baseline instead of announcing what was done meanwhile — see {@link CompletionWatcher}.
+	 *
+	 * <p>Under the reward lock, like every other way into the outbox, so a withdrawal written on
+	 * another thread cannot land between the context check and the queueing.
+	 */
+	void announceCompletions(long now)
+	{
+		/* Loading a region is not a boundary; onGameStateChanged resets on the states that are. */
+		if (client.getGameState() != GameState.LOGGED_IN)
+		{
+			return;
+		}
+		synchronized (rewardObserver)
+		{
+			if (activeRewardContext() == null)
+			{
+				completions.reset();
+				return;
+			}
+			if (config.shareQuestLog() || config.shareQuests())
+			{
+				Map<String, String> quests = config.shareQuestLog() ? questReader.readLog(now)
+					: questReader.settled(now) ? questReader.readStates(now) : null;
+				for (String quest : completions.quests(quests))
+				{
+					milestones.quest(quest, now);
+					dirty = true;
+				}
+			}
+			else
+			{
+				completions.forgetQuests();
+			}
+			if (config.shareDiaries())
+			{
+				for (String[] tier : completions.diaries(diaryReader.readTiers(now)))
+				{
+					milestones.diary(tier[0], tier[1], now);
+					dirty = true;
+				}
+			}
+			else
+			{
+				completions.forgetDiaries();
 			}
 		}
 	}

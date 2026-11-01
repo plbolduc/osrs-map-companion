@@ -187,10 +187,12 @@ on until you press, and you can untick any of it first. Each choice can send:
 - **Loot:** observed loot kills for every monster, how long ago each was last killed, notable drop
   counts and observation baselines, kills since a drop, slayer-task/diary rate conditions, the
   monster currently being killed and your pinned drop. Completeness flags identify omitted history.
-- **Announcements and death:** an announcement of a notable reward or a real level gained,
-  with observed item name/id, quantity, NPC/activity source and optional pet/collection badge;
-  the tile where you most recently died and its age. Unknown reward details remain absent.
-  Large snapshots include a flag saying some of it was left out.
+- **Announcements and death:** an announcement of a notable reward, a real level gained, or a quest or
+  achievement diary tier finished while the plugin watched, with observed item name/id, quantity,
+  NPC/activity source and optional pet/collection badge, or the quest's name or the diary's region
+  and tier; the tile where you most recently died and its age. A quest or diary is announced only
+  when its own choice above is shared too, and never for what was done before the plugin was watching.
+  Unknown reward details remain absent. Large snapshots include a flag saying some of it was left out.
 
 **Reroute**, under the steps of a destination the map sent, sends the tile you are standing on,
 once per press and whatever you share, so the map can plan the way from there. The map plans with
