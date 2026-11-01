@@ -565,7 +565,7 @@ public final class HarnessMain
 		emit("joined", event);
 	}
 
-	/** The sidebar's Open map: the link the map hands this member, or null for the plain map. */
+	/** The sidebar's Open the map: the link the map hands this member, or null for the plain map. */
 	private void openMap()
 	{
 		String member = identity.id();

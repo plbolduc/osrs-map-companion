@@ -86,7 +86,7 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RouteClient`, `RoutePress
   pasted invite. Header: `X-Companion-Installation`. JSON is empty, or the group code and the
   invite's token from the pasted link. No character data, member id or secret. The answer is a
   connection code, kept exactly as a pasted one; a refusal is printed. One at a time, no retry.
-- **POST /api/companion/link** — one **Open the map** press while connected and logged in. Headers:
+- **POST /api/companion/link** — one **Open the map** press while connected. Headers:
   `X-Companion-Code`, `X-Companion-Member`, `X-Companion-Member-Secret`. The answer is a one-time
   link, opened with RuneLite's `LinkBrowser` only if it is the approved map's own page with the
   token in the URL fragment; otherwise the plain map opens. Never retried.
