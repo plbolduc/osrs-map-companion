@@ -27,6 +27,10 @@ package com.pbolduc.mapcompanion;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.GridLayout;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import javax.swing.BoxLayout;
 import javax.swing.BorderFactory;
@@ -69,10 +73,15 @@ final class RunView extends JPanel
 	private final JButton before = MapCompanionPanel.linkButton("▸ Before you leave");
 	private final JPanel bring = column();
 	private final JPanel stops = column();
-	private final JButton follow = MapCompanionPanel.linkButton("Follow");
-	private final JButton reroute = MapCompanionPanel.linkButton("Reroute");
-	private final JButton end = MapCompanionPanel.linkButton("End run");
-	private final JPanel actions = new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 0, 0));
+	/*
+	 * Small buttons, as the destination card's are: these act, and a link is a fold's own opener. A
+	 * third of the card is too narrow for "Pause route", so the button says Pause and its tip the rest.
+	 */
+	private final JButton follow = MapCompanionPanel.smallButton("Follow");
+	private final JButton reroute = MapCompanionPanel.smallButton("Reroute");
+	private final JButton end = MapCompanionPanel.smallButton("End run");
+	private final JPanel actions = new JPanel(new GridLayout(1, 0, 4, 0));
+	private List<JButton> shownActions = Collections.emptyList();
 	private final RouteStepsView steps;
 	private final JLabel message = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
 	private boolean bringOpen;
@@ -103,9 +112,7 @@ final class RunView extends JPanel
 		add(stops);
 		add(steps);
 		actions.setOpaque(false);
-		actions.add(follow);
-		actions.add(reroute);
-		actions.add(end);
+		actions.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
 		add(MapCompanionPanel.left(actions));
 		add(MapCompanionPanel.left(message));
 
@@ -149,8 +156,14 @@ final class RunView extends JPanel
 		boolean ready = connected && client.ready();
 		reroute.setEnabled(ready && active && view.next() != null);
 		end.setEnabled(!client.endingRequest() && (active || planning || (ending && ready)));
-		follow.setVisible(active);
-		reroute.setVisible(active);
+		List<JButton> wanted = new ArrayList<>();
+		if (active)
+		{
+			wanted.add(follow);
+			wanted.add(reroute);
+		}
+		wanted.add(end);
+		shownActions = MapCompanionPanel.syncRow(actions, wanted, shownActions);
 		// The Port tasks card's own heading already names its one kind of run.
 		title.setVisible(active && !port);
 		progress.setVisible(active);
@@ -168,7 +181,8 @@ final class RunView extends JPanel
 			MapCompanionPanel.setWrapped(title, view.run.name, WIDTH);
 			MapCompanionPanel.setWrapped(progress, progressLine(view), WIDTH);
 			MapCompanionPanel.setWrapped(changed, CHANGED, WIDTH);
-			follow.setText(view.following ? "Pause route" : "Follow");
+			follow.setText(view.following ? "Pause" : "Follow");
+			follow.setToolTipText(view.following ? "Keep this run and stop following it until you press Follow" : null);
 			follow.setEnabled(view.next() != null);
 			String key = view.run.id + "|" + view.revision + "|" + view.done + "|" + view.visited + "|" + view.here + "|" + view.carried;
 			if (!key.equals(shown))

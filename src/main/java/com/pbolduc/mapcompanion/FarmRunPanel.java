@@ -57,7 +57,8 @@ final class FarmRunPanel extends JPanel
 
 	private final transient FarmRunClient client;
 	private final JComboBox<String> kind = new JComboBox<>();
-	private final JButton start = MapCompanionPanel.linkButton("Start run");
+	/* A button under the picker, the picker's width: it acts, and a link is a fold's own opener. */
+	private final JButton start = MapCompanionPanel.smallButton("Start run");
 	private final RunView run;
 
 	@Inject

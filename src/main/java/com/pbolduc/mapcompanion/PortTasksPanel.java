@@ -27,8 +27,9 @@ package com.pbolduc.mapcompanion;
 
 import com.google.inject.Inject;
 import java.awt.Color;
-import java.awt.FlowLayout;
+import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -69,9 +70,10 @@ final class PortTasksPanel extends JPanel
 	private final transient MapCompanionConfig config;
 	private final transient FarmRunClient client;
 	private final JPanel body = new JPanel();
-	private final JButton start = MapCompanionPanel.linkButton("Start run");
+	/* The card's width, as the farm run's Start run is: it acts, so it is a button and not a link. */
+	private final JButton start = MapCompanionPanel.smallButton("Start run");
 	private final JLabel hint = new JLabel();
-	private final JPanel starter = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+	private final JPanel starter = new JPanel(new GridLayout(1, 1));
 	private final RunView run;
 	private transient List<PortTaskReader.Slot> shown;
 	private transient Integer shownHold;
@@ -104,6 +106,7 @@ final class PortTasksPanel extends JPanel
 		starter.setBorder(BorderFactory.createEmptyBorder(4, 0, 0, 0));
 		start.setToolTipText("Ask the map for one run over every task you hold, starting from your boat");
 		starter.add(start);
+		starter.setMaximumSize(new Dimension(Integer.MAX_VALUE, starter.getPreferredSize().height));
 		add(MapCompanionPanel.left(starter));
 		hint.setForeground(MUTED);
 		hint.setFont(hint.getFont().deriveFont(11f));

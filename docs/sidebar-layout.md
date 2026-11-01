@@ -563,3 +563,13 @@ The last polish pass placed the task cards on Home "under a *Tasks* heading, bel
 each", and the owner took that pick. They were built above Now, so an idle farm run's picker sat
 between the search and the route being walked. Home is now the search, *Now*, *Tasks* and Drop luck.
 The *Tasks* heading hides with the last visible card, as *Now*'s does.
+
+### Actions are buttons
+
+*Start run*, a run's *Pause route · Reroute · End run* and Slayer's *Route · World map* were drawn as
+links, which this panel keeps for a fold's own opener; every other action, the destination card's
+*Follow · Reroute · Dismiss* among them, is a small button. They are small buttons now. A run's
+three share one row the card's width, rebuilt by the destination card's own `syncRow`, so a button
+that comes back takes its old place. A third of the card is too narrow for *Pause route*, so the
+button says *Pause* and its tip says the rest. *Customise* and *Not now* in the step after Connect,
+and *Meet here…*, stay links: those were chosen as links and kept by the owner.

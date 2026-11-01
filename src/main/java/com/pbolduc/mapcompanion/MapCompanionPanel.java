@@ -1773,7 +1773,7 @@ public class MapCompanionPanel extends PluginPanel
 	 * one row of seven, which is where the rule was learned; it is three short rows now, each
 	 * beside the facts it acts on, and the rule is the same.
 	 */
-	private static List<JButton> syncRow(JPanel row, List<JButton> wanted, List<JButton> shown)
+	static List<JButton> syncRow(JPanel row, List<JButton> wanted, List<JButton> shown)
 	{
 		if (wanted.equals(shown))
 		{
