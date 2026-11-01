@@ -388,7 +388,7 @@ public final class HarnessMain
 				join(text(command, "text", ""));
 				break;
 			case "connect":
-				connect(command.has("name") ? text(command, "name", null) : null);
+				connect();
 				break;
 			case "openMap":
 				openMap();
@@ -536,11 +536,11 @@ public final class HarnessMain
 		emit("joined", event);
 	}
 
-	/** The sidebar's Connect with no group: the map makes one, named as the dialog was left or typed. */
-	private void connect(@Nullable String name)
+	/** The sidebar's Connect with no group: the map makes one, and names it. */
+	private void connect()
 	{
 		ConnectClient.Outcome outcome = await(done ->
-			connectClient.start(pairing.serverUrl(), identity.installationKey(), name, done));
+			connectClient.start(pairing.serverUrl(), identity.installationKey(), done));
 		keep(outcome, "connect");
 	}
 

@@ -48,9 +48,10 @@ import net.runelite.client.ui.ColorScheme;
 /**
  * Individual opt-ins with shortcuts for selecting a known group, in RuneLite's narrow sidebar.
  * Customise changes visibility alone. Group checkboxes write only their explicitly listed fields;
- * name, death location and client actions stay separate. Native settings retain their warnings;
- * the sidebar discloses the server once at Connect, before any request. These choices only select
- * which fields may be sent after that approval. Refresh cannot grant approval or change a preference.
+ * name, death location and client actions stay separate. The warning is the install's, and a map
+ * other than osrs-map.com is approved by name at Connect, before any request; these choices only
+ * select which fields may be sent after that approval. Refresh cannot grant approval or change a
+ * preference.
  * The fields and their words are {@link SharingFields}, which the step after a first Connect reads too.
  * The name box shows only while the character name is off, because only then is it what the group
  * sees (see {@code SnapshotBuilder.nickname}).

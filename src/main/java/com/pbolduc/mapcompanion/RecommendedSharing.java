@@ -50,22 +50,22 @@ import net.runelite.client.ui.ColorScheme;
 /**
  * The step after a first Connect: what the map uses, ticked, and one press to share it.
  *
- * <p>Every sharing setting still starts off, and RuneLite's warning stays on each one. What this
- * adds is the press: after the server notice, a new player is shown the four sharing groups, their
- * character name and the two things this client draws from the map, all ticked, one short row each
- * so the press is in reach without scrolling. Every field and the one stream they open are named in
- * <i>What each one sends</i>, one tap below the rows, and pressing <i>Share what's ticked</i> writes
- * those settings exactly as the group shortcuts in Settings write them. Until then nothing is
- * stored: ticking, unticking and <i>Customise</i> change this step and nothing else, and <i>Not
- * now</i> leaves every setting as it was.
+ * <p>Every sharing setting still starts off. What this adds is the press: on the first Connect to a
+ * map, a new player is shown the four sharing groups, their character name and the two things this
+ * client draws from the map, all ticked, one short row each so the press is in reach without
+ * scrolling. Every field and the one stream they open are named in <i>What each one sends</i>, one
+ * tap below the rows, and pressing <i>Share what's ticked</i> writes those settings exactly as the
+ * group shortcuts in Settings write them. Until then nothing is stored: ticking, unticking and
+ * <i>Customise</i> change this step and nothing else, and <i>Not now</i> leaves every setting as it
+ * was.
  *
- * <p><b>Who sees it.</b> Only a Connect that showed the server notice, which is the first Connect
- * to that map, and only while every choice it offers is still off. A player who connected before
- * this version approved their server already, so an update never shows them the step, and one who
- * chose anything in Settings first keeps their own choices. RuneLite writes every default
- * into the profile when a plugin loads, so "never set" cannot be read back; "still at its default"
- * is the only test that holds on a real client. The step is never remembered: a closed client
- * simply does not offer it again, and Settings holds every choice.
+ * <p><b>Who sees it.</b> Only the first Connect to a map — the one that approves it, asking nothing
+ * of osrs-map.com and a question of any other — and only while every choice it offers is still off.
+ * A player who connected before this version approved their server already, so an update never
+ * shows them the step, and one who chose anything in Settings first keeps their own choices.
+ * RuneLite writes every default into the profile when a plugin loads, so "never set" cannot be read
+ * back; "still at its default" is the only test that holds on a real client. The step is never
+ * remembered: a closed client simply does not offer it again, and Settings holds every choice.
  *
  * <p><b>What it may share.</b> {@link #KEYS} is a list written out rather than read from the
  * groups, so a field added to a group later joins the press only when somebody adds it here, in the
@@ -212,7 +212,7 @@ final class RecommendedSharing extends JPanel
 	}
 
 	/**
-	 * Whether a Connect that just showed the server notice should offer the step.
+	 * Whether a Connect that just approved its map should offer the step.
 	 *
 	 * <p>Every choice the step could turn on, and meetup notifications beside them, must still be
 	 * off: anything else is a player who has chosen already, and their choice stands.
@@ -232,11 +232,13 @@ final class RecommendedSharing extends JPanel
 	}
 
 	/**
-	 * Connect, and run {@code offer} only when this Connect was the one that showed the server
-	 * notice and {@link #offered} still holds.
+	 * Connect, and run {@code offer} only when this Connect was the one that approved its map and
+	 * {@link #offered} still holds.
 	 *
-	 * <p>The notice runs once per map, which is what keeps an update from offering anything to a
-	 * player who connected before it: their map is approved, so {@code notice} is never asked.
+	 * <p>A map is approved once, which is what keeps an update from offering anything to a player who
+	 * connected before it: their map is approved, so {@code notice} is never asked. For osrs-map.com
+	 * the approval asks nothing, because the install warning was the question; the step is what the
+	 * player is shown instead.
 	 */
 	static boolean connect(Pairing pairing, JoinCode joined, BooleanSupplier notice, MapCompanionConfig config, Runnable offer)
 	{

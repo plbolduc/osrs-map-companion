@@ -97,7 +97,7 @@ public class ConnectClientTest
 	public void connectKeepsTheRuneLiteCodeTheMapHandsBackAsIfItHadBeenPasted() throws Exception
 	{
 		ConnectClient client = client(201, "{\"code\":\"ABC234\",\"name\":\"Our group\",\"runeliteCode\":\"ABC234-K7PQ2M3X\"}");
-		ConnectClient.Outcome outcome = outcome(done -> client.start(MAP, INSTALLATION, null, done));
+		ConnectClient.Outcome outcome = outcome(done -> client.start(MAP, INSTALLATION, done));
 
 		assertEquals("ABC234", outcome.joined.code);
 		assertEquals("K7PQ2M3X", outcome.joined.suffix);
@@ -107,14 +107,6 @@ public class ConnectClientTest
 		assertEquals(MAP + "/api/companion/connect", request.url().toString());
 		assertEquals(INSTALLATION, request.header("X-Companion-Installation"));
 		assertEquals("{}", body(request).toString());
-	}
-
-	@Test
-	public void connectSendsTheNameThePlayerTyped() throws Exception
-	{
-		ConnectClient client = client(201, "{\"code\":\"ABC234\",\"name\":\"Sunday raids\",\"runeliteCode\":\"ABC234-K7PQ2M3X\"}");
-		outcome(done -> client.start(MAP, INSTALLATION, "Sunday raids", done));
-		assertEquals("Sunday raids", body(sent.get(0)).get("name").getAsString());
 	}
 
 	@Test
@@ -141,7 +133,7 @@ public class ConnectClientTest
 		assertNull(outcome(done -> other.join(MAP, INSTALLATION, "ABC234", "ABCDEFGHJKMNPQRS", done)).joined);
 
 		ConnectClient split = client(201, "{\"code\":\"ABC234\",\"runeliteCode\":\"XYZ789-K7PQ2M3X\"}");
-		ConnectClient.Outcome outcome = outcome(done -> split.start(MAP, INSTALLATION, null, done));
+		ConnectClient.Outcome outcome = outcome(done -> split.start(MAP, INSTALLATION, done));
 		assertNull(outcome.joined);
 		assertEquals(ConnectClient.FAILED, outcome.message);
 	}
@@ -159,13 +151,13 @@ public class ConnectClientTest
 	public void aSentenceWithMarkupOrNoneAtAllIsNotPrintedAsOne() throws Exception
 	{
 		ConnectClient tagged = client(403, "{\"reason\":\"expired\",\"error\":\"<b>That</b> invite <img src=x>expired.\"}");
-		assertEquals("That invite expired.", outcome(done -> tagged.start(MAP, INSTALLATION, null, done)).message);
+		assertEquals("That invite expired.", outcome(done -> tagged.start(MAP, INSTALLATION, done)).message);
 
 		ConnectClient wordless = client(500, "<html>proxy</html>");
-		assertEquals(ConnectClient.FAILED, outcome(done -> wordless.start(MAP, INSTALLATION, null, done)).message);
+		assertEquals(ConnectClient.FAILED, outcome(done -> wordless.start(MAP, INSTALLATION, done)).message);
 
 		ConnectClient busy = client(429, "{\"reason\":\"busy\",\"error\":\"Slow down a moment.\"}");
-		assertEquals(ConnectClient.BUSY, outcome(done -> busy.start(MAP, INSTALLATION, null, done)).message);
+		assertEquals(ConnectClient.BUSY, outcome(done -> busy.start(MAP, INSTALLATION, done)).message);
 	}
 
 	/** Without the installation key the map refuses anyway; nothing is sent to be refused. */
@@ -173,7 +165,7 @@ public class ConnectClientTest
 	public void sendsNothingWithoutAnInstallationKey() throws Exception
 	{
 		ConnectClient client = client(201, "{}");
-		ConnectClient.Outcome outcome = outcome(done -> client.start(MAP, "not-a-key", null, done));
+		ConnectClient.Outcome outcome = outcome(done -> client.start(MAP, "not-a-key", done));
 		assertNull(outcome.joined);
 		assertTrue(sent.isEmpty());
 	}

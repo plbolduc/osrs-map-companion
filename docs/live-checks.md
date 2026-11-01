@@ -217,12 +217,19 @@ The website plan's second session, once the routes in the game are built: a memb
 - [ ] **Meetups.** Answer a meetup from the sidebar and see the same answer on that member's browser
       on the website; On my way is one of the four. Meet here on W302 makes a
       meetup at your tile whose copied link opens on the map; inside an instance it refuses.
-- [ ] **The one press at Connect.** On a fresh RuneLite profile, the first Connect shows the notice
-      and then the step, with every group, the name and both drawing choices ticked and *Where you
-      died* not; it fits 225px with no cut word. Customise, untick a field, then Not now: the
-      Settings page still shows everything off. Connect to a new local map again and press Share
-      what's ticked: Settings shows the four groups full, the receive stream opens, *Where
-      you died* and *Notify before a meetup* stay off. Restart RuneLite and reconnect: no step.
+- [ ] **The one press at Connect.** On a fresh RuneLite profile, the first Connect to osrs-map.com
+      asks nothing and shows the step, with every group, the name and both drawing choices ticked
+      and *Where you died* not; it fits 225px with no cut word. Customise, untick a field, then Not
+      now: the Settings page still shows everything off. Change the map address to a local map and
+      Connect: one question names that server, and Cancel sends nothing. Connect and press Share
+      what's ticked: Settings shows the four groups full, the receive stream opens, *Where you died*
+      and *Notify before a meetup* stay off. Restart RuneLite and reconnect: no step. In RuneLite's
+      own config panel, ticking a sharing setting asks no "Are you sure?".
+- [ ] **Connect, Join and Open the map without the website.** With no group, Connect makes *Our
+      group*; the sidebar's Group tab says *Just you so far*. Copy invite, paste the whole message
+      into a second RuneLite's *Have an invite?* field and press Join: both see each other. Open the
+      map from each: the browser opens in the group as that player, the maker's as owner, with no
+      `#link` left in the address.
 - [ ] **The reminder.** With *Notify before a meetup* on and the minutes set to 2, a meetup two
       minutes off raises one RuneLite notification and no second one; with it off, none.
 

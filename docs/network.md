@@ -10,17 +10,17 @@ requests carry it, what identifies a member, and what is kept. The
 
 Requests go to **Settings → Advanced → Map address**, default `https://osrs-map.com`; it must be https
 unless the map runs on this machine, and redirects are not followed. With no pairing code or no
-approval of the selected server, the plugin makes no requests. First **Connect** discloses that
-destination; changing it pauses requests until you connect there.
+approval of the selected server, the plugin makes no requests. The warning RuneLite requires is the
+Hub manifest's, shown when the plugin is installed; no setting repeats it. The first **Connect** to
+osrs-map.com approves it with that press. A changed map address asks once, naming the server, before
+anything is sent there, and changing the address pauses requests until you connect there.
 
-**Connect and Join.** With no group, **Connect** shows the server notice with a name for the group,
-and only after it is accepted makes one `POST /api/companion/connect`. That request carries this
-RuneLite's random installation key and the name, or nothing when the name was left as it was. The
-map makes a group whose maker is this installation and answers with a connection code, which the
-plugin keeps exactly as a pasted one. **Join** with a pasted invite makes the same request with the
-group code and the invite's token instead of a name; the notice comes first if this map has not had
-it. Neither request carries character data, a member id or a secret, and neither is retried: a
-refusal is printed under the field.
+**Connect and Join.** With no group, **Connect** makes one `POST /api/companion/connect` per press,
+carrying this RuneLite's random installation key and nothing else. The map makes a group called
+*Our group* whose maker is this installation, and answers with a connection code, which the plugin
+keeps exactly as a pasted one. **Join** with a pasted invite makes the same request with the group
+code and the invite's token. Neither request carries character data, a member id or a secret, and
+neither is retried: a refusal is printed under the field.
 
 **Open the map.** While connected and logged in, **Open the map** makes one `POST /api/companion/link` with
 the group code, member id and member secret, and opens the link the map answers with: the map's own
@@ -66,13 +66,13 @@ type and cargo are never sent. The same values are read locally, whatever the se
 voyage's steps; that sends nothing.
 
 **The step after a first Connect.** Every sharing setting, **Show destinations from the map** and
-**Show my group on the world map** start off. After the server notice, the sidebar shows a row each for the
+**Show my group on the world map** start off. After the first Connect to a map, the sidebar shows a row each for the
 four sharing groups, the character name and those two drawing choices, all ticked, and *Where you
 died* unticked, with a line saying the drawing choices open one connection. *What each one sends*,
 a fold under the rows, names every field and describes the receive stream in full. **Share what's ticked** writes exactly the ticked settings, as the group shortcuts in Settings
 do, and is the only thing in the step that changes anything: ticking, **Customise** and
-**Not now** write nothing, and nothing in the step makes a request. It follows only a Connect that
-showed the notice, which runs once per map, and only while every choice it could turn on is still
+**Not now** write nothing, and nothing in the step makes a request. It follows only the Connect that
+approved its map, which happens once per map, and only while every choice it could turn on is still
 off, so a player who connected before, or chose first, is never offered it. Meetup notifications
 are not in it.
 

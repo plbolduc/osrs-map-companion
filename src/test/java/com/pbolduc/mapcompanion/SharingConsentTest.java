@@ -36,14 +36,16 @@ import net.runelite.api.Client;
 import net.runelite.client.config.ConfigItem;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 /**
  * Joining and enabling sharing are different choices, at both places a player can make them.
  *
  * <p>The snapshot checks use the real builder against a logged-in, paired harness client.
- * Native setting warnings remain required. Sidebar choices and the Connect disclosure are
- * exercised together in SharingControlsTest, including cancellation with sharing already selected.
+ * The warning RuneLite requires is the install's, from the Hub manifest; no setting repeats it.
+ * Sidebar choices are exercised in SharingControlsTest, including cancellation with sharing already
+ * selected.
  */
 public class SharingConsentTest
 {
@@ -106,11 +108,18 @@ public class SharingConsentTest
 		}
 	}
 
+	/**
+	 * Every remote feature starts off, and none asks "Are you sure?" with RuneLite's warning.
+	 *
+	 * <p>RuneLite asks for its warning "either on the plugin, or on the configuration option", and it
+	 * shows the Hub manifest's on Install, so a setting repeating it would ask again about a decision
+	 * already made. The warning that is kept is pinned here instead, where its removal from the
+	 * submission guide fails a build.
+	 */
 	@Test
-	public void everyRemoteFeatureStartsOffAndCarriesTheRequiredWarning() throws Exception
+	public void everyRemoteFeatureStartsOffAndTheWarningIsTheInstallsAlone() throws Exception
 	{
 		MapCompanionConfig config = new MapCompanionConfig() {};
-		String required = "This feature submits your IP address to a 3rd-party server not controlled or verified by RuneLite developers";
 		int remoteFeatures = 0;
 		for (Method method : MapCompanionConfig.class.getDeclaredMethods())
 		{
@@ -121,15 +130,20 @@ public class SharingConsentTest
 				|| item.section().equals(MapCompanionConfig.tasksSection)
 				|| item.section().equals(MapCompanionConfig.lootSection))
 				|| method.getName().equals("showDestination") || method.getName().equals("notifyMeetups")
-				/* Receives rather than sends, but it holds the stream open, which is the warning's subject. */
 				|| method.getName().equals("showGroupOnWorldMap")))
 			{
 				assertEquals(method.getName(), false, method.invoke(config));
-				assertEquals(method.getName(), required, item.warning());
+				assertEquals(method.getName(), "", item.warning());
 				remoteFeatures++;
 			}
 		}
 		assertEquals(28, remoteFeatures);
+
+		String guide = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get("docs", "plugin-hub-submission.md")),
+			java.nio.charset.StandardCharsets.UTF_8);
+		java.util.regex.Matcher manifest = java.util.regex.Pattern.compile("(?m)^[ \t]*warning=(.+)$").matcher(guide);
+		assertTrue("the Hub manifest in the submission guide carries the install warning", manifest.find());
+		assertTrue(manifest.group(1), manifest.group(1).contains("IP address") && manifest.group(1).contains("third-party"));
 	}
 
 	private static final class Fixture
