@@ -106,6 +106,7 @@ public class NetworkDisclosureTest
 		DISCLOSED.put("mahoganyHome", "your Mahogany Homes customer and tier");
 		DISCLOSED.put("farmingContract", "the crop requested by your farming contract");
 		DISCLOSED.put("birdhouses", "birdhouse states and observation ages");
+		DISCLOSED.put("portTasks", "which Sailing port task each of your five slots holds");
 		DISCLOSED.put("farming", "the state of farming patches you have walked past");
 		DISCLOSED.put("loot", "observed loot kills for every monster, how long ago each was last killed");
 		DISCLOSED.put("milestones", "an announcement of a notable reward, a real level gained, or a quest or "
@@ -214,7 +215,7 @@ public class NetworkDisclosureTest
 		expected.put("Clue", "coordTile, itemId, mapTile, text, tier");
 		expected.put("CompanionSnapshot", "accountType, activeSkill, birdhouses, boats, capabilities, clue, death, "
 					 + "detailsTruncated, diaries, diaryRewards, farming, farmingContract, house, hunterRumour, idleMs, instanceLayout, instanced, loot, mahoganyHome, member, "
-					 + "milestones, pos, questLog, questStates, questsCompleted, runReceiverVersion, sentAtMs, skills, slayer, slayerPreferences, stashUnits, travelUnlocks, v, world, worldFlags");
+					 + "milestones, portTasks, pos, questLog, questStates, questsCompleted, runReceiverVersion, sentAtMs, skills, slayer, slayerPreferences, stashUnits, travelUnlocks, v, world, worldFlags");
 		expected.put("Death", "msAgo, tile");
 		expected.put("Drop", "boostedSinceLast, boostedWatched, item, killsAtLast, obtained, trackedSinceKill");
 		expected.put("Farming", "patches, progressVersion");
@@ -224,6 +225,8 @@ public class NetworkDisclosureTest
 					 + "quest, region, rewardType, sequence, session, skill, source, tier");
 		expected.put("Npc", "drops, dropsComplete, kills, lastKillMsAgo, npc, ratedKey");
 		expected.put("Pin", "item, npc");
+		expected.put("PortTaskSlot", "delivered, remaining, slot, state, taken, taskId");
+		expected.put("PortTasks", "slots");
 		expected.put("Patch", "completedMsAgo, completionId, id, observedMsAgo, produce, readyInMaxMs, readyInMinMs, stagesLeft, state");
 		expected.put("RewardSource", "kind, name");
 		expected.put("Slayer", "areaName, remaining, taskName");

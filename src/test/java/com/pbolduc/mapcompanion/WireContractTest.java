@@ -262,6 +262,14 @@ public class WireContractTest
 		s.hunterRumour = AssignmentReader.assignment("Red salamander", "Wolf");
 		s.mahoganyHome = AssignmentReader.assignment("Jess", "Expert");
 		s.farmingContract = AssignmentReader.assignment("Snapdragon", "herb");
+		/* Port Sarim spice delivery, its one crate collected; the tern bounty with 9 of 15 feathers owed. */
+		s.portTasks = new CompanionSnapshot.PortTasks();
+		s.portTasks.slots = Arrays.asList(
+			portSlot(0, "courier", 2, 1, 0, null),
+			portSlot(1, "bounty", 438, null, null, 9),
+			portSlot(2, "empty", null, null, null, null),
+			portSlot(3, "locked", null, null, null, null),
+			portSlot(4, "unknown", null, null, null, null));
 		s.stashUnits = new HashMap<>();
 		s.stashUnits.put(28960, true);
 		Map<String, String> rewards = new HashMap<>();
@@ -371,6 +379,19 @@ public class WireContractTest
 	 * depth: a friend's news is a level for one friend and a drop for the next, so its skill and its
 	 * item are each vouched for by whichever friend's news has one.
 	 */
+	private static CompanionSnapshot.PortTaskSlot portSlot(int slot, String state, Integer taskId, Integer taken,
+		Integer delivered, Integer remaining)
+	{
+		CompanionSnapshot.PortTaskSlot w = new CompanionSnapshot.PortTaskSlot();
+		w.slot = slot;
+		w.state = state;
+		w.taskId = taskId;
+		w.taken = taken;
+		w.delivered = delivered;
+		w.remaining = remaining;
+		return w;
+	}
+
 	private static void assertEveryFieldSet(String path, Object value)
 	{
 		List<String> missing = new ArrayList<>();

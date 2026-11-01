@@ -83,6 +83,35 @@
     "state": "active",
     "observedMsAgo": 0
   },
+  "portTasks": {
+    "slots": [
+      {
+        "slot": 0,
+        "state": "courier",
+        "taskId": 2,
+        "taken": 1,
+        "delivered": 0
+      },
+      {
+        "slot": 1,
+        "state": "bounty",
+        "taskId": 438,
+        "remaining": 9
+      },
+      {
+        "slot": 2,
+        "state": "empty"
+      },
+      {
+        "slot": 3,
+        "state": "locked"
+      },
+      {
+        "slot": 4,
+        "state": "unknown"
+      }
+    ]
+  },
   "diaryRewards": {
     "Varrock": "medium"
   },

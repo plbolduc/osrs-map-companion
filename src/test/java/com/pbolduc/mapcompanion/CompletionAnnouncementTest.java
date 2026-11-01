@@ -91,6 +91,7 @@ public class CompletionAnnouncementTest
 		set("travelUnlockReader", new TravelUnlockReader(game.client()));
 		set("stashReader", new StashReader(game.client()));
 		set("boatReader", new BoatReader(game.client()));
+		set("portTaskReader", new PortTaskReader(game.client()));
 		set("birdhouseReader", new BirdhouseReader(key -> null));
 		set("assignmentReader", new AssignmentReader(game.client(), config));
 		set("deathWatcher", construct(DeathWatcher.class, game.client()));

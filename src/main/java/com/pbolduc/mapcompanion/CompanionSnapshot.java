@@ -115,6 +115,11 @@ public class CompanionSnapshot
 	public Assignment mahoganyHome;
 	public Assignment farmingContract;
 	/**
+	 * The five Sailing port task slots, each with its state and the game's own counters. Null while
+	 * not shared or while the session is too young to read; see {@link PortTaskReader}.
+	 */
+	public PortTasks portTasks;
+	/**
 	 * The highest diary reward tier actually collected in each region, on the same terms.
 	 *
 	 * <p>Separate from {@link #diaries} because finishing the tasks and going to take the cloak are
@@ -240,6 +245,27 @@ public class CompanionSnapshot
 		/** Active work, or "return" when its rare part or farming crop is ready to hand in. */
 		public String state;
 		public long observedMsAgo;
+	}
+
+	/** All five slots, slot 0 first, so a slot that is missing was not read rather than empty. */
+	public static class PortTasks
+	{
+		public List<PortTaskSlot> slots;
+	}
+
+	/**
+	 * One slot: {@code courier}, {@code bounty}, {@code empty}, {@code locked} or {@code unknown}.
+	 * A courier carries its crates taken and delivered, a bounty the parts still owed; the task id
+	 * is the {@code PortTask} table's id column, which the map's own copy of the table is keyed by.
+	 */
+	public static class PortTaskSlot
+	{
+		public int slot;
+		public String state;
+		public Integer taskId;
+		public Integer taken;
+		public Integer delivered;
+		public Integer remaining;
 	}
 
 	public static class Birdhouse
