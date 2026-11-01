@@ -141,6 +141,12 @@ public final class HarnessMain
 	private final SnapshotBuilder snapshotBuilder;
 	private final SnapshotFingerprint snapshotFingerprint;
 	private final DestinationState destinationState;
+	private final FarmRunState farmRunState;
+	private final FarmRunClient farmRunClient;
+	private final FarmRunRoute farmRunRoute;
+	private final DestinationRoute destinationRoute;
+	private final BirdhouseReader birdhouseReader;
+	private final CapabilityEvaluator capabilityEvaluator;
 	private final MilestoneOutbox milestones;
 	private final XpTracker xpTracker;
 	private final ClueReader clueReader;
@@ -195,6 +201,14 @@ public final class HarnessMain
 			protected void configure()
 			{
 				bind(Client.class).toInstance(game.client());
+				bind(net.runelite.client.callback.ClientThread.class).toInstance(new net.runelite.client.callback.ClientThread()
+				{
+					@Override
+					public void invokeLater(Runnable action)
+					{
+						action.run();
+					}
+				});
 				bind(Gson.class).toInstance(gson);
 				bind(OkHttpClient.class).toInstance(http);
 				bind(ScheduledExecutorService.class).toInstance(reconnects);
@@ -212,6 +226,12 @@ public final class HarnessMain
 		this.snapshotBuilder = injector.getInstance(SnapshotBuilder.class);
 		this.snapshotFingerprint = injector.getInstance(SnapshotFingerprint.class);
 		this.destinationState = injector.getInstance(DestinationState.class);
+		this.farmRunState = injector.getInstance(FarmRunState.class);
+		this.farmRunClient = injector.getInstance(FarmRunClient.class);
+		this.farmRunRoute = injector.getInstance(FarmRunRoute.class);
+		this.destinationRoute = injector.getInstance(DestinationRoute.class);
+		this.birdhouseReader = injector.getInstance(BirdhouseReader.class);
+		this.capabilityEvaluator = injector.getInstance(CapabilityEvaluator.class);
 		this.milestones = injector.getInstance(MilestoneOutbox.class);
 		this.xpTracker = injector.getInstance(XpTracker.class);
 		this.clueReader = injector.getInstance(ClueReader.class);
@@ -358,6 +378,8 @@ public final class HarnessMain
 				/** Exactly what the sidebar's <i>Leave group</i> does, in its order. */
 				pairing.leave();
 				identity.forget();
+				farmRunClient.clear();
+				farmRunState.clear();
 				destinationState.clear();
 				break;
 			case "tick":
@@ -396,6 +418,15 @@ public final class HarnessMain
 				break;
 			case "copyInvite":
 				copyInvite();
+				break;
+			case "startRun":
+				farmRunClient.start(text(command, "kind", "ready-now"));
+				break;
+			case "rerouteRun":
+				farmRunClient.reroute();
+				break;
+			case "endRun":
+				farmRunClient.end();
 				break;
 			case "state":
 				lastStateLine = null;
@@ -551,6 +582,8 @@ public final class HarnessMain
 		}
 		if (MapCompanionConfig.KEY_PAIRING_CODE.equals(key) || MapCompanionConfig.KEY_RELAY_URL.equals(key))
 		{
+			farmRunClient.clear();
+			farmRunState.clear();
 			relay.reset();
 			directiveStream.stop();
 			lastSentFingerprint = null;
@@ -580,7 +613,19 @@ public final class HarnessMain
 		long now = System.currentTimeMillis();
 
 		trackMovement(now);
+		if (game.gameState() == GameState.LOGGED_IN && identity.id() != null)
+		{
+			farmRunState.bind(identity.id());
+		}
 		observeGameState(now);
+		if (farmRunState.active())
+		{
+			farmRunState.carried(capabilityEvaluator.evaluate());
+			farmRunState.observe(farmingObserver.observations(now), birdhouseReader.read(now), DestinationRoute.standing(game.client()), now);
+		}
+		farmRunRoute.sync();
+		destinationRoute.sync(DestinationSceneOverlay.shown(config, destinationState));
+		destinationRoute.advance(DestinationRoute.standing(game.client()));
 
 		if (suffixClaimed)
 		{
@@ -621,11 +666,13 @@ public final class HarnessMain
 		boolean showGroup = config.showGroupOnWorldMap();
 		if (config.showDestination() || showGroup)
 		{
-			directiveStream.start(config.relayUrl(), code, identity.id(), pairing.secret(identity.id()), showGroup, directive ->
+			String streamedMember = identity.id();
+			directiveStream.start(config.relayUrl(), code, streamedMember, pairing.secret(streamedMember), showGroup, directive ->
 			{
 				if (config.showDestination())
 				{
 					destinationState.accept(directive);
+					farmRunState.acceptFor(streamedMember, directive.run, directive.runRevision, System.currentTimeMillis());
 					emit("directive", describe(directive));
 				}
 				if (config.showGroupOnWorldMap() && directive.members != null)
@@ -712,6 +759,10 @@ public final class HarnessMain
 			if (config.showDestination())
 			{
 				destinationState.accept(response.directive);
+				if (response.directive != null)
+				{
+					farmRunState.acceptFor(snapshot.member.id, response.directive.run, response.directive.runRevision, System.currentTimeMillis());
+				}
 			}
 			Map<String, Object> event = new LinkedHashMap<>();
 			event.put("claimed", Boolean.TRUE.equals(response.claimed));
@@ -785,8 +836,9 @@ public final class HarnessMain
 			return;
 		}
 		farmingObserver.onSessionResumed(now);
+		birdhouseReader.onSessionResumed(now);
 		diaryReader.onSessionResumed(now);
-		if (config.shareFarming())
+		if (config.shareFarming() || farmRunState.active())
 		{
 			farmingObserver.observe(now, game.where().getRegionID());
 		}
@@ -860,6 +912,18 @@ public final class HarnessMain
 		state.put("destination", destination == null ? null : destination.name);
 		RelayResponse.Event event = destinationState.getEvent();
 		state.put("meetup", event == null ? null : event.title);
+		FarmRunState.View farm = farmRunState.view();
+		Map<String, Object> run = new LinkedHashMap<>();
+		if (farm != null)
+		{
+			run.put("id", farm.run.id);
+			run.put("name", farm.run.name);
+			run.put("next", farm.next() == null ? null : farm.next().n);
+			run.put("done", farm.done);
+			run.put("visited", farm.visited);
+			run.put("revision", farm.revision);
+		}
+		state.put("farmRun", farm == null ? null : run);
 		String line = wire.toJson(state);
 		if (line.equals(lastStateLine))
 		{
@@ -901,6 +965,7 @@ public final class HarnessMain
 
 	private void shutDown()
 	{
+		farmRunClient.clear();
 		directiveStream.stop();
 		reconnects.shutdown();
 		out.flush();

@@ -54,6 +54,8 @@ import java.util.Map;
 public class CompanionSnapshot
 {
 	public int v = 1;
+	/** Protocol support while remote destinations are enabled; no character observation is in it. */
+	public Integer runReceiverVersion;
 	public Member member;
 	public String accountType;
 	public Integer world;

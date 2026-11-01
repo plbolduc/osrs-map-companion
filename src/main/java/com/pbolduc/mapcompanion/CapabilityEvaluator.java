@@ -133,6 +133,25 @@ public class CapabilityEvaluator
 
 	private final Client client;
 
+	/** A bank-list name that unambiguously names a known travel flag; spells and unknown items abstain. */
+	@Nullable
+	static Boolean carrying(String item, @Nullable List<String> flags)
+	{
+		if (flags == null || item == null)
+		{
+			return null;
+		}
+		String named = item.replaceAll("[^A-Za-z]", "");
+		for (Capability capability : CAPABILITIES)
+		{
+			if (capability.flag.equalsIgnoreCase(named))
+			{
+				return flags.contains(capability.flag);
+			}
+		}
+		return null;
+	}
+
 	@Inject
 	CapabilityEvaluator(Client client)
 	{

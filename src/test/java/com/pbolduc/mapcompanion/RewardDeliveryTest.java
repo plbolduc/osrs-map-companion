@@ -61,6 +61,7 @@ public class RewardDeliveryTest
 		plugin.groupMarkers = new GroupMarkers(null, null);
 		plugin.pairing = new Pairing(store, new Gson());
 		plugin.rewardObserver = new RewardObserver(game.client, catalog, catalog::contains, () -> 1000L);
+		TestFarmRuns.attach(plugin);
 		set("client", game.client);
 		set("config", config);
 		set("assignmentReader", new AssignmentReader(game.client, config));

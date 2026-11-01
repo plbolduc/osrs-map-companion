@@ -101,7 +101,7 @@ public class GroupPanelTest
 		assertTrue(pairing.connect(JoinCode.parse("ABC234"), () -> true));
 		pairing.rememberSecret(pairing.code(), identity.id(), SECRET);
 		RoutePress press = new RoutePress(http(RoutePressTest.ANSWER), new Gson(), MeetupClientTest.game(false), now(),
-			pairing, identity, route, destinations, new DestinationMarker(null, null, null, null, null)
+			pairing, identity, route, destinations, new DestinationMarker(null, null, null, null, null, null)
 			{
 				@Override
 				void sync()

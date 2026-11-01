@@ -305,6 +305,7 @@ public class RewardDeliveryRaceTest
 			plugin.groupMarkers = new GroupMarkers(null, null);
 			plugin.pairing = new Pairing(new HarnessStore(), new Gson());
 			plugin.rewardObserver = new RewardObserver(game.client, catalog, catalog::contains, () -> 1000L);
+			TestFarmRuns.attach(plugin);
 			set("client", client);
 			set("config", config);
 			set("assignmentReader", new AssignmentReader(client, config));

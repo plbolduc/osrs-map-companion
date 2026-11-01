@@ -66,7 +66,8 @@ import okhttp3.OkHttpClient;
 public class SidebarPolishShot
 {
 	static final List<String> STATES = Arrays.asList("fresh", "fresh-log", "connect", "home", "route", "group", "settings", "settings-closed",
-		"stars", "stars-filters", "search", "search-whip", "search-whip-card", "death", "meetup", "dropluck", "dropluck-card", "status");
+		"stars", "stars-filters", "search", "search-whip", "search-whip-card", "death", "meetup", "dropluck", "dropluck-card", "status",
+		"farm", "farm-card", "farm-bring");
 
 	static HarnessGame game;
 
@@ -84,7 +85,8 @@ public class SidebarPolishShot
 			SwingUtilities.invokeAndWait(() -> { });
 			SwingUtilities.invokeAndWait(() -> call(() -> shoot(state.equals("dropluck-card")
 				? (JComponent) get(panel[0], "drySection") : state.equals("search-whip-card")
-				? (JComponent) get(panel[0], "searchPanel") : panel[0], args[0] + "/" + state + ".png")));
+				? (JComponent) get(panel[0], "searchPanel") : state.equals("farm-card") || state.equals("farm-bring")
+				? (JComponent) get(panel[0], "farmRunPanel") : panel[0], args[0] + "/" + state + ".png")));
 		}
 		System.exit(0);
 	}
@@ -156,6 +158,14 @@ public class SidebarPolishShot
 			protected void configure()
 			{
 				bind(Client.class).toInstance(game.client());
+				bind(net.runelite.client.callback.ClientThread.class).toInstance(new net.runelite.client.callback.ClientThread()
+				{
+					@Override
+					public void invokeLater(Runnable action)
+					{
+						action.run();
+					}
+				});
 				bind(Gson.class).toInstance(gson);
 				bind(OkHttpClient.class).toInstance(new OkHttpClient());
 				bind(MapCompanionConfig.class).toInstance(config);
@@ -213,6 +223,25 @@ public class SidebarPolishShot
 		static void fill(String state, Injector injector, HarnessConfig config, LootLog log) throws Exception
 		{
 			DestinationState destinations = injector.getInstance(DestinationState.class);
+			if (state.startsWith("farm"))
+			{
+				String json = Files.readString(Paths.get("src/test/resources/contract/farm-run.json"), StandardCharsets.UTF_8);
+				RelayResponse.FarmRun run = new Gson().fromJson(json, RelayResponse.FarmRun.class);
+				long now = System.currentTimeMillis();
+				FarmRunState farm = injector.getInstance(FarmRunState.class);
+				farm.bind(injector.getInstance(MemberIdentity.class).id());
+				farm.accept(run, 1, now - 1_000);
+				CompanionSnapshot.Patch replanted = new CompanionSnapshot.Patch();
+				replanted.id = "falador-herb";
+				replanted.state = "growing";
+				replanted.observedMsAgo = 0;
+				replanted.completionId = "synthetic-replant";
+				replanted.completedMsAgo = 100L;
+				farm.observe(Collections.singletonList(replanted), null, new WorldPoint(2811, 3462, 0), now);
+				farm.carried(Collections.singletonList("explorersRing"));
+				injector.getInstance(FarmRunRoute.class).sync();
+				set(injector.getInstance(ShortestPath.class), "installed", true);
+			}
 			if (state.equals("home"))
 			{
 				route(injector, destinations);
@@ -375,6 +404,10 @@ public class SidebarPolishShot
 
 	static void after(String state, MapCompanionPanel panel) throws Exception
 	{
+		if (state.equals("farm-bring"))
+		{
+			expand(panel, "Before you leave");
+		}
 		if (state.equals("connect"))
 		{
 			Pairing pairing = (Pairing) get(panel, "pairing");

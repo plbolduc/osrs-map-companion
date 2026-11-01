@@ -77,7 +77,7 @@ sharing off still sends a random member id, alias, timestamp and connection cred
 
 All paths use **Map address** (`https://osrs-map.com` by default); clipboard contents cannot change it.
 Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RouteClient`, `RoutePress`, `SearchClient` and
-`MeetupClient` construct HTTP requests:
+`MeetupClient` and `FarmRunClient` construct HTTP requests:
 
 - **POST /api/companion/snapshot** — logged-in state changes, at least two seconds apart, plus
   six-second idle heartbeats (twenty seconds with a stream). JSON comes from `SnapshotBuilder`;
@@ -117,10 +117,22 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RouteClient`, `RoutePress
   last key or on Enter, two to sixty-four characters, one in flight, and nothing before a
   `Retry-After` has passed. Same three headers; the query is the `q` parameter and is never logged.
   The rows' icons are the client's own sprites (`SpriteManager`, `ItemManager`); no image is downloaded.
+- **POST /api/companion/run** — one **Start run** or farm **Reroute** press, with the same three
+  credential headers as Route. Start carries a run kind; Reroute carries its id, done ordinals and
+  visited reference ordinals. Both carry the local tile even with position sharing off. Route and
+  farm planning share one flight and the server's Retry-After wait. No automatic retry.
+  **DELETE /api/companion/run?run=<id>** ends only that run; a pending initial plan has no id yet.
+  It also ends locally immediately. The map keeps a run privately in memory for up to three hours.
+  The 204 reply carries `X-Companion-Run-Revision`, preventing a delayed initial-plan stream frame
+  from reviving it even if the removal frame was missed.
+  Reply/stream frames carry the itinerary and revision; no extra polling. The snapshot advertises
+  `runReceiverVersion: 1` only with destinations enabled. Local replant observation while a run
+  is active does not bypass the existing farming snapshot sharing choice; a checklist's local
+  carried-item check also sends nothing. Reroute explicitly shares only the progress ordinals.
 
 Requests carry the versioned User-Agent. The address must be https (plain http only on loopback),
 redirects are not followed, and reply bodies are capped at 1 MB. Snapshot and stream failures back
-off; the Stars, Reroute, route-press, search and meetup clients also honour Retry-After. Nothing requests the upstream star feed directly.
+off; the Stars, Reroute, route-press, farm-run, search and meetup clients also honour Retry-After. Nothing requests the upstream star feed directly.
 The README's [What you share](../README.md#what-you-share) names every transmitted category, and
 [Network and storage](network.md) covers credentials and storage.
 
@@ -168,6 +180,8 @@ screenshot tools are outside `src/main`. Bundled third-party notices accompany t
 
 Say these in the description of the next Hub update, as changes from what was approved:
 
+- Farm runs: a received ordered itinerary, local replant/seeded-house progress, numbered stop
+  pins, and Start, Reroute and End requests as disclosed above. No input or movement is automated.
 - Completed farming contracts remain visible under the existing sharing choice, with the same
   assignment's `state: "return"`, so the website can point back to Guildmaster Jane.
 - **One press at Connect** (above): the recommended set is offered after the server notice and

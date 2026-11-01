@@ -138,6 +138,13 @@ It accepts one JSON command per line on stdin and emits one JSON event per line 
 so the map's `npm run story` can start multiple installations without launching Gradle each time.
 The normal plugin jar contains only `src/main`; the harness is never shipped to players.
 
+`startRun` accepts a `kind` (`ready-now`, `preset:herb`, `birdhouses`, `contract`);
+`rerouteRun` and `endRun` take no other fields. The `state` event includes `farmRun` with its id,
+revision, next ordinal, confirmed `done` and reference `visited` ordinals. The map's
+`scripts/companion-farm-story.mjs` drives these against an isolated fixture production server.
+It waits through the real login settle and checks the actual Java reader/receiver, but its
+game values and tick ordering are supplied by the harness and are not live-client evidence.
+
 `settledReward` commands begin after reward observation and test delivery, not actual game events.
 The fake cannot establish live reward coverage, farming varbit delivery or marker appearance.
 See [reward source coverage](docs/rewards-and-dryness.md) and [live checks](docs/live-checks.md).

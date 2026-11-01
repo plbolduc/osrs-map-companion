@@ -209,7 +209,7 @@ final class RouteWire
 	}
 
 	@Nullable
-	private static RelayResponse.RouteStep step(@Nullable RelayResponse.RouteStep step)
+	static RelayResponse.RouteStep step(@Nullable RelayResponse.RouteStep step)
 	{
 		if (step == null || step.slot == null || !SLOT.matcher(step.slot).matches())
 		{
@@ -244,7 +244,7 @@ final class RouteWire
 
 	/** A step's end on the map and on one of the four floors, or null: the words stay, the pin goes. */
 	@Nullable
-	private static RelayResponse.RouteTile tile(@Nullable RelayResponse.RouteTile at)
+	static RelayResponse.RouteTile tile(@Nullable RelayResponse.RouteTile at)
 	{
 		if (at == null || at.x <= 0 || at.y <= 0 || at.x > MAX_COORDINATE || at.y > MAX_COORDINATE
 			|| (at.plane != null && (at.plane < 0 || at.plane > 3)))

@@ -135,6 +135,10 @@ public class SnapshotBuilder
 		CompanionSnapshot snapshot = new CompanionSnapshot();
 		snapshot.member = new CompanionSnapshot.Member(identity.id(), nickname());
 		snapshot.sentAtMs = nowMs;
+		if (config.showDestination())
+		{
+			snapshot.runReceiverVersion = 1;
+		}
 
 		/*
 		 * The one field that names the account rather than describing it, so it is gated like every

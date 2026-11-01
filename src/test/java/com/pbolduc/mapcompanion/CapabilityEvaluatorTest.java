@@ -33,6 +33,16 @@ import org.junit.Test;
 /** Carrying an item name is not enough: zero charges and bank notes cannot fund a teleport. */
 public class CapabilityEvaluatorTest
 {
+	@Test
+	public void theBankChecklistOnlyClaimsMissingItemsFromItsKnownTravelVocabulary()
+	{
+		assertEquals(Boolean.TRUE, CapabilityEvaluator.carrying("Ring of dueling", Arrays.asList("ringOfDueling")));
+		assertEquals(Boolean.FALSE, CapabilityEvaluator.carrying("Ring of dueling", Arrays.asList("amuletOfGlory")));
+		assertEquals(null, CapabilityEvaluator.carrying("Ring of dueling", null));
+		assertEquals(null, CapabilityEvaluator.carrying("Catherby Teleport", Arrays.asList("ringOfDueling")));
+		assertEquals(null, CapabilityEvaluator.carrying("My supplies", Arrays.asList("ringOfDueling")));
+	}
+
 	private final ItemReadingsTestClient game = new ItemReadingsTestClient();
 	private final CapabilityEvaluator evaluator = new CapabilityEvaluator(game.client);
 

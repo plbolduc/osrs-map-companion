@@ -112,6 +112,13 @@ final class RouteStepsView extends JPanel
 		show(view, null);
 	}
 
+	/** A run leg was planned from its preceding stop; the destination card's origin warning is inapplicable. */
+	void showRunLeg(@Nullable DestinationRoute.View view, @Nullable String shortestPath)
+	{
+		show(view, shortestPath);
+		origin.setVisible(false);
+	}
+
 	/** @param shortestPath what Shortest Path is drawing for it, in words, or null */
 	void show(@Nullable DestinationRoute.View view, @Nullable String shortestPath)
 	{

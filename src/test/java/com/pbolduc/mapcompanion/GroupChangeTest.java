@@ -185,6 +185,7 @@ public class GroupChangeTest
 		plugin.groupMarkers = new GroupMarkers(null, null);
 		HarnessGame game = new HarnessGame();
 		plugin.rewardObserver = new RewardObserver(game.client(), new CollectionItemCatalog(game.client()));
+		TestFarmRuns.attach(plugin);
 		plugin.pairing.join(JoinCode.parse(pasted));
 		return plugin;
 	}

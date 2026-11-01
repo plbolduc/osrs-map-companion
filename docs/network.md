@@ -56,6 +56,33 @@ position sharing is on, because a route from where you stand is what the press a
 flight at a time, and none before the wait the map last asked for: its `Retry-After`, and at least
 five seconds between presses that reached it. The map plans with both tiles and keeps neither.
 
+**Farm runs.** With **Show destinations from the map** enabled, snapshots include the plumbing
+field `runReceiverVersion: 1`. It contains no character data and is omitted with that setting off.
+The website offers Send run only for a fresh, compatible receiver belonging to its own reader.
+An itinerary arrives as `run` and a monotonic `runRevision` in the existing reply/stream; its
+removal carries the revision without a run. There is no additional poll or automatic planning.
+
+**Start run** and a farm run's **Reroute** each make one `POST /api/companion/run` with the same
+three member credentials as Route. Start sends a bounded preset/run-kind string; Reroute sends
+the run id and the `done` and `visited` ordinals. Both include the tile the player stands on,
+even with position sharing off. They share Route's one-flight gate and Retry-After wait.
+**End run** makes one `DELETE /api/companion/run?run=<id>`; the id guard prevents an old End
+from erasing a replacement run. An initial plan can be cancelled before it has an id.
+The 204 reply's `X-Companion-Run-Revision` supplies the removal counter even if the stream
+coalesces that frame. Until removal is confirmed, a cancelled initial plan cannot return over
+the stream; End remains available to retry if that request failed. A new explicit Start can
+replace it by its own successful reply.
+There is no automatic retry. A run is private to that member and kept in relay memory for up
+to three hours; it is not saved in the database. The request's starting tile is used then dropped.
+
+An active run continues local farming observation with farming sharing off, to follow witnessed
+replants, and checks derived carried-item flags locally for its bank checklist. The existing
+snapshot settings still gate all automatic disclosure. The explicit Reroute press shares only
+its stop ordinals, not the underlying receipts or inventory. Birdhouse progress comes from the
+existing read-only Time Tracking settings and requires a fresh seeded sighting after the run
+was received. Custom stops are visited, never marked as a confirmed replant.
+The receiver rejects old revisions, old character channels and callbacks from ended connections.
+
 **Search**, at the top of Home while connected, asks `GET /api/companion/search?q=` with the
 same three credentials, about 350ms after the last key or at once on Enter, and never for fewer than
 two characters. One is in flight at a time: a query typed meanwhile waits for it, and the older

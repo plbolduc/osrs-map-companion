@@ -36,6 +36,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 import net.runelite.api.Skill;
+import net.runelite.api.gameval.ItemID;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.SkillIconManager;
 import net.runelite.client.game.SpriteManager;
@@ -134,6 +135,41 @@ class GameSprites
 		if (found != null)
 		{
 			item(label, found, box);
+		}
+	}
+
+	/** Diary rings are not in the tradeable price index; the map also calls lunar tablets "tablet". */
+	void farmTravelItem(JLabel label, String name, int box)
+	{
+		int known = farmTravelItemId(name);
+		if (known > 0)
+		{
+			item(label, known, box);
+		}
+		else
+		{
+			itemNamed(label, name, box);
+		}
+	}
+
+	static int farmTravelItemId(String name)
+	{
+		if (name == null)
+		{
+			return 0;
+		}
+		switch (name.toLowerCase(Locale.ROOT))
+		{
+			case "explorer's ring 2":
+				return ItemID.LUMBRIDGE_RING_MEDIUM;
+			case "explorer's ring 3":
+				return ItemID.LUMBRIDGE_RING_HARD;
+			case "explorer's ring 4":
+				return ItemID.LUMBRIDGE_RING_ELITE;
+			case "catherby tablet":
+				return ItemID.LUNAR_TABLET_CATHERBY_TELEPORT;
+			default:
+				return 0;
 		}
 	}
 

@@ -113,6 +113,7 @@ public class NetworkDisclosureTest
 		DISCLOSED.put("detailsTruncated", "a flag saying some of it was left out");
 
 		PLUMBING.put("member", "the container; its own fields are disclosed one at a time");
+		PLUMBING.put("runReceiverVersion", "software protocol support, only while remote destinations are enabled; no game data");
 		PLUMBING.put("sentAtMs", "the sender's clock, which the map replaces with its own");
 	}
 
@@ -209,7 +210,7 @@ public class NetworkDisclosureTest
 		expected.put("Clue", "coordTile, itemId, mapTile, text, tier");
 		expected.put("CompanionSnapshot", "accountType, activeSkill, birdhouses, capabilities, clue, death, "
 					 + "detailsTruncated, diaries, diaryRewards, farming, farmingContract, house, hunterRumour, idleMs, instanceLayout, instanced, loot, mahoganyHome, member, "
-					 + "milestones, pos, questLog, questStates, questsCompleted, sentAtMs, skills, slayer, stashUnits, travelUnlocks, v, world, worldFlags");
+					 + "milestones, pos, questLog, questStates, questsCompleted, runReceiverVersion, sentAtMs, skills, slayer, stashUnits, travelUnlocks, v, world, worldFlags");
 		expected.put("Death", "msAgo, tile");
 		expected.put("Drop", "boostedSinceLast, boostedWatched, item, killsAtLast, obtained, trackedSinceKill");
 		expected.put("Farming", "patches, progressVersion");

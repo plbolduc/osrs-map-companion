@@ -4,7 +4,7 @@ Bring [osrs-map.com](https://osrs-map.com)'s routes, search and shooting stars i
 and see your character and friends on the website.
 
 [Getting started](#getting-started) · [Search](#search-for-a-place-or-item) ·
-[Slayer](#slayer-on-the-website) · [Sailing](#sailing-on-the-website) ·
+[Farm runs](#farm-runs-in-runelite) · [Slayer](#slayer-on-the-website) · [Sailing](#sailing-on-the-website) ·
 [What's new](https://osrs-map.com/whats-new)
 
 ## Routes in RuneLite
@@ -33,6 +33,24 @@ and to coordinate clues and recognised beginner map clues.
 Search for banks, shops, NPCs, monsters and items from **Home**. An item can show the monsters
 that drop it and the shops that sell it. Pick a place, monster or shop to plan the way there.
 Results use the game's map icons and item sprites.
+
+## Farm runs in RuneLite
+
+<p>
+  <img src="docs/mockups/sidebar-farm-run.png" width="300" alt="A farm run in the real sidebar: a bank checklist, numbered stops with Done and Visited kept separate, the current leg's steps, and Pause route, Reroute and End run">
+</p>
+
+Build a run on the website and press **Send run to RuneLite**, or choose a preset, **Ready now**,
+**Birdhouses** or your **Farming contract** under **Farm run** on Home and press **Start run**.
+The sidebar lists your stops, how to reach each one, and **Before you leave**, a bank checklist.
+Numbered pins mark the stops on the game's world map.
+
+A farm stop becomes **Done** after the plugin witnesses every patch it needs being replanted.
+Arriving or harvesting alone does not finish it. Birdhouses use a fresh seeded Time Tracking
+sighting, labelled as such. Personal stops say **Visited** when you reach them.
+**Reroute** reorders what remains from where you stand; **End run** clears the run.
+**Pause route** keeps the itinerary, and **Follow** resumes it. A route you choose yourself
+pauses the run. With Shortest Path installed, its walking legs can be drawn as you reach them.
 
 ## Friends and meetups
 
@@ -167,6 +185,15 @@ Reroute does, so the way is planned from there.
 and the tile it goes to, once per press. That includes your clue's tile and where you died when you
 do not share them: they leave in that one request and the map plans with them and keeps neither.
 Your clue is read in this client whether or not you share it, so the sidebar can offer Route.
+
+**Start run** sends your chosen run kind and the tile you stand on, once per press, even with
+position sharing off. A farm run's **Reroute** also sends its id and which numbered stops are
+done or visited. **End run** asks the map to remove your run. The map keeps the itinerary in
+memory for up to three hours. While a run is active, patch replants and carried travel items
+are read locally even with farming or item sharing off; only your enabled sharing choices
+put readings in snapshots. The bank checklist's local item check sends nothing.
+Enabling **Show destinations from the map** also tells the website this build can receive a
+farm run, so it offers **Send run** only to a compatible live client of your own.
 
 **Meet here** sends the title and time you choose, the tile you are standing on and your world,
 once per press, to make a meetup your group can see. Answering a meetup (**Going**, **Maybe**,

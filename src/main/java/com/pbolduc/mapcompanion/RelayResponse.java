@@ -89,6 +89,12 @@ public class RelayResponse
 	{
 		public Destination destination;
 		public Event event;
+		/** The member's own ordered farm run; a malformed one cannot cost the rest of the reply. */
+		@JsonAdapter(FarmRunWire.Lenient.class)
+		public FarmRun run;
+		/** Also sent after End run, so a stale reply cannot revive its old list. */
+		@JsonAdapter(FarmRunWire.Revision.class)
+		public long runRevision;
 		/**
 		 * The other members of the group, one row each, worded on the map by the website's own rules:
 		 * {@code buildRoster}'s order, *near* a landmark, *Near you*, the newest news. Null from a map
@@ -231,6 +237,40 @@ public class RelayResponse
 		 */
 		@JsonAdapter(RouteWire.Lenient.class)
 		public Route route;
+	}
+
+	/** An ordered run sent to this member alone; stops carry their own local progress evidence ids. */
+	public static class FarmRun
+	{
+		public String id;
+		public String kind;
+		public String name;
+		public long startedAtMs;
+		public List<FarmBring> bring;
+		public List<FarmStop> stops;
+	}
+
+	public static class FarmBring
+	{
+		public String kind;
+		public String name;
+		public Integer uses;
+		public String note;
+	}
+
+	public static class FarmStop
+	{
+		public int n;
+		public String name;
+		public RouteTile tile;
+		public List<String> patchIds;
+		public String birdhouseId;
+		public String method;
+		public String item;
+		public int costTiles;
+		public List<RouteStep> steps;
+		public boolean done;
+		public boolean visited;
 	}
 
 	/**

@@ -197,6 +197,7 @@ public class WireContractTest
 	static CompanionSnapshot everyFieldSet()
 	{
 		CompanionSnapshot s = new CompanionSnapshot();
+		s.runReceiverVersion = 1;
 		s.member = new CompanionSnapshot.Member("b3f1c2d4-0000-4000-8000-000000000000", "Zezima");
 		s.member.characterName = "Zezima";
 		s.accountType = "gim";
