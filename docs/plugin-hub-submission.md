@@ -254,6 +254,10 @@ Say these in the description of the next Hub update, as changes from what was ap
   registered through `KeyManager`. A key presses the sidebar's own Reroute or Follow button on the
   EDT, and only while that button is shown and enabled, so it sends nothing a click would not and
   takes no game action.
+- **A farm run's teleports in the bank**: a `WidgetItemOverlay` shown on the bank that draws an
+  outline around the travel items a running farm run's checklist names and the player is not
+  carrying, matched by the same local rule as the checklist. It moves, hides and resizes nothing,
+  reads no bank contents beyond the items it is asked to draw, and sends nothing.
 
 ## Before submission
 

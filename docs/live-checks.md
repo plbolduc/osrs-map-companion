@@ -307,6 +307,9 @@ continuously witnessed empty-to-newly-planted transition mints a stable completi
       sharing off, Start still plans from the tile sent on that press; no live position is shared.
 - [ ] Open Before you leave. Known carried travel items are checked locally; unknown supplies
       make no inventory claim. Complete a seeded birdhouse and check its weaker sighting label.
+- [ ] Open the bank during a herb run that names an Amulet of glory you are not carrying: charged
+      glories are outlined and an emptied one is not; withdraw one and the outlines go within a
+      tick. Seeds and a tablet no travel flag names are never outlined, and nothing moves or hides.
 - [ ] Reach a personal stop. It says Visited, never Done. Reroute keeps completed and visited
       stops at their original numbers and orders only the rest.
 - [ ] Pause, then replant. The list can record it without reclaiming a Shortest Path route

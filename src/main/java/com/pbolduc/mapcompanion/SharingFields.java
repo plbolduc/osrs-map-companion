@@ -161,7 +161,10 @@ final class SharingFields
 		"Receive a notification before a meetup starts.");
 	static final Field DROP_LUCK_CHAT = field("dropLuckChat", "Drop luck in chat", MapCompanionConfig::dropLuckChat,
 		"One chat line when a drop with a known rate lands. Nothing leaves this computer.");
+	static final Field BANK_MARKS = field("markFarmRunInBank", "Farm run teleports in the bank", MapCompanionConfig::markFarmRunInBank,
+		"Outline in the bank the teleports a farm run needs that you are not carrying. Nothing leaves this computer.");
 
 	static final List<Field> CLIENT = Collections.unmodifiableList(Arrays.asList(
-		DESTINATIONS, GROUP_ON_WORLD_MAP, HINT_ARROW, STEP_ON_SCREEN, SHORTEST_PATH, ROUTE_HERE, NOTIFY_MEETUPS, DROP_LUCK_CHAT));
+		DESTINATIONS, GROUP_ON_WORLD_MAP, HINT_ARROW, STEP_ON_SCREEN, SHORTEST_PATH, ROUTE_HERE, NOTIFY_MEETUPS, DROP_LUCK_CHAT,
+		BANK_MARKS));
 }

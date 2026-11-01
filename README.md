@@ -57,7 +57,8 @@ Results use the game's map icons and item sprites.
 Build a run on the website and press **Send run to RuneLite**, or choose a preset, **Ready now**,
 **Birdhouses** or your **Farming contract** under **Farm run** on Home and press **Start run**.
 The sidebar lists your stops, how to reach each one, and **Before you leave**, a bank checklist.
-Numbered pins mark the stops on the game's world map.
+In the bank, the checklist's teleports you are not carrying are outlined. Numbered pins mark the
+stops on the game's world map.
 
 A farm stop becomes **Done** after the plugin witnesses every patch it needs being replanted.
 Arriving or harvesting alone does not finish it. Birdhouses use a fresh seeded Time Tracking
@@ -285,9 +286,9 @@ rename it there.
 
 In the plugin's settings, **Show destinations from the map**, **Show my group on the world map**
 and **Notify before a meetup** start off; the step after Connect ticks the first two for you to
-confirm. **Drop luck in chat**, **Point the game's arrow at a destination** and **Show the step on
-screen** start on; none of them sends anything. **Route here on the world map** starts on too, and
-sends only when you choose it.
+confirm. **Drop luck in chat**, **Point the game's arrow at a destination**, **Show the step on
+screen** and **Mark a farm run's teleports in the bank** start on; none of them sends anything.
+**Route here on the world map** starts on too, and sends only when you choose it.
 
 </details>
 

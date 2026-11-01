@@ -639,6 +639,20 @@ public interface MapCompanionConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "markFarmRunInBank",
+		name = "Mark a farm run's teleports in the bank",
+		description =
+			"While a farm run is going, outline in your bank the teleports its Before you leave list names "
+			+ "that you are not carrying. Nothing in the bank moves, and nothing leaves this computer.",
+		position = 41,
+		section = clientSection
+	)
+	default boolean markFarmRunInBank()
+	{
+		return true;
+	}
+
+	@ConfigItem(
 		keyName = "notifyMeetups",
 		name = "Notify before a meetup",
 		description =

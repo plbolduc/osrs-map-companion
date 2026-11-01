@@ -305,4 +305,10 @@ final class HarnessConfig implements MapCompanionConfig
 	{
 		return on("showStepOnScreen", MapCompanionConfig.super.showStepOnScreen());
 	}
+
+	@Override
+	public boolean markFarmRunInBank()
+	{
+		return on("markFarmRunInBank", MapCompanionConfig.super.markFarmRunInBank());
+	}
 }
