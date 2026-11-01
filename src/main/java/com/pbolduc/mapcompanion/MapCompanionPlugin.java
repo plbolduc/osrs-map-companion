@@ -36,6 +36,7 @@ import java.util.regex.Pattern;
 import java.util.Set;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import javax.swing.SwingUtilities;
 import lombok.extern.slf4j.Slf4j;
 import lombok.Getter;
 import net.runelite.api.ChatMessageType;
@@ -72,6 +73,7 @@ import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.events.PluginMessage;
 import net.runelite.client.events.RuneScapeProfileChanged;
 import net.runelite.client.events.ServerNpcLoot;
+import net.runelite.client.input.KeyManager;
 import net.runelite.client.Notifier;
 import net.runelite.client.plugins.loottracker.LootReceived;
 import net.runelite.client.plugins.Plugin;
@@ -79,6 +81,7 @@ import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.overlay.OverlayManager;
+import net.runelite.client.util.HotkeyListener;
 import net.runelite.client.util.ImageUtil;
 
 /**
@@ -294,6 +297,39 @@ public class MapCompanionPlugin extends Plugin
 	private RouteStepOverlay routeStepOverlay;
 
 	@Inject
+	private KeyManager keyManager;
+
+	/*
+	 * The two route keys press the sidebar's own buttons on the EDT (MapCompanionPanel#pressHotkey), so a
+	 * key can do nothing a click could not. Both are unset until the player chooses one.
+	 */
+	private final HotkeyListener rerouteKey = new HotkeyListener(() -> config.rerouteHotkey())
+	{
+		@Override
+		public void hotkeyPressed()
+		{
+			MapCompanionPanel shown = panel;
+			if (shown != null)
+			{
+				SwingUtilities.invokeLater(() -> shown.pressHotkey(true));
+			}
+		}
+	};
+
+	private final HotkeyListener followKey = new HotkeyListener(() -> config.followHotkey())
+	{
+		@Override
+		public void hotkeyPressed()
+		{
+			MapCompanionPanel shown = panel;
+			if (shown != null)
+			{
+				SwingUtilities.invokeLater(() -> shown.pressHotkey(false));
+			}
+		}
+	};
+
+	@Inject
 	private DirectiveStream directiveStream;
 
 	@Inject
@@ -452,6 +488,8 @@ public class MapCompanionPlugin extends Plugin
 		overlayManager.add(destinationMinimapOverlay);
 		overlayManager.add(voyageMapOverlay);
 		overlayManager.add(routeStepOverlay);
+		keyManager.registerKeyListener(rerouteKey);
+		keyManager.registerKeyListener(followKey);
 		relay.reset();
 		lootLog.reload();
 		clientThread.invokeLater(() -> { collectionItems.initialize(); });
@@ -504,6 +542,8 @@ public class MapCompanionPlugin extends Plugin
 		overlayManager.remove(destinationMinimapOverlay);
 		overlayManager.remove(voyageMapOverlay);
 		overlayManager.remove(routeStepOverlay);
+		keyManager.unregisterKeyListener(rerouteKey);
+		keyManager.unregisterKeyListener(followKey);
 	}
 
 	/**

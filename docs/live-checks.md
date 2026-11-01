@@ -203,6 +203,9 @@ The website plan's second session, once the routes in the game are built: a memb
 - [ ] **The step on screen.** Follow a route with the sidebar closed: a small box in the top left
       names the destination and the step the sidebar marks, moves on with it, and goes on arrival.
       It can be dragged like any RuneLite box, and it is not drawn inside an instance.
+- [ ] **Route keys.** Set *Reroute key* to Ctrl+R and *Follow and pause key* to Ctrl+F. On a farm run,
+      Ctrl+F pauses and follows it and Ctrl+R reroutes it; twice within five seconds asks once. With
+      no run, they act on the destination's own buttons, and do nothing with neither shown.
 - [ ] **Shortest Path, installed.** With it running, Follow appears beside Reroute. A received
       destination draws nothing in it until Follow is pressed. On a teleport step it shows nothing
       new; on reaching the landing it draws the walk from your tile to the step's end, and the

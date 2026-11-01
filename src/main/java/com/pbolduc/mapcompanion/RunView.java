@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import javax.annotation.Nullable;
 import javax.swing.BoxLayout;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -154,6 +155,13 @@ final class RunView extends JPanel
 	boolean ours(RelayResponse.FarmRun run)
 	{
 		return port == FarmRunWire.PORT_TASKS.equals(run.kind);
+	}
+
+	/** The button a hotkey presses here: Reroute, or Follow and Pause, while this card shows a run. EDT. */
+	@Nullable
+	JButton hotkey(boolean rerouting)
+	{
+		return shownActions.contains(follow) ? (rerouting ? reroute : follow) : null;
 	}
 
 	/**

@@ -29,6 +29,7 @@ import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.ConfigSection;
+import net.runelite.client.config.Keybind;
 import net.runelite.client.config.Range;
 import net.runelite.client.config.Units;
 
@@ -606,6 +607,35 @@ public interface MapCompanionConfig extends Config
 	default boolean showStepOnScreen()
 	{
 		return true;
+	}
+
+	@ConfigItem(
+		keyName = "rerouteHotkey",
+		name = "Reroute key",
+		description =
+			"A key that presses Reroute on the run or route you follow, as the sidebar's button would, with "
+			+ "its same wait between presses. Unset until you choose one; pick one with Ctrl, Alt or Shift so "
+			+ "typing in chat does not press it.",
+		position = 39,
+		section = clientSection
+	)
+	default Keybind rerouteHotkey()
+	{
+		return Keybind.NOT_SET;
+	}
+
+	@ConfigItem(
+		keyName = "followHotkey",
+		name = "Follow and pause key",
+		description =
+			"A key that presses Follow, or Pause while you follow, on the run or route the sidebar shows, "
+			+ "where the card offers it. Unset until you choose one.",
+		position = 40,
+		section = clientSection
+	)
+	default Keybind followHotkey()
+	{
+		return Keybind.NOT_SET;
 	}
 
 	@ConfigItem(
