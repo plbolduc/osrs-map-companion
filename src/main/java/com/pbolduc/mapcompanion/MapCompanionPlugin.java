@@ -374,6 +374,17 @@ public class MapCompanionPlugin extends Plugin
 	private volatile ForGroup toldName = null;
 
 	/**
+	 * The group this installation last heard it may rename, from the map's {@code groupOwner}.
+	 *
+	 * <p>Memory only, and replaced by every reply, because the map says it on each one: a reply
+	 * without it means "may not", so losing ownership on the website shows here a post later. Kept
+	 * with the server and code it was said for, so a reply from the group the player just left
+	 * cannot offer <i>Rename group…</i> in the one they joined.
+	 */
+	@Nullable
+	private volatile ForGroup runsGroup = null;
+
+	/**
 	 * The tick a pickpocket succeeded on. NPC loot arriving on it is thieving, not a kill.
 	 *
 	 * <p>Starts below every real tick count so the first kill of a session is not mistaken for one.
@@ -534,6 +545,7 @@ public class MapCompanionPlugin extends Plugin
 		suffixClaimed = false;
 		issuedSecret = null;
 		toldName = null;
+		runsGroup = null;
 		setStatus(Health.IDLE, "Not paired");
 	}
 
@@ -1264,6 +1276,7 @@ public class MapCompanionPlugin extends Plugin
 			}
 			noteIssuedSecret(server, code, postedAs, response.memberSecret);
 			noteGroupName(server, code, response.groupName);
+			noteGroupOwner(server, code, response.groupOwner);
 			destinationState.acceptSocial(response.directive, config.showDestination());
 			if (config.shareSlayer())
 			{
@@ -1562,6 +1575,19 @@ public class MapCompanionPlugin extends Plugin
 		{
 			toldName = new ForGroup(server, code, name);
 		}
+	}
+
+	/** Hold whether this member may rename its group, from a reply; absent is "may not". OkHttp's thread. */
+	void noteGroupOwner(String server, String code, @Nullable Boolean owner)
+	{
+		runsGroup = Boolean.TRUE.equals(owner) ? new ForGroup(server, code, "owner") : null;
+	}
+
+	/** Whether the last reply said this member may rename the group it is in now. Swing's thread. */
+	boolean runsGroup(@Nullable String server, String code)
+	{
+		ForGroup held = runsGroup;
+		return held != null && held.server.equals(server) && held.code.equalsIgnoreCase(code);
 	}
 
 	/**

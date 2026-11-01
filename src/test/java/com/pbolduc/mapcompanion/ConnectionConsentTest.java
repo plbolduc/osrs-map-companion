@@ -72,9 +72,9 @@ public class ConnectionConsentTest
 	}
 
 	/**
-	 * Open the map acts as the player, so on the login screen, with no character to name, it acts as
-	 * a member of this RuneLite the group has already issued a secret to — the character logged in
-	 * when there is one, and never a member of another group or another map.
+	 * Open the map and Rename group act as the player, so on the login screen, with no character to
+	 * name, they act as a member of this RuneLite the group has already issued a secret to — the
+	 * character logged in when there is one, and never a member of another group or another map.
 	 */
 	@Test
 	public void theLoginScreenActsAsAMemberThisGroupHasAlreadyMet()
@@ -95,6 +95,25 @@ public class ConnectionConsentTest
 			met.contains(pairing.memberWithSecret(server, "ABC234", "new-character")));
 		assertNull("not another group's", pairing.memberWithSecret(server, "GHJ789", null));
 		assertNull("not another map's", pairing.memberWithSecret("http://localhost:3000", "ABC234", null));
+	}
+
+	/**
+	 * Rename group is offered from what the last reply said, for the map and group it was said for:
+	 * a reply from a group just left cannot offer it in the next, and a reply without it takes it away.
+	 */
+	@Test
+	public void renameIsOfferedOnlyWhereTheLastReplySaidSo()
+	{
+		MapCompanionPlugin plugin = new MapCompanionPlugin();
+		String map = MapCompanionConfig.DEFAULT_MAP_URL;
+		assertFalse(plugin.runsGroup(map, "ABC234"));
+		plugin.noteGroupOwner(map, "ABC234", true);
+		assertTrue(plugin.runsGroup(map, "ABC234"));
+		assertTrue("a code is the same in either case", plugin.runsGroup(map, "abc234"));
+		assertFalse("another group", plugin.runsGroup(map, "DEF567"));
+		assertFalse("another map", plugin.runsGroup("http://localhost:3000", "ABC234"));
+		plugin.noteGroupOwner(map, "ABC234", null);
+		assertFalse("a reply without it", plugin.runsGroup(map, "ABC234"));
 	}
 
 	@Test

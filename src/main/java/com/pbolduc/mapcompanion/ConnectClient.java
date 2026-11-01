@@ -41,8 +41,8 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
- * The plugin's own way into a group, and its way out to the map as the player: <i>Connect</i>,
- * <i>Join</i> with a pasted invite, and <i>Open the map</i>.
+ * The plugin's own way into a group, its way out to the map as the player, and the group's name:
+ * <i>Connect</i>, <i>Join</i> with a pasted invite, <i>Open the map</i> and <i>Rename group</i>.
  *
  * <p><b>Why the plugin asks for a group at all.</b> Making a group and joining one both used to
  * happen in a browser: the map's panel made the group and handed the plugin a RuneLite code to
@@ -60,12 +60,16 @@ import okhttp3.Response;
  *       when this RuneLite made the group. The token is in the link's fragment, which no browser
  *       sends to a server. On the login screen the member is any character of this RuneLite the
  *       group has issued a secret to.
+ *   <li><b>Rename group</b> — {@code PATCH /api/companion/group} with the new name, under the same
+ *       headers, for a member the map has said may ({@code groupOwner}): the group's maker, or a
+ *       member bound to an owner's browser. A group made by Connect is "Our group" until then.
  * </ul>
  *
  * <p><b>What it sends.</b> The installation key the snapshot already carries, so the map knows which
  * RuneLite made or joined a group, and on Join the code and token the player pasted. Open the map
- * sends the code, member id and secret every member request sends. No character data: a group is
- * made before anything is shared, and the sharing choices are offered after.
+ * sends the code, member id and secret every member request sends, and Rename group sends them with
+ * the new name. No character data: a group is made before anything is shared, and the sharing
+ * choices are offered after.
  *
  * <p><b>When.</b> Only on a press, and one at a time. On the map the plugin was installed for, the
  * install warning was the notice; a different map address is asked about by name first. Nothing is
@@ -80,6 +84,7 @@ final class ConnectClient
 	private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 	static final String CONNECT = "/api/companion/connect";
 	static final String LINK = "/api/companion/link";
+	static final String GROUP = "/api/companion/group";
 	private static final String INSTALLATION_HEADER = "X-Companion-Installation";
 
 	static final String UNREACHABLE = "The map could not be reached. Try again in a moment.";
@@ -116,6 +121,12 @@ final class ConnectClient
 		{
 			return new Outcome(null, null, message);
 		}
+
+		/** A rename the map took: the name as it now has it, and no code to keep. */
+		static Outcome named(String name)
+		{
+			return new Outcome(null, name, null);
+		}
 	}
 
 	/** What {@code /api/companion/connect} reads: nothing, or a code and the token beside it. */
@@ -123,6 +134,12 @@ final class ConnectClient
 	{
 		String code;
 		String invite;
+	}
+
+	/** What a rename sends. From RuneLite the map takes a group's name and nothing else. */
+	static final class Rename
+	{
+		String name;
 	}
 
 	/** And what it answers. {@code runeliteCode} is absent when the map needs no ticket. */
@@ -257,6 +274,82 @@ final class ConnectClient
 				return Outcome.refused(FAILED);
 			}
 			return Outcome.joined(joined, Pairing.tidyName(answer.name));
+		}
+		catch (IOException | RuntimeException unreadable)
+		{
+			return Outcome.refused(FAILED);
+		}
+	}
+
+	/**
+	 * Rename the group, as a member who runs it. The sidebar offers this only after the map said this
+	 * member may, so a refusal is rare and is printed as the map wrote it; a name the map did not take
+	 * is never kept.
+	 */
+	void rename(String server, String code, @Nullable String memberId, @Nullable String secret, String name,
+		Consumer<Outcome> done)
+	{
+		HttpUrl url = HttpUrl.parse(server + GROUP);
+		if (url == null || code.isEmpty() || memberId == null || !JoinCode.isWellFormedSecret(secret))
+		{
+			done.accept(Outcome.refused(FAILED));
+			return;
+		}
+		synchronized (this)
+		{
+			if (busy)
+			{
+				done.accept(Outcome.refused(ONE_AT_A_TIME));
+				return;
+			}
+			busy = true;
+		}
+		Rename body = new Rename();
+		body.name = name;
+		Request request = new Request.Builder()
+			.url(url)
+			.header("User-Agent", CompanionVersion.USER_AGENT)
+			.header("X-Companion-Code", code)
+			.header("X-Companion-Member", memberId)
+			.header("X-Companion-Member-Secret", secret)
+			.patch(RequestBody.create(JSON, gson.toJson(body)))
+			.build();
+		http.newCall(request).enqueue(new Callback()
+		{
+			@Override
+			public void onFailure(Call call, IOException error)
+			{
+				finish(done, Outcome.refused(UNREACHABLE));
+			}
+
+			@Override
+			public void onResponse(Call call, Response response)
+			{
+				finish(done, readRename(response));
+			}
+		});
+	}
+
+	/** One answer to a rename: the name the map now has, or why not. Package-private for its test. */
+	Outcome readRename(Response response)
+	{
+		try (Response close = response)
+		{
+			int status = close.code();
+			String text = CompanionHttp.readBounded(close.body(), CompanionHttp.MAX_REPLY_BYTES);
+			if (status == 429 || status == 503)
+			{
+				return Outcome.refused(BUSY);
+			}
+			if (!close.isSuccessful())
+			{
+				Refusal refusal = gson.fromJson(text, Refusal.class);
+				String sentence = refusal == null ? null : sentence(refusal.error);
+				return Outcome.refused(sentence != null ? sentence : FAILED);
+			}
+			Answer answer = gson.fromJson(text, Answer.class);
+			String named = answer == null ? null : Pairing.tidyName(answer.name);
+			return named != null ? Outcome.named(named) : Outcome.refused(FAILED);
 		}
 		catch (IOException | RuntimeException unreadable)
 		{

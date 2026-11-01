@@ -902,8 +902,8 @@ public class MapCompanionPanel extends PluginPanel
 	 * Connect with no group: one press, and the map makes the group.
 	 *
 	 * <p>Nothing is asked. The group is called what the map calls a group nobody has named, and its
-	 * maker can rename it on the map; a player who plays alone never has to think of a name at all.
-	 * What to share comes next, as the step it has always been.
+	 * maker can rename it from the groups menu; a player who plays alone never has to think of a
+	 * name at all. What to share comes next, as the step it has always been.
 	 */
 	private void startGroup()
 	{
@@ -1165,6 +1165,14 @@ public class MapCompanionPanel extends PluginPanel
 				refresh();
 			});
 			menu.add(another);
+			/* Only for whoever the map said may, so nobody is offered a press it would refuse. */
+			if (plugin.runsGroup(pairing.serverUrl(), active))
+			{
+				JMenuItem rename = groupMenuItem(RENAME);
+				rename.setToolTipText("Change the name everybody in the group sees");
+				rename.addActionListener(e -> renameGroup());
+				menu.add(rename);
+			}
 		}
 		/*
 		 * Hung from the button's right edge, so it opens into the sidebar. Names made it wider than
@@ -1174,8 +1182,57 @@ public class MapCompanionPanel extends PluginPanel
 		menu.show(anchor, anchor.getWidth() - menu.getPreferredSize().width, anchor.getHeight());
 	}
 
+	static final String RENAME = "Rename group…";
+
 	/**
-	 * The groups menu's last row: it opens the code field above the tabs, and while that is open it
+	 * Rename the group: a name typed in a small dialog that starts on the current one, sent to the map,
+	 * and kept here only once the map has taken it.
+	 *
+	 * <p>A group made by Connect is "Our group" until somebody names it, and this is where its maker
+	 * does, without opening the map. The menu offers it only to a member the map said may, and asks
+	 * as one of this RuneLite's members of the group even on the login screen.
+	 */
+	private void renameGroup()
+	{
+		String server = pairing.serverUrl();
+		String code = pairingCode();
+		String member = pairing.memberWithSecret(server, code, identity.id());
+		String secret = member == null ? null : pairing.secret(server, code, member);
+		if (server == null || member == null || secret == null)
+		{
+			say("Log in once while connected, then rename the group.");
+			return;
+		}
+		Object typed = JOptionPane.showInputDialog(this, "The name everybody in the group sees:", "Rename group",
+			JOptionPane.PLAIN_MESSAGE, null, null, pairing.name(code));
+		if (!(typed instanceof String))
+		{
+			return;
+		}
+		String name = ((String) typed).replaceAll("\\s+", " ").trim();
+		if (name.isEmpty() || name.length() > Pairing.MAX_GROUP_NAME)
+		{
+			say("A group name is 1 to " + Pairing.MAX_GROUP_NAME + " characters.");
+			return;
+		}
+		say("Renaming…");
+		connectClient.rename(server, code, member, secret, name, outcome -> SwingUtilities.invokeLater(() ->
+		{
+			if (outcome.name != null && server.equals(pairing.serverUrl()) && code.equalsIgnoreCase(pairingCode()))
+			{
+				pairing.rememberName(code, outcome.name);
+				say("Renamed to " + outcome.name + ".");
+			}
+			else
+			{
+				say(outcome.message != null ? outcome.message : ConnectClient.FAILED);
+			}
+			refresh();
+		}));
+	}
+
+	/**
+	 * The groups menu's join row: it opens the code field above the tabs, and while that is open it
 	 * closes it again, as the fold it replaced did.
 	 */
 	static String joinMenuWords(boolean open)

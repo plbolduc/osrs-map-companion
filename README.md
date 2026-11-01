@@ -164,7 +164,7 @@ The pictures use made-up characters and stars.
 
 1. Install **OSRS Map Companion** from the Plugin Hub and open its sidebar.
 2. Press **Connect**. The plugin makes a group for you, called *Our group*; you can use it on your
-   own.
+   own, and rename it with **Switch ▾ → Rename group…** under **Group**.
 3. Press **Share what's ticked**, or **Customise** to choose field by field first, or **Not now** to
    share nothing yet. The gear opens **Settings** whenever you want to change your choices.
 4. To play with friends, press **Copy invite** under **Group** and send it. A friend pastes it into
@@ -231,7 +231,7 @@ your group with it. **Join** with a pasted invite sends that key and the invite.
 anything about your character. If you have changed **Settings → Advanced → Map address** to a server
 other than osrs-map.com, the first Connect to it asks you first, naming it.
 **Open the map** sends your group's credentials once per press, and opens a one-time link that
-adds that browser to your group as you.
+adds that browser to your group as you. **Rename group…** sends the new name, once per press.
 
 **Reroute**, under the steps of a destination the map sent, sends the tile you are standing on,
 once per press and whatever you share, so the map can plan the way from there. The map plans with
@@ -277,7 +277,8 @@ Miners, who do not endorse it.
 Nothing is shared until you choose it, and joining a group does not turn anything on. With
 **Character name** ticked your group sees it; untick it and **Name to show instead** sets what they
 see, or Member if you leave it empty. **Copy invite** copies a message you can send a friend.
-**Switch** remembers up to eight groups, and joins another.
+**Switch** remembers up to eight groups, and joins another; the person who made the group can
+rename it there.
 
 In the plugin's settings, **Show destinations from the map**, **Show my group on the world map**
 and **Notify before a meetup** start off; the step after Connect ticks the first two for you to
