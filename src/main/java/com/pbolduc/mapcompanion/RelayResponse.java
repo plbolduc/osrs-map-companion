@@ -362,6 +362,36 @@ public class RelayResponse
 		/** The whole trip in run tiles, a tick worth two, or null where the ranking priced none. */
 		public Integer tiles;
 		public List<RouteStep> steps;
+		/**
+		 * The voyage on this way, when it sails one: the moorings it boards and docks at, the sail as
+		 * a line, and the docking mooring's gates. Null on a way that does not sail. The steps that
+		 * belong to it are the ones whose slot is {@code board}, {@code sail} or {@code dock}, or, for
+		 * a boat the map does not know, the one {@code method} step that sails.
+		 */
+		public Voyage voyage;
+	}
+
+	/**
+	 * A sail in the player's own boat, as the map traces it. Shortest Path has no row for one, so
+	 * this plugin draws its line on the world map itself (the map's plan, <i>A sailing leg in the
+	 * game</i>) and never hands it a voyage.
+	 */
+	public static class Voyage
+	{
+		/** The mooring boarded at, by the name the game's {@code SailingDock} table gives it. */
+		public String from;
+		/** The mooring docked at by the same name, or null for a sail out to a spot at sea. */
+		public String to;
+		/** The sail, simplified to a few dozen {@code [x, y]} tiles on the sea. */
+		public int[][] line;
+		/** What docking at {@link #to} asks, each with the account's tier: met, unmet or unknown. */
+		public List<Gate> gates;
+	}
+
+	public static class Gate
+	{
+		public String text;
+		public String tier;
 	}
 
 	public static class RouteStep

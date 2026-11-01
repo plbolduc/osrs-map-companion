@@ -157,7 +157,7 @@ public class WireContractTest
 		String committed = new String(Files.readAllBytes(REPLY), StandardCharsets.UTF_8);
 		RelayResponse.Route route = new Gson().fromJson(committed, RelayResponse.class).directive.destination.route;
 		assertEquals("shared", route.origin);
-		assertEquals(2, route.options.size());
+		assertEquals(3, route.options.size());
 		RelayResponse.RouteOption best = route.options.get(0);
 		assertTrue(best.best);
 		assertEquals(Integer.valueOf(52), best.tiles);
@@ -172,6 +172,18 @@ public class WireContractTest
 		assertEquals(null, walk.tiles);
 		assertEquals(null, walk.steps.get(0).at.plane);
 		assertEquals(3208, walk.steps.get(0).at.x);
+		RelayResponse.RouteOption sail = route.options.get(2);
+		assertEquals(Arrays.asList("boarding-walk", "board", "sail", "dock"),
+					 Arrays.asList(sail.steps.get(0).slot, sail.steps.get(1).slot, sail.steps.get(2).slot, sail.steps.get(3).slot));
+		assertTrue("the walk to the boat is a walk", sail.steps.get(0).walk);
+		assertTrue("boarding is not", !sail.steps.get(1).walk);
+		assertEquals("Port Sarim", sail.voyage.from);
+		assertEquals("Catherby", sail.voyage.to);
+		assertEquals(5, sail.voyage.line.length);
+		assertEquals(2797, sail.voyage.line[4][0]);
+		assertEquals("met", sail.voyage.gates.get(0).tier);
+		assertEquals("a voyage's fixture survives this plugin's own reader whole",
+					 new Gson().toJson(sail.voyage), new Gson().toJson(RouteWire.voyage(sail.voyage)));
 
 		String streamed = new String(Files.readAllBytes(STREAM), StandardCharsets.UTF_8);
 		RelayResponse.StreamDirective frame = new Gson().fromJson(streamed, RelayResponse.StreamDirective.class);

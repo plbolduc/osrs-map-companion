@@ -237,12 +237,29 @@ public class DestinationMarker
 		/** Negative for a step done, zero for the current one, positive ahead. */
 		final int place;
 
+		/** The first step this pin stands for, where several end on its tile. */
+		final int first;
+		/** The last step this pin stands for: the next pin's number follows it. */
+		final int lastStep;
+
 		StepPin(int number, WorldPoint where, String title, int place)
+		{
+			this(number, where, title, place, number, number);
+		}
+
+		StepPin(int number, WorldPoint where, String title, int place, int first)
+		{
+			this(number, where, title, place, first, number);
+		}
+
+		StepPin(int number, WorldPoint where, String title, int place, int first, int lastStep)
 		{
 			this.number = number;
 			this.where = where;
 			this.title = title;
 			this.place = place;
+			this.first = first;
+			this.lastStep = lastStep;
 		}
 
 		@Override
@@ -255,6 +272,11 @@ public class DestinationMarker
 	/**
 	 * A pin for each step of the way being shown that names where it ends, numbered as the sidebar
 	 * numbers it — none once arrived, and none on the destination's own tile, where its pin is.
+	 *
+	 * <p>Steps that end on the same tile one after another share one pin: a voyage's walk to the
+	 * mooring and its boarding both end at the mooring, and two numbers stacked there would hide each
+	 * other. The shared pin carries the current step's number while one of them is current, and the
+	 * first's otherwise.
 	 */
 	static List<StepPin> stepPins(DestinationRoute.View view)
 	{
@@ -274,6 +296,19 @@ public class DestinationMarker
 			WorldPoint where = DestinationRoute.point(at);
 			if (where.equals(view.target))
 			{
+				continue;
+			}
+			StepPin before = pins.isEmpty() ? null : pins.get(pins.size() - 1);
+			if (before != null && before.where.equals(where) && before.lastStep == i)
+			{
+				if (i == view.step)
+				{
+					pins.set(pins.size() - 1, new StepPin(i + 1, where, list.get(i).title, 0, before.first));
+				}
+				else
+				{
+					pins.set(pins.size() - 1, new StepPin(before.number, where, before.title, before.place, before.first, i + 1));
+				}
 				continue;
 			}
 			pins.add(new StepPin(i + 1, where, list.get(i).title, Integer.compare(i, view.step)));

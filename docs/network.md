@@ -57,7 +57,10 @@ every thirty seconds and after changes, using the group code, member id and memb
 level and skill total filter stars locally. Turn sync off to keep those preferences local.
 
 A destination can carry the map's way there, step by step; reading it sends nothing, and the
-sidebar moves its steps on from your position in the game without telling the map. **Reroute**
+sidebar moves its steps on from your position in the game without telling the map. A voyage's
+steps also carry its moorings, a simplified line of the sail and the docking mooring's gates; its
+rows tick from whether you stand on a deck and where your boats read moored, read locally whatever
+the boats setting and never sent. **Reroute**
 under those steps makes one `POST /api/companion/route` per press, with the group code, member id
 and member secret. It carries the destination's tile and the tile you stand on, whether or not
 position sharing is on, because a route from where you stand is what the press asks for. One is in

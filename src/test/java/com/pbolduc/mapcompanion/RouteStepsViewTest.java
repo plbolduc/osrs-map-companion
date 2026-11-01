@@ -45,7 +45,7 @@ import org.junit.Test;
  * What the destination's card says about a route the map sent, read off the real components.
  *
  * <p>The reply fixture's own route: Lumbridge Home Teleport then a walk upstairs to the bank, with
- * walking all the way as the other way.
+ * walking all the way and a voyage from Port Sarim as the other ways.
  */
 public class RouteStepsViewTest
 {
@@ -65,7 +65,7 @@ public class RouteStepsViewTest
 		receive();
 		assertEquals(
 			"Lumbridge Home Teleport · 52 tiles | ▸ 1. Lumbridge Home Teleport | Standard spellbook"
-			+ " | Ten seconds to cast, and a combat hit stops it | 2. Walk 12 tiles to the bank | ▸ 1 other way",
+			+ " | Ten seconds to cast, and a combat hit stops it | 2. Walk 12 tiles to the bank | ▸ 2 other ways",
 			shown());
 	}
 
@@ -86,12 +86,24 @@ public class RouteStepsViewTest
 	public void anotherWayShowsItsOwnSteps() throws IOException
 	{
 		receive();
-		assertTrue(SidebarWords.press(view, "▸ 1 other way"));
-		assertTrue(shown(), shown().endsWith("▾ 1 other way | Walk"));
+		assertTrue(SidebarWords.press(view, "▸ 2 other ways"));
+		assertTrue(shown(), shown().endsWith("▾ 2 other ways | Walk | Docking point · 1340 tiles"));
 		assertTrue(SidebarWords.press(view, "Walk"));
 		view.show(route.view());
 		assertTrue(shown(), shown().startsWith("Walk | ▸ 1. Walk 140 tiles"));
 		assertTrue("the best way is now the other one", shown().contains("Lumbridge Home Teleport · 52 tiles · best"));
+	}
+
+	/** The fixture's voyage: its three rows, and the docking mooring's gate under the one that sails. */
+	@Test
+	public void aVoyageSaysItsGateUnderTheSail() throws IOException
+	{
+		receive();
+		assertTrue(SidebarWords.press(view, "▸ 2 other ways"));
+		assertTrue(SidebarWords.press(view, "Docking point · 1340 tiles"));
+		view.show(route.view());
+		assertTrue(shown(), shown().contains("2. Board your boat at Port Sarim | 3. Sail to Catherby | About 650 tiles"
+			+ " | ✓ 20 Sailing | 4. Dock at Catherby | Your boat stays there"));
 	}
 
 	@Test

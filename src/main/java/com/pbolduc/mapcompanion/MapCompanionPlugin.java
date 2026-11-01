@@ -273,6 +273,9 @@ public class MapCompanionPlugin extends Plugin
 	private DestinationMinimapOverlay destinationMinimapOverlay;
 
 	@Inject
+	private VoyageMapOverlay voyageMapOverlay;
+
+	@Inject
 	private DirectiveStream directiveStream;
 
 	@Inject
@@ -418,6 +421,7 @@ public class MapCompanionPlugin extends Plugin
 		clientToolbar.addNavigation(navButton);
 		overlayManager.add(destinationSceneOverlay);
 		overlayManager.add(destinationMinimapOverlay);
+		overlayManager.add(voyageMapOverlay);
 		relay.reset();
 		lootLog.reload();
 		clientThread.invokeLater(() -> { collectionItems.initialize(); });
@@ -468,6 +472,7 @@ public class MapCompanionPlugin extends Plugin
 		clientToolbar.removeNavigation(navButton);
 		overlayManager.remove(destinationSceneOverlay);
 		overlayManager.remove(destinationMinimapOverlay);
+		overlayManager.remove(voyageMapOverlay);
 	}
 
 	/**
@@ -1025,7 +1030,9 @@ public class MapCompanionPlugin extends Plugin
 		destinationRoute.sync(DestinationSceneOverlay.shown(config, destinationState));
 		if (destinationRoute.hasRoute())
 		{
-			destinationRoute.advance(DestinationRoute.standing(client));
+			/* A voyage's rows are ticked by the deck and the boats' ports, read here and never sent. */
+			destinationRoute.advance(DestinationRoute.standing(client),
+				DestinationRoute.Sailing.of(WorldTiles.aboard(client), boatReader.read(now)));
 		}
 		/* The step pins follow the step; unchanged, this compares one string and returns. */
 		destinationMarker.sync();
