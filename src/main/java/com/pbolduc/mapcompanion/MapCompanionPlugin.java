@@ -1078,7 +1078,7 @@ public class MapCompanionPlugin extends Plugin
 				if (config.showDestination())
 				{
 					destinationState.accept(directive);
-					farmRunState.acceptFor(memberId, directive.run, directive.runRevision, System.currentTimeMillis());
+					farmRunState.acceptFor(memberId, directive.relayEpoch, directive.run, directive.runRevision, System.currentTimeMillis());
 					destinationMarker.sync();
 				}
 				long at = System.currentTimeMillis();
@@ -1178,7 +1178,7 @@ public class MapCompanionPlugin extends Plugin
 				destinationState.accept(response.directive);
 				if (response.directive != null)
 				{
-					farmRunState.acceptFor(postedAs, response.directive.run, response.directive.runRevision, System.currentTimeMillis());
+					farmRunState.acceptFor(postedAs, response.directive.relayEpoch, response.directive.run, response.directive.runRevision, System.currentTimeMillis());
 				}
 				destinationMarker.sync();
 			}

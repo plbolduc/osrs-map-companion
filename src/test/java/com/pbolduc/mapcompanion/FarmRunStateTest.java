@@ -198,12 +198,12 @@ public class FarmRunStateTest
 	{
 		FarmRunState state = new FarmRunState();
 		state.bind("old-character");
-		state.acceptFor("old-character", run(), 20, START);
+		state.acceptFor("old-character", "test-relay-epoch", run(), 20, START);
 		state.bind("new-character");
 		RelayResponse.FarmRun fresh = run();
 		fresh.id = "new-characters-run";
-		state.acceptFor("new-character", fresh, 1, START + 100);
-		state.acceptFor("old-character", run(), 21, START + 200);
+		state.acceptFor("new-character", "test-relay-epoch", fresh, 1, START + 100);
+		state.acceptFor("old-character", "test-relay-epoch", run(), 21, START + 200);
 		assertEquals("new-characters-run", state.view().run.id);
 		assertEquals(1, state.view().revision);
 		assertTrue(state.view().done.isEmpty());
@@ -229,12 +229,28 @@ public class FarmRunStateTest
 		FarmRunState state = new FarmRunState();
 		state.bind("reader");
 		state.end();
-		state.acceptFor("reader", run(), 7, START);
+		state.acceptFor("reader", "test-relay-epoch", run(), 7, START);
 		assertNull(state.view());
 		RelayResponse.FarmRun next = run();
 		next.id = "new-start";
-		state.acceptPlannedFor("reader", next, 8, START + 100);
+		state.acceptPlannedFor("reader", "test-relay-epoch", next, 8, START + 100);
 		assertEquals(next.id, state.view().run.id);
 		assertFalse(state.ending());
+	}
+
+	@Test
+	public void aServerRestartResetsItsCounterButRetiredServerFramesCannotReturn() throws Exception
+	{
+		FarmRunState state = new FarmRunState();
+		state.bind("reader");
+		state.acceptFor("reader", "first-server-epoch", run(), 7, START);
+		RelayResponse.FarmRun next = run();
+		next.id = "new-process-run";
+		state.acceptFor("reader", "second-server-epoch", next, 1, START + 100);
+		assertEquals("a new server's counters begin again", next.id, state.view().run.id);
+		state.acceptFor("reader", "first-server-epoch", run(), 8, START + 200);
+		assertEquals("an old heartbeat cannot switch the client back", next.id, state.view().run.id);
+		state.acceptFor("reader", "second-server-epoch", null, 2, START + 300);
+		assertNull(state.view());
 	}
 }

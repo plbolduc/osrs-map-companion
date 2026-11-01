@@ -92,6 +92,18 @@ public class FarmRunWireTest
 	}
 
 	@Test
+	public void anUnreadableEpochDoesNotLoseThePairingSecretOrAcknowledgement()
+	{
+		for (String bad : new String[] {"4", "[]", "{}", "null", "\"short\""})
+		{
+			RelayResponse response = gson.fromJson("{\"memberSecret\":\"keep-this\",\"acknowledgedMilestones\":[\"reward-1\"],\"directive\":{\"relayEpoch\":" + bad + "}}", RelayResponse.class);
+			assertNull(response.directive.relayEpoch);
+			assertEquals("keep-this", response.memberSecret);
+			assertEquals("reward-1", response.acknowledgedMilestones.get(0));
+		}
+	}
+
+	@Test
 	public void rejectsUnknownKindsAndRunsWithNoUsableStop() throws Exception
 	{
 		RelayResponse.FarmRun raw = example();
