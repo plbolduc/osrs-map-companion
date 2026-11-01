@@ -100,6 +100,7 @@ public class NetworkDisclosureTest
 		DISCLOSED.put("capabilities", "derived travel unlocks");
 		DISCLOSED.put("slayer", "your current slayer task");
 		DISCLOSED.put("stashUnits", "which STASH units you have built");
+		DISCLOSED.put("boats", "where each of your boats is moored and whether it carries a teleport focus");
 		DISCLOSED.put("clue", "your active clue step");
 		DISCLOSED.put("hunterRumour", "your observed hunter rumour");
 		DISCLOSED.put("mahoganyHome", "your Mahogany Homes customer and tier");
@@ -209,8 +210,9 @@ public class NetworkDisclosureTest
 		expected.put("ActiveSkill", "msSinceLastDrop, skill, xpGained5m");
 		expected.put("Assignment", "detail, name, observedMsAgo, state");
 		expected.put("Birdhouse", "id, observedMsAgo, state");
+		expected.put("Boat", "dock, focus, port, slot");
 		expected.put("Clue", "coordTile, itemId, mapTile, text, tier");
-		expected.put("CompanionSnapshot", "accountType, activeSkill, birdhouses, capabilities, clue, death, "
+		expected.put("CompanionSnapshot", "accountType, activeSkill, birdhouses, boats, capabilities, clue, death, "
 					 + "detailsTruncated, diaries, diaryRewards, farming, farmingContract, house, hunterRumour, idleMs, instanceLayout, instanced, loot, mahoganyHome, member, "
 					 + "milestones, pos, questLog, questStates, questsCompleted, runReceiverVersion, sentAtMs, skills, slayer, slayerPreferences, stashUnits, travelUnlocks, v, world, worldFlags");
 		expected.put("Death", "msAgo, tile");

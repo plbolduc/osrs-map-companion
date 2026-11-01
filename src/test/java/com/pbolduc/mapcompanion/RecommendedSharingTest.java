@@ -302,7 +302,7 @@ public class RecommendedSharingTest
 		expected.add(SharingFields.DESTINATIONS.key);
 		expected.add(SharingFields.GROUP_ON_WORLD_MAP.key);
 		assertEquals(expected, new LinkedHashSet<>(RecommendedSharing.KEYS));
-		assertEquals(24, RecommendedSharing.KEYS.size());
+		assertEquals(25, RecommendedSharing.KEYS.size());
 		Set<String> configKeys = new HashSet<>();
 		for (Method method : MapCompanionConfig.class.getDeclaredMethods())
 		{

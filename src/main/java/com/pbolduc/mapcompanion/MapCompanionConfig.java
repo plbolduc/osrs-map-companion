@@ -317,6 +317,20 @@ public interface MapCompanionConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "shareBoats",
+		name = "Boats and moorings",
+		description = "Where each of your boats is moored and whether it carries a teleport focus, so the map's "
+			+ "voyages start at your boat. Boat names are not sent.",
+		position = 26,
+		warning = NETWORK_WARNING,
+		section = progressSection
+	)
+	default boolean shareBoats()
+	{
+		return false;
+	}
+
+	@ConfigItem(
 		keyName = "shareBirdhouses",
 		name = "Birdhouse observations",
 		description = "Birdhouse states observed by RuneLite Time Tracking for this character, with their age. Enable Time Tracking to collect observations.",

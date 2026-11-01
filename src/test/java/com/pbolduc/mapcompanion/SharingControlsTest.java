@@ -65,11 +65,11 @@ public class SharingControlsTest
 			}
 			assertEquals(expected, actual);
 			/*
-			 * 26 data and client choices, and the three that only draw on this client: Drop luck's chat
+			 * 27 data and client choices, and the three that only draw on this client: Drop luck's chat
 			 * line, the destination's hint arrow, and a followed route's walks handed to Shortest Path,
 			 * which is a plugin message inside the client rather than anything sent.
 			 */
-			assertEquals(29, actual.size());
+			assertEquals(30, actual.size());
 			for (String key : actual)
 			{
 				if (key.startsWith("share")) assertFalse("every data choice starts off: " + key, defaultOf(key));
@@ -141,7 +141,7 @@ public class SharingControlsTest
 	public void everyOtherGroupWritesOnlyItsKnownIndividualOptIns() throws Exception
 	{
 		String[][] groupKeys = {
-			{"progress", "shareSkills", "shareQuests", "shareQuestLog", "shareDiaries", "sharePermanentTravel", "shareCapabilities", "shareStash"},
+			{"progress", "shareSkills", "shareQuests", "shareQuestLog", "shareDiaries", "sharePermanentTravel", "shareCapabilities", "shareStash", "shareBoats"},
 			{"tasks", "shareSlayer", "shareClue", "shareFarming", "shareBirdhouses", "shareHunterRumours", "shareMahoganyHomes", "shareFarmingContracts"},
 			{"loot", "shareLoot", "shareMilestones", "sharePets", "shareCollectionLog"}
 		};

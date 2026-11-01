@@ -97,6 +97,25 @@ final class WorldTiles
 		}
 	}
 
+	/**
+	 * Whether the local player is standing on a boat's deck: their tile belongs to a boat's world
+	 * view rather than the world's, the same test {@link #of} makes. False where the client will not
+	 * say; a voyage step waits for a positive reading rather than taking that as one.
+	 */
+	static boolean aboard(Client client)
+	{
+		try
+		{
+			Player player = client.getLocalPlayer();
+			LocalPoint local = player == null ? null : player.getLocalLocation();
+			return local != null && local.getWorldView() != WorldView.TOPLEVEL;
+		}
+		catch (RuntimeException e)
+		{
+			return false;
+		}
+	}
+
 	/** One place copied whole: {@link #of} is where the player stands, somewhere a map draws. */
 	static final String COPY = "copy";
 
