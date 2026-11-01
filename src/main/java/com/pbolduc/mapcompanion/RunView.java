@@ -27,6 +27,8 @@ package com.pbolduc.mapcompanion;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -82,6 +84,11 @@ final class RunView extends JPanel
 	private final JButton end = MapCompanionPanel.smallButton("End run");
 	private final JPanel actions = new JPanel(new GridLayout(1, 0, 4, 0));
 	private List<JButton> shownActions = Collections.emptyList();
+	/*
+	 * A hairline and its own heading over the steps of the leg being walked. Without them the leg's
+	 * Walk, Board, Sail and Dock read as more stops at the bottom of the list. Shown with the steps.
+	 */
+	private final JLabel legHead = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
 	private final RouteStepsView steps;
 	private final JLabel message = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
 	private boolean bringOpen;
@@ -110,6 +117,16 @@ final class RunView extends JPanel
 		add(before);
 		add(bring);
 		add(stops);
+		legHead.setText("This leg");
+		legHead.setFont(legHead.getFont().deriveFont(Font.BOLD));
+		legHead.setBorder(BorderFactory.createCompoundBorder(
+			BorderFactory.createEmptyBorder(6, 0, 0, 0),
+			BorderFactory.createCompoundBorder(
+				BorderFactory.createMatteBorder(1, 0, 0, 0, ColorScheme.MEDIUM_GRAY_COLOR),
+				BorderFactory.createEmptyBorder(5, 0, 1, 0))));
+		legHead.setMaximumSize(new Dimension(Integer.MAX_VALUE, legHead.getPreferredSize().height));
+		legHead.setVisible(false);
+		add(MapCompanionPanel.left(legHead));
 		add(steps);
 		actions.setOpaque(false);
 		actions.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
@@ -204,6 +221,7 @@ final class RunView extends JPanel
 		boolean following = active && follower.ownsDestinationRoute(route);
 		boolean drawable = following && config.drawWithShortestPath() && shortest.installed() && !route.arrived();
 		steps.showRunLeg(following ? route : null, following ? RouteStepsView.shortestPathLine(route, drawable, shortest.drawing()) : null);
+		legHead.setVisible(steps.isVisible());
 		boolean speaks = mine && said.message != null;
 		message.setVisible(speaks);
 		MapCompanionPanel.setWrapped(message, speaks ? said.message : "", WIDTH);

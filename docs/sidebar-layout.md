@@ -573,3 +573,11 @@ three share one row the card's width, rebuilt by the destination card's own `syn
 that comes back takes its old place. A third of the card is too narrow for *Pause route*, so the
 button says *Pause* and its tip says the rest. *Customise* and *Not now* in the step after Connect,
 and *Meet here…*, stay links: those were chosen as links and kept by the owner.
+
+### This leg
+
+A run's card lists its stops and then the steps of the leg being walked, and the leg's *Walk*,
+*Board*, *Sail* and *Dock* read as more stops at the bottom of the list. A hairline and a *This leg*
+heading now sit over them, shown with the steps. The steps keep words where the map sends no picture:
+a walk, a ride, or a teleport the map has no id for stays words alone, and the client names no
+constant for a boat's icons, so none was added.
