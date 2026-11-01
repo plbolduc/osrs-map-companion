@@ -98,6 +98,11 @@ public class RelayResponse
 		/** Also sent after End run, so a stale reply cannot revive its old list. */
 		@JsonAdapter(FarmRunWire.Revision.class)
 		public long runRevision;
+		/** Own task's places, sent only until this client acknowledges their revision. */
+		@JsonAdapter(SlayerWire.Lenient.class)
+		public SlayerOptions slayerOptions;
+		@JsonAdapter(FarmRunWire.Revision.class)
+		public long slayerRevision;
 		/**
 		 * The other members of the group, one row each, worded on the map by the website's own rules:
 		 * {@code buildRoster}'s order, *near* a landmark, *Near you*, the newest news. Null from a map
@@ -113,6 +118,57 @@ public class RelayResponse
 		 */
 		@JsonAdapter(SocialWire.LenientMeetups.class)
 		public List<Meetup> events;
+	}
+
+	public static class SlayerOptions
+	{
+		public String taskName;
+		public String areaName;
+		public String order;
+		public boolean hideWilderness;
+		public List<SlayerSpot> rows;
+		public int ranked;
+		public int hiddenWilderness;
+		public List<SlayerKind> kinds;
+		public List<SlayerBoss> bosses;
+		public String rate;
+		public String page;
+		public String note;
+		public List<String> notes;
+	}
+
+	public static class SlayerSpot
+	{
+		public String id;
+		public int rank;
+		public String name;
+		public List<String> kinds;
+		public List<String> labels;
+		public String tier;
+		public List<SlayerAsk> asks;
+		public boolean bestForYou;
+		public RouteTile target;
+	}
+
+	public static class SlayerAsk
+	{
+		public String text;
+		public String tier;
+		public String skill;
+	}
+
+	public static class SlayerKind
+	{
+		public String name;
+		public String facts;
+		public String best;
+	}
+
+	public static class SlayerBoss
+	{
+		public String name;
+		public String where;
+		public RouteTile entrance;
 	}
 
 	/** One other member, as the website's Members list says them. */

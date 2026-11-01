@@ -72,14 +72,26 @@ public class HarnessGameTest
 	private static final Set<String> EXPECTED = new LinkedHashSet<>(Arrays.asList(
 			"getGameState", "getLocalPlayer", "getWorld", "getWorldType", "getVarbitValue", "getVarpValue",
 			"getRealSkillLevel", "getTickCount", "getPlane", "getItemDefinition", "getComponentTable",
+			"getDBRowsByValue", "getDBTableField",
 			"getName", "getWorldLocation", "getLocalLocation"));
 
 	@Test
-	public void answersExactlyTheseFourteenMethods()
+	public void answersExactlyTheseSixteenMethods()
 	{
 		assertEquals(EXPECTED, HarnessGame.ANSWERED);
-		// Modal state became an explicit farming input; the rest of the fake stays bounded.
-		assertEquals(14, HarnessGame.ANSWERED.size());
+		// DB values are explicit Slayer input, not inferred or simulated game state.
+		assertEquals(16, HarnessGame.ANSWERED.size());
+	}
+
+	@Test
+	public void repeatsOnlyExplicitDatabaseValuesWithoutConfusingTheValueWithTheRow()
+	{
+		HarnessGame game = new HarnessGame();
+		game.setDbValue(10, 11, 7, 9007, 12, "Dust Devils");
+		assertEquals(Arrays.asList(9007), game.client().getDBRowsByValue(10, 11, 0, 7));
+		assertEquals("Dust Devils", game.client().getDBTableField(9007, 12, 0)[0]);
+		assertNull(game.client().getDBTableField(7, 12, 0));
+		assertNull(game.client().getDBRowsByValue(10, 11, 0, 8));
 	}
 
 	/**

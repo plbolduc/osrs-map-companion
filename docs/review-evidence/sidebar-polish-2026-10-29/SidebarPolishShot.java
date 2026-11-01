@@ -67,7 +67,7 @@ public class SidebarPolishShot
 {
 	static final List<String> STATES = Arrays.asList("fresh", "fresh-log", "connect", "home", "route", "group", "settings", "settings-closed",
 		"stars", "stars-filters", "search", "search-whip", "search-whip-card", "death", "meetup", "dropluck", "dropluck-card", "status",
-		"farm", "farm-card", "farm-bring");
+		"farm", "farm-card", "farm-bring", "slayer", "slayer-card", "slayer-open", "slayer-expanded", "slayer-blocked");
 
 	static HarnessGame game;
 
@@ -86,7 +86,9 @@ public class SidebarPolishShot
 			SwingUtilities.invokeAndWait(() -> call(() -> shoot(state.equals("dropluck-card")
 				? (JComponent) get(panel[0], "drySection") : state.equals("search-whip-card")
 				? (JComponent) get(panel[0], "searchPanel") : state.equals("farm-card") || state.equals("farm-bring")
-				? (JComponent) get(panel[0], "farmRunPanel") : panel[0], args[0] + "/" + state + ".png")));
+				? (JComponent) get(panel[0], "farmRunPanel") : state.equals("slayer-card") || state.equals("slayer-open")
+				? (JComponent) get(panel[0], "slayerPanel") : state.equals("slayer-blocked")
+				? (JComponent) get(panel[0], "slayerPanel") : panel[0], args[0] + "/" + state + ".png")));
 		}
 		System.exit(0);
 	}
@@ -223,6 +225,22 @@ public class SidebarPolishShot
 		static void fill(String state, Injector injector, HarnessConfig config, LootLog log) throws Exception
 		{
 			DestinationState destinations = injector.getInstance(DestinationState.class);
+			if (state.startsWith("slayer"))
+			{
+				config.set("shareSlayer", true);
+				RelayResponse.SlayerOptions options = new Gson().fromJson(Files.readString(Paths.get("src/test/resources/contract/" + (state.equals("slayer-blocked") ? "slayer-blocked.json" : "slayer-options.json")), StandardCharsets.UTF_8), RelayResponse.SlayerOptions.class);
+				options.note = null;
+				if (options.kinds.size() == 1) for (RelayResponse.SlayerSpot spot : options.rows) spot.kinds.clear();
+				options = SlayerWire.normalize(options);
+				CompanionSnapshot.Slayer task = new CompanionSnapshot.Slayer();
+				task.taskName = options.taskName; task.areaName = options.areaName; task.remaining = 143;
+				String member = injector.getInstance(MemberIdentity.class).id();
+				SlayerState slayer = injector.getInstance(SlayerState.class);
+				slayer.local(member, task, options.order, options.hideWilderness);
+				RelayResponse.Directive directive = new RelayResponse.Directive();
+				directive.relayEpoch = "fixture-relay-epoch"; directive.slayerOptions = options; directive.slayerRevision = 1;
+				slayer.accept(member, directive, System.currentTimeMillis());
+			}
 			if (state.startsWith("farm"))
 			{
 				String json = Files.readString(Paths.get("src/test/resources/contract/farm-run.json"), StandardCharsets.UTF_8);
@@ -404,6 +422,11 @@ public class SidebarPolishShot
 
 	static void after(String state, MapCompanionPanel panel) throws Exception
 	{
+		if (state.equals("slayer-open") || state.equals("slayer-expanded"))
+		{
+			expand(panel, "All 3 places & options");
+			expand(panel, "1 kind counts");
+		}
 		if (state.equals("farm-bring"))
 		{
 			expand(panel, "Before you leave");

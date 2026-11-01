@@ -81,7 +81,10 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RouteClient`, `RoutePress
 
 - **POST /api/companion/snapshot** — logged-in state changes, at least two seconds apart, plus
   six-second idle heartbeats (twenty seconds with a stream). JSON comes from `SnapshotBuilder`;
-  each character field is gated independently. Headers: `X-Companion-Code`, optional
+  each character field is gated independently. With Share Slayer task enabled it also sends
+  the list's ranking order, Wilderness filter and delivery receipt (`slayerPreferences`).
+  Its ranked places arrive on the existing member directive, only until acknowledged;
+  this adds no poll or stream. Headers: `X-Companion-Code`, optional
   `X-Companion-Member-Secret`, `X-Companion-Installation`, and `X-Companion-Suffix`
   until the browser-link suffix is claimed.
 - **POST /api/companion/invite** — one **Copy invite** press. Group code and optional member-secret
@@ -185,6 +188,10 @@ Say these in the description of the next Hub update, as changes from what was ap
 
 - Farm runs: a received ordered itinerary, local replant/seeded-house progress, numbered stop
   pins, and Start, Reroute and End requests as disclosed above. No input or movement is automated.
+- Slayer places: the map's ranked list in Home, received through existing replies/stream until
+  acknowledged. Sharing the task also sends the order, Wilderness filter and receipt. Route
+  uses the existing endpoint with a public spot id; World map sets only a local pin. The Wiki
+  and licence are linked. No ranking table, automatic route request or additional poll is added.
 - Completed farming contracts remain visible under the existing sharing choice, with the same
   assignment's `state: "return"`, so the website can point back to Guildmaster Jane.
 - **One press at Connect** (above): the recommended set is offered after the server notice and

@@ -88,6 +88,21 @@ credential or a character identifier. A server restart clears the lost itinerary
 its counters locally; delayed frames from the retired process remain rejected. The marker is
 received on existing requests, with no additional polling or outgoing character field.
 
+**Slayer places.** With **Slayer task** shared, snapshots also carry `slayerPreferences`:
+version 1, the kept `best`/`single` order, the Wilderness filter and `seenRevision`. The server
+uses the website's ranking and the same fused account profile. Its own-member directive carries
+`slayerOptions` and `slayerRevision` until acknowledged; a task, profile or choice change can
+produce a new list. Remaining kills are displayed from the local reader and do not resend the
+list. The existing heartbeat and optional receive stream deliver it; sharing Slayer alone opens
+no stream. Turning sharing off clears the list and omits these fields. No list is written to disk.
+The relay epoch also scopes this counter across server restarts.
+
+**Route** on a Slayer place sends its public spot id and the player's current tile through
+the existing route endpoint, even with position sharing off. The server chooses a recorded
+spawn nearest the player already at that spot, otherwise the spot's recorded anchor. Boss
+versions with a recorded entrance route to that entrance. **World map** sets a local destination
+and hint arrow, with no request. The list credits the OSRS Wiki and its CC BY-NC-SA 3.0 licence.
+
 **Search**, at the top of Home while connected, asks `GET /api/companion/search?q=` with the
 same three credentials, about 350ms after the last key or at once on Enter, and never for fewer than
 two characters. One is in flight at a time: a query typed meanwhile waits for it, and the older

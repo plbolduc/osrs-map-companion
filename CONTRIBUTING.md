@@ -145,6 +145,12 @@ revision, next ordinal, confirmed `done` and reference `visited` ordinals. The m
 It waits through the real login settle and checks the actual Java reader/receiver, but its
 game values and tick ordering are supplied by the harness and are not live-client evidence.
 
+`slayer` supplies a synthetic task name and remaining count through explicit DB rows and varps;
+the real reader must resolve the row by value. `slayerOrder` changes the kept ranking and
+`routeSlayer` presses Route for the best usable received spot. The `slayer` state block contains
+the local task/count, received options and acknowledged revision. The map's
+`companion-slayer-story.mjs` checks both receive channels and a real server restart with it.
+
 `settledReward` commands begin after reward observation and test delivery, not actual game events.
 The fake cannot establish live reward coverage, farming varbit delivery or marker appearance.
 See [reward source coverage](docs/rewards-and-dryness.md) and [live checks](docs/live-checks.md).

@@ -70,6 +70,19 @@ final class HarnessConfig implements MapCompanionConfig
 	}
 
 	@Override
+	public String slayerOrder()
+	{
+		String value = store.get("slayerOrder");
+		return "single".equals(value) ? "single" : "best";
+	}
+
+	@Override
+	public boolean slayerHideWilderness()
+	{
+		return on("slayerHideWilderness", MapCompanionConfig.super.slayerHideWilderness());
+	}
+
+	@Override
 	public String pairingCode()
 	{
 		String held = store.get(MapCompanionConfig.KEY_PAIRING_CODE);

@@ -4,7 +4,7 @@ Bring [osrs-map.com](https://osrs-map.com)'s routes, search and shooting stars i
 and see your character and friends on the website.
 
 [Getting started](#getting-started) · [Search](#search-for-a-place-or-item) ·
-[Farm runs](#farm-runs-in-runelite) · [Slayer](#slayer-on-the-website) · [Sailing](#sailing-on-the-website) ·
+[Farm runs](#farm-runs-in-runelite) · [Slayer](#slayer-in-runelite) · [Sailing](#sailing-on-the-website) ·
 [What's new](https://osrs-map.com/whats-new)
 
 ## Routes in RuneLite
@@ -99,7 +99,22 @@ Patch tracking includes hops, bushes, hardwood and spirit trees, cactus and the 
 special patches, alongside herbs, allotments, flowers and trees.
 Completed farming contracts point back to Guildmaster Jane to hand them in.
 
-## Slayer on the website
+<a id="slayer-on-the-website"></a>
+
+## Slayer in RuneLite
+
+<p>
+  <img src="docs/mockups/sidebar-slayer.png" width="225" alt="The RuneLite Slayer card: remaining task count, best usable place, requirements and Route or World map actions">
+</p>
+
+Share your Slayer task to see the website's ranked places in Home. The counter follows kills
+in this client. Better places you cannot use yet stay visible with their requirements; expand
+the list for other places, ranking choices, the Wilderness filter and the kinds that count.
+Wilderness places start hidden. **Route** plans from where you stand; **World map** pins the
+spot locally. Locations and rates are from the [OSRS Wiki](https://oldschool.runescape.wiki/w/Slayer_training),
+[CC BY-NC-SA 3.0](https://creativecommons.org/licenses/by-nc-sa/3.0/).
+
+The website offers the same ranking with a larger map:
 
 <p>
   <img src="docs/mockups/website-slayer.jpg" width="360" alt="The website's Slayer panel for 143 Aberrant spectres: ranked places, monster variants, access requirements and controls for the list">
@@ -167,6 +182,8 @@ on until you press, and you can untick any of it first. Each choice can send:
   birdhouse states and observation ages; the state of farming patches you have walked past,
   including crop, stages, observation age, estimated growth windows and witnessed replant receipts
   for the 99 patches supported by RuneLite's crop tracker (including grapes, coral and seaweed).
+- With **Slayer task** shared: the Slayer list's order, Wilderness filter and delivery receipt.
+  These request your own sidebar list through the existing connection. They add no poll.
 - **Loot:** observed loot kills for every monster, how long ago each was last killed, notable drop
   counts and observation baselines, kills since a drop, slayer-task/diary rate conditions, the
   monster currently being killed and your pinned drop. Completeness flags identify omitted history.

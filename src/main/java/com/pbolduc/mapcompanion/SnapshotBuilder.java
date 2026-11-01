@@ -63,6 +63,7 @@ public class SnapshotBuilder
 	private final MapCompanionConfig config;
 	private final MemberIdentity identity;
 	private final SlayerTaskReader slayerReader;
+	private final SlayerState slayerState;
 	private final ClueReader clueReader;
 	private final QuestReader questReader;
 	private final DiaryReader diaryReader;
@@ -97,7 +98,8 @@ public class SnapshotBuilder
 		LootLog lootLog,
 		MilestoneOutbox milestones,
 		SnapshotTrimmer trimmer,
-		DeathWatcher deathWatcher)
+		DeathWatcher deathWatcher,
+		SlayerState slayerState)
 	{
 		this.client = client;
 		this.config = config;
@@ -117,6 +119,7 @@ public class SnapshotBuilder
 		this.milestones = milestones;
 		this.trimmer = trimmer;
 		this.deathWatcher = deathWatcher;
+		this.slayerState = slayerState;
 	}
 
 	@Nullable
@@ -235,7 +238,13 @@ public class SnapshotBuilder
 
 		if (config.shareSlayer())
 		{
-			snapshot.slayer = slayerReader.read();
+			snapshot.slayer = questReader.settled(nowMs) ? slayerReader.read() : null;
+			slayerState.local(identity.id(), snapshot.slayer, config.slayerOrder(), config.slayerHideWilderness());
+			snapshot.slayerPreferences = slayerState.preferences();
+		}
+		else
+		{
+			slayerState.clear();
 		}
 
 		if (config.shareClue())
