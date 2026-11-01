@@ -163,6 +163,12 @@ final class HarnessConfig implements MapCompanionConfig
 	}
 
 	@Override
+	public boolean shareBoats()
+	{
+		return on("shareBoats", MapCompanionConfig.super.shareBoats());
+	}
+
+	@Override
 	public boolean shareBirdhouses()
 	{
 		return on("shareBirdhouses", MapCompanionConfig.super.shareBirdhouses());

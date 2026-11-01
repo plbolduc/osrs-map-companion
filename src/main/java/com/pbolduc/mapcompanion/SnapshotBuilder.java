@@ -69,6 +69,7 @@ public class SnapshotBuilder
 	private final DiaryReader diaryReader;
 	private final TravelUnlockReader travelUnlockReader;
 	private final StashReader stashReader;
+	private final BoatReader boatReader;
 	private final BirdhouseReader birdhouseReader;
 	private final AssignmentReader assignmentReader;
 	private final CapabilityEvaluator capabilities;
@@ -90,6 +91,7 @@ public class SnapshotBuilder
 		DiaryReader diaryReader,
 		TravelUnlockReader travelUnlockReader,
 		StashReader stashReader,
+		BoatReader boatReader,
 		BirdhouseReader birdhouseReader,
 		AssignmentReader assignmentReader,
 		CapabilityEvaluator capabilities,
@@ -110,6 +112,7 @@ public class SnapshotBuilder
 		this.diaryReader = diaryReader;
 		this.travelUnlockReader = travelUnlockReader;
 		this.stashReader = stashReader;
+		this.boatReader = boatReader;
 		this.birdhouseReader = birdhouseReader;
 		this.assignmentReader = assignmentReader;
 		this.capabilities = capabilities;
@@ -229,6 +232,15 @@ public class SnapshotBuilder
 		if (config.shareStash())
 		{
 			snapshot.stashUnits = stashReader.read(nowMs);
+		}
+
+		/*
+		 * Null whenever the reader cannot vouch for every slot — unsettled, aboard, unreadable, or no
+		 * boat seen — which the map reads as "not told" and keeps its docking network for.
+		 */
+		if (config.shareBoats())
+		{
+			snapshot.boats = boatReader.read(nowMs);
 		}
 
 		if (config.shareCapabilities())

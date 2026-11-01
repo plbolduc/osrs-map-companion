@@ -90,6 +90,7 @@ public class CompletionAnnouncementTest
 		set("farmingObserver", new FarmingObserver(game.client(), store, new Gson()));
 		set("travelUnlockReader", new TravelUnlockReader(game.client()));
 		set("stashReader", new StashReader(game.client()));
+		set("boatReader", new BoatReader(game.client()));
 		set("birdhouseReader", new BirdhouseReader(key -> null));
 		set("assignmentReader", new AssignmentReader(game.client(), config));
 		set("deathWatcher", construct(DeathWatcher.class, game.client()));

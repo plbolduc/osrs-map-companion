@@ -232,6 +232,16 @@ public class WireContractTest
 		s.travelUnlocks.put("ates-darkfrost", true);
 		s.travelUnlocks.put("ates-ralos-rise", false);
 		s.house = "rellekka";
+		CompanionSnapshot.Boat moored = new CompanionSnapshot.Boat();
+		moored.slot = 1;
+		moored.dock = 6;
+		moored.port = "Catherby";
+		moored.focus = "greater";
+		/* A capsized boat: at no dock, so the map leaves it out of where voyages start. */
+		CompanionSnapshot.Boat capsized = new CompanionSnapshot.Boat();
+		capsized.slot = 3;
+		capsized.focus = "none";
+		s.boats = Arrays.asList(moored, capsized);
 		CompanionSnapshot.Birdhouse house = new CompanionSnapshot.Birdhouse();
 		house.id = "meadow-north";
 		house.state = "seeded";
