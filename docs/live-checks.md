@@ -303,7 +303,7 @@ continuously witnessed empty-to-newly-planted transition mints a stable completi
       make no inventory claim. Complete a seeded birdhouse and check its weaker sighting label.
 - [ ] Reach a personal stop. It says Visited, never Done. Reroute keeps completed and visited
       stops at their original numbers and orders only the rest.
-- [ ] Pause route, then replant. The list can record it without reclaiming a Shortest Path route
+- [ ] Pause, then replant. The list can record it without reclaiming a Shortest Path route
       you chose yourself. Follow resumes at the next unfinished stop. An outside target also
       pauses the whole run, including when the next replant arrives.
 - [ ] End while a plan is pending, and while Reroute is pending. No late answer revives it.

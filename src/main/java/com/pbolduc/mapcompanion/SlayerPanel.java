@@ -27,8 +27,9 @@ package com.pbolduc.mapcompanion;
 
 import com.google.inject.Inject;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -289,16 +290,17 @@ final class SlayerPanel extends JPanel
 
 	private void actions(String source, String id, RelayResponse.RouteTile tile, String name)
 	{
-		JPanel actions = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 1));
+		/* Route and World map side by side, as on a friend's card: they act, so they are buttons. */
+		JPanel actions = new JPanel(new GridLayout(1, 0, 4, 0));
 		actions.setOpaque(false);
-		JButton route = MapCompanionPanel.linkButton("Route");
+		actions.setBorder(BorderFactory.createEmptyBorder(3, 0, 1, 0));
+		JButton route = MapCompanionPanel.smallButton("Route");
 		route.setName(source);
 		WorldPoint at = new WorldPoint(tile.x, tile.y, tile.plane);
 		route.addActionListener(e -> { routes.press(id == null ? RoutePress.Target.tile(source, at, name, null, null) : RoutePress.Target.place(source, id, name, at, null)); refresh(connected); });
 		routeButtons.add(route);
 		actions.add(route);
-		actions.add(javax.swing.Box.createHorizontalStrut(10));
-		JButton pin = MapCompanionPanel.linkButton("World map");
+		JButton pin = MapCompanionPanel.smallButton("World map");
 		pin.setToolTipText("Pin this spot on the game's world map and hint arrow");
 		pin.setName(source + ".map");
 		pin.addActionListener(e ->
@@ -309,6 +311,7 @@ final class SlayerPanel extends JPanel
 		});
 		pinButtons.add(pin);
 		actions.add(pin);
+		actions.setMaximumSize(new Dimension(Integer.MAX_VALUE, actions.getPreferredSize().height));
 		body.add(MapCompanionPanel.left(actions));
 		JLabel feedback = line("", MUTED);
 		feedback.setName(source);
