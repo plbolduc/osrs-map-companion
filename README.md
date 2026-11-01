@@ -181,7 +181,9 @@ on until you press, and you can untick any of it first. Each choice can send:
   it is ready to hand in;
   birdhouse states and observation ages; the state of farming patches you have walked past,
   including crop, stages, observation age, estimated growth windows and witnessed replant receipts
-  for the 99 patches supported by RuneLite's crop tracker (including grapes, coral and seaweed).
+  for the 99 patches supported by RuneLite's crop tracker (including grapes, coral and seaweed);
+  which Sailing port task each of your five slots holds, with crates collected and delivered or
+  bounty parts still owed, and whether a slot is empty, locked or unreadable. Cargo is not read.
 - With **Slayer task** shared: the Slayer list's order, Wilderness filter and delivery receipt.
   These request your own sidebar list through the existing connection. They add no poll.
 - **Loot:** observed loot kills for every monster, how long ago each was last killed, notable drop

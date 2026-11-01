@@ -208,6 +208,9 @@ public class MapCompanionPlugin extends Plugin
 	private StashReader stashReader;
 
 	@Inject
+	private PortTaskReader portTaskReader;
+
+	@Inject
 	private BirdhouseReader birdhouseReader;
 
 	@Inject
@@ -500,6 +503,7 @@ public class MapCompanionPlugin extends Plugin
 		diaryReader.onSessionEnded();
 		travelUnlockReader.onSessionEnded();
 		stashReader.onSessionEnded();
+		portTaskReader.onSessionEnded();
 		birdhouseReader.onSessionEnded();
 		questReader.onSessionEnded();
 		assignmentReader.onSessionEnded();
@@ -716,6 +720,7 @@ public class MapCompanionPlugin extends Plugin
 		clueReader.reset();
 		travelUnlockReader.onSessionEnded();
 		stashReader.onSessionEnded();
+		portTaskReader.onSessionEnded();
 		birdhouseReader.onSessionEnded();
 		questReader.onSessionEnded();
 		assignmentReader.onSessionEnded();
@@ -869,6 +874,7 @@ public class MapCompanionPlugin extends Plugin
 			diaryReader.onSessionEnded();
 			travelUnlockReader.onSessionEnded();
 			stashReader.onSessionEnded();
+			portTaskReader.onSessionEnded();
 			birdhouseReader.onSessionEnded();
 			questReader.onSessionEnded();
 			assignmentReader.onSessionEnded();
@@ -1665,9 +1671,22 @@ public class MapCompanionPlugin extends Plugin
 		diaryReader.onSessionResumed(now);
 		travelUnlockReader.onSessionResumed(now);
 		stashReader.onSessionResumed(now);
+		portTaskReader.onSessionResumed(now);
 		birdhouseReader.onSessionResumed(now);
 		questReader.onSessionResumed(now);
 		assignmentReader.observe(now);
+		/*
+		 * Read every tick while the choice is on, for the sidebar as much as the snapshot: the slots
+		 * are five varbits and a cached row each. Off, nothing is read or shown.
+		 */
+		if (config.sharePortTasks())
+		{
+			portTaskReader.read(now);
+		}
+		else
+		{
+			portTaskReader.forget();
+		}
 		/* The sidebar's clue card reads the last reading; a scroll dropped or finished goes with it. */
 		clueReader.read();
 		if (config.shareFarming() || farmRunState.active())

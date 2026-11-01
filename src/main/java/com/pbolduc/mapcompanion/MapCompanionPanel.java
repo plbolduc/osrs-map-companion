@@ -1694,6 +1694,7 @@ public class MapCompanionPanel extends PluginPanel
 		kinds.add(new SharedKind("hunter rumours", config.shareHunterRumours()));
 		kinds.add(new SharedKind("Mahogany Homes", config.shareMahoganyHomes()));
 		kinds.add(new SharedKind("farming contracts", config.shareFarmingContracts()));
+		kinds.add(new SharedKind("port tasks", config.sharePortTasks()));
 		kinds.add(new SharedKind("full quest progress", config.shareQuestLog()));
 		kinds.add(new SharedKind("observed loot kills", config.shareLoot()));
 		kinds.add(new SharedKind("drops & levels", config.shareMilestones()));

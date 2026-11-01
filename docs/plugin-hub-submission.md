@@ -84,7 +84,9 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RouteClient`, `RoutePress
   each character field is gated independently. With Share Slayer task enabled it also sends
   the list's ranking order, Wilderness filter and delivery receipt (`slayerPreferences`).
   Its ranked places arrive on the existing member directive, only until acknowledged;
-  this adds no poll or stream. Headers: `X-Companion-Code`, optional
+  this adds no poll or stream. With Port tasks enabled it carries the five Sailing task
+  slots (`portTasks`): each slot's state, the task id and the game's own counters, read from
+  varbits and the client's `PortTask` table by value. Cargo is never read. Headers: `X-Companion-Code`, optional
   `X-Companion-Member-Secret`, `X-Companion-Installation`, and `X-Companion-Suffix`
   until the browser-link suffix is claimed.
 - **POST /api/companion/invite** — one **Copy invite** press. Group code and optional member-secret
@@ -194,6 +196,9 @@ Say these in the description of the next Hub update, as changes from what was ap
   and licence are linked. No ranking table, automatic route request or additional poll is added.
 - Completed farming contracts remain visible under the existing sharing choice, with the same
   assignment's `state: "return"`, so the website can point back to Guildmaster Jane.
+- Port tasks: a new sharing choice, off by default and in the one press at Connect, sending the
+  five Sailing task slots and their counters as disclosed above. No request, poll or game action
+  is added.
 - **One press at Connect** (above): the recommended set is offered after the server notice and
   shared only on the player's press, which names every field and the receive stream it opens. No
   config default changed.

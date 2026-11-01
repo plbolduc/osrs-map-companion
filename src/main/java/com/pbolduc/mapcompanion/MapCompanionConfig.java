@@ -369,6 +369,20 @@ public interface MapCompanionConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "sharePortTasks",
+		name = "Port tasks",
+		description = "Your five Sailing port task slots: which task each holds, crates collected and delivered, "
+			+ "and bounty parts still owed. Cargo itself is never read.",
+		position = 37,
+		warning = NETWORK_WARNING,
+		section = tasksSection
+	)
+	default boolean sharePortTasks()
+	{
+		return false;
+	}
+
+	@ConfigItem(
 		keyName = "shareQuestLog",
 		name = "Full quest progress",
 		description = "Started, finished or not started for the full quest and miniquest log, including subquests. Separate from travel-quest sharing; refreshed at most every thirty seconds.",

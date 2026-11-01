@@ -88,11 +88,22 @@ steps wait on these readings (`osrs-stars-map/docs/plan-where-to-go-for-a-task.m
 
 - [ ] **Slayer task name.** With *Slayer task* sharing on, the map names an ordinary task, a
       boss task if one is assigned, and a Konar task's area.
-- [ ] **Port task slots.** Take a courier task at a port task board and note
-      `PORT_TASK_SLOT_0_ID` (19574): is it the task's id in the map's `data/port-tasks.json`?
-      Collect the crates and watch `..._CARGO_TAKEN`, then deliver and watch `..._DELIVERED`.
-      An empty slot should read 0. Take a bounty task and watch `BOUNTY_TASK_ITEM_COUNTER_1`
-      (14662) count down as the parts drop.
+- [ ] **Port task slots.** `PortTaskReader` is written from the Hub's Sailing and Port Tasks
+      plugins and the game's script, not from a session; these settle it. With *Port tasks*
+      sharing on:
+  - [ ] Take a courier task and note `PORT_TASK_SLOT_0_ID` (19574): the map's Port tasks page
+        should name the same task. Collect some crates, then the rest, and watch
+        `..._CARGO_TAKEN`; deliver and watch `..._DELIVERED`. The page's run should drop the
+        pickup once every crate is collected, and the drop-off once every crate is delivered.
+  - [ ] After the last delivery: does the slot clear at once, or hold the task until something
+        else happens? The page says *all delivered* and assumes nothing beyond it.
+  - [ ] Take a bounty task in slot 0 and watch `BOUNTY_TASK_ITEM_COUNTER_1` (14662): at the
+        moment the task is taken it should read the parts asked for, and count down as they
+        drop. Repeat in another slot for the other four counters if convenient.
+  - [ ] An empty slot reads 0 or the *No Task* row and shows as free; a slot not yet bought is
+        *locked*. Log out and in, and hop: for fifteen seconds nothing is sent, then the same
+        tasks come back, never five empty slots.
+  - [ ] Cancel a task, and take a new one into the slot it left: the page replaces it.
 - [ ] **Where the boat is.** Note `SAILING_BOAT_1_PORT` (19260) where the boat is moored. Dock
       at another port and note it again, to learn how the value names a dock. Note
       `SAILING_BOAT_1_TELEPORT_FOCUS` (19270) for a boat with and without a teleportation focus,

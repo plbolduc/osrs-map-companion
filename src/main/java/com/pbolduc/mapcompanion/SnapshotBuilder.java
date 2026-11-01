@@ -71,6 +71,7 @@ public class SnapshotBuilder
 	private final StashReader stashReader;
 	private final BirdhouseReader birdhouseReader;
 	private final AssignmentReader assignmentReader;
+	private final PortTaskReader portTaskReader;
 	private final CapabilityEvaluator capabilities;
 	private final FarmingObserver farming;
 	private final XpTracker xpTracker;
@@ -99,7 +100,8 @@ public class SnapshotBuilder
 		MilestoneOutbox milestones,
 		SnapshotTrimmer trimmer,
 		DeathWatcher deathWatcher,
-		SlayerState slayerState)
+		SlayerState slayerState,
+		PortTaskReader portTaskReader)
 	{
 		this.client = client;
 		this.config = config;
@@ -120,6 +122,7 @@ public class SnapshotBuilder
 		this.trimmer = trimmer;
 		this.deathWatcher = deathWatcher;
 		this.slayerState = slayerState;
+		this.portTaskReader = portTaskReader;
 	}
 
 	@Nullable
@@ -267,6 +270,10 @@ public class SnapshotBuilder
 		if (config.shareBirdhouses())
 		{
 			snapshot.birdhouses = birdhouseReader.read(nowMs);
+		}
+		if (config.sharePortTasks())
+		{
+			snapshot.portTasks = portTaskReader.wire(nowMs);
 		}
 
 		if (config.shareFarming())
