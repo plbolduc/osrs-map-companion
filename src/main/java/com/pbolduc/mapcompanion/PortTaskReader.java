@@ -35,6 +35,8 @@ import java.util.Map;
 import javax.annotation.Nullable;
 import net.runelite.api.Client;
 import net.runelite.api.ItemComposition;
+import net.runelite.api.Player;
+import net.runelite.api.WorldView;
 import net.runelite.api.gameval.DBTableID;
 import net.runelite.api.gameval.VarbitID;
 
@@ -62,7 +64,8 @@ import net.runelite.api.gameval.VarbitID;
  * reader that cannot know yet sends nothing.
  *
  * <p><b>What leaves the machine.</b> {@link #wire} sends a slot's state, the task id and the
- * game's own counters — nothing else. The names, ports and crate counts in {@link Slot} are read
+ * game's own counters, and how many crates the hold of the boat last stood on carries
+ * ({@link CargoHolds}) — nothing else. The names, ports and crate counts in {@link Slot} are read
  * from the client's tables for the sidebar and stay here; the map has the same table.
  */
 @Singleton
@@ -189,16 +192,20 @@ public class PortTaskReader
 	}
 
 	private final Client client;
+	private final CargoHolds holds;
 	private final SessionSettle settle = new SessionSettle(15_000L);
 	/** Task id to its row, for this session's client. Client thread only. */
 	private final Map<Integer, Task> tasks = new HashMap<>();
 	/** The last settled reading, for the sidebar; null before one. */
 	private volatile List<Slot> latest;
+	/** The hold's crates as of that reading; null where no boat with a hold was stood on. */
+	private volatile Integer latestHold;
 
 	@Inject
-	PortTaskReader(Client client)
+	PortTaskReader(Client client, CargoHolds holds)
 	{
 		this.client = client;
+		this.holds = holds;
 	}
 
 	public void onSessionResumed(long nowMs)
@@ -211,13 +218,16 @@ public class PortTaskReader
 	{
 		settle.ended();
 		tasks.clear();
+		holds.reset();
 		latest = null;
+		latestHold = null;
 	}
 
 	/** Sharing withdrawn: the sidebar stops showing the last reading, and the session's clock runs on. */
 	public void forget()
 	{
 		latest = null;
+		latestHold = null;
 	}
 
 	/**
@@ -230,16 +240,26 @@ public class PortTaskReader
 		if (!settle.settled(nowMs))
 		{
 			latest = null;
+			latestHold = null;
 			return null;
 		}
+		standing();
 		List<Slot> slots = new ArrayList<>(SLOT_IDS.length);
 		for (int i = 0; i < SLOT_IDS.length; i++)
 		{
 			slots.add(slot(i));
 		}
 		List<Slot> reading = Collections.unmodifiableList(slots);
+		latestHold = hold();
 		latest = reading;
 		return reading;
+	}
+
+	/** Crates the remembered boat's hold carries; read after {@link #read} on the same thread. */
+	@Nullable
+	Integer latestHold()
+	{
+		return latestHold;
 	}
 
 	/** The last settled reading, from any thread; null before one or after the session ended. */
@@ -278,7 +298,33 @@ public class PortTaskReader
 			}
 			out.slots.add(w);
 		}
+		out.hold = latestHold;
 		return out;
+	}
+
+	/** Which boat the player stands on, if any, for {@link CargoHolds}. */
+	private void standing()
+	{
+		Player local = client.getLocalPlayer();
+		WorldView view = local == null ? null : local.getWorldView();
+		if (view != null)
+		{
+			holds.standingIn(view.getId(), view.isTopLevel());
+		}
+	}
+
+	/** The remembered hold's crates, at an Ultimate Ironman's limit where the account is one. */
+	@Nullable
+	private Integer hold()
+	{
+		try
+		{
+			return holds.capacity("uim".equals(AccountTypes.name(client.getVarbitValue(AccountTypes.VARBIT))));
+		}
+		catch (RuntimeException e)
+		{
+			return null;
+		}
 	}
 
 	private Slot slot(int index)

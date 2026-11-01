@@ -104,6 +104,11 @@ steps wait on these readings (`osrs-stars-map/docs/plan-where-to-go-for-a-task.m
         *locked*. Log out and in, and hop: for fifteen seconds nothing is sent, then the same
         tasks come back, never five empty slots.
   - [ ] Cancel a task, and take a new one into the slot it left: the page replaces it.
+  - [ ] Board a boat with a cargo hold: the page should name its crates as the Sailing plugin's
+        cargo overlay does, and keep it ashore. Board a second boat with a different hold; the
+        page follows it. A boat without a hold leaves the last one. On an Ultimate Ironman, the
+        hold should read the source table's limit (4 to 10); `CargoHoldTier` carries that column
+        but its own capacity method never reads it, so this is the reading least supported.
 - [ ] **Where the boat is (`BoatReader`, built from the game's scripts, not yet seen live).** The
       encodings are sourced (the map's `docs/review-evidence/sailing-reader-sources-2026-10-30.md`):
       a stored port is a `SailingDock` `dock_id` value joined by value, 253–255 are lost, capsized
