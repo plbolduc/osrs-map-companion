@@ -224,6 +224,10 @@ The website plan's second session, once the routes in the game are built: a memb
 - [ ] **Route back.** Die somewhere ordinary with *Share death* off, respawn and press Route back.
       Then, if convenient, die at a boss fought in an instance (Vorkath, Zulrah): note where the
       route goes. The map's half decides whether it is the boss's way in.
+- [ ] **Route here.** Right-click empty ground on the world map: *Route here* sits below Cancel,
+      and a left-click still drags the map and plans nothing. Choose it on a spot a few tiles from a
+      landmark: the route under Now ends on that tile, not the one beside it. Logged out of the
+      group, the entry is not offered; pressed twice within five seconds, the chat box says why once.
 - [ ] **Route on a star and a meetup.** In Stars, a precise site's Route sits beside Pin
       destination without cutting a word; an approximate one shows Open website. A meetup's Route
       prints its world in the destination's line and nobody in the group is told.

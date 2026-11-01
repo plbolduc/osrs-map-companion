@@ -49,6 +49,8 @@ import net.runelite.api.events.GameObjectSpawned;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ItemContainerChanged;
+import net.runelite.api.events.MenuEntryAdded;
+import net.runelite.api.events.MenuOpened;
 import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.events.ScriptPreFired;
 import net.runelite.api.events.StatChanged;
@@ -272,6 +274,9 @@ public class MapCompanionPlugin extends Plugin
 
 	@Inject
 	private RoutePress routePress;
+
+	@Inject
+	private WorldMapRouteHere routeHere;
 
 	@Inject
 	private OverlayManager overlayManager;
@@ -880,6 +885,19 @@ public class MapCompanionPlugin extends Plugin
 	 * <p>The clue is read whether or not it is shared, because the sidebar's clue card offers Route
 	 * either way. The snapshot carries it only with <i>Share clue</i>; see {@link ClueReader#current}.
 	 */
+	/** Where a right-click opened, for Route here on the world map; see {@link WorldMapRouteHere}. */
+	@Subscribe
+	public void onMenuOpened(MenuOpened event)
+	{
+		routeHere.menuOpened();
+	}
+
+	@Subscribe
+	public void onMenuEntryAdded(MenuEntryAdded event)
+	{
+		routeHere.entryAdded();
+	}
+
 	@Subscribe
 	public void onMenuOptionClicked(MenuOptionClicked event)
 	{
@@ -1051,6 +1069,7 @@ public class MapCompanionPlugin extends Plugin
 		flushRewards(now);
 		/* Kills inside the save window; a logout or character change writes them through reload. */
 		lootLog.saveIfDue();
+		routeHere.tick();
 
 		trackMovement(now);
 		if (client.getGameState() == GameState.LOGGED_IN)
