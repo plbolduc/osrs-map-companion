@@ -61,6 +61,72 @@
                 }
               }
             ]
+          },
+          {
+            "id": "docking_point:2797,3412,0",
+            "label": "Docking point",
+            "best": false,
+            "blocked": false,
+            "tiles": 1340,
+            "steps": [
+              {
+                "slot": "boarding-walk",
+                "title": "Walk 12t north-west",
+                "detail": "To Port Sarim",
+                "walk": true,
+                "at": {
+                  "x": 3051,
+                  "y": 3192,
+                  "plane": 0
+                }
+              },
+              {
+                "slot": "board",
+                "title": "Board your boat at Port Sarim",
+                "at": {
+                  "x": 3051,
+                  "y": 3192,
+                  "plane": 0
+                }
+              },
+              {
+                "slot": "sail",
+                "title": "Sail to Catherby",
+                "detail": "About 650 tiles",
+                "at": {
+                  "x": 2797,
+                  "y": 3412,
+                  "plane": 0
+                }
+              },
+              {
+                "slot": "dock",
+                "title": "Dock at Catherby",
+                "detail": "Your boat stays there",
+                "at": {
+                  "x": 2797,
+                  "y": 3412,
+                  "plane": 0
+                }
+              }
+            ],
+            "voyage": {
+              "from": "Port Sarim",
+              "to": "Catherby",
+              "line": [
+                [3051, 3192],
+                [3046, 3140],
+                [2950, 3205],
+                [2860, 3330],
+                [2797, 3412]
+              ],
+              "gates": [
+                {
+                  "text": "20 Sailing",
+                  "tier": "met"
+                }
+              ]
+            }
           }
         ]
       }

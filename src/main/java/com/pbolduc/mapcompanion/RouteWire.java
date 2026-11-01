@@ -69,6 +69,16 @@ final class RouteWire
 	/** The game's tile space, overworld and the underground beside it. */
 	private static final int MAX_COORDINATE = 16_383;
 	private static final Pattern SLOT = Pattern.compile("[a-z][a-z-]{0,31}");
+	/** The map's cap on a voyage's line: a few dozen tiles is what a simplified sail needs. */
+	static final int MAX_VOYAGE_POINTS = 64;
+	private static final int MAX_GATES = 4;
+	private static final int MAX_GATE = 80;
+	/** A mooring's name, as the map caps a boat's port. */
+	private static final int MAX_PORT = 48;
+	/** The rows of a voyage: told and ticked here, never walked, so never Shortest Path's. */
+	static final String BOARD = "board";
+	static final String SAIL = "sail";
+	static final String DOCK = "dock";
 
 	private RouteWire()
 	{
@@ -205,6 +215,62 @@ final class RouteWire
 		clean.blocked = option.blocked;
 		clean.tiles = option.tiles != null && option.tiles >= 0 ? option.tiles : null;
 		clean.steps = steps;
+		clean.voyage = voyage(option.voyage);
+		return clean;
+	}
+
+	/** A step of a voyage, which is told and ticked here and never handed to Shortest Path. */
+	static boolean voyageSlot(@Nullable String slot)
+	{
+		return BOARD.equals(slot) || SAIL.equals(slot) || DOCK.equals(slot);
+	}
+
+	/**
+	 * A voyage made safe to keep and to draw, or null: a voyage needs the mooring it leaves from. A
+	 * line point off the map goes, and a line of fewer than two points goes whole; a gate whose tier
+	 * is not one of the three goes, because a tier this cannot draw is one it would draw wrong.
+	 */
+	@Nullable
+	static RelayResponse.Voyage voyage(@Nullable RelayResponse.Voyage voyage)
+	{
+		String from = voyage == null ? null : text(voyage.from, MAX_PORT);
+		if (from == null)
+		{
+			return null;
+		}
+		RelayResponse.Voyage clean = new RelayResponse.Voyage();
+		clean.from = from;
+		clean.to = text(voyage.to, MAX_PORT);
+		List<int[]> points = new ArrayList<>();
+		if (voyage.line != null)
+		{
+			for (int[] point : voyage.line)
+			{
+				if (point != null && point.length == 2 && point[0] > 0 && point[1] > 0
+					&& point[0] <= MAX_COORDINATE && point[1] <= MAX_COORDINATE && points.size() < MAX_VOYAGE_POINTS)
+				{
+					points.add(new int[]{point[0], point[1]});
+				}
+			}
+		}
+		clean.line = points.size() < 2 ? null : points.toArray(new int[0][]);
+		List<RelayResponse.Gate> gates = new ArrayList<>();
+		if (voyage.gates != null)
+		{
+			for (RelayResponse.Gate gate : voyage.gates)
+			{
+				String said = gate == null ? null : text(gate.text, MAX_GATE);
+				String tier = gate == null ? null : gate.tier;
+				if (said != null && ("met".equals(tier) || "unmet".equals(tier) || "unknown".equals(tier)) && gates.size() < MAX_GATES)
+				{
+					RelayResponse.Gate kept = new RelayResponse.Gate();
+					kept.text = said;
+					kept.tier = tier;
+					gates.add(kept);
+				}
+			}
+		}
+		clean.gates = gates.isEmpty() ? null : gates;
 		return clean;
 	}
 
@@ -237,7 +303,8 @@ final class RouteWire
 			}
 		}
 		clean.notes = notes.isEmpty() ? null : notes;
-		clean.walk = step.walk;
+		/* A voyage's rows are sailed, never walked, whatever the wire says: Shortest Path cannot sail. */
+		clean.walk = step.walk && !voyageSlot(step.slot);
 		clean.at = tile(step.at);
 		return clean;
 	}
