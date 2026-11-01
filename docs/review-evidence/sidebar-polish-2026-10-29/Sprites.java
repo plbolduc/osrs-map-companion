@@ -24,6 +24,11 @@ final class Sprites
 
 	/** The item ids the scenes use, by the website's file for them. */
 	static final Map<Integer, String> ITEMS = new HashMap<>();
+	/**
+	 * The spell icons the scenes use, by the website's copy of the same picture: the client's sprite
+	 * cache holds the spellbook's icons, which a renderer without a running game cannot open.
+	 */
+	static final Map<Integer, String> SPELLS = new HashMap<>();
 
 	static
 	{
@@ -34,6 +39,8 @@ final class Sprites
 		ITEMS.put(4151, "abyssal-whip");
 		ITEMS.put(net.runelite.api.gameval.ItemID.LUNAR_TABLET_CATHERBY_TELEPORT, "catherby-teleport-tablet");
 		ITEMS.put(net.runelite.api.gameval.ItemID.MYSTIC_ROBE_BOTTOM_DARK, "mystic-robe-bottom-dark");
+		SPELLS.put(net.runelite.api.gameval.SpriteID.Magicon2.LUMBRIDGE_HOME_TELEPORT, "home-teleport");
+		SPELLS.put(net.runelite.api.gameval.SpriteID.MagicNecroOn.DRAYNOR_MANOR_TELEPORT, "draynor-manor-teleport");
 	}
 
 	/** The same item sprite that the live client's ItemManager supplies to Drop luck. */
@@ -69,7 +76,8 @@ final class Sprites
 			{
 				/* The combat tab's crossed swords is the one sprite the website keeps under a name of its own. */
 				show(label, read(root, spriteId == net.runelite.api.gameval.SpriteID.SideIcons.COMBAT
-					? "osrs-icons/1x/skill-combat.png" : "osrs-icons/cache/" + spriteId + ".png"), box);
+					? "osrs-icons/1x/skill-combat.png" : SPELLS.containsKey(spriteId)
+					? "osrs-icons/1x/" + SPELLS.get(spriteId) + ".png" : "osrs-icons/cache/" + spriteId + ".png"), box);
 			}
 
 			/**
