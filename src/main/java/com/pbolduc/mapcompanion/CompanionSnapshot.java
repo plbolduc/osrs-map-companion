@@ -251,6 +251,8 @@ public class CompanionSnapshot
 	public static class PortTasks
 	{
 		public List<PortTaskSlot> slots;
+		/** Crates the hold of the boat last stood on carries; absent where none was seen this session. */
+		public Integer hold;
 	}
 
 	/**

@@ -34,6 +34,8 @@ import java.util.Map;
 import java.util.Objects;
 import net.runelite.api.Client;
 import net.runelite.api.ItemComposition;
+import net.runelite.api.Player;
+import net.runelite.api.WorldView;
 import net.runelite.api.gameval.DBTableID;
 import net.runelite.api.gameval.VarbitID;
 import static org.junit.Assert.assertArrayEquals;
@@ -67,12 +69,15 @@ public class PortTaskReaderTest
 	private final Map<Integer, Map<Integer, Object[]>> rows = new HashMap<>();
 	private final Map<Integer, Integer> tableOf = new HashMap<>();
 	private RuntimeException failure;
+	private Player local;
 
 	private final Client client = (Client) Proxy.newProxyInstance(Client.class.getClassLoader(), new Class<?>[] {Client.class},
 		(proxy, method, args) ->
 		{
 			switch (method.getName())
 			{
+				case "getLocalPlayer":
+					return local;
 				case "getVarbitValue":
 					return varbits.getOrDefault((Integer) args[0], 0);
 				case "getDBRowsByValue":
@@ -89,7 +94,8 @@ public class PortTaskReaderTest
 					throw new UnsupportedOperationException(method.getName());
 			}
 		});
-	private final PortTaskReader reader = new PortTaskReader(client);
+	private final CargoHolds holds = new CargoHolds();
+	private final PortTaskReader reader = new PortTaskReader(client, holds);
 
 	public PortTaskReaderTest()
 	{
@@ -234,12 +240,54 @@ public class PortTaskReaderTest
 	}
 
 	@Test
+	public void theWireCarriesTheHoldOfTheBoatStoodOnAndNothingBeforeOne()
+	{
+		settle();
+		assertNull("no boat stood on: the hold is unknown, not empty", reader.wire(20_000).hold);
+		holds.spawned(7, CargoHolds.HOLDS[2][3]);
+		holds.spawned(7, CargoHolds.HULLS[1][2]);
+		standIn(7);
+		assertEquals("a teak skiff's hold", Integer.valueOf(60), reader.wire(21_000).hold);
+		varbits.put(AccountTypes.VARBIT, 2);
+		assertEquals("an Ultimate Ironman's teak hold", Integer.valueOf(6), reader.wire(22_000).hold);
+		reader.onSessionEnded();
+		reader.onSessionResumed(30_000);
+		assertNull("a hop forgets the boat until it is stood on again", reader.wire(50_000).hold);
+	}
+
+	@Test
 	public void withdrawingSharingHidesTheReading()
 	{
 		settle();
 		reader.read(20_000);
 		reader.forget();
 		assertNull(reader.latest());
+	}
+
+	private void standIn(int view)
+	{
+		WorldView boat = (WorldView) Proxy.newProxyInstance(WorldView.class.getClassLoader(), new Class<?>[] {WorldView.class},
+			(proxy, method, args) ->
+			{
+				switch (method.getName())
+				{
+					case "getId":
+						return view;
+					case "isTopLevel":
+						return false;
+					default:
+						throw new UnsupportedOperationException(method.getName());
+				}
+			});
+		local = (Player) Proxy.newProxyInstance(Player.class.getClassLoader(), new Class<?>[] {Player.class},
+			(proxy, method, args) ->
+			{
+				if ("getWorldView".equals(method.getName()))
+				{
+					return boat;
+				}
+				throw new UnsupportedOperationException(method.getName());
+			});
 	}
 
 	private void settle()

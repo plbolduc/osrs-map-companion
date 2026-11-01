@@ -28,7 +28,11 @@ crates collected and delivered for a courier, parts still owed for a bounty. `un
 whose value names no row this client can read, and stays distinct from `empty`. Nothing is sent for
 fifteen seconds after a login or a hop, while every varbit still reads zero. Task names, ports and
 crate counts are read from the client's tables for the sidebar and are not sent; the map has the
-same table. Cargo itself, and anything else in the hold, is never read.
+same table. Cargo itself, and anything else in the hold, is never read. With the slots goes `hold`,
+how many crates the cargo hold of the boat you last stood on carries, from the hold and hull objects
+that boat spawns and RuneLite's account type for an Ultimate Ironman's limit. It is absent until you
+stand on a boat with a hold, and forgotten at logout, a hop or a character change, so the map plans
+as if only one task's crates fit until it has been seen.
 
 **Farming patches** covers the 99 crop patches in RuneLite 1.13.4's Time Tracking catalogue,
 excluding compost bins. This includes the additional hops, bushes, hardwood, spirit trees,

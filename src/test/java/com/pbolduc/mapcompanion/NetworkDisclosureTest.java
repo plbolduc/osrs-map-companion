@@ -226,7 +226,7 @@ public class NetworkDisclosureTest
 		expected.put("Npc", "drops, dropsComplete, kills, lastKillMsAgo, npc, ratedKey");
 		expected.put("Pin", "item, npc");
 		expected.put("PortTaskSlot", "delivered, remaining, slot, state, taken, taskId");
-		expected.put("PortTasks", "slots");
+		expected.put("PortTasks", "hold, slots");
 		expected.put("Patch", "completedMsAgo, completionId, id, observedMsAgo, produce, readyInMaxMs, readyInMinMs, stagesLeft, state");
 		expected.put("RewardSource", "kind, name");
 		expected.put("Slayer", "areaName, remaining, taskName");

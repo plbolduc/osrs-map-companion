@@ -270,6 +270,7 @@ public class WireContractTest
 			portSlot(2, "empty", null, null, null, null),
 			portSlot(3, "locked", null, null, null, null),
 			portSlot(4, "unknown", null, null, null, null));
+		s.portTasks.hold = 60;
 		s.stashUnits = new HashMap<>();
 		s.stashUnits.put(28960, true);
 		Map<String, String> rewards = new HashMap<>();

@@ -40,9 +40,12 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.Getter;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
+import net.runelite.api.GameObject;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.ActorDeath;
 import net.runelite.api.events.ChatMessage;
+import net.runelite.api.events.GameObjectDespawned;
+import net.runelite.api.events.GameObjectSpawned;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ItemContainerChanged;
@@ -51,6 +54,7 @@ import net.runelite.api.events.ScriptPreFired;
 import net.runelite.api.events.StatChanged;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.events.WidgetLoaded;
+import net.runelite.api.events.WorldViewUnloaded;
 import net.runelite.api.GameState;
 import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.Player;
@@ -212,6 +216,9 @@ public class MapCompanionPlugin extends Plugin
 
 	@Inject
 	private PortTaskReader portTaskReader;
+
+	@Inject
+	private CargoHolds cargoHolds;
 
 	@Inject
 	private BirdhouseReader birdhouseReader;
@@ -961,6 +968,27 @@ public class MapCompanionPlugin extends Plugin
 			}
 		}
 		dirty = true;
+	}
+
+	/** A boat's cargo hold and hull, for how many crates it carries; see {@link CargoHolds}. */
+	@Subscribe
+	public void onGameObjectSpawned(GameObjectSpawned event)
+	{
+		GameObject object = event.getGameObject();
+		cargoHolds.spawned(object.getWorldView().getId(), object.getId());
+	}
+
+	@Subscribe
+	public void onGameObjectDespawned(GameObjectDespawned event)
+	{
+		GameObject object = event.getGameObject();
+		cargoHolds.despawned(object.getWorldView().getId(), object.getId());
+	}
+
+	@Subscribe
+	public void onWorldViewUnloaded(WorldViewUnloaded event)
+	{
+		cargoHolds.unloaded(event.getWorldView().getId());
 	}
 
 	@Subscribe
