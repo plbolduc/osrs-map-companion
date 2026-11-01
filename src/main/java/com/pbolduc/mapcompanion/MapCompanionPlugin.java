@@ -291,6 +291,9 @@ public class MapCompanionPlugin extends Plugin
 	private VoyageMapOverlay voyageMapOverlay;
 
 	@Inject
+	private RouteStepOverlay routeStepOverlay;
+
+	@Inject
 	private DirectiveStream directiveStream;
 
 	@Inject
@@ -448,6 +451,7 @@ public class MapCompanionPlugin extends Plugin
 		overlayManager.add(destinationSceneOverlay);
 		overlayManager.add(destinationMinimapOverlay);
 		overlayManager.add(voyageMapOverlay);
+		overlayManager.add(routeStepOverlay);
 		relay.reset();
 		lootLog.reload();
 		clientThread.invokeLater(() -> { collectionItems.initialize(); });
@@ -499,6 +503,7 @@ public class MapCompanionPlugin extends Plugin
 		overlayManager.remove(destinationSceneOverlay);
 		overlayManager.remove(destinationMinimapOverlay);
 		overlayManager.remove(voyageMapOverlay);
+		overlayManager.remove(routeStepOverlay);
 	}
 
 	/**

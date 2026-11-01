@@ -247,6 +247,9 @@ Say these in the description of the next Hub update, as changes from what was ap
   the game nothing, added below Cancel so a left-click never takes it, and only over the map with a
   group set. A press is the Route request above with the clicked tile; it can be turned off under
   *In the client*.
+- **The step on screen**: an `OverlayPanel` naming the followed route's destination and the step the
+  sidebar marks, drawn only while the player follows a route, gone on arrival and inside instances.
+  It draws what the sidebar already holds and sends nothing; it can be turned off under *In the client*.
 
 ## Before submission
 

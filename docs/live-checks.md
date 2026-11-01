@@ -200,6 +200,9 @@ The website plan's second session, once the routes in the game are built: a memb
 - [ ] **The arrow follows the step.** With the current step's end in the loaded scene, the game's
       arrow points there rather than at the destination; it moves on as each step is reached, and a
       quest's arrow set first is left alone.
+- [ ] **The step on screen.** Follow a route with the sidebar closed: a small box in the top left
+      names the destination and the step the sidebar marks, moves on with it, and goes on arrival.
+      It can be dragged like any RuneLite box, and it is not drawn inside an instance.
 - [ ] **Shortest Path, installed.** With it running, Follow appears beside Reroute. A received
       destination draws nothing in it until Follow is pressed. On a teleport step it shows nothing
       new; on reaching the landing it draws the walk from your tile to the step's end, and the

@@ -151,6 +151,8 @@ final class SharingFields
 		"Receive the positions your group already shares and draw them on the world map.");
 	static final Field HINT_ARROW = field("destinationHintArrow", "Hint arrow to a destination", MapCompanionConfig::destinationHintArrow,
 		"Point the game's own arrow at a destination once it is nearby. Nothing leaves this computer.");
+	static final Field STEP_ON_SCREEN = field("showStepOnScreen", "Step on screen", MapCompanionConfig::showStepOnScreen,
+		"While you follow a route, the step you are on in a small box over the game. Nothing leaves this computer.");
 	static final Field SHORTEST_PATH = field(MapCompanionConfig.KEY_SHORTEST_PATH, "Draw paths with Shortest Path", MapCompanionConfig::drawWithShortestPath,
 		"When you follow a route, the Shortest Path plugin draws each walking step. Nothing leaves this computer.");
 	static final Field ROUTE_HERE = field("routeHereOnWorldMap", "Route here on the world map", MapCompanionConfig::routeHereOnWorldMap,
@@ -161,5 +163,5 @@ final class SharingFields
 		"One chat line when a drop with a known rate lands. Nothing leaves this computer.");
 
 	static final List<Field> CLIENT = Collections.unmodifiableList(Arrays.asList(
-		DESTINATIONS, GROUP_ON_WORLD_MAP, HINT_ARROW, SHORTEST_PATH, ROUTE_HERE, NOTIFY_MEETUPS, DROP_LUCK_CHAT));
+		DESTINATIONS, GROUP_ON_WORLD_MAP, HINT_ARROW, STEP_ON_SCREEN, SHORTEST_PATH, ROUTE_HERE, NOTIFY_MEETUPS, DROP_LUCK_CHAT));
 }
