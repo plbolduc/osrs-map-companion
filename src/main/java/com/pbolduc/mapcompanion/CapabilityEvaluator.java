@@ -152,6 +152,33 @@ public class CapabilityEvaluator
 		return null;
 	}
 
+	/** Whether one item grants a flag, by its id or its name. */
+	interface ItemTest
+	{
+		boolean grants(int itemId, @Nullable String name);
+	}
+
+	/**
+	 * What an item must be to carry the flag a bank-list name names, by the rule {@link #evaluate}
+	 * carries it by: the flag's own item id where the name cannot tell spent from charged, its name
+	 * otherwise. Null for a name no flag names, as {@link #carrying} abstains on it.
+	 */
+	@Nullable
+	static ItemTest itemTest(String item)
+	{
+		String named = item == null ? "" : item.replaceAll("[^A-Za-z]", "");
+		for (Capability capability : CAPABILITIES)
+		{
+			if (capability.flag.equalsIgnoreCase(named))
+			{
+				return (itemId, name) -> capability.itemId != 0
+					? capability.itemId == itemId
+					: name != null && capability.name.matcher(name).find();
+			}
+		}
+		return null;
+	}
+
 	@Inject
 	CapabilityEvaluator(Client client)
 	{

@@ -297,6 +297,9 @@ public class MapCompanionPlugin extends Plugin
 	private RouteStepOverlay routeStepOverlay;
 
 	@Inject
+	private FarmBankOverlay farmBankOverlay;
+
+	@Inject
 	private KeyManager keyManager;
 
 	/*
@@ -488,6 +491,7 @@ public class MapCompanionPlugin extends Plugin
 		overlayManager.add(destinationMinimapOverlay);
 		overlayManager.add(voyageMapOverlay);
 		overlayManager.add(routeStepOverlay);
+		overlayManager.add(farmBankOverlay);
 		keyManager.registerKeyListener(rerouteKey);
 		keyManager.registerKeyListener(followKey);
 		relay.reset();
@@ -542,6 +546,7 @@ public class MapCompanionPlugin extends Plugin
 		overlayManager.remove(destinationMinimapOverlay);
 		overlayManager.remove(voyageMapOverlay);
 		overlayManager.remove(routeStepOverlay);
+		overlayManager.remove(farmBankOverlay);
 		keyManager.unregisterKeyListener(rerouteKey);
 		keyManager.unregisterKeyListener(followKey);
 	}
@@ -1115,6 +1120,7 @@ public class MapCompanionPlugin extends Plugin
 		/* Kills inside the save window; a logout or character change writes them through reload. */
 		lootLog.saveIfDue();
 		routeHere.tick();
+		farmBankOverlay.refresh();
 
 		trackMovement(now);
 		if (client.getGameState() == GameState.LOGGED_IN)
