@@ -838,79 +838,41 @@ public class MapCompanionPanel extends PluginPanel
 		return true;
 	}
 
-	private boolean confirmServer()
+	/**
+	 * The one question before anything leaves for a map, asked only of a map that is not osrs-map.com.
+	 *
+	 * <p>The warning RuneLite requires is shown at install, from the Hub's manifest: what this plugin
+	 * sends, and that the server is a third party's. Pressing Connect or Join on the map the plugin
+	 * was installed for is the choice that warning was about, so nothing more is asked. A different
+	 * map address is a different server, and no install warning could have named it: a player told
+	 * to paste some address into Settings would be sending their position somewhere they never saw
+	 * named. So that map is asked about by name, once — {@link Pairing} remembers the answer per map
+	 * — and cancelling sends nothing.
+	 */
+	private boolean confirmMap()
 	{
+		String server = pairing.serverUrl();
+		if (server == null)
+		{
+			return false;
+		}
+		if (isDefaultMap(server))
+		{
+			return true;
+		}
 		return JOptionPane.showOptionDialog(this,
-			"Connect to " + pairing.serverUrl() + "?\n\n"
-			+ MapCompanionConfig.NETWORK_WARNING + ".\n\n"
-			+ "Connecting sends a random member ID, a random key for this\n"
-			+ "RuneLite, your name to show and the connection code.\n"
-			+ "Selected sharing data is sent while logged in and is\n"
-			+ "visible to your group's members.\n\n"
-			+ "You can change sharing or leave the group in this sidebar.",
-			"Connect to the map", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE,
+			"Send your data to " + pairing.serverLabel() + " instead of osrs-map.com?\n\n"
+			+ "It is a map server RuneLite has not checked. It receives your IP address, and what you\n"
+			+ "choose to share goes to it and to your group there.",
+			"Connect to another map", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE,
 			null, new Object[]{"Connect", "Cancel"}, "Cancel") == JOptionPane.OK_OPTION;
 	}
 
-	/**
-	 * Connect's one dialog: the server notice, and the new group's name under it.
-	 *
-	 * <p>One dialog rather than two, because making a group and agreeing to talk to the map are one
-	 * press for the player. The notice is the same words {@link #confirmServer} shows, plus the
-	 * sentence that says a group is being made; the name is filled in already, so a player who plays
-	 * alone and never invites anybody presses Connect and nothing else. Returns the name, or null when
-	 * the player cancelled — and cancelling sends nothing.
-	 */
-	@Nullable
-	private String confirmStart()
+	/** The map the plugin is installed for, whose install warning already said all of this. */
+	static boolean isDefaultMap(@Nullable String server)
 	{
-		JTextField name = new JTextField(DEFAULT_GROUP_NAME, 18);
-		name.setName("connect.name");
-		JPanel form = new JPanel(new BorderLayout(0, 6));
-		form.add(new JLabel("<html>Connect to " + escape(pairing.serverUrl()) + "?<br><br>"
-			+ escape(MapCompanionConfig.NETWORK_WARNING) + ".<br><br>"
-			+ "This makes a group for you on the map. Play alone, or<br>"
-			+ "invite friends with Copy invite. Connecting sends a random<br>"
-			+ "member ID, a random key for this RuneLite and your name to show.<br>"
-			+ "Selected sharing data is sent while logged in and is<br>"
-			+ "visible to your group's members.<br><br>"
-			+ "Group name, which friends you invite will see:</html>"), BorderLayout.CENTER);
-		form.add(name, BorderLayout.SOUTH);
-		name.addAncestorListener(new javax.swing.event.AncestorListener()
-		{
-			/** Into the field, so a name can be typed straight away; Connect is still the default. */
-			@Override
-			public void ancestorAdded(javax.swing.event.AncestorEvent event)
-			{
-				name.selectAll();
-			}
-
-			@Override
-			public void ancestorRemoved(javax.swing.event.AncestorEvent event)
-			{
-			}
-
-			@Override
-			public void ancestorMoved(javax.swing.event.AncestorEvent event)
-			{
-			}
-		});
-		int chose = JOptionPane.showOptionDialog(this, form, "Connect to the map", JOptionPane.OK_CANCEL_OPTION,
-			JOptionPane.WARNING_MESSAGE, null, new Object[]{"Connect", "Cancel"}, "Connect");
-		if (chose != JOptionPane.OK_OPTION)
-		{
-			return null;
-		}
-		String typed = name.getText().replaceAll("\\s+", " ").trim();
-		return typed.isEmpty() ? DEFAULT_GROUP_NAME : typed.substring(0, Math.min(typed.length(), Pairing.MAX_GROUP_NAME));
+		return server != null && server.equals(Pairing.normalizeServer(MapCompanionConfig.DEFAULT_MAP_URL));
 	}
-
-	/**
-	 * What a group made by Connect is called until somebody names it — the map's own default, so a
-	 * name left as it was and a name the map supplied are the same name. It reads true to its maker
-	 * and to everyone they invite, which "My group" would not.
-	 */
-	static final String DEFAULT_GROUP_NAME = "Our group";
 
 	/**
 	 * The orange button: Connect before a group, Open map after.
@@ -936,7 +898,13 @@ public class MapCompanionPanel extends PluginPanel
 		}
 	}
 
-	/** Connect with no group: the notice and a name, then the map makes the group. */
+	/**
+	 * Connect with no group: one press, and the map makes the group.
+	 *
+	 * <p>Nothing is asked. The group is called what the map calls a group nobody has named, and its
+	 * maker can rename it on the map; a player who plays alone never has to think of a name at all.
+	 * What to share comes next, as the step it has always been.
+	 */
 	private void startGroup()
 	{
 		if (asking || !applyMapAddress())
@@ -944,18 +912,17 @@ public class MapCompanionPanel extends PluginPanel
 			return;
 		}
 		String server = pairing.serverUrl();
-		String name = confirmStart();
-		if (name == null)
+		if (!pairing.approvedMap(server) && !confirmMap())
 		{
 			say("Connection cancelled.");
 			return;
 		}
 		ask(server);
-		connectClient.start(server, identity.installationKey(), name.equals(DEFAULT_GROUP_NAME) ? null : name,
+		connectClient.start(server, identity.installationKey(),
 			outcome -> SwingUtilities.invokeLater(() -> finishConnect(server, outcome)));
 	}
 
-	/** Join with a friend's invite: the notice if this map has none yet, then the map spends the invite. */
+	/** Join with a friend's invite: the one question for another map, then the map spends the invite. */
 	private void joinWithInvite(JoinCode invited)
 	{
 		if (asking)
@@ -963,7 +930,7 @@ public class MapCompanionPanel extends PluginPanel
 			return;
 		}
 		String server = pairing.serverUrl();
-		if (!pairing.noticeAccepted(server) && !confirmServer())
+		if (!pairing.approvedMap(server) && !confirmMap())
 		{
 			say("Connection cancelled.");
 			return;
@@ -985,7 +952,7 @@ public class MapCompanionPanel extends PluginPanel
 	 * The map's answer to Connect or Join, on Swing's thread: keep the code as if it had been pasted,
 	 * or say why not.
 	 *
-	 * <p>The notice was accepted before anything was sent, so the code is connected with a notice
+	 * <p>The map was approved before anything was sent, so the code is connected with an approval
 	 * that answers yes — which is also what lets {@link RecommendedSharing} offer the sharing step to a
 	 * player meeting this map for the first time. An answer that arrives after the map address has
 	 * changed is for a map the player has left, and is dropped.
@@ -1127,7 +1094,7 @@ public class MapCompanionPanel extends PluginPanel
 	/** Connect, then offer the recommended set if this was a first Connect to the map. */
 	private boolean connect(JoinCode joined)
 	{
-		return RecommendedSharing.connect(pairing, joined, this::confirmServer, config,
+		return RecommendedSharing.connect(pairing, joined, this::confirmMap, config,
 			() -> recommendedSharing.offer(pairing.serverLabel()));
 	}
 

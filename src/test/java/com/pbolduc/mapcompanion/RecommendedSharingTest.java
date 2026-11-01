@@ -48,10 +48,9 @@ import static org.junit.Assert.*;
 /**
  * The one press after a first Connect: the recommended set is a press, never a default.
  *
- * <p>Every setting still starts off, so the reviewer notes and RuneLite's per-setting warnings
- * stay true; what the press writes is exactly the listed keys, as the group shortcuts write them;
- * nothing is written until it is pressed; and a player who connected before, or chose anything
- * first, is never offered it.
+ * <p>Every setting still starts off, so the reviewer notes stay true; what the press writes is
+ * exactly the listed keys, as the group shortcuts write them; nothing is written until it is
+ * pressed; and a player who connected before, or chose anything first, is never offered it.
  */
 public class RecommendedSharingTest
 {
@@ -192,7 +191,7 @@ public class RecommendedSharingTest
 			assertTrue(RecommendedSharing.offered(quiet.config));
 			assertTrue(RecommendedSharing.connect(quietPairing, JoinCode.parse("ABC234"), () -> true,
 				quiet.config, offers::incrementAndGet));
-			assertEquals("only the Connect that showed the notice offers it", 0, offers.get());
+			assertEquals("only the Connect that approved its map offers it", 0, offers.get());
 		});
 	}
 

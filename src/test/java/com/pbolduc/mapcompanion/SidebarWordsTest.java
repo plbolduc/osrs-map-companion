@@ -29,6 +29,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Locale;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
@@ -142,14 +143,28 @@ public class SidebarWordsTest
 
 	/**
 	 * One orange button, saying the one thing to press: Connect before a group, which makes one, and
-	 * Open map after, which opens the website as the player. A fresh install no longer needs the map.
+	 * Open the map after, which opens the website as the player. A fresh install no longer needs the
+	 * map.
 	 */
 	@Test
 	public void theOrangeButtonConnectsBeforeAGroupAndOpensTheMapAfter()
 	{
 		assertEquals("Connect", MapCompanionPanel.CONNECT);
 		assertEquals("Open the map", MapCompanionPanel.OPEN_MAP);
-		assertEquals("Our group", MapCompanionPanel.DEFAULT_GROUP_NAME);
+	}
+
+	/**
+	 * Connect asks nothing of the map the plugin was installed for — the install warning was the
+	 * question — and a map anywhere else is asked about by name. Only the address decides which.
+	 */
+	@Test
+	public void onlyAMapOtherThanTheInstalledOneIsAskedAbout()
+	{
+		assertTrue(MapCompanionPanel.isDefaultMap("https://osrs-map.com"));
+		assertTrue(MapCompanionPanel.isDefaultMap(Pairing.normalizeServer("https://OSRS-MAP.com:443/")));
+		assertFalse(MapCompanionPanel.isDefaultMap("https://osrs-map.com.example.test"));
+		assertFalse(MapCompanionPanel.isDefaultMap("http://localhost:3000"));
+		assertFalse(MapCompanionPanel.isDefaultMap(null));
 	}
 
 	/** The invite says both ways in, and keeps the link last so a chat client links all of it. */

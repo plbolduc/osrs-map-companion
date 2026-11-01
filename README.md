@@ -163,8 +163,8 @@ The pictures use made-up characters and stars.
 ## Getting started
 
 1. Install **OSRS Map Companion** from the Plugin Hub and open its sidebar.
-2. Press **Connect**. Read the server notice, name your group if you like, and press **Connect**
-   again. The plugin makes a group for you; you can use it on your own.
+2. Press **Connect**. The plugin makes a group for you, called *Our group*; you can use it on your
+   own.
 3. Press **Share what's ticked**, or **Customise** to choose field by field first, or **Not now** to
    share nothing yet. The gear opens **Settings** whenever you want to change your choices.
 4. To play with friends, press **Copy invite** under **Group** and send it. A friend pastes it into
@@ -177,9 +177,9 @@ from its Companion panel.
 ## What you share
 
 **This plugin sends data to osrs-map.com, a third-party server, which receives your IP address.**
-Nothing is sent until you press **Connect** and accept the server notice. While you are connected
-and logged in, the plugin sends a random member id, the name you chose and your group's
-credentials, even with every sharing choice off.
+Nothing is sent until you press **Connect**. While you are connected and logged in, the plugin
+sends a random member id, the name you chose and your group's credentials, even with every
+sharing choice off.
 
 <details>
 <summary>Full sharing details and settings</summary>
@@ -188,7 +188,7 @@ credentials, even with every sharing choice off.
   <img src="docs/mockups/sidebar-settings.png" width="300" alt="Settings with its four sharing categories, Name and death location, In the client and Advanced; Advanced is closed">
 </p>
 
-Every choice starts off. After the server notice, one press of **Share what's ticked** turns on
+Every choice starts off. After your first Connect, one press of **Share what's ticked** turns on
 everything below except where you died, and draws destinations, meetups and your group on the
 world map, which keeps one connection open to the map while you are logged in. Nothing is turned
 on until you press, and you can untick any of it first. Each choice can send:
@@ -226,9 +226,10 @@ on until you press, and you can untick any of it first. Each choice can send:
   when its own choice above is shared too, and never for what was done before the plugin was watching.
   Unknown reward details remain absent. Large snapshots include a flag saying some of it was left out.
 
-**Connect**, with no group yet, sends a random key for this RuneLite and the group name you chose,
-once per press and only after the server notice; the map makes your group with it. **Join** with a
-pasted invite sends that key and the invite. Neither sends anything about your character.
+**Connect**, with no group yet, sends a random key for this RuneLite, once per press; the map makes
+your group with it. **Join** with a pasted invite sends that key and the invite. Neither sends
+anything about your character. If you have changed **Settings → Advanced → Map address** to a server
+other than osrs-map.com, the first Connect to it asks you first, naming it.
 **Open the map** sends your group's credentials once per press, and opens a one-time link that
 adds that browser to your group as you.
 

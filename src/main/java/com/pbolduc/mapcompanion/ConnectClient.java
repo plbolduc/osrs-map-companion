@@ -51,8 +51,8 @@ import okhttp3.Response;
  * {@code claimed}, and the map issues the member secret.
  *
  * <ul>
- *   <li><b>Connect</b> — {@code POST /api/companion/connect} with the group's name, or nothing for
- *       the map's own. The map makes a group whose maker is this RuneLite.
+ *   <li><b>Connect</b> — {@code POST /api/companion/connect} with nothing in it. The map makes a
+ *       group whose maker is this RuneLite, and names it as it names a group nobody has named.
  *   <li><b>Join</b> — the same address with the group's code and the invite's token out of a pasted
  *       link. The map spends one use of the invite.
  *   <li><b>Open map</b> — {@code POST /api/companion/link} under the member's own headers. The map
@@ -66,8 +66,9 @@ import okhttp3.Response;
  * the code, member id and secret every member request sends. No character data: a group is made
  * before anything is shared, and the sharing choices are offered after.
  *
- * <p><b>When.</b> Only on a press, after the server notice, and one at a time. Nothing is retried:
- * a refusal is a sentence for the player, and a link that cannot be had opens the plain map.
+ * <p><b>When.</b> Only on a press, and one at a time. On the map the plugin was installed for, the
+ * install warning was the notice; a different map address is asked about by name first. Nothing is
+ * retried: a refusal is a sentence for the player, and a link that cannot be had opens the plain map.
  *
  * <p><b>Threads.</b> Presses are Swing's; the call and its answer are OkHttp's. The answer is handed
  * to the caller, which takes it back to Swing.
@@ -116,10 +117,9 @@ final class ConnectClient
 		}
 	}
 
-	/** What {@code /api/companion/connect} reads: one of a name, or a code and the token beside it. */
+	/** What {@code /api/companion/connect} reads: nothing, or a code and the token beside it. */
 	static final class Ask
 	{
-		String name;
 		String code;
 		String invite;
 	}
@@ -156,12 +156,10 @@ final class ConnectClient
 		this.gson = gson;
 	}
 
-	/** Connect: make a group named {@code name}, or the map's own name when it is null. */
-	void start(String server, String installationKey, @Nullable String name, Consumer<Outcome> done)
+	/** Connect: make a group, which the map names. */
+	void start(String server, String installationKey, Consumer<Outcome> done)
 	{
-		Ask ask = new Ask();
-		ask.name = name;
-		send(server, installationKey, ask, null, done);
+		send(server, installationKey, new Ask(), null, done);
 	}
 
 	/** Join: spend {@code invite} for the group {@code code}. */

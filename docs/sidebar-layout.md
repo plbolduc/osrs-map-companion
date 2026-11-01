@@ -358,7 +358,7 @@ Status: **built**, on `claude/where-to-go`, step 9d of `docs/plan-where-to-go-fo
 `osrs-stars-map`, and not yet seen in a real client. Every setting still starts off; the press is
 the opt-in.
 
-After the server notice of a first Connect, a card under the connecting line, *Choose what to
+After a first Connect to a map, a card under the connecting line, *Choose what to
 share*, with one short row per choice:
 
 - the four groups as bold checkboxes, all ticked; the loot row reads *Loot and milestones · kept
@@ -493,6 +493,11 @@ second line and *Character sharing paused* the third, about a connection that di
 Then Open the map, and the code field with no heading over it, its placeholder *Paste your
 connection code* and its tooltip saying where the code comes from; with a kill log, Drop luck
 follows. A fresh install is 130px where it was 221.
+
+Since `docs/plan-plugin-first.md` in `osrs-stars-map`, the one filled button says **Connect** here,
+because it makes a group, and *Open the map* once there is one. A small *Have an invite?* heading
+goes over the field, its placeholder *Paste an invite or code*, and **Paste** and **Join** under it:
+the field is the other way in now, and the heading says which of the two a friend's message is for.
 
 ### The step after Connect
 

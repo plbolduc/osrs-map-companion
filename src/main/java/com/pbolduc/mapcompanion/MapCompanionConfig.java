@@ -36,13 +36,19 @@ import net.runelite.client.config.Units;
  * The plugin's settings and the player's choices about sharing.
  *
  * <p>An empty pairing code opens no connection. Joining chooses a group; it does not choose
- * which character data that group may see. Each category starts off and carries RuneLite's
- * third-party warning, so enabling it is a separate decision.
+ * which character data that group may see. Each category starts off, so enabling it is a separate
+ * decision.
  *
- * <p>The sidebar's sharing checkboxes write the same settings as RuneLite's config panel without
- * a warning of their own: the sidebar's Connect dialog shows this warning, with what connecting
- * sends, before any request leaves, and a checkbox only chooses what goes to a server already
- * approved there. A nickname can label the member without naming an account. Saved choices keep their existing keys so an update does not reset them.
+ * <p><b>Why no setting carries RuneLite's {@code warning}.</b> RuneLite asks a plugin that talks to
+ * a server for a warning "either on the plugin, or on the configuration option", and this plugin's
+ * is on the plugin: the Hub manifest's {@code warning=} line, which RuneLite shows when somebody
+ * presses Install (`docs/plugin-hub-submission.md`). RuneLite turns a setting's warning into an
+ * "Are you sure?" on every change, which would ask that one decision again on every setting, so
+ * the sidebar's checkboxes and RuneLite's config panel write these settings the same way, with
+ * nothing in between.
+ *
+ * <p>A nickname can label the member without naming an account. Saved choices keep their existing
+ * keys so an update does not reset them.
  *
  * <p>Receiving destinations opens the relay stream and is also opt-in. The client section
  * keeps that choice beside the local notification controls.
@@ -52,10 +58,6 @@ public interface MapCompanionConfig extends Config
 {
 	String GROUP = "mapcompanion";
 	String DEFAULT_MAP_URL = "https://osrs-map.com";
-
-	/** Shown by RuneLite's config panel on each sharing setting, and by the sidebar's Connect dialog. */
-	String NETWORK_WARNING =
-		"This feature submits your IP address to a 3rd-party server not controlled or verified by RuneLite developers";
 
 	/**
 	 * What the map keeps of a drop or a level, said beside the choice that sends one. A group made
@@ -184,7 +186,6 @@ public interface MapCompanionConfig extends Config
 			+ "nothing is sent while you are logged out. Leave it off and they see your Name to "
 			+ "show, or Member.",
 		position = 9,
-		warning = NETWORK_WARNING,
 		section = presenceSection
 	)
 	default boolean shareName()
@@ -202,7 +203,6 @@ public interface MapCompanionConfig extends Config
 			+ "on a shared map, so the map says so instead of drawing your dot in a room nobody "
 			+ "else is in.",
 		position = 10,
-		warning = NETWORK_WARNING,
 		section = presenceSection
 	)
 	default boolean sharePosition()
@@ -217,7 +217,6 @@ public interface MapCompanionConfig extends Config
 			"Your levels, so the map can rank routes you can actually use. These are already public "
 			+ "on the hiscores.",
 		position = 11,
-		warning = NETWORK_WARNING,
 		section = progressSection
 	)
 	default boolean shareSkills()
@@ -233,7 +232,6 @@ public interface MapCompanionConfig extends Config
 			+ "since you last moved — so the map can show the rocks or trees for it, and tell your "
 			+ "friends you are idle rather than ignoring them.",
 		position = 12,
-		warning = NETWORK_WARNING,
 		section = presenceSection
 	)
 	default boolean shareActivity()
@@ -249,7 +247,6 @@ public interface MapCompanionConfig extends Config
 			+ "differ — an ironman cannot buy the teleport a main would. This is the badge the game "
 			+ "already prints beside your name in every line of chat.",
 		position = 13,
-		warning = NETWORK_WARNING,
 		section = presenceSection
 	)
 	default boolean shareAccountType()
@@ -265,7 +262,6 @@ public interface MapCompanionConfig extends Config
 			+ "rings, spirit trees and the like). Nothing else about your quest log is read, and "
 			+ "no individual step of one is.",
 		position = 14,
-		warning = NETWORK_WARNING,
 		section = progressSection
 	)
 	default boolean shareQuests()
@@ -281,7 +277,6 @@ public interface MapCompanionConfig extends Config
 			+ "their rewards you have collected — so the map can rank the teleports those unlock "
 			+ "instead of asking you to tick them by hand. No individual task is read.",
 		position = 15,
-		warning = NETWORK_WARNING,
 		section = progressSection
 	)
 	default boolean shareDiaries()
@@ -295,7 +290,6 @@ public interface MapCompanionConfig extends Config
 		description = "Built landing sites, activated statues and other permanent transport unlocks, "
 			+ "plus the town your house is in. Unverified flags are not sent.",
 		position = 25,
-		warning = NETWORK_WARNING,
 		section = progressSection
 	)
 	default boolean sharePermanentTravel()
@@ -308,7 +302,6 @@ public interface MapCompanionConfig extends Config
 		name = "STASH construction",
 		description = "Which STASH units you have built. Does not read or share stored equipment.",
 		position = 26,
-		warning = NETWORK_WARNING,
 		section = progressSection
 	)
 	default boolean shareStash()
@@ -322,7 +315,6 @@ public interface MapCompanionConfig extends Config
 		description = "Where each of your boats is moored and whether it carries a teleport focus, so the map's "
 			+ "voyages start at your boat. Boat names are not sent.",
 		position = 26,
-		warning = NETWORK_WARNING,
 		section = progressSection
 	)
 	default boolean shareBoats()
@@ -335,7 +327,6 @@ public interface MapCompanionConfig extends Config
 		name = "Birdhouse observations",
 		description = "Birdhouse states observed by RuneLite Time Tracking for this character, with their age. Enable Time Tracking to collect observations.",
 		position = 27,
-		warning = NETWORK_WARNING,
 		section = tasksSection
 	)
 	default boolean shareBirdhouses()
@@ -348,7 +339,6 @@ public interface MapCompanionConfig extends Config
 		name = "Hunter rumours",
 		description = "Your current rumour, after using the Rumour option on a quetzal whistle. Recheck after logging in or hopping.",
 		position = 28,
-		warning = NETWORK_WARNING,
 		section = tasksSection
 	)
 	default boolean shareHunterRumours()
@@ -361,7 +351,6 @@ public interface MapCompanionConfig extends Config
 		name = "Mahogany Homes",
 		description = "Your customer and contract tier, when observed in game messages or NPC dialogue.",
 		position = 29,
-		warning = NETWORK_WARNING,
 		section = tasksSection
 	)
 	default boolean shareMahoganyHomes()
@@ -374,7 +363,6 @@ public interface MapCompanionConfig extends Config
 		name = "Farming contracts",
 		description = "The crop requested by your current Farming Guild contract.",
 		position = 30,
-		warning = NETWORK_WARNING,
 		section = tasksSection
 	)
 	default boolean shareFarmingContracts()
@@ -388,7 +376,6 @@ public interface MapCompanionConfig extends Config
 		description = "Your five Sailing port task slots: which task each holds, crates collected and delivered, "
 			+ "and bounty parts still owed. Cargo itself is never read.",
 		position = 37,
-		warning = NETWORK_WARNING,
 		section = tasksSection
 	)
 	default boolean sharePortTasks()
@@ -401,7 +388,6 @@ public interface MapCompanionConfig extends Config
 		name = "Full quest progress",
 		description = "Started, finished or not started for the full quest and miniquest log, including subquests. Separate from travel-quest sharing; refreshed at most every thirty seconds.",
 		position = 31,
-		warning = NETWORK_WARNING,
 		section = progressSection
 	)
 	default boolean shareQuestLog()
@@ -416,7 +402,6 @@ public interface MapCompanionConfig extends Config
 			"Whether you are carrying the items that unlock a route — a dramen staff, a slayer ring. "
 			+ "Evaluated here as yes/no answers; your inventory itself never leaves the client.",
 		position = 16,
-		warning = NETWORK_WARNING,
 		section = progressSection
 	)
 	default boolean shareCapabilities()
@@ -429,7 +414,6 @@ public interface MapCompanionConfig extends Config
 		name = "Slayer task",
 		description = "Your current assignment and how many are left.",
 		position = 17,
-		warning = NETWORK_WARNING,
 		section = tasksSection
 	)
 	default boolean shareSlayer()
@@ -442,7 +426,6 @@ public interface MapCompanionConfig extends Config
 		name = "Clue step",
 		description = "The clue scroll step you are on, so the map can route you to it.",
 		position = 18,
-		warning = NETWORK_WARNING,
 		section = tasksSection
 	)
 	default boolean shareClue()
@@ -457,7 +440,6 @@ public interface MapCompanionConfig extends Config
 			"The state of patches you have walked past, so the map can build a run. Only patches you "
 			+ "have actually seen are known.",
 		position = 19,
-		warning = NETWORK_WARNING,
 		section = tasksSection
 	)
 	default boolean shareFarming()
@@ -474,7 +456,6 @@ public interface MapCompanionConfig extends Config
 			+ "show your drop luck. The log itself always stays on this computer; this only controls "
 			+ "whether it is shared. Normal members worlds only; these are not your lifetime game kill counts.",
 		position = 20,
-		warning = NETWORK_WARNING,
 		section = lootSection
 	)
 	default boolean shareLoot()
@@ -493,7 +474,6 @@ public interface MapCompanionConfig extends Config
 			+ "its own quest or diary choice is on; nothing done before is. Nothing is queued while "
 			+ "unpaired or logged out. " + FEED_KEPT,
 		position = 21,
-		warning = NETWORK_WARNING,
 		section = lootSection
 	)
 	default boolean shareMilestones()
@@ -507,7 +487,6 @@ public interface MapCompanionConfig extends Config
 		description = "Include observed local pet rewards while Drops and levels is on. A pet message "
 					  + "without a confirmed item stays unnamed; no boss or pet is guessed.",
 		position = 23,
-		warning = NETWORK_WARNING,
 		section = lootSection
 	)
 	default boolean sharePets()
@@ -522,7 +501,6 @@ public interface MapCompanionConfig extends Config
 					  + "collection log chat or popup notifications in the game's settings so additions can be "
 					  + "observed. Your collection log contents and previously filled slots are never read.",
 		position = 24,
-		warning = NETWORK_WARNING,
 		section = lootSection
 	)
 	default boolean shareCollectionLog()
@@ -537,7 +515,6 @@ public interface MapCompanionConfig extends Config
 			"Send the tile of your most recent death so the map can offer a route back to it. Forgotten "
 			+ "after an hour.",
 		position = 22,
-		warning = NETWORK_WARNING,
 		section = presenceSection
 	)
 	default boolean shareDeath()
@@ -552,7 +529,6 @@ public interface MapCompanionConfig extends Config
 			"Draw a marker on the world map when somebody sends you one, and count down to meetups. "
 			+ "Nothing is ever clicked or walked for you.",
 		position = 30,
-		warning = NETWORK_WARNING,
 		section = clientSection
 	)
 	default boolean showDestination()
@@ -568,7 +544,6 @@ public interface MapCompanionConfig extends Config
 			+ "them. Only members who share their position with the group appear. Nothing about you is sent "
 			+ "for this; it receives what the group already shares.",
 		position = 34,
-		warning = NETWORK_WARNING,
 		section = clientSection
 	)
 	default boolean showGroupOnWorldMap()
@@ -612,7 +587,6 @@ public interface MapCompanionConfig extends Config
 			"Raise a RuneLite notification before each of your group's meetups starts, as many minutes "
 			+ "ahead as the setting below says, so one does not pass while the sidebar is closed.",
 		position = 31,
-		warning = NETWORK_WARNING,
 		section = clientSection
 	)
 	default boolean notifyMeetups()

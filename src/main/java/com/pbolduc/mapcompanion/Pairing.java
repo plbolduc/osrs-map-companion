@@ -225,18 +225,20 @@ public class Pairing
 	}
 
 	/**
-	 * Whether the server notice has been accepted for this map, whichever group it was for.
+	 * Whether the player has connected to this map before, whichever group it was for.
 	 *
 	 * <p>Asked before <i>Connect</i> or an invite sends anything, because those ask the map for a
-	 * group before there is one to {@link #connect} to: the notice comes first, the request after,
-	 * and {@link #connect} records the acceptance once the answer arrives.
+	 * group before there is one to {@link #connect} to: the approval comes first, the request after,
+	 * and {@link #connect} records it once the answer arrives. For the map the plugin is installed
+	 * for the approval asks nothing — the install warning was the question — and another map is asked
+	 * about by name; the panel's {@code confirmMap} is that question.
 	 */
-	public boolean noticeAccepted(@Nullable String server)
+	public boolean approvedMap(@Nullable String server)
 	{
 		return server != null && DISCLOSURE_VERSION.equals(readMap(KEY_SERVER_CONSENT).get(server));
 	}
 
-	/** The dialog precedes any group change; cancelling writes nothing. */
+	/** The approval precedes any group change; declining writes nothing. */
 	public boolean connect(JoinCode joined, BooleanSupplier confirm)
 	{
 		String server = serverUrl();
