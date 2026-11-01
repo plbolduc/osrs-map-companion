@@ -98,7 +98,8 @@
         "slot": 4,
         "state": "unknown"
       }
-    ]
+    ],
+    "hold": 60
   },
   "diaryRewards": {
     "Varrock": "medium"

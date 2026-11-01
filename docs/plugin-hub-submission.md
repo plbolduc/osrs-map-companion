@@ -86,7 +86,8 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RouteClient`, `RoutePress
   Its ranked places arrive on the existing member directive, only until acknowledged;
   this adds no poll or stream. With Port tasks enabled it carries the five Sailing task
   slots (`portTasks`): each slot's state, the task id and the game's own counters, read from
-  varbits and the client's `PortTask` table by value. Cargo is never read. Headers: `X-Companion-Code`, optional
+  varbits and the client's `PortTask` table by value, and the crates the hold of the boat last
+  stood on carries, from its spawned hold and hull objects. Cargo is never read. Headers: `X-Companion-Code`, optional
   `X-Companion-Member-Secret`, `X-Companion-Installation`, and `X-Companion-Suffix`
   until the browser-link suffix is claimed.
 - **POST /api/companion/invite** — one **Copy invite** press. Group code and optional member-secret
