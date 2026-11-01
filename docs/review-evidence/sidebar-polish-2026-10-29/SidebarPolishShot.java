@@ -67,7 +67,8 @@ public class SidebarPolishShot
 {
 	static final List<String> STATES = Arrays.asList("fresh", "fresh-log", "connect", "home", "route", "group", "settings", "settings-closed",
 		"stars", "stars-filters", "search", "search-whip", "search-whip-card", "death", "meetup", "dropluck", "dropluck-card", "status",
-		"farm", "farm-card", "farm-bring", "slayer", "slayer-card", "slayer-open", "slayer-expanded", "slayer-blocked");
+		"farm", "farm-card", "farm-bring", "slayer", "slayer-card", "slayer-open", "slayer-expanded", "slayer-blocked",
+		"port-tasks", "port-tasks-card", "port-tasks-unread");
 
 	static HarnessGame game;
 
@@ -88,7 +89,8 @@ public class SidebarPolishShot
 				? (JComponent) get(panel[0], "searchPanel") : state.equals("farm-card") || state.equals("farm-bring")
 				? (JComponent) get(panel[0], "farmRunPanel") : state.equals("slayer-card") || state.equals("slayer-open")
 				? (JComponent) get(panel[0], "slayerPanel") : state.equals("slayer-blocked")
-				? (JComponent) get(panel[0], "slayerPanel") : panel[0], args[0] + "/" + state + ".png")));
+				? (JComponent) get(panel[0], "slayerPanel") : state.equals("port-tasks-card") || state.equals("port-tasks-unread")
+				? (JComponent) get(panel[0], "portTasksPanel") : panel[0], args[0] + "/" + state + ".png")));
 		}
 		System.exit(0);
 	}
@@ -240,6 +242,25 @@ public class SidebarPolishShot
 				RelayResponse.Directive directive = new RelayResponse.Directive();
 				directive.relayEpoch = "fixture-relay-epoch"; directive.slayerOptions = options; directive.slayerRevision = 1;
 				slayer.accept(member, directive, System.currentTimeMillis());
+			}
+			if (state.startsWith("port-tasks"))
+			{
+				/*
+				 * The reading is laid in directly: the reader's varbits and tables are PortTaskReaderTest's
+				 * to prove, and the harness client answers neither. The map's own rows: Brimhaven's sword
+				 * crates already aboard, its fruit and Port Khazard's sand still to collect, and the
+				 * osprey bounty with nine feathers owed — the website's Port tasks scene holds the same.
+				 */
+				config.set("sharePortTasks", true);
+				boolean unread = state.equals("port-tasks-unread");
+				PortTaskReader reader = injector.getInstance(PortTaskReader.class);
+				set(reader, "latest", Arrays.asList(
+					new PortTaskReader.Slot(0, PortTaskReader.COURIER, 81, "Corsair Cove sword delivery", "Brimhaven", "Corsair Cove", 3, 3, 0, 0, null),
+					new PortTaskReader.Slot(1, PortTaskReader.COURIER, 84, "Port Khazard fruit delivery", "Brimhaven", "Port Khazard", 3, 0, 0, 0, null),
+					new PortTaskReader.Slot(2, PortTaskReader.COURIER, 121, "Ardougne sand delivery", "Port Khazard", "Ardougne", 3, 0, 0, 0, null),
+					new PortTaskReader.Slot(3, PortTaskReader.BOUNTY, 466, "Brimhaven osprey bounty", null, "Brimhaven", 15, 0, 0, 9, "Osprey feather"),
+					PortTaskReader.Slot.plain(4, unread ? PortTaskReader.UNKNOWN : PortTaskReader.LOCKED)));
+				set(reader, "latestHold", unread ? null : 30);
 			}
 			if (state.startsWith("farm"))
 			{

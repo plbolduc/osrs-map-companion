@@ -145,6 +145,16 @@ Open a port task board on osrs-map.com to compare courier and bounty jobs, their
 Couriers are ranked by XP per sailed tile; bounties account for the sail out and back and the
 expected hunting. A bounty's pin opens the creature on the map.
 
+## Port tasks in RuneLite
+
+<p>
+  <img src="docs/mockups/sidebar-port-tasks.png" width="225" alt="The RuneLite Port tasks card: three courier deliveries with the crates still to collect or deliver, an osprey bounty with nine feathers owed, and the hold's 30 crates">
+</p>
+
+Share your port tasks to list the ones you hold in Home: the crates still to collect and where
+they go, or the bounty parts still owed and the board to hand them in at. On the website, **You →
+Port tasks** orders every pickup and drop-off into one courier run that fits your boat's hold.
+
 The pictures use made-up characters and stars.
 
 ## Getting started
