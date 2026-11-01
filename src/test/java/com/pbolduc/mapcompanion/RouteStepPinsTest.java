@@ -26,6 +26,7 @@
 package com.pbolduc.mapcompanion;
 
 import com.google.gson.Gson;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import net.runelite.api.coords.WorldPoint;
@@ -69,7 +70,7 @@ public class RouteStepPinsTest
 	private final DestinationState state = new DestinationState(new Gson());
 	private final DestinationRoute route = new DestinationRoute();
 	private final HarnessConfig config = new HarnessConfig(new HarnessStore(), "http://localhost");
-	private final DestinationMarker markers = new DestinationMarker(manager, state, config, now, route);
+	private final DestinationMarker markers = new DestinationMarker(manager, state, config, now, route, null);
 
 	/** The Al Kharid route; its last step ends on the destination's own tile. */
 	private void routed()
@@ -118,6 +119,32 @@ public class RouteStepPinsTest
 		state.dismiss();
 		route.sync(state.getDestination());
 		markers.sync();
+		assertTrue(drawn.isEmpty());
+	}
+
+	@Test
+	public void aFarmRunDrawsItsStopNumbersWithoutADuplicateDestinationOrJourneyNumbers() throws Exception
+	{
+		FarmRunState farm = new FarmRunState();
+		RelayResponse.FarmRun run = new Gson().fromJson(new String(getClass().getResourceAsStream("/contract/farm-run.json")
+			.readAllBytes(), StandardCharsets.UTF_8), RelayResponse.FarmRun.class);
+		FarmRunRoute follower = new FarmRunRoute(farm, state, route, now);
+		DestinationMarker farmMarkers = new DestinationMarker(manager, state, config, now, route, follower);
+		farm.accept(run, 1, 1_000);
+		follower.sync();
+		farmMarkers.sync();
+		assertEquals("four stops, without a second destination or journey-step pins", 4, drawn.size());
+		assertEquals("1. Falador farm · next", drawn.get(3).getTooltip());
+		assertTrue(drawn.get(3).isSnapToEdge());
+		assertTrue(drawn.stream().anyMatch(pin -> "3. Fossil Island birdhouse · done".equals(pin.getTooltip())));
+		assertTrue(drawn.stream().anyMatch(pin -> "4. My bank · visited".equals(pin.getTooltip())));
+		assertEquals(1, drawn.stream().filter(WorldMapPoint::isSnapToEdge).count());
+		farm.follow(false);
+		farmMarkers.sync();
+		assertTrue(drawn.stream().noneMatch(WorldMapPoint::isSnapToEdge));
+		farm.end();
+		follower.sync();
+		farmMarkers.sync();
 		assertTrue(drawn.isEmpty());
 	}
 }

@@ -163,5 +163,161 @@
       ],
       "mine": "maybe"
     }
-  ]
+  ],
+  "run": {
+    "id": "q3V8mK2xT7aB",
+    "kind": "sent",
+    "name": "Herb run",
+    "startedAtMs": 1793001600000,
+    "bring": [
+      {
+        "kind": "teleport",
+        "name": "Explorer's ring 2",
+        "uses": 1
+      },
+      {
+        "kind": "teleport",
+        "name": "Catherby tablet",
+        "uses": 1
+      },
+      {
+        "kind": "supply",
+        "name": "2 herb seeds"
+      },
+      {
+        "kind": "supply",
+        "name": "Rake",
+        "note": "If weeds need clearing; skip with auto-weed."
+      }
+    ],
+    "stops": [
+      {
+        "n": 1,
+        "name": "Falador farm",
+        "tile": {
+          "x": 3053,
+          "y": 3309,
+          "plane": 0
+        },
+        "patchIds": [
+          "falador-herb"
+        ],
+        "method": "Explorer's ring 2: Teleport",
+        "item": "Explorer's ring 2",
+        "costTiles": 26,
+        "steps": [
+          {
+            "slot": "method",
+            "title": "Use Explorer's ring 2: Teleport",
+            "notes": [
+              "Bring the ring."
+            ],
+            "at": {
+              "x": 3052,
+              "y": 3291
+            }
+          },
+          {
+            "slot": "arrival-walk",
+            "title": "Walk 18t north",
+            "detail": "To Falador farm",
+            "walk": true,
+            "at": {
+              "x": 3053,
+              "y": 3309,
+              "plane": 0
+            }
+          }
+        ]
+      },
+      {
+        "n": 2,
+        "name": "Catherby",
+        "tile": {
+          "x": 2811,
+          "y": 3462,
+          "plane": 0
+        },
+        "patchIds": [
+          "catherby-herb"
+        ],
+        "method": "Catherby tablet",
+        "item": "Catherby tablet",
+        "costTiles": 29,
+        "steps": [
+          {
+            "slot": "method",
+            "title": "Use Catherby tablet",
+            "at": {
+              "x": 2801,
+              "y": 3449
+            }
+          },
+          {
+            "slot": "arrival-walk",
+            "title": "Walk 21t north-east",
+            "detail": "To Catherby",
+            "walk": true,
+            "at": {
+              "x": 2811,
+              "y": 3462,
+              "plane": 0
+            }
+          }
+        ]
+      },
+      {
+        "n": 3,
+        "name": "Fossil Island birdhouse",
+        "tile": {
+          "x": 3677,
+          "y": 3882,
+          "plane": 0
+        },
+        "patchIds": [],
+        "birdhouseId": "meadow-north",
+        "method": null,
+        "item": null,
+        "costTiles": 140,
+        "steps": [
+          {
+            "slot": "walk-leg",
+            "title": "Walk 140 tiles",
+            "walk": true,
+            "at": {
+              "x": 3677,
+              "y": 3882
+            }
+          }
+        ],
+        "done": true
+      },
+      {
+        "n": 4,
+        "name": "My bank",
+        "tile": {
+          "x": 3094,
+          "y": 3243,
+          "plane": 0
+        },
+        "patchIds": [],
+        "method": null,
+        "item": null,
+        "costTiles": 20,
+        "steps": [
+          {
+            "slot": "walk-leg",
+            "title": "Walk 20 tiles",
+            "walk": true,
+            "at": {
+              "x": 3094,
+              "y": 3243
+            }
+          }
+        ],
+        "visited": true
+      }
+    ]
+  },
+  "runRevision": 1
 }

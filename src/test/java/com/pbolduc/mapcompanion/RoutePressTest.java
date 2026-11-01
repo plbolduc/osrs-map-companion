@@ -95,7 +95,7 @@ public class RoutePressTest
 			{
 				r.run();
 			}
-		}, pairing, identity, route, destinations, new DestinationMarker(null, null, null, null, null)
+		}, pairing, identity, route, destinations, new DestinationMarker(null, null, null, null, null, null)
 		{
 			@Override
 			void sync()

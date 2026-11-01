@@ -69,6 +69,9 @@ public class DestinationMarker
 	private final MapCompanionConfig config;
 	private final ClientThread clientThread;
 	private final DestinationRoute route;
+	private final FarmRunRoute farming;
+	private final List<MapPin> farmStops = new ArrayList<>();
+	private String farmKey;
 
 	private MapPin current;
 	private String currentKey;
@@ -86,13 +89,15 @@ public class DestinationMarker
 		DestinationState state,
 		MapCompanionConfig config,
 		ClientThread clientThread,
-		DestinationRoute route)
+		DestinationRoute route,
+		FarmRunRoute farming)
 	{
 		this.points = points;
 		this.state = state;
 		this.config = config;
 		this.clientThread = clientThread;
 		this.route = route;
+		this.farming = farming;
 	}
 
 	/** Rebuild the live points from {@link DestinationState}, or remove them. */
@@ -112,13 +117,14 @@ public class DestinationMarker
 		syncDestination();
 		syncMeetup();
 		syncSteps();
+		syncFarmStops();
 	}
 
 	private void syncDestination()
 	{
 		RelayResponse.Destination destination =
 			config.showDestination() || state.hasLocalDestination() ? state.getDestination() : null;
-		if (destination == null)
+		if (destination == null || (farming != null && farming.owns(destination)))
 		{
 			removeDestination();
 			return;
@@ -175,6 +181,12 @@ public class DestinationMarker
 	 */
 	private void syncSteps()
 	{
+		// Run ordinals label its stops; a second set of step ordinals would make each number ambiguous.
+		if (farming != null && farming.owns(state.getDestination()))
+		{
+			removeSteps();
+			return;
+		}
 		RelayResponse.Destination destination =
 			config.showDestination() || state.hasLocalDestination() ? state.getDestination() : null;
 		DestinationRoute.View view = destination == null ? null : route.view();
@@ -269,11 +281,57 @@ public class DestinationMarker
 		return pins;
 	}
 
+	private void syncFarmStops()
+	{
+		FarmRunState.View view = farming == null ? null : farming.view();
+		String key = view == null ? null : view.run.id + "|" + view.revision + "|" + view.done + "|" + view.visited + "|" + view.following;
+		if (Objects.equals(key, farmKey))
+		{
+			return;
+		}
+		removeFarmStops();
+		farmKey = key;
+		if (view == null)
+		{
+			return;
+		}
+		RelayResponse.FarmStop next = view.next();
+		List<RelayResponse.FarmStop> ordered = new ArrayList<>(view.run.stops);
+		if (next != null)
+		{
+			ordered.remove(next);
+			ordered.add(next); // The current stop draws over another stop on the same tile.
+		}
+		for (RelayResponse.FarmStop stop : ordered)
+		{
+			boolean done = view.done.contains(stop.n);
+			boolean visited = view.visited.contains(stop.n);
+			boolean current = next != null && stop.n == next.n;
+			String words = stop.n + ". " + stop.name + (done ? " · done" : visited ? " · visited" : current ? " · next" : "");
+			MapPin pin = new MapPin(FarmRunState.point(stop), current ? MapPin.AMBER : STEP, String.valueOf(stop.n),
+				done || visited, "Farm stop " + stop.n, () -> words);
+			pin.setSnapToEdge(current && view.following);
+			farmStops.add(pin);
+			points.add(pin);
+		}
+	}
+
+	private void removeFarmStops()
+	{
+		for (MapPin pin : farmStops)
+		{
+			points.remove(pin);
+		}
+		farmStops.clear();
+		farmKey = null;
+	}
+
 	private void removeNow()
 	{
 		removeDestination();
 		removeMeetup();
 		removeSteps();
+		removeFarmStops();
 	}
 
 	private void removeSteps()

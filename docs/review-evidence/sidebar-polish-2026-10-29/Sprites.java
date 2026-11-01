@@ -32,6 +32,7 @@ final class Sprites
 		ITEMS.put(3853, "games-necklace-8");
 		ITEMS.put(2722, "clue-scroll-hard");
 		ITEMS.put(4151, "abyssal-whip");
+		ITEMS.put(net.runelite.api.gameval.ItemID.LUNAR_TABLET_CATHERBY_TELEPORT, "catherby-teleport-tablet");
 		ITEMS.put(net.runelite.api.gameval.ItemID.MYSTIC_ROBE_BOTTOM_DARK, "mystic-robe-bottom-dark");
 	}
 

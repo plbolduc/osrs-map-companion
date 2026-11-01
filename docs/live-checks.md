@@ -193,7 +193,7 @@ With Farming patches enabled and the map's farm run open:
    patches. Natural growth and checking health must not create receipts.
 3. Cross Catherby's 2840/3440 boundary and visit an upstairs room. Region/floor changes cannot
    create completion.
-4. Disable sharing, replant and re-enable it; repeat across a hop or logout. Unobserved actions
+4. With no active sidebar run, disable sharing, replant and re-enable it; repeat across a hop or logout. Unobserved actions
    remain unconfirmed; reconnect cannot replay a completion.
 5. Switch RuneScape characters. History belongs to its character; returning cannot invent a receipt.
 6. Repeat arrival, harvest-only and replant with hops, a bush, hardwood, a spirit tree, cactus
@@ -205,6 +205,28 @@ The bundled decoder is compared against RuneLite by automated tests. Growth wind
 ordinary cycles and are measured relative to the observation; disease, boosts and later actions
 can change them. Two settling ticks and the login delay suppress stale patch slots. Only a
 continuously witnessed empty-to-newly-planted transition mints a stable completion id.
+
+### Farm-run follower (source and harness checked; a members-client visit remains pending)
+
+- [ ] Send a two-stop herb run from your own browser. A fresh compatible client offers Send run;
+      an older receiver does not. The sidebar and world map use the same stop numbers.
+- [ ] Arrive, harvest without planting, then replant. Only the replant finishes that stop and
+      moves the arrow/current leg. A mixed allotment stop waits for every selected patch.
+- [ ] Start Ready now, each preset, Birdhouses and a contract from the sidebar. With position
+      sharing off, Start still plans from the tile sent on that press; no live position is shared.
+- [ ] Open Before you leave. Known carried travel items are checked locally; unknown supplies
+      make no inventory claim. Complete a seeded birdhouse and check its weaker sighting label.
+- [ ] Reach a personal stop. It says Visited, never Done. Reroute keeps completed and visited
+      stops at their original numbers and orders only the rest.
+- [ ] Pause route, then replant. The list can record it without reclaiming a Shortest Path route
+      you chose yourself. Follow resumes at the next unfinished stop. An outside target also
+      pauses the whole run, including when the next replant arrives.
+- [ ] End while a plan is pending, and while Reroute is pending. No late answer revives it.
+      Replace a run from the browser while End is in flight: the newer run must remain.
+- [ ] With a run active, turn farming sharing off and replant. Local progress still works;
+      Show what's sent has no farming block. Reroute sends only its done/visited ordinals.
+- [ ] Switch characters, groups and server addresses with a stream and a Start in flight.
+      The replacement character never sees the old run. End and shutdown remove its numbered pins.
 
 Automated reader, protocol and concurrency tests complement these checks. A fake client cannot
 establish the events a real game session emits or verify every marker visually.

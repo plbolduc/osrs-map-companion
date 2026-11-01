@@ -236,6 +236,18 @@ public class MapCompanionPlugin extends Plugin
 	private DestinationRoute destinationRoute;
 
 	@Inject
+	private FarmRunState farmRunState;
+
+	@Inject
+	private FarmRunClient farmRunClient;
+
+	@Inject
+	private FarmRunRoute farmRunRoute;
+
+	@Inject
+	private CapabilityEvaluator capabilityEvaluator;
+
+	@Inject
 	private ShortestPath shortestPath;
 
 	/** Whose dot the player asked to see, and a Route to a friend waiting for their position. */
@@ -466,6 +478,8 @@ public class MapCompanionPlugin extends Plugin
 	/** Everything a game tick reads, writes or starts. Client thread only; see {@link #shutDown}. */
 	private void endLifetime()
 	{
+		farmRunClient.clear();
+		farmRunState.clear();
 		lootLog.flush();
 		relay.reset();
 		stopStream();
@@ -688,6 +702,9 @@ public class MapCompanionPlugin extends Plugin
 		{
 			return;
 		}
+		// Old member replies and frames must not deliver a previous character's run.
+		farmRunClient.clear();
+		farmRunState.bind(null);
 		milestones.reset();
 		xpTracker.reset();
 		deathWatcher.clear();
@@ -941,7 +958,21 @@ public class MapCompanionPlugin extends Plugin
 		lootLog.saveIfDue();
 
 		trackMovement(now);
+		if (client.getGameState() == GameState.LOGGED_IN)
+		{
+			String farmMember = identity.id();
+			if (farmMember != null)
+			{
+				farmRunState.bind(farmMember);
+			}
+		}
 		observeGameState(now);
+		if (farmRunState.active())
+		{
+			farmRunState.carried(capabilityEvaluator.evaluate());
+			farmRunState.observe(farmingObserver.observations(now), birdhouseReader.read(now), DestinationRoute.standing(client), now);
+		}
+		farmRunRoute.sync();
 		/**
 		 * Before the pairing checks: a destination pinned from the Stars tab needs no group, and a
 		 * route already received is followed whether or not the next post can be made.
@@ -955,7 +986,7 @@ public class MapCompanionPlugin extends Plugin
 		destinationMarker.sync();
 		destinationArrow.sync();
 		shortestPath.tick(client.getTickCount(), destinationRoute.view(), config.drawWithShortestPath(),
-			DestinationRoute.standing(client), () -> destinationRoute.stopFollowing(ShortestPath.TAKEN_OVER));
+			DestinationRoute.standing(client), farmRunRoute::takenOver);
 		/*
 		 * The task counter, so a kill can be matched to the counter it moved — see TaskKills — and the
 		 * collection vocabulary's retry, which drop luck needs whether or not rewards are shared.
@@ -1047,6 +1078,7 @@ public class MapCompanionPlugin extends Plugin
 				if (config.showDestination())
 				{
 					destinationState.accept(directive);
+					farmRunState.acceptFor(memberId, directive.run, directive.runRevision, System.currentTimeMillis());
 					destinationMarker.sync();
 				}
 				long at = System.currentTimeMillis();
@@ -1144,6 +1176,10 @@ public class MapCompanionPlugin extends Plugin
 			if (config.showDestination())
 			{
 				destinationState.accept(response.directive);
+				if (response.directive != null)
+				{
+					farmRunState.acceptFor(postedAs, response.directive.run, response.directive.runRevision, System.currentTimeMillis());
+				}
 				destinationMarker.sync();
 			}
 		}))
@@ -1175,6 +1211,8 @@ public class MapCompanionPlugin extends Plugin
 	 */
 	void onGroupChanged()
 	{
+		farmRunClient.clear();
+		farmRunState.clear();
 		pairing.clearStaleSuffix();
 		resetRewardDelivery();
 		destinationState.clear();
@@ -1610,7 +1648,7 @@ public class MapCompanionPlugin extends Plugin
 		assignmentReader.observe(now);
 		/* The sidebar's clue card reads the last reading; a scroll dropped or finished goes with it. */
 		clueReader.read();
-		if (config.shareFarming())
+		if (config.shareFarming() || farmRunState.active())
 		{
 			farmingObserver.observe(now, currentRegionId());
 		}

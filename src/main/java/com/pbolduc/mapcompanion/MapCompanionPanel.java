@@ -208,6 +208,10 @@ public class MapCompanionPanel extends PluginPanel
 	private final JComponent searchGap;
 	/** Route, pressed beside anything in the sidebar; see {@link RoutePress}. */
 	private final RoutePress routePress;
+	private final FarmRunPanel farmRunPanel;
+	private final FarmRunRoute farmRunRoute;
+	private final FarmRunState farmRunState;
+	private final FarmRunClient farmRunClient;
 	private final ClueReader clueReader;
 	private final GameSprites sprites;
 	/** The scroll whose sprite the clue card shows, so a refresh asks for it once rather than every second. */
@@ -344,7 +348,11 @@ public class MapCompanionPanel extends PluginPanel
 		ClueReader clueReader,
 		GroupState groupState,
 		MeetupClient meetupClient,
-		GameSprites sprites)
+		GameSprites sprites,
+		FarmRunPanel farmRunPanel,
+		FarmRunRoute farmRunRoute,
+		FarmRunState farmRunState,
+		FarmRunClient farmRunClient)
 	{
 		this.config = config;
 		this.plugin = plugin;
@@ -363,6 +371,10 @@ public class MapCompanionPanel extends PluginPanel
 		this.destinationRoute = destinationRoute;
 		this.shortestPath = shortestPath;
 		this.routePress = routePress;
+		this.farmRunPanel = farmRunPanel;
+		this.farmRunRoute = farmRunRoute;
+		this.farmRunState = farmRunState;
+		this.farmRunClient = farmRunClient;
 		this.clueReader = clueReader;
 		this.sprites = sprites;
 		this.searchPanel = new SearchPanel(searchClient, routePress, sprites);
@@ -441,6 +453,7 @@ public class MapCompanionPanel extends PluginPanel
 		overview.add(searchPanel);
 		searchGap = gap(8, ColorScheme.DARK_GRAY_COLOR);
 		overview.add(searchGap);
+		overview.add(farmRunPanel);
 
 		/*
 		 * Now: a destination with its dismiss, a meetup, a death. "From the map" named two of
@@ -1285,6 +1298,7 @@ public class MapCompanionPanel extends PluginPanel
 			/* The search is the map's, asked as a member: a box that could only say "connect" is not shown. */
 			searchPanel.setVisible(ready);
 			searchGap.setVisible(ready);
+			farmRunPanel.refresh(ready);
 			if (ready)
 			{
 				searchPanel.refresh();
@@ -1296,7 +1310,8 @@ public class MapCompanionPanel extends PluginPanel
 			 * the sidebar ended up with gaps where nothing was ever going to be written — and the
 			 * same goes for a card, whose padding is a line's worth of nothing.
 			 */
-			destinationSlot.setVisible(destination != null);
+			boolean farmDestination = farmRunRoute.owns(destination);
+			destinationSlot.setVisible(destination != null && !farmDestination);
 			if (destination != null)
 			{
 				setWrapped(destinationName, destination.name, CARD_TEXT_WIDTH);
@@ -1395,7 +1410,7 @@ public class MapCompanionPanel extends PluginPanel
 				routeState(clueRouteButton, clueSaid, "clue", "Route", ready && routable);
 			}
 			/** The heading goes with the last card under it, rather than naming nothing. */
-			fromMap.setVisible(destination != null || event != null || death != null || (clue != null && paired));
+			fromMap.setVisible((destination != null && !farmDestination) || event != null || death != null || (clue != null && paired));
 
 			/* Redraws only when its words change, so a click or a search is never painted over. */
 			boolean paused = LootLog.PAUSED.equals(lootLog.summary());
@@ -1618,6 +1633,8 @@ public class MapCompanionPanel extends PluginPanel
 		/* Clearing the code raises a ConfigChanged, which is what stops the stream and resets the relay. */
 		pairing.leave();
 		identity.forget();
+		farmRunClient.clear();
+		farmRunState.clear();
 		destinationState.clear();
 		say("Left the group.");
 		pages.open(false);
@@ -1800,7 +1817,7 @@ public class MapCompanionPanel extends PluginPanel
 	}
 
 	/** Null-safe: names and titles arrive from the map, and Gson leaves an absent field null. */
-	private static String escape(@Nullable String text)
+	static String escape(@Nullable String text)
 	{
 		if (text == null)
 		{
