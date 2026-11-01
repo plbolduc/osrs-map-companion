@@ -581,3 +581,23 @@ A run's card lists its stops and then the steps of the leg being walked, and the
 heading now sit over them, shown with the steps. The steps keep words where the map sends no picture:
 a walk, a ride, or a teleport the map has no id for stays words alone, and the client names no
 constant for a boat's icons, so none was added.
+
+### Outside the sidebar
+
+*Route here* on a right-click of the game's world map, the step being walked in a small box over
+the game, a key each for Reroute and Follow, and a farm run's missing teleports outlined in the
+bank. Each is a setting under *In the client*. Only Route here sends anything, and it sends what
+Route sends; `docs/network.md` and the submission guide say so. Each is information or a press of
+the player's own: the menu entry is RuneLite's and acts in nothing in the game, and a key presses
+the sidebar's own button, so the rule that nothing acts in the game holds.
+
+### Proposed and not changed
+
+- *Open website* on the death card, beside *Open the map*, is not a slip. The polish pass chose
+  *Open website* for every button that opens the browser and *World map* for the game's map, and
+  *Open the map* is a different request, the one that makes the browser the player.
+- *Rename group…* stays in *Switch ▾*, where the plugin-first plan put it and the README names it;
+  a *Groups ▾* label was turned down before.
+- No star notifications. Stars are fetched only while the Stars tab is open, and an alert would
+  keep the map asking Star Miners at hours nobody is watching, against the one condition they set.
+  The owner has declined star alerts once already.
