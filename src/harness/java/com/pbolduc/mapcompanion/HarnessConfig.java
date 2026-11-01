@@ -299,4 +299,10 @@ final class HarnessConfig implements MapCompanionConfig
 	{
 		return on("routeHereOnWorldMap", MapCompanionConfig.super.routeHereOnWorldMap());
 	}
+
+	@Override
+	public boolean showStepOnScreen()
+	{
+		return on("showStepOnScreen", MapCompanionConfig.super.showStepOnScreen());
+	}
 }

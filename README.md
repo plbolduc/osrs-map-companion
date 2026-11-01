@@ -19,8 +19,10 @@ Each step gets a numbered pin on the game's world map; the game's arrow points a
 step when it is in the loaded area.
 
 With **Shortest Path** installed, press **Follow** to draw each walking step as you reach it.
-**Reroute** plans again from where you stand. The website uses the progress and travel choices
-you share to suggest routes around your account's quests, diaries, items and transport unlocks.
+While you follow a route, the step you're on also shows in a small box over the game, so the
+sidebar can stay closed. **Reroute** plans again from where you stand. The website uses the
+progress and travel choices you share to suggest routes around your account's quests, diaries,
+items and transport unlocks.
 
 You can also plan a route to a friend, a meetup or a precise star site, back to where you died,
 and to coordinate clues and recognised beginner map clues. Or right-click any spot on the game's
@@ -283,8 +285,9 @@ rename it there.
 
 In the plugin's settings, **Show destinations from the map**, **Show my group on the world map**
 and **Notify before a meetup** start off; the step after Connect ticks the first two for you to
-confirm. **Drop luck in chat** and **Point the game's arrow at a destination** start on; neither
-sends anything. **Route here on the world map** starts on too, and sends only when you choose it.
+confirm. **Drop luck in chat**, **Point the game's arrow at a destination** and **Show the step on
+screen** start on; none of them sends anything. **Route here on the world map** starts on too, and
+sends only when you choose it.
 
 </details>
 

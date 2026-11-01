@@ -595,6 +595,20 @@ public interface MapCompanionConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "showStepOnScreen",
+		name = "Show the step on screen",
+		description =
+			"While you follow a route, show the step you are on in a small box over the game, so the sidebar "
+			+ "can stay closed. Hidden inside instances. Nothing leaves this computer.",
+		position = 38,
+		section = clientSection
+	)
+	default boolean showStepOnScreen()
+	{
+		return true;
+	}
+
+	@ConfigItem(
 		keyName = "notifyMeetups",
 		name = "Notify before a meetup",
 		description =
