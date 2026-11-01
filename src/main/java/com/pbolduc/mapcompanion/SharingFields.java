@@ -141,7 +141,10 @@ final class SharingFields
 	static final Field DEATH = field("shareDeath", "Where you died", MapCompanionConfig::shareDeath,
 		"The tile of your most recent death, forgotten after an hour.");
 
-	/* What this client draws or does. The first two open the receive stream; the rest stay here. */
+	/*
+	 * What this client draws or does. The first two open the receive stream, and Route here asks the map
+	 * on a press, as every Route does; the rest stay here.
+	 */
 	static final Field DESTINATIONS = field("showDestination", "Show map destinations", MapCompanionConfig::showDestination,
 		"Receive destinations and meetup details. Nothing is clicked or walked for you.");
 	static final Field GROUP_ON_WORLD_MAP = field("showGroupOnWorldMap", "Group on the world map", MapCompanionConfig::showGroupOnWorldMap,
@@ -150,11 +153,13 @@ final class SharingFields
 		"Point the game's own arrow at a destination once it is nearby. Nothing leaves this computer.");
 	static final Field SHORTEST_PATH = field(MapCompanionConfig.KEY_SHORTEST_PATH, "Draw paths with Shortest Path", MapCompanionConfig::drawWithShortestPath,
 		"When you follow a route, the Shortest Path plugin draws each walking step. Nothing leaves this computer.");
+	static final Field ROUTE_HERE = field("routeHereOnWorldMap", "Route here on the world map", MapCompanionConfig::routeHereOnWorldMap,
+		"Right-click the world map for the way to that spot. A press sends that spot and where you stand, as Route does.");
 	static final Field NOTIFY_MEETUPS = field("notifyMeetups", "Meetup notifications", MapCompanionConfig::notifyMeetups,
 		"Receive a notification before a meetup starts.");
 	static final Field DROP_LUCK_CHAT = field("dropLuckChat", "Drop luck in chat", MapCompanionConfig::dropLuckChat,
 		"One chat line when a drop with a known rate lands. Nothing leaves this computer.");
 
 	static final List<Field> CLIENT = Collections.unmodifiableList(Arrays.asList(
-		DESTINATIONS, GROUP_ON_WORLD_MAP, HINT_ARROW, SHORTEST_PATH, NOTIFY_MEETUPS, DROP_LUCK_CHAT));
+		DESTINATIONS, GROUP_ON_WORLD_MAP, HINT_ARROW, SHORTEST_PATH, ROUTE_HERE, NOTIFY_MEETUPS, DROP_LUCK_CHAT));
 }

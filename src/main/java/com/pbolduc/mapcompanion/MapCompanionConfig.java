@@ -581,6 +581,20 @@ public interface MapCompanionConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "routeHereOnWorldMap",
+		name = "Route here on the world map",
+		description =
+			"Add Route here to a right-click of the game's world map, below Cancel. Choosing it asks the map "
+			+ "for the way to that spot and sends that spot and where you stand, as Route does.",
+		position = 37,
+		section = clientSection
+	)
+	default boolean routeHereOnWorldMap()
+	{
+		return true;
+	}
+
+	@ConfigItem(
 		keyName = "notifyMeetups",
 		name = "Notify before a meetup",
 		description =

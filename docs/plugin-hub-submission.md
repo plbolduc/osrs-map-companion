@@ -129,7 +129,8 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RouteClient`, `RoutePress
   `RoutePress` sends the same request for a pick from **Search**, with the row's id as the target,
   and for **Route** beside the carried clue, the last death, a star and a meetup, with that tile as
   the target. A clue or death tile that is not shared leaves only in that request. Same
-  one-at-a-time rule and wait; the answer becomes the destination. Nothing is walked.
+  one-at-a-time rule and wait; the answer becomes the destination. Nothing is walked. **Route here**
+  on a right-click of the world map sends it too, with the clicked tile as the target.
 - **PUT /api/companion/event/answer** — one press of a meetup's answer (**Going**, **Maybe**,
   **Can't**, **On my way**). JSON is the meetup's id and the answer. Headers:
   `X-Companion-Code`, `X-Companion-Member`, `X-Companion-Member-Secret`.
@@ -242,6 +243,10 @@ Say these in the description of the next Hub update, as changes from what was ap
 - **One warning, at install**: no setting carries a warning of its own any more, because the
   manifest's install warning satisfies RuneLite's rule on its own. A changed map address is still
   asked about by name before anything is sent to it.
+- **Route here** on the world map: a `MenuAction.RUNELITE` entry, handled by the client and sending
+  the game nothing, added below Cancel so a left-click never takes it, and only over the map with a
+  group set. A press is the Route request above with the clicked tile; it can be turned off under
+  *In the client*.
 
 ## Before submission
 

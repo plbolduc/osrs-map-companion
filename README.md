@@ -23,7 +23,8 @@ With **Shortest Path** installed, press **Follow** to draw each walking step as 
 you share to suggest routes around your account's quests, diaries, items and transport unlocks.
 
 You can also plan a route to a friend, a meetup or a precise star site, back to where you died,
-and to coordinate clues and recognised beginner map clues.
+and to coordinate clues and recognised beginner map clues. Or right-click any spot on the game's
+world map and choose **Route here**.
 
 <p>
   <img src="docs/mockups/sidebar-voyage.png" width="300" alt="A voyage in the plugin sidebar: the walk to Port Sarim done, Board your boat at Port Sarim, Sail to Catherby current with its Sailing level marked unmet, then Dock at Catherby">
@@ -283,7 +284,7 @@ rename it there.
 In the plugin's settings, **Show destinations from the map**, **Show my group on the world map**
 and **Notify before a meetup** start off; the step after Connect ticks the first two for you to
 confirm. **Drop luck in chat** and **Point the game's arrow at a destination** start on; neither
-sends anything.
+sends anything. **Route here on the world map** starts on too, and sends only when you choose it.
 
 </details>
 

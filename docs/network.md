@@ -176,6 +176,9 @@ honoured by asking nothing until it has passed, and a failure without one waits 
 query is in the request's address, which the map leaves out of its logs; the plugin logs nothing it
 types. A pick is one `POST /api/companion/route` with the row's id and the tile you stand on, under
 Reroute's rules, and its answer becomes the destination, as a destination the map sent would.
+**Route here**, on a right-click of the game's world map with a group set, is the same request with
+the clicked tile as the target, once per press; it is a RuneLite menu entry that the client handles
+itself and sends the game nothing. A refusal is said once in the chat box, locally.
 Each row's picture is the game's own, from the client's sprite cache: the map's kind for a row picks
 a world-map icon, and an item's `itemId`, where the map names one, picks its sprite. No picture is
 ever fetched from the map or anywhere else.

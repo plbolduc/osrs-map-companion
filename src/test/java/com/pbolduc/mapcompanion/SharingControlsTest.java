@@ -65,11 +65,12 @@ public class SharingControlsTest
 			}
 			assertEquals(expected, actual);
 			/*
-			 * 28 data and client choices, and the three that only draw on this client: Drop luck's chat
-			 * line, the destination's hint arrow, and a followed route's walks handed to Shortest Path,
-			 * which is a plugin message inside the client rather than anything sent.
+			 * 28 data and client choices; Route here on the world map, which asks the map only on a press
+			 * of its own, as every Route does; and the three that only draw on this client: Drop luck's
+			 * chat line, the destination's hint arrow, and a followed route's walks handed to Shortest
+			 * Path, which is a plugin message inside the client rather than anything sent.
 			 */
-			assertEquals(31, actual.size());
+			assertEquals(32, actual.size());
 			for (String key : actual)
 			{
 				if (key.startsWith("share")) assertFalse("every data choice starts off: " + key, defaultOf(key));

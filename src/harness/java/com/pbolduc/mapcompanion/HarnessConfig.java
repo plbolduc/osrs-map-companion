@@ -293,4 +293,10 @@ final class HarnessConfig implements MapCompanionConfig
 	{
 		return on(MapCompanionConfig.KEY_SHORTEST_PATH, MapCompanionConfig.super.drawWithShortestPath());
 	}
+
+	@Override
+	public boolean routeHereOnWorldMap()
+	{
+		return on("routeHereOnWorldMap", MapCompanionConfig.super.routeHereOnWorldMap());
+	}
 }

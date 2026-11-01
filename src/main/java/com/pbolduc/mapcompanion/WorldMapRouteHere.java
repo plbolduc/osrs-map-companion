@@ -1,0 +1,204 @@
+/*
+ * Copyright (c) 2026, pbolduc
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+package com.pbolduc.mapcompanion;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import net.runelite.api.ChatMessageType;
+import net.runelite.api.Client;
+import net.runelite.api.MenuAction;
+import net.runelite.api.MenuEntry;
+import net.runelite.api.Point;
+import net.runelite.api.coords.WorldPoint;
+import net.runelite.api.gameval.InterfaceID;
+import net.runelite.api.widgets.Widget;
+import net.runelite.api.worldmap.WorldMap;
+import net.runelite.client.chat.ChatColorType;
+import net.runelite.client.chat.ChatMessageBuilder;
+import net.runelite.client.chat.ChatMessageManager;
+import net.runelite.client.chat.QueuedMessage;
+import net.runelite.client.ui.overlay.worldmap.WorldMapOverlay;
+
+/**
+ * Route here, on a right-click of the game's own world map: the question Route asks beside a search
+ * result, for the spot under the pointer, so the way somewhere needs no typing.
+ *
+ * <p>The entry goes below Cancel, as Shortest Path's Set target does. A left-click takes the top
+ * entry, and over empty map that would otherwise be this one, so a click meant to drag the map would
+ * plan a route. It is offered only with a group, because a route is a member's question, and only
+ * while the pointer is over the map itself.
+ *
+ * <p>The spot is worked out from where the menu opened rather than where the pointer is when the
+ * entry is chosen, because the menu sits between the two. The world map draws one floor, so the spot
+ * is on floor 0.
+ *
+ * <p>What it sends is what Route back sends: that tile and the one the player stands on, once per
+ * press ({@link RoutePress}). The press has no row in the sidebar to say a refusal beside, so a
+ * refusal is said once in the chat box; a route that comes back shows itself as the destination, its
+ * arrow and its pins. Client thread throughout.
+ */
+@Singleton
+class WorldMapRouteHere
+{
+	static final String OPTION = "Route here";
+	/** The press's source, which {@link RoutePress#said} answers by. */
+	static final String SOURCE = "worldmap";
+	static final String NAME = "Picked on the world map";
+
+	private final Client client;
+	private final MapCompanionConfig config;
+	private final WorldMapOverlay worldMap;
+	private final RoutePress routePress;
+	private final Pairing pairing;
+	private final ChatMessageManager chat;
+	/** Where the last menu opened, in canvas pixels. */
+	@Nullable
+	private Point opened;
+	/** Whether a press is waiting for its answer, and what this source said before it. */
+	private boolean awaiting;
+	@Nullable
+	private RoutePress.Said before;
+
+	@Inject
+	WorldMapRouteHere(Client client, MapCompanionConfig config, WorldMapOverlay worldMap, RoutePress routePress,
+		Pairing pairing, ChatMessageManager chat)
+	{
+		this.client = client;
+		this.config = config;
+		this.worldMap = worldMap;
+		this.routePress = routePress;
+		this.pairing = pairing;
+		this.chat = chat;
+	}
+
+	void menuOpened()
+	{
+		opened = client.getMouseCanvasPosition();
+	}
+
+	/** Each entry the game adds while a menu is built; cheap, because that is every frame. */
+	void entryAdded()
+	{
+		if (!config.routeHereOnWorldMap() || pairing.code().isEmpty())
+		{
+			return;
+		}
+		Widget map = client.getWidget(InterfaceID.Worldmap.MAP_CONTAINER);
+		Point pointer = client.getMouseCanvasPosition();
+		if (map == null || map.isHidden() || pointer == null || !map.getBounds().contains(pointer.getX(), pointer.getY()))
+		{
+			return;
+		}
+		for (MenuEntry entry : client.getMenu().getMenuEntries())
+		{
+			if (OPTION.equals(entry.getOption()))
+			{
+				return;
+			}
+		}
+		client.getMenu().createMenuEntry(0)
+			.setOption(OPTION)
+			.setTarget("")
+			.setType(MenuAction.RUNELITE)
+			.onClick(chosen -> press());
+	}
+
+	private void press()
+	{
+		WorldPoint spot = spotAt(opened != null ? opened : client.getMouseCanvasPosition());
+		if (spot == null)
+		{
+			return;
+		}
+		before = routePress.said(SOURCE);
+		awaiting = true;
+		routePress.press(RoutePress.Target.tile(SOURCE, spot, NAME, null, null));
+	}
+
+	/** Game tick: a refused press is said once, in the chat box. */
+	void tick()
+	{
+		if (!awaiting)
+		{
+			return;
+		}
+		String refusal = refusal(before, routePress.said(SOURCE));
+		if (refusal == null && !answered(before, routePress.said(SOURCE)))
+		{
+			return;
+		}
+		awaiting = false;
+		if (refusal != null)
+		{
+			chat.queue(QueuedMessage.builder()
+				.type(ChatMessageType.GAMEMESSAGE)
+				.runeLiteFormattedMessage(new ChatMessageBuilder()
+					.append(ChatColorType.HIGHLIGHT).append(OPTION + ": ")
+					.append(ChatColorType.NORMAL).append(refusal)
+					.build())
+				.build());
+		}
+	}
+
+	/** True once this source holds a finished answer that is not the one it held before the press. */
+	static boolean answered(@Nullable RoutePress.Said before, @Nullable RoutePress.Said now)
+	{
+		return now != null && now != before && !now.planning;
+	}
+
+	/** The sentence a finished, refused press left, or null while waiting or after a route came back. */
+	@Nullable
+	static String refusal(@Nullable RoutePress.Said before, @Nullable RoutePress.Said now)
+	{
+		return answered(before, now) ? now.message : null;
+	}
+
+	@Nullable
+	private WorldPoint spotAt(@Nullable Point pointer)
+	{
+		WorldMap map = client.getWorldMap();
+		if (pointer == null || map == null || map.getWorldMapPosition() == null)
+		{
+			return null;
+		}
+		WorldPoint centre = new WorldPoint(map.getWorldMapPosition().getX(), map.getWorldMapPosition().getY(), 0);
+		Point middle = worldMap.mapWorldPointToGraphicsPoint(centre);
+		return middle == null ? null : tileAt(pointer.getX(), pointer.getY(), middle.getX(), middle.getY(), map.getWorldMapZoom(), centre);
+	}
+
+	/**
+	 * The tile under the pointer. RuneLite draws a tile's centre at the point it maps the tile to, so
+	 * the nearest tile is the rounded offset; truncating would take the tile beside it on one side.
+	 * North is up the screen, which is down in canvas pixels.
+	 */
+	static WorldPoint tileAt(int x, int y, int middleX, int middleY, float pixelsPerTile, WorldPoint centre)
+	{
+		int dx = Math.round((x - middleX) / pixelsPerTile);
+		int dy = Math.round((middleY - y) / pixelsPerTile);
+		return centre.dx(dx).dy(dy);
+	}
+}
