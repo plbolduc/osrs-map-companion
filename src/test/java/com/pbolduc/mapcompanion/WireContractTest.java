@@ -73,6 +73,12 @@ public class WireContractTest
 	private static final Path REPLY = Paths.get("src", "test", "resources", "contract", "reply.json");
 	/** A frame on the held stream with members asked for; the map's contract test reads it too. */
 	private static final Path STREAM = Paths.get("src", "test", "resources", "contract", "stream.json");
+	/**
+	 * The map's port-task run, which the map's contract test holds equal to its own. The reply and
+	 * the stream carry a farm run, whose stops have no task ticks and sail no voyage, so this is the
+	 * fixture that vouches for those two fields of a stop: see {@link #withPortTaskStops}.
+	 */
+	private static final Path PORT_TASK_RUN = Paths.get("src", "test", "resources", "contract", "port-task-run.json");
 
 	@Test
 	public void theSnapshotFixtureIsWhatThisPluginSends() throws IOException
@@ -98,6 +104,7 @@ public class WireContractTest
 	{
 		String committed = new String(Files.readAllBytes(REPLY), StandardCharsets.UTF_8);
 		RelayResponse reply = new Gson().fromJson(committed, RelayResponse.class);
+		withPortTaskStops(reply.directive.run);
 		assertEveryFieldSet("RelayResponse", reply);
 		assertTrue(reply.claimed);
 		assertEquals("Sunday hunt", reply.groupName);
@@ -202,6 +209,7 @@ public class WireContractTest
 	{
 		String committed = new String(Files.readAllBytes(STREAM), StandardCharsets.UTF_8);
 		RelayResponse.StreamDirective frame = new Gson().fromJson(committed, RelayResponse.StreamDirective.class);
+		withPortTaskStops(frame.run);
 		assertEveryFieldSet("StreamDirective", frame);
 		assertEquals("Big Rob", frame.members.get(0).name);
 		assertEquals(Integer.valueOf(302), frame.members.get(0).world);
@@ -391,6 +399,21 @@ public class WireContractTest
 		w.delivered = delivered;
 		w.remaining = remaining;
 		return w;
+	}
+
+	/**
+	 * The reply's run with the port-task fixture's stops beside its own, so a stop's fields are set
+	 * when either kind of run sets them. Every other field of a run is still the reply's own to fill:
+	 * the port-task fixture brings nothing to bring, no patch and no item.
+	 */
+	private static void withPortTaskStops(RelayResponse.FarmRun run) throws IOException
+	{
+		String json = new String(Files.readAllBytes(PORT_TASK_RUN), StandardCharsets.UTF_8);
+		RelayResponse.FarmRun ports = new Gson().fromJson(json, RelayResponse.FarmRun.class);
+		assertEquals(FarmRunWire.PORT_TASKS, ports.kind);
+		List<RelayResponse.FarmStop> stops = new ArrayList<>(run.stops);
+		stops.addAll(ports.stops);
+		run.stops = stops;
 	}
 
 	private static void assertEveryFieldSet(String path, Object value)

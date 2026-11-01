@@ -330,6 +330,31 @@ public class RelayResponse
 		public List<RouteStep> steps;
 		public boolean done;
 		public boolean visited;
+		/**
+		 * A port-task stop's ticks, one per task slot it serves, or empty on a farm stop. The stop is
+		 * done when every one is reached, read from this client's own task slots and never from where
+		 * the player stands: see {@link FarmRunState}.
+		 */
+		public List<RunTask> tasks;
+		/** The voyage this stop's leg sails, drawn and ticked as a destination's voyage is; null otherwise. */
+		public Voyage voyage;
+	}
+
+	/**
+	 * What finishes one task's part of a port-task stop: the slot's {@code counter} reaching {@code n}
+	 * (crates {@code taken} or {@code delivered} at least, parts {@code remaining} at most), or for
+	 * {@code held} the slot no longer holding the task. {@code ends} marks the stop where the task
+	 * finishes, which may take the slot letting go of it when it was never seen held this run; see
+	 * {@link FarmRunState#tick}. The map's {@code RunTaskTick}.
+	 */
+	public static class RunTask
+	{
+		public int slot;
+		public int taskId;
+		public String counter;
+		public int n;
+		public boolean ends;
+		public String text;
 	}
 
 	/**
