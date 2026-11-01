@@ -156,6 +156,9 @@ invite link is copied only if it is on the approved map. Meetup notifications us
 `Notifier`, with the title stripped of control characters, cut to 60 characters, and at most one a
 minute.
 
+`BoatReader` reads the five `SAILING_BOAT_n_*` varbits and looks a stored port up in the game's
+`SailingDock` table by value, as the game's own dock lookup does; it is read-only.
+
 The plugin takes no gameplay action. `StashReader` uses
 the read-only `WATSON_STASH_UNIT_CHECK` script used by RuneLite's clue plugin, only with STASH
 sharing enabled, at most once a minute. `DestinationArrow` sets the hint arrow on a loaded
@@ -195,6 +198,10 @@ Say these in the description of the next Hub update, as changes from what was ap
   acknowledged. Sharing the task also sends the order, Wilderness filter and receipt. Route
   uses the existing endpoint with a public spot id; World map sets only a local pin. The Wiki
   and licence are linked. No ranking table, automatic route request or additional poll is added.
+- **Boats and moorings**, a new sharing choice that starts off and joins the one press at
+  Connect: each boat's slot, dock id and dock name from the game's `SailingDock` table, and its
+  teleport focus. Nothing for an unsettled login, while aboard, or for an unreadable slot; boat
+  names are read only as evidence a slot holds a boat and never sent.
 - Completed farming contracts remain visible under the existing sharing choice, with the same
   assignment's `state: "return"`, so the website can point back to Guildmaster Jane.
 - **One press at Connect** (above): the recommended set is offered after the server notice and

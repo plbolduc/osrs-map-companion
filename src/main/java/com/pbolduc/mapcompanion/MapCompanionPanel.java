@@ -1689,6 +1689,7 @@ public class MapCompanionPanel extends PluginPanel
 		kinds.add(new SharedKind("slayer", config.shareSlayer()));
 		kinds.add(new SharedKind("clue", config.shareClue()));
 		kinds.add(new SharedKind("STASH construction", config.shareStash()));
+		kinds.add(new SharedKind("boats", config.shareBoats()));
 		kinds.add(new SharedKind("patches", config.shareFarming()));
 		kinds.add(new SharedKind("birdhouses", config.shareBirdhouses()));
 		kinds.add(new SharedKind("hunter rumours", config.shareHunterRumours()));

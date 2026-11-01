@@ -174,7 +174,9 @@ on until you press, and you can untick any of it first. Each choice can send:
   travel; optionally the full quest and miniquest log; which achievement diary tier you have finished
   and which of those rewards you have collected; derived travel unlocks from carried/equipped items
   as yes/no flags; verified permanent transport unlocks, your house town and which STASH units you
-  have built. STASH contents are not read.
+  have built. STASH contents are not read. With **Boats and moorings**, where each of your boats is
+  moored and whether it carries a teleport focus, so the map's voyages start at your boat; boat
+  names are not sent.
 - **Tasks and timers:** your current slayer task and remaining count; your active clue step
   (tier, item id, observed clue text and resolved tile); your observed hunter rumour;
   your Mahogany Homes customer and tier; the crop requested by your farming contract and whether

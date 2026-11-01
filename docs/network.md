@@ -29,6 +29,14 @@ coral. The same setting, snapshot cadence and local replant evidence apply to ev
 Off-surface patches can be observed even where the website's surface run planner cannot visit.
 The snapshot byte cap is unchanged: it drops older observations first and flags omitted details.
 
+**Boats and moorings** sends, for each boat slot that shows a boat, its slot number, the game's
+dock id for where it is moored and that dock's name, and its teleport focus as none, teleport or
+greater. Lost, capsized and bottled boats are sent without a dock. Nothing is sent for 15 seconds
+after a login or hop, while the player stands on a deck, when a slot cannot be read, or when no slot
+shows a boat; the map treats that absence as unknown, not as owning no boat. Boat names, health,
+type and cargo are never sent. The same values are read locally, whatever the setting, to follow a
+voyage's steps; that sends nothing.
+
 **The step after a first Connect.** Every sharing setting, **Show destinations from the map** and
 **Show my group on the world map** start off. After the server notice, the sidebar shows a row each for the
 four sharing groups, the character name and those two drawing choices, all ticked, and *Where you

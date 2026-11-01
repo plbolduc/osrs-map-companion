@@ -43,6 +43,18 @@
     "ates-ralos-rise": false
   },
   "house": "rellekka",
+  "boats": [
+    {
+      "slot": 1,
+      "dock": 6,
+      "port": "Catherby",
+      "focus": "greater"
+    },
+    {
+      "slot": 3,
+      "focus": "none"
+    }
+  ],
   "stashUnits": {
     "28960": true
   },

@@ -208,6 +208,9 @@ public class MapCompanionPlugin extends Plugin
 	private StashReader stashReader;
 
 	@Inject
+	private BoatReader boatReader;
+
+	@Inject
 	private BirdhouseReader birdhouseReader;
 
 	@Inject
@@ -503,6 +506,7 @@ public class MapCompanionPlugin extends Plugin
 		diaryReader.onSessionEnded();
 		travelUnlockReader.onSessionEnded();
 		stashReader.onSessionEnded();
+		boatReader.onSessionEnded();
 		birdhouseReader.onSessionEnded();
 		questReader.onSessionEnded();
 		assignmentReader.onSessionEnded();
@@ -720,6 +724,7 @@ public class MapCompanionPlugin extends Plugin
 		clueReader.reset();
 		travelUnlockReader.onSessionEnded();
 		stashReader.onSessionEnded();
+		boatReader.onSessionEnded();
 		birdhouseReader.onSessionEnded();
 		questReader.onSessionEnded();
 		assignmentReader.onSessionEnded();
@@ -894,6 +899,7 @@ public class MapCompanionPlugin extends Plugin
 			diaryReader.onSessionEnded();
 			travelUnlockReader.onSessionEnded();
 			stashReader.onSessionEnded();
+			boatReader.onSessionEnded();
 			birdhouseReader.onSessionEnded();
 			questReader.onSessionEnded();
 			assignmentReader.onSessionEnded();
@@ -1749,6 +1755,7 @@ public class MapCompanionPlugin extends Plugin
 		diaryReader.onSessionResumed(now);
 		travelUnlockReader.onSessionResumed(now);
 		stashReader.onSessionResumed(now);
+		boatReader.onSessionResumed(now);
 		birdhouseReader.onSessionResumed(now);
 		questReader.onSessionResumed(now);
 		assignmentReader.observe(now);
