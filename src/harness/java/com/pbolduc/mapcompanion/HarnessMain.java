@@ -46,6 +46,8 @@ import javax.annotation.Nullable;
 import net.runelite.api.Client;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.GameState;
+import net.runelite.api.Quest;
+import net.runelite.api.QuestState;
 import net.runelite.api.Skill;
 import net.runelite.client.events.ServerNpcLoot;
 import net.runelite.client.game.ItemStack;
@@ -96,7 +98,7 @@ import okhttp3.Response;
  * <p>One JSON object per line in, one per line out, so an orchestrator can wait on a condition
  * rather than on a sleep. Commands: {@code login}, {@code logout}, {@code nick}, {@code join},
  * {@code leave}, {@code tick}, {@code move}, {@code xp}, {@code loot}, {@code settledReward}, {@code varbit},
- * {@code varp}, {@code config}, {@code copyInvite}, {@code state}, {@code quit}. Events: {@code hello},
+ * {@code varp}, {@code quest}, {@code config}, {@code copyInvite}, {@code state}, {@code quit}. Events: {@code hello},
  * {@code done}, {@code state} (whenever it changes — what the sidebar would print), {@code http}
  * (every request this plugin makes and what came back), {@code posted}, {@code refused},
  * {@code directive}, {@code streamState}, {@code invite}, {@code joined}, {@code error}.
@@ -127,6 +129,8 @@ public final class HarnessMain
 	private final HarnessStore store = new HarnessStore();
 	private final HarnessConfig config;
 	private final long tickMs;
+	/** The plugin's own, as {@code MapCompanionPlugin} holds one: not injected, and reset by hand. */
+	private final CompletionWatcher completions = new CompletionWatcher();
 
 	private final RelayClient relay;
 	private final ScheduledExecutorService reconnects = Executors.newSingleThreadScheduledExecutor(action ->
@@ -418,6 +422,17 @@ public final class HarnessMain
 				game.setVarp(number(command, "id", 0), number(command, "value", 0));
 				dirty = true;
 				break;
+			case "quest":
+				game.setQuest(Quest.valueOf(text(command, "quest", "DRAGON_SLAYER_I")),
+					QuestState.valueOf(text(command, "state", "FINISHED")));
+				/*
+				 * The full log is read at most every thirty seconds, which a story should not sit
+				 * through; JUnit holds the cache. Dropping it is the only thing here the plugin does
+				 * not do, and only the full log's cache: the travel quests keep theirs.
+				 */
+				questReader.clearLog();
+				dirty = true;
+				break;
 			case "config":
 				config.set(text(command, "key", ""), command.has("value") && command.get("value").getAsBoolean());
 				onConfigChanged(text(command, "key", ""));
@@ -472,6 +487,7 @@ public final class HarnessMain
 	/** {@code MapCompanionPlugin.onGameStateChanged}, for the one state this harness can be put in. */
 	private void logout()
 	{
+		completions.reset();
 		xpTracker.reset();
 		clueReader.reset();
 		farmingObserver.onSessionEnded();
@@ -571,6 +587,46 @@ public final class HarnessMain
 		emit("settledReward", milestones.take(now));
 	}
 
+	/** {@code MapCompanionPlugin.announceCompletions}, with this harness's sharing check. */
+	private void announceCompletions(long now)
+	{
+		if (game.gameState() != GameState.LOGGED_IN)
+		{
+			return;
+		}
+		if (!sharingMilestones())
+		{
+			completions.reset();
+			return;
+		}
+		if (config.shareQuestLog() || config.shareQuests())
+		{
+			Map<String, String> quests = config.shareQuestLog() ? questReader.readLog(now)
+				: questReader.settled(now) ? questReader.readStates(now) : null;
+			for (String quest : completions.quests(quests))
+			{
+				milestones.quest(quest, now);
+				dirty = true;
+			}
+		}
+		else
+		{
+			completions.forgetQuests();
+		}
+		if (config.shareDiaries())
+		{
+			for (String[] tier : completions.diaries(diaryReader.readTiers(now)))
+			{
+				milestones.diary(tier[0], tier[1], now);
+				dirty = true;
+			}
+		}
+		else
+		{
+			completions.forgetDiaries();
+		}
+	}
+
 	private boolean sharingMilestones()
 	{
 		return config.shareMilestones() && game.gameState() == GameState.LOGGED_IN
@@ -608,11 +664,24 @@ public final class HarnessMain
 		{
 			slayerState.clear();
 		}
+		if (key.equals("shareQuests") || key.equals("shareQuestLog"))
+		{
+			completions.forgetQuests();
+		}
+		if (key.equals("shareQuestLog"))
+		{
+			questReader.clearLog();
+		}
+		if (key.equals("shareDiaries"))
+		{
+			completions.forgetDiaries();
+		}
 		if (MapCompanionConfig.KEY_SHARE_MILESTONES.equals(key)
 			|| MapCompanionConfig.KEY_SHARE_PETS.equals(key)
 			|| MapCompanionConfig.KEY_SHARE_COLLECTION.equals(key))
 		{
 			milestones.reset();
+			completions.reset();
 		}
 		if (MapCompanionConfig.KEY_PAIRING_CODE.equals(key) || MapCompanionConfig.KEY_RELAY_URL.equals(key))
 		{
@@ -627,6 +696,7 @@ public final class HarnessMain
 				/** {@code onGroupChanged}: neither a suffix nor an unsent drop crosses a group. */
 				pairing.clearSuffix();
 				milestones.reset();
+				completions.reset();
 			}
 		}
 		else if (MapCompanionConfig.KEY_PAIRING_SUFFIX.equals(key))
@@ -653,6 +723,7 @@ public final class HarnessMain
 			farmRunState.bind(identity.id());
 		}
 		observeGameState(now);
+		announceCompletions(now);
 		if (farmRunState.active())
 		{
 			farmRunState.carried(capabilityEvaluator.evaluate());

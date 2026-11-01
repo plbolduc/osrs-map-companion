@@ -151,6 +151,11 @@ the real reader must resolve the row by value. `slayerOrder` changes the kept ra
 the local task/count, received options and acknowledged revision. The map's
 `companion-slayer-story.mjs` checks both receive channels and a real server restart with it.
 
+`quest` sets one quest's state (`{"cmd":"quest","quest":"DRAGON_SLAYER_I","state":"FINISHED"}`,
+the client's `Quest` and `QuestState` names) and drops the full log's thirty-second cache, so a
+story can finish a quest without waiting; a quest never set reads as unknown. With a diary's
+completion `varbit`, it drives the real quest and diary announcements from a watched change.
+
 `settledReward` commands begin after reward observation and test delivery, not actual game events.
 The fake cannot establish live reward coverage, farming varbit delivery or marker appearance.
 See [reward source coverage](docs/rewards-and-dryness.md) and [live checks](docs/live-checks.md).
