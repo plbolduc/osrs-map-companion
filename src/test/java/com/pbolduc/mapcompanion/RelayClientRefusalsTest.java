@@ -71,9 +71,11 @@ public class RelayClientRefusalsTest
 		/**
 		 * Three sentences a player can act on or has to accept. The wording matters as much as the
 		 * decision: this is the whole of what the sidebar shows somebody whose dot has stopped.
+		 *
+		 * The first used to send the player to the map's panel for a RuneLite code. The sidebar spends
+		 * a pasted invite itself now ({@link ConnectClient#join}), so the invite is the answer it names.
 		 */
-		assertEquals(
-			"The map needs your RuneLite code — copy it from the map's Companion panel and paste it here.",
+		assertEquals("This group needs an invite. Paste one from somebody in it.",
 			RelayClient.permanentReason(403, "needs_code"));
 		assertEquals("This group was closed.", RelayClient.permanentReason(410, "closed"));
 		assertEquals("You were removed from this group.", RelayClient.permanentReason(410, "removed"));

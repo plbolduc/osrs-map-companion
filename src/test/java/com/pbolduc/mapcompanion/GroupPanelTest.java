@@ -146,6 +146,27 @@ public class GroupPanelTest
 		assertFalse(drawn.toString(), drawn.stream().anyMatch(d -> d.startsWith("group.news.rob")));
 	}
 
+	/**
+	 * A group of one says so where the friends will be, and names the button that changes it. Most
+	 * groups start this way now that Connect makes one for a player alone; a blank tab read as
+	 * "nothing works". The card goes the moment a friend arrives.
+	 */
+	@Test
+	public void aGroupOfOneSaysSoAndNamesCopyInvite() throws Exception
+	{
+		AtomicReference<GroupPanel> panel = new AtomicReference<>();
+		SwingUtilities.invokeAndWait(() -> panel.set(panel()));
+		RelayResponse.StreamDirective alone = new Gson().fromJson("{\"roster\":[],\"events\":[]}",
+			RelayResponse.StreamDirective.class);
+		destinations.acceptSocial(alone, true);
+		SwingUtilities.invokeAndWait(() -> panel.get().refresh(true));
+		assertTrue(SidebarWords.words(panel.get()).toString(), SidebarWords.words(panel.get()).contains(GroupPanel.ALONE));
+
+		social();
+		SwingUtilities.invokeAndWait(() -> panel.get().refresh(true));
+		assertFalse(SidebarWords.words(panel.get()).contains(GroupPanel.ALONE));
+	}
+
 	private void social() throws Exception
 	{
 		String stream = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "contract", "stream.json")),

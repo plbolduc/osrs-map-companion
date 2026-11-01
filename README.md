@@ -159,14 +159,17 @@ The pictures use made-up characters and stars.
 
 ## Getting started
 
-1. Install **OSRS Map Companion** from the Plugin Hub.
-2. On osrs-map.com, open the [Companion panel](https://osrs-map.com/map?task=companion) and create
-   a group, or follow a friend's invite. You can use a group on your own.
-3. Press **Copy connection code** on the map, then **Paste** and **Connect** in the plugin's
-   sidebar.
-4. Read the server notice. Press **Share what's ticked**, or **Customise** to choose field by
-   field first, or **Not now** to share nothing yet. The gear opens **Settings** whenever you
-   want to change your choices.
+1. Install **OSRS Map Companion** from the Plugin Hub and open its sidebar.
+2. Press **Connect**. Read the server notice, name your group if you like, and press **Connect**
+   again. The plugin makes a group for you; you can use it on your own.
+3. Press **Share what's ticked**, or **Customise** to choose field by field first, or **Not now** to
+   share nothing yet. The gear opens **Settings** whenever you want to change your choices.
+4. To play with friends, press **Copy invite** under **Group** and send it. A friend pastes it into
+   their own sidebar, under **Have an invite?**, and presses **Join**.
+
+**Open the map** opens osrs-map.com already in your group, as you, for the bigger map on another
+screen. A group made on the website joins the same way: paste its invite, or the connection code
+from its Companion panel.
 
 ## What you share
 
@@ -219,6 +222,12 @@ on until you press, and you can untick any of it first. Each choice can send:
   and tier; the tile where you most recently died and its age. A quest or diary is announced only
   when its own choice above is shared too, and never for what was done before the plugin was watching.
   Unknown reward details remain absent. Large snapshots include a flag saying some of it was left out.
+
+**Connect**, with no group yet, sends a random key for this RuneLite and the group name you chose,
+once per press and only after the server notice; the map makes your group with it. **Join** with a
+pasted invite sends that key and the invite. Neither sends anything about your character.
+**Open the map** sends your group's credentials once per press, and opens a one-time link that
+adds that browser to your group as you.
 
 **Reroute**, under the steps of a destination the map sent, sends the tile you are standing on,
 once per press and whatever you share, so the map can plan the way from there. The map plans with

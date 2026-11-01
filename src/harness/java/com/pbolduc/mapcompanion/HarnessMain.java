@@ -96,12 +96,13 @@ import okhttp3.Response;
  * <h2>The protocol</h2>
  *
  * <p>One JSON object per line in, one per line out, so an orchestrator can wait on a condition
- * rather than on a sleep. Commands: {@code login}, {@code logout}, {@code nick}, {@code join},
+ * rather than on a sleep. Commands: {@code login}, {@code logout}, {@code nick}, {@code connect}
+ * (the sidebar's Connect with no group, optionally with a {@code name}), {@code join}, {@code openMap},
  * {@code leave}, {@code tick}, {@code move}, {@code xp}, {@code loot}, {@code settledReward}, {@code varbit},
  * {@code varp}, {@code quest}, {@code config}, {@code copyInvite}, {@code state}, {@code quit}. Events: {@code hello},
  * {@code done}, {@code state} (whenever it changes — what the sidebar would print), {@code http}
  * (every request this plugin makes and what came back), {@code posted}, {@code refused},
- * {@code directive}, {@code streamState}, {@code invite}, {@code joined}, {@code error}.
+ * {@code directive}, {@code streamState}, {@code invite}, {@code joined}, {@code link}, {@code error}.
  */
 public final class HarnessMain
 {
@@ -162,6 +163,7 @@ public final class HarnessMain
 	private final LootLog lootLog;
 	private final MemberIdentity identity;
 	private final Pairing pairing;
+	private final ConnectClient connectClient;
 
 	private volatile boolean dirty = true;
 	private long lastPostAtMs = 0L;
@@ -250,6 +252,7 @@ public final class HarnessMain
 		this.lootLog = injector.getInstance(LootLog.class);
 		this.identity = injector.getInstance(MemberIdentity.class);
 		this.pairing = injector.getInstance(Pairing.class);
+		this.connectClient = injector.getInstance(ConnectClient.class);
 
 		/** The event bus, for the one event this plugin acts on — see {@link HarnessStore}. */
 		store.onChanged(this::onConfigChanged);
@@ -384,6 +387,12 @@ public final class HarnessMain
 			case "join":
 				join(text(command, "text", ""));
 				break;
+			case "connect":
+				connect(command.has("name") ? text(command, "name", null) : null);
+				break;
+			case "openMap":
+				openMap();
+				break;
 			case "leave":
 				/** Exactly what the sidebar's <i>Leave group</i> does, in its order. */
 				pairing.leave();
@@ -500,7 +509,10 @@ public final class HarnessMain
 		setStatus(Health.WAITING, "Logged out");
 	}
 
-	/** The sidebar's Connect button: whatever was pasted, through the real {@link JoinCode}. */
+	/**
+	 * The sidebar's Join button: whatever was pasted, through the real {@link JoinCode}. An invite
+	 * goes to the map to be spent, through the real {@link ConnectClient}, as the sidebar sends it.
+	 */
 	private void join(String pasted)
 	{
 		JoinCode joined = JoinCode.parse(pasted);
@@ -509,12 +521,79 @@ public final class HarnessMain
 			emit("joined", one("found", null));
 			return;
 		}
+		if (joined.invite != null)
+		{
+			ConnectClient.Outcome outcome = await(done ->
+				connectClient.join(pairing.serverUrl(), identity.installationKey(), joined.code, joined.invite, done));
+			keep(outcome, "invite");
+			return;
+		}
 		pairing.join(joined);
 		pairing.approveServer();
 		Map<String, Object> event = new LinkedHashMap<>();
 		event.put("found", joined.code);
 		event.put("suffix", joined.suffix != null);
 		emit("joined", event);
+	}
+
+	/** The sidebar's Connect with no group: the map makes one, named as the dialog was left or typed. */
+	private void connect(@Nullable String name)
+	{
+		ConnectClient.Outcome outcome = await(done ->
+			connectClient.start(pairing.serverUrl(), identity.installationKey(), name, done));
+		keep(outcome, "connect");
+	}
+
+	/** What the sidebar's {@code finishConnect} does with an answer: keep the code, or say why not. */
+	private void keep(ConnectClient.Outcome outcome, String via)
+	{
+		Map<String, Object> event = new LinkedHashMap<>();
+		event.put("via", via);
+		if (outcome.joined == null)
+		{
+			event.put("found", null);
+			event.put("message", outcome.message);
+			emit("joined", event);
+			return;
+		}
+		pairing.join(outcome.joined);
+		pairing.approveServer();
+		pairing.rememberName(outcome.joined.code, outcome.name);
+		event.put("found", outcome.joined.code);
+		event.put("suffix", outcome.joined.suffix != null);
+		event.put("name", outcome.name);
+		emit("joined", event);
+	}
+
+	/** The sidebar's Open map: the link the map hands this member, or null for the plain map. */
+	private void openMap()
+	{
+		String member = identity.id();
+		String server = pairing.serverUrl();
+		String url = this.<String>await(done -> connectClient.link(server, pairing.code(), member,
+			member == null ? null : pairing.secret(server, pairing.code(), member), done));
+		emit("link", one("url", url));
+	}
+
+	/**
+	 * A request's answer, waited for. The sidebar hands it back to Swing; this harness has one thread
+	 * reading stdin and wants the next command to see the answer, so it waits, for as long as the
+	 * plugin's own call may take.
+	 */
+	@Nullable
+	private <T> T await(java.util.function.Consumer<java.util.function.Consumer<T>> ask)
+	{
+		java.util.concurrent.CompletableFuture<T> answer = new java.util.concurrent.CompletableFuture<>();
+		ask.accept(answer::complete);
+		try
+		{
+			return answer.get(30, java.util.concurrent.TimeUnit.SECONDS);
+		}
+		catch (Exception e)
+		{
+			emit("error", one("message", "no answer from the map: " + e));
+			return null;
+		}
 	}
 
 	/** {@code MapCompanionPlugin.onStatChanged}, which is where a level-up becomes an announcement. */

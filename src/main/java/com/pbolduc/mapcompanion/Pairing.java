@@ -224,6 +224,18 @@ public class Pairing
 			&& scopedKey(server, code).equals(store.get(KEY_ACTIVE_CONNECTION));
 	}
 
+	/**
+	 * Whether the server notice has been accepted for this map, whichever group it was for.
+	 *
+	 * <p>Asked before <i>Connect</i> or an invite sends anything, because those ask the map for a
+	 * group before there is one to {@link #connect} to: the notice comes first, the request after,
+	 * and {@link #connect} records the acceptance once the answer arrives.
+	 */
+	public boolean noticeAccepted(@Nullable String server)
+	{
+		return server != null && DISCLOSURE_VERSION.equals(readMap(KEY_SERVER_CONSENT).get(server));
+	}
+
 	/** The dialog precedes any group change; cancelling writes nothing. */
 	public boolean connect(JoinCode joined, BooleanSupplier confirm)
 	{

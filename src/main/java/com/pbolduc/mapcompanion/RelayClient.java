@@ -607,8 +607,8 @@ public class RelayClient
 	 *
 	 * <ul>
 	 *   <li>{@code 403 needs_code} — the group knows nothing about this installation, which is what
-	 *       a bare code gets in a group that keeps members. The answer is a paste, and the sentence
-	 *       says where from.
+	 *       a bare code gets in a group that keeps members. The answer is a paste: an invite from
+	 *       somebody in the group, which the sidebar can spend itself, and the sentence says so.
 	 *   <li>{@code 410 closed} — the group's owner ended it. Nothing to retry: the map keeps a
 	 *       tombstone so that an old plugin cannot bring it back.
 	 *   <li>{@code 410 removed} — an owner removed this member. Retrying that thirty seconds later,
@@ -630,8 +630,7 @@ public class RelayClient
 		if (status == 403)
 		{
 			return "needs_code".equals(tidy)
-				   ? "The map needs your RuneLite code — copy it from the map's Companion panel and "
-				   + "paste it here."
+				   ? "This group needs an invite. Paste one from somebody in it."
 				   : null;
 		}
 		if (status == 410)

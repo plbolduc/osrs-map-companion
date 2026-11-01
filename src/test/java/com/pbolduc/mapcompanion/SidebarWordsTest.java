@@ -133,7 +133,33 @@ public class SidebarWordsTest
 		assertEquals("Press Connect", MapCompanionPanel.statusWords(true, false, Health.WAITING, "Press Connect to choose osrs-map.com", "Sunday raids"));
 		assertEquals("Sunday raids", MapCompanionPanel.statusWords(true, true, Health.LIVE, "Connected to osrs-map.com", "Sunday raids"));
 		assertEquals("Logged out", MapCompanionPanel.statusWords(true, true, Health.WAITING, "Logged out", "Sunday raids"));
-		assertEquals("Paste your connection code", MapCompanionPanel.JOIN_PLACEHOLDER);
+		/**
+		 * The field asked for "your connection code", which only the map's panel could give. The orange
+		 * button makes a group now and the field is the other way in, so a friend's invite comes first.
+		 */
+		assertEquals("Paste an invite or code", MapCompanionPanel.JOIN_PLACEHOLDER);
+	}
+
+	/**
+	 * One orange button, saying the one thing to press: Connect before a group, which makes one, and
+	 * Open map after, which opens the website as the player. A fresh install no longer needs the map.
+	 */
+	@Test
+	public void theOrangeButtonConnectsBeforeAGroupAndOpensTheMapAfter()
+	{
+		assertEquals("Connect", MapCompanionPanel.CONNECT);
+		assertEquals("Open the map", MapCompanionPanel.OPEN_MAP);
+		assertEquals("Our group", MapCompanionPanel.DEFAULT_GROUP_NAME);
+	}
+
+	/** The invite says both ways in, and keeps the link last so a chat client links all of it. */
+	@Test
+	public void anInviteSaysWhereToPasteItAndEndsWithTheLink()
+	{
+		String link = "https://osrs-map.com/map?join=ABC234&i=K7PQ2M3XABCDEFGH&task=companion";
+		String message = MapCompanionPanel.inviteMessage(link);
+		assertTrue(message, message.contains("OSRS Map Companion"));
+		assertTrue(message, message.endsWith(" " + link));
 	}
 
 	@Test
