@@ -383,8 +383,8 @@ public class SidebarPolishShot
 		best.best = true;
 		best.tiles = 52;
 		best.steps = new ArrayList<>(Arrays.asList(
-			Steps.icon(step("method", "Cast Lumbridge Home Teleport", "Standard spellbook", false, 3222, 3218, null,
-				"Ten seconds to cast, and a combat hit stops it"), "spell:lumbridge-home-teleport"),
+			Steps.picture(step("method", "Cast Lumbridge Home Teleport", "Standard spellbook", false, 3222, 3218, null,
+				"Ten seconds to cast, and a combat hit stops it"), "spriteId", net.runelite.api.gameval.SpriteID.Magicon2.LUMBRIDGE_HOME_TELEPORT),
 			step("walk-leg", "Walk to the castle's staircase", "18 tiles", true, 3206, 3209, null),
 			step("walk-leg", "Climb to the bank", "2nd floor", true, 3208, 3220, 2)));
 		RelayResponse.RouteOption ring = new RelayResponse.RouteOption();
@@ -392,7 +392,7 @@ public class SidebarPolishShot
 		ring.label = "Ring of dueling";
 		ring.tiles = 80;
 		ring.steps = new ArrayList<>(Collections.singletonList(
-			Steps.icon(step("method", "Rub a ring of dueling", "Ferox Enclave", false, 3150, 3635, null), "item:2552")));
+			Steps.picture(step("method", "Rub a ring of dueling", "Ferox Enclave", false, 3150, 3635, null), "itemId", 2552)));
 		RelayResponse.Route route = new RelayResponse.Route();
 		route.origin = "shared";
 		route.options = new ArrayList<>(Arrays.asList(best, ring));
@@ -402,17 +402,18 @@ public class SidebarPolishShot
 	/** A step's icon where this build reads one; nothing where it does not. */
 	static final class Steps
 	{
-		static RelayResponse.RouteStep icon(RelayResponse.RouteStep step, String icon)
+		/** A step's picture by the id the map sends, {@code itemId} or {@code spriteId}; set by name so this still runs on a step that has neither. */
+		static RelayResponse.RouteStep picture(RelayResponse.RouteStep step, String field, int id)
 		{
 			try
 			{
-				Field field = RelayResponse.RouteStep.class.getDeclaredField("icon");
-				field.setAccessible(true);
-				field.set(step, icon);
+				Field picture = RelayResponse.RouteStep.class.getDeclaredField(field);
+				picture.setAccessible(true);
+				picture.set(step, id);
 			}
 			catch (ReflectiveOperationException absent)
 			{
-				/* An older step reads no icon. */
+				/* An older step reads no picture. */
 			}
 			return step;
 		}

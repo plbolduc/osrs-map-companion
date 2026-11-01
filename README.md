@@ -10,10 +10,11 @@ and see your character and friends on the website.
 ## Routes in RuneLite
 
 <p>
-  <img src="docs/mockups/sidebar-route.png" width="300" alt="A route to Lumbridge Castle bank in the real plugin sidebar: numbered steps, the current walk highlighted, and Follow, Reroute and Dismiss">
+  <img src="docs/mockups/sidebar-route.png" width="300" alt="A route to Lumbridge Castle bank in the real plugin sidebar: numbered steps, the home teleport's spell icon on its step, the current walk highlighted, and Follow, Reroute and Dismiss">
 </p>
 
 Send a place from the website or pick a search result, and the sidebar lists the way there.
+A teleport step shows what to click: the item's sprite or the spell's icon, from the game.
 Each step gets a numbered pin on the game's world map; the game's arrow points at the current
 step when it is in the loaded area.
 
