@@ -116,6 +116,13 @@ final class PortTasksPanel extends JPanel
 		setVisible(false);
 	}
 
+	/** The button a hotkey presses on this card's run, or null with none shown here. EDT. */
+	@Nullable
+	JButton hotkey(boolean rerouting)
+	{
+		return isVisible() ? run.hotkey(rerouting) : null;
+	}
+
 	/** Called on the EDT by the sidebar refresh, beside the farm run card. */
 	void refresh(boolean connected)
 	{

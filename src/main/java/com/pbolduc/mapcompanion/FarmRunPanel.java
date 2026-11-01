@@ -29,6 +29,7 @@ import com.google.inject.Inject;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
+import javax.annotation.Nullable;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -93,6 +94,13 @@ final class FarmRunPanel extends JPanel
 		add(run);
 
 		start.addActionListener(e -> client.start(STARTS[kind.getSelectedIndex()][0]));
+	}
+
+	/** The button a hotkey presses on this card's run, or null with none shown here. EDT. */
+	@Nullable
+	JButton hotkey(boolean rerouting)
+	{
+		return isVisible() ? run.hotkey(rerouting) : null;
 	}
 
 	/** Called on the EDT by the sidebar refresh; character state has already been read on a game tick. */

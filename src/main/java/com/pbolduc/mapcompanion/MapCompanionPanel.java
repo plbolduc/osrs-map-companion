@@ -1765,6 +1765,38 @@ public class MapCompanionPanel extends PluginPanel
 	}
 
 	/**
+	 * A hotkey, taken as the card it acts on would take a click: a run's own buttons while a run is
+	 * shown, otherwise the destination's. The key presses that very button, so it obeys every rule the
+	 * button does — Reroute inside its wait is disabled, and Follow is offered only where the card
+	 * offers it. EDT.
+	 */
+	void pressHotkey(boolean rerouting)
+	{
+		JButton button = farmRunPanel.hotkey(rerouting);
+		if (button == null)
+		{
+			button = portTasksPanel.hotkey(rerouting);
+		}
+		if (button == null && destinationSlot.isVisible())
+		{
+			JButton own = rerouting ? rerouteButton : followButton;
+			button = shownDestinationActions.contains(own) ? own : null;
+		}
+		press(button);
+	}
+
+	/** Click a button only as a player could: one in its row and enabled. True when it was pressed. */
+	static boolean press(@Nullable JButton button)
+	{
+		if (button == null || !button.isEnabled())
+		{
+			return false;
+		}
+		button.doClick();
+		return true;
+	}
+
+	/**
 	 * Put a row of buttons in one known order, and only touch it when that order changes.
 	 *
 	 * <p>A grid appends, so a button that comes back after being hidden would come back at the end
