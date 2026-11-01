@@ -55,7 +55,8 @@ Results use the game's map icons and item sprites.
 </p>
 
 Build a run on the website and press **Send run to RuneLite**, or choose a preset, **Ready now**,
-**Birdhouses** or your **Farming contract** under **Farm run** on Home and press **Start run**.
+**Birdhouses** or your **Farming contract** under **Farm run** on Home and press **Start run**;
+the choice steps aside while the run is going, so a stray press cannot replace it.
 The sidebar lists your stops, how to reach each one, and **Before you leave**, a bank checklist.
 In the bank, the checklist's teleports you are not carrying are outlined. Numbered pins mark the
 stops on the game's world map.

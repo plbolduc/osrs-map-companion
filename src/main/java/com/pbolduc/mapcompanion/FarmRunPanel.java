@@ -60,6 +60,12 @@ final class FarmRunPanel extends JPanel
 	private final JComboBox<String> kind = new JComboBox<>();
 	/* A button under the picker, the picker's width: it acts, and a link is a fold's own opener. */
 	private final JButton start = MapCompanionPanel.smallButton("Start run");
+	/*
+	 * The kind of run and Start run, hidden while a run is going or being planned: there is one run at
+	 * a time, so a press here would replace the run being walked. The Port tasks card holds the same
+	 * rule; the picker comes back when the run ends.
+	 */
+	private final JPanel picker = new JPanel(new BorderLayout(0, 4));
 	private final RunView run;
 
 	@Inject
@@ -79,7 +85,6 @@ final class FarmRunPanel extends JPanel
 		heading.setForeground(Color.WHITE);
 		heading.setFont(heading.getFont().deriveFont(Font.BOLD, 13f));
 		add(MapCompanionPanel.left(heading));
-		JPanel picker = new JPanel(new BorderLayout(0, 4));
 		picker.setBackground(getBackground());
 		for (String[] choice : STARTS)
 		{
@@ -108,6 +113,7 @@ final class FarmRunPanel extends JPanel
 	{
 		boolean showing = run.refresh(connected);
 		setVisible(connected || showing);
+		picker.setVisible(!run.busy());
 		boolean ready = connected && client.ready();
 		start.setEnabled(ready);
 		kind.setEnabled(ready);

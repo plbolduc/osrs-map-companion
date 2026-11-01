@@ -601,6 +601,13 @@ and the press sends the clue as the snapshot carries it; the card takes the name
 map reads from the words, and an emote's way goes by its STASH unit first. A step with a tile still
 goes as that tile, so the words leave only when they are what the map needs.
 
+### The farm run's picker steps aside
+
+The farm run card kept its kind of run and *Start run* above a run being walked, and there is one run
+at a time, so one press replaced it. The Port tasks card already held the rule "a run already held is
+the order: no second Start beside it". The farm card follows it now: the picker hides while a run is
+shown, planned or ended, and comes back when the card has no run.
+
 ### Outside the sidebar
 
 *Route here* on a right-click of the game's world map, the step being walked in a small box over

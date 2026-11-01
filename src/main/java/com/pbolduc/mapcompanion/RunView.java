@@ -85,6 +85,8 @@ final class RunView extends JPanel
 	private final JButton end = MapCompanionPanel.smallButton("End run");
 	private final JPanel actions = new JPanel(new GridLayout(1, 0, 4, 0));
 	private List<JButton> shownActions = Collections.emptyList();
+	/** A run shown, or one being planned or ended: the card's own Start would replace it. EDT. */
+	private boolean busy;
 	/*
 	 * A hairline and its own heading over the steps of the leg being walked. Without them the leg's
 	 * Walk, Board, Sail and Dock read as more stops at the bottom of the list. Shown with the steps.
@@ -157,6 +159,12 @@ final class RunView extends JPanel
 		return port == FarmRunWire.PORT_TASKS.equals(run.kind);
 	}
 
+	/** Whether this card holds a run, or one being planned or ended, as of its last refresh. EDT. */
+	boolean busy()
+	{
+		return busy;
+	}
+
 	/** The button a hotkey presses here: Reroute, or Follow and Pause, while this card shows a run. EDT. */
 	@Nullable
 	JButton hotkey(boolean rerouting)
@@ -195,6 +203,7 @@ final class RunView extends JPanel
 		changed.setVisible(active && view.changed);
 		before.setVisible(active && !view.run.bring.isEmpty());
 		actions.setVisible(active || planning || ending);
+		busy = active || planning || ending;
 		if (active)
 		{
 			boolean newRun = !Objects.equals(shownRun, view.run.id);
