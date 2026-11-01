@@ -42,7 +42,7 @@ import okhttp3.Response;
 
 /**
  * The plugin's own way into a group, and its way out to the map as the player: <i>Connect</i>,
- * <i>Join</i> with a pasted invite, and <i>Open map</i>.
+ * <i>Join</i> with a pasted invite, and <i>Open the map</i>.
  *
  * <p><b>Why the plugin asks for a group at all.</b> Making a group and joining one both used to
  * happen in a browser: the map's panel made the group and handed the plugin a RuneLite code to
@@ -55,16 +55,17 @@ import okhttp3.Response;
  *       group whose maker is this RuneLite, and names it as it names a group nobody has named.
  *   <li><b>Join</b> — the same address with the group's code and the invite's token out of a pasted
  *       link. The map spends one use of the invite.
- *   <li><b>Open map</b> — {@code POST /api/companion/link} under the member's own headers. The map
- *       answers with a one-time link that opens the map as this member, and as the group's owner
+ *   <li><b>Open the map</b> — {@code POST /api/companion/link} under the member's own headers. The
+ *       map answers with a one-time link that opens the map as this member, and as the group's owner
  *       when this RuneLite made the group. The token is in the link's fragment, which no browser
- *       sends to a server.
+ *       sends to a server. On the login screen the member is any character of this RuneLite the
+ *       group has issued a secret to.
  * </ul>
  *
  * <p><b>What it sends.</b> The installation key the snapshot already carries, so the map knows which
- * RuneLite made or joined a group, and on Join the code and token the player pasted. Open map sends
- * the code, member id and secret every member request sends. No character data: a group is made
- * before anything is shared, and the sharing choices are offered after.
+ * RuneLite made or joined a group, and on Join the code and token the player pasted. Open the map
+ * sends the code, member id and secret every member request sends. No character data: a group is
+ * made before anything is shared, and the sharing choices are offered after.
  *
  * <p><b>When.</b> Only on a press, and one at a time. On the map the plugin was installed for, the
  * install warning was the notice; a different map address is asked about by name first. Nothing is
@@ -264,7 +265,7 @@ final class ConnectClient
 	}
 
 	/**
-	 * Open map: a one-time link for the browser about to open, or null when there is none to be had.
+	 * Open the map: a one-time link for the browser about to open, or null when there is none to be had.
 	 *
 	 * <p>Null for every failure — unreachable, refused, a legacy group, an answer on another map — and
 	 * the caller opens the plain map then, which is all the button did before. No secret means the map

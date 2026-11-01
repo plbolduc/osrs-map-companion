@@ -93,8 +93,8 @@ import net.runelite.client.util.LinkBrowser;
  *
  * <p><b>The plugin is enough on its own.</b> Before a group the orange button is <i>Connect</i>, which
  * makes one for the player ({@link ConnectClient}), and the field under it takes a friend's invite, a
- * RuneLite code from the map or an old code. Once connected the button is <i>Open map</i>, which opens
- * the website already in the group as this player. The field folds away until switching or
+ * RuneLite code from the map or an old code. Once connected the button is <i>Open the map</i>, which
+ * opens the website already in the group as this player. The field folds away until switching or
  * reconnecting needs it.
  *
  * <p><b>Reading the clipboard is a button, never a background job.</b> Nothing here looks at the
@@ -154,8 +154,8 @@ public class MapCompanionPanel extends PluginPanel
 	/**
 	 * The one filled button. See the constructor for why it is filled and nothing else is.
 	 *
-	 * <p><i>Connect</i> until the plugin is in a group, and <i>Open map</i> after: the one thing to
-	 * press is a different thing before and after, and two orange buttons would answer "what do I
+	 * <p><i>Connect</i> until the plugin is in a group, and <i>Open the map</i> after: the one thing
+	 * to press is a different thing before and after, and two orange buttons would answer "what do I
 	 * press" with two answers.
 	 */
 	private final JButton openMapButton = new JButton(OPEN_MAP);
@@ -163,7 +163,7 @@ public class MapCompanionPanel extends PluginPanel
 	static final String OPEN_MAP = "Open the map";
 	/** Asks for groups and links; see {@link ConnectClient}. */
 	private final ConnectClient connectClient;
-	/** True while Connect, Join or Open map is waiting on the map, so a second press sends nothing. */
+	/** True while Connect, Join or Open the map waits on the map, so a second press sends nothing. */
 	private boolean asking = false;
 
 	/*
@@ -875,7 +875,7 @@ public class MapCompanionPanel extends PluginPanel
 	}
 
 	/**
-	 * The orange button: Connect before a group, Open map after.
+	 * The orange button: Connect before a group, Open the map after.
 	 *
 	 * <p>Connect with a code already set — a changed map address, say — connects to that code again
 	 * rather than making another group: "Connect" always means "connect me", and only a player with
@@ -988,17 +988,19 @@ public class MapCompanionPanel extends PluginPanel
 	}
 
 	/**
-	 * Open map: the website, already in the group as this player.
+	 * Open the map: the website, already in the group as this player.
 	 *
 	 * <p>The map is asked for a one-time link ({@link ConnectClient#link}) and the browser opens it;
-	 * anything short of a link — logged out, no secret yet, a legacy group, the map unreachable —
-	 * opens the plain map, which is what this button always did.
+	 * anything short of a link — no secret yet, a legacy group, the map unreachable — opens the
+	 * plain map, which is what this button always did. On the login screen no character is logged in
+	 * to ask as, so it asks as one this RuneLite has already been in the group as
+	 * ({@link Pairing#memberWithSecret}): the link puts the player in the group, whichever account.
 	 */
 	private void openMap()
 	{
 		String server = pairing.serverUrl();
 		String code = pairingCode();
-		String member = identity.id();
+		String member = pairing.memberWithSecret(server, code, identity.id());
 		String secret = member == null ? null : pairing.secret(server, code, member);
 		if (asking || server == null || member == null || secret == null)
 		{

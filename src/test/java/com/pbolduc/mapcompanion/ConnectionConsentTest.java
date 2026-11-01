@@ -26,6 +26,8 @@
 package com.pbolduc.mapcompanion;
 
 import com.google.gson.Gson;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -67,6 +69,32 @@ public class ConnectionConsentTest
 		assertTrue(pairing.connect(JoinCode.parse("ABC234-K7PQ2M3X"), () -> true));
 		assertTrue(pairing.approvedMap(pairing.serverUrl()));
 		assertFalse(pairing.approvedMap("http://localhost:3000"));
+	}
+
+	/**
+	 * Open the map acts as the player, so on the login screen, with no character to name, it acts as
+	 * a member of this RuneLite the group has already issued a secret to — the character logged in
+	 * when there is one, and never a member of another group or another map.
+	 */
+	@Test
+	public void theLoginScreenActsAsAMemberThisGroupHasAlreadyMet()
+	{
+		HarnessStore store = new HarnessStore();
+		Pairing pairing = new Pairing(store, new Gson());
+		assertTrue(pairing.connect(JoinCode.parse("ABC234-K7PQ2M3X"), () -> true));
+		String server = pairing.serverUrl();
+		assertNull(pairing.memberWithSecret(server, "ABC234", null));
+
+		pairing.rememberSecret(server, "ABC234", "main", SECRET);
+		pairing.rememberSecret(server, "ABC234", "alt", "ZYXWVTSRQPNMKJHGFEDCBA98765432KM");
+		pairing.rememberSecret(server, "DEF567", "elsewhere", SECRET);
+		List<String> met = Arrays.asList("main", "alt");
+		assertEquals("logged in: that character", "main", pairing.memberWithSecret(server, "ABC234", "main"));
+		assertTrue("logged out: one this group knows", met.contains(pairing.memberWithSecret(server, "ABC234", null)));
+		assertTrue("a character it has not met: one it has",
+			met.contains(pairing.memberWithSecret(server, "ABC234", "new-character")));
+		assertNull("not another group's", pairing.memberWithSecret(server, "GHJ789", null));
+		assertNull("not another map's", pairing.memberWithSecret("http://localhost:3000", "ABC234", null));
 	}
 
 	@Test
