@@ -360,9 +360,10 @@ public class Pairing
 	 * A member of this installation the group has issued a secret to, preferring {@code current}, or
 	 * null when it has issued none.
 	 *
-	 * <p>For <i>Open the map</i>, which acts as the player rather than as a character, on the login
-	 * screen, where no character is logged in to name one. Any of them will do: the map binds every
-	 * character of an installation to the browser one of them opens.
+	 * <p>For the two presses that act as the player rather than as a character — <i>Open the map</i>
+	 * and <i>Rename group…</i> — on the login screen, where no character is logged in to name one.
+	 * Any of them will do: the map binds every character of an installation to the browser one of
+	 * them opens, and runs the group for its maker's installation, not for one character of it.
 	 */
 	@Nullable
 	public String memberWithSecret(@Nullable String server, String code, @Nullable String current)

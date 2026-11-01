@@ -77,6 +77,12 @@ public class RelayResponse
 	 */
 	public String groupName;
 	/**
+	 * True when this member may rename the group from the sidebar: its RuneLite made the group, or it
+	 * is bound to an owner's browser. Absent otherwise, and absent means "may not" — unlike the name,
+	 * there is nothing here worth keeping from an older reply, because standing in a group changes.
+	 */
+	public Boolean groupOwner;
+	/**
 	 * The ids of the milestones this reply is the receipt for.
 	 *
 	 * <p>Every id the map read, whether or not it had already seen it — which is the property that
