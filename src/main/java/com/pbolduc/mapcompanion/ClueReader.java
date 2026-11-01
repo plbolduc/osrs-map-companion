@@ -242,7 +242,8 @@ public class ClueReader
 
 	/**
 	 * Where a Route press for this clue goes: the coordinate's dig spot or the beginner map's tile,
-	 * or null for a step that is words, which the map cannot yet be asked about from here.
+	 * or null for a step that is words, which a press asks about by its words instead
+	 * ({@link #routesByWords}).
 	 */
 	@Nullable
 	static CompanionSnapshot.Tile routeTile(@Nullable CompanionSnapshot.Clue clue)
@@ -252,6 +253,16 @@ public class ClueReader
 			return null;
 		}
 		return clue.coordTile != null ? clue.coordTile : clue.mapTile;
+	}
+
+	/**
+	 * Whether a Route press sends this clue by its words: a step read off the scroll that names no
+	 * tile, whose place the map finds in its own clue table. The words leave only in that press.
+	 */
+	static boolean routesByWords(@Nullable CompanionSnapshot.Clue clue)
+	{
+		return clue != null && clue.tier != null && routeTile(clue) == null
+			&& clue.text != null && !clue.text.trim().isEmpty();
 	}
 
 	private boolean carried(int itemId)

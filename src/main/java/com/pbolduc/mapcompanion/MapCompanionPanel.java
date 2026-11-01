@@ -613,8 +613,9 @@ public class MapCompanionPanel extends PluginPanel
 		deathRouteButton.addActionListener(e -> routeToDeath());
 		clueRouteButton.addActionListener(e -> routeToClue());
 		eventRouteButton.addActionListener(e -> routeToMeetup());
-		clueRouteButton.setToolTipText("Plan the way to this step from where you stand. The tile goes to the map in this "
-			+ "request only, whether or not you share your clue; the map plans with it and does not keep it.");
+		clueRouteButton.setToolTipText("Plan the way to this step from where you stand. Its tile, or for a step that is words "
+			+ "the clue's words, go to the map in this request only, whether or not you share your clue; the map plans with "
+			+ "them and does not keep them.");
 		eventRouteButton.setToolTipText("Plan the way to this meetup from where you stand. Nobody is told you are coming.");
 		leaveButton.addActionListener(e -> leaveGroup());
 		rerouteButton.setToolTipText("Plan the way again from where you stand. Sends your tile to the map once; "
@@ -1469,7 +1470,7 @@ public class MapCompanionPanel extends PluginPanel
 
 	/**
 	 * The step in a few words: where a Route goes, or the scroll's own words cut to two lines. A step
-	 * that is words has no Route here yet, because the map is asked by tile and this one names none.
+	 * that is words is routed by those words, so the card shows them and Route under them.
 	 */
 	static String clueDetail(CompanionSnapshot.Clue clue)
 	{
@@ -1483,13 +1484,15 @@ public class MapCompanionPanel extends PluginPanel
 		}
 		if (clue.text != null && !clue.text.isEmpty())
 		{
-			String text = clue.text.length() <= 80 ? clue.text : clue.text.substring(0, 79).trim() + "…";
-			return text + " · open the map for this step";
+			return clue.text.length() <= 80 ? clue.text : clue.text.substring(0, 79).trim() + "…";
 		}
 		return "Read the scroll to see its step";
 	}
 
-	/** Route to the clue's tile, read again at the press: the scroll may have changed since the paint. */
+	/**
+	 * Route to the clue, read again at the press: the scroll may have changed since the paint. A step
+	 * with a tile goes as that tile; one that is words goes as the clue, and the map names its place.
+	 */
 	private void routeToClue()
 	{
 		CompanionSnapshot.Clue clue = clueReader.current();
@@ -1498,6 +1501,10 @@ public class MapCompanionPanel extends PluginPanel
 		{
 			routePress.press(RoutePress.Target.tile("clue", new WorldPoint(tile.x, tile.y, tile.plane),
 				clueTitle(clue.tier), null, clue.coordTile != null ? "Coordinate" : "Beginner map"));
+		}
+		else if (ClueReader.routesByWords(clue))
+		{
+			routePress.press(RoutePress.Target.clue("clue", clue, clueTitle(clue.tier), clueTitle(clue.tier)));
 		}
 		refresh();
 	}
@@ -1704,7 +1711,7 @@ public class MapCompanionPanel extends PluginPanel
 				}
 				setWrapped(clueTitle, clueTitle(clue.tier), scroll != null ? CARD_TEXT_WIDTH - CLUE_PICTURE - 6 : CARD_TEXT_WIDTH);
 				setWrapped(clueDetail, clueDetail(clue), CARD_TEXT_WIDTH);
-				boolean routable = ClueReader.routeTile(clue) != null;
+				boolean routable = ClueReader.routeTile(clue) != null || ClueReader.routesByWords(clue);
 				clueActions.setVisible(routable);
 				routeState(clueRouteButton, clueSaid, "clue", "Route", ready && routable);
 			}

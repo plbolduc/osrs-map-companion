@@ -226,7 +226,9 @@ The website plan's second session, once the routes in the game are built: a memb
       search is out: nothing comes back. Check RuneLite's log holds nothing that was typed.
 - [ ] **Route on a clue.** With *Share clue* off, read a coordinate clue and a beginner map: the
       clue card appears under *Now* with Route, and Route fills the destination's card. A step that
-      is words shows no Route. Nothing about the clue reaches the map's member page.
+      is words, an anagram or an emote, shows its words and Route: the card is named after the place
+      the map reads from them, and an emote's way goes by its STASH unit first. Nothing about the
+      clue reaches the map's member page.
 - [ ] **Route back.** Die somewhere ordinary with *Share death* off, respawn and press Route back.
       Then, if convenient, die at a boss fought in an instance (Vorkath, Zulrah): note where the
       route goes. The map's half decides whether it is the boss's way in.

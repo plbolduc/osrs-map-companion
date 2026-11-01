@@ -56,8 +56,10 @@ import okhttp3.Response;
  * <p><b>What it sends.</b> {@code POST /api/companion/route} with the member's own credentials, a
  * target and the tile the player stands on. The target is a public place's id where the thing has
  * one — a search result — and otherwise a tile: a clue's, a gravestone's, a star's, a meetup's, a
- * friend's. A clue or a death the player does not share travels in this request only; the map
- * plans with it and keeps nothing, as its route endpoint says. Inside a raid's rooms the client
+ * friend's. A clue step that is words names no tile, so it goes as the clue itself, its tier,
+ * words and scroll, and the map places it with its own clue table. A clue or a death the player
+ * does not share travels in this request only; the map plans with it and keeps nothing, as its
+ * route endpoint says. Inside a raid's rooms the client
  * cannot say where the player stands, so no {@code from} is sent and the map ranks from the
  * position the member shares, or from nowhere and says so.
  *
@@ -94,9 +96,15 @@ final class RoutePress
 		final Integer world;
 		@Nullable
 		final String note;
+		/**
+		 * A clue step that is words, sent as the snapshot carries it so the map places it from its own
+		 * clue table; a step with a tile of its own goes as that tile instead.
+		 */
+		@Nullable
+		final CompanionSnapshot.Clue clue;
 
 		private Target(String source, @Nullable String id, @Nullable WorldPoint tile, String name,
-			@Nullable Integer world, @Nullable String note)
+			@Nullable Integer world, @Nullable String note, @Nullable CompanionSnapshot.Clue clue)
 		{
 			this.source = source;
 			this.id = id;
@@ -104,16 +112,22 @@ final class RoutePress
 			this.name = name;
 			this.world = world;
 			this.note = note;
+			this.clue = clue;
 		}
 
 		static Target place(String source, String id, String name, @Nullable WorldPoint stood, @Nullable String note)
 		{
-			return new Target(source, id, stood, name, null, note);
+			return new Target(source, id, stood, name, null, note, null);
 		}
 
 		static Target tile(String source, WorldPoint tile, String name, @Nullable Integer world, @Nullable String note)
 		{
-			return new Target(source, null, tile, name, world, note);
+			return new Target(source, null, tile, name, world, note, null);
+		}
+
+		static Target clue(String source, CompanionSnapshot.Clue clue, String name, @Nullable String note)
+		{
+			return new Target(source, null, null, name, null, note, clue);
 		}
 	}
 
@@ -159,6 +173,17 @@ final class RoutePress
 	{
 		Object target;
 		RouteClient.Tile from;
+	}
+
+	/** A clue step by its words, which the map turns into a place with its own clue table. */
+	static final class ClueTarget
+	{
+		final CompanionSnapshot.Clue clue;
+
+		ClueTarget(CompanionSnapshot.Clue clue)
+		{
+			this.clue = clue;
+		}
 	}
 
 	/** A public place, by the id the map's own search gave it. */
@@ -236,7 +261,7 @@ final class RoutePress
 			said = new Said(target.source, false, RouteClient.NEEDS_CONNECTION, null, destinations.generation());
 			return;
 		}
-		if (target.id == null && target.tile == null)
+		if (target.id == null && target.tile == null && target.clue == null)
 		{
 			return;
 		}
@@ -270,7 +295,9 @@ final class RoutePress
 	Request request(String server, String code, String member, String secret, Target target, @Nullable WorldPoint from)
 	{
 		Question question = new Question();
-		question.target = target.id != null ? new PlaceId(target.id) : new RouteClient.Tile(target.tile);
+		question.target = target.id != null ? new PlaceId(target.id)
+			: target.clue != null ? new ClueTarget(target.clue)
+			: new RouteClient.Tile(target.tile);
 		question.from = from == null ? null : new RouteClient.Tile(from);
 		return new Request.Builder()
 			.url(server + RouteClient.PATH)
@@ -374,7 +401,8 @@ final class RoutePress
 			return null;
 		}
 		String resolved = planned == null ? null : RouteWire.text(planned.name, MAX_NAME);
-		destination.name = target.id != null && resolved != null ? resolved : RouteWire.text(target.name, MAX_NAME);
+		/* The map names what it resolved: an item's drop, or the place a clue's words lead to. */
+		destination.name = (target.id != null || target.clue != null) && resolved != null ? resolved : RouteWire.text(target.name, MAX_NAME);
 		destination.world = target.world;
 		destination.note = RouteWire.text(target.note, MAX_NAME);
 		destination.route = ways;

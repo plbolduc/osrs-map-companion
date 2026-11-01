@@ -29,6 +29,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -58,12 +59,21 @@ public class RouteButtonsTest
 		picture.mapTile = new CompanionSnapshot.Tile(3166, 3361, 0);
 		assertSame(picture.mapTile, ClueReader.routeTile(picture));
 
+		/*
+		 * A step that is words names no tile. The map's route door now places a clue from its words
+		 * (osrs-stars-map's companion-clue-route), so such a step routes by its words, and the card no
+		 * longer sends the player to the website for it.
+		 */
 		CompanionSnapshot.Clue words = new CompanionSnapshot.Clue();
 		words.tier = "medium";
 		words.text = "Speak to the bartender of the Rusty Anchor.";
-		assertNull("a step that is words names no tile, so it offers no Route", ClueReader.routeTile(words));
-		assertTrue(MapCompanionPanel.clueDetail(words).startsWith("Speak to the bartender"));
+		assertNull(ClueReader.routeTile(words));
+		assertTrue(ClueReader.routesByWords(words));
+		assertEquals("Speak to the bartender of the Rusty Anchor.", MapCompanionPanel.clueDetail(words));
+		assertFalse("a step with a tile goes as that tile", ClueReader.routesByWords(coordinate));
+		assertFalse(ClueReader.routesByWords(picture));
 		assertNull(ClueReader.routeTile(null));
+		assertFalse(ClueReader.routesByWords(null));
 	}
 
 	@Test
