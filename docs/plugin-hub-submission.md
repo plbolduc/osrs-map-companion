@@ -54,18 +54,21 @@ Three things reviewers ask about first:
   minute through the map's own coalesced cache. The plugin never contacts Star Miners, who have
   their own plugin and do not endorse this one.
 
-**Defaults, and the one press at Connect.** Every character-sharing setting, remote destinations,
-group markers and meetup notifications still default to off in the config, each with the
-third-party warning. First Connect discloses the destination and IP transmission before any
-request. After that notice, and only then, the sidebar shows one step: a row each for the four
+**Defaults, the warning, and the one press at Connect.** Every character-sharing setting, remote
+destinations, group markers and meetup notifications still default to off in the config. The
+third-party warning is the manifest's `warning=` above, which RuneLite shows on Install; RuneLite's
+rule asks for it "either on the plugin, or on the configuration option", so no setting repeats it as
+an "Are you sure?" any more. The first Connect to osrs-map.com is that press and asks nothing more; a
+changed **Map address** is asked about once, naming the server, before any request goes there.
+After the first Connect to a map, and only then, the sidebar shows one step: a row each for the four
 sharing groups, the character name, and destinations and group markers, all ticked, with a line
 saying those two open one connection. *What each one sends*, one tap below the rows and before the
 press, names every field in the sidebar's own words and the receive stream in full (one held
 connection carrying the group code and member id). *Where you died* is offered unticked; meetup
 notifications are not offered. One press, **Share what's ticked**, writes exactly those existing
 settings, as the group shortcuts in Settings do: the press is the opt-in, and nothing turns on
-without it. Ticking, **Customise** and **Not now** write nothing. The step follows only a Connect
-that showed the notice and only while every choice it offers is still off, so an update changes no
+without it. Ticking, **Customise** and **Not now** write nothing. The step follows only the Connect
+that approved its map and only while every choice it offers is still off, so an update changes no
 existing player's settings and opens no stream for them. `RecommendedSharing` is the step;
 `RecommendedSharingTest` holds it to these sentences.
 
@@ -79,11 +82,10 @@ All paths use **Map address** (`https://osrs-map.com` by default); clipboard con
 Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RouteClient`, `RoutePress`, `SearchClient`,
 `MeetupClient`, `FarmRunClient` and `ConnectClient` construct HTTP requests:
 
-- **POST /api/companion/connect** — one **Connect** press with no group, after the server notice and
-  its group-name field, or one **Join** press with a pasted invite (the notice first if this map has
-  not had it). Header: `X-Companion-Installation`. JSON is the typed group name, or the group code
-  and the invite's token from the pasted link. No character data, member id or secret. The answer
-  is a connection code, kept exactly as a pasted one; a refusal is printed. One at a time, no retry.
+- **POST /api/companion/connect** — one **Connect** press with no group, or one **Join** press with a
+  pasted invite. Header: `X-Companion-Installation`. JSON is empty, or the group code and the
+  invite's token from the pasted link. No character data, member id or secret. The answer is a
+  connection code, kept exactly as a pasted one; a refusal is printed. One at a time, no retry.
 - **POST /api/companion/link** — one **Open the map** press while connected and logged in. Headers:
   `X-Companion-Code`, `X-Companion-Member`, `X-Companion-Member-Secret`. The answer is a one-time
   link, opened with RuneLite's `LinkBrowser` only if it is the approved map's own page with the
@@ -224,14 +226,17 @@ Say these in the description of the next Hub update, as changes from what was ap
 - Port tasks: a new sharing choice, off by default and in the one press at Connect, sending the
   five Sailing task slots and their counters as disclosed above. Home lists the tasks held, from
   the local reading. No request, poll or game action is added.
-- **One press at Connect** (above): the recommended set is offered after the server notice and
+- **One press at Connect** (above): the recommended set is offered after the first Connect and
   shared only on the player's press, which names every field and the receive stream it opens. No
   config default changed.
 - The routes, Search, Route buttons, friends and meetups listed under *Network requests*, each a
   press of the player's own.
-- **Connect without the website**: Connect makes a group after the same server notice, Join takes
-  a friend's pasted invite, and Open the map opens the website already in the group. Two requests,
-  `connect` and `link` above, each a press. Nothing is sent before Connect and the notice, as before.
+- **Connect without the website**: Connect makes a group, Join takes a friend's pasted invite, and
+  Open the map opens the website already in the group. Two requests, `connect` and `link` above,
+  each a press. Nothing is sent before Connect, as before.
+- **One warning, at install**: no setting carries a warning of its own any more, because the
+  manifest's install warning satisfies RuneLite's rule on its own. A changed map address is still
+  asked about by name before anything is sent to it.
 
 ## Before submission
 
