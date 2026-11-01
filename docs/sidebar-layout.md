@@ -582,6 +582,16 @@ heading now sit over them, shown with the steps. The steps keep words where the 
 a walk, a ride, or a teleport the map has no id for stays words alone, and the client names no
 constant for a boat's icons, so none was added.
 
+### Rename beside a new group's name
+
+A group made by Connect is *Our group* until somebody names it, and renaming lives in the menu under
+*Switch ▾*, which nothing on the status card hints at. For whoever runs the group, the status card
+now shows *Rename group…* under the name while it is still *Our group*; it opens the menu's own
+dialog, and goes once the group has a name. A member who does not run the group never sees it. It is
+a link coloured as *Meet here…* is, and *Switch ▾* and its menu are unchanged. The starting name is
+the map's `DEFAULT_RUNELITE_GROUP_NAME`; if the two ever differ, the link stops showing and the menu
+still renames.
+
 ### Outside the sidebar
 
 *Route here* on a right-click of the game's world map, the step being walked in a small box over
@@ -597,7 +607,9 @@ the sidebar's own button, so the rule that nothing acts in the game holds.
   *Open website* for every button that opens the browser and *World map* for the game's map, and
   *Open the map* is a different request, the one that makes the browser the player.
 - *Rename group…* stays in *Switch ▾*, where the plugin-first plan put it and the README names it;
-  a *Groups ▾* label was turned down before.
+  a *Groups ▾* label was turned down before. The link beside a new group's name, above, is what
+  changed instead.
 - No star notifications. Stars are fetched only while the Stars tab is open, and an alert would
   keep the map asking Star Miners at hours nobody is watching, against the one condition they set.
-  The owner has declined star alerts once already.
+  The owner has declined star alerts once already, and on 1 November declined the version that adds
+  no request, an alert from the list the open Stars tab already holds.

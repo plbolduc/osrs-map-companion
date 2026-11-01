@@ -146,6 +146,12 @@ public class MapCompanionPanel extends PluginPanel
 	private final JLabel dot = new JLabel("●");
 	private final JLabel statusLabel = new JLabel();
 	private final JLabel groupLabel = new JLabel();
+	/**
+	 * Rename group…, in the status card, for whoever runs a group still called what Connect named it.
+	 * Renaming lives in the menu under Switch ▾; a new group is when a name is most wanted, so the card
+	 * says so beside the name, and the link goes once the group has one. A link, as Meet here… is.
+	 */
+	private final JButton nameLink = linkButton(RENAME);
 	private final JLabel sharingLabel = new JLabel();
 	private final JButton previewButton = smallButton("Show what's sent");
 	/** Settings, as a page in place of this one. See {@link SidebarPages}. */
@@ -449,6 +455,12 @@ public class MapCompanionPanel extends PluginPanel
 		sharingLabel.setFont(sharingLabel.getFont().deriveFont(11f));
 		sharingLabel.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
 		status.add(left(sharingLabel));
+		nameLink.setName("companion.rename");
+		nameLink.setForeground(ColorScheme.BRAND_ORANGE);
+		nameLink.setToolTipText("Change the name everybody in the group sees");
+		nameLink.addActionListener(e -> renameGroup());
+		nameLink.setVisible(false);
+		status.add(nameLink);
 		previewButton.setToolTipText("Print the exact snapshot this plugin would send right now");
 		body.add(status);
 		body.add(gap(6, ColorScheme.DARK_GRAY_COLOR));
@@ -1196,6 +1208,19 @@ public class MapCompanionPanel extends PluginPanel
 	static final String RENAME = "Rename group…";
 
 	/**
+	 * What the map calls a group Connect made until somebody names it: the map's
+	 * {@code DEFAULT_RUNELITE_GROUP_NAME}. If the two ever differ, the status card's link simply
+	 * stops showing; the menu still renames.
+	 */
+	static final String STARTING_NAME = "Our group";
+
+	/** Whether the status card offers Rename group…: to whoever runs the group, while it has its starting name. */
+	static boolean offersRename(boolean paired, boolean runs, @Nullable String name)
+	{
+		return paired && runs && STARTING_NAME.equals(name);
+	}
+
+	/**
 	 * Rename the group: a name typed in a small dialog that starts on the current one, sent to the map,
 	 * and kept here only once the map has taken it.
 	 *
@@ -1553,6 +1578,7 @@ public class MapCompanionPanel extends PluginPanel
 				setWrapped(groupLabel, group, CARD_TEXT_WIDTH);
 			}
 			groupLabel.setToolTipText(paired ? "Group code " + JoinCode.forDisplay(code) : null);
+			nameLink.setVisible(offersRename(paired, paired && plugin.runsGroup(pairing.serverUrl(), code), pairing.name(code)));
 
 			/*
 			 * Character fields are separate from membership: all opt-ins off still sends the latter

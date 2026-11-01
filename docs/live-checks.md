@@ -255,8 +255,9 @@ The website plan's second session, once the routes in the game are built: a memb
 - [ ] **Connect, Join and Open the map without the website.** With no group, Connect makes *Our
       group*; the sidebar's Group tab says *Just you so far*. Copy invite, paste the whole message
       into a second RuneLite's *Have an invite?* field and press Join: both see each other. The
-      maker's Switch ▾ shows *Rename group…* and the friend's does not; rename the group, and both
-      status cards show the new name. Open the map from each: the browser opens in the group as
+      maker's Switch ▾ shows *Rename group…* and the friend's does not, and so does the maker's status
+      card, under *Our group*; rename the group, and both status cards show the new name and the
+      maker's link is gone. Open the map from each: the browser opens in the group as
       that player, the maker's as owner, with no `#link` left in the address. Log out and press Open
       the map on the login screen: the same. Press Connect on the login screen of a fresh profile and
       log in a few days later: the group is still there.
