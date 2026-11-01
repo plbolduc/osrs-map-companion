@@ -126,8 +126,9 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RouteClient`, `RoutePress
   last key or on Enter, two to sixty-four characters, one in flight, and nothing before a
   `Retry-After` has passed. Same three headers; the query is the `q` parameter and is never logged.
   The rows' icons are the client's own sprites (`SpriteManager`, `ItemManager`); no image is downloaded.
-- **POST /api/companion/run** — one **Start run** or farm **Reroute** press, with the same three
-  credential headers as Route. Start carries a run kind; Reroute carries its id, done ordinals and
+- **POST /api/companion/run** — one **Start run** or **Reroute** press, from the farm run or Port
+  tasks card, with the same three credential headers as Route. Start carries a run kind (a farm
+  run's, or `port-tasks`); Reroute carries its id, done ordinals and
   visited reference ordinals. Both carry the local tile even with position sharing off. Route and
   farm planning share one flight and the server's Retry-After wait. No automatic retry.
   **DELETE /api/companion/run?run=<id>** ends only that run; a pending initial plan has no id yet.
@@ -141,6 +142,7 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RouteClient`, `RoutePress
   `runReceiverVersion: 1` only with destinations enabled. Local replant observation while a run
   is active does not bypass the existing farming snapshot sharing choice; a checklist's local
   carried-item check also sends nothing. Reroute explicitly shares only the progress ordinals.
+  A port-task run's stops are ticked from the task slots read locally; that ticking sends nothing.
 
 Requests carry the versioned User-Agent. The address must be https (plain http only on loopback),
 redirects are not followed, and reply bodies are capped at 1 MB. Snapshot and stream failures back
