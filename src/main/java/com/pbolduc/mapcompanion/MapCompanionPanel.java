@@ -1303,7 +1303,7 @@ public class MapCompanionPanel extends PluginPanel
 			searchGap.setVisible(ready);
 			farmRunPanel.refresh(ready);
 			slayerPanel.refresh(ready);
-			portTasksPanel.refresh();
+			portTasksPanel.refresh(ready);
 			if (ready)
 			{
 				searchPanel.refresh();

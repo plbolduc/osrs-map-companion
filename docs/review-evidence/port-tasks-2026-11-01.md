@@ -1,6 +1,7 @@
 # Port tasks in the sidebar — 1 November 2026
 
-`docs/mockups/sidebar-port-tasks.png` is the real `PortTasksPanel`, painted at 225px with
+`docs/mockups/sidebar-port-tasks.png` was the real `PortTasksPanel` (since replaced by the run,
+`port-task-run-2026-11-01.md`), painted at 225px with
 RuneLite 1.13.4's look and feel by `sidebar-polish-2026-10-29/SidebarPolishShot.java`, scene
 `port-tasks-card`. The `port-tasks` scene photographs it inside Home and `port-tasks-unread`
 with one slot the client could not read and no hold seen. The card is 226px tall, 195px wide.

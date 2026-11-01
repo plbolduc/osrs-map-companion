@@ -171,6 +171,7 @@ public class PortTaskRunTest
 		state.observePorts(Arrays.asList(empty(0), empty(1), empty(2), empty(3), empty(4)));
 		assertFalse(state.view().changed);
 		assertNull(state.view().next());
+		assertEquals("Route finished.", RunView.progressLine(state.view()));
 	}
 
 	@Test
@@ -271,5 +272,13 @@ public class PortTaskRunTest
 		assertEquals("Sail from Port Sarim", way.label);
 		assertEquals("Port Khazard", way.voyage.to);
 		assertEquals(state.view().run.stops.get(0).voyage.line.length, way.voyage.line.length);
+	}
+
+	@Test
+	public void aPortTaskRunCountsItsStopsRatherThanTrackedPatches() throws Exception
+	{
+		RelayResponse.FarmRun ports = run();
+		assertEquals("0 of 4 stops done", RunView.progressLine(new FarmRunState.View(FarmRunWire.normalize(ports),
+			Collections.emptySet(), Collections.emptySet(), Collections.emptySet(), true, 0, 1, null)));
 	}
 }

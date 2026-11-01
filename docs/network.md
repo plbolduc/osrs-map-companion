@@ -99,9 +99,9 @@ The website offers Send run only for a fresh, compatible receiver belonging to i
 An itinerary arrives as `run` and a monotonic `runRevision` in the existing reply/stream; its
 removal carries the revision without a run. There is no additional poll or automatic planning.
 
-**Start run** and a farm run's **Reroute** each make one `POST /api/companion/run` with the same
-three member credentials as Route. Start sends a bounded preset/run-kind string; Reroute sends
-the run id and the `done` and `visited` ordinals. Both include the tile the player stands on,
+**Start run** and a run's **Reroute** each make one `POST /api/companion/run` with the same
+three member credentials as Route. Start sends a bounded preset/run-kind string, `port-tasks`
+from the Port tasks card; Reroute sends the run id and the `done` and `visited` ordinals. Both include the tile the player stands on,
 even with position sharing off. They share Route's one-flight gate and Retry-After wait.
 **End run** makes one `DELETE /api/companion/run?run=<id>`; the id guard prevents an old End
 from erasing a replacement run. An initial plan can be cancelled before it has an id.
@@ -118,6 +118,11 @@ snapshot settings still gate all automatic disclosure. The explicit Reroute pres
 its stop ordinals, not the underlying receipts or inventory. Birdhouse progress comes from the
 existing read-only Time Tracking settings and requires a fresh seeded sighting after the run
 was received. Custom stops are visited, never marked as a confirmed replant.
+
+A port-task run is planned on the map from what the snapshot already carries under **Port tasks**
+and **Boats and moorings**; Start adds nothing to it but the run kind and the tile. Its stops are
+ticked locally from the task slots `PortTaskReader` reads each tick while **Port tasks** is on,
+and nothing of that ticking is sent: Reroute shares only the ordinals, as for a farm run.
 The receiver rejects old revisions, old character channels and callbacks from ended connections.
 `relayEpoch` on replies/stream frames, and `X-Companion-Relay-Epoch` on End's 204 response,
 identify the lifetime of that relay's memory. It is a random public process marker, not a

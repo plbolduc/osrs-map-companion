@@ -148,12 +148,15 @@ expected hunting. A bounty's pin opens the creature on the map.
 ## Port tasks in RuneLite
 
 <p>
-  <img src="docs/mockups/sidebar-port-tasks.png" width="225" alt="The RuneLite Port tasks card: three courier deliveries with the crates still to collect or deliver, an osprey bounty with nine feathers owed, and the hold's 30 crates">
+  <img src="docs/mockups/sidebar-port-tasks.png" width="225" alt="A port-task run in the RuneLite Port tasks card: Port Khazard done, Ardougne next with its crates to deliver, then the osprey hunt and Brimhaven's task board, and the current leg's steps from boarding the boat to the ledger table">
 </p>
 
 Share your port tasks to list the ones you hold in Home: the crates still to collect and where
-they go, or the bounty parts still owed and the board to hand them in at. On the website, **You →
-Port tasks** orders every pickup and drop-off into one courier run that fits your boat's hold.
+they go, or the bounty parts still owed and the board to hand them in at. With **Boats and
+moorings** shared too, **Start run** turns them into one run: every pickup and drop-off in the
+order that fits your boat's hold, then each bounty out to its creature and back to its board. Each
+stop's voyage starts where your boat docked last, draws on the world map, and ticks off from the
+task's own counters. The website's **You → Port tasks** shows the same order.
 
 The pictures use made-up characters and stars.
 
@@ -234,7 +237,7 @@ do not share them: they leave in that one request and the map plans with them an
 Your clue is read in this client whether or not you share it, so the sidebar can offer Route.
 
 **Start run** sends your chosen run kind and the tile you stand on, once per press, even with
-position sharing off. A farm run's **Reroute** also sends its id and which numbered stops are
+position sharing off. A run's **Reroute** also sends its id and which numbered stops are
 done or visited. **End run** asks the map to remove your run. The map keeps the itinerary in
 memory for up to three hours. While a run is active, patch replants and carried travel items
 are read locally even with farming or item sharing off; only your enabled sharing choices

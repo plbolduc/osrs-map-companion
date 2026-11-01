@@ -68,7 +68,7 @@ public class SidebarPolishShot
 	static final List<String> STATES = Arrays.asList("fresh", "fresh-log", "connect", "home", "route", "group", "settings", "settings-closed",
 		"stars", "stars-filters", "search", "search-whip", "search-whip-card", "death", "meetup", "dropluck", "dropluck-card", "status",
 		"farm", "farm-card", "farm-bring", "slayer", "slayer-card", "slayer-open", "slayer-expanded", "slayer-blocked",
-		"port-tasks", "port-tasks-card", "port-tasks-unread");
+		"port-tasks", "port-tasks-card", "port-tasks-unread", "port-run", "port-run-changed");
 
 	static HarnessGame game;
 
@@ -89,7 +89,7 @@ public class SidebarPolishShot
 				? (JComponent) get(panel[0], "searchPanel") : state.equals("farm-card") || state.equals("farm-bring")
 				? (JComponent) get(panel[0], "farmRunPanel") : state.equals("slayer-card") || state.equals("slayer-open")
 				? (JComponent) get(panel[0], "slayerPanel") : state.equals("slayer-blocked")
-				? (JComponent) get(panel[0], "slayerPanel") : state.equals("port-tasks-card") || state.equals("port-tasks-unread")
+				? (JComponent) get(panel[0], "slayerPanel") : state.equals("port-tasks-card") || state.equals("port-tasks-unread") || state.startsWith("port-run")
 				? (JComponent) get(panel[0], "portTasksPanel") : panel[0], args[0] + "/" + state + ".png")));
 		}
 		System.exit(0);
@@ -261,6 +261,53 @@ public class SidebarPolishShot
 					new PortTaskReader.Slot(3, PortTaskReader.BOUNTY, 466, "Brimhaven osprey bounty", null, "Brimhaven", 15, 0, 0, 9, "Osprey feather"),
 					PortTaskReader.Slot.plain(4, unread ? PortTaskReader.UNKNOWN : PortTaskReader.LOCKED)));
 				set(reader, "latestHold", unread ? null : 30);
+				/* Start run is offered beside the card once the boats are shared too. */
+				config.set("shareBoats", !unread);
+			}
+			if (state.startsWith("port-run"))
+			{
+				/*
+				 * The map's own port-task run fixture (the planner's answer for these slots, from Port
+				 * Sarim): Port Khazard, Ardougne, the osprey and Brimhaven's board. The fruit went in and
+				 * the sand was loaded, so stop 1 has ticked by its counters and the leg to Ardougne is
+				 * followed. The changed scene has the sand task swapped for another in its slot.
+				 */
+				config.set("sharePortTasks", true);
+				config.set("shareBoats", true);
+				boolean changed = state.equals("port-run-changed");
+				PortTaskReader reader = injector.getInstance(PortTaskReader.class);
+				List<PortTaskReader.Slot> planned = Arrays.asList(
+					PortTaskReader.Slot.plain(0, PortTaskReader.EMPTY),
+					new PortTaskReader.Slot(1, PortTaskReader.COURIER, 84, "Port Khazard fruit delivery", "Brimhaven", "Port Khazard", 3, 3, 0, 0, null),
+					new PortTaskReader.Slot(2, PortTaskReader.COURIER, 121, "Ardougne sand delivery", "Port Khazard", "Ardougne", 3, 0, 0, 0, null),
+					new PortTaskReader.Slot(3, PortTaskReader.BOUNTY, 466, "Brimhaven osprey bounty", null, "Brimhaven", 15, 0, 0, 9, "Osprey feather"),
+					PortTaskReader.Slot.plain(4, PortTaskReader.LOCKED));
+				List<PortTaskReader.Slot> now = Arrays.asList(
+					PortTaskReader.Slot.plain(0, PortTaskReader.EMPTY),
+					PortTaskReader.Slot.plain(1, PortTaskReader.EMPTY),
+					changed
+						? new PortTaskReader.Slot(2, PortTaskReader.COURIER, 2, "Port Sarim spice delivery", "Catherby", "Port Sarim", 3, 0, 0, 0, null)
+						: new PortTaskReader.Slot(2, PortTaskReader.COURIER, 121, "Ardougne sand delivery", "Port Khazard", "Ardougne", 3, 3, 0, 0, null),
+					new PortTaskReader.Slot(3, PortTaskReader.BOUNTY, 466, "Brimhaven osprey bounty", null, "Brimhaven", 15, 0, 0, 9, "Osprey feather"),
+					PortTaskReader.Slot.plain(4, PortTaskReader.LOCKED));
+				set(reader, "latest", now);
+				set(reader, "latestHold", 30);
+				String json = Files.readString(Paths.get("src/test/resources/contract/port-task-run.json"), StandardCharsets.UTF_8);
+				RelayResponse.FarmRun run = new Gson().fromJson(json, RelayResponse.FarmRun.class);
+				for (RelayResponse.FarmStop stop : run.stops)
+				{
+					stop.done = false;
+				}
+				FarmRunState farm = injector.getInstance(FarmRunState.class);
+				farm.bind(injector.getInstance(MemberIdentity.class).id());
+				farm.accept(run, 1, System.currentTimeMillis() - 1_000);
+				farm.observePorts(planned);
+				farm.observePorts(changed
+					? Arrays.asList(now.get(0), new PortTaskReader.Slot(1, PortTaskReader.COURIER, 84, "Port Khazard fruit delivery", "Brimhaven", "Port Khazard", 3, 3, 3, 0, null),
+						now.get(2), now.get(3), now.get(4))
+					: now);
+				injector.getInstance(FarmRunRoute.class).sync();
+				set(injector.getInstance(ShortestPath.class), "installed", true);
 			}
 			if (state.startsWith("farm"))
 			{

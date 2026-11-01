@@ -79,14 +79,22 @@ final class FarmRunClient
 		final String message;
 		final long lifetime;
 		final long runGeneration;
+		/** Said about a port-task run, so the Port tasks card shows it and the farm run card does not. */
+		final boolean port;
 
 		Said(boolean planning, @Nullable String message, long lifetime)
 		{
-			this(planning, message, lifetime, -1);
+			this(planning, message, lifetime, -1, false);
 		}
 
 		Said(boolean planning, @Nullable String message, long lifetime, long runGeneration)
 		{
+			this(planning, message, lifetime, runGeneration, false);
+		}
+
+		Said(boolean planning, @Nullable String message, long lifetime, long runGeneration, boolean port)
+		{
+			this.port = port;
 			this.runGeneration = runGeneration;
 			this.planning = planning;
 			this.message = message;
@@ -100,9 +108,11 @@ final class FarmRunClient
 		final boolean end;
 		final boolean holdsGate;
 		final String member;
+		final boolean port;
 
-		Ticket(long lifetime, boolean end, boolean holdsGate, String member)
+		Ticket(long lifetime, boolean end, boolean holdsGate, String member, boolean port)
 		{
+			this.port = port;
 			this.lifetime = lifetime;
 			this.end = end;
 			this.holdsGate = holdsGate;
@@ -197,6 +207,7 @@ final class FarmRunClient
 			return;
 		}
 		String id = current == null ? null : current.run.id;
+		boolean port = FarmRunWire.PORT_TASKS.equals(start) || (start == null && current != null && FarmRunWire.PORT_TASKS.equals(current.run.kind));
 		if (end)
 		{
 			state.end(id == null);
@@ -241,7 +252,7 @@ final class FarmRunClient
 				{
 					gate.finishPress(System.currentTimeMillis() + RouteClient.MIN_GAP_MS);
 				}
-				said = new Said(false, end ? "Run ended here. Connect to end it on the map too." : RouteClient.NEEDS_CONNECTION, lifetime);
+				said = new Said(false, end ? "Run ended here. Connect to end it on the map too." : RouteClient.NEEDS_CONNECTION, lifetime, -1, port);
 				return;
 			}
 			if (!held)
@@ -249,14 +260,14 @@ final class FarmRunClient
 				String refused = gate.beginPress(System.currentTimeMillis());
 				if (refused != null && !end)
 				{
-					said = new Said(false, refused, lifetime);
+					said = new Said(false, refused, lifetime, -1, port);
 					return;
 				}
 				held = refused == null;
 			}
-			ticket = new Ticket(lifetime, end, held, member);
+			ticket = new Ticket(lifetime, end, held, member, port);
 			active = ticket;
-			said = new Said(true, end ? "Ending run…" : "Planning run…", lifetime);
+			said = new Said(true, end ? "Ending run…" : "Planning run…", lifetime, -1, port);
 			call = http.newCall(request(server, code, member, secret, question, end, id));
 			call.enqueue(new Callback()
 			{
@@ -397,7 +408,7 @@ final class FarmRunClient
 			}
 		}
 		said = new Said(false, why == null ? ticket.end ? "Run ended." : "Run ready." : why, ticket.lifetime,
-						why == null && run != null ? state.generation() : -1);
+						why == null && run != null ? state.generation() : -1, ticket.port);
 	}
 
 	/** A connection or profile ended. A cancelled reply must not release a newer press's gate. */

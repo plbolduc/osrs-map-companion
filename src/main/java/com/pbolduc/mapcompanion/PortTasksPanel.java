@@ -27,6 +27,7 @@ package com.pbolduc.mapcompanion;
 
 import com.google.inject.Inject;
 import java.awt.Color;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,19 +35,27 @@ import java.util.Objects;
 import javax.annotation.Nullable;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import net.runelite.client.ui.ColorScheme;
 
 /**
- * The port tasks this character holds, and what each still asks, in Home.
+ * The port tasks this character holds, what each still asks, and the run that does them, in Home.
  *
- * <p>Read in this client and drawn from the reading alone ({@link PortTaskReader}): no table and
- * no request. The Hub's Sailing plugins already draw the tasks over the game, so this says the one
- * line each that a player plans by — the crates still to collect and where, or the parts still owed
- * and where they go — and leaves the order of a courier run to the map's Port tasks page, which can
- * price the sail between every port. Shown while the choice is on and something is held or
+ * <p>The tasks are read in this client and drawn from the reading alone ({@link PortTaskReader}):
+ * no table and no request. The Hub's Sailing plugins already draw the tasks over the game, so this
+ * says the one line each that a player plans by — the crates still to collect and where, or the
+ * parts still owed and where they go. Shown while the choice is on and something is held or
  * unreadable; a slot the client could not read is said, never folded into the free ones.
+ *
+ * <p>What those plugins do not draw is the order. <b>Start run</b> asks the map for it — the
+ * couriers as one run within the hold, then each bounty out and back — and the run is followed
+ * here as a farm run is followed on its card ({@link RunView}): numbered stops, the leg's steps
+ * and its voyage on the world map, ticked by the slots' own counters. While a run is held the
+ * per-task lines step aside, since every stop says its tasks in the order they are done. It is
+ * offered only with Boats and moorings shared too: a run sails the player's own boat, and the map
+ * plans no voyage from a boat it was never told about.
  *
  * <p>EDT only. The reading is immutable and replaced whole, so an unchanged one rebuilds nothing.
  */
@@ -55,17 +64,27 @@ final class PortTasksPanel extends JPanel
 	private static final long serialVersionUID = 1L;
 	private static final int WIDTH = MapCompanionPanel.CARD_TEXT_WIDTH;
 	private static final Color MUTED = ColorScheme.LIGHT_GRAY_COLOR;
+	static final String NEEDS_BOATS = "Turn on Boats and moorings to plan these as one run.";
 	private final transient PortTaskReader reader;
 	private final transient MapCompanionConfig config;
+	private final transient FarmRunClient client;
 	private final JPanel body = new JPanel();
+	private final JButton start = MapCompanionPanel.linkButton("Start run");
+	private final JLabel hint = new JLabel();
+	private final JPanel starter = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+	private final RunView run;
 	private transient List<PortTaskReader.Slot> shown;
 	private transient Integer shownHold;
+	private transient boolean shownRunning;
 
 	@Inject
-	PortTasksPanel(PortTaskReader reader, MapCompanionConfig config, GameSprites sprites)
+	PortTasksPanel(PortTaskReader reader, MapCompanionConfig config, GameSprites sprites, FarmRunState state,
+		FarmRunClient client, FarmRunRoute follower, DestinationRoute routes, ShortestPath shortest)
 	{
 		this.reader = reader;
 		this.config = config;
+		this.client = client;
+		this.run = new RunView(true, state, client, follower, routes, shortest, sprites, config);
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
@@ -81,39 +100,68 @@ final class PortTasksPanel extends JPanel
 		body.setOpaque(false);
 		body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
 		add(MapCompanionPanel.left(body));
+		starter.setOpaque(false);
+		starter.setBorder(BorderFactory.createEmptyBorder(4, 0, 0, 0));
+		start.setToolTipText("Ask the map for one run over every task you hold, starting from your boat");
+		starter.add(start);
+		add(MapCompanionPanel.left(starter));
+		hint.setForeground(MUTED);
+		hint.setFont(hint.getFont().deriveFont(11f));
+		add(MapCompanionPanel.left(hint));
+		add(run);
+		start.addActionListener(e -> client.start(FarmRunWire.PORT_TASKS));
 		setVisible(false);
 	}
 
-	void refresh()
+	/** Called on the EDT by the sidebar refresh, beside the farm run card. */
+	void refresh(boolean connected)
 	{
 		List<PortTaskReader.Slot> slots = config.sharePortTasks() ? reader.latest() : null;
 		boolean worth = slots != null && slots.stream().anyMatch(s -> s.held() || PortTaskReader.UNKNOWN.equals(s.state));
-		setVisible(worth);
+		boolean running = run.refresh(connected);
+		setVisible(worth || running);
+		/* A run already held is the order: no second Start beside it. */
+		boolean offer = startable(slots) && !running;
+		starter.setVisible(offer && config.shareBoats());
+		start.setEnabled(connected && client.ready());
+		hint.setVisible(offer && !config.shareBoats());
+		MapCompanionPanel.setWrapped(hint, NEEDS_BOATS, WIDTH);
 		if (!worth)
 		{
 			shown = null;
+			body.setVisible(false);
+			revalidate();
+			repaint();
 			return;
 		}
+		body.setVisible(true);
 		Integer hold = reader.latestHold();
-		if (slots == shown && Objects.equals(hold, shownHold))
+		if (slots == shown && Objects.equals(hold, shownHold) && running == shownRunning)
 		{
 			return;
 		}
 		shown = slots;
 		shownHold = hold;
+		shownRunning = running;
 		body.removeAll();
 		for (PortTaskReader.Slot slot : slots)
 		{
-			if (!slot.held())
+			if (!slot.held() || running)
 			{
 				continue;
 			}
 			body.add(line(title(slot), Color.WHITE, 12f, 4));
 			body.add(line(next(slot), MUTED, 11f, 0));
 		}
-		body.add(line(footer(slots, hold), MUTED, 11f, 6));
+		body.add(line(footer(slots, hold), MUTED, 11f, running ? 4 : 6));
 		revalidate();
 		repaint();
+	}
+
+	/** Something a run can do: a courier or a bounty, read this session. */
+	static boolean startable(@Nullable List<PortTaskReader.Slot> slots)
+	{
+		return slots != null && slots.stream().anyMatch(PortTaskReader.Slot::held);
 	}
 
 	/** The game's own name for the task, or its kind where the table gave none. */
@@ -157,7 +205,7 @@ final class PortTasksPanel extends JPanel
 		return part + " · " + of + " still owed · hand in at " + to;
 	}
 
-	/** Free and unreadable slots, the hold, and where the order is. */
+	/** Free and unreadable slots, and the hold; the order is Start run's, beneath it. */
 	static String footer(List<PortTaskReader.Slot> slots, @Nullable Integer hold)
 	{
 		List<String> said = new ArrayList<>();
@@ -172,10 +220,8 @@ final class PortTasksPanel extends JPanel
 			said.add(free + " free");
 		}
 		said.add(hold == null ? "hold not seen yet" : "hold carries " + hold + " crates");
-		boolean courier = slots.stream().anyMatch(s -> PortTaskReader.COURIER.equals(s.state));
 		String line = String.join(" · ", said);
-		return Character.toUpperCase(line.charAt(0)) + line.substring(1)
-			+ (courier ? ". The map's Port tasks page orders your stops into one run." : ".");
+		return Character.toUpperCase(line.charAt(0)) + line.substring(1) + ".";
 	}
 
 	private static String crates(int n)

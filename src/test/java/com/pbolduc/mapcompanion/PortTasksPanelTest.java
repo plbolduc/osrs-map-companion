@@ -28,6 +28,8 @@ package com.pbolduc.mapcompanion;
 import java.util.Arrays;
 import java.util.List;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 /**
@@ -67,20 +69,32 @@ public class PortTasksPanelTest
 		assertEquals("Tern feather · all collected · hand in at Port Sarim", PortTasksPanel.next(bounty(0)));
 	}
 
+	/**
+	 * The footer used to end by sending a courier's order to the map's Port tasks page. Start run now
+	 * asks for that order here, beneath the footer, so the footer says only what the slots and the hold
+	 * are; the order is the button's.
+	 */
 	@Test
 	public void theFooterTellsUnreadableFromFreeAndSaysWhenTheHoldIsUnknown()
 	{
 		List<PortTaskReader.Slot> slots = Arrays.asList(courier(3, 0, 0), bounty(9),
 			PortTaskReader.Slot.plain(2, PortTaskReader.EMPTY), PortTaskReader.Slot.plain(3, PortTaskReader.UNKNOWN),
 			PortTaskReader.Slot.plain(4, PortTaskReader.LOCKED));
-		assertEquals("1 slot couldn't be read · 1 free · hold not seen yet. The map's Port tasks page orders your stops into one run.",
-			PortTasksPanel.footer(slots, null));
-		assertEquals("1 slot couldn't be read · 1 free · hold carries 60 crates. The map's Port tasks page orders your stops into one run.",
-			PortTasksPanel.footer(slots, 60));
-		assertEquals("Hold carries 30 crates. The map's Port tasks page orders your stops into one run.",
+		assertEquals("1 slot couldn't be read · 1 free · hold not seen yet.", PortTasksPanel.footer(slots, null));
+		assertEquals("1 slot couldn't be read · 1 free · hold carries 60 crates.", PortTasksPanel.footer(slots, 60));
+		assertEquals("Hold carries 30 crates.",
 			PortTasksPanel.footer(Arrays.asList(courier(3, 0, 0), PortTaskReader.Slot.plain(1, PortTaskReader.LOCKED)), 30));
 		assertEquals("4 free · hold not seen yet.", PortTasksPanel.footer(Arrays.asList(bounty(3),
 			PortTaskReader.Slot.plain(1, PortTaskReader.EMPTY), PortTaskReader.Slot.plain(2, PortTaskReader.EMPTY),
 			PortTaskReader.Slot.plain(3, PortTaskReader.EMPTY), PortTaskReader.Slot.plain(4, PortTaskReader.EMPTY)), null));
+	}
+
+	@Test
+	public void aRunIsOfferedOnlyForATaskItCanDo()
+	{
+		assertTrue(PortTasksPanel.startable(Arrays.asList(bounty(0), PortTaskReader.Slot.plain(1, PortTaskReader.EMPTY))));
+		assertFalse(PortTasksPanel.startable(Arrays.asList(PortTaskReader.Slot.plain(0, PortTaskReader.UNKNOWN),
+			PortTaskReader.Slot.plain(1, PortTaskReader.LOCKED))));
+		assertFalse(PortTasksPanel.startable(null));
 	}
 }

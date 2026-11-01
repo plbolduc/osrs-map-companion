@@ -104,6 +104,23 @@ steps wait on these readings (`osrs-stars-map/docs/plan-where-to-go-for-a-task.m
         *locked*. Log out and in, and hop: for fifteen seconds nothing is sent, then the same
         tasks come back, never five empty slots.
   - [ ] Cancel a task, and take a new one into the slot it left: the page replaces it.
+- [ ] **A port-task run in the sidebar (built from the same sourced encodings, not yet seen live).**
+      With *Port tasks* and *Boats and moorings* on, press **Start run** on the Port tasks card:
+  - [ ] The stops are the website's *Port tasks* order, one per port visit, then each bounty's hunt
+        and its board. The first leg starts from where you stand and boards the boat the snapshot
+        named; every later leg boards at the port the stop before docked at.
+  - [ ] A collect stop ticks when `..._CARGO_TAKEN` reaches the task's crates, a drop-off when
+        `..._DELIVERED` does, a hunt when the bounty counter reaches 0, and the board when the slot
+        lets go of the bounty. Standing on a ledger table ticks nothing.
+  - [ ] After the last crate is delivered, if the slot clears at once (the check above), the drop-off
+        still ticks: the plugin last saw every crate loaded. If it holds the task instead, the
+        counter ticks it.
+  - [ ] Abandon a task mid-run, or take another into a free slot: the card says the tasks changed and
+        Reroute plans again from the slots held now, keeping done stops at their numbers.
+  - [ ] Each leg's voyage line draws on the world map, the Board, Sail and Dock rows tick as a
+        destination's voyage does, and *Your boat is no longer at …* appears if the boat is moved
+        away from the port the leg boards at. The hand-in after a hunt starts at sea, with no Board
+        row: its Sail row ticks within 15 tiles of the mooring, aboard.
   - [ ] Board a boat with a cargo hold: the page should name its crates as the Sailing plugin's
         cargo overlay does, and keep it ashore. Board a second boat with a different hold; the
         page follows it. A boat without a hold leaves the last one. On an Ultimate Ironman, the
