@@ -233,6 +233,27 @@ public class RunCardsTest
 		assertEquals(ColorScheme.LIGHT_GRAY_COLOR, label(ports, "Run ended.").getForeground());
 	}
 
+	/**
+	 * A busy run said "Try the run again shortly." while every Route and Start was held for half a
+	 * minute. It says the wait the routes share, counted down as the card is drawn.
+	 */
+	@Test
+	public void aBusyRunSaysTheSharedWaitAndCountsItDown() throws Exception
+	{
+		refresh();
+		choose("Herb run");
+		status = 429;
+		body = "{\"reason\":\"busy\"}";
+		press(farm, "Start run");
+		long now = System.currentTimeMillis();
+		long opens = now + route.pressWait(now);
+		RunView card = runView(farm);
+		SwingUtilities.invokeAndWait(() -> card.refresh(true, opens - 25_000L));
+		assertTrue(shown(farm).toString(), shown(farm).contains("The map is busy. Try again in 25s."));
+		SwingUtilities.invokeAndWait(() -> card.refresh(true, opens));
+		assertTrue(shown(farm).toString(), shown(farm).contains("The map was busy."));
+	}
+
 	/** A refused Start is no run either: the tasks stay, and so does the button that can try again. */
 	@Test
 	public void aRefusedStartKeepsTheTasksAndStartRun() throws Exception

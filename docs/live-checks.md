@@ -285,7 +285,8 @@ The website plan's second session, once the routes in the game are built: a memb
 - [ ] **Route here.** Right-click empty ground on the world map: *Route here* sits below Cancel,
       and a left-click still drags the map and plans nothing. Choose it on a spot a few tiles from a
       landmark: the route under Now ends on that tile, not the one beside it. Logged out of the
-      group, the entry is not offered; pressed twice within five seconds, the chat box says why once.
+      group, the entry is not offered; pressed twice within five seconds, the chat box says why once,
+      with the seconds the wait has left.
       Where the map's answer names the landmark near the spot, the card, the box over the game and
       the pin's tooltip say it, *Near Lumbridge Castle*; where it names none, *Picked on the world map*.
       Between the press and the answer the spot has a faded amber pin, *Planning the way here…*,

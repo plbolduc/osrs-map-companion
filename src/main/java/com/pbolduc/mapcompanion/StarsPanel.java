@@ -141,6 +141,16 @@ final class StarsPanel extends JPanel
 	private final Set<String> expanded = new HashSet<>();
 	private boolean selected, active, updating;
 	private String rendered;
+	/**
+	 * The picked star's Route and the line its last press left, while they are drawn: a wait counts
+	 * down in both on every refresh, where rebuilding the block each second would eat a press.
+	 */
+	@Nullable
+	private JButton starRoute;
+	@Nullable
+	private JLabel starSaid;
+	private static final String STAR_ROUTE_TIP = "Plan the way to this star from where you stand. The world is printed in "
+		+ "the steps; hopping is left to the game's world switcher.";
 
 	/**
 	 * @param shortestPath and {@code config}, for the line under the steps saying Shortest Path draws
@@ -373,10 +383,16 @@ final class StarsPanel extends JPanel
 			&& shortestPath.installed() && !way.arrived();
 		steps.show(routed ? way : null, routed ? RouteStepsView.shortestPathLine(way, drawable, drawable ? shortestPath.drawing() : 0) : null);
 		signature.append(routed).append(offered(routed, false)).append(offered(routed, true));
-		if (signature.toString().equals(rendered)) return;
+		if (signature.toString().equals(rendered))
+		{
+			countDown(said);
+			return;
+		}
 		rendered = signature.toString();
 		rows.removeAll();
 		selection.removeAll();
+		starRoute = null;
+		starSaid = null;
 		selection.setBorder(null);
 		if (model.feed == null)
 		{
@@ -417,8 +433,23 @@ final class StarsPanel extends JPanel
 		{
 			selection(picked, elapsed, destination, routed);
 		}
+		countDown(said);
 		revalidate();
 		repaint();
+	}
+
+	/** The picked star's Route and its line as of now: how long the map's wait has left, in each. */
+	private void countDown(@Nullable RoutePress.Said said)
+	{
+		long now = System.currentTimeMillis();
+		if (starRoute != null)
+		{
+			MapWait.tip(starRoute, STAR_ROUTE_TIP, press.waitMs(now));
+		}
+		if (starSaid != null && said != null && said.message != null)
+		{
+			wrap(starSaid, press.words(said, now), TEXT);
+		}
 	}
 
 	/** Whether the destination is this star: its tile and its world, which a name cannot tell apart. */
@@ -631,8 +662,8 @@ final class StarsPanel extends JPanel
 				route.setFont(route.getFont().deriveFont(11f));
 				route.setMargin(new Insets(4, 4, 4, 4));
 				route.setEnabled(star.left(elapsed) > 0 && !planning && press.ready());
-				route.setToolTipText("Plan the way to this star from where you stand. The world is printed in the steps; "
-					+ "hopping is left to the game's world switcher.");
+				route.setToolTipText(STAR_ROUTE_TIP);
+				starRoute = route;
 				route.addActionListener(e ->
 				{
 					/* No note, as Pin destination writes none: nothing on the card may age. */
@@ -672,6 +703,7 @@ final class StarsPanel extends JPanel
 				wrap(line, said.message, TEXT);
 				MapCompanionPanel.tone(line, said.refused());
 				selection.add(line);
+				starSaid = line;
 			}
 		}
 	}

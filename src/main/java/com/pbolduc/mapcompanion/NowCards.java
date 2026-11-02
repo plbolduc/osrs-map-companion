@@ -177,6 +177,15 @@ final class NowCards extends JPanel
 	private final JLabel destinationSaid = new JLabel();
 	/** Which Route button a press came from, so its answer is said under this card. */
 	static final String DESTINATION = "destination";
+	/* Each Route's own tooltip, which the map's wait stands in for while it greys the button; see MapWait#tip. */
+	private static final String CLUE_ROUTE_TIP = "Plan the way to this step from where you stand. Its tile, or for a step "
+		+ "that is words or a map the clue itself, go to the map in this request only, whether or not you share your clue; "
+		+ "the map plans with them and does not keep them.";
+	private static final String MEETUP_ROUTE_TIP = "Plan the way to this meetup from where you stand. Nobody is told you are coming.";
+	private static final String REROUTE_TIP = "Plan the way again from where you stand. Sends your tile to the map once; "
+		+ "the map plans with it and does not keep it.";
+	private static final String ROUTE_TIP = "Plan the way here from where you stand. Sends your tile and this one to the map once; "
+		+ "the map plans with them and does not keep them.";
 
 	NowCards(MapCompanionConfig config, DestinationState destinationState, DeathWatcher deathWatcher,
 		DestinationMarker destinationMarker, DestinationRoute destinationRoute, RouteClient routeClient,
@@ -293,19 +302,15 @@ final class NowCards extends JPanel
 		deathSaid.setName("now.death.said");
 		clueRouteButton.setName("now.clue.route");
 		eventRouteButton.setName("now.meetup.route");
-		clueRouteButton.setToolTipText("Plan the way to this step from where you stand. Its tile, or for a step that is words "
-			+ "or a map the clue itself, go to the map in this request only, whether or not you share your clue; the map "
-			+ "plans with them and does not keep them.");
-		eventRouteButton.setToolTipText("Plan the way to this meetup from where you stand. Nobody is told you are coming.");
-		rerouteButton.setToolTipText("Plan the way again from where you stand. Sends your tile to the map once; "
-									 + "the map plans with it and does not keep it.");
+		clueRouteButton.setToolTipText(CLUE_ROUTE_TIP);
+		eventRouteButton.setToolTipText(MEETUP_ROUTE_TIP);
+		rerouteButton.setToolTipText(REROUTE_TIP);
 		rerouteButton.addActionListener(e ->
 		{
 			routeClient.reroute();
 			refresh.run();
 		});
-		routeButton.setToolTipText("Plan the way here from where you stand. Sends your tile and this one to the map once; "
-			+ "the map plans with them and does not keep them.");
+		routeButton.setToolTipText(ROUTE_TIP);
 		routeButton.addActionListener(e -> routeToDestination());
 		followButton.addActionListener(e ->
 		{
@@ -392,9 +397,10 @@ final class NowCards extends JPanel
 	 * answers, its refusal in the line, and pressable only when a press would be sent. While the
 	 * destination on Home is the answer this card's last press made, it reads Reroute, as a friend's
 	 * row does: pressed, it asks again from where you stand, where Route would offer as new the very
-	 * card above it.
+	 * card above it. A wait the press met counts down in the line, and greys the button with how long
+	 * it has left in place of its own tooltip, {@code tip}.
 	 */
-	private void routeState(JButton button, JLabel line, String source, String label, boolean ready)
+	private void routeState(JButton button, JLabel line, String source, String label, boolean ready, String tip, long now)
 	{
 		RoutePress.Said said = routePress.said(source);
 		boolean planning = said != null && said.planning;
@@ -402,11 +408,12 @@ final class NowCards extends JPanel
 			&& said.key.equals(DestinationRoute.keyOf(destinationState.getDestination()));
 		button.setText(planning ? "Planning…" : routedHere ? "Reroute" : label);
 		button.setEnabled(ready && !planning && routePress.ready());
+		MapWait.tip(button, tip, routePress.waitMs(now));
 		String message = said == null ? null : said.message;
 		line.setVisible(message != null);
 		if (message != null)
 		{
-			setWrapped(line, message, CARD_TEXT_WIDTH);
+			setWrapped(line, routePress.words(said, now), CARD_TEXT_WIDTH);
 			MapCompanionPanel.tone(line, said.refused());
 		}
 	}
@@ -602,10 +609,12 @@ final class NowCards extends JPanel
 			followButton.setToolTipText(followTip(route.following, drawable, box));
 			destinationRow.add(followButton);
 		}
+		long now = System.currentTimeMillis();
 		if (steps)
 		{
 			destinationRow.add(rerouteButton);
-			rerouteButton.setEnabled(ready && !route.rerouting && System.currentTimeMillis() >= route.nextRerouteMs);
+			rerouteButton.setEnabled(ready && !route.rerouting && now >= route.nextRerouteMs);
+			MapWait.tip(rerouteButton, REROUTE_TIP, route.nextRerouteMs - now);
 		}
 		/*
 		 * No way yet, and none arriving with the destination itself for the tick before the route
@@ -615,7 +624,7 @@ final class NowCards extends JPanel
 		if (wayless)
 		{
 			destinationRow.add(routeButton);
-			routeState(routeButton, destinationSaid, DESTINATION, "Route", true);
+			routeState(routeButton, destinationSaid, DESTINATION, "Route", true, ROUTE_TIP, now);
 		}
 		else
 		{
@@ -630,14 +639,13 @@ final class NowCards extends JPanel
 		 */
 		RelayResponse.Event event = destinationState.getEvents() == null ? destinationState.getEvent() : null;
 		eventSlot.setVisible(event != null);
-		long now = System.currentTimeMillis();
 		if (event != null)
 		{
 			/* Its countdown amber while it is imminent, as the Group tab's meetups have it. */
 			GroupPanel.setWhen(eventWhen, meetupWhen(event.startsAtMs, now, ZoneId.systemDefault(),
 											 Locale.getDefault(Locale.Category.FORMAT), event.world), event.startsAtMs, now, CARD_TEXT_WIDTH);
 			setWrapped(eventTitle, event.title, CARD_TEXT_WIDTH);
-			routeState(eventRouteButton, eventSaid, "meetup", "Route", ready);
+			routeState(eventRouteButton, eventSaid, "meetup", "Route", ready, MEETUP_ROUTE_TIP, now);
 		}
 
 		CompanionSnapshot.Death death = deathWatcher.snapshot(now);
@@ -663,10 +671,10 @@ final class NowCards extends JPanel
 										  ? "Open osrs-map.com at the tile where you died"
 										  : "Open osrs-map.com at the tile where you died. Sharing it is off, so it leaves this "
 										  + "client only in the address of the page this opens, and only when you press it.");
-			deathRouteButton.setToolTipText(config.shareDeath()
+			String routeBackTip = config.shareDeath()
 				? "Plan the way back from where you stand"
 				: "Plan the way back from where you stand. Sharing it is off, so the tile goes to the map in "
-				+ "this request only, and the map plans with it and does not keep it.");
+				+ "this request only, and the map plans with it and does not keep it.";
 			List<JButton> deathRow = new ArrayList<>();
 			deathRow.add(deathMapButton);
 			if (ready)
@@ -674,7 +682,7 @@ final class NowCards extends JPanel
 				deathRow.add(deathRouteButton);
 			}
 			shownDeathActions = syncRow(deathActions, deathRow, shownDeathActions);
-			routeState(deathRouteButton, deathSaid, "death", "Route back", ready);
+			routeState(deathRouteButton, deathSaid, "death", "Route back", ready, routeBackTip, now);
 		}
 
 		CompanionSnapshot.Clue clue = clueReader.current();
@@ -697,7 +705,7 @@ final class NowCards extends JPanel
 			setWrapped(clueDetail, clueDetail(clue), CARD_TEXT_WIDTH);
 			boolean routable = ClueReader.routeTile(clue) != null || ClueReader.routesByClue(clue);
 			clueActions.setVisible(routable);
-			routeState(clueRouteButton, clueSaid, "clue", "Route", ready && routable);
+			routeState(clueRouteButton, clueSaid, "clue", "Route", ready && routable, CLUE_ROUTE_TIP, now);
 		}
 		/** The heading goes with the last card under it, rather than naming nothing. */
 		setVisible((destination != null && !farmDestination) || event != null || death != null || (clue != null && paired));

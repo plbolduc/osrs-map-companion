@@ -167,6 +167,28 @@ public class RouteStepsViewTest
 	}
 
 	/**
+	 * Reroute's wait was written into its sentence once, "Try again in 4s." for good. It is the wait
+	 * the map's gate holds as the card is drawn, so a press that makes it longer is counted, and the
+	 * steps above are not built again each second to say it.
+	 */
+	@Test
+	public void aReroutesWaitIsTheGatesAsTheCardIsDrawn() throws IOException
+	{
+		receive();
+		long now = System.currentTimeMillis();
+		route.finishReroute(route.beginReroute(now), null, MapWait.BUSY, now + 20_000L);
+		view.show(route.view());
+		JLabel line = starting("The map is busy.");
+		assertTrue(line.getText(), line.getText().matches(".*The map is busy\\. Try again in (19|20)s\\..*"));
+		JLabel step = label("Walk 12 tiles to the bank");
+
+		route.finishPress(now + 40_000L);
+		view.show(route.view());
+		assertTrue(line.getText(), line.getText().matches(".*The map is busy\\. Try again in (39|40)s\\..*"));
+		assertSame("the steps were not built again", step, label("Walk 12 tiles to the bank"));
+	}
+
+	/**
 	 * On a run's leg the stop's own line names the way, so the way line said it a second time; the
 	 * leg starts at its first step, and its length is the view's to hand This leg's heading.
 	 */
@@ -382,6 +404,21 @@ public class RouteStepsViewTest
 			}
 		}
 		throw new AssertionError("no label says " + words + ": " + shown());
+	}
+
+	/** The label whose words start with these, for a line whose end counts down. */
+	private JLabel starting(String words)
+	{
+		List<JLabel> labels = new ArrayList<>();
+		collectLabels(view, labels);
+		for (JLabel label : labels)
+		{
+			if (label.getText().replaceAll("<[^>]+>", "").startsWith(words))
+			{
+				return label;
+			}
+		}
+		throw new AssertionError("no label starts " + words + ": " + shown());
 	}
 
 	/** Every shown label with this name, in order. */

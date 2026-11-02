@@ -49,6 +49,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.LongConsumer;
 import javax.annotation.Nullable;
 import javax.swing.Icon;
 import javax.swing.JButton;
@@ -116,6 +117,7 @@ final class GroupPanel extends JPanel
 	private static final String HERE = "#34d399";
 	/** A friend's button for the game's own world map; "Show on world map" does not fit beside Route. */
 	static final String WORLD_MAP = "World map";
+	private static final String MEETUP_ROUTE_TIP = "Plan the way to this meetup from where you stand. Nobody is told you are coming.";
 	/** A news line's picture: the game's 16px skill icons, and an item's sprite shrunk to match. */
 	private static final int NEWS_PICTURE = 16;
 	/** The picture's place while the client's cache answers, as a route step keeps it. */
@@ -167,6 +169,12 @@ final class GroupPanel extends JPanel
 	private final Map<String, String> pressed = new HashMap<>();
 	/** The later meetups opened from their line, by id; sorted, so the rows' signature reads them in one order. */
 	private final Set<String> openMeetups = new TreeSet<>();
+	/**
+	 * What redraws itself on every refresh between two rebuilds of the rows: a Route's tooltip while
+	 * the map's wait greys it, and a line counting a wait down. A rebuild each second would eat a
+	 * press under the pointer, so the rows hand these over when they are built and they are run.
+	 */
+	private final transient List<LongConsumer> ticking = new ArrayList<>();
 	/**
 	 * Copy invite, which {@link ConnectCard} owns, presses and words. The card of a group of one
 	 * holds it, under the sentence that is about it; otherwise it sits beside Switch ▾ under the tab.
@@ -400,9 +408,11 @@ final class GroupPanel extends JPanel
 		String words = signature(roster, events, destinationKey, now);
 		if (Objects.equals(words, drawn))
 		{
+			tick(now);
 			return;
 		}
 		drawn = words;
+		ticking.clear();
 		friends.removeAll();
 		holdsInvite = roster != null && roster.isEmpty();
 		if (roster != null)
@@ -438,10 +448,19 @@ final class GroupPanel extends JPanel
 				}
 			}
 		}
+		tick(now);
 		friends.revalidate();
 		meetupCards.revalidate();
 		revalidate();
 		repaint();
+	}
+
+	private void tick(long now)
+	{
+		for (LongConsumer redraw : ticking)
+		{
+			redraw.accept(now);
+		}
 	}
 
 	/** Everything a row says, so they are rebuilt only when that changes. */
@@ -539,7 +558,10 @@ final class GroupPanel extends JPanel
 				: routedHere ? "Reroute" : "Route");
 			route.setName("group.route." + row.id);
 			route.setEnabled(ready && !planning && !finding && press.ready());
-			route.setToolTipText("Plan the way to where " + row.name + " stands now. Nothing follows them; press again to ask again.");
+			String own = "Plan the way to where " + row.name + " stands now. Nothing follows them; press again to ask again.";
+			route.setToolTipText(own);
+			JButton held = route;
+			ticking.add(at -> MapWait.tip(held, own, press.waitMs(at)));
 			route.addActionListener(e -> routeToFriend(row.id));
 		}
 		JLabel name = label(12f, Color.WHITE);
@@ -620,8 +642,9 @@ final class GroupPanel extends JPanel
 		card.add(gap(5));
 		card.add(MapCompanionPanel.left(actions));
 		/* Inside an instance nothing was asked, so this is newer than any answer the press last gave. */
+		boolean pressed = !group.inside(row.id) && said != null && said.message != null;
 		String message = group.inside(row.id) ? row.name + " is inside an instance. Route works once they're out."
-			: said != null && said.message != null ? said.message
+			: pressed ? said.message
 			: group.lost(row.id) ? row.name + " is not sharing a position just now." : null;
 		if (message != null)
 		{
@@ -631,6 +654,10 @@ final class GroupPanel extends JPanel
 			MapCompanionPanel.setWrapped(line, message, WIDTH);
 			MapCompanionPanel.tone(line, true);
 			card.add(MapCompanionPanel.left(line));
+			if (pressed)
+			{
+				ticking.add(at -> MapCompanionPanel.setWrapped(line, press.words(said, at), WIDTH));
+			}
 		}
 		return slot(card);
 	}
@@ -661,7 +688,8 @@ final class GroupPanel extends JPanel
 		JButton route = MapCompanionPanel.smallButton(planning ? "Planning…" : "Route");
 		route.setName("group.meetupRoute." + meetup.id);
 		route.setEnabled(ready && !planning && press.ready());
-		route.setToolTipText("Plan the way to this meetup from where you stand. Nobody is told you are coming.");
+		route.setToolTipText(MEETUP_ROUTE_TIP);
+		ticking.add(at -> MapWait.tip(route, MEETUP_ROUTE_TIP, press.waitMs(at)));
 		route.addActionListener(e ->
 		{
 			press.press(RoutePress.Target.tile(source, new WorldPoint(meetup.x, meetup.y, meetup.plane), meetup.title,
@@ -730,7 +758,8 @@ final class GroupPanel extends JPanel
 		}
 		answers.setMaximumSize(new java.awt.Dimension(Integer.MAX_VALUE, answers.getPreferredSize().height));
 		card.add(MapCompanionPanel.left(answers));
-		String message = said != null && said.message != null ? said.message : answer != null ? answer.message : null;
+		boolean routed = said != null && said.message != null;
+		String message = routed ? said.message : answer != null ? answer.message : null;
 		if (message != null)
 		{
 			/* A Route or an answer that did not happen: an answer that lands says nothing, its fill does. */
@@ -739,6 +768,8 @@ final class GroupPanel extends JPanel
 			MapCompanionPanel.setWrapped(line, message, WIDTH);
 			MapCompanionPanel.tone(line, true);
 			card.add(MapCompanionPanel.left(line));
+			/* Each wait from its own gate: a Route's is the routes' wait, an answer's the meetups'. */
+			ticking.add(at -> MapCompanionPanel.setWrapped(line, routed ? press.words(said, at) : meetups.words(answer, at), WIDTH));
 		}
 		return slot(card);
 	}

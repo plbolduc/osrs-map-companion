@@ -247,6 +247,33 @@ public class SearchPanelTest
 		assertEquals(MapCompanionPanel.REFUSED, line.getForeground());
 	}
 
+	/**
+	 * The search's own waits were written into their sentence once: "Try again in 6s." and "Searching
+	 * in 3s." stayed put while the wait ran out. The line says the search's wait as it is drawn.
+	 */
+	@Test
+	public void theSearchsOwnWaitsAreSaidAsTheyAre() throws Exception
+	{
+		RoutePress press = press(200, RoutePressTest.ANSWER);
+		OkHttpClient busy = new OkHttpClient.Builder().addInterceptor(chain ->
+			new Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1).code(429).message("")
+				.header("Retry-After", "20").body(ResponseBody.create(JSON, "{\"reason\":\"busy\"}")).build()).build();
+		String[] held = {"https://osrs-map.com", pairing.code(), identity.id(), SECRET};
+		SearchClient search = new SearchClient(busy, new Gson(), () -> held, (action, delayMs) -> () -> { }, swing::add);
+		SearchPanel panel = new SearchPanel(search, press, null);
+		panel.box().setText("bank");
+		panel.box().postActionEvent();
+		until(() -> !swing.isEmpty());
+		runSwing();
+		panel.refresh();
+		assertTrue(status(panel), status(panel).matches(".*The map is busy\\. Try again in (19|20)s\\..*"));
+
+		/* Enter again inside the wait: nothing is refused, and the search goes by itself once it is over. */
+		panel.box().postActionEvent();
+		panel.refresh();
+		assertTrue(status(panel), status(panel).matches(".*The map asked to wait\\. Searching in (19|20)s\\..*"));
+	}
+
 	/** The list folds when the card has the answer, not at the press: while it plans, the rows stay. */
 	@Test
 	public void anAnswerFoldsTheListOnlyOnceItLands() throws Exception

@@ -210,6 +210,15 @@ final class FarmRunClient
 		return active != null && active.end;
 	}
 
+	/**
+	 * What a press said, as it is drawn at {@code now}: a wait it met counts down from the gate the run
+	 * shares with every Route, and every other sentence is said as it is.
+	 */
+	String words(Said said, long now)
+	{
+		return MapWait.waits(said.message) ? MapWait.tryAgain(said.message, gate.pressWait(now)) : said.message;
+	}
+
 	@Nullable
 	Said said()
 	{
@@ -352,7 +361,7 @@ final class FarmRunClient
 			if (!close.isSuccessful())
 			{
 				int code = close.code();
-				String why = code == 429 || code == 503 ? "The map is busy. Try the run again shortly."
+				String why = code == 429 || code == 503 ? MapWait.BUSY
 							 : code == 403 || code == 410 ? RouteClient.NEEDS_CONNECTION : "The map could not prepare that run.";
 				boolean worded = false;
 				String body = CompanionHttp.readBounded(close.body(), CompanionHttp.MAX_REPLY_BYTES);

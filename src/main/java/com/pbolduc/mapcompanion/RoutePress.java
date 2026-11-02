@@ -293,6 +293,21 @@ final class RoutePress
 		return route.pressReady(System.currentTimeMillis());
 	}
 
+	/** How long the wait shared by every Route, Reroute and run has left at {@code now}, or 0. */
+	long waitMs(long now)
+	{
+		return route.pressWait(now);
+	}
+
+	/**
+	 * What a press said, as it is drawn at {@code now}: a wait it met counts down from the wait the
+	 * gate holds, "The map is busy. Try again in 25s.", and every other sentence is said as it is.
+	 */
+	String words(Said said, long now)
+	{
+		return MapWait.waits(said.message) ? MapWait.tryAgain(said.message, waitMs(now)) : said.message;
+	}
+
 	/**
 	 * What the last press from this button said, or null when the last press was another's, or was
 	 * made before the destinations were last cleared — in a group since left, or a lifetime ended.
@@ -402,7 +417,7 @@ final class RoutePress
 			int status = close.code();
 			if (status == 429 || status == 503)
 			{
-				finish(asked, target, RouteClient.BUSY, now + StarsClient.retryDelay(wait));
+				finish(asked, target, MapWait.BUSY, now + StarsClient.retryDelay(wait));
 				return;
 			}
 			if (!close.isSuccessful())

@@ -188,6 +188,8 @@ final class RouteStepsView extends JPanel
 		String words = view == null ? null : words(view) + "|" + shortestPath;
 		if (words != null && words.equals(said))
 		{
+			/* Nothing it says has changed but how long a wait has left, which is said on every refresh. */
+			sayMessage(view);
 			return;
 		}
 		said = words;
@@ -260,14 +262,25 @@ final class RouteStepsView extends JPanel
 		drawn.setVisible(shortestPath != null);
 		MapCompanionPanel.setWrapped(drawn, shortestPath == null ? "" : shortestPath, WIDTH);
 
-		String status = view.rerouting ? "Planning from where you stand…" : view.message;
-		message.setVisible(status != null);
-		MapCompanionPanel.setWrapped(message, status == null ? "" : status, WIDTH);
-		/* A Reroute refused in pink; its Planning… and Shortest Path's notices in the line's grey. */
-		MapCompanionPanel.tone(message, !view.rerouting && view.refused);
+		sayMessage(view);
 
 		revalidate();
 		repaint();
+	}
+
+	/**
+	 * The line under the steps: Planning… while a Reroute is out, else what the last one said, a wait
+	 * it met counted down from the map's wait the view carries. A Reroute refused in pink; its
+	 * Planning… and Shortest Path's notices in the line's grey.
+	 */
+	private void sayMessage(DestinationRoute.View view)
+	{
+		String status = view.rerouting ? "Planning from where you stand…"
+			: MapWait.waits(view.message) ? MapWait.tryAgain(view.message, view.nextRerouteMs - System.currentTimeMillis())
+			: view.message;
+		message.setVisible(status != null);
+		MapCompanionPanel.setWrapped(message, status == null ? "" : status, WIDTH);
+		MapCompanionPanel.tone(message, !view.rerouting && view.refused);
 	}
 
 	/**
