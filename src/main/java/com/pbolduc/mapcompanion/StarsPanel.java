@@ -543,7 +543,7 @@ final class StarsPanel extends JPanel
 				open.setName("stars.open");
 				open.setFont(open.getFont().deriveFont(11f));
 				open.setMargin(new Insets(4, 4, 4, 4));
-				open.setToolTipText("This site's tile is approximate. Open the map, which shows where it might be.");
+				open.setToolTipText("Show the possible spots on osrs-map.com in your browser");
 				open.addActionListener(e -> net.runelite.client.util.LinkBrowser.browse(mapUrl.get() + "/map?q="
 					+ java.net.URLEncoder.encode(star.name, java.nio.charset.StandardCharsets.UTF_8)));
 				actions.add(open);
@@ -552,7 +552,7 @@ final class StarsPanel extends JPanel
 			if (!star.precise)
 			{
 				JLabel note = label("");
-				wrap(note, "This location is approximate; open it on the map to pin it.", TEXT);
+				wrap(note, "This spot is approximate. Open website shows where it might be.", TEXT);
 				selection.add(note);
 			}
 			RoutePress.Said said = press.said(SOURCE);

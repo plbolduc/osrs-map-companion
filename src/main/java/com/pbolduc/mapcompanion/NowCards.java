@@ -540,8 +540,8 @@ final class NowCards extends JPanel
 				graveBar.setValue(stone.ticksLeft);
 			}
 			deathMapButton.setToolTipText(config.shareDeath()
-										  ? "Open the map at the tile where you died"
-										  : "Open the map at the tile where you died. Sharing it is off, so it leaves this "
+										  ? "Open osrs-map.com at the tile where you died"
+										  : "Open osrs-map.com at the tile where you died. Sharing it is off, so it leaves this "
 										  + "client only in the address of the page this opens, and only when you press it.");
 			deathRouteButton.setToolTipText(config.shareDeath()
 				? "Plan the way back from where you stand"
