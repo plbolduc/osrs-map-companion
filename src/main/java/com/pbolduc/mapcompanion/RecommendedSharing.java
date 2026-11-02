@@ -91,7 +91,7 @@ final class RecommendedSharing extends JPanel
 	 * Two short sentences over the rows: who sees what is ticked, the one fact a player weighs before
 	 * sharing, and where to change it afterwards. The press under them says what one press does.
 	 */
-	static final String INTRO = "Your group sees what's ticked. Change it any time in Settings.";
+	static final String INTRO = Words.of("share.intro");
 
 	/** The connection the two drawing choices keep, in one line under them, to the map it goes to. */
 	static String streamShort(String server)
@@ -105,15 +105,12 @@ final class RecommendedSharing extends JPanel
 	 */
 	static String stream(String server)
 	{
-		return "While you're logged in, either one keeps a connection to " + server + " open. It brings the places "
-			+ "your group sends, meetups and your friends' positions, and carries your group's code, your member id "
-			+ "and its key, and nothing about your character.";
+		return "While you're logged in, either one keeps a connection to " + server + Words.of("share.stream");
 	}
 
-	static final String DEATH_DETAIL = "Your last death's tile, kept for an hour. Route back works without it.";
-	static final String DESTINATIONS_DETAIL = "Places your group sends you, and your group's meetups, in the sidebar "
-		+ "and on the world map. Nothing is clicked or walked for you.";
-	static final String GROUP_DETAIL = "Your group's dots on the game's world map, from what they already share.";
+	static final String DEATH_DETAIL = Words.of("share.deathDetail");
+	static final String DESTINATIONS_DETAIL = Words.of("share.destinationsDetail");
+	static final String GROUP_DETAIL = Words.of("share.groupDetail");
 
 	private static final int TEXT = MapCompanionPanel.CARD_TEXT_WIDTH;
 	private static final int INDENT = 20;
@@ -193,7 +190,7 @@ final class RecommendedSharing extends JPanel
 		share.setName("recommended.share");
 		share.setFont(share.getFont().deriveFont(12f));
 		orange(share, true);
-		share.setToolTipText("Turn on the ticked settings, as the switches in Settings do. Nothing else changes.");
+		share.setToolTipText(Words.of("share.shareTip"));
 		share.addActionListener(e -> share());
 		card.add(MapCompanionPanel.fill(share, BACK));
 
@@ -202,7 +199,7 @@ final class RecommendedSharing extends JPanel
 		links.setAlignmentX(Component.LEFT_ALIGNMENT);
 		JButton skip = MapCompanionPanel.linkButton("Not now");
 		skip.setName("recommended.skip");
-		skip.setToolTipText("Share nothing yet. Every choice stays off until you turn it on in Settings.");
+		skip.setToolTipText(Words.of("share.skipTip"));
 		skip.addActionListener(e -> close());
 		links.add(skip);
 		MapCompanionPanel.capped(links);

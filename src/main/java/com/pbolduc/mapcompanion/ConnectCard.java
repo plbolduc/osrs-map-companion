@@ -280,7 +280,7 @@ final class ConnectCard extends JPanel
 		statusLabel.setVerticalAlignment(SwingConstants.TOP);
 		statusLabel.setBorder(new EmptyBorder(drop, 0, 0, 0));
 		gearButton.setName("companion.settings");
-		gearButton.setToolTipText("Settings: what you share, the map address and Show what's sent");
+		gearButton.setToolTipText(Words.of("connect.settingsTip"));
 		gearButton.getAccessibleContext().setAccessibleName("Settings");
 		gearButton.setBorderPainted(false);
 		gearButton.setContentAreaFilled(false);
@@ -294,7 +294,7 @@ final class ConnectCard extends JPanel
 		status.add(sharingLabel);
 		nameLink.setName("companion.rename");
 		nameLink.setForeground(ColorScheme.BRAND_ORANGE);
-		nameLink.setToolTipText("Change the name everybody in the group sees");
+		nameLink.setToolTipText(Words.of("connect.renameTip"));
 		nameLink.addActionListener(e -> renameGroup(true));
 		nameLink.setVisible(false);
 		status.add(nameLink);
@@ -335,7 +335,7 @@ final class ConnectCard extends JPanel
 
 		openMapButton.setName("companion.orange");
 		openMapButton.addActionListener(e -> pressOrange());
-		pasteButton.setToolTipText("Read the clipboard. Only ever when you press this.");
+		pasteButton.setToolTipText(Words.of("connect.pasteTip"));
 		pasteButton.addActionListener(e -> pasteIntoJoinField());
 		joinButton.addActionListener(e -> joinFromField());
 		copyInviteButton.addActionListener(e -> copyInvite());
@@ -358,9 +358,9 @@ final class ConnectCard extends JPanel
 		block.add(joinHeading);
 		block.add(gap(3, ColorScheme.DARK_GRAY_COLOR));
 		joinField.setName("join.field");
-		joinField.setToolTipText("Paste the invite a friend sent you, or the code from osrs-map.com's Companion panel");
+		joinField.setToolTipText(Words.of("connect.joinFieldTip"));
 		joinButton.setName("join.button");
-		joinButton.setToolTipText("Join the group this invite or code is for");
+		joinButton.setToolTipText(Words.of("connect.joinTip"));
 		joinField.putClientProperty("JTextField.placeholderText", JOIN_PLACEHOLDER);
 		joinField.addActionListener(e -> joinFromField());
 		/* Connect joins an invite in the field, so its tooltip follows a paste or a keystroke at once. */
@@ -405,9 +405,7 @@ final class ConnectCard extends JPanel
 	 */
 	static String otherMapQuestion(String server)
 	{
-		return "Send your data to " + server + " instead of osrs-map.com?\n\n"
-			+ "It is a map server RuneLite has not checked. It receives your IP address, and what you "
-			+ "choose to share goes to it and to your group there.";
+		return "Send your data to " + server + Words.of("connect.otherMap");
 	}
 
 	/** The map the plugin is installed for, whose install warning already said all of this. */
@@ -653,7 +651,7 @@ final class ConnectCard extends JPanel
 
 		if (pasted == null || pasted.trim().isEmpty())
 		{
-			refuse("There is nothing to paste. Copy the invite first, then press Paste.");
+			refuse(Words.of("connect.nothingToPaste"));
 			return;
 		}
 		joinField.setText(pasted.trim());
@@ -662,7 +660,7 @@ final class ConnectCard extends JPanel
 		JoinCode found = JoinCode.parse(pasted);
 		if (found == null)
 		{
-			refuse("No invite or code found. Ask a friend in the group for an invite.");
+			refuse(Words.of("connect.noInvite"));
 			return;
 		}
 		say(found.invite != null ? "Found an invite to " + JoinCode.forDisplay(found.code) + ". Press Join."
@@ -688,9 +686,7 @@ final class ConnectCard extends JPanel
 		JoinCode joined = JoinCode.parse(entered.isEmpty() ? pairingCode() : entered);
 		if (joined == null)
 		{
-			refuse(pairingCode().isEmpty()
-				? "Paste the invite a friend sent you, or press Connect to start your own group."
-				: "Paste an invite, or the code from osrs-map.com's Companion panel.");
+			refuse(pairingCode().isEmpty() ? Words.of("connect.pasteOrStart") : Words.of("connect.pasteOrCode"));
 			return;
 		}
 		if (joined.invite != null)
@@ -856,7 +852,7 @@ final class ConnectCard extends JPanel
 			}
 			else
 			{
-				item.setToolTipText("Post to this group instead. One group at a time, like a party.");
+				item.setToolTipText(Words.of("connect.switchTip"));
 				item.addActionListener(e ->
 				{
 					if (!connect(JoinCode.parse(code)))
@@ -873,7 +869,7 @@ final class ConnectCard extends JPanel
 		{
 			menu.addSeparator();
 			JMenuItem another = groupMenuItem(joinMenuWords(joinOpen));
-			another.setToolTipText("Paste another group's connection code or invite");
+			another.setToolTipText(Words.of("connect.anotherTip"));
 			another.addActionListener(e ->
 			{
 				joinOpen = !joinOpen;
@@ -884,7 +880,7 @@ final class ConnectCard extends JPanel
 			if (plugin.runsGroup(pairing.serverUrl(), active))
 			{
 				JMenuItem rename = groupMenuItem(RENAME);
-				rename.setToolTipText("Change the name everybody in the group sees");
+				rename.setToolTipText(Words.of("connect.renameTip"));
 				rename.addActionListener(e -> renameGroup(false));
 				menu.add(rename);
 			}
@@ -937,7 +933,7 @@ final class ConnectCard extends JPanel
 		String secret = member == null ? null : pairing.secret(server, code, member);
 		if (server == null || member == null || secret == null)
 		{
-			under(line, "Log in once while connected, then rename the group.", true, false);
+			under(line, Words.of("connect.renameLogIn"), true, false);
 			return;
 		}
 		JTextField typed = nameField(pairing.name(code));
@@ -1166,13 +1162,13 @@ final class ConnectCard extends JPanel
 			case NEEDS_INVITE:
 				return "Ask someone in " + group + " for an invite and paste it here.";
 			case FULL:
-				return "Ask someone in " + group + " to make room, or paste another group's invite here.";
+				return "Ask someone in " + group + Words.of("connect.makeRoom");
 			case BAD_CODE:
 				return "Paste the invite again.";
 			case REMOVED:
 			case CLOSED:
 			case GONE:
-				return "Paste another group's invite here, or use Leave group in Settings → Advanced to start over.";
+				return Words.of("connect.startOver");
 			default:
 				return null;
 		}
@@ -1300,7 +1296,7 @@ final class ConnectCard extends JPanel
 		openMapButton.setEnabled(!asking);
 		JoinCode pasted = joinsInstead(joinField.getText());
 		openMapButton.setToolTipText(ready
-			? "Open " + pairing.serverLabel() + " in your browser, already in your group as you"
+			? "Open " + pairing.serverLabel() + Words.of("connect.openTip")
 			: pasted != null ? "Join the group this " + (pasted.invite != null ? "invite" : "code") + " is for"
 			: paired ? "Connect to this group again"
 			: "Make a group for you on " + pairing.serverLabel() + ". Play alone, or invite friends to it.");
@@ -1403,7 +1399,7 @@ final class ConnectCard extends JPanel
 		String memberId = identity.id();
 		if (memberId == null)
 		{
-			refuseUnderGroup("Log in to a character to copy an invite.");
+			refuseUnderGroup(Words.of("connect.inviteLogIn"));
 			return;
 		}
 		copyingInvite = true;
@@ -1430,7 +1426,7 @@ final class ConnectCard extends JPanel
 	}
 
 	/** What Copy invite says when the map made no invite a friend could use: the clipboard is as it was. */
-	static final String INVITE_FAILED = "Couldn't make an invite, so nothing was copied. Try again in a minute.";
+	static final String INVITE_FAILED = Words.of("connect.inviteFailed");
 
 	/**
 	 * What Copy invite puts on the clipboard for the map's answer, or null for nothing at all: the
@@ -1480,7 +1476,7 @@ final class ConnectCard extends JPanel
 		catch (RuntimeException e)
 		{
 			log.debug("could not copy invite", e);
-			refuseUnderGroup("Couldn't put the invite on the clipboard.");
+			refuseUnderGroup(Words.of("connect.clipboardFailed"));
 			return;
 		}
 		showCopied(true);
