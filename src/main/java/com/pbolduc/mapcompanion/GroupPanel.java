@@ -53,6 +53,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import net.runelite.api.coords.WorldPoint;
+import net.runelite.api.gameval.SpriteID;
 import net.runelite.client.ui.ColorScheme;
 
 /**
@@ -488,9 +489,11 @@ final class GroupPanel extends JPanel
 			news.setName("group.news." + row.id);
 			/*
 			 * The news's own picture, as the website's friend rows draw it: the item a drop or reward
-			 * names, else the skill a level names. A quest or a diary has neither and stays words.
+			 * names, else the skill a level names, else the mark a quest or a diary has. Every news
+			 * line then starts in the same column.
 			 */
-			boolean pictured = row.news.itemId != null || row.news.skill != null;
+			int progress = progressSprite(row.news.kind);
+			boolean pictured = row.news.itemId != null || row.news.skill != null || progress > 0;
 			MapCompanionPanel.setWrapped(news, row.news.title + " · " + ago(now - row.news.atMs),
 				pictured ? WIDTH - NEWS_PICTURE - 5 : WIDTH);
 			news.setIconTextGap(5);
@@ -509,6 +512,10 @@ final class GroupPanel extends JPanel
 			else if (row.news.skill != null)
 			{
 				sprites.skill(news, row.news.skill, NEWS_PICTURE);
+			}
+			else if (progress > 0)
+			{
+				sprites.sprite(news, progress, NEWS_PICTURE);
 			}
 			card.add(MapCompanionPanel.left(news));
 		}
@@ -799,6 +806,16 @@ final class GroupPanel extends JPanel
 			return "just now";
 		}
 		return minutes < 60 ? minutes + "m ago" : (minutes / 60) + "h ago";
+	}
+
+	/**
+	 * The game's own mark for a finished quest or diary, as the website's news line draws them: the
+	 * world map's quest-start star and the diary tab's icon. Zero for any other news.
+	 */
+	static int progressSprite(@Nullable String kind)
+	{
+		return "quest".equals(kind) ? SpriteID.Mapfunction.QUEST_START
+			: "diary".equals(kind) ? SpriteID.SideIcons.ACHIEVEMENT_DIARIES : 0;
 	}
 
 	static String presenceWord(@Nullable String presence)
