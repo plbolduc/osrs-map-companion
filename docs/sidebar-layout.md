@@ -493,7 +493,11 @@ minimap's yellow dot, drawn, for a character; and an item's own sprite, by the `
 sends where its tables name one, or else by the item's exact name in the client's own price table.
 The box is a plain field, so it can say *Search places, people, items* while empty, and item rows
 have their own *Items* heading: they were drawn under the last source's, so *Bank filler* read as
-one more counter under *Sold at*. Their line no longer starts *Item ·*.
+one more counter under *Sold at*. Their line no longer starts *Item ·*, and each count says what it
+counts, *Dropped by 3 monsters · sold in 1 shop*: a bare *Dropped by 3* sat under a heading listing
+two monsters. A pick from them names the item on the destination's card, *For Abyssal whip*, since
+the card takes the name of the monster or shop the route goes to. One letter in the box says *Type
+one more letter.*, where it showed nothing.
 
 ### Before a group is joined
 
