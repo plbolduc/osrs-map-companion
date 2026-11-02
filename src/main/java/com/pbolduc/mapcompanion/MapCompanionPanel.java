@@ -233,12 +233,16 @@ public class MapCompanionPanel extends PluginPanel
 
 		overview.add(nowCards);
 
-		/* Under Now, as the last polish pass placed them: what is happening comes before what to start. */
+		/*
+		 * Under Now, as the last polish pass placed them: what is happening comes before what to start.
+		 * Each card in a slot of its own, as Now's are, so three cards do not read as one dark block
+		 * with two Start runs in it.
+		 */
 		tasks.add(sectionHead("Tasks"));
 		tasks.add(gap(3, ColorScheme.DARK_GRAY_COLOR));
-		tasks.add(farmRunPanel);
-		tasks.add(slayerPanel);
-		tasks.add(portTasksPanel);
+		tasks.add(slot(farmRunPanel));
+		tasks.add(slot(slayerPanel));
+		tasks.add(slot(portTasksPanel));
 		tasks.add(gap(7, ColorScheme.DARK_GRAY_COLOR));
 		overview.add(tasks);
 
@@ -503,7 +507,14 @@ public class MapCompanionPanel extends PluginPanel
 			farmRunPanel.refresh(ready);
 			slayerPanel.refresh(ready);
 			portTasksPanel.refresh(ready);
-			tasks.setVisible(farmRunPanel.isVisible() || slayerPanel.isVisible() || portTasksPanel.isVisible());
+			/* Each card decides its own visibility; its slot follows, so a hidden card leaves no gap. */
+			boolean anyTask = false;
+			for (JComponent card : new JComponent[] {farmRunPanel, slayerPanel, portTasksPanel})
+			{
+				card.getParent().setVisible(card.isVisible());
+				anyTask |= card.isVisible();
+			}
+			tasks.setVisible(anyTask);
 			if (ready)
 			{
 				searchPanel.refresh();

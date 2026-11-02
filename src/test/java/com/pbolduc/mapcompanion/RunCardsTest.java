@@ -28,6 +28,7 @@ package com.pbolduc.mapcompanion;
 import com.google.gson.Gson;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Insets;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -363,6 +364,32 @@ public class RunCardsTest
 		route.follow(false);
 		refresh();
 		assertEquals("Follow", hotkey(false).getText());
+	}
+
+	/**
+	 * The farm card had seven pixels more of its own colour above and below than the task cards beside
+	 * it, and bare words where theirs carry their skill's icon, so the three read as one block.
+	 */
+	@Test
+	public void theFarmCardHasTheTaskCardsInsetAndItsSkillsIcon() throws Exception
+	{
+		List<String> skills = new ArrayList<>();
+		GameSprites recording = new GameSprites(null, null, null)
+		{
+			@Override
+			void skill(JLabel label, String name, int box)
+			{
+				skills.add(name + " " + box);
+			}
+		};
+		Insets[] insets = new Insets[2];
+		SwingUtilities.invokeAndWait(() ->
+		{
+			insets[0] = new FarmRunPanel(state, client, follower, route, shortest, recording, config).getInsets();
+			insets[1] = new PortTasksPanel(tasks, config, recording, state, client, follower, route, shortest).getInsets();
+		});
+		assertEquals(insets[1], insets[0]);
+		assertTrue(skills.toString(), skills.contains("Farming 16"));
 	}
 
 	private JButton hotkey(boolean rerouting) throws Exception
