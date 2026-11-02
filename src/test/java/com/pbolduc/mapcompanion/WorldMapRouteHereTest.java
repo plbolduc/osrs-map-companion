@@ -25,7 +25,22 @@
  */
 package com.pbolduc.mapcompanion;
 
+import com.google.common.util.concurrent.Uninterruptibles;
+import com.google.gson.Gson;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import net.runelite.api.coords.WorldPoint;
+import net.runelite.client.callback.ClientThread;
+import net.runelite.client.ui.overlay.worldmap.WorldMapPoint;
+import net.runelite.client.ui.overlay.worldmap.WorldMapPointManager;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Protocol;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -35,6 +50,118 @@ import org.junit.Test;
 public class WorldMapRouteHereTest
 {
 	private static final WorldPoint CENTRE = new WorldPoint(3200, 3200, 0);
+	private static final String SECRET = "K7PQ2M3XABCDEFGHJKMNPQRSTVWXYZ23";
+
+	private final List<WorldMapPoint> drawn = new CopyOnWriteArrayList<>();
+	private final WorldMapPointManager manager = new WorldMapPointManager()
+	{
+		@Override
+		public void add(WorldMapPoint point)
+		{
+			drawn.add(point);
+		}
+
+		@Override
+		public void remove(WorldMapPoint point)
+		{
+			drawn.remove(point);
+		}
+	};
+	private final ClientThread now = new ClientThread()
+	{
+		@Override
+		public void invoke(Runnable r)
+		{
+			r.run();
+		}
+
+		@Override
+		public void invokeLater(Runnable r)
+		{
+			r.run();
+		}
+	};
+	private final HarnessStore store = new HarnessStore();
+	private final DestinationState destinations = new DestinationState(new Gson());
+	private final DestinationRoute route = new DestinationRoute();
+	/** The marker's syncs that have finished, so an answer's pins are read only once drawn. */
+	private final AtomicInteger synced = new AtomicInteger();
+	private final DestinationMarker marker = new DestinationMarker(manager, destinations,
+		new HarnessConfig(store, "http://localhost"), now, route, null)
+	{
+		@Override
+		void sync()
+		{
+			super.sync();
+			synced.incrementAndGet();
+		}
+	};
+
+	/** Route here wired as the plugin wires it, its map's answer held until {@code answer} opens. */
+	private WorldMapRouteHere routeHere(CountDownLatch answer)
+	{
+		Pairing pairing = new Pairing(store, new Gson());
+		MemberIdentity identity = new MemberIdentity(store);
+		assertTrue(pairing.connect(JoinCode.parse("ABC234"), () -> true));
+		pairing.rememberSecret(pairing.code(), identity.id(), SECRET);
+		OkHttpClient http = new OkHttpClient.Builder().addInterceptor(chain ->
+		{
+			assertTrue(Uninterruptibles.awaitUninterruptibly(answer, 5, TimeUnit.SECONDS));
+			return new Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1).code(200).message("")
+				.body(ResponseBody.create(MediaType.get("application/json"), RoutePressTest.ANSWER)).build();
+		}).build();
+		RoutePress press = new RoutePress(http, new Gson(), RoutePressTest.game(), now, pairing, identity, route,
+			destinations, marker);
+		return new WorldMapRouteHere(null, null, null, press, pairing, null, marker);
+	}
+
+	/**
+	 * The spot pressed is marked on the map the press was made on while its answer is on its way:
+	 * the destination's pin, faded, and not held at the edge, which is the way to go's. The answer
+	 * takes the mark away and leaves the route's own pin.
+	 */
+	@Test
+	public void theSpotIsMarkedWhileItsPressPlans() throws Exception
+	{
+		CountDownLatch answer = new CountDownLatch(1);
+		WorldMapRouteHere routeHere = routeHere(answer);
+		WorldPoint spot = new WorldPoint(3408, 3573, 0);
+		routeHere.press(spot);
+		assertEquals(1, drawn.size());
+		WorldMapPoint mark = drawn.get(0);
+		assertEquals(spot, mark.getWorldPoint());
+		assertFalse(mark.isSnapToEdge());
+		assertEquals("Planning the way here…", mark.getTooltip());
+		routeHere.tick();
+		assertEquals("still planning", 1, drawn.size());
+
+		answer.countDown();
+		long deadline = System.currentTimeMillis() + 3_000;
+		while (synced.get() == 0 && System.currentTimeMillis() < deadline)
+		{
+			Thread.sleep(10);
+		}
+		assertEquals("the answer is drawn", 1, synced.get());
+		routeHere.tick();
+		assertFalse("the answer takes the mark away", drawn.contains(mark));
+		assertEquals(1, drawn.size());
+		assertEquals("the route's own pin, where the map planned to", new WorldPoint(3408, 3573, 2), drawn.get(0).getWorldPoint());
+	}
+
+	/** A press made among destinations since cleared, by a group left, leaves no mark behind. */
+	@Test
+	public void aGroupLeftWhileItPlansTakesTheMark()
+	{
+		marker.planning(new WorldPoint(3408, 3573, 0));
+		assertEquals(1, drawn.size());
+		destinations.clear();
+		marker.sync();
+		assertTrue(drawn.isEmpty());
+
+		marker.planning(new WorldPoint(3408, 3573, 0));
+		marker.remove();
+		assertTrue("nor does a plugin turned off", drawn.isEmpty());
+	}
 
 	/** RuneLite draws a tile's centre at the point it maps the tile to, so the nearest tile is the rounded offset. */
 	@Test

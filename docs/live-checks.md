@@ -256,6 +256,8 @@ The website plan's second session, once the routes in the game are built: a memb
       group, the entry is not offered; pressed twice within five seconds, the chat box says why once.
       Where the map's answer names the landmark near the spot, the card, the box over the game and
       the pin's tooltip say it, *Near Lumbridge Castle*; where it names none, *Picked on the world map*.
+      Between the press and the answer the spot has a faded amber pin, *Planning the way here…*,
+      which stays put when the map is panned away and goes with the answer or the chat box's refusal.
 - [ ] **Route on a star and a meetup.** In Stars, a precise site's Route sits beside Pin
       destination without cutting a word; an approximate one shows Open website. A meetup's Route
       prints its world in the destination's line and nobody in the group is told.

@@ -59,7 +59,8 @@ import net.runelite.client.ui.overlay.worldmap.WorldMapOverlay;
  * <p>What it sends is what Route back sends: that tile and the one the player stands on, once per
  * press ({@link RoutePress}). The press has no row in the sidebar to say a refusal beside, so a
  * refusal is said once in the chat box; a route that comes back shows itself as the destination, its
- * arrow and its pins. Client thread throughout.
+ * arrow and its pins. Until then the spot has a faded pin ({@link DestinationMarker#planning}), so the
+ * map the press was made on shows that it took. Client thread throughout.
  */
 @Singleton
 class WorldMapRouteHere
@@ -76,6 +77,7 @@ class WorldMapRouteHere
 	private final RoutePress routePress;
 	private final Pairing pairing;
 	private final ChatMessageManager chat;
+	private final DestinationMarker marker;
 	/** Where the last menu opened, in canvas pixels. */
 	@Nullable
 	private Point opened;
@@ -86,7 +88,7 @@ class WorldMapRouteHere
 
 	@Inject
 	WorldMapRouteHere(Client client, MapCompanionConfig config, WorldMapOverlay worldMap, RoutePress routePress,
-		Pairing pairing, ChatMessageManager chat)
+		Pairing pairing, ChatMessageManager chat, DestinationMarker marker)
 	{
 		this.client = client;
 		this.config = config;
@@ -94,6 +96,7 @@ class WorldMapRouteHere
 		this.routePress = routePress;
 		this.pairing = pairing;
 		this.chat = chat;
+		this.marker = marker;
 	}
 
 	void menuOpened()
@@ -135,12 +138,19 @@ class WorldMapRouteHere
 		{
 			return;
 		}
+		press(spot);
+	}
+
+	/** Ask for the way to a spot, marked on the world map until the answer is in. */
+	void press(WorldPoint spot)
+	{
 		before = routePress.said(SOURCE);
 		awaiting = true;
+		marker.planning(spot);
 		routePress.press(RoutePress.Target.tile(SOURCE, spot, NAME, null, null));
 	}
 
-	/** Game tick: a refused press is said once, in the chat box. */
+	/** Game tick: the spot's mark goes once the answer is in, and a refused press is said once, in the chat box. */
 	void tick()
 	{
 		if (!awaiting)
@@ -153,6 +163,7 @@ class WorldMapRouteHere
 			return;
 		}
 		awaiting = false;
+		marker.planning(null);
 		if (refusal != null)
 		{
 			chat.queue(QueuedMessage.builder()
