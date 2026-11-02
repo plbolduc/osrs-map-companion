@@ -27,11 +27,8 @@ package com.pbolduc.mapcompanion;
 
 import com.google.inject.Inject;
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Font;
 import javax.annotation.Nullable;
 import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -92,18 +89,7 @@ final class FarmRunPanel extends JPanel
 		this.client = client;
 		this.config = config;
 		this.run = new RunView(false, state, client, follower, routes, shortest, sprites, config);
-		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		setBackground(ColorScheme.DARKER_GRAY_COLOR);
-		/* The Slayer and Port tasks cards' inset; the gap between cards is the Tasks column's to draw. */
-		setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
-		MapCompanionPanel.left(this);
-		setName("farmRun");
-
-		JLabel heading = new JLabel("Farm run");
-		heading.setForeground(Color.WHITE);
-		heading.setFont(heading.getFont().deriveFont(Font.BOLD, 13f));
-		sprites.skill(heading, "Farming", 16);
-		add(MapCompanionPanel.left(heading));
+		MapCompanionPanel.taskCard(this, "farmRun", "Farm run", sprites, "Farming");
 		picker.setBackground(getBackground());
 		for (String[] choice : STARTS)
 		{

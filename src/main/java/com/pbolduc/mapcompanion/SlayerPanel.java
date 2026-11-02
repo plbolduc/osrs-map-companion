@@ -101,17 +101,7 @@ final class SlayerPanel extends JPanel
 		this.marker = marker;
 		this.clientThread = clientThread;
 		this.sprites = sprites;
-		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		setBackground(ColorScheme.DARKER_GRAY_COLOR);
-		setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
-		setName("slayer");
-		MapCompanionPanel.left(this);
-		JLabel heading = new JLabel("Slayer");
-		heading.setForeground(Color.WHITE);
-		MapCompanionPanel.left(heading);
-		heading.setFont(heading.getFont().deriveFont(Font.BOLD, 13f));
-		sprites.skill(heading, "Slayer", 16);
-		add(heading);
+		MapCompanionPanel.taskCard(this, "slayer", "Slayer", sprites, "Slayer");
 		add(task);
 		add(status);
 		add(body);
