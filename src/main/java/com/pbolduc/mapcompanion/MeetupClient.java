@@ -77,7 +77,8 @@ final class MeetupClient
 	/** A path the map builds from a meetup: letters, digits and the punctuation a query needs. */
 	private static final Pattern PATH = Pattern.compile("/[A-Za-z0-9/?=&%._~+\\-]{0,2000}");
 
-	static final String NEEDS_CONNECTION = "Connect to your map to answer or make a meetup.";
+	/** A press with no character logged in: an answer and a meetup are a member's, and a member is a character. */
+	static final String LOG_IN = "Log in to answer or make a meetup.";
 	/** The cause and the one step that fixes it: a meetup is made on the tile you stand on, which an instance does not give. */
 	static final String NEEDS_TILE = "You can't make a meetup inside an instance. Step outside, then press Make meetup.";
 	static final String ONE_AT_A_TIME = "The last answer is still on its way.";
@@ -242,7 +243,7 @@ final class MeetupClient
 		{
 			if (client.getGameState() != GameState.LOGGED_IN || WorldTiles.isInstance(client))
 			{
-				said = new Said("meet", false, client.getGameState() == GameState.LOGGED_IN ? NEEDS_TILE : NEEDS_CONNECTION,
+				said = new Said("meet", false, client.getGameState() == GameState.LOGGED_IN ? NEEDS_TILE : LOG_IN,
 					destinations.generation());
 				return;
 			}
@@ -271,10 +272,15 @@ final class MeetupClient
 		String code = pairing.code();
 		String member = identity.id();
 		String secret = member == null ? null : pairing.secret(server, code, member);
-		if (client.getGameState() != GameState.LOGGED_IN || server == null || code.isEmpty()
-			|| !pairing.hasServerConsent(server, code) || secret == null || HttpUrl.parse(server + path) == null)
+		if (client.getGameState() != GameState.LOGGED_IN)
 		{
-			said = new Said(source, false, NEEDS_CONNECTION, asked);
+			said = new Said(source, false, LOG_IN, asked);
+			return;
+		}
+		if (server == null || code.isEmpty() || !pairing.hasServerConsent(server, code) || secret == null
+			|| HttpUrl.parse(server + path) == null)
+		{
+			said = new Said(source, false, RouteClient.NOT_CONNECTED, asked);
 			return;
 		}
 		synchronized (this)
@@ -335,7 +341,7 @@ final class MeetupClient
 			}
 			if (!close.isSuccessful())
 			{
-				String why = status == 403 || status == 410 ? NEEDS_CONNECTION
+				String why = status == 403 || status == 410 ? RouteClient.NOT_CONNECTED
 					: status == 404 && !making ? GONE
 					: status == 400 && making ? REFUSED : FAILED;
 				finish(source, asked, why, now + Math.max(FAILURE_GAP_MS, wait == null ? 0L : StarsClient.retryDelay(wait)));

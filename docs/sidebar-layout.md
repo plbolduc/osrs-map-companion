@@ -790,6 +790,21 @@ tooltip, *The map asked to wait: 25s*, as a search row that takes no pick does, 
 chat line gives the seconds left as it is said. The gates are what they were: nothing is asked
 sooner, and the sidebar only says them.
 
+At the login screen the status card's *Logged out* is said once, and the presses that ask the map
+as a member wait for a character, greyed, since a member is a character: Reroute, Route back, the
+clue's Route, a friend's and a meetup's Route, the answers, Meet here, Copy invite, the run picker
+and Start run, a run's Reroute, Port tasks' Start run and Slayer's Route. A Route's tooltip says
+*Log in to plan a route.* The search box goes, as it does before a group is joined, and Stars says
+*Log in to see stars.* Each had stayed pressable and answered with a fix for a connection nothing
+was wrong with, *Connect to your map to plan a route.*, on a page with no Connect button, and a
+friend's Route waited half a minute for a position the logout had stopped, then said the friend
+shared none; a friend's Route still *Finding…* at the logout now stops and says to log in. What
+acts here or as the player stays: Follow, Pause, Dismiss, End run, World map, Pin, Open the map,
+Switch ▾ and Rename group…. End run ends the run here and says *Run ended here. Log in to end it
+on the map too.* A press that still arrives, from a key or a click a refresh had not greyed yet,
+says *Log in to…* in its own words, and one made in game before the map takes the member, or after
+it turns one away, *Not connected to the group yet. The top of the sidebar says why.*
+
 ### A meetup's Route
 
 A meetup was three rows of buttons: Route, then the four answers two by two. Route now sits beside

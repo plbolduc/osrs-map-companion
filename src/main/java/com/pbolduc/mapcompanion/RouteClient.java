@@ -69,7 +69,13 @@ final class RouteClient
 	/** After a reply that was not an answer and named no wait of its own. */
 	static final long FAILURE_GAP_MS = 30_000L;
 
-	static final String NEEDS_CONNECTION = "Connect to your map to plan a route.";
+	/** A press with no character logged in, so nobody to ask the map as; the sidebar offers none then. */
+	static final String LOG_IN = "Log in to plan a route.";
+	/**
+	 * Logged in, but not yet a member the map takes: no group, no member secret issued yet, or the map
+	 * refusing this member. The status card is where the cause is said, so this points there.
+	 */
+	static final String NOT_CONNECTED = "Not connected to the group yet. The top of the sidebar says why.";
 	/** The cause and the one step that fixes it: the game gives no tile inside a raid's rooms, and does outside. */
 	static final String NEEDS_TILE = "Reroute can't see where you are inside an instance. Press it again once you're out.";
 	static final String NO_WAY = "The map found no way there from here.";
@@ -113,10 +119,14 @@ final class RouteClient
 		String code = pairing.code();
 		String member = identity.id();
 		String secret = member == null ? null : pairing.secret(server, code, member);
-		if (client.getGameState() != GameState.LOGGED_IN || server == null || code.isEmpty()
-			|| !pairing.hasServerConsent(server, code) || secret == null)
+		if (client.getGameState() != GameState.LOGGED_IN)
 		{
-			route.refuse(NEEDS_CONNECTION);
+			route.refuse(LOG_IN);
+			return;
+		}
+		if (server == null || code.isEmpty() || !pairing.hasServerConsent(server, code) || secret == null)
+		{
+			route.refuse(NOT_CONNECTED);
 			return;
 		}
 		WorldPoint from = DestinationRoute.standing(client);
@@ -127,7 +137,7 @@ final class RouteClient
 		}
 		if (HttpUrl.parse(server + PATH) == null)
 		{
-			route.refuse(NEEDS_CONNECTION);
+			route.refuse(NOT_CONNECTED);
 			return;
 		}
 		DestinationRoute.Ticket ticket = route.beginReroute(System.currentTimeMillis());
@@ -188,7 +198,7 @@ final class RouteClient
 			}
 			if (!close.isSuccessful())
 			{
-				String why = code == 404 ? NOT_FOUND : code == 403 || code == 410 ? NEEDS_CONNECTION : FAILED;
+				String why = code == 404 ? NOT_FOUND : code == 403 || code == 410 ? NOT_CONNECTED : FAILED;
 				route.finishReroute(ticket, null, why, now + Math.max(code == 404 ? MIN_GAP_MS : FAILURE_GAP_MS, asked));
 				return;
 			}

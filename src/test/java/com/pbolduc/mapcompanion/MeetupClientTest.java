@@ -161,7 +161,8 @@ public class MeetupClientTest
 		MeetupClient forged = client(403, "{\"reason\":\"needs_code\"}", null, false);
 		forged.handle("answer:x", destinations.generation(), false, null, "https://osrs-map.com",
 			RoutePressTest.reply(403, "{\"reason\":\"needs_code\"}"));
-		assertEquals(MeetupClient.NEEDS_CONNECTION, forged.said("answer:x").message);
+		/* The map refusing this member: one sentence for it, pointing at the card that says why. */
+		assertEquals(RouteClient.NOT_CONNECTED, forged.said("answer:x").message);
 	}
 
 	/** "Meetup made." is news for a moment, as a run's "Run ended." is; a refusal stays until the next press. */
@@ -186,13 +187,43 @@ public class MeetupClientTest
 		assertTrue("a refusal is still said a minute on", said.shown(said.atMs + 60_000L));
 	}
 
+	/**
+	 * At the login screen an answer and Meet here said "Connect to your map to answer or make a
+	 * meetup." to a player in the group. Each says to log in, and nothing is sent.
+	 */
+	@Test
+	public void atTheLoginScreenAMeetupPressSaysToLogIn()
+	{
+		connect();
+		Client loggedOut = (Client) Proxy.newProxyInstance(Client.class.getClassLoader(), new Class<?>[]{Client.class},
+			(proxy, method, args) -> "getGameState".equals(method.getName()) ? GameState.LOGIN_SCREEN : null);
+		MeetupClient client = new MeetupClient(new OkHttpClient.Builder().addInterceptor(chain ->
+		{
+			sent.add(chain.request());
+			throw new java.io.IOException("nothing should be sent");
+		}).build(), new Gson(), loggedOut, new ClientThread()
+		{
+			@Override
+			public void invokeLater(Runnable r)
+			{
+				r.run();
+			}
+		}, pairing, identity, destinations, group, copied::add);
+		client.answer("star-hunt", "going");
+		assertEquals("Log in to answer or make a meetup.", client.said("answer:star-hunt").message);
+		client.create("Barrows run", System.currentTimeMillis() + 3_600_000L);
+		assertEquals("Log in to answer or make a meetup.", client.said("meet").message);
+		assertTrue(sent.isEmpty());
+	}
+
 	@Test
 	public void sendsNothingBeforeConnect()
 	{
 		MeetupClient client = client(200, "{}", null, false);
 		client.answer("star-hunt", "going");
 		assertTrue(sent.isEmpty());
-		assertEquals(MeetupClient.NEEDS_CONNECTION, client.said("answer:star-hunt").message);
+		/* Logged in with no group: not connected, said apart from a logout, which asks to log in instead. */
+		assertEquals(RouteClient.NOT_CONNECTED, client.said("answer:star-hunt").message);
 	}
 
 	@Test

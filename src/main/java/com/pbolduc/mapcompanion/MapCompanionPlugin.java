@@ -457,6 +457,32 @@ public class MapCompanionPlugin extends Plugin
 	@Getter
 	private volatile Health health = Health.IDLE;
 
+	/**
+	 * At the login screen, with no character to ask the map as: the sidebar stops offering the presses
+	 * that need one, and the status card's Logged out is the one place that says so. Set and cleared
+	 * by the game's own state changes, and read at the start and end of a lifetime, on the client
+	 * thread; read by the sidebar's refresh, so volatile. A hop, a loading screen and a lost connection
+	 * keep the character, and leave it as it was. False until something has been read, so a plugin
+	 * made but not started offers what it always did.
+	 */
+	private volatile boolean loggedOut;
+
+	/** Whether a character is logged in to press as, as the game last said. Any thread. */
+	boolean loggedIn()
+	{
+		return !loggedOut;
+	}
+
+	/**
+	 * Whether the player is at the login screen after {@code state}: reaching it says so, and logging
+	 * in says otherwise, while every state between keeps what was, a hop and a loading screen among
+	 * them. Package-private so the rule is pinned without a client.
+	 */
+	static boolean loggedOutAfter(boolean before, GameState state)
+	{
+		return state == GameState.LOGIN_SCREEN || (state != GameState.LOGGED_IN && before);
+	}
+
 	/** Status and health move together; setting one without the other is the bug this prevents. */
 	private void setStatus(Health health, String status)
 	{
@@ -621,8 +647,9 @@ public class MapCompanionPlugin extends Plugin
 	private void restStatus()
 	{
 		String code = config.pairingCode() == null ? "" : config.pairingCode().trim();
-		setStatus(code.isEmpty() ? Health.IDLE : Health.WAITING,
-			restingStatus(!code.isEmpty(), client.getGameState() == GameState.LOGGED_IN));
+		boolean playing = client.getGameState() == GameState.LOGGED_IN;
+		loggedOut = !playing;
+		setStatus(code.isEmpty() ? Health.IDLE : Health.WAITING, restingStatus(!code.isEmpty(), playing));
 	}
 
 	/**
@@ -1032,6 +1059,7 @@ public class MapCompanionPlugin extends Plugin
 	public void onGameStateChanged(GameStateChanged event)
 	{
 		GameState state = event.getGameState();
+		loggedOut = loggedOutAfter(loggedOut, state);
 		if (state == GameState.LOGIN_SCREEN || state == GameState.HOPPING)
 		{
 			/* On no world until the next tick names one, so no meetup's world reads as this one meanwhile. */

@@ -352,7 +352,8 @@ final class StarsPanel extends JPanel
 		/* Nothing is counted, and no age given, until the map has answered once: there is no list yet. */
 		count.setText(model.feed == null ? "" : locations + (locations == 1 ? " site · " : " sites · ") + stars + (stars == 1 ? " star" : " stars"));
 		/* A list it holds says how old it is, the same when Star Miners or the last refresh failed. */
-		String notice = loggedOut ? "Log in and connect to your map to see stars."
+		/* The tab is a member's, so the group is there: logging in is the one thing left to do. */
+		String notice = loggedOut ? LOG_IN
 			: model.feed == null ? service.message
 			: f.safe() && !model.feed.worldsAvailable ? "World list unavailable: PvP and Deadman filters cannot be checked."
 			: "Updated " + age(model.feed.snapshotAgeSeconds * 1000 + elapsed) + " · "
@@ -745,6 +746,8 @@ final class StarsPanel extends JPanel
 
 	/** Which Route button a press came from, so its answer is said beside it. */
 	static final String SOURCE = "star";
+	/** The tab while no character is logged in, since the list is asked for as one. */
+	static final String LOG_IN = "Log in to see stars.";
 
 	/** What the sync box does now, for the map this sidebar is actually paired with. */
 	private String syncTip()

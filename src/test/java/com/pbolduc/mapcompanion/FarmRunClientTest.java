@@ -161,7 +161,41 @@ public class FarmRunClientTest
 		client.start("birdhouses");
 		assertTrue(sent.isEmpty());
 		assertNull(state.view());
-		assertEquals(RouteClient.NEEDS_CONNECTION, client.said().message);
+		/* Logged in with no group: not connected, said apart from a logout, which asks to log in instead. */
+		assertEquals(RouteClient.NOT_CONNECTED, client.said().message);
+	}
+
+	/**
+	 * At the login screen a run's presses said "Connect to your map to plan a route." and "Run ended
+	 * here. Connect to end it on the map too." to a player in a group. They say to log in, End still
+	 * ends the run here, and nothing is sent. Logged in with no member the map takes yet, End says
+	 * the map still has the run.
+	 */
+	@Test
+	public void atTheLoginScreenARunsPressesSayToLogIn() throws Exception
+	{
+		connect();
+		Client loggedOut = (Client) Proxy.newProxyInstance(Client.class.getClassLoader(), new Class<?>[]{Client.class},
+			(proxy, method, args) -> "getGameState".equals(method.getName()) ? GameState.LOGIN_SCREEN : null);
+		FarmRunClient client = new FarmRunClient(new OkHttpClient.Builder().addInterceptor(chain ->
+		{
+			sent.add(chain.request());
+			throw new java.io.IOException("nothing should be sent");
+		}).build(), gson, loggedOut, new ClientThread()
+		{
+			@Override
+			public void invokeLater(Runnable r)
+			{
+				r.run();
+			}
+		}, pairing, identity, state, destinations, gate);
+		client.start("birdhouses");
+		assertEquals("Log in to start a run.", client.said().message);
+		client.end();
+		assertEquals("Run ended here. Log in to end it on the map too.", client.said().message);
+		assertTrue(sent.isEmpty());
+		assertEquals("Log in to reroute the run.", FarmRunClient.unsent(false, true, false));
+		assertEquals("Run ended here. Not connected to the group yet, so the map still has it.", FarmRunClient.unsent(true, false, true));
 	}
 
 	@Test

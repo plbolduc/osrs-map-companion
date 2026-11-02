@@ -511,13 +511,25 @@ public class MapCompanionPanel extends PluginPanel
 			boolean ready = paired && pairing.hasServerConsent();
 
 			connectCard.refreshStatus(health, code, paired, ready);
+			/*
+			 * At the login screen the status card says Logged out, the one true thing to say, and the
+			 * presses that ask the map as a member wait for a character, greyed, rather than each
+			 * answering a press with a fix for a connection nothing is wrong with. What acts here or as
+			 * the player stays: Follow, Pause, Dismiss, End run, World map, Pin, Open the map, Switch ▾
+			 * and Rename group….
+			 */
+			boolean loggedIn = plugin.loggedIn();
 
-			/* The search is the map's, asked as a member: a box that could only say "connect" is not shown. */
-			searchPanel.setVisible(ready);
-			searchGap.setVisible(ready);
-			farmRunPanel.refresh(ready);
-			slayerPanel.refresh(ready);
-			portTasksPanel.refresh(ready);
+			/*
+			 * The search is the map's, asked as a member, and a member is a character: a box that could
+			 * only say "connect" or "log in" is not shown.
+			 */
+			boolean searching = ready && loggedIn;
+			searchPanel.setVisible(searching);
+			searchGap.setVisible(searching);
+			farmRunPanel.refresh(ready, loggedIn);
+			slayerPanel.refresh(ready, loggedIn);
+			portTasksPanel.refresh(ready, loggedIn);
 			/* Each card decides its own visibility; its slot follows, so a hidden card leaves no gap. */
 			boolean anyTask = false;
 			for (JComponent card : new JComponent[] {farmRunPanel, slayerPanel, portTasksPanel})
@@ -526,12 +538,12 @@ public class MapCompanionPanel extends PluginPanel
 				anyTask |= card.isVisible();
 			}
 			tasks.setVisible(anyTask);
-			if (ready)
+			if (searching)
 			{
 				searchPanel.refresh();
 			}
 
-			nowCards.refresh(paired, ready);
+			nowCards.refresh(paired, ready, loggedIn);
 			/* After Now: under a routed star, Stars offers the destination card's own buttons as they stand. */
 			starsPanel.refresh();
 
@@ -566,9 +578,9 @@ public class MapCompanionPanel extends PluginPanel
 			groupPanel.setVisible(ready);
 			if (ready)
 			{
-				groupPanel.refresh(true);
+				groupPanel.refresh(true, loggedIn, System.currentTimeMillis());
 			}
-			connectCard.refreshButtons(paired, ready, known, groupPanel);
+			connectCard.refreshButtons(paired, ready, loggedIn, known, groupPanel, System.currentTimeMillis());
 			/* Offered for the group just joined; leaving it, or a changed map, takes the offer away. */
 			if (!ready)
 			{

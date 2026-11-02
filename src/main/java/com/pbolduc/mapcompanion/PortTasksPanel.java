@@ -130,11 +130,17 @@ final class PortTasksPanel extends JPanel
 	/** Called on the EDT by the sidebar refresh, beside the farm run card. */
 	void refresh(boolean connected)
 	{
+		refresh(connected, true);
+	}
+
+	/** The same, knowing whether a character is logged in: with none, Start run waits for one. */
+	void refresh(boolean connected, boolean loggedIn)
+	{
 		List<PortTaskReader.Slot> slots = config.sharePortTasks() ? reader.shown() : null;
 		/* Through a hop's window these are the tasks from before it: shown, but not a reading to plan from. */
 		boolean kept = slots != null && reader.latest() == null;
 		boolean worth = slots != null && slots.stream().anyMatch(s -> s.held() || PortTaskReader.UNKNOWN.equals(s.state));
-		boolean showing = run.refresh(connected);
+		boolean showing = run.refresh(connected, loggedIn, System.currentTimeMillis());
 		setVisible(worth || showing);
 		/*
 		 * A run already held is the order: no second Start beside it. A refusal or "Run ended." is
@@ -145,7 +151,7 @@ final class PortTasksPanel extends JPanel
 		/* The farm card's run being walked holds Start back too, and the line where it was says so. */
 		boolean after = offer && config.shareBoats() && run.otherBusy();
 		starter.setVisible(offer && config.shareBoats() && !after);
-		start.setEnabled(connected && client.ready() && !kept);
+		start.setEnabled(connected && loggedIn && client.ready() && !kept);
 		hint.setVisible(offer && (!config.shareBoats() || after));
 		MapCompanionPanel.setWrapped(hint, after ? AFTER_FARM_RUN : NEEDS_BOATS, WIDTH);
 		if (!worth)

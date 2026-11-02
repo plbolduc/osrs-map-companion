@@ -241,11 +241,21 @@ final class RunView extends JPanel
 	 */
 	boolean refresh(boolean connected)
 	{
-		return refresh(connected, System.currentTimeMillis());
+		return refresh(connected, true, System.currentTimeMillis());
 	}
 
 	/** The same, as of {@code now}: a confirmation is drawn only while it is news. */
 	boolean refresh(boolean connected, long now)
+	{
+		return refresh(connected, true, now);
+	}
+
+	/**
+	 * The same, knowing whether a character is logged in: with none, Reroute is not offered, since it
+	 * asks the map as one. Follow, Pause and End run stay, because each acts here; End run tells the
+	 * map too once it can.
+	 */
+	boolean refresh(boolean connected, boolean loggedIn, long now)
 	{
 		FarmRunState.View any = state.view();
 		FarmRunState.View view = any != null && ours(any.run) ? any : null;
@@ -255,7 +265,7 @@ final class RunView extends JPanel
 		boolean planning = mine && said.planning;
 		// An End whose run id never arrived has no run to say whose it was; the farm card keeps it, as before.
 		boolean ending = state.ending() && (said == null ? !port : said.port == port);
-		boolean ready = connected && client.ready();
+		boolean ready = connected && loggedIn && client.ready();
 		/* A run with every stop behind it has nothing to follow or reorder: End run is its one press. */
 		boolean left = active && view.next() != null;
 		reroute.setEnabled(ready && left);

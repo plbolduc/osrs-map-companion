@@ -560,6 +560,17 @@ final class NowCards extends JPanel
 	/** The four cards and the heading, from the connection the sidebar's refresh has just read. EDT. */
 	void refresh(boolean paired, boolean ready)
 	{
+		refresh(paired, ready, true);
+	}
+
+	/**
+	 * The same, knowing whether a character is logged in. With none, every Route here waits for one,
+	 * greyed, its tooltip saying so, since a route is asked for as a member and a member is a
+	 * character; Follow, Pause and Dismiss act here and stay.
+	 */
+	void refresh(boolean paired, boolean ready, boolean loggedIn)
+	{
+		boolean asks = ready && loggedIn;
 		RelayResponse.Destination destination = destinationState.getDestination();
 		/*
 		 * Hidden rather than blanked. A label holding a space still takes a line, which is how
@@ -613,8 +624,8 @@ final class NowCards extends JPanel
 		if (steps)
 		{
 			destinationRow.add(rerouteButton);
-			rerouteButton.setEnabled(ready && !route.rerouting && now >= route.nextRerouteMs);
-			MapWait.tip(rerouteButton, REROUTE_TIP, route.nextRerouteMs - now);
+			rerouteButton.setEnabled(asks && !route.rerouting && now >= route.nextRerouteMs);
+			MapWait.tip(rerouteButton, loggedIn ? REROUTE_TIP : RouteClient.LOG_IN, route.nextRerouteMs - now);
 		}
 		/*
 		 * No way yet, and none arriving with the destination itself for the tick before the route
@@ -624,7 +635,7 @@ final class NowCards extends JPanel
 		if (wayless)
 		{
 			destinationRow.add(routeButton);
-			routeState(routeButton, destinationSaid, DESTINATION, "Route", true, ROUTE_TIP, now);
+			routeState(routeButton, destinationSaid, DESTINATION, "Route", loggedIn, loggedIn ? ROUTE_TIP : RouteClient.LOG_IN, now);
 		}
 		else
 		{
@@ -645,7 +656,7 @@ final class NowCards extends JPanel
 			GroupPanel.setWhen(eventWhen, meetupWhen(event.startsAtMs, now, ZoneId.systemDefault(),
 											 Locale.getDefault(Locale.Category.FORMAT), event.world), event.startsAtMs, now, CARD_TEXT_WIDTH);
 			setWrapped(eventTitle, event.title, CARD_TEXT_WIDTH);
-			routeState(eventRouteButton, eventSaid, "meetup", "Route", ready, MEETUP_ROUTE_TIP, now);
+			routeState(eventRouteButton, eventSaid, "meetup", "Route", asks, loggedIn ? MEETUP_ROUTE_TIP : RouteClient.LOG_IN, now);
 		}
 
 		CompanionSnapshot.Death death = deathWatcher.snapshot(now);
@@ -682,7 +693,7 @@ final class NowCards extends JPanel
 				deathRow.add(deathRouteButton);
 			}
 			shownDeathActions = syncRow(deathActions, deathRow, shownDeathActions);
-			routeState(deathRouteButton, deathSaid, "death", "Route back", ready, routeBackTip, now);
+			routeState(deathRouteButton, deathSaid, "death", "Route back", asks, loggedIn ? routeBackTip : RouteClient.LOG_IN, now);
 		}
 
 		CompanionSnapshot.Clue clue = clueReader.current();
@@ -705,7 +716,7 @@ final class NowCards extends JPanel
 			setWrapped(clueDetail, clueDetail(clue), CARD_TEXT_WIDTH);
 			boolean routable = ClueReader.routeTile(clue) != null || ClueReader.routesByClue(clue);
 			clueActions.setVisible(routable);
-			routeState(clueRouteButton, clueSaid, "clue", "Route", ready && routable, CLUE_ROUTE_TIP, now);
+			routeState(clueRouteButton, clueSaid, "clue", "Route", asks && routable, loggedIn ? CLUE_ROUTE_TIP : RouteClient.LOG_IN, now);
 		}
 		/** The heading goes with the last card under it, rather than naming nothing. */
 		setVisible((destination != null && !farmDestination) || event != null || death != null || (clue != null && paired));

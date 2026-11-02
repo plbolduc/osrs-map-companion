@@ -748,6 +748,68 @@ public class GroupPanelTest
 		});
 	}
 
+	/**
+	 * At the login screen the Group tab's presses that ask the map as a member wait for a character:
+	 * a friend's Route, a meetup's answers and Meet here, where each answered "Connect to your map…".
+	 * World map, which draws here, stays. A friend's Route pressed then says to log in, where it waited
+	 * half a minute for a position the logout had stopped and then blamed the friend for it.
+	 */
+	@Test
+	public void atTheLoginScreenThePressesWaitForACharacter() throws Exception
+	{
+		AtomicReference<GroupPanel> panel = new AtomicReference<>();
+		SwingUtilities.invokeAndWait(() -> panel.set(panel()));
+		social();
+		long now = System.currentTimeMillis();
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.get().refresh(true, false, now);
+			AbstractButton route = named(panel.get(), "group.route.cara");
+			assertFalse(route.isEnabled());
+			assertEquals(RouteClient.LOG_IN, route.getToolTipText());
+			assertFalse(named(panel.get(), "group.answer.star-hunt.going").isEnabled());
+			assertFalse(named(panel.get(), "group.meetHere").isEnabled());
+			assertTrue("World map draws here", named(panel.get(), "group.show.cara").isEnabled());
+
+			panel.get().routeToFriend("cara");
+			assertFalse("no position is waited for", group.finding("cara", now));
+			assertNotNull(words(panel.get()), saying(panel.get(), RouteClient.LOG_IN));
+		});
+	}
+
+	/**
+	 * A friend's Route pressed just before a logout waited on the stream the logout closed, then half
+	 * a minute later said the friend shares no position. At the login screen it stops waiting and says
+	 * to log in, as a press made there does, and the friend is not blamed.
+	 */
+	@Test
+	public void aRouteStillFindingAtTheLogoutSaysToLogIn() throws Exception
+	{
+		AtomicReference<GroupPanel> panel = new AtomicReference<>();
+		SwingUtilities.invokeAndWait(() -> panel.set(panel()));
+		social();
+		long now = System.currentTimeMillis();
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.get().refresh(true, true, now);
+			named(panel.get(), "group.route.cara").doClick();
+		});
+		assertTrue("no dot yet: the Route waits for one", group.finding("cara", now));
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.get().refresh(true, false, now);
+			assertEquals("Route", named(panel.get(), "group.route.cara").getText());
+			assertNotNull(words(panel.get()), saying(panel.get(), RouteClient.LOG_IN));
+		});
+		long later = now + GroupState.PENDING_MS + 1_000L;
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.get().refresh(true, false, later);
+			assertNull(words(panel.get()), saying(panel.get(), "Cara is not sharing a position just now."));
+		});
+		assertFalse("the friend is not blamed", group.lost("cara"));
+	}
+
 	/** The shown label whose words, markup taken out, are these. */
 	private static javax.swing.JLabel saying(Container parent, String words)
 	{

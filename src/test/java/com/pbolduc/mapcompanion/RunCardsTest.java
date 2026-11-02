@@ -254,6 +254,23 @@ public class RunCardsTest
 		assertTrue(shown(farm).toString(), shown(farm).contains("The map was busy."));
 	}
 
+	/**
+	 * At the login screen a run's card offers nothing that asks the map as a member: the kind of run and
+	 * Start run wait, and a run's Reroute, while End run, which ends the run here, stays.
+	 */
+	@Test
+	public void atTheLoginScreenARunWaitsButEndRunStays() throws Exception
+	{
+		SwingUtilities.invokeAndWait(() -> farm.refresh(true, false));
+		assertTrue(button(farm, "Start run") != null && !enabled(farm, "Start run"));
+		assertFalse(combo(farm).isEnabled());
+
+		state.acceptFor(identity.id(), EPOCH, run("/contract/farm-run.json"), 1, System.currentTimeMillis());
+		SwingUtilities.invokeAndWait(() -> farm.refresh(true, false));
+		assertTrue(button(farm, "Reroute") != null && !enabled(farm, "Reroute"));
+		assertTrue(enabled(farm, "End run"));
+	}
+
 	/** A refused Start is no run either: the tasks stay, and so does the button that can try again. */
 	@Test
 	public void aRefusedStartKeepsTheTasksAndStartRun() throws Exception

@@ -1303,13 +1303,23 @@ final class ConnectCard extends JPanel
 	 */
 	void refreshButtons(boolean paired, boolean ready, List<String> known, GroupPanel groupPanel)
 	{
-		refreshButtons(paired, ready, known, groupPanel, System.currentTimeMillis());
+		refreshButtons(paired, ready, true, known, groupPanel, System.currentTimeMillis());
 	}
 
 	/** The same, as of {@code now}: a confirmation is drawn only while it is news. */
 	void refreshButtons(boolean paired, boolean ready, List<String> known, GroupPanel groupPanel, long now)
 	{
-		copyInviteButton.setEnabled(paired && pairing.hasServerConsent() && !copyingInvite);
+		refreshButtons(paired, ready, true, known, groupPanel, now);
+	}
+
+	/**
+	 * The same, knowing whether a character is logged in: an invite is asked for as a member, and a
+	 * member is a character, so Copy invite waits for one. Switch ▾, Rename group… and the orange
+	 * button act as the player, and stay.
+	 */
+	void refreshButtons(boolean paired, boolean ready, boolean loggedIn, List<String> known, GroupPanel groupPanel, long now)
+	{
+		copyInviteButton.setEnabled(paired && loggedIn && pairing.hasServerConsent() && !copyingInvite);
 		knownGroupsRow.setVisible(!paired && !known.isEmpty());
 		List<JButton> groupRow = new ArrayList<>();
 		/* A group of one has Copy invite in the card that says so, from the Group tab's refresh just before. */

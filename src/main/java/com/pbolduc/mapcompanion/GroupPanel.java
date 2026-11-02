@@ -163,6 +163,8 @@ final class GroupPanel extends JPanel
 	@Nullable
 	private String drawn;
 	private boolean ready;
+	/** Whether a character is logged in, as of the last refresh: every press here but World map asks as one. */
+	private boolean loggedIn = true;
 	/** The world this client is on, as the last refresh read it; zero for none. */
 	private int here;
 	/** The answer last pressed on each meetup, by its id: the pick while that answer is on its way. */
@@ -371,7 +373,25 @@ final class GroupPanel extends JPanel
 	/** The same, as of {@code now}: a confirmation is drawn only while it is news. */
 	void refresh(boolean ready, long now)
 	{
+		refresh(ready, loggedIn, now);
+	}
+
+	/**
+	 * The same, knowing whether a character is logged in. With none, Route, the answers, Meet here
+	 * and Make meetup wait for one, greyed, since each asks the map as a member and a member is a
+	 * character; World map draws here and stays.
+	 */
+	void refresh(boolean ready, boolean loggedIn, long now)
+	{
 		this.ready = ready;
+		this.loggedIn = loggedIn;
+		boolean asks = ready && loggedIn;
+		String waited = loggedIn ? null : group.stopFinding();
+		if (waited != null)
+		{
+			/* A Route pressed before the logout waits on a stream the logout closed: it says why it stopped. */
+			press.refuse(GroupState.source(waited), RouteClient.LOG_IN);
+		}
 		here = group.world();
 		List<RelayResponse.RosterRow> roster = destinations.getRoster();
 		List<RelayResponse.Meetup> events = destinations.getEvents();
@@ -396,8 +416,8 @@ final class GroupPanel extends JPanel
 			MapCompanionPanel.setWrapped(meetSaid, fresh.message, WIDTH + 16);
 			MapCompanionPanel.tone(meetSaid, fresh.refused());
 		}
-		make.setEnabled(ready && meetups.ready() && (meet == null || !meet.sending));
-		meetHere.setEnabled(ready);
+		make.setEnabled(asks && meetups.ready() && (meet == null || !meet.sending));
+		meetHere.setEnabled(asks);
 		meetupsOff.setVisible(events == null && !config.showDestination());
 		if (events != null)
 		{
@@ -467,7 +487,7 @@ final class GroupPanel extends JPanel
 	private String signature(@Nullable List<RelayResponse.RosterRow> roster, @Nullable List<RelayResponse.Meetup> events,
 		@Nullable String destinationKey, long now)
 	{
-		StringBuilder sb = new StringBuilder().append(ready).append(press.ready()).append(meetups.ready())
+		StringBuilder sb = new StringBuilder().append(ready).append(loggedIn).append(press.ready()).append(meetups.ready())
 			.append(config.showGroupOnWorldMap()).append('|').append(destinationKey).append('|').append(now / 60_000L);
 		/* No roster draws nothing and an empty one draws the card of a group of one, so they sign apart. */
 		sb.append('|').append(roster == null ? "none" : Integer.toString(roster.size()));
@@ -557,8 +577,9 @@ final class GroupPanel extends JPanel
 			route = MapCompanionPanel.smallButton(planning ? "Planning…" : finding ? "Finding…"
 				: routedHere ? "Reroute" : "Route");
 			route.setName("group.route." + row.id);
-			route.setEnabled(ready && !planning && !finding && press.ready());
-			String own = "Plan the way to where " + row.name + " stands now. Nothing follows them; press again to ask again.";
+			route.setEnabled(ready && loggedIn && !planning && !finding && press.ready());
+			String own = !loggedIn ? RouteClient.LOG_IN
+				: "Plan the way to where " + row.name + " stands now. Nothing follows them; press again to ask again.";
 			route.setToolTipText(own);
 			JButton held = route;
 			ticking.add(at -> MapWait.tip(held, own, press.waitMs(at)));
@@ -662,9 +683,20 @@ final class GroupPanel extends JPanel
 		return slot(card);
 	}
 
-	/** Route to a friend: now, from their fresh dot, or once the stream that asks for it brings one. */
+	/**
+	 * Route to a friend: now, from their fresh dot, or once the stream that asks for it brings one.
+	 * Logged out, there is no stream to bring one, so it says to log in rather than wait half a minute
+	 * and then say the friend shares no position.
+	 */
 	void routeToFriend(String id)
 	{
+		if (!loggedIn)
+		{
+			press.refuse(GroupState.source(id), RouteClient.LOG_IN);
+			drawn = null;
+			refresh(ready, loggedIn, System.currentTimeMillis());
+			return;
+		}
 		RelayResponse.MemberDot dot = group.routeTo(id, System.currentTimeMillis());
 		if (dot != null)
 		{
@@ -674,7 +706,7 @@ final class GroupPanel extends JPanel
 			}
 		}
 		drawn = null;
-		refresh(ready);
+		refresh(ready, loggedIn, System.currentTimeMillis());
 	}
 
 	/** One meetup: what, when, where, who, then Route and the answers. */
@@ -687,9 +719,10 @@ final class GroupPanel extends JPanel
 		boolean planning = said != null && said.planning;
 		JButton route = MapCompanionPanel.smallButton(planning ? "Planning…" : "Route");
 		route.setName("group.meetupRoute." + meetup.id);
-		route.setEnabled(ready && !planning && press.ready());
-		route.setToolTipText(MEETUP_ROUTE_TIP);
-		ticking.add(at -> MapWait.tip(route, MEETUP_ROUTE_TIP, press.waitMs(at)));
+		route.setEnabled(ready && loggedIn && !planning && press.ready());
+		String own = loggedIn ? MEETUP_ROUTE_TIP : RouteClient.LOG_IN;
+		route.setToolTipText(own);
+		ticking.add(at -> MapWait.tip(route, own, press.waitMs(at)));
 		route.addActionListener(e ->
 		{
 			press.press(RoutePress.Target.tile(source, new WorldPoint(meetup.x, meetup.y, meetup.plane), meetup.title,
@@ -732,7 +765,7 @@ final class GroupPanel extends JPanel
 		 * colour whatever its background, so the pick stays enabled and ignores the press instead.
 		 */
 		String pick = sending ? pressed.getOrDefault(meetup.id, mine) : mine;
-		boolean pressable = ready && !sending && meetups.ready();
+		boolean pressable = ready && loggedIn && !sending && meetups.ready();
 		card.add(gap(5));
 		JPanel answers = new JPanel(new GridLayout(2, 2, 4, 4));
 		answers.setBackground(ColorScheme.DARKER_GRAY_COLOR);
