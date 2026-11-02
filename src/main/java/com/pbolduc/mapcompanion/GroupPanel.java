@@ -118,7 +118,7 @@ final class GroupPanel extends JPanel
 	private static final String HERE = "#34d399";
 	/** A friend's button for the game's own world map; "Show on world map" does not fit beside Route. */
 	static final String WORLD_MAP = "World map";
-	private static final String MEETUP_ROUTE_TIP = "Plan the way to this meetup from where you stand. Nobody is told you are coming.";
+	private static final String MEETUP_ROUTE_TIP = Words.of("meetup.routeTip");
 	/** A news line's picture: the game's 16px skill icons, and an item's sprite shrunk to match. */
 	private static final int NEWS_PICTURE = 16;
 	/** The picture's place while the client's cache answers, as a route step keeps it. */
@@ -139,7 +139,7 @@ final class GroupPanel extends JPanel
 	 * with it on ({@link DestinationState#acceptSocial}), so the section is empty, and a meetup made
 	 * with Meet here never shows; this says why, and where the setting is, in the sidebar's own names.
 	 */
-	static final String MEETUPS_OFF = "Meetups show here with Destinations and meetups on (Settings → In RuneLite).";
+	static final String MEETUPS_OFF = Words.of("group.meetupsOff");
 	private final JLabel meetupsOff = new JLabel();
 	private final JPanel meetupCards = MapCompanionPanel.column(ColorScheme.DARK_GRAY_COLOR);
 	private final JButton meetHere = MapCompanionPanel.linkButton("Meet here…");
@@ -204,7 +204,7 @@ final class GroupPanel extends JPanel
 		meetHere.setName("group.meetHere");
 		meetHere.setForeground(ColorScheme.BRAND_ORANGE);
 		meetHere.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-		meetHere.setToolTipText("Make a meetup where you stand, on this world, and copy its link for your clan chat or Discord");
+		meetHere.setToolTipText(Words.of("group.meetHereTip"));
 		meetHere.addActionListener(e -> openForm(!formOpen));
 		JPanel head = MapCompanionPanel.bar(0, ColorScheme.DARK_GRAY_COLOR, meetupsHead, null, meetHere);
 		head.setName("group.meetupsHead");
@@ -237,7 +237,7 @@ final class GroupPanel extends JPanel
 		form.add(heading);
 		title.setName("group.meetTitle");
 		title.putClientProperty("JTextField.placeholderText", "What for");
-		title.setToolTipText("The meetup's title, up to sixty characters. Everybody in the group sees it.");
+		title.setToolTipText(Words.of("group.titleTip"));
 		form.add(fill(title));
 		form.add(gap(4));
 		day.setName("group.meetDay");
@@ -251,7 +251,7 @@ final class GroupPanel extends JPanel
 		form.add(fill(actions(hour, minute)));
 		form.add(gap(6));
 		make.setName("group.meetMake");
-		make.setToolTipText("Make the meetup at the tile and world you are on, and copy its link");
+		make.setToolTipText(Words.of("group.makeTip"));
 		make.addActionListener(e -> makeMeetup());
 		JButton cancel = MapCompanionPanel.smallButton("Cancel");
 		cancel.addActionListener(e -> openForm(false));
@@ -521,8 +521,7 @@ final class GroupPanel extends JPanel
 	 * Copy invite, under the sentence that is about it. It comes with the map's empty roster, and
 	 * goes, giving the button back to the row under the tab, the moment a friend's row arrives.
 	 */
-	static final String ALONE = "Just you so far. Send a friend an invite; they paste it into their sidebar "
-		+ "and appear here and on osrs-map.com.";
+	static final String ALONE = Words.of("group.alone");
 
 	private JPanel alone()
 	{
@@ -561,8 +560,7 @@ final class GroupPanel extends JPanel
 				: routedHere ? "Reroute" : "Route");
 			route.setName("group.route." + row.id);
 			route.setEnabled(ready && loggedIn && !planning && !finding && press.ready());
-			String own = !loggedIn ? RouteClient.LOG_IN
-				: "Plan the way to where " + row.name + " stands now. Nothing follows them; press again to ask again.";
+			String own = !loggedIn ? RouteClient.LOG_IN : "Plan the way to where " + row.name + Words.of("group.routeFriendTip");
 			route.setToolTipText(own);
 			JButton held = route;
 			ticking.add(at -> MapWait.tip(held, own, press.waitMs(at)));
@@ -631,8 +629,7 @@ final class GroupPanel extends JPanel
 		JButton map = MapCompanionPanel.smallButton(layer ? "On world map" : shown ? "Hide on map" : WORLD_MAP);
 		map.setName("group.show." + row.id);
 		map.setEnabled(!layer && ready);
-		map.setToolTipText(layer ? "Your whole group is on the world map already"
-			: "Draw " + row.name + "'s dot on the game's world map, without the rest of the group");
+		map.setToolTipText(layer ? Words.of("group.allOnMapTip") : "Draw " + row.name + Words.of("group.drawOneTip"));
 		map.addActionListener(e ->
 		{
 			group.toggleShown(row.id);
@@ -643,7 +640,7 @@ final class GroupPanel extends JPanel
 		card.add(MapCompanionPanel.left(actions(map)));
 		/* Inside an instance nothing was asked, so this is newer than any answer the press last gave. */
 		boolean pressed = !group.inside(row.id) && said != null && said.message != null;
-		String message = group.inside(row.id) ? row.name + " is inside an instance. Route works once they're out."
+		String message = group.inside(row.id) ? row.name + Words.of("group.inside")
 			: pressed ? said.message
 			: group.lost(row.id) ? row.name + " is not sharing a position just now." : null;
 		if (message != null)
@@ -802,7 +799,7 @@ final class GroupPanel extends JPanel
 		line.setName("group.meetupFold." + meetup.id);
 		/* Wrapped as a label is, since the title is whatever the group typed and a button's own text would widen the tab. */
 		line.setText(markup(words, onItsWorld(meetup) ? "W" + meetup.world : null, HERE, WIDTH + 16));
-		line.setToolTipText(open ? "Fold this meetup to its line" : "Open this meetup: who is coming, Route and your answer");
+		line.setToolTipText(open ? "Fold this meetup to its line" : Words.of("group.openMeetupTip"));
 		line.addActionListener(e ->
 		{
 			if (!openMeetups.remove(meetup.id))
