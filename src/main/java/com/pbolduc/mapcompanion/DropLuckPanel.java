@@ -842,13 +842,7 @@ final class DropLuckPanel extends JPanel
 	/** A label that wraps at {@code width}: a JLabel does not wrap on its own, it cuts off mid-word. */
 	private static JLabel wrapped(String text, int width, float size, Color color)
 	{
-		return html(escape(text), width, size, color);
-	}
-
-	/** The same, for markup that is already escaped where it needs to be. */
-	private static JLabel html(String markup, int width, float size, Color color)
-	{
-		return label("<html><body width='" + width + "'>" + markup + "</body></html>", size, color);
+		return MapCompanionPanel.wrapped(text, size, color, width);
 	}
 
 	private static JPanel card()

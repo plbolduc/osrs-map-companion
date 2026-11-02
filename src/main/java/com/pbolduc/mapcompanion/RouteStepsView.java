@@ -367,9 +367,7 @@ final class RouteStepsView extends JPanel
 	/** A line under a step's title, in its column: its detail, a note, a docking gate. */
 	private static JLabel under(String text, int width)
 	{
-		JLabel label = label(11f, AHEAD);
-		MapCompanionPanel.setWrapped(label, text, width);
-		return MapCompanionPanel.left(label);
+		return MapCompanionPanel.wrapped(text, 11f, AHEAD, width);
 	}
 
 	/**

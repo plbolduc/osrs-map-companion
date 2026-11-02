@@ -426,11 +426,7 @@ final class SlayerPanel extends JPanel
 
 	private static JLabel line(String text, Color color)
 	{
-		JLabel label = new JLabel();
-		label.setForeground(color);
-		label.setFont(label.getFont().deriveFont(11f));
-		MapCompanionPanel.setWrapped(label, text, WIDTH);
-		return MapCompanionPanel.left(label);
+		return MapCompanionPanel.wrapped(text, 11f, color, WIDTH);
 	}
 	private static JPanel column()
 	{
