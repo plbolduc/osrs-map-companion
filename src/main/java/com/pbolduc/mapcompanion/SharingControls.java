@@ -94,9 +94,14 @@ final class SharingControls extends JPanel
 
 		/* The six switches, in the order the step after Connect and RuneLite's list give them. */
 		add(row(choice(SharingFields.NAME, true)));
+		/* Under the switch's words, as a partly shared group's line is: it is what the switch leaves the group. */
+		JPanel nameBox = column();
+		nameBox.setName("sharing.nameBox");
+		nameBox.setBorder(BorderFactory.createEmptyBorder(0, TEXT_INSET, 0, 0));
+		add(nameBox);
 		nicknameLabel.setFont(nicknameLabel.getFont().deriveFont(11f));
 		nicknameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-		add(nicknameLabel);
+		nameBox.add(nicknameLabel);
 		nickname.setName("nickname");
 		nickname.setMaximumSize(new Dimension(Integer.MAX_VALUE, nickname.getPreferredSize().height));
 		nickname.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -110,11 +115,11 @@ final class SharingControls extends JPanel
 				saveNickname();
 			}
 		});
-		add(nickname);
+		nameBox.add(nickname);
 		nicknameHint.setFont(nicknameHint.getFont().deriveFont(11f));
 		nicknameHint.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
 		nicknameHint.setAlignmentX(Component.LEFT_ALIGNMENT);
-		add(nicknameHint);
+		nameBox.add(nicknameHint);
 		for (SharingFields.Section section : SharingFields.GROUPS)
 		{
 			Group group = new Group(section);

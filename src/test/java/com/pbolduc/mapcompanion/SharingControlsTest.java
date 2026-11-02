@@ -298,6 +298,52 @@ public class SharingControlsTest
 		});
 	}
 
+	/**
+	 * The name box is what the Character name switch leaves the group, so it starts under the switch's
+	 * words, where a partly shared group's line starts, rather than at the page's edge, left of the
+	 * boxes it follows from.
+	 */
+	@Test
+	public void theNameBoxStartsUnderTheSwitchsWords() throws Exception
+	{
+		SwingUtilities.invokeAndWait(() ->
+		{
+			HarnessStore store = new HarnessStore();
+			HarnessConfig config = new HarnessConfig(store, MapCompanionConfig.DEFAULT_MAP_URL);
+			config.set("sharePosition", true);
+			SharingControls controls = new SharingControls(config, store);
+			controls.setSize(net.runelite.client.ui.PluginPanel.PANEL_WIDTH - 20, controls.getPreferredSize().height);
+			layout(controls);
+			int words = left(named(controls, "sharingPartly.presence"), controls);
+			assertEquals(SharingControls.TEXT_INSET, words);
+			Container box = (Container) named(controls, "sharing.nameBox");
+			assertEquals("the label, the field and the hint", 3, box.getComponentCount());
+			for (Component line : box.getComponents())
+			{
+				assertEquals(line.getClass().getSimpleName(), words, left(line, controls));
+			}
+		});
+	}
+
+	/** Where a component's own drawing starts across the page: its left edge, and its border's left inset. */
+	private static int left(Component component, Container page)
+	{
+		int inset = component instanceof javax.swing.JLabel ? ((javax.swing.JLabel) component).getInsets().left : 0;
+		return SwingUtilities.convertPoint(component.getParent(), component.getX(), 0, page).x + inset;
+	}
+
+	private static void layout(Container parent)
+	{
+		parent.doLayout();
+		for (Component child : parent.getComponents())
+		{
+			if (child instanceof Container)
+			{
+				layout((Container) child);
+			}
+		}
+	}
+
 	/** The box is only what the group sees while the name is off, so only then is it there. */
 	@Test
 	public void theNameBoxShowsOnlyWhileTheCharacterNameIsOff() throws Exception
