@@ -163,7 +163,7 @@ final class RecommendedSharing extends JPanel
 
 		JLabel drawn = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
 		drawn.setFont(drawn.getFont().deriveFont(Font.BOLD));
-		drawn.setText("Drawn in this client");
+		drawn.setText(SharingControls.CLIENT_TITLE);
 		card.add(drawn);
 		card.add(single(SharingFields.DESTINATIONS, DESTINATIONS_DETAIL, details));
 		card.add(single(SharingFields.GROUP_ON_WORLD_MAP, GROUP_DETAIL, details));

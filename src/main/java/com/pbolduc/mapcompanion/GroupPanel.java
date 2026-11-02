@@ -132,11 +132,11 @@ final class GroupPanel extends JPanel
 	private final JPanel friends = MapCompanionPanel.column(ColorScheme.DARK_GRAY_COLOR);
 	private final JLabel meetupsHead = MapCompanionPanel.left(new JLabel("Meetups"));
 	/**
-	 * Under the Meetups heading while Show map destinations is off. The map's meetups are taken only
+	 * Under the Meetups heading while Destinations and meetups is off. The map's meetups are taken only
 	 * with it on ({@link DestinationState#acceptSocial}), so the section is empty, and a meetup made
 	 * with Meet here never shows; this says why, and where the setting is, in the sidebar's own names.
 	 */
-	static final String MEETUPS_OFF = "Meetups show here with Show map destinations on (Settings → In the client).";
+	static final String MEETUPS_OFF = "Meetups show here with Destinations and meetups on (Settings → In RuneLite).";
 	private final JLabel meetupsOff = new JLabel();
 	private final JPanel meetupCards = MapCompanionPanel.column(ColorScheme.DARK_GRAY_COLOR);
 	private final JButton meetHere = MapCompanionPanel.linkButton("Meet here…");

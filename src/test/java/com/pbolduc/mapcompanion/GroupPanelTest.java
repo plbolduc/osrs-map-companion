@@ -621,7 +621,7 @@ public class GroupPanelTest
 	}
 
 	/**
-	 * Show map destinations is off until the player turns it on, and while it is off the map's meetups
+	 * Destinations and meetups is off until the player turns it on, and while it is off the map's meetups
 	 * are not taken, so the section under the heading is empty and a meetup made here never shows.
 	 * One line says why and where the setting is, and goes once the setting is on.
 	 */

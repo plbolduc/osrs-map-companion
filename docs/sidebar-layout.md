@@ -625,7 +625,7 @@ reads ▾ while open, as the website lists them; it is answered in the card, not
 as before. **Meet here…** opens a form under the heading it sits on, above the meetups, and says what
 became of the press there: a title, a day of the coming week, an hour and a minute in fives,
 defaulting to half an hour from now, and **Make meetup**, which copies the link.
-Like the single meetup under *Now*, the week's meetups are taken only while *Show map destinations*
+Like the single meetup under *Now*, the week's meetups are taken only while *Destinations and meetups*
 is on; while it is off, one grey line under the heading says why the section is empty and where the
 setting is.
 

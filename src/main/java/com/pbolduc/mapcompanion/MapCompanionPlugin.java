@@ -1871,7 +1871,7 @@ public class MapCompanionPlugin extends Plugin
 
 	/**
 	 * Say once when a meetup is about to start, through RuneLite's own notifier with the setting's own
-	 * notification settings, and only with <i>Notify before a meetup</i> on. {@link MeetupReminder}
+	 * notification settings, and only with <i>Meetup reminder</i> on. {@link MeetupReminder}
 	 * holds the rule, and {@link NotificationChoice} how it reaches a player who is playing.
 	 */
 	private void maybeNotifyMeetup(long now)

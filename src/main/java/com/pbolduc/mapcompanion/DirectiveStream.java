@@ -198,7 +198,7 @@ public class DirectiveStream
 	/**
 	 * The same, and asking for the other members' dots as well when {@code withMembers}.
 	 *
-	 * <p>Part of the key, so turning <i>Show my group on the world map</i> on or off reopens the
+	 * <p>Part of the key, so turning <i>Group on the world map</i> on or off reopens the
 	 * connection with the question changed rather than waiting for the next drop to ask it.
 	 */
 	public synchronized void start(

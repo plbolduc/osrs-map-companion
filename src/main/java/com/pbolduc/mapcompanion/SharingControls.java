@@ -71,6 +71,10 @@ final class SharingControls extends JPanel
 	static final int TEXT_INSET = 28;
 	/** The column's width for a wrapped line, as the rest of the sidebar takes it. */
 	private static final int TEXT = PluginPanel.PANEL_WIDTH - 30;
+	/** What this client draws and does, named as RuneLite's list and the step after Connect name it. */
+	static final String CLIENT_TITLE = "In RuneLite";
+	static final String KEYS_ELSEWHERE = "Keys for Reroute and Follow, and the reminder's minutes, are in RuneLite's own "
+		+ "settings for this plugin.";
 	private final MapCompanionConfig config;
 	private final ConfigStore store;
 	private final List<Choice> choices = new ArrayList<>();
@@ -125,7 +129,11 @@ final class SharingControls extends JPanel
 		{
 			client.add(choice(field, false));
 		}
-		add(fold("In the client", client));
+		/* The settings a box cannot hold live only in RuneLite's list, and the README sends players to them. */
+		JLabel elsewhere = line(KEYS_ELSEWHERE, ColorScheme.LIGHT_GRAY_COLOR, 2);
+		elsewhere.setName("sharing.keysElsewhere");
+		client.add(elsewhere);
+		add(fold(CLIENT_TITLE, client));
 		refresh();
 	}
 

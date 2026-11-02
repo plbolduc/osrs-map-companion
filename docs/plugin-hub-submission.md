@@ -191,7 +191,7 @@ installation key are per installation, not per server or group, and [Network and
 reads (Paste) and writes (Copy invite, Copy connection code) happen only on a button press; an
 invite link is copied only if it is on the approved map. Meetup notifications use RuneLite's
 `Notifier`, with the title stripped of control characters, cut to 60 characters, and at most one a
-minute. *Notify before a meetup* is a RuneLite `Notification` setting, so its cog in RuneLite's panel
+minute. *Meetup reminder* is a RuneLite `Notification` setting, so its cog in RuneLite's panel
 says how it arrives; the sidebar's box turns it on with RuneLite's own notification settings copied
 and *Send notifications when focused* on, and leaves one the player customised as they set it.
 
@@ -272,10 +272,10 @@ Say these in the description of the next Hub update, as changes from what was ap
 - **Route here** on the world map: a `MenuAction.RUNELITE` entry, handled by the client and sending
   the game nothing, added below Cancel so a left-click never takes it, and only over the map with a
   group set. A press is the Route request above with the clicked tile, which a faded pin marks on
-  the world map until the answer; it can be turned off under *In the client*.
+  the world map until the answer; it can be turned off under *In RuneLite*.
 - **The step on screen**: an `OverlayPanel` naming the followed route's destination and the step the
   sidebar marks, drawn only while the player follows a route, gone on arrival and inside instances.
-  It draws what the sidebar already holds and sends nothing; it can be turned off under *In the client*.
+  It draws what the sidebar already holds and sends nothing; it can be turned off under *In RuneLite*.
   A teleport step's picture comes from the client's own `ItemManager` and `SpriteManager`, as the
   sidebar's does, asked for once and drawn when it has loaded.
 - **Two route keys**: `Keybind` settings, unset until the player picks one, read by `HotkeyListener`s
@@ -293,7 +293,7 @@ Say these in the description of the next Hub update, as changes from what was ap
 - **Map clues above beginner**: Route beside an easy, medium, hard or elite map sends that same clue
   with its tier and scroll item id alone, which RuneLite's own `MapClue` table and the map's both
   key the picture by. No field is added; before, such a map offered no Route.
-- **The meetup reminder while playing**: *Notify before a meetup* is now a RuneLite `Notification`
+- **The meetup reminder while playing**: *Meetup reminder* is now a RuneLite `Notification`
   setting, still off by default, and a stored `true` or `false` still reads as on or off. Ticked in
   the sidebar, it is written as RuneLite's panel initialises a customised notification, from
   RuneLite's own settings, with *Send notifications when focused* on, so it reaches a player whose

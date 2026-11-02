@@ -20,8 +20,8 @@ step when it is in the loaded area.
 
 Press **Follow** to show the step you're on in a small box over the game; with **Shortest Path**
 installed, it also draws each walking step as you reach it. With the box over the game, the
-sidebar can stay closed. **Reroute** plans again from where you stand, and the settings can give
-Reroute and Follow a key of your own. The website uses the progress and travel choices you share
+sidebar can stay closed. **Reroute** plans again from where you stand, and RuneLite's settings for
+the plugin can give Reroute and Follow a key of your own. The website uses the progress and travel choices you share
 to suggest routes around your account's quests, diaries, items and transport unlocks.
 
 You can also plan a route to a friend, a meetup or a precise star site, back to where you died,
@@ -265,7 +265,7 @@ done or visited. **End run** asks the map to remove your run. The map keeps the 
 memory for up to three hours. While a run is active, patch replants and carried travel items
 are read locally even with farming or item sharing off; only your enabled sharing choices
 put readings in snapshots. The bank checklist's local item check sends nothing.
-Enabling **Show destinations from the map** also tells the website this build can receive a
+Enabling **Destinations and meetups** also tells the website this build can receive a
 farm run, so it offers **Send run** only to a compatible live client of your own.
 
 **Meet here** sends the title and time you choose, the tile you are standing on and your world,
@@ -294,11 +294,12 @@ see, or Member if you leave it empty. **Copy invite** copies a message you can s
 **Switch** remembers up to eight groups, and joins another; the person who made the group can
 rename it there.
 
-In the plugin's settings, **Show destinations from the map**, **Show my group on the world map**
-and **Notify before a meetup** start off; the step after Connect ticks the first two for you to
-confirm. **Drop luck in chat**, **Point the game's arrow at a destination**, **Show the step on
-screen** and **Mark a farm run's teleports in the bank** start on; none of them sends anything.
-**Route here on the world map** starts on too, and sends only when you choose it.
+Under **In RuneLite**, **Destinations and meetups**, **Group on the world map** and **Meetup reminder**
+start off; the step after Connect ticks the first two for you to confirm. **Drop luck in chat**,
+**Hint arrow to a destination**, **Step on screen** and **Farm run teleports in the bank** start on;
+none of them sends anything. **Route here on the world map** starts on too, and sends only when you
+choose it. The keys for Reroute and Follow, and how many minutes before a meetup the reminder comes,
+are in RuneLite's own settings for the plugin.
 
 </details>
 

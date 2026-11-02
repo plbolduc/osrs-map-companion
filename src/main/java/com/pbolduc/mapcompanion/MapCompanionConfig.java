@@ -118,8 +118,8 @@ public interface MapCompanionConfig extends Config
 	String advancedSection = "advanced";
 
 	@ConfigSection(
-		name = "In the client",
-		description = "What the paired map sends to your screen, and the actions you allow here",
+		name = "In RuneLite",
+		description = "What the plugin shows and does in RuneLite",
 		position = 4,
 		closedByDefault = true
 	)
@@ -580,9 +580,10 @@ public interface MapCompanionConfig extends Config
 
 	@ConfigItem(
 		keyName = "showDestination",
-		name = "Show destinations from the map",
+		name = "Destinations and meetups",
 		description =
-			"Draw a marker on the world map when somebody sends you one, and count down to meetups. "
+			"The places your group sends you and the group's meetups: a destination's card and pin, the meetups "
+			+ "in the sidebar, and their reminder. "
 			+ "Nothing is ever clicked or walked for you.",
 		position = 30,
 		section = clientSection
@@ -594,7 +595,7 @@ public interface MapCompanionConfig extends Config
 
 	@ConfigItem(
 		keyName = "showGroupOnWorldMap",
-		name = "Show my group on the world map",
+		name = "Group on the world map",
 		description =
 			"Draw the other members of your group on the game's world map, in the colours the map gives "
 			+ "them. Only members who share their position with the group appear. Nothing about you is sent "
@@ -609,7 +610,7 @@ public interface MapCompanionConfig extends Config
 
 	@ConfigItem(
 		keyName = "destinationHintArrow",
-		name = "Point the game's arrow at a destination",
+		name = "Hint arrow to a destination",
 		description =
 			"When a destination is in the area the game has loaded, point the game's own hint arrow at it, "
 			+ "as RuneLite's clue plugin does. Never replaces an arrow the game or another plugin set.",
@@ -652,7 +653,7 @@ public interface MapCompanionConfig extends Config
 
 	@ConfigItem(
 		keyName = "showStepOnScreen",
-		name = "Show the step on screen",
+		name = "Step on screen",
 		description =
 			"While you follow a route, show the step you are on in a small box over the game, so the sidebar "
 			+ "can stay closed. Hidden inside instances. Nothing leaves this computer.",
@@ -695,7 +696,7 @@ public interface MapCompanionConfig extends Config
 
 	@ConfigItem(
 		keyName = "markFarmRunInBank",
-		name = "Mark a farm run's teleports in the bank",
+		name = "Farm run teleports in the bank",
 		description =
 			"While a farm run is going, outline in your bank the teleports its Before you leave list names "
 			+ "that you are not carrying. Nothing in the bank moves, and nothing leaves this computer.",
@@ -714,7 +715,7 @@ public interface MapCompanionConfig extends Config
 	 */
 	@ConfigItem(
 		keyName = "notifyMeetups",
-		name = "Notify before a meetup",
+		name = "Meetup reminder",
 		description =
 			"Raise a RuneLite notification before each of your group's meetups starts, as many minutes "
 			+ "ahead as the setting below says, so one does not pass while the sidebar is closed. RuneLite "

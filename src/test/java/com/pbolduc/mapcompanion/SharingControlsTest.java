@@ -87,7 +87,7 @@ public class SharingControlsTest
 			{
 				if (key.startsWith("share")) assertFalse("every data choice starts off: " + key, defaultOf(key));
 			}
-			for (String title : new String[]{"What each one sends", "In the client"})
+			for (String title : new String[]{"What each one sends", SharingControls.CLIENT_TITLE})
 			{
 				JButton header = buttonWithText(controls, "▸ " + title);
 				assertNotNull(header);
@@ -98,6 +98,39 @@ public class SharingControlsTest
 			{
 				assertNull("opening settings cannot write " + key, store.get(key));
 			}
+		});
+	}
+
+	/**
+	 * One name for each of this client's settings: RuneLite's list calls each what the sidebar does,
+	 * under the section the sidebar's fold is named after, and the fold says where the settings with
+	 * no box here are, since the README sends players to them.
+	 */
+	@Test
+	public void eachClientSettingHasOneNameAndTheFoldSaysWhereTheKeysAre() throws Exception
+	{
+		for (SharingFields.Field field : SharingFields.CLIENT)
+		{
+			ConfigItem item = null;
+			for (Method method : MapCompanionConfig.class.getDeclaredMethods())
+			{
+				ConfigItem candidate = method.getAnnotation(ConfigItem.class);
+				if (candidate != null && candidate.keyName().equals(field.key)) item = candidate;
+			}
+			assertNotNull(field.key, item);
+			assertEquals(field.key, field.label, item.name());
+			assertEquals(field.key, MapCompanionConfig.clientSection, item.section());
+		}
+		assertEquals(SharingControls.CLIENT_TITLE, MapCompanionConfig.class.getField("clientSection")
+			.getAnnotation(net.runelite.client.config.ConfigSection.class).name());
+		SwingUtilities.invokeAndWait(() ->
+		{
+			HarnessStore store = new HarnessStore();
+			SharingControls controls = new SharingControls(new HarnessConfig(store, MapCompanionConfig.DEFAULT_MAP_URL), store);
+			assertFalse("folded with the settings it is about", named(controls, "sharing.keysElsewhere").getParent().isVisible());
+			buttonWithText(controls, "▸ " + SharingControls.CLIENT_TITLE).doClick();
+			assertTrue(named(controls, "sharing.keysElsewhere").getParent().isVisible());
+			assertTrue(SidebarWords.words(controls).contains(SharingControls.KEYS_ELSEWHERE));
 		});
 	}
 
