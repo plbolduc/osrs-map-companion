@@ -427,6 +427,8 @@ final class RecommendedSharing extends JPanel
 		spacer.setBackground(BACK);
 		spacer.setPreferredSize(new Dimension(1, height));
 		spacer.setMaximumSize(new Dimension(Integer.MAX_VALUE, height));
+		/* A plain panel's FlowLayout asks for 10px at least, and a squeezed column grows a gap to that. */
+		spacer.setMinimumSize(new Dimension(0, height));
 		spacer.setAlignmentX(Component.LEFT_ALIGNMENT);
 		return spacer;
 	}

@@ -314,6 +314,61 @@ public class RecommendedSharingTest
 		assertFalse(RecommendedSharing.KEYS.contains("notifyMeetups"));
 	}
 
+	/**
+	 * Squeezed, a column takes each row down to its minimum, and a plain panel's minimum is 10px: the
+	 * step's 4 and 6px gaps grew while the rows beside them were cut, as the sidebar's other gaps did
+	 * before theirs were given none. A gap holds its height.
+	 */
+	@Test
+	public void aSqueezedStepNeverGrowsItsGaps() throws Exception
+	{
+		SwingUtilities.invokeAndWait(() ->
+		{
+			Fixture fixture = new Fixture();
+			fixture.step.offer("osrs-map.com");
+			click(fixture.step, "recommended.detailsToggle");
+			fixture.step.setSize(net.runelite.client.ui.PluginPanel.PANEL_WIDTH - 20, fixture.step.getPreferredSize().height - 4);
+			layout(fixture.step);
+			int checked = 0;
+			for (Component gap : gaps(fixture.step, new ArrayList<>()))
+			{
+				checked++;
+				assertTrue("a " + gap.getPreferredSize().height + "px gap drawn " + gap.getHeight() + "px tall",
+					gap.getHeight() <= gap.getPreferredSize().height);
+			}
+			assertTrue("the step's gaps, above and below the rows and the press", checked >= 5);
+		});
+	}
+
+	private static void layout(Container parent)
+	{
+		parent.doLayout();
+		for (Component child : parent.getComponents())
+		{
+			if (child instanceof Container)
+			{
+				layout((Container) child);
+			}
+		}
+	}
+
+	/** The spacers: empty panels one pixel wide, which is how the step's gap() is made. */
+	private static List<Component> gaps(Container parent, List<Component> found)
+	{
+		for (Component child : parent.getComponents())
+		{
+			if (child instanceof javax.swing.JPanel && ((Container) child).getComponentCount() == 0 && child.getPreferredSize().width == 1)
+			{
+				found.add(child);
+			}
+			else if (child instanceof Container)
+			{
+				gaps((Container) child, found);
+			}
+		}
+		return found;
+	}
+
 	private static List<SharingFields.Field> offeredOrAsked()
 	{
 		List<SharingFields.Field> fields = new ArrayList<>(RecommendedSharing.all());
