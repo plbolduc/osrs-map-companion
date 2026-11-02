@@ -572,9 +572,9 @@ public class MapCompanionPanel extends PluginPanel
 
 	/**
 	 * A hotkey, taken as the card it acts on would take a click: a run's own buttons while a run is
-	 * shown, otherwise the destination's. The key presses that very button, so it obeys every rule the
-	 * button does — Reroute inside its wait is disabled, and Follow is offered only where the card
-	 * offers it. EDT.
+	 * shown and no other route is followed, otherwise the destination's. The key presses that very
+	 * button, so it obeys every rule the button does — Reroute inside its wait is disabled, and Follow
+	 * is offered only where the card offers it. EDT.
 	 */
 	void pressHotkey(boolean rerouting)
 	{

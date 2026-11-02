@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.concurrent.AbstractExecutorService;
 import java.util.concurrent.TimeUnit;
 import javax.swing.AbstractButton;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
@@ -48,6 +49,7 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
@@ -332,6 +334,42 @@ public class RunCardsTest
 		RunView card = runView(farm);
 		SwingUtilities.invokeAndWait(() -> card.refresh(true, System.currentTimeMillis() + FarmRunClient.Said.CONFIRMATION_MS));
 		assertFalse(shown(farm).toString(), shown(farm).contains("Run ended."));
+	}
+
+	/**
+	 * Mid-detour the Reroute key rerouted the paused run and the Follow key took the run back, throwing
+	 * away the route being walked. While another route is followed the run's card leaves the keys to
+	 * the destination card; a destination merely shown, not followed, leaves them with the run.
+	 */
+	@Test
+	public void duringAFollowedDetourTheKeysLeaveThePausedRunAlone() throws Exception
+	{
+		state.acceptFor(identity.id(), EPOCH, run("/contract/farm-run.json"), 1, System.currentTimeMillis());
+		follower.sync();
+		refresh();
+		assertEquals("Pause", hotkey(false).getText());
+		assertEquals("Reroute", hotkey(true).getText());
+
+		RelayResponse.Destination bank = DestinationRouteTest.destination("Lumbridge Castle bank",
+			DestinationRouteTest.route("Lumbridge Home Teleport", DestinationRouteTest.alKharid()));
+		destinations.selectLocal(bank);
+		route.adoptPressed(bank);
+		follower.sync();
+		refresh();
+		assertTrue("a Route press follows what it planned", route.view().following);
+		assertNull(hotkey(false));
+		assertNull(hotkey(true));
+
+		route.follow(false);
+		refresh();
+		assertEquals("Follow", hotkey(false).getText());
+	}
+
+	private JButton hotkey(boolean rerouting) throws Exception
+	{
+		JButton[] button = new JButton[1];
+		SwingUtilities.invokeAndWait(() -> button[0] = farm.hotkey(rerouting));
+		return button[0];
 	}
 
 	private static RunView runView(Component component)
