@@ -162,13 +162,13 @@ final class RunView extends JPanel
 			BorderFactory.createCompoundBorder(
 				BorderFactory.createMatteBorder(1, 0, 0, 0, ColorScheme.MEDIUM_GRAY_COLOR),
 				BorderFactory.createEmptyBorder(5, 0, 1, 0))));
-		legHead.setMaximumSize(new Dimension(Integer.MAX_VALUE, legHead.getPreferredSize().height));
+		MapCompanionPanel.capped(legHead);
 		legHead.setVisible(false);
 		MapCompanionPanel.left(legHead);
 		legEnd.setBorder(BorderFactory.createCompoundBorder(
 			BorderFactory.createEmptyBorder(6, 0, 0, 0),
 			BorderFactory.createMatteBorder(1, 0, 0, 0, ColorScheme.MEDIUM_GRAY_COLOR)));
-		legEnd.setMaximumSize(new Dimension(Integer.MAX_VALUE, legEnd.getPreferredSize().height));
+		MapCompanionPanel.capped(legEnd);
 		legEnd.setVisible(false);
 		MapCompanionPanel.left(legEnd);
 		actions.setOpaque(false);

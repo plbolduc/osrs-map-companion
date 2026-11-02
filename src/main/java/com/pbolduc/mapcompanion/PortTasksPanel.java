@@ -27,7 +27,6 @@ package com.pbolduc.mapcompanion;
 
 import com.google.inject.Inject;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.util.ArrayList;
@@ -109,7 +108,7 @@ final class PortTasksPanel extends JPanel
 		starter.setBorder(BorderFactory.createEmptyBorder(4, 0, 0, 0));
 		start.setToolTipText("Ask the map for one run over every task you hold, starting from your boat");
 		starter.add(start);
-		starter.setMaximumSize(new Dimension(Integer.MAX_VALUE, starter.getPreferredSize().height));
+		MapCompanionPanel.capped(starter);
 		add(MapCompanionPanel.left(starter));
 		add(hint);
 		add(run);

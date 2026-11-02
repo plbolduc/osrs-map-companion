@@ -27,7 +27,6 @@ package com.pbolduc.mapcompanion;
 
 import com.google.inject.Inject;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.net.URI;
@@ -378,7 +377,7 @@ final class SlayerPanel extends JPanel
 		});
 		pinButtons.add(pin);
 		actions.add(pin);
-		actions.setMaximumSize(new Dimension(Integer.MAX_VALUE, actions.getPreferredSize().height));
+		MapCompanionPanel.capped(actions);
 		body.add(MapCompanionPanel.left(actions));
 		JLabel feedback = line("", MUTED);
 		feedback.setName(source);

@@ -211,7 +211,7 @@ final class RecommendedSharing extends JPanel
 		skip.setToolTipText("Share nothing yet. Every choice stays off until you turn it on in Settings.");
 		skip.addActionListener(e -> close());
 		links.add(skip);
-		links.setMaximumSize(new Dimension(Integer.MAX_VALUE, links.getPreferredSize().height));
+		MapCompanionPanel.capped(links);
 		card.add(links);
 		setVisible(false);
 	}
