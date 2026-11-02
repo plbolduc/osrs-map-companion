@@ -308,8 +308,8 @@ Say these in the description of the next Hub update, as changes from what was ap
       `UpdateNoticeTest` fails until they match.
 - [ ] Read the plugin's description and tags as a player searching the Hub would: `description=` and
       `tags=` in `runelite-plugin.properties`, and the same two on `MapCompanionPlugin`'s
-      `@PluginDescriptor`, which RuneLite's plugin list shows. They must agree and still say what the
-      plugin does.
+      `@PluginDescriptor`, which RuneLite's plugin list shows. They must agree, which
+      `PluginDescriptionTest` checks, and still say what the plugin does, which only a reader can.
 - [ ] Run `./gradlew clean build -PruneLiteVersion=1.13.4` from a clean checkout.
       Recheck the Hub's [current client version](https://github.com/runelite/plugin-hub/blob/master/runelite.version).
 - [ ] Verify production sources against the Hub's
