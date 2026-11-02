@@ -58,6 +58,8 @@ often. A clean run is now 443 tests with no failures or skips.
 - [ ] Log back in: the same character keeps its member identity. Withdraw Position while logged in
       and confirm the next accepted snapshot clears the map pin.
 - [ ] Walk a short distance manually and verify live movement and reconnection.
+- [ ] Open Stars and pick a world, then hop with the world switcher and cross a loading line: the
+      list and the pick stay through both, and no line says to log in. Log out: the list clears.
 - [ ] Receive a destination, preserve an existing quest hint arrow, and test clearing it.
 - [ ] Use two characters in one group: see only the other member on the game world map, including
       an edge pin when panned away. Turn sharing off and log out; pins must disappear.
