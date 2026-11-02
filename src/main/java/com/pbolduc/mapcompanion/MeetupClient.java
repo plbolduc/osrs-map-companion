@@ -32,6 +32,8 @@ import java.io.IOException;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.coords.WorldPoint;
@@ -133,16 +135,11 @@ final class MeetupClient
 		}
 	}
 
+	@AllArgsConstructor(access = AccessLevel.PACKAGE)
 	static final class Answer
 	{
 		final String eventId;
 		final String answer;
-
-		Answer(String eventId, String answer)
-		{
-			this.eventId = eventId;
-			this.answer = answer;
-		}
 	}
 
 	static final class NewMeetup

@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import javax.annotation.Nullable;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import net.runelite.api.Client;
 import net.runelite.api.Player;
 import net.runelite.api.coords.WorldPoint;
@@ -156,6 +158,7 @@ public class DestinationRoute
 	private String boatAway;
 
 	/** One moment of the route, for the sidebar and the pins. Never changes after it is made. */
+	@AllArgsConstructor(access = AccessLevel.PACKAGE)
 	static final class View
 	{
 		/** The destination it belongs to; see {@link #keyOf}. */
@@ -188,26 +191,6 @@ public class DestinationRoute
 			boolean rerouted, boolean rerouting, @Nullable String message, long nextRerouteMs, boolean following, long revision)
 		{
 			this(key, target, ways, chosen, step, origin, rerouted, rerouting, message, false, nextRerouteMs, following, revision, null);
-		}
-
-		View(String key, WorldPoint target, List<RelayResponse.RouteOption> ways, int chosen, int step, @Nullable String origin,
-			boolean rerouted, boolean rerouting, @Nullable String message, boolean refused, long nextRerouteMs, boolean following,
-			long revision, @Nullable String boatAway)
-		{
-			this.refused = refused;
-			this.boatAway = boatAway;
-			this.revision = revision;
-			this.following = following;
-			this.key = key;
-			this.target = target;
-			this.ways = ways;
-			this.chosen = chosen;
-			this.step = step;
-			this.origin = origin;
-			this.rerouted = rerouted;
-			this.rerouting = rerouting;
-			this.message = message;
-			this.nextRerouteMs = nextRerouteMs;
 		}
 
 		boolean hasRoute()
@@ -259,16 +242,11 @@ public class DestinationRoute
 	}
 
 	/** What a Reroute press asked about, so an answer for a place since replaced is thrown away. */
+	@AllArgsConstructor(access = AccessLevel.PACKAGE)
 	static final class Ticket
 	{
 		final long generation;
 		final WorldPoint target;
-
-		Ticket(long generation, WorldPoint target)
-		{
-			this.generation = generation;
-			this.target = target;
-		}
 	}
 
 	/** A place as {@link DestinationState} tells places apart: everything but its route. */

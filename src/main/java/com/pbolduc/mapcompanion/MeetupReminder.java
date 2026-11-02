@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 
 /**
  * When to say a meetup is about to start: once for each, a chosen number of minutes before.
@@ -54,18 +56,12 @@ final class MeetupReminder
 	static final long SPACING_MS = 60_000L;
 
 	/** One meetup as this needs it: something to tell it apart by, a title, and when. */
+	@AllArgsConstructor(access = AccessLevel.PACKAGE)
 	static final class Upcoming
 	{
 		final String key;
 		final String title;
 		final long startsAtMs;
-
-		Upcoming(String key, String title, long startsAtMs)
-		{
-			this.key = key;
-			this.title = title;
-			this.startsAtMs = startsAtMs;
-		}
 	}
 
 	private final Set<String> said = new HashSet<>();

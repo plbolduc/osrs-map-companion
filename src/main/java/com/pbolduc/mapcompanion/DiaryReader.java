@@ -32,6 +32,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import net.runelite.api.Client;
 
 /**
@@ -108,20 +110,13 @@ public class DiaryReader
 	 * there is no translation layer, so "Kourend &amp; Kebos" being spelled "Kourend" here would
 	 * simply never match and would fail silently forever.
 	 */
+	@AllArgsConstructor(access = AccessLevel.PACKAGE)
 	private static final class Region
 	{
 		final String name;
 		final int[] completion;
 		final int[] rewards;
 		final int[] completeAt;
-
-		Region(String name, int[] completion, int[] rewards, int[] completeAt)
-		{
-			this.name = name;
-			this.completion = completion;
-			this.rewards = rewards;
-			this.completeAt = completeAt;
-		}
 	}
 
 	private static final List<Region> REGIONS = Arrays.asList(

@@ -35,6 +35,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nullable;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 
 /**
  * What this sidebar holds about the group beyond what the map last said: whose dot the player
@@ -87,16 +89,11 @@ public class GroupState
 	 */
 	private volatile int world;
 
+	@AllArgsConstructor(access = AccessLevel.PACKAGE)
 	private static final class Answered
 	{
 		final String answer;
 		final long atMs;
-
-		Answered(String answer, long atMs)
-		{
-			this.answer = answer;
-			this.atMs = atMs;
-		}
 	}
 
 	@Inject

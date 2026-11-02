@@ -29,6 +29,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Locale;
 import javax.annotation.Nullable;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 
 /**
  * Drop luck's arithmetic and its words, in one place.
@@ -71,6 +73,7 @@ final class DropOdds
 	}
 
 	/** A drop's rate, and the better one that applies to some kills — on a task, with a diary. */
+	@AllArgsConstructor(access = AccessLevel.PACKAGE)
 	static final class Rate
 	{
 		final double oneIn;
@@ -80,13 +83,6 @@ final class DropOdds
 		/** "on task", "with the diary": how a reader is told when the second rate applies. */
 		@Nullable
 		final String boostLabel;
-
-		Rate(double oneIn, @Nullable Double boostOneIn, @Nullable String boostLabel)
-		{
-			this.oneIn = oneIn;
-			this.boostOneIn = boostOneIn;
-			this.boostLabel = boostLabel;
-		}
 
 		static Rate of(double oneIn)
 		{

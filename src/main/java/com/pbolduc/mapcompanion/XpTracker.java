@@ -31,6 +31,8 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nullable;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import net.runelite.api.Skill;
 
 /**
@@ -51,18 +53,12 @@ public class XpTracker
 {
 	private static final long WINDOW_MS = 5 * 60_000L;
 
+	@AllArgsConstructor(access = AccessLevel.PACKAGE)
 	private static class Drop
 	{
 		final Skill skill;
 		final int amount;
 		final long atMs;
-
-		Drop(Skill skill, int amount, long atMs)
-		{
-			this.skill = skill;
-			this.amount = amount;
-			this.atMs = atMs;
-		}
 	}
 
 	private final Deque<Drop> window = new ArrayDeque<>();

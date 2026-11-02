@@ -36,6 +36,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import javax.annotation.Nullable;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.ui.overlay.worldmap.WorldMapPointManager;
@@ -195,20 +197,13 @@ public class GroupMarkers
 	}
 
 	/** What a point is drawn from, apart from where. Two equal looks share a picture. */
+	@AllArgsConstructor(access = AccessLevel.PRIVATE)
 	static final class Look
 	{
 		final String name;
 		final String colour;
 		final boolean stale;
 		final String tooltip;
-
-		private Look(String name, String colour, boolean stale, String tooltip)
-		{
-			this.name = name;
-			this.colour = colour;
-			this.stale = stale;
-			this.tooltip = tooltip;
-		}
 
 		static Look of(RelayResponse.MemberDot dot)
 		{
@@ -262,15 +257,10 @@ public class GroupMarkers
 		}
 	}
 
+	@AllArgsConstructor(access = AccessLevel.PACKAGE)
 	private static final class Drawn
 	{
 		final MapPin pin;
 		final Look look;
-
-		Drawn(MapPin pin, Look look)
-		{
-			this.pin = pin;
-			this.look = look;
-		}
 	}
 }

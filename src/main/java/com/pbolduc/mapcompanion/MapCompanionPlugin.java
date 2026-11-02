@@ -37,6 +37,8 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.swing.SwingUtilities;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.Getter;
 import net.runelite.api.ChatMessageType;
@@ -1792,6 +1794,7 @@ public class MapCompanionPlugin extends Plugin
 	 * a reply crosses a group change often enough to be worth designing for rather than hoping
 	 * about. One immutable object published through one volatile field cannot be half-read.
 	 */
+	@AllArgsConstructor(access = AccessLevel.PRIVATE)
 	private static final class ForGroup
 	{
 		private final String server;
@@ -1804,14 +1807,6 @@ public class MapCompanionPlugin extends Plugin
 		private ForGroup(String server, String code, String value)
 		{
 			this(server, code, null, value);
-		}
-
-		private ForGroup(String server, String code, @Nullable String member, String value)
-		{
-			this.server = server;
-			this.code = code;
-			this.member = member;
-			this.value = value;
 		}
 	}
 

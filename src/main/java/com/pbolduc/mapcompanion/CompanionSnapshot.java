@@ -27,6 +27,7 @@ package com.pbolduc.mapcompanion;
 
 import java.util.List;
 import java.util.Map;
+import lombok.AllArgsConstructor;
 
 /**
  * The v1 wire contract, mirrored from {@code lib/companion-snapshot.ts} in the map's repository.
@@ -216,18 +217,12 @@ public class CompanionSnapshot
 		public String focus;
 	}
 
+	@AllArgsConstructor
 	public static class Tile
 	{
 		public int x;
 		public int y;
 		public int plane;
-
-		public Tile(int x, int y, int plane)
-		{
-			this.x = x;
-			this.y = y;
-			this.plane = plane;
-		}
 	}
 
 	public static class Slayer

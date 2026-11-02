@@ -34,6 +34,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.coords.WorldPoint;
@@ -131,6 +133,7 @@ final class FarmRunClient
 		}
 	}
 
+	@AllArgsConstructor(access = AccessLevel.PACKAGE)
 	private static final class Ticket
 	{
 		final long lifetime;
@@ -138,15 +141,6 @@ final class FarmRunClient
 		final boolean holdsGate;
 		final String member;
 		final boolean port;
-
-		Ticket(long lifetime, boolean end, boolean holdsGate, String member, boolean port)
-		{
-			this.port = port;
-			this.lifetime = lifetime;
-			this.end = end;
-			this.holdsGate = holdsGate;
-			this.member = member;
-		}
 	}
 
 	static final class Question

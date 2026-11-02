@@ -26,6 +26,8 @@
 package com.pbolduc.mapcompanion;
 
 import javax.annotation.Nullable;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 
 /**
  * One reward after the game's overlapping loot, pet and collection messages have settled.
@@ -34,6 +36,7 @@ import javax.annotation.Nullable;
  * Null means the client did not establish that fact. In particular a pet message does not invent
  * an item id, a quantity, or a boss, and a collection addition is not proof of a particular drop.
  */
+@AllArgsConstructor(access = AccessLevel.PACKAGE)
 public final class RewardObservation
 {
 	public final String rewardType;
@@ -49,17 +52,4 @@ public final class RewardObservation
 	@Nullable
 	public final Boolean collectionNew;
 	public final long at;
-
-	RewardObservation(String rewardType, String item, Integer itemId, Integer quantity,
-					  String sourceKind, String sourceName, Boolean collectionNew, long at)
-	{
-		this.rewardType = rewardType;
-		this.item = item;
-		this.itemId = itemId;
-		this.quantity = quantity;
-		this.sourceKind = sourceKind;
-		this.sourceName = sourceName;
-		this.collectionNew = collectionNew;
-		this.at = at;
-	}
 }

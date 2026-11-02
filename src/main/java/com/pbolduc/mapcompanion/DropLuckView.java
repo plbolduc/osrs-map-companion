@@ -30,6 +30,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import javax.annotation.Nullable;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 
 /**
  * What the Drop luck card and list say, decided without Swing.
@@ -186,6 +188,7 @@ final class DropLuckView
 	}
 
 	/** The details under the rows, for one drop. */
+	@AllArgsConstructor(access = AccessLevel.PACKAGE)
 	static final class Detail
 	{
 		final String verdict;
@@ -202,19 +205,6 @@ final class DropLuckView
 		final String aheadValue;
 		@Nullable
 		final String median;
-
-		Detail(String verdict, String sinceLabel, String sinceValue, @Nullable String sinceComparison,
-			double drierThan, @Nullable String aheadLabel, @Nullable String aheadValue, @Nullable String median)
-		{
-			this.verdict = verdict;
-			this.sinceLabel = sinceLabel;
-			this.sinceValue = sinceValue;
-			this.sinceComparison = sinceComparison;
-			this.drierThan = drierThan;
-			this.aheadLabel = aheadLabel;
-			this.aheadValue = aheadValue;
-			this.median = median;
-		}
 	}
 
 	/**

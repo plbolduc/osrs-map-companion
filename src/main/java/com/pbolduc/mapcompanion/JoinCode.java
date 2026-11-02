@@ -29,6 +29,8 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 
 /**
  * Finding a group code inside whatever the player actually pasted.
@@ -63,6 +65,7 @@ import javax.annotation.Nullable;
  * therefore tried first, and the bare form only matches a token standing on its own, so a code
  * inside a longer run of letters and digits is not one.
  */
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public final class JoinCode
 {
 	/**
@@ -191,13 +194,6 @@ public final class JoinCode
 	private JoinCode(String code, @Nullable String suffix)
 	{
 		this(code, suffix, null);
-	}
-
-	private JoinCode(String code, @Nullable String suffix, @Nullable String invite)
-	{
-		this.code = code;
-		this.suffix = suffix;
-		this.invite = invite;
 	}
 
 	/**
