@@ -311,7 +311,8 @@ final class DropLuckPanel extends JPanel
 	private JComponent nowBar(LootLog.Monster monster)
 	{
 		JPanel bar = MapCompanionPanel.bar(6, new Color(0x3a2e1a), null, small("<html>Now killing <font color='#ffffff'>"
-			+ escape(monster.npc) + "</font></html>", ColorScheme.LIGHT_GRAY_COLOR), small("Back ›", ColorScheme.BRAND_ORANGE));
+			+ MapCompanionPanel.escape(monster.npc) + "</font></html>", ColorScheme.LIGHT_GRAY_COLOR),
+			small("Back ›", ColorScheme.BRAND_ORANGE));
 		bar.setBorder(BorderFactory.createCompoundBorder(
 			BorderFactory.createLineBorder(new Color(0x7a5410)), new EmptyBorder(3, 6, 3, 6)));
 		clickable(bar, () ->
@@ -435,8 +436,8 @@ final class DropLuckPanel extends JPanel
 			}
 			invalidateAndRefresh();
 		});
-		card.add(fillIn(MapCompanionPanel.bar(0, ColorScheme.DARKER_GRAY_COLOR, label(drop.item, 12f, Color.WHITE), null, pin),
-			ColorScheme.DARKER_GRAY_COLOR));
+		card.add(MapCompanionPanel.fill(MapCompanionPanel.bar(0, ColorScheme.DARKER_GRAY_COLOR, label(drop.item, 12f, Color.WHITE),
+			null, pin), ColorScheme.DARKER_GRAY_COLOR));
 		card.add(gap(3, ColorScheme.DARKER_GRAY_COLOR));
 		card.add(wrapped(detail.verdict, TEXT_WIDTH, 13f, Color.WHITE));
 		card.add(gap(5, ColorScheme.DARKER_GRAY_COLOR));
@@ -460,7 +461,7 @@ final class DropLuckPanel extends JPanel
 			JLabel dry = small("Dry", ColorScheme.LIGHT_GRAY_COLOR);
 			dry.setHorizontalAlignment(SwingConstants.RIGHT);
 			ends.add(dry);
-			card.add(fillIn(ends, ColorScheme.DARKER_GRAY_COLOR));
+			card.add(MapCompanionPanel.fill(ends, ColorScheme.DARKER_GRAY_COLOR));
 		}
 		if (detail.aheadLabel != null)
 		{
@@ -588,8 +589,9 @@ final class DropLuckPanel extends JPanel
 		JPanel row = column(ColorScheme.DARK_GRAY_COLOR);
 		row.setBorder(BorderFactory.createCompoundBorder(
 			new MatteBorder(1, 0, 0, 0, ColorScheme.DARKER_GRAY_COLOR), new EmptyBorder(5, 2, 5, 2)));
-		row.add(fillIn(MapCompanionPanel.bar(4, ColorScheme.DARK_GRAY_COLOR, null, label(monster.npc, 12f, Color.WHITE),
-			small(DropLuckView.listMeta(monster, now), ColorScheme.LIGHT_GRAY_COLOR)), ColorScheme.DARK_GRAY_COLOR));
+		row.add(MapCompanionPanel.fill(MapCompanionPanel.bar(4, ColorScheme.DARK_GRAY_COLOR, null,
+			label(monster.npc, 12f, Color.WHITE), small(DropLuckView.listMeta(monster, now), ColorScheme.LIGHT_GRAY_COLOR)),
+			ColorScheme.DARK_GRAY_COLOR));
 		JPanel icons = new JPanel(new FlowLayout(FlowLayout.LEFT, 3, 3));
 		icons.setBackground(ColorScheme.DARK_GRAY_COLOR);
 		int shown = 0;
@@ -612,7 +614,7 @@ final class DropLuckPanel extends JPanel
 		{
 			icons.add(small("No notable drops yet", ColorScheme.LIGHT_GRAY_COLOR));
 		}
-		row.add(fillIn(icons, ColorScheme.DARK_GRAY_COLOR));
+		row.add(MapCompanionPanel.fill(icons, ColorScheme.DARK_GRAY_COLOR));
 		MapCompanionPanel.capped(row);
 		clickable(row, () -> open(monster.npc, null));
 		return row;
@@ -866,25 +868,12 @@ final class DropLuckPanel extends JPanel
 
 	private static JComponent fill(JComponent component)
 	{
-		return fillIn(component, ColorScheme.DARK_GRAY_COLOR);
-	}
-
-	private static JComponent fillIn(JComponent component, Color background)
-	{
-		JPanel holder = new JPanel(new BorderLayout());
-		holder.setBackground(background);
-		holder.add(component, BorderLayout.CENTER);
-		return left(MapCompanionPanel.capped(holder));
+		return MapCompanionPanel.fill(component, ColorScheme.DARK_GRAY_COLOR);
 	}
 
 	private static <T extends JComponent> T left(T component)
 	{
 		component.setAlignmentX(Component.LEFT_ALIGNMENT);
 		return component;
-	}
-
-	private static String escape(String text)
-	{
-		return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
 	}
 }

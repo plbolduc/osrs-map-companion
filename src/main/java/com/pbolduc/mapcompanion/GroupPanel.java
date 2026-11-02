@@ -54,6 +54,7 @@ import javax.annotation.Nullable;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -1115,9 +1116,7 @@ final class GroupPanel extends JPanel
 
 	private static JPanel actions()
 	{
-		JPanel actions = new JPanel(new GridLayout(1, 0, 4, 0));
-		actions.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-		return actions;
+		return MapCompanionPanel.row(ColorScheme.DARKER_GRAY_COLOR);
 	}
 
 	/**
@@ -1132,23 +1131,15 @@ final class GroupPanel extends JPanel
 		return MapCompanionPanel.capped(MapCompanionPanel.bar(4, ColorScheme.DARKER_GRAY_COLOR, null, words, hug));
 	}
 
-	private static JPanel fill(Component component)
+	private static JPanel fill(JComponent component)
 	{
-		JPanel holder = new JPanel(new GridLayout(1, 1));
-		holder.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-		holder.add(component);
-		return MapCompanionPanel.left(MapCompanionPanel.capped(holder));
+		return MapCompanionPanel.fill(component, ColorScheme.DARKER_GRAY_COLOR);
 	}
 
+	/** In the cards' grey: every gap here is inside a card or the meetup form, and both are that grey. */
 	private static JPanel gap(int height)
 	{
-		JPanel spacer = new JPanel();
-		spacer.setOpaque(false);
-		spacer.setPreferredSize(new java.awt.Dimension(1, height));
-		spacer.setMaximumSize(new java.awt.Dimension(Integer.MAX_VALUE, height));
-		/* A plain panel's FlowLayout asks for 10px at least, and a squeezed column grows a gap to that. */
-		spacer.setMinimumSize(new java.awt.Dimension(0, height));
-		return MapCompanionPanel.left(spacer);
+		return MapCompanionPanel.gap(height, ColorScheme.DARKER_GRAY_COLOR);
 	}
 
 	private static JLabel line(JLabel line)

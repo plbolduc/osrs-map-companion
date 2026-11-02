@@ -530,7 +530,7 @@ final class StarsPanel extends JPanel
 			list.setBackground(box.getBackground());
 			list.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, EDGE), BorderFactory.createEmptyBorder(3, 0, 0, 0)));
 			for (StarsModel.Star star : site.worlds) list.add(fill(world(site, star, elapsed, box.getBackground())));
-			box.add(gap(4, box.getBackground()));
+			box.add(MapCompanionPanel.gap(4, box.getBackground()));
 			box.add(fill(list));
 		}
 		return fill(box);
@@ -854,18 +854,7 @@ final class StarsPanel extends JPanel
 
 	private static JComponent gap(int height)
 	{
-		return gap(height, ColorScheme.DARK_GRAY_COLOR);
-	}
-
-	private static JComponent gap(int height, Color background)
-	{
-		JPanel gap = new JPanel();
-		gap.setBackground(background);
-		gap.setPreferredSize(new Dimension(1, height));
-		gap.setMaximumSize(new Dimension(Integer.MAX_VALUE, height));
-		/* A plain panel's FlowLayout asks for 10px at least, and a squeezed column grows a gap to that. */
-		gap.setMinimumSize(new Dimension(0, height));
-		return left(gap);
+		return MapCompanionPanel.gap(height, ColorScheme.DARK_GRAY_COLOR);
 	}
 
 	private static JComponent spacer(int width, int height)
