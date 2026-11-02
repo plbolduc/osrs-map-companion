@@ -618,6 +618,10 @@ machine, in the field rather than a refusal. Connect's own answers were already 
 A meetup was three rows of buttons: Route, then the four answers two by two. Route now sits beside
 the title, and the four answers keep their grid. A meetup card is 146px where it was 186.
 
+A friend's **Route** sits beside their name the same way, reading *Finding…*, *Planning…* and
+*Reroute* there, so the words are next to the name they are about. **World map** keeps the row
+under the card, and with the group layer on it still reads *On world map* and is not pressable.
+
 ### The status card
 
 Three lines became two. While the map is being fed the dot's green is *Connected*, said in words in

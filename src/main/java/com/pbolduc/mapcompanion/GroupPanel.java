@@ -61,10 +61,11 @@ import net.runelite.client.ui.ColorScheme;
  * <p><b>A friend's row</b> carries what the game's own friends list cannot say. Their disc in the
  * colour their dot has on the map, with presence as a small dot in its corner and never as words,
  * because online and world are the game's to say; where they are, <i>near</i> a landmark as the map
- * words it, and <i>Near you</i>; their newest level or drop. Then <b>Route</b>, once, to where they
- * stand now — pressed again it reads <b>Reroute</b> and asks again, and nothing follows them on its
- * own — and <b>World map</b>, which draws that friend's dot on the game's world map while its
- * group layer is off. A friend who shares no position shows a name and presence and nothing else.
+ * words it, and <i>Near you</i>; their newest level or drop. <b>Route</b>, beside their name, goes
+ * once to where they stand now — pressed again it reads <b>Reroute</b> and asks again, and nothing
+ * follows them on its own — and <b>World map</b>, under the card, draws that friend's dot on the
+ * game's world map while its group layer is off. A friend who shares no position shows a name and
+ * presence and nothing else.
  *
  * <p><b>A meetup</b> says its title, with <b>Route</b> beside it, when in the player's own clock
  * with a countdown, where in words with its world, and who is coming as their discs. Route plans
@@ -447,17 +448,33 @@ final class GroupPanel extends JPanel
 		return holdsInvite;
 	}
 
-	/** One friend: their disc and name, where they are, their news, and the two buttons. */
+	/** One friend: their disc and name with Route beside it, where they are, their news, and World map. */
 	private JPanel friend(RelayResponse.RosterRow row, @Nullable String destinationKey, long now)
 	{
 		JPanel card = card();
 		card.setName("group.friend." + row.id);
+		String source = GroupState.source(row.id);
+		RoutePress.Said said = press.said(source);
+		JButton route = null;
+		if (row.routable)
+		{
+			boolean planning = said != null && said.planning;
+			boolean finding = group.finding(row.id, now);
+			boolean routedHere = said != null && said.key != null && said.key.equals(destinationKey);
+			route = MapCompanionPanel.smallButton(planning ? "Planning…" : finding ? "Finding…"
+				: routedHere ? "Reroute" : "Route");
+			route.setName("group.route." + row.id);
+			route.setEnabled(ready && !planning && !finding && press.ready());
+			route.setToolTipText("Plan the way to where " + row.name + " stands now. Nothing follows them; press again to ask again.");
+			route.addActionListener(e -> routeToFriend(row.id));
+		}
 		JLabel name = label(12f, Color.WHITE);
 		name.setIcon(new Disc(colour(row.colour), presenceColour(row.presence)));
 		name.setIconTextGap(6);
-		MapCompanionPanel.setWrapped(name, row.name, WIDTH - 20);
+		MapCompanionPanel.setWrapped(name, row.name, WIDTH - 20 - (route == null ? 0 : route.getPreferredSize().width + 4));
 		name.setToolTipText(presenceWord(row.presence));
-		card.add(MapCompanionPanel.left(name));
+		/* Route on the name's line, as a meetup's sits beside its title; World map keeps the row under the card. */
+		card.add(MapCompanionPanel.left(route == null ? name : beside(name, route)));
 		String where = whereLine(row);
 		if (where != null)
 		{
@@ -500,22 +517,7 @@ final class GroupPanel extends JPanel
 		{
 			return slot(card);
 		}
-		String source = GroupState.source(row.id);
-		RoutePress.Said said = press.said(source);
-		boolean planning = said != null && said.planning;
-		boolean finding = group.finding(row.id, now);
-		boolean routedHere = said != null && said.key != null && said.key.equals(destinationKey);
 		JPanel actions = actions();
-		if (row.routable)
-		{
-			JButton route = MapCompanionPanel.smallButton(planning ? "Planning…" : finding ? "Finding…"
-				: routedHere ? "Reroute" : "Route");
-			route.setName("group.route." + row.id);
-			route.setEnabled(ready && !planning && !finding && press.ready());
-			route.setToolTipText("Plan the way to where " + row.name + " stands now. Nothing follows them; press again to ask again.");
-			route.addActionListener(e -> routeToFriend(row.id));
-			actions.add(route);
-		}
 		boolean layer = config.showGroupOnWorldMap();
 		boolean shown = group.shown(row.id);
 		/*
@@ -589,17 +591,9 @@ final class GroupPanel extends JPanel
 		 * Route beside the title rather than on a row of its own over the answers: a meetup was three
 		 * rows of buttons, and the title's line had room for one.
 		 */
-		JPanel top = new JPanel(new java.awt.BorderLayout(4, 0));
-		top.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		JLabel name = label(12f, Color.WHITE);
 		MapCompanionPanel.setWrapped(name, meetup.title, WIDTH - route.getPreferredSize().width - 4);
-		top.add(name, java.awt.BorderLayout.CENTER);
-		JPanel hug = new JPanel(new java.awt.BorderLayout());
-		hug.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-		hug.add(route, java.awt.BorderLayout.NORTH);
-		top.add(hug, java.awt.BorderLayout.EAST);
-		top.setMaximumSize(new java.awt.Dimension(Integer.MAX_VALUE, top.getPreferredSize().height));
-		card.add(MapCompanionPanel.left(top));
+		card.add(MapCompanionPanel.left(beside(name, route)));
 		JLabel when = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
 		MapCompanionPanel.setWrapped(when, when(meetup.startsAtMs, now, ZoneId.systemDefault(),
 			Locale.getDefault(Locale.Category.FORMAT)), WIDTH);
@@ -870,6 +864,23 @@ final class GroupPanel extends JPanel
 		JPanel actions = new JPanel(new GridLayout(1, 0, 4, 0));
 		actions.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		return actions;
+	}
+
+	/**
+	 * A card's first line with its one button: the words, wrapped to the room the button leaves, and
+	 * the button at the right, held to the top when the words take two lines.
+	 */
+	private static JPanel beside(JLabel words, JButton button)
+	{
+		JPanel top = new JPanel(new java.awt.BorderLayout(4, 0));
+		top.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		top.add(words, java.awt.BorderLayout.CENTER);
+		JPanel hug = new JPanel(new java.awt.BorderLayout());
+		hug.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		hug.add(button, java.awt.BorderLayout.NORTH);
+		top.add(hug, java.awt.BorderLayout.EAST);
+		top.setMaximumSize(new java.awt.Dimension(Integer.MAX_VALUE, top.getPreferredSize().height));
+		return top;
 	}
 
 	private static JPanel fill(Component component)
