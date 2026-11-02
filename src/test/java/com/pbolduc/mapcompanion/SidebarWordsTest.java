@@ -107,26 +107,26 @@ public class SidebarWordsTest
 	@Test
 	public void theStatusLineNamesTheGroupAndFallsBackToItsCode()
 	{
-		assertEquals("Sunday raids", MapCompanionPanel.statusGroup("KQX482", "Sunday raids"));
-		assertEquals("KQX 482", MapCompanionPanel.statusGroup("KQX482", null));
-		assertEquals("KQX 482", MapCompanionPanel.statusGroup("KQX482", "   "));
+		assertEquals("Sunday raids", ConnectCard.statusGroup("KQX482", "Sunday raids"));
+		assertEquals("KQX 482", ConnectCard.statusGroup("KQX482", null));
+		assertEquals("KQX 482", ConnectCard.statusGroup("KQX482", "   "));
 		/** An adopted legacy group is named after its own code, and says it once. */
-		assertEquals("KQX 482", MapCompanionPanel.statusGroup("KQX482", "KQX 482"));
+		assertEquals("KQX 482", ConnectCard.statusGroup("KQX482", "KQX 482"));
 	}
 
 	/** Joining another group is a row of the groups menu, and closes the field it opened. */
 	@Test
 	public void theGroupsMenuJoinsAnotherGroupAndClosesItsField()
 	{
-		assertEquals("Join another group…", MapCompanionPanel.joinMenuWords(false));
-		assertEquals("Hide the code field", MapCompanionPanel.joinMenuWords(true));
+		assertEquals("Join another group…", ConnectCard.joinMenuWords(false));
+		assertEquals("Hide the code field", ConnectCard.joinMenuWords(true));
 	}
 
 	/** Renaming is the groups menu's last row, for whoever the map says runs the group. */
 	@Test
 	public void theGroupsMenuRenamesTheGroup()
 	{
-		assertEquals("Rename group…", MapCompanionPanel.RENAME);
+		assertEquals("Rename group…", ConnectCard.RENAME);
 	}
 
 	/**
@@ -136,12 +136,12 @@ public class SidebarWordsTest
 	@Test
 	public void theStatusCardOffersRenameOnlyWhileTheRunnersGroupIsUnnamed()
 	{
-		assertEquals("Our group", MapCompanionPanel.STARTING_NAME);
-		assertTrue(MapCompanionPanel.offersRename(true, true, "Our group"));
-		assertFalse("named already", MapCompanionPanel.offersRename(true, true, "Sunday raids"));
-		assertFalse("does not run it", MapCompanionPanel.offersRename(true, false, "Our group"));
-		assertFalse("no group", MapCompanionPanel.offersRename(false, true, "Our group"));
-		assertFalse("no name heard yet", MapCompanionPanel.offersRename(true, true, null));
+		assertEquals("Our group", ConnectCard.STARTING_NAME);
+		assertTrue(ConnectCard.offersRename(true, true, "Our group"));
+		assertFalse("named already", ConnectCard.offersRename(true, true, "Sunday raids"));
+		assertFalse("does not run it", ConnectCard.offersRename(true, false, "Our group"));
+		assertFalse("no group", ConnectCard.offersRename(false, true, "Our group"));
+		assertFalse("no name heard yet", ConnectCard.offersRename(true, true, null));
 	}
 
 	/**
@@ -152,15 +152,15 @@ public class SidebarWordsTest
 	@Test
 	public void aFreshInstallIsNotConnectedRatherThanNotPaired()
 	{
-		assertEquals("Not connected", MapCompanionPanel.statusWords(false, false, false, null, Health.IDLE, "Not paired", null));
-		assertEquals("Press Connect", MapCompanionPanel.statusWords(true, false, false, null, Health.WAITING, "Press Connect to choose osrs-map.com", "Sunday raids"));
-		assertEquals("Sunday raids", MapCompanionPanel.statusWords(true, true, false, null, Health.LIVE, "Connected to osrs-map.com", "Sunday raids"));
-		assertEquals("Logged out", MapCompanionPanel.statusWords(true, true, false, null, Health.WAITING, "Logged out", "Sunday raids"));
+		assertEquals("Not connected", ConnectCard.statusWords(false, false, false, null, Health.IDLE, "Not paired", null));
+		assertEquals("Press Connect", ConnectCard.statusWords(true, false, false, null, Health.WAITING, "Press Connect to choose osrs-map.com", "Sunday raids"));
+		assertEquals("Sunday raids", ConnectCard.statusWords(true, true, false, null, Health.LIVE, "Connected to osrs-map.com", "Sunday raids"));
+		assertEquals("Logged out", ConnectCard.statusWords(true, true, false, null, Health.WAITING, "Logged out", "Sunday raids"));
 		/**
 		 * The field asked for "your connection code", which only the map's panel could give. The orange
 		 * button makes a group now and the field is the other way in, so a friend's invite comes first.
 		 */
-		assertEquals("Paste an invite or code", MapCompanionPanel.JOIN_PLACEHOLDER);
+		assertEquals("Paste an invite or code", ConnectCard.JOIN_PLACEHOLDER);
 	}
 
 	/**
@@ -173,18 +173,18 @@ public class SidebarWordsTest
 	@Test
 	public void beforeAGroupTheCardAnswersConnect()
 	{
-		assertEquals("Connecting…", MapCompanionPanel.statusWords(false, false, true, null, Health.IDLE, "Not paired", null));
+		assertEquals("Connecting…", ConnectCard.statusWords(false, false, true, null, Health.IDLE, "Not paired", null));
 		assertEquals(ConnectClient.UNREACHABLE,
-			MapCompanionPanel.statusWords(false, false, false, ConnectClient.UNREACHABLE, Health.IDLE, "Not paired", null));
+			ConnectCard.statusWords(false, false, false, ConnectClient.UNREACHABLE, Health.IDLE, "Not paired", null));
 		/** A code without this map's approval joins through the field too, and is asked the same way. */
-		assertEquals("Connecting…", MapCompanionPanel.statusWords(true, false, true, null, Health.WAITING, "Press Connect", "Sunday raids"));
+		assertEquals("Connecting…", ConnectCard.statusWords(true, false, true, null, Health.WAITING, "Press Connect", "Sunday raids"));
 		/** Open the map asks as well, and the card goes on naming the group it opens. */
-		assertEquals("Sunday raids", MapCompanionPanel.statusWords(true, true, true, null, Health.LIVE, "Connected to osrs-map.com", "Sunday raids"));
+		assertEquals("Sunday raids", ConnectCard.statusWords(true, true, true, null, Health.LIVE, "Connected to osrs-map.com", "Sunday raids"));
 
-		assertEquals("the login screen's Logged out", Health.IDLE, MapCompanionPanel.dotHealth(false, false, Health.WAITING));
-		assertEquals(Health.IDLE, MapCompanionPanel.dotHealth(false, false, Health.IDLE));
-		assertEquals(Health.WAITING, MapCompanionPanel.dotHealth(false, true, Health.IDLE));
-		assertEquals(Health.LIVE, MapCompanionPanel.dotHealth(true, false, Health.LIVE));
+		assertEquals("the login screen's Logged out", Health.IDLE, ConnectCard.dotHealth(false, false, Health.WAITING));
+		assertEquals(Health.IDLE, ConnectCard.dotHealth(false, false, Health.IDLE));
+		assertEquals(Health.WAITING, ConnectCard.dotHealth(false, true, Health.IDLE));
+		assertEquals(Health.LIVE, ConnectCard.dotHealth(true, false, Health.LIVE));
 	}
 
 	/**
@@ -195,8 +195,8 @@ public class SidebarWordsTest
 	@Test
 	public void theOrangeButtonConnectsBeforeAGroupAndOpensTheMapAfter()
 	{
-		assertEquals("Connect", MapCompanionPanel.CONNECT);
-		assertEquals("Open the map", MapCompanionPanel.OPEN_MAP);
+		assertEquals("Connect", ConnectCard.CONNECT);
+		assertEquals("Open the map", ConnectCard.OPEN_MAP);
 	}
 
 	/**
@@ -206,11 +206,11 @@ public class SidebarWordsTest
 	@Test
 	public void onlyAMapOtherThanTheInstalledOneIsAskedAbout()
 	{
-		assertTrue(MapCompanionPanel.isDefaultMap("https://osrs-map.com"));
-		assertTrue(MapCompanionPanel.isDefaultMap(Pairing.normalizeServer("https://OSRS-MAP.com:443/")));
-		assertFalse(MapCompanionPanel.isDefaultMap("https://osrs-map.com.example.test"));
-		assertFalse(MapCompanionPanel.isDefaultMap("http://localhost:3000"));
-		assertFalse(MapCompanionPanel.isDefaultMap(null));
+		assertTrue(ConnectCard.isDefaultMap("https://osrs-map.com"));
+		assertTrue(ConnectCard.isDefaultMap(Pairing.normalizeServer("https://OSRS-MAP.com:443/")));
+		assertFalse(ConnectCard.isDefaultMap("https://osrs-map.com.example.test"));
+		assertFalse(ConnectCard.isDefaultMap("http://localhost:3000"));
+		assertFalse(ConnectCard.isDefaultMap(null));
 	}
 
 	/** The invite says both ways in, and keeps the link last so a chat client links all of it. */
@@ -218,7 +218,7 @@ public class SidebarWordsTest
 	public void anInviteSaysWhereToPasteItAndEndsWithTheLink()
 	{
 		String link = "https://osrs-map.com/map?join=ABC234&i=K7PQ2M3XABCDEFGH&task=companion";
-		String message = MapCompanionPanel.inviteMessage(link);
+		String message = ConnectCard.inviteMessage(link);
 		assertTrue(message, message.contains("OSRS Map Companion"));
 		assertTrue(message, message.endsWith(" " + link));
 	}

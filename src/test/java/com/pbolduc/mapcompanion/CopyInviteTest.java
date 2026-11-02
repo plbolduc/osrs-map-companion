@@ -58,14 +58,14 @@ public class CopyInviteTest
 	@Test
 	public void aMapThatMadeNoInviteCopiesNothingAndSaysSo()
 	{
-		assertNull("unreachable", MapCompanionPanel.inviteText(null, RelayClient.NO_ANSWER, true, MAP, "KQX482"));
-		assertNull("having trouble", MapCompanionPanel.inviteText(null, 503, true, MAP, "KQX482"));
-		assertNull("busy", MapCompanionPanel.inviteText(null, 429, true, MAP, "KQX482"));
-		assertNull("refused", MapCompanionPanel.inviteText(null, 403, true, MAP, "KQX482"));
-		assertNull("closed", MapCompanionPanel.inviteText(null, 410, true, MAP, "KQX482"));
+		assertNull("unreachable", ConnectCard.inviteText(null, RelayClient.NO_ANSWER, true, MAP, "KQX482"));
+		assertNull("having trouble", ConnectCard.inviteText(null, 503, true, MAP, "KQX482"));
+		assertNull("busy", ConnectCard.inviteText(null, 429, true, MAP, "KQX482"));
+		assertNull("refused", ConnectCard.inviteText(null, 403, true, MAP, "KQX482"));
+		assertNull("closed", ConnectCard.inviteText(null, 410, true, MAP, "KQX482"));
 		/** And the line says the clipboard is as it was, so nothing stale gets pasted to a friend. */
 		assertEquals("Couldn't make an invite, so nothing was copied. Try again in a minute.",
-			MapCompanionPanel.INVITE_FAILED);
+			ConnectCard.INVITE_FAILED);
 	}
 
 	/**
@@ -75,21 +75,21 @@ public class CopyInviteTest
 	@Test
 	public void anOwnedGroupBeforeItsFirstSecretIsNotGivenTheBareCode()
 	{
-		assertNull(MapCompanionPanel.inviteText(null, 403, false, MAP, "KQX482"));
-		assertNull(MapCompanionPanel.inviteText(null, 410, false, MAP, "KQX482"));
+		assertNull(ConnectCard.inviteText(null, 403, false, MAP, "KQX482"));
+		assertNull(ConnectCard.inviteText(null, 410, false, MAP, "KQX482"));
 	}
 
 	@Test
 	public void aGroupThatAdmitsByItsCodeStillGetsThePlainMessage()
 	{
 		/** The invite door's answer for a group nobody owns, and a map with no such door. */
-		String plain = MapCompanionPanel.inviteText(null, 404, true, MAP, "KQX482");
+		String plain = ConnectCard.inviteText(null, 404, true, MAP, "KQX482");
 		assertNotNull(plain);
 		assertTrue(plain, plain.contains(MAP + "/map?join=KQX482"));
 		assertTrue(plain, plain.endsWith("enter code KQX482"));
 		/** A legacy group never issues a secret, and its code admits whether or not the map answered. */
-		assertEquals(plain, MapCompanionPanel.inviteText(null, RelayClient.NO_ANSWER, false, MAP, "KQX482"));
-		assertEquals(plain, MapCompanionPanel.inviteText(null, 503, false, MAP, "KQX482"));
+		assertEquals(plain, ConnectCard.inviteText(null, RelayClient.NO_ANSWER, false, MAP, "KQX482"));
+		assertEquals(plain, ConnectCard.inviteText(null, 503, false, MAP, "KQX482"));
 	}
 
 	@Test
@@ -97,8 +97,8 @@ public class CopyInviteTest
 	{
 		RelayClient.Invite invite = new RelayClient.Invite();
 		invite.url = "https://osrs-map.com/map?join=KQX482&task=companion&i=K7PQ2M3XABCDEFGH";
-		assertEquals(MapCompanionPanel.inviteMessage(invite.url),
-			MapCompanionPanel.inviteText(invite, 201, true, MAP, "KQX482"));
+		assertEquals(ConnectCard.inviteMessage(invite.url),
+			ConnectCard.inviteText(invite, 201, true, MAP, "KQX482"));
 	}
 
 	/** The status reaches the panel with the null, which is the whole of how it tells the cases apart. */
