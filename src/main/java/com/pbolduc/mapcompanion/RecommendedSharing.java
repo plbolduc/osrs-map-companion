@@ -89,22 +89,31 @@ final class RecommendedSharing extends JPanel
 		"showDestination", "showGroupOnWorldMap"));
 
 	/**
-	 * Two short sentences over the rows. The press under them says what one press does, so the
-	 * intro no longer says it too; what it keeps is where to change it afterwards.
+	 * Two short sentences over the rows: who sees what is ticked, the one fact a player weighs before
+	 * sharing, and where to change it afterwards. The press under them says what one press does.
 	 */
-	static final String INTRO = "Ticked is what the map uses. Change any of it later in Settings.";
+	static final String INTRO = "Your group sees what's ticked. Change it any time in Settings.";
 
-	/** The stream the two drawing choices open, in one line under them. */
-	static final String STREAM_SHORT = "Opens one connection while you're logged in.";
+	/** The connection the two drawing choices keep, in one line under them, to the map it goes to. */
+	static String streamShort(String server)
+	{
+		return "Either keeps a connection to " + server + " open while you're logged in.";
+	}
 
-	/** The same stream in full, in the fold under the rows. */
-	static final String STREAM = "Either one opens the map's receive stream: one connection, held open while you "
-		+ "are logged in, that brings destinations, meetups and your group's positions. It carries your group "
-		+ "code and member id, and nothing about your character.";
+	/**
+	 * The same connection in full, in the fold under the rows: what it brings and all it carries, the
+	 * member key included, in words a player knows rather than "receive stream" and "member id".
+	 */
+	static String stream(String server)
+	{
+		return "While you're logged in, either one keeps a connection to " + server + " open. It brings the places "
+			+ "your group sends, meetups and your friends' positions, and carries your group's code, your member id "
+			+ "and its key, and nothing about your character.";
+	}
 
 	static final String DEATH_DETAIL = "Your last death's tile, kept for an hour. Route back works without it.";
-	static final String DESTINATIONS_DETAIL = "Places your group sends, and meetup cards, on the world map. "
-		+ "Nothing is clicked or walked for you.";
+	static final String DESTINATIONS_DETAIL = "Places your group sends you, and your group's meetups, in the sidebar "
+		+ "and on the world map. Nothing is clicked or walked for you.";
 	static final String GROUP_DETAIL = "Your group's dots on the game's world map, from what they already share.";
 
 	private static final int TEXT = MapCompanionPanel.CARD_TEXT_WIDTH;
@@ -120,6 +129,10 @@ final class RecommendedSharing extends JPanel
 	private final Map<JCheckBox, List<SharingFields.Field>> rows = new LinkedHashMap<>();
 	private final List<Group> groups = new ArrayList<>();
 	private final JLabel where = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
+	/** The connection under the drawing choices, and in full in the fold under its own heading. */
+	private final JLabel opens = indented(label(11f, ColorScheme.LIGHT_GRAY_COLOR));
+	private final JLabel connection = heading("The connection");
+	private final JLabel streamLine = detailLine("recommended.stream", "");
 
 	RecommendedSharing(MapCompanionConfig config, ConfigStore store, Runnable closed)
 	{
@@ -168,13 +181,11 @@ final class RecommendedSharing extends JPanel
 		card.add(drawn);
 		card.add(single(SharingFields.DESTINATIONS, DESTINATIONS_DETAIL, details));
 		card.add(single(SharingFields.GROUP_ON_WORLD_MAP, GROUP_DETAIL, details));
-		JLabel opens = indented(label(11f, ColorScheme.LIGHT_GRAY_COLOR));
+		/* Their words name the map, so offer() writes them. */
 		opens.setName("recommended.opens");
-		MapCompanionPanel.setWrapped(opens, STREAM_SHORT, TEXT - INDENT);
 		card.add(opens);
-		JLabel stream = detailLine("recommended.stream", STREAM);
-		details.add(heading("The connection"));
-		details.add(stream);
+		details.add(connection);
+		details.add(streamLine);
 		card.add(gap(4));
 		card.add(fold(details));
 		card.add(gap(4));
@@ -279,7 +290,11 @@ final class RecommendedSharing extends JPanel
 			}
 			row.getKey().setSelected(recommended);
 		}
-		MapCompanionPanel.setWrapped(where, "Sent to " + server + " while you're logged in; your group sees it.", TEXT);
+		/* Who sees it is the intro's first sentence, so the line over the press says only where it goes. */
+		MapCompanionPanel.setWrapped(where, "Sent to " + server + " while you're logged in.", TEXT);
+		MapCompanionPanel.setWrapped(opens, streamShort(server), TEXT - INDENT);
+		MapCompanionPanel.setWrapped(connection, "The connection to " + server, TEXT);
+		MapCompanionPanel.setWrapped(streamLine, stream(server), TEXT);
 		refreshGroups();
 		setVisible(true);
 		revalidate();

@@ -64,7 +64,8 @@ After the first Connect to a map, and only then, the sidebar shows one step: a r
 character name, the four sharing groups, and destinations and group markers, all ticked, with a line
 saying those two open one connection. *What each one sends*, one tap below the rows and before the
 press, names every field in the sidebar's own words and the receive stream in full (one held
-connection carrying the group code and member id). *Where you died* is offered unticked; meetup
+connection to the named map, carrying the group code, member id and member key). The step's first
+line says the group sees what is ticked. *Where you died* is offered unticked; meetup
 notifications are not offered. One press, **Share what's ticked**, writes exactly those existing
 settings, as the switches in Settings do: the press is the opt-in, and nothing turns on
 without it. Ticking and **Not now** write nothing. The step follows only the Connect
