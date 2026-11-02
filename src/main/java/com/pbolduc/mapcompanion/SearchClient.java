@@ -83,6 +83,8 @@ final class SearchClient
 	static final String FAILED = "The map could not search just now.";
 	static final String UNREADABLE = "The map returned unreadable data.";
 	static final String NOTHING = "Nothing on the map by that name.";
+	/** Under a one-letter box: {@link #MIN_QUERY} is two, and a query of one asks nothing. */
+	static final String ONE_MORE = "Type one more letter.";
 
 	/** One row as the map sends it. Read leniently and then bounded by {@link #normalize}. */
 	static final class Answer
@@ -273,7 +275,8 @@ final class SearchClient
 		cancelTimer();
 		if (query.length() < MIN_QUERY)
 		{
-			show(new Result(query, Collections.<Hit>emptyList(), null, null, false));
+			/* The map answers two letters or more; an empty list under one letter said nothing of why. */
+			show(new Result(query, Collections.<Hit>emptyList(), null, ONE_MORE, false));
 			return;
 		}
 		long wait = Math.max(DEBOUNCE_MS, nextAllowedMs - System.currentTimeMillis());
@@ -541,19 +544,21 @@ final class SearchClient
 	}
 
 	/**
-	 * "Dropped by 3 · sold at 1": what picking a name a partial query could mean would answer. It no
-	 * longer starts "Item ·", because the row sits under the Items heading that says so.
+	 * "Dropped by 3 monsters · sold in 1 shop": what picking a name a partial query could mean would
+	 * answer. It does not start "Item ·", because the row sits under the Items heading that says so.
+	 * Each count names what it counts: the row can follow a Dropped by heading that lists fewer
+	 * sources than its count, and a bare number there reads as a count of something on the screen.
 	 */
 	static String itemLine(Item item)
 	{
 		StringBuilder sb = new StringBuilder();
 		if (item.droppedBy > 0)
 		{
-			sb.append("dropped by ").append(item.droppedBy);
+			sb.append("dropped by ").append(item.droppedBy).append(item.droppedBy == 1 ? " monster" : " monsters");
 		}
 		if (item.soldAt > 0)
 		{
-			sb.append(sb.length() > 0 ? " · " : "").append("sold at ").append(item.soldAt);
+			sb.append(sb.length() > 0 ? " · " : "").append("sold in ").append(item.soldAt).append(item.soldAt == 1 ? " shop" : " shops");
 		}
 		return sb.length() == 0 ? "" : Character.toUpperCase(sb.charAt(0)) + sb.substring(1);
 	}

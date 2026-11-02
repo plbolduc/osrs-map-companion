@@ -457,8 +457,24 @@ final class SearchPanel extends JPanel
 		WorldPoint stood = hit.tile == null ? null : new WorldPoint(hit.tile[0], hit.tile[1], hit.tile[2]);
 		picked = hit;
 		typedPast = false;
-		press.press(RoutePress.Target.place(SOURCE, hit.id, hit.name, stood, hit.line.isEmpty() ? null : hit.line));
+		press.press(RoutePress.Target.place(SOURCE, hit.id, hit.name, stood, note(hit)));
 		refresh();
+	}
+
+	/**
+	 * The destination card's second line for a pick. An item's route goes to whatever drops or sells
+	 * it, and the card takes that source's name, so its line says which item it is for: the row's own
+	 * count under a monster's name would read as a fact about the monster and never name the item.
+	 * Any other row keeps its own line.
+	 */
+	@Nullable
+	static String note(SearchClient.Hit hit)
+	{
+		if (SearchClient.ITEMS.equals(hit.section))
+		{
+			return "For " + hit.name;
+		}
+		return hit.line.isEmpty() ? null : hit.line;
 	}
 
 	private static JLabel label(float size, Color colour)

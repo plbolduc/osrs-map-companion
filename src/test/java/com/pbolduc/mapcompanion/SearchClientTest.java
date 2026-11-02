@@ -155,8 +155,11 @@ public class SearchClientTest
 		assertNull("Places carries no heading of its own", hits.get(0).section);
 		assertEquals("Dropped by", hits.get(1).section);
 		assertEquals("item:Abyssal whip", hits.get(2).id);
-		/* The row sits under the Items heading now, so its line no longer starts by saying it is one. */
-		assertEquals("Dropped by 3", hits.get(2).line);
+		/*
+		 * The row sits under the Items heading now, so its line no longer starts by saying it is one;
+		 * and the count says what it counts, where "Dropped by 3" left the reader to guess.
+		 */
+		assertEquals("Dropped by 3 monsters", hits.get(2).line);
 		assertNull("an item stands nowhere until the map picks its source", hits.get(2).tile);
 	}
 
@@ -167,6 +170,9 @@ public class SearchClientTest
 		search.enter("b");
 		assertTrue(sent.isEmpty());
 		assertTrue(waiting.isEmpty());
+		/* One letter asks nothing, and says why rather than leaving an empty box under it. */
+		assertEquals(SearchClient.ONE_MORE, search.result().message);
+		assertEquals("Type one more letter.", search.result().message);
 
 		search.enter("bank");
 		until(() -> !search.result().searching);
@@ -288,8 +294,23 @@ public class SearchClientTest
 		assertEquals("bank", hits.get(0).kind);
 		assertNull("an item is no kind of place", hits.get(2).kind);
 		assertNull("the map named no id for a whip, so none is made up", hits.get(2).itemId);
-		assertEquals("Sold at 1", SearchClient.itemLine(item(0, 1)));
-		assertEquals("Dropped by 3 · sold at 1", SearchClient.itemLine(item(3, 1)));
+		/* Each count names what it counts, one or many: "Sold at 1" left the reader to guess one what. */
+		assertEquals("Sold in 1 shop", SearchClient.itemLine(item(0, 1)));
+		assertEquals("Dropped by 3 monsters · sold in 1 shop", SearchClient.itemLine(item(3, 1)));
+		assertEquals("Dropped by 1 monster · sold in 2 shops", SearchClient.itemLine(item(1, 2)));
+	}
+
+	/**
+	 * An item's route goes to one of its sources, whose name heads the card, so the card's line says
+	 * which item it was for; a place's pick keeps the row's own line.
+	 */
+	@Test
+	public void anItemsPickSaysWhichItemTheCardIsFor()
+	{
+		List<SearchClient.Hit> hits = SearchClient.normalize(new com.google.gson.Gson().fromJson(BANKS, SearchClient.Answer.class));
+		assertEquals("For Abyssal whip", SearchPanel.note(hits.get(2)));
+		assertTrue("a place keeps its own words", SearchPanel.note(hits.get(0)).startsWith("Bank · 2nd floor"));
+		assertNull("a row with no line gives the card none", SearchPanel.note(new SearchClient.Hit("bank:x", "X", "", null, null)));
 	}
 
 	/** The map's own description of an answer (lib/contract/search.json), read whole: the item's id picks its sprite. */
