@@ -416,15 +416,8 @@ final class SettingsPage extends JPanel
 				others++;
 			}
 		}
-		Object[] choices = {"Leave group", "Cancel"};
-		int answer = JOptionPane.showOptionDialog(
-						 SwingUtilities.getWindowAncestor(this),
-						 leaveMessage(others),
-						 "Leave " + ConnectCard.statusGroup(code, pairing.name(code)) + "?",
-						 JOptionPane.OK_CANCEL_OPTION,
-						 JOptionPane.WARNING_MESSAGE,
-						 null, choices, choices[1]);
-		if (answer != JOptionPane.OK_OPTION)
+		if (!MapCompanionPanel.confirm(SwingUtilities.getWindowAncestor(this), leaveMessage(others),
+			"Leave " + ConnectCard.statusGroup(code, pairing.name(code)) + "?", "Leave group"))
 		{
 			return;
 		}
@@ -463,16 +456,10 @@ final class SettingsPage extends JPanel
 	 */
 	private boolean confirmForgetKillLog()
 	{
-		Object[] choices = {"Forget kill log", "Cancel"};
-		return JOptionPane.showOptionDialog(
-				   SwingUtilities.getWindowAncestor(this),
-				   "Forget every kill and drop counted for this character?\n\n"
-				   + "Drop luck starts again from zero, and your pinned drop goes with it.\n"
-				   + "This cannot be undone.",
-				   "Forget kill log",
-				   JOptionPane.OK_CANCEL_OPTION,
-				   JOptionPane.WARNING_MESSAGE,
-				   null, choices, choices[1]) == JOptionPane.OK_OPTION;
+		return MapCompanionPanel.confirm(SwingUtilities.getWindowAncestor(this),
+			"Forget every kill and drop counted for this character?\n\n"
+			+ "Drop luck starts again from zero, and your pinned drop goes with it.\n"
+			+ "This cannot be undone.", "Forget kill log", "Forget kill log");
 	}
 
 	/** Clear the kill log once the player has said yes, and only then. True when it was cleared. */

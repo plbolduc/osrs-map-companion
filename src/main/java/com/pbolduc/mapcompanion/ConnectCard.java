@@ -438,9 +438,7 @@ final class ConnectCard extends JPanel
 		{
 			return true;
 		}
-		return JOptionPane.showOptionDialog(sidebar, otherMapQuestion(pairing.serverLabel()),
-			"Connect to another map", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE,
-			null, new Object[]{"Connect", "Cancel"}, "Cancel") == JOptionPane.OK_OPTION;
+		return MapCompanionPanel.confirm(sidebar, otherMapQuestion(pairing.serverLabel()), "Connect to another map", "Connect");
 	}
 
 	/**
