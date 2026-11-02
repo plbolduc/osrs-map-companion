@@ -490,7 +490,9 @@ instance. Route works once they're out.* With the group
 layer on, Show on map reads *On the map* and is not pressable.
 
 Then *Meetups*: each with its title, *Today 7:42 PM · in 1h 20m* — past twelve hours the day and
-the clock alone, *Wednesday 8:59 PM*, as the line under *Now* counts — *near Lumbridge Castle · W302*,
+the clock alone, *Wednesday 8:59 PM*, as the line under *Now* counts, and from a quarter of an hour
+before the start until it stops saying *now* the countdown in the map's amber, there as here, as the
+map's own meetup card turns amber in the same window — *near Lumbridge Castle · W302*,
 who is coming as discs (solid for coming or here, a ring for maybe, faint for can't) with *1 here ·
 1 coming · 1 maybe*, **Route**, and the four answers in a two-by-two grid with this member's own
 filled, an answer pressed included while it is on its way: the pick ignores a press then rather than

@@ -631,8 +631,9 @@ final class NowCards extends JPanel
 		long now = System.currentTimeMillis();
 		if (event != null)
 		{
-			setWrapped(eventWhen, meetupWhen(event.startsAtMs, now, ZoneId.systemDefault(),
-											 Locale.getDefault(Locale.Category.FORMAT), event.world), CARD_TEXT_WIDTH);
+			/* Its countdown amber while it is imminent, as the Group tab's meetups have it. */
+			GroupPanel.setWhen(eventWhen, meetupWhen(event.startsAtMs, now, ZoneId.systemDefault(),
+											 Locale.getDefault(Locale.Category.FORMAT), event.world), event.startsAtMs, now, CARD_TEXT_WIDTH);
 			setWrapped(eventTitle, event.title, CARD_TEXT_WIDTH);
 			routeState(eventRouteButton, eventSaid, "meetup", "Route", ready);
 		}

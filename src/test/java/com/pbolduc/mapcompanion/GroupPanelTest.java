@@ -216,10 +216,16 @@ public class GroupPanelTest
 
 	private void social() throws Exception
 	{
+		social(System.currentTimeMillis() + 3_600_000L);
+	}
+
+	/** The contract's group of three, its one meetup starting at {@code startsAtMs}. */
+	private void social(long startsAtMs) throws Exception
+	{
 		String stream = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "contract", "stream.json")),
 			StandardCharsets.UTF_8);
 		RelayResponse.StreamDirective directive = new Gson().fromJson(stream, RelayResponse.StreamDirective.class);
-		directive.events.get(0).startsAtMs = System.currentTimeMillis() + 3_600_000L;
+		directive.events.get(0).startsAtMs = startsAtMs;
 		destinations.acceptSocial(directive, true);
 	}
 
@@ -610,6 +616,56 @@ public class GroupPanelTest
 		assertEquals("Tomorrow 19:00", GroupPanel.when(now + 25 * 3_600_000L, now, zone, Locale.UK));
 		assertEquals("1 here · 1 coming · 1 maybe", GroupPanel.whoLine(Arrays.asList(face("arrived"), face("on_my_way"),
 			face("maybe"), face("no"))));
+	}
+
+	/**
+	 * A meetup about to start says so in the map's amber, as the map's own meetup card does: its
+	 * countdown, from a quarter of an hour before the start until the line stops saying now, on the
+	 * Group tab and on the one meetup under Now. The day, the clock and the world keep the line's own
+	 * colour, and a meetup further off is all one colour.
+	 */
+	@Test
+	public void aMeetupAboutToStartHasItsCountdownInAmber() throws Exception
+	{
+		long now = System.currentTimeMillis();
+		assertTrue(GroupPanel.imminent(now + 14 * 60_000L, now));
+		assertFalse(GroupPanel.imminent(now + 16 * 60_000L, now));
+		assertTrue("under way", GroupPanel.imminent(now - 30 * 60_000L, now));
+		assertFalse("started over an hour ago", GroupPanel.imminent(now - 61 * 60_000L, now));
+
+		AtomicReference<GroupPanel> panel = new AtomicReference<>();
+		SwingUtilities.invokeAndWait(() -> panel.set(panel()));
+		social(now + 10 * 60_000L);
+		SwingUtilities.invokeAndWait(() -> panel.get().refresh(true));
+		String card = String.join("\n", labelTexts((Container) namedComponent(panel.get(), "group.meetup.star-hunt")));
+		assertTrue(card, card.contains(" · <font color='#f59e0b'>in 10m</font></body>"));
+
+		ZoneId zone = ZoneId.of("Europe/London");
+		javax.swing.JLabel line = new javax.swing.JLabel();
+		GroupPanel.setWhen(line, MapCompanionPanel.meetupWhen(now + 10 * 60_000L, now, zone, Locale.UK, 302),
+			now + 10 * 60_000L, now, 100);
+		assertTrue(line.getText(), line.getText().contains("Meetup <font color='#f59e0b'>in 10m</font> · W302"));
+		GroupPanel.setWhen(line, MapCompanionPanel.meetupWhen(now + 25 * 60_000L, now, zone, Locale.UK, 302),
+			now + 25 * 60_000L, now, 100);
+		assertFalse("twenty-five minutes off is only a time: " + line.getText(), line.getText().contains("<font"));
+	}
+
+	/** Every label's text under a component, markup and all. */
+	private static List<String> labelTexts(Container parent)
+	{
+		List<String> texts = new java.util.ArrayList<>();
+		for (Component child : parent.getComponents())
+		{
+			if (child instanceof javax.swing.JLabel)
+			{
+				texts.add(((javax.swing.JLabel) child).getText());
+			}
+			if (child instanceof Container)
+			{
+				texts.addAll(labelTexts((Container) child));
+			}
+		}
+		return texts;
 	}
 
 	/**
