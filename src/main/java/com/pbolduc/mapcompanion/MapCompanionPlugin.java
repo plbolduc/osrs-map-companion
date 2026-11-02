@@ -1045,6 +1045,7 @@ public class MapCompanionPlugin extends Plugin
 			birdhouseReader.onSessionEnded();
 			questReader.onSessionEnded();
 			assignmentReader.onSessionEnded();
+			deathWatcher.onSessionEnded();
 			lastPosition = null;
 			lastSentFingerprint = null;
 			if (state == GameState.LOGIN_SCREEN)
@@ -1950,6 +1951,7 @@ public class MapCompanionPlugin extends Plugin
 		portTaskReader.onSessionResumed(now);
 		birdhouseReader.onSessionResumed(now);
 		questReader.onSessionResumed(now);
+		deathWatcher.onSessionResumed(now);
 		assignmentReader.observe(now);
 		/*
 		 * Read every tick while the choice is on, for the sidebar as much as the snapshot: the slots
@@ -1965,6 +1967,8 @@ public class MapCompanionPlugin extends Plugin
 		}
 		/* The sidebar's clue card reads the last reading; a scroll dropped or finished goes with it. */
 		clueReader.read();
+		/* The death card's gravestone line, from the game's own timer; local, and never sent. */
+		deathWatcher.readGravestone(now);
 		if (config.shareFarming() || farmRunState.active())
 		{
 			farmingObserver.observe(now, currentRegionId());

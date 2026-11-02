@@ -443,6 +443,15 @@ the clue's and the meetup's button reads **Reroute**, as a friend's does, so the
 offered again as new; Dismiss gives back their own word. Route back's answer has no line under its
 name: the death card keeps the age counting, and an age written at the press sat above it, older.
 
+Under the death, the card says how long its gravestone has left, *Gravestone · 8m left*, over a
+thin orange bar that is full at the first reading and drains, as RuneLite's Time Tracking draws one.
+The where-to-go plan in `osrs-stars-map` (§ 5.4) left a timer out because a figure would be a
+guess: how long a stone stands varies. This one is not a figure worked out here but the game's own
+timer, `GRAVESTONE_DURATION`, which counts game ticks as the game's HUD script reads it. It shows
+only while `GRAVESTONE_VISIBLE` says a stone stands, the session has settled, the timer reads no
+more than the fifteen minutes the game itself prints, and the stone appeared after the death the
+card is about; otherwise the card says only how long ago, as before. Nothing about it is sent.
+
 ### Friends and meetups under Group
 
 Step 9, from `plan-companion-social.md`. Under the Group heading, one card per other member: their

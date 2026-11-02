@@ -120,6 +120,12 @@ public class SourceCardsTest
 	/** Died at the Ungael crater a moment ago, through the real death event. */
 	private static DeathWatcher died() throws Exception
 	{
+		return died(java.util.Collections.<Integer, Integer>emptyMap());
+	}
+
+	/** The same death, with the game's varbits as given, for the gravestone's timer. */
+	private static DeathWatcher died(java.util.Map<Integer, Integer> varbits) throws Exception
+	{
 		Player player = (Player) Proxy.newProxyInstance(Player.class.getClassLoader(), new Class<?>[]{Player.class},
 			(proxy, method, args) ->
 			{
@@ -142,6 +148,8 @@ public class SourceCardsTest
 						return player;
 					case "getTopLevelWorldView":
 						return null;
+					case "getVarbitValue":
+						return varbits.getOrDefault((Integer) args[0], 0);
 					default:
 						throw new UnsupportedOperationException(method.getName());
 				}
@@ -209,6 +217,55 @@ public class SourceCardsTest
 		destinations.dismiss();
 		refresh();
 		assertEquals("Route back", button(cards, "now.death.route").getText());
+	}
+
+	/**
+	 * Under the death, the gravestone's time left by the game's own timer, with a bar full at the
+	 * first reading; with no stone standing the card says only how long ago, as it did.
+	 */
+	@Test
+	public void theDeathCardShowsTheGravestonesOwnTimeLeft() throws Exception
+	{
+		java.util.Map<Integer, Integer> varbits = new java.util.concurrent.ConcurrentHashMap<>();
+		DeathWatcher deaths = died(varbits);
+		cards(deaths, RoutePressTest.ANSWER);
+		javax.swing.JLabel grave = label(cards, "now.death.grave");
+		assertFalse("no stone read, no line", grave.getParent().isVisible());
+
+		long now = System.currentTimeMillis();
+		deaths.onSessionResumed(now - 20_000L);
+		varbits.put(net.runelite.api.gameval.VarbitID.GRAVESTONE_VISIBLE, 1);
+		varbits.put(net.runelite.api.gameval.VarbitID.GRAVESTONE_DURATION, 830);
+		deaths.readGravestone(now + 1_000L);
+		refresh();
+		assertTrue(grave.getParent().isVisible());
+		assertTrue(grave.getText(), grave.getText().contains("Gravestone · 9m left"));
+
+		varbits.put(net.runelite.api.gameval.VarbitID.GRAVESTONE_VISIBLE, 0);
+		deaths.readGravestone(now + 2_000L);
+		refresh();
+		assertFalse("the stone has gone; the death stays", grave.getParent().isVisible());
+		assertNotNull(button(cards, "now.death.route"));
+	}
+
+	private static javax.swing.JLabel label(Container parent, String name)
+	{
+		for (Component child : parent.getComponents())
+		{
+			if (child instanceof javax.swing.JLabel && name.equals(child.getName()))
+			{
+				return (javax.swing.JLabel) child;
+			}
+			if (child instanceof Container)
+			{
+				javax.swing.JLabel found = label((Container) child, name);
+				if (found != null)
+				{
+					return found;
+				}
+			}
+		}
+		return null;
 	}
 
 	/** The clue card's Route reads Reroute too while the destination is the answer it asked for. */

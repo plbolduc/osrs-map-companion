@@ -32,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.ActorDeath;
+import net.runelite.api.gameval.VarbitID;
 import net.runelite.api.Player;
 
 /**
@@ -47,6 +48,10 @@ import net.runelite.api.Player;
  *
  * <p>Nothing here acts. It records a tile; the map draws it and offers a route, and walking there
  * is the player's own business — the same line every other part of this plugin holds.
+ *
+ * <p><b>The gravestone's time left</b> is the game's own timer, read rather than guessed: how long a
+ * stone stands varies, and a figure worked out here would be the guess the map's death card refuses
+ * to print. It stays in this client; nothing about it joins the snapshot.
  */
 @Slf4j
 @Singleton
@@ -61,6 +66,41 @@ public class DeathWatcher
 	 */
 	private static final long FORGET_AFTER_MS = 60 * 60_000L;
 
+	/**
+	 * The most the timer may read and still be shown. {@code GRAVESTONE_DURATION} counts game ticks:
+	 * the game's own HUD script turns it into seconds as ticks × 30 client cycles ÷ 50, which is 0.6
+	 * a tick, and prints no time at all past 1,500, fifteen minutes ({@code [proc,gravestone_hud_resynch]}
+	 * and {@code [proc,gravestone_hud_write]}). A reading past it is one the game itself does not put
+	 * a number on, so neither does the card.
+	 */
+	static final int MOST_TICKS_SHOWN = 1_500;
+	static final long TICK_MS = 600L;
+
+	/** A gravestone standing, as the game last gave its timer. Never changes after it is made. */
+	static final class Stone
+	{
+		/** Game ticks left, by the game's own timer. */
+		final int ticksLeft;
+		/** The most this stone has read, so its bar is full at the first reading and drains. */
+		final int ticksFull;
+		/** When this stone was first seen standing: it is shown only under a death it can be from. */
+		final long sinceMs;
+
+		Stone(int ticksLeft, int ticksFull, long sinceMs)
+		{
+			this.ticksLeft = ticksLeft;
+			this.ticksFull = ticksFull;
+			this.sinceMs = sinceMs;
+		}
+
+		/** "8m left", rounded up as a countdown is, in the minutes the card's age is given in. */
+		String left()
+		{
+			long seconds = (ticksLeft * TICK_MS + 999L) / 1000L;
+			return ((seconds + 59L) / 60L) + "m left";
+		}
+	}
+
 	private final Client client;
 
 	/**
@@ -71,6 +111,16 @@ public class DeathWatcher
 	 */
 	private volatile WorldPoint diedAt = null;
 	private volatile long diedAtMs = 0L;
+
+	/**
+	 * Fifteen seconds, as the other readers wait: right after a login or a hop every varbit reads
+	 * zero, and the timer is not believed, nor shown, until the session has settled. Client thread.
+	 */
+	private final SessionSettle settle = new SessionSettle(15_000L);
+
+	/** The stone as the last game tick read it; null while there is none or the reading is in doubt. */
+	@Nullable
+	private volatile Stone stone;
 
 	@Inject
 	private DeathWatcher(Client client)
@@ -147,9 +197,62 @@ public class DeathWatcher
 		return snapshot(nowMs) != null;
 	}
 
+	/** The client is up: starts the settling clock. Client thread; see {@link SessionSettle}. */
+	public void onSessionResumed(long nowMs)
+	{
+		settle.resumed(nowMs);
+	}
+
+	/** Logged out or hopping: the timer is about to read zero, so nothing is shown until it settles. */
+	public void onSessionEnded()
+	{
+		settle.ended();
+		stone = null;
+	}
+
+	/**
+	 * Read the gravestone's timer, on the game tick. Shown only while {@code GRAVESTONE_VISIBLE} says
+	 * a stone stands and the timer reads something the game itself would print; any other reading,
+	 * and every reading before the session settles, shows nothing rather than a doubtful number.
+	 *
+	 * <p>A timer that goes up is a stone placed or extended since, so it counts from now: that is
+	 * what keeps a stone left by an earlier death off the card of a later one that left none.
+	 */
+	public void readGravestone(long nowMs)
+	{
+		if (!settle.settled(nowMs))
+		{
+			stone = null;
+			return;
+		}
+		boolean standing = client.getVarbitValue(VarbitID.GRAVESTONE_VISIBLE) != 0;
+		int ticks = client.getVarbitValue(VarbitID.GRAVESTONE_DURATION);
+		if (!standing || ticks <= 0 || ticks > MOST_TICKS_SHOWN)
+		{
+			stone = null;
+			return;
+		}
+		Stone last = stone;
+		stone = last == null || ticks > last.ticksLeft
+			? new Stone(ticks, ticks, nowMs)
+			: new Stone(ticks, last.ticksFull, last.sinceMs);
+	}
+
+	/**
+	 * The gravestone of the death being shown, or null: none stands, the reading is in doubt, or the
+	 * stone was standing before that death and so is not its own. Any thread.
+	 */
+	@Nullable
+	Stone gravestone(long nowMs)
+	{
+		Stone standing = stone;
+		return standing != null && snapshot(nowMs) != null && standing.sinceMs >= diedAtMs ? standing : null;
+	}
+
 	public void clear()
 	{
 		diedAt = null;
 		diedAtMs = 0L;
+		stone = null;
 	}
 }
