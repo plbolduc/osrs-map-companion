@@ -395,6 +395,15 @@ public class MapCompanionPanel extends PluginPanel
 		return left(holder);
 	}
 
+	/** A line in one size and ink, its words set later: the shape most of the sidebar's labels start from. */
+	static JLabel label(float size, Color colour)
+	{
+		JLabel label = new JLabel();
+		label.setFont(label.getFont().deriveFont(size));
+		label.setForeground(colour);
+		return label;
+	}
+
 	/** A section's name: bold, small and grey, the way the old join heading was. */
 	static JLabel sectionHead(String text)
 	{

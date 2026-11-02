@@ -47,6 +47,7 @@ import javax.swing.event.DocumentListener;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.gameval.SpriteID;
 import net.runelite.client.ui.ColorScheme;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.label;
 
 /**
  * Search the map from the sidebar: a box at the top of Home and up to eight places under it.
@@ -519,13 +520,5 @@ final class SearchPanel extends JPanel
 			return "For " + hit.name;
 		}
 		return hit.note.isEmpty() ? null : hit.note;
-	}
-
-	private static JLabel label(float size, Color colour)
-	{
-		JLabel label = new JLabel();
-		label.setFont(label.getFont().deriveFont(size));
-		label.setForeground(colour);
-		return label;
 	}
 }

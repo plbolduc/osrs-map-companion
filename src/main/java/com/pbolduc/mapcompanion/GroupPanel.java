@@ -61,6 +61,7 @@ import javax.swing.border.EmptyBorder;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.gameval.SpriteID;
 import net.runelite.client.ui.ColorScheme;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.label;
 
 /**
  * The group in the sidebar: each friend's row, the week's meetups, and <i>Meet here</i>.
@@ -1179,14 +1180,6 @@ final class GroupPanel extends JPanel
 		line.setBorder(new EmptyBorder(4, 0, 0, 0));
 		line.setVisible(false);
 		return line;
-	}
-
-	private static JLabel label(float size, Color colour)
-	{
-		JLabel label = new JLabel();
-		label.setFont(label.getFont().deriveFont(size));
-		label.setForeground(colour);
-		return label;
 	}
 
 	/**
