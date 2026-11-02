@@ -36,6 +36,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import net.runelite.api.coords.WorldPoint;
+import net.runelite.client.callback.ClientThread;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -123,6 +124,32 @@ public class RouteStepOverlayTest
 		assertEquals("a destination on any world names none", "Lumbridge", RouteStepOverlay.title(box, destination, 444));
 	}
 
+	/**
+	 * A run's leg has no step pins on the world map, and its stop's number, which the stop's own pin
+	 * carries, heads the box; the step under it is its words alone. Any other route's step keeps the
+	 * number its pin carries.
+	 */
+	@Test
+	public void aRunsLegNumbersItsStopAndNotItsStep() throws IOException
+	{
+		DestinationState destinations = new DestinationState(new Gson());
+		FarmRunState farm = new FarmRunState();
+		FarmRunRoute run = new FarmRunRoute(farm, destinations, route, new ClientThread());
+		RouteStepOverlay overlay = new RouteStepOverlay(null, null, destinations, route, run);
+		String json = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "contract", "farm-run.json")), StandardCharsets.UTF_8);
+		farm.accept(new Gson().fromJson(json, RelayResponse.FarmRun.class), 1, 1_000);
+		run.sync();
+		RouteStepOverlay.Box box = overlay.box(destinations.getDestination());
+		assertEquals("1. Falador farm", box.title);
+		assertEquals("Use Explorer's ring 2: Teleport", box.step);
+
+		/* A place picked instead of the run's next stop: its steps have pins, and so their numbers. */
+		RelayResponse.Destination place = received();
+		destinations.selectLocal(place);
+		route.follow(true);
+		assertEquals("1. Lumbridge Home Teleport", overlay.box(destinations.getDestination()).step);
+	}
+
 	/** The tile's one line cuts a long name short; the box, which wraps, keeps it whole, up to a bound. */
 	@Test
 	public void keepsTheWholeNameTheTileCutsShort() throws IOException
@@ -147,7 +174,8 @@ public class RouteStepOverlayTest
 		HarnessGame game = new HarnessGame();
 		game.login("Example", 444, 3222, 3218, 0);
 		RouteStepOverlay overlay = new RouteStepOverlay(game.client(),
-			new HarnessConfig(new HarnessStore(), MapCompanionConfig.DEFAULT_MAP_URL), destinations, route);
+			new HarnessConfig(new HarnessStore(), MapCompanionConfig.DEFAULT_MAP_URL), destinations, route,
+			new FarmRunRoute(new FarmRunState(), destinations, route, new ClientThread()));
 		int left = 200;
 		BufferedImage image = new BufferedImage(600, 240, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D graphics = image.createGraphics();

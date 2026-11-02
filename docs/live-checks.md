@@ -219,6 +219,8 @@ The website plan's second session, once the routes in the game are built: a memb
       *Civitas illa Fortis east bank deposit box* and follow it: the whole name wraps inside the box.
       Route to a star on another world: the box and the tile's label both end in its world, *(W302)*;
       hop to that world and both drop it.
+      Follow a farm run: the box is headed by the stop's number, *2. Catherby*, as its pin on the
+      world map is, and the step under it has no number of its own, *Use Catherby tablet*.
 - [ ] **Route keys.** Set *Reroute key* to Ctrl+R and *Follow and pause key* to Ctrl+F. On a farm run,
       Ctrl+F pauses and follows it and Ctrl+R reroutes it; twice within five seconds asks once. With
       no run, they act on the destination's own buttons, and do nothing with neither shown.
