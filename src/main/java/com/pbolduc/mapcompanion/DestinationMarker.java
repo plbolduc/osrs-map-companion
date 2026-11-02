@@ -34,6 +34,8 @@ import java.util.Objects;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.ui.overlay.worldmap.WorldMapPointManager;
@@ -280,6 +282,7 @@ public class DestinationMarker
 	}
 
 	/** One step's pin, as plain values, so which pins a route gets is pinned by a test. */
+	@AllArgsConstructor(access = AccessLevel.PACKAGE)
 	static final class StepPin
 	{
 		final int number;
@@ -301,16 +304,6 @@ public class DestinationMarker
 		StepPin(int number, WorldPoint where, String title, int place, int first)
 		{
 			this(number, where, title, place, first, number);
-		}
-
-		StepPin(int number, WorldPoint where, String title, int place, int first, int lastStep)
-		{
-			this.number = number;
-			this.where = where;
-			this.title = title;
-			this.place = place;
-			this.first = first;
-			this.lastStep = lastStep;
 		}
 
 		@Override

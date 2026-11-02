@@ -33,6 +33,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.UUID;
 import javax.annotation.Nullable;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import net.runelite.client.config.ConfigManager;
 
 /**
@@ -58,6 +60,7 @@ import net.runelite.client.config.ConfigManager;
  * including the ones not logged in, whose profiles this class cannot reach.
  */
 @Singleton
+@AllArgsConstructor(access = AccessLevel.PACKAGE)
 public class MemberIdentity
 {
 	private static final String KEY = "memberId";
@@ -73,15 +76,10 @@ public class MemberIdentity
 		this(ConfigStore.of(configManager), ConfigStore.forRuneScapeProfile(configManager));
 	}
 
-	/**
-	 * The same identity, kept somewhere a test or the integration harness can hold — see
-	 * {@link ConfigStore}. Package-private, because a seam is not an API.
+	/*
+	 * Lombok's constructor from the two stores is the same identity, kept somewhere a test or the
+	 * integration harness can hold — see ConfigStore. Package-private, because a seam is not an API.
 	 */
-	MemberIdentity(ConfigStore settings, ConfigStore profile)
-	{
-		this.settings = settings;
-		this.profile = profile;
-	}
 
 	/** One store playing both parts: the harness has one character, and its scope is its own. */
 	MemberIdentity(ConfigStore store)

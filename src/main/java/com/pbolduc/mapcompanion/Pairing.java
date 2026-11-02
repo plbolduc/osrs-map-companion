@@ -40,6 +40,8 @@ import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import net.runelite.client.config.ConfigManager;
 import okhttp3.HttpUrl;
 
@@ -96,6 +98,7 @@ import okhttp3.HttpUrl;
  * write back the secret Leave had just deleted. The readers stay unlocked: each reads one value.
  */
 @Singleton
+@AllArgsConstructor(access = AccessLevel.PACKAGE)
 public class Pairing
 {
 	/**
@@ -160,13 +163,6 @@ public class Pairing
 	Pairing(ConfigStore store, Gson gson)
 	{
 		this(store, gson, () -> store.get(MapCompanionConfig.KEY_RELAY_URL));
-	}
-
-	Pairing(ConfigStore store, Gson gson, Supplier<String> address)
-	{
-		this.store = store;
-		this.gson = gson;
-		this.address = address;
 	}
 
 	private static boolean isLoopback(String host)

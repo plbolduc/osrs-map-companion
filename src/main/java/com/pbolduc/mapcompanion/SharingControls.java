@@ -43,6 +43,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
 
@@ -300,16 +302,11 @@ final class SharingControls extends JPanel
 		return panel;
 	}
 
+	@AllArgsConstructor(access = AccessLevel.PACKAGE)
 	private static final class Choice
 	{
 		final JCheckBox box;
 		final BooleanSupplier read;
-
-		Choice(JCheckBox box, BooleanSupplier read)
-		{
-			this.box = box;
-			this.read = read;
-		}
 	}
 
 	/**

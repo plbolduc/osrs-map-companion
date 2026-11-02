@@ -36,6 +36,8 @@ import java.util.Map;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import net.runelite.api.Client;
 import net.runelite.api.WorldView;
 import net.runelite.client.ui.FontManager;
@@ -189,6 +191,7 @@ class RouteStepOverlay extends OverlayPanel
 	}
 
 	/** What the box says. */
+	@AllArgsConstructor(access = AccessLevel.PACKAGE)
 	static final class Box
 	{
 		final String title;
@@ -200,15 +203,6 @@ class RouteStepOverlay extends OverlayPanel
 		final Integer itemId;
 		@Nullable
 		final Integer spriteId;
-
-		Box(String title, String step, @Nullable String detail, @Nullable Integer itemId, @Nullable Integer spriteId)
-		{
-			this.title = title;
-			this.step = step;
-			this.detail = detail;
-			this.itemId = itemId;
-			this.spriteId = spriteId;
-		}
 	}
 
 	/** The box as {@link #render} draws it: the route followed now, a run's leg read as one. */

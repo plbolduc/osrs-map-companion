@@ -33,6 +33,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import net.runelite.api.Client;
 import net.runelite.api.ItemComposition;
 import net.runelite.api.Player;
@@ -108,6 +110,7 @@ public class PortTaskReader
 	static final String UNKNOWN = "unknown";
 
 	/** One slot as the sidebar draws it. Immutable, so the panel can read it off the client thread. */
+	@AllArgsConstructor(access = AccessLevel.PACKAGE)
 	static final class Slot
 	{
 		final int slot;
@@ -131,22 +134,6 @@ public class PortTaskReader
 		@Nullable
 		final String part;
 
-		Slot(int slot, String state, @Nullable Integer taskId, @Nullable String name, @Nullable String from,
-			@Nullable String to, int needed, int taken, int delivered, int remaining, @Nullable String part)
-		{
-			this.slot = slot;
-			this.state = state;
-			this.taskId = taskId;
-			this.name = name;
-			this.from = from;
-			this.to = to;
-			this.needed = needed;
-			this.taken = taken;
-			this.delivered = delivered;
-			this.remaining = remaining;
-			this.part = part;
-		}
-
 		private static Slot of(int slot, String state, int taskId, Task task, int taken, int delivered, int remaining)
 		{
 			return new Slot(slot, state, taskId, task.name, task.from, task.to, task.needed, taken, delivered, remaining,
@@ -165,6 +152,7 @@ public class PortTaskReader
 	}
 
 	/** What the client's tables say about one task id; read once a session and kept. */
+	@AllArgsConstructor(access = AccessLevel.PACKAGE)
 	private static final class Task
 	{
 		final int row;
@@ -178,18 +166,6 @@ public class PortTaskReader
 		final int needed;
 		@Nullable
 		final String part;
-
-		Task(int row, int type, @Nullable String name, @Nullable String from, @Nullable String to, int needed,
-			@Nullable String part)
-		{
-			this.row = row;
-			this.type = type;
-			this.name = name;
-			this.from = from;
-			this.to = to;
-			this.needed = needed;
-			this.part = part;
-		}
 	}
 
 	private final Client client;

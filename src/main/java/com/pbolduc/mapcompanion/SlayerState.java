@@ -28,6 +28,8 @@ package com.pbolduc.mapcompanion;
 import com.google.inject.Singleton;
 import java.util.Objects;
 import javax.annotation.Nullable;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 
 /**
  * One character's local counter and the server's ranked places. Counts never invalidate the list.
@@ -67,6 +69,7 @@ final class SlayerState
 	private Reading kept;
 
 	/** One reading of the assignment, as the card shows it. */
+	@AllArgsConstructor(access = AccessLevel.PACKAGE)
 	static final class Reading
 	{
 		@Nullable
@@ -77,16 +80,9 @@ final class SlayerState
 		final Integer remaining;
 		/** Taken after the session settled; before that a missing task says nothing about the game. */
 		final boolean settled;
-
-		Reading(@Nullable String task, @Nullable String area, @Nullable Integer remaining, boolean settled)
-		{
-			this.task = task;
-			this.area = area;
-			this.remaining = remaining;
-			this.settled = settled;
-		}
 	}
 
+	@AllArgsConstructor(access = AccessLevel.PACKAGE)
 	static final class View
 	{
 		final String task;
@@ -101,20 +97,6 @@ final class SlayerState
 		final boolean hideWilderness;
 		/** The reading the card shows: the last one taken or, through a hop's window, the last settled one. */
 		final Reading shown;
-
-		View(String task, String area, Integer remaining, RelayResponse.SlayerOptions options, boolean stale,
-			RelayResponse.SlayerOptions previous, String order, boolean hideWilderness, Reading shown)
-		{
-			this.task = task;
-			this.area = area;
-			this.remaining = remaining;
-			this.options = options;
-			this.stale = stale;
-			this.previous = previous;
-			this.order = order;
-			this.hideWilderness = hideWilderness;
-			this.shown = shown;
-		}
 	}
 
 	/** A settled reading: the task the game holds, or null for none. */

@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 
 /**
  * What the status card's second line says is shared, in the six switches Settings has.
@@ -51,18 +53,12 @@ final class SharingSummary
 	}
 
 	/** One switch as the status card weighs it: its words in a sentence, and its fields going out. */
+	@AllArgsConstructor(access = AccessLevel.PACKAGE)
 	private static final class Switch
 	{
 		final String title;
 		final List<SharingFields.Field> fields;
 		final List<SharingFields.Field> sent;
-
-		Switch(String title, List<SharingFields.Field> fields, List<SharingFields.Field> sent)
-		{
-			this.title = title;
-			this.fields = fields;
-			this.sent = sent;
-		}
 
 		boolean whole()
 		{

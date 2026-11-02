@@ -33,6 +33,8 @@ import com.google.inject.Singleton;
 import java.io.IOException;
 import javax.annotation.Nullable;
 import javax.swing.JLabel;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.coords.WorldPoint;
@@ -87,6 +89,7 @@ final class RoutePress
 	private static final int MAX_COORDINATE = 16_383;
 
 	/** What a press asks for, and what the destination's card will call it. */
+	@AllArgsConstructor(access = AccessLevel.PRIVATE)
 	static final class Target
 	{
 		/** Which button asked, so the sidebar can say what came of it beside that button. */
@@ -112,19 +115,6 @@ final class RoutePress
 		/** What the row that asked drew beside it, for the destination's card; never sent. */
 		@Nullable
 		final Picture picture;
-
-		private Target(String source, @Nullable String id, @Nullable WorldPoint tile, String name,
-			@Nullable Integer world, @Nullable String note, @Nullable CompanionSnapshot.Clue clue, @Nullable Picture picture)
-		{
-			this.source = source;
-			this.id = id;
-			this.tile = tile;
-			this.name = name;
-			this.world = world;
-			this.note = note;
-			this.clue = clue;
-			this.picture = picture;
-		}
 
 		static Target place(String source, String id, String name, @Nullable WorldPoint stood, @Nullable String note)
 		{
@@ -161,21 +151,16 @@ final class RoutePress
 	}
 
 	/** The picture of the destination the last answered press made, by that destination's key. */
+	@AllArgsConstructor(access = AccessLevel.PACKAGE)
 	private static final class Shown
 	{
 		final String key;
 		final Picture picture;
 		final long generation;
-
-		Shown(String key, Picture picture, long generation)
-		{
-			this.key = key;
-			this.picture = picture;
-			this.generation = generation;
-		}
 	}
 
 	/** What the last press said, for the sidebar. Never changes after it is made. */
+	@AllArgsConstructor(access = AccessLevel.PACKAGE)
 	static final class Said
 	{
 		final String source;
@@ -187,15 +172,6 @@ final class RoutePress
 		final String key;
 		/** {@link DestinationState#generation} when the press was made. */
 		final long generation;
-
-		Said(String source, boolean planning, @Nullable String message, @Nullable String key, long generation)
-		{
-			this.generation = generation;
-			this.source = source;
-			this.planning = planning;
-			this.message = message;
-			this.key = key;
-		}
 
 		/** A press that did not happen. A route that came back says nothing: the card it filled is the answer. */
 		boolean refused()

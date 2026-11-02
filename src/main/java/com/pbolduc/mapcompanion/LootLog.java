@@ -48,6 +48,8 @@ import java.util.function.LongSupplier;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.ItemComposition;
@@ -396,6 +398,7 @@ public class LootLog
 	 * announcement is a thing that happened at a moment and is worth telling a group about once —
 	 * see {@link MilestoneOutbox}. This class owns the first and knows nothing about the second.
 	 */
+	@AllArgsConstructor(access = AccessLevel.PACKAGE)
 	public static final class Notable
 	{
 		public final String npc;
@@ -416,20 +419,6 @@ public class LootLog
 		public final Double boostOneIn;
 		@Nullable
 		public final String boostLabel;
-
-		Notable(String npc, String item, int itemId, int quantity, @Nullable Double oneIn, int wait,
-			int waitBoosted, @Nullable Double boostOneIn, @Nullable String boostLabel)
-		{
-			this.npc = npc;
-			this.item = item;
-			this.itemId = itemId;
-			this.quantity = quantity;
-			this.oneIn = oneIn;
-			this.wait = wait;
-			this.waitBoosted = waitBoosted;
-			this.boostOneIn = boostOneIn;
-			this.boostLabel = boostLabel;
-		}
 
 		/** The rate this drop is priced by, or null with none. */
 		@Nullable
@@ -1110,6 +1099,7 @@ public class LootLog
 	}
 
 	/** One drop's standing. {@code oneIn} null is a collection item with no rate to price it. */
+	@AllArgsConstructor(access = AccessLevel.PACKAGE)
 	public static final class Drop
 	{
 		public final String item;
@@ -1134,21 +1124,6 @@ public class LootLog
 		/** "slayer-task", "kourend-easy-diary", or null. */
 		@Nullable
 		public final String boostWhen;
-
-		Drop(String item, int itemId, int obtained, int sinceLast, int watched, int boostedSinceLast, int boostedWatched,
-			@Nullable Double oneIn, @Nullable Double boostOneIn, @Nullable String boostWhen)
-		{
-			this.item = item;
-			this.itemId = itemId;
-			this.obtained = obtained;
-			this.sinceLast = sinceLast;
-			this.watched = watched;
-			this.boostedSinceLast = boostedSinceLast;
-			this.boostedWatched = boostedWatched;
-			this.oneIn = oneIn;
-			this.boostOneIn = boostOneIn;
-			this.boostWhen = boostWhen;
-		}
 
 		/** The rate pair, or null for a collection item with no rate. */
 		@Nullable

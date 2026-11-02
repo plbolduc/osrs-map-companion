@@ -31,6 +31,8 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -54,6 +56,7 @@ final class PatchStates
 	static final Decoded UNREADABLE = new Decoded(UNKNOWN, null, null, false, null);
 	private static final Map<String, Decoded[]> TABLE = load();
 
+	@AllArgsConstructor(access = AccessLevel.PACKAGE)
 	static final class Decoded
 	{
 		final String state;
@@ -61,15 +64,6 @@ final class PatchStates
 		final Integer stagesLeft;
 		final boolean newlyPlanted;
 		final Integer growthMinutes;
-
-		Decoded(String state, String produce, Integer stagesLeft, boolean newlyPlanted, Integer growthMinutes)
-		{
-			this.state = state;
-			this.produce = produce;
-			this.stagesLeft = stagesLeft;
-			this.newlyPlanted = newlyPlanted;
-			this.growthMinutes = growthMinutes;
-		}
 	}
 
 	static Decoded decode(String kind, int value)

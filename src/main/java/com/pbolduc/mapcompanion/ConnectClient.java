@@ -31,6 +31,8 @@ import com.google.inject.Singleton;
 import java.io.IOException;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.HttpUrl;
@@ -95,6 +97,7 @@ final class ConnectClient
 	static final int MAX_SENTENCE = 200;
 
 	/** What a press came back with: a code to keep as if pasted, or a sentence for the player. */
+	@AllArgsConstructor(access = AccessLevel.PRIVATE)
 	static final class Outcome
 	{
 		@Nullable
@@ -104,13 +107,6 @@ final class ConnectClient
 		final String name;
 		@Nullable
 		final String message;
-
-		private Outcome(@Nullable JoinCode joined, @Nullable String name, @Nullable String message)
-		{
-			this.joined = joined;
-			this.name = name;
-			this.message = message;
-		}
 
 		static Outcome joined(JoinCode joined, @Nullable String name)
 		{

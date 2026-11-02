@@ -28,6 +28,8 @@ package com.pbolduc.mapcompanion;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.coords.WorldPoint;
@@ -77,6 +79,7 @@ public class DeathWatcher
 	static final long TICK_MS = 600L;
 
 	/** A gravestone standing, as the game last gave its timer. Never changes after it is made. */
+	@AllArgsConstructor(access = AccessLevel.PACKAGE)
 	static final class Stone
 	{
 		/** Game ticks left, by the game's own timer. */
@@ -85,13 +88,6 @@ public class DeathWatcher
 		final int ticksFull;
 		/** When this stone was first seen standing: it is shown only under a death it can be from. */
 		final long sinceMs;
-
-		Stone(int ticksLeft, int ticksFull, long sinceMs)
-		{
-			this.ticksLeft = ticksLeft;
-			this.ticksFull = ticksFull;
-			this.sinceMs = sinceMs;
-		}
 
 		/** "8m left", rounded up as a countdown is, in the minutes the card's age is given in. */
 		String left()

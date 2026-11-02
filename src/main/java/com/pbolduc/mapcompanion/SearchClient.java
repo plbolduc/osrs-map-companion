@@ -37,6 +37,8 @@ import java.util.function.BooleanSupplier;
 import javax.annotation.Nullable;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.HttpUrl;
@@ -124,6 +126,7 @@ final class SearchClient
 	static final String ITEMS = "Items";
 
 	/** One thing the list shows: a place, or an item routed to its nearest source. */
+	@AllArgsConstructor(access = AccessLevel.PACKAGE)
 	static final class Hit
 	{
 		final String id;
@@ -159,22 +162,10 @@ final class SearchClient
 		{
 			this(id, name, line, line, section, tile, kind, itemId);
 		}
-
-		Hit(String id, String name, String line, String note, @Nullable String section, @Nullable int[] tile,
-			@Nullable String kind, @Nullable Integer itemId)
-		{
-			this.id = id;
-			this.name = name;
-			this.line = line;
-			this.note = note;
-			this.section = section;
-			this.tile = tile;
-			this.kind = kind;
-			this.itemId = itemId;
-		}
 	}
 
 	/** What the list says now. Never changes after it is made. */
+	@AllArgsConstructor(access = AccessLevel.PACKAGE)
 	static final class Result
 	{
 		static final Result EMPTY = new Result("", Collections.<Hit>emptyList(), null, null, false);
@@ -195,17 +186,6 @@ final class SearchClient
 		Result(String query, List<Hit> hits, @Nullable String suggestion, @Nullable String message, boolean searching)
 		{
 			this(query, hits, suggestion, message, searching, false);
-		}
-
-		Result(String query, List<Hit> hits, @Nullable String suggestion, @Nullable String message, boolean searching,
-			boolean refused)
-		{
-			this.query = query;
-			this.hits = hits;
-			this.suggestion = suggestion;
-			this.message = message;
-			this.searching = searching;
-			this.refused = refused;
 		}
 	}
 
