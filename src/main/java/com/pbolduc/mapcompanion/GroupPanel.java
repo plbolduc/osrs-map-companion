@@ -100,6 +100,10 @@ final class GroupPanel extends JPanel
 	private static final Color OFFLINE = new Color(159, 159, 169);
 	/** This member's own answer to a meetup, filled. */
 	static final Color CHOSEN = new Color(117, 94, 52);
+	/** How long before its start a meetup's countdown turns amber; see {@link #imminent}. */
+	static final long IMMINENT_MS = 15 * 60_000L;
+	/** The map's amber, as a font colour: the colour of a meetup's countdown once it is imminent. */
+	private static final String AMBER = String.format("#%06x", MapPin.AMBER.getRGB() & 0xFFFFFF);
 	/** A friend's button for the game's own world map; "Show on world map" does not fit beside Route. */
 	static final String WORLD_MAP = "World map";
 	/** A news line's picture: the game's 16px skill icons, and an item's sprite shrunk to match. */
@@ -607,8 +611,8 @@ final class GroupPanel extends JPanel
 		MapCompanionPanel.setWrapped(name, meetup.title, WIDTH - route.getPreferredSize().width - 4);
 		card.add(MapCompanionPanel.left(beside(name, route)));
 		JLabel when = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
-		MapCompanionPanel.setWrapped(when, when(meetup.startsAtMs, now, ZoneId.systemDefault(),
-			Locale.getDefault(Locale.Category.FORMAT)), WIDTH);
+		setWhen(when, when(meetup.startsAtMs, now, ZoneId.systemDefault(),
+			Locale.getDefault(Locale.Category.FORMAT)), meetup.startsAtMs, now, WIDTH);
 		card.add(MapCompanionPanel.left(when));
 		String where = meetupWhere(meetup);
 		if (!where.isEmpty())
@@ -796,26 +800,62 @@ final class GroupPanel extends JPanel
 			: days > 1 && days < 7 ? at.format(DateTimeFormatter.ofPattern("EEEE", Locale.ENGLISH))
 			: at.format(DateTimeFormatter.ofPattern("d MMM", Locale.ENGLISH));
 		String clock = at.format(DateTimeFormatter.ofPattern(MapCompanionPanel.clockPattern(locale), Locale.ENGLISH));
+		String countdown = countdown(startsAtMs, nowMs);
+		return countdown == null ? day + " " + clock : day + " " + clock + " · " + countdown;
+	}
+
+	/** The countdown a when line ends with: "in 25m", "in 3h 20m", "now", "started", or null past twelve hours. */
+	@Nullable
+	static String countdown(long startsAtMs, long nowMs)
+	{
 		long minutes = Math.round((startsAtMs - nowMs) / 60_000.0);
-		String countdown;
 		if (minutes <= 0)
 		{
-			countdown = minutes > -60 ? "now" : "started";
+			return minutes > -60 ? "now" : "started";
 		}
-		else if (minutes < 60)
+		if (minutes < 60)
 		{
-			countdown = "in " + minutes + "m";
+			return "in " + minutes + "m";
 		}
-		else if (minutes < 12 * 60)
+		if (minutes < 12 * 60)
 		{
 			long rest = minutes % 60;
-			countdown = "in " + (minutes / 60) + "h" + (rest == 0 ? "" : " " + rest + "m");
+			return "in " + (minutes / 60) + "h" + (rest == 0 ? "" : " " + rest + "m");
 		}
-		else
+		return null;
+	}
+
+	/**
+	 * Whether a meetup is about to start or under way: from a quarter of an hour before its start
+	 * until its line stops saying "now". The map's meetup card turns its countdown amber inside the
+	 * same window, where amber means a thing to act on, and outside it a countdown is only a time.
+	 */
+	static boolean imminent(long startsAtMs, long nowMs)
+	{
+		return startsAtMs - nowMs < IMMINENT_MS && !"started".equals(countdown(startsAtMs, nowMs));
+	}
+
+	/**
+	 * A meetup's when line — the Group tab's, or the one meetup's under Now — with its countdown in the
+	 * map's amber while the meetup is imminent, and the rest in the label's own colour. The words are
+	 * escaped here as {@link MapCompanionPanel#setWrapped} escapes them, since the line is markup.
+	 */
+	static void setWhen(JLabel label, String line, long startsAtMs, long nowMs, int width)
+	{
+		String countdown = imminent(startsAtMs, nowMs) ? countdown(startsAtMs, nowMs) : null;
+		int at = countdown == null ? -1 : line.lastIndexOf(countdown);
+		if (at < 0)
 		{
-			return day + " " + clock;
+			MapCompanionPanel.setWrapped(label, line, width);
+			return;
 		}
-		return day + " " + clock + " · " + countdown;
+		String html = "<html><body width='" + width + "'>" + MapCompanionPanel.escape(line.substring(0, at))
+			+ "<font color='" + AMBER + "'>" + MapCompanionPanel.escape(countdown) + "</font>"
+			+ MapCompanionPanel.escape(line.substring(at + countdown.length())) + "</body></html>";
+		if (!html.equals(label.getText()))
+		{
+			label.setText(html);
+		}
 	}
 
 	/** "5m ago", "2h ago": how old a friend's news is. */
