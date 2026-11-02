@@ -151,22 +151,34 @@ final class StarsClient
 		if (!active) return;
 		clientThread.invokeLater(() -> {
 			String server = pairing.serverUrl(), code = pairing.code(), profile = store.scopeKey();
-			boolean allowed = client.getGameState() == GameState.LOGGED_IN && profile != null
-				&& code != null && !code.isEmpty() && pairing.hasServerConsent(server, code);
+			GameState state = client.getGameState();
+			boolean connected = profile != null && code != null && !code.isEmpty() && pairing.hasServerConsent(server, code);
+			boolean allowed = connected && state == GameState.LOGGED_IN;
+			boolean between = connected && betweenWorlds(state);
 			Integer mining = allowed ? client.getRealSkillLevel(Skill.MINING) : null;
 			Integer total = allowed ? client.getTotalLevel() : null;
 			if (mining != null && mining < 1) mining = null;
 			if (total != null && total < 1) total = null;
 			Integer knownMining = mining, knownTotal = total;
-			SwingUtilities.invokeLater(() -> update(server, code, profile, allowed, knownMining, knownTotal));
+			SwingUtilities.invokeLater(() -> update(server, code, profile, allowed, between, knownMining, knownTotal));
 		});
 	}
 
-	private void update(String server, String code, String profile, boolean allowed, Integer mining, Integer total)
+	/**
+	 * A hop, a loading screen, and a dropped connection the game is still reconnecting: the same
+	 * character on the same connection, which is how the plugin's own stream treats all three. A
+	 * reconnect that fails ends on the login screen, and that is where the list is cleared.
+	 */
+	private static boolean betweenWorlds(GameState state)
+	{
+		return state == GameState.HOPPING || state == GameState.LOADING || state == GameState.CONNECTION_LOST;
+	}
+
+	private void update(String server, String code, String profile, boolean allowed, boolean between, Integer mining, Integer total)
 	{
 		if (!active) return;
 		/* The mailbox is this character's member's, so no character means no mailbox yet. */
-		String member = allowed ? identity.id() : null;
+		String member = allowed || between ? identity.id() : null;
 		if (member == null)
 		{
 			eligible = false;
@@ -203,6 +215,12 @@ final class StarsClient
 			model.preferences = saved == null ? new StarsModel.Preferences() : validPreferences(saved.preferences);
 		}
 		eligible = true;
+		/*
+		 * Between worlds the list, the pick, its words and a call in flight all stay, and nothing is
+		 * asked until the game is back on one: a hop costs no request and moves neither schedule. The
+		 * levels are not read there either, so the filters do not change under the player mid-hop.
+		 */
+		if (between) return;
 		model.miningLevel = mining;
 		model.skillTotal = total;
 		long now = System.currentTimeMillis();
