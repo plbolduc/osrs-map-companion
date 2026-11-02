@@ -70,6 +70,20 @@ public class MeetupReminderTest
 		assertEquals(1, reminder.due(moved, NOW + 65 * 60_000L, true, 15).size());
 	}
 
+	/** An untitled meetup is a meetup, not "somewhere", which would read as where it is. */
+	@Test
+	public void anUntitledMeetupIsAMeetup()
+	{
+		assertEquals(Collections.singletonList("A meetup starts in 1m"), new MeetupReminder().due(
+			Collections.singletonList(new MeetupReminder.Upcoming("hunt", null, NOW + 60_000L)), NOW, true, 5));
+		assertEquals(Collections.singletonList("A meetup starts in 1m"), new MeetupReminder().due(
+			Collections.singletonList(new MeetupReminder.Upcoming("hunt", "  ", NOW + 60_000L)), NOW, true, 5));
+		assertEquals(Collections.singletonList("A meetup is starting"), new MeetupReminder().due(
+			Collections.singletonList(new MeetupReminder.Upcoming("hunt", "", NOW)), NOW, true, 5));
+		assertEquals("a titled one keeps its title", Collections.singletonList("Meetup: Star hunt is starting"),
+			new MeetupReminder().due(Collections.singletonList(new MeetupReminder.Upcoming("hunt", "Star hunt", NOW)), NOW, true, 5));
+	}
+
 	@Test
 	public void aMeetupLongStartedIsNotNews()
 	{
