@@ -207,11 +207,8 @@ final class GroupPanel extends JPanel
 		meetHere.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
 		meetHere.setToolTipText("Make a meetup where you stand, on this world, and copy its link for your clan chat or Discord");
 		meetHere.addActionListener(e -> openForm(!formOpen));
-		JPanel head = new JPanel(new java.awt.BorderLayout());
+		JPanel head = MapCompanionPanel.bar(0, ColorScheme.DARK_GRAY_COLOR, meetupsHead, null, meetHere);
 		head.setName("group.meetupsHead");
-		head.setBackground(ColorScheme.DARK_GRAY_COLOR);
-		head.add(meetupsHead, java.awt.BorderLayout.WEST);
-		head.add(meetHere, java.awt.BorderLayout.EAST);
 		head.setBorder(new EmptyBorder(4, 0, 3, 0));
 		MapCompanionPanel.capped(head);
 		add(MapCompanionPanel.left(head));
@@ -1137,15 +1134,10 @@ final class GroupPanel extends JPanel
 	 */
 	private static JPanel beside(JLabel words, JButton button)
 	{
-		JPanel top = new JPanel(new java.awt.BorderLayout(4, 0));
-		top.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-		top.add(words, java.awt.BorderLayout.CENTER);
 		JPanel hug = new JPanel(new java.awt.BorderLayout());
 		hug.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		hug.add(button, java.awt.BorderLayout.NORTH);
-		top.add(hug, java.awt.BorderLayout.EAST);
-		MapCompanionPanel.capped(top);
-		return top;
+		return MapCompanionPanel.capped(MapCompanionPanel.bar(4, ColorScheme.DARKER_GRAY_COLOR, null, words, hug));
 	}
 
 	private static JPanel fill(Component component)

@@ -25,7 +25,6 @@
  */
 package com.pbolduc.mapcompanion;
 
-import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -228,11 +227,8 @@ final class NowCards extends JPanel
 		destinationPicture.setPreferredSize(square);
 		destinationPicture.setMinimumSize(square);
 		destinationPicture.setVisible(false);
-		JPanel named = new JPanel(new BorderLayout(DESTINATION_PICTURE_GAP, 0));
-		named.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-		named.add(destinationPicture, BorderLayout.WEST);
-		named.add(destinationName, BorderLayout.CENTER);
-		destination.add(left(named));
+		destination.add(left(MapCompanionPanel.bar(DESTINATION_PICTURE_GAP, ColorScheme.DARKER_GRAY_COLOR, destinationPicture,
+			destinationName, null)));
 		destinationDetail.setFont(destinationDetail.getFont().deriveFont(11f));
 		destinationDetail.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
 		destination.add(left(destinationDetail));

@@ -372,6 +372,27 @@ public class MapCompanionPanel extends PluginPanel
 		return row;
 	}
 
+	/**
+	 * A strip of up to three parts as BorderLayout lays them: west and east at their own widths, the centre
+	 * taking what is left. A part may be null. They are added west, centre, east, the order every strip
+	 * built by hand added them in, so the children keep the order the tests read their words in.
+	 */
+	static JPanel bar(int gap, Color background, @Nullable Component west, @Nullable Component center, @Nullable Component east)
+	{
+		JPanel bar = new JPanel(new BorderLayout(gap, 0));
+		bar.setBackground(background);
+		Component[] parts = {west, center, east};
+		String[] places = {BorderLayout.WEST, BorderLayout.CENTER, BorderLayout.EAST};
+		for (int i = 0; i < 3; i++)
+		{
+			if (parts[i] != null)
+			{
+				bar.add(parts[i], places[i]);
+			}
+		}
+		return bar;
+	}
+
 	/** No taller than it asks to be: a vertical BoxLayout stretches any child whose maximum allows it. */
 	static <T extends JComponent> T capped(T component)
 	{

@@ -25,7 +25,6 @@
  */
 package com.pbolduc.mapcompanion;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -323,11 +322,7 @@ final class RouteStepsView extends JPanel
 			}
 			/* Faded behind the current step, as the world map fades the pins of steps done. */
 			picture.setEnabled(place >= 0);
-			JPanel both = new JPanel(new BorderLayout(PICTURE_GAP, 0));
-			both.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-			both.add(number, BorderLayout.WEST);
-			both.add(picture, BorderLayout.CENTER);
-			lead = both;
+			lead = MapCompanionPanel.bar(PICTURE_GAP, ColorScheme.DARKER_GRAY_COLOR, number, picture, null);
 		}
 		int width = WIDTH - NUMBER - PICTURE_GAP - (slot ? PICTURE + PICTURE_GAP : 0);
 		JPanel words = MapCompanionPanel.column(ColorScheme.DARKER_GRAY_COLOR);
@@ -356,11 +351,8 @@ final class RouteStepsView extends JPanel
 				words.add(said);
 			}
 		}
-		JPanel row = new JPanel(new BorderLayout(PICTURE_GAP, 0));
-		row.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		JPanel row = MapCompanionPanel.bar(PICTURE_GAP, ColorScheme.DARKER_GRAY_COLOR, lead, words, null);
 		row.setBorder(new EmptyBorder(3, 0, 0, 0));
-		row.add(lead, BorderLayout.WEST);
-		row.add(words, BorderLayout.CENTER);
 		return MapCompanionPanel.left(row);
 	}
 
@@ -385,11 +377,7 @@ final class RouteStepsView extends JPanel
 			draw(picture, shows, sprites);
 		}
 		picture.setEnabled(!option.blocked);
-		JPanel row = new JPanel(new BorderLayout(PICTURE_GAP, 0));
-		row.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-		row.add(picture, BorderLayout.WEST);
-		row.add(pick, BorderLayout.CENTER);
-		return MapCompanionPanel.left(row);
+		return MapCompanionPanel.left(MapCompanionPanel.bar(PICTURE_GAP, ColorScheme.DARKER_GRAY_COLOR, picture, pick, null));
 	}
 
 	/** The first step of a way with the game's picture of what to click, or null when none has one. */
