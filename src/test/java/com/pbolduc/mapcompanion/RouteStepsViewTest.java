@@ -148,6 +148,25 @@ public class RouteStepsViewTest
 	}
 
 	/**
+	 * A Reroute that did not happen was said in the grey of the steps above it, so it read as one more
+	 * line of the route. It is said in the sidebar's refusal pink; Shortest Path's notice, which is
+	 * news rather than a refusal, keeps the line's grey.
+	 */
+	@Test
+	public void aRefusedRerouteIsSaidInPinkAndANoticeInGrey() throws IOException
+	{
+		receive();
+		route.refuse(RouteClient.NEEDS_TILE);
+		view.show(route.view());
+		assertEquals(MapCompanionPanel.REFUSED, label(RouteClient.NEEDS_TILE).getForeground());
+
+		route.follow(true);
+		route.stopFollowing(ShortestPath.TAKEN_OVER);
+		view.show(route.view());
+		assertEquals(ColorScheme.LIGHT_GRAY_COLOR, label(ShortestPath.TAKEN_OVER).getForeground());
+	}
+
+	/**
 	 * On a run's leg the stop's own line names the way, so the way line said it a second time; the
 	 * leg starts at its first step, and its length is the view's to hand This leg's heading.
 	 */

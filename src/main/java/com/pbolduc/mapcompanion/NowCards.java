@@ -290,6 +290,7 @@ final class NowCards extends JPanel
 		clueRouteButton.addActionListener(e -> routeToClue());
 		eventRouteButton.addActionListener(e -> routeToMeetup());
 		deathRouteButton.setName("now.death.route");
+		deathSaid.setName("now.death.said");
 		clueRouteButton.setName("now.clue.route");
 		eventRouteButton.setName("now.meetup.route");
 		clueRouteButton.setToolTipText("Plan the way to this step from where you stand. Its tile, or for a step that is words "
@@ -406,10 +407,11 @@ final class NowCards extends JPanel
 		if (message != null)
 		{
 			setWrapped(line, message, CARD_TEXT_WIDTH);
+			MapCompanionPanel.tone(line, said.refused());
 		}
 	}
 
-	/** The line a press's refusal is said in, under the buttons it came from. */
+	/** The line a press's refusal is said in, under the buttons it came from, in the refusal pink. */
 	private static JLabel said(JLabel line)
 	{
 		line.setFont(line.getFont().deriveFont(11f));

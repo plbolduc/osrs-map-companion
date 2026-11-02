@@ -28,9 +28,11 @@ package com.pbolduc.mapcompanion;
 import com.google.gson.Gson;
 import java.awt.Component;
 import java.awt.Container;
+import javax.swing.AbstractButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import net.runelite.client.callback.ClientThread;
+import net.runelite.client.ui.ColorScheme;
 import okhttp3.OkHttpClient;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -150,9 +152,35 @@ public class AnsweredWherePressedTest
 		draw(now + FarmRunClient.Said.CONFIRMATION_MS + 1_000L);
 		assertFalse(shown(named("group.message")));
 
-		card.sayUnderGroup(ConnectCard.INVITE_FAILED);
+		card.refuseUnderGroup(ConnectCard.INVITE_FAILED);
 		draw(now + 60_000L);
 		assertTrue("a refusal is still said a minute on", shown(named("group.message")));
+	}
+
+	/**
+	 * Every line under a group's press was one grey, so "Paste the invite a friend sent you…" read as
+	 * "Found an invite to KQX 482. Press Join." does. A press that did not happen is in the refusal
+	 * pink; a step on the way and a press that worked keep the line's grey.
+	 */
+	@Test
+	public void aRefusalIsPinkAndAStepOrAConfirmationIsGrey()
+	{
+		draw();
+		((AbstractButton) named("join.button")).doClick();
+		draw();
+		assertEquals(MapCompanionPanel.REFUSED,
+			label("Paste the invite a friend sent you, or press Connect to start your own group.").getForeground());
+		card.say("Found an invite to KQX 482. Press Join.");
+		draw();
+		assertEquals(ColorScheme.LIGHT_GRAY_COLOR, label("Found an invite to KQX 482. Press Join.").getForeground());
+
+		assertTrue(pairing.connect(JoinCode.parse("ABC234"), () -> true));
+		card.renameGroup(false);
+		draw();
+		assertEquals(MapCompanionPanel.REFUSED, label("Log in once while connected, then rename the group.").getForeground());
+		card.confirmUnderGroup("Invite copied.");
+		draw();
+		assertEquals(ColorScheme.LIGHT_GRAY_COLOR, label("Invite copied.").getForeground());
 	}
 
 	/**

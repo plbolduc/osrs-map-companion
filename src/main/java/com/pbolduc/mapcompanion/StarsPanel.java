@@ -101,7 +101,8 @@ final class StarsPanel extends JPanel
 	private static final Color CARD_INK = new Color(184, 184, 184);
 	private static final Color EDGE = new Color(65, 65, 65);
 	private static final Color MUTED = new Color(160, 160, 160);
-	private static final Color DANGER = new Color(239, 150, 150);
+	/** A site in the Wilderness has its name in the sidebar's pink for what cannot be done safely. */
+	private static final String WILDERNESS = String.format("#%06x", MapCompanionPanel.REFUSED.getRGB() & 0xffffff);
 	/** The column inside the sidebar's 10px border, and the text width that fits it. */
 	private static final int COLUMN = PluginPanel.PANEL_WIDTH - 20;
 	private static final int TEXT = COLUMN - 10;
@@ -351,6 +352,8 @@ final class StarsPanel extends JPanel
 		{
 			wrap(status, notice, TEXT);
 		}
+		/* Pink only for why there is no list: a held list, and how old it is, is not a refusal. */
+		MapCompanionPanel.tone(status, !loggedOut && model.feed == null && service.message != null);
 		/* Why the refresh failed is a hover away, so the line over the list stays short. */
 		status.setToolTipText(model.feed != null && service.message != null ? service.message : null);
 		RelayResponse.Destination destination = destinations.getDestination();
@@ -443,7 +446,7 @@ final class StarsPanel extends JPanel
 			BorderFactory.createEmptyBorder(5, 6, 5, 4)));
 		JPanel head = new JPanel(new BorderLayout(2, 0));
 		head.setBackground(box.getBackground());
-		String name = "<font color='" + (primary == null ? "#a0a0a0" : primary.wilderness ? "#ef9696" : "#ffffff") + "'>" + escape(site.name) + "</font>";
+		String name = "<font color='" + (primary == null ? "#a0a0a0" : primary.wilderness ? WILDERNESS : "#ffffff") + "'>" + escape(site.name) + "</font>";
 		String detail = primary == null ? "<font color='#a0a0a0'>" + (site.hiddenByFilters ? "Hidden by filters" : "No star right now") + "</font>"
 			: font(tierColour(primary.tier(elapsed)), "T" + primary.tier(elapsed)) + font(CARD_INK, " · W" + primary.world + " · ")
 				+ font(lifeColour(primary.left(elapsed), CARD_INK), StarsModel.timeLeft(primary.left(elapsed)))
@@ -667,6 +670,7 @@ final class StarsPanel extends JPanel
 			{
 				JLabel line = label("");
 				wrap(line, said.message, TEXT);
+				MapCompanionPanel.tone(line, said.refused());
 				selection.add(line);
 			}
 		}

@@ -125,13 +125,11 @@ final class ConnectCard extends JPanel
 	/* The status card: connection, group and a short summary; the snapshot preview is in Advanced. */
 	private final JLabel dot = new JLabel("●");
 	private final JLabel statusLabel = new JLabel();
-	/** The first line's own colour, for every line that is not a refusal. */
-	private final Color statusInk = statusLabel.getForeground();
 	/**
-	 * The first line while the map refuses this member: the pink the sidebar gives what cannot be
-	 * done, a star site's danger and a route step's unmet requirement.
+	 * The first line's own colour, for every line that is not a refusal. While the map refuses this
+	 * member it is {@link MapCompanionPanel#REFUSED}, the pink the sidebar gives what cannot be done.
 	 */
-	private static final Color REFUSED = new Color(239, 150, 150);
+	private final Color statusInk = statusLabel.getForeground();
 	/** What the map holds to refusing, from the status card's refresh for the buttons' just after it. */
 	@Nullable
 	private RelayClient.Refused refused;
@@ -579,7 +577,7 @@ final class ConnectCard extends JPanel
 		String server = pairing.serverUrl();
 		if (!pairing.approvedMap(server) && !confirmMap())
 		{
-			say("Connection cancelled.");
+			refuse("Connection cancelled.");
 			return;
 		}
 		ask();
@@ -653,7 +651,7 @@ final class ConnectCard extends JPanel
 		}
 		else
 		{
-			say(message);
+			refuse(message);
 		}
 	}
 
@@ -713,16 +711,19 @@ final class ConnectCard extends JPanel
 
 		if (pasted == null || pasted.trim().isEmpty())
 		{
-			say("There is nothing to paste. Copy the invite first, then press Paste.");
+			refuse("There is nothing to paste. Copy the invite first, then press Paste.");
 			return;
 		}
 		joinField.setText(pasted.trim());
 		/* The start of the message, which says what it is, rather than the tail of a link's token. */
 		joinField.setCaretPosition(0);
 		JoinCode found = JoinCode.parse(pasted);
-		say(found == null
-			? "No invite or code found. Ask a friend in the group for an invite."
-			: found.invite != null ? "Found an invite to " + JoinCode.forDisplay(found.code) + ". Press Join."
+		if (found == null)
+		{
+			refuse("No invite or code found. Ask a friend in the group for an invite.");
+			return;
+		}
+		say(found.invite != null ? "Found an invite to " + JoinCode.forDisplay(found.code) + ". Press Join."
 			: "Found " + JoinCode.forDisplay(found.code) + ". Press Join.");
 	}
 
@@ -745,7 +746,7 @@ final class ConnectCard extends JPanel
 		JoinCode joined = JoinCode.parse(entered.isEmpty() ? pairingCode() : entered);
 		if (joined == null)
 		{
-			say(pairingCode().isEmpty()
+			refuse(pairingCode().isEmpty()
 				? "Paste the invite a friend sent you, or press Connect to start your own group."
 				: "Paste an invite, or the code from osrs-map.com's Companion panel.");
 			return;
@@ -757,7 +758,7 @@ final class ConnectCard extends JPanel
 		}
 		if (!connect(joined))
 		{
-			say("Connection cancelled.");
+			refuse("Connection cancelled.");
 			return;
 		}
 		joinField.setText("");
@@ -773,12 +774,20 @@ final class ConnectCard extends JPanel
 			() -> recommendedSharing.offer(pairing.serverLabel()));
 	}
 
-	/** One line under the join field, hidden when there is nothing to say. */
+	/** One line under the join field, hidden when there is nothing to say: here, a step on the way. */
 	void say(String message)
 	{
 		joinConfirmedAtMs = 0L;
 		setWrapped(joinMessage, message);
+		MapCompanionPanel.tone(joinMessage, false);
 		joinMessage.setVisible(true);
+	}
+
+	/** The same line, for a press there that did not happen: in the refusal pink until the next press. */
+	void refuse(String message)
+	{
+		say(message);
+		MapCompanionPanel.tone(joinMessage, true);
 	}
 
 	/** The same line, for a press that did what it asked: news for a moment, then gone. */
@@ -797,13 +806,21 @@ final class ConnectCard extends JPanel
 		joinMessage.setVisible(false);
 	}
 
-	/** One line under Copy invite and Switch ▾, for what was pressed there. */
+	/** One line under Copy invite and Switch ▾, for what was pressed there: here, a press on its way. */
 	void sayUnderGroup(String message)
 	{
 		saidFor = pairingCode();
 		groupConfirmedAtMs = 0L;
 		setWrapped(groupMessage, message);
+		MapCompanionPanel.tone(groupMessage, false);
 		groupMessage.setVisible(true);
+	}
+
+	/** The same line, for a press that did not happen. */
+	void refuseUnderGroup(String message)
+	{
+		sayUnderGroup(message);
+		MapCompanionPanel.tone(groupMessage, true);
 	}
 
 	/** The same line, for a press that did what it asked: news for a moment, then gone. */
@@ -813,13 +830,21 @@ final class ConnectCard extends JPanel
 		groupConfirmedAtMs = System.currentTimeMillis();
 	}
 
-	/** One line in the status card, under the Rename group… link that was pressed. */
+	/** One line in the status card, under the Rename group… link that was pressed: here, a rename on its way. */
 	private void sayOnCard(String message)
 	{
 		saidFor = pairingCode();
 		cardConfirmedAtMs = 0L;
 		setWrapped(cardMessage, message, CARD_TEXT_WIDTH);
+		MapCompanionPanel.tone(cardMessage, false);
 		cardMessage.setVisible(true);
+	}
+
+	/** The same line, for a rename that did not happen. */
+	private void refuseOnCard(String message)
+	{
+		sayOnCard(message);
+		MapCompanionPanel.tone(cardMessage, true);
 	}
 
 	/** The same line, for a rename that landed. */
@@ -959,6 +984,7 @@ final class ConnectCard extends JPanel
 	void renameGroup(boolean fromCard)
 	{
 		Consumer<String> answer = fromCard ? this::sayOnCard : this::sayUnderGroup;
+		Consumer<String> refused = fromCard ? this::refuseOnCard : this::refuseUnderGroup;
 		Consumer<String> renamed = fromCard ? this::confirmOnCard : this::confirmUnderGroup;
 		String server = pairing.serverUrl();
 		String code = pairingCode();
@@ -966,7 +992,7 @@ final class ConnectCard extends JPanel
 		String secret = member == null ? null : pairing.secret(server, code, member);
 		if (server == null || member == null || secret == null)
 		{
-			answer.accept("Log in once while connected, then rename the group.");
+			refused.accept("Log in once while connected, then rename the group.");
 			return;
 		}
 		JTextField typed = nameField(pairing.name(code));
@@ -1005,7 +1031,7 @@ final class ConnectCard extends JPanel
 			}
 			else
 			{
-				answer.accept(outcome.message != null ? outcome.message : ConnectClient.FAILED);
+				refused.accept(outcome.message != null ? outcome.message : ConnectClient.FAILED);
 			}
 			refresh.run();
 		}));
@@ -1244,7 +1270,7 @@ final class ConnectCard extends JPanel
 		setWrapped(statusLabel, refused == null
 			? statusWords(paired, ready, asking, connectFailed, health, plugin.getStatus(), group)
 			: asking ? "Connecting…" : refusedWords(refused), CARD_TEXT_WIDTH - 18 - SidebarIcons.SIZE - 4);
-		statusLabel.setForeground(paired && shown == Health.ERROR ? REFUSED : statusInk);
+		statusLabel.setForeground(paired && shown == Health.ERROR ? MapCompanionPanel.REFUSED : statusInk);
 		statusLabel.setToolTipText(live ? "Group code " + JoinCode.forDisplay(code) + " · " + dot.getToolTipText()
 			: dot.getToolTipText());
 		/* Before a group, no second line: the map's address is in Settings, and is not news. */
@@ -1436,7 +1462,7 @@ final class ConnectCard extends JPanel
 		String memberId = identity.id();
 		if (memberId == null)
 		{
-			sayUnderGroup("Log in to a character to copy an invite.");
+			refuseUnderGroup("Log in to a character to copy an invite.");
 			return;
 		}
 		copyingInvite = true;
@@ -1500,7 +1526,7 @@ final class ConnectCard extends JPanel
 		String message = inviteText(invite, status, heldSecret, mapUrl.get(), code);
 		if (message == null)
 		{
-			sayUnderGroup(INVITE_FAILED);
+			refuseUnderGroup(INVITE_FAILED);
 			return;
 		}
 		boolean linked = invite != null && invite.url != null && !invite.url.isEmpty();
@@ -1513,7 +1539,7 @@ final class ConnectCard extends JPanel
 		catch (RuntimeException e)
 		{
 			log.debug("could not copy invite", e);
-			sayUnderGroup("Couldn't put the invite on the clipboard.");
+			refuseUnderGroup("Couldn't put the invite on the clipboard.");
 			return;
 		}
 		showCopied(true);

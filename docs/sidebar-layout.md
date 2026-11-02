@@ -538,8 +538,8 @@ of `docs/plan-where-to-go-for-a-task.md` in `osrs-stars-map`.
   first of its steps that has one, the ring or the tablet, as the website's route chip leads with
   its teleport; a way not open yet is grey, its picture faded, and still shows its steps.
 - **Reroute** sits beside **Dismiss**, and plans again from where you stand. While the answer is
-  on its way the card says *Planning from where you stand…*, and a refusal is one plain sentence
-  under the steps. A route ranked from no position says so above the steps. A destination with no
+  on its way the card says *Planning from where you stand…*, and a refusal is one sentence under
+  the steps, in the refusal pink. A route ranked from no position says so above the steps. A destination with no
   way yet, a star pinned on Stars or a place the map sent bare, has **Route** in Reroute's cell
   instead: it asks by the destination's own tile, as a star's Route does, so the card that shows a
   place can always lead there.
@@ -579,7 +579,8 @@ Step 8. Each card under *Now* that names a place gains the way there, planned fr
 *Hard clue* over *Coordinate · dig at 2896, 3119*, whose Route appears when the step names a tile.
 In Stars, Route sits beside *Pin destination* for a precise site; an approximate one has **Open on
 map** there instead. While the map answers the button reads *Planning…*, and a refusal is one line
-under it, in the map's own words when it gives them, as it does for a clue step it cannot place.
+under it in the refusal pink, in the map's own words when it gives them, as it does for a clue step
+it cannot place.
 The answer fills the destination's card, as a pick from Search does, and a star's is drawn under the
 star on Stars too (see *Stars* under 29 October). The line a press writes under the destination's
 name is written once, so it holds nothing that ages: a meetup's day and clock, *Today 7:52 PM*, with
@@ -765,6 +766,17 @@ still true and still asks something of the player. Meet here's form keeps its ow
 is open, and Cancel puts the refusal away with the form, where it went on under the heading. A
 meetup made closes the form once: it closed it again each time the form was opened, so a second
 meetup could not be made until the map's answer about the first was replaced.
+
+A line a press leaves says by its ink, too, whether the press happened. A refusal, wherever a press
+is answered — under a Route or Reroute, a search pick, a run's buttons, a friend's Route, a meetup's
+answers, Meet here's form, Join and Paste, Copy invite, Rename group… and Apply — is in the pink the
+status card gives a group the map refuses, the rose the website draws its own refusals in, where it
+was the grey of a step's detail: *The map is busy.* read as one more line of the route, and on the
+Slayer card *The map could not be reached.* ran on into *Only Slayer Tower counts for this task.* as
+one paragraph. A press on its way, a wait being kept and a confirmation keep the line's grey, as
+Shortest Path's notices do, and the death card keeps the card's ink, since nothing has gone wrong.
+The status card's own lines are as they were. It is one pink, from one constant: a step's unmet
+gate, Slayer's *Needs* line and a Wilderness star site's name are drawn in it too.
 
 ### A meetup's Route
 

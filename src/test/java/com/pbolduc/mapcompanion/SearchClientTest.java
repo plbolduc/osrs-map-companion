@@ -225,6 +225,30 @@ public class SearchClientTest
 		assertTrue("typing inside the wait waits as long", (long) waiting.get(0)[1] > 19_000L);
 	}
 
+	/**
+	 * Whether the box's line says the search did not happen, which it draws in the refusal pink: the
+	 * map refusing it is, while a wait being kept, a letter short and an empty answer are not.
+	 */
+	@Test
+	public void aRefusalIsMarkedAndAWaitIsNot() throws Exception
+	{
+		SearchClient busy = client(429, "{\"reason\":\"busy\"}", "20", null);
+		busy.enter("bank");
+		until(() -> !busy.result().searching);
+		assertTrue(busy.result().refused);
+		busy.enter("banker");
+		assertFalse("a wait being kept goes by itself", busy.result().refused);
+		busy.typed("b");
+		assertEquals(SearchClient.ONE_MORE, busy.result().message);
+		assertFalse(busy.result().refused);
+
+		SearchClient empty = client(200, "{\"rows\":[],\"items\":[]}", null, null);
+		empty.enter("zezima");
+		until(() -> !empty.result().searching);
+		assertEquals(SearchClient.NOTHING, empty.result().message);
+		assertFalse(empty.result().refused);
+	}
+
 	@Test
 	public void sendsNothingWithoutAMemberToAskAs() throws Exception
 	{

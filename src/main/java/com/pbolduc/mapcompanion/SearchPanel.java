@@ -201,8 +201,11 @@ final class SearchPanel extends JPanel
 			: shown != null && shown.message != null ? named(shown.message)
 			: result.searching ? "Searching…"
 			: result.message;
+		/* A pick or a search that did not happen, in the refusal pink; what is on its way, or an empty answer, in grey. */
+		boolean refused = shown != null && (shown.planning || shown.message != null) ? shown.refused()
+			: !result.searching && result.refused;
 		boolean live = press.ready();
-		String words = folded + "|" + live + "|" + result.query + "|" + result.suggestion + "|" + line + "|"
+		String words = folded + "|" + live + "|" + result.query + "|" + result.suggestion + "|" + line + "|" + refused + "|"
 			+ result.hits.size() + "|" + hitsKey(result);
 		if (Objects.equals(words, drawn))
 		{
@@ -247,6 +250,7 @@ final class SearchPanel extends JPanel
 		if (line != null)
 		{
 			MapCompanionPanel.setWrapped(status, line, WIDTH + 16);
+			MapCompanionPanel.tone(status, refused);
 		}
 		rows.revalidate();
 		rows.repaint();

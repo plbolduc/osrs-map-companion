@@ -210,6 +210,29 @@ public class RunCardsTest
 			ended.indexOf("Run ended.") > ended.indexOf("Start run"));
 	}
 
+	/**
+	 * A refusal under a run's card was the grey of its stops' notes, so "The map doesn't know where
+	 * your boat is." read as one more line of the card. It is in the refusal pink; "Run ended." keeps
+	 * the line's grey, since that press did what it asked.
+	 */
+	@Test
+	public void aRefusalIsSaidInPinkAndRunEndedInGrey() throws Exception
+	{
+		refresh();
+		status = 409;
+		body = "{\"error\":\"" + NO_BOAT + "\"}";
+		press(ports, "Start run");
+		refresh();
+		assertEquals(MapCompanionPanel.REFUSED, label(ports, NO_BOAT).getForeground());
+
+		state.acceptFor(identity.id(), EPOCH, portRun(), 1, System.currentTimeMillis());
+		refresh();
+		status = 204;
+		press(ports, "End run");
+		refresh();
+		assertEquals(ColorScheme.LIGHT_GRAY_COLOR, label(ports, "Run ended.").getForeground());
+	}
+
 	/** A refused Start is no run either: the tasks stay, and so does the button that can try again. */
 	@Test
 	public void aRefusedStartKeepsTheTasksAndStartRun() throws Exception

@@ -97,6 +97,15 @@ public class MapCompanionPanel extends PluginPanel
 	/** The same, inside a card, which takes eight pixels a side for its own inset. */
 	static final int CARD_TEXT_WIDTH = TEXT_WIDTH - 16;
 
+	/**
+	 * The sidebar's one pink, for what did not happen or cannot be done: a press refused, said under
+	 * the button that made it; a requirement not met; a group the map refuses, on the status card;
+	 * a star site in the Wilderness. The map's own panel draws its refusals in rose and its progress
+	 * and confirmations in ordinary ink, and so does this, so a glance after a press says whether it
+	 * worked. The death card is not a refusal and keeps the card's ink.
+	 */
+	static final Color REFUSED = new Color(239, 150, 150);
+
 	private final MapCompanionConfig config;
 	private final MapCompanionPlugin plugin;
 	private final DestinationState destinationState;
@@ -672,6 +681,15 @@ public class MapCompanionPanel extends PluginPanel
 		{
 			label.setText(html);
 		}
+	}
+
+	/**
+	 * The ink of a line a press left under its button: {@link #REFUSED} while it says the press did
+	 * not happen, and the line's grey for a press on its way, a wait being kept, or one that worked.
+	 */
+	static void tone(JLabel line, boolean refused)
+	{
+		line.setForeground(refused ? REFUSED : ColorScheme.LIGHT_GRAY_COLOR);
 	}
 
 	/** Null-safe: names and titles arrive from the map, and Gson leaves an absent field null. */

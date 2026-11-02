@@ -125,6 +125,12 @@ final class MeetupClient
 		{
 			return message != null && (!confirms() || now - atMs < FarmRunClient.Said.CONFIRMATION_MS);
 		}
+
+		/** A write that did not happen: everything said but one on its way and a meetup made. */
+		boolean refused()
+		{
+			return !sending && message != null && !confirms();
+		}
 	}
 
 	static final class Answer
