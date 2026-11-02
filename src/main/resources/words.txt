@@ -113,3 +113,58 @@ group.allOnMapTip=Your whole group is on the world map already
 group.drawOneTip='s dot on the game's world map, without the rest of the group
 group.inside= is inside an instance. Route works once they're out.
 group.openMeetupTip=Open this meetup: who is coming, Route and your answer
+
+# StarsPanel: the Stars tab.
+stars.routeTip=Plan the way to this star from where you stand. The world is printed in the steps; hopping is left to the game's world switcher.
+stars.safeTip=Hide Wilderness, PvP, high-risk and Deadman
+stars.noWorldList=World list unavailable: PvP and Deadman filters cannot be checked.
+stars.openTip=Show the possible spots on osrs-map.com in your browser
+stars.approximate=This spot is approximate. Open website shows where it might be.
+stars.keptHere=These filters are kept for this character. Tick to keep them the same here and on
+stars.synced=Your filters and favourites are the same here and on
+stars.notSynced=Not synced yet; these filters are kept for this character.
+stars.noLevels=Levels not read yet: every tier and world shows
+
+# SlayerPanel: the Slayer card and its places.
+slayer.getOne=Get one from a Slayer master and it shows here.
+slayer.nextTask=Get your next task from a Slayer master.
+slayer.noneOpen=No place for this task is open to you yet.
+slayer.settling=The current assignment appears here once the game has settled.
+slayer.stale=Waiting for the map to reconnect. These are the last places received.
+slayer.orderTip=Rank potential with an area attack, or one target at a time
+slayer.wikiTip=Open this task's source page in your browser
+slayer.licenceTip=The licence for the Wiki's locations and rates
+slayer.pinTip=Pin this spot as your destination: world map, arrow and Home
+slayer.rankingSingle=Ranking again for one target at a time…
+slayer.rankingSafe=Ranking again without Wilderness places…
+slayer.rankingAll=Ranking again with Wilderness places…
+
+# DropLuckPanel and DropLuckView: Drop luck.
+luck.noDrops=No notable drops yet. Kills are counted; a drop gets odds where its rate is on file.
+luck.unpinTip=Unpin: the card goes back to the last monster you killed
+luck.pinTip=Keep this drop on the card when you are not killing anything
+luck.recordedNoRate= recorded. No drop rate on file, so no odds.
+
+# FarmRunPanel, PortTasksPanel and RunView: farm and port-task runs.
+farm.afterPortRun=Start a farm run after the port run ends.
+farm.needsPatches=Ready now reads your patches. Turn on Tasks and timers in Settings.
+farm.needsContract=Turn on Tasks and timers in Settings to plan your contract.
+farm.kindTip=Choose a run the map can build from your character's shared readings
+port.needsBoats=Turn on Progress and travel, which shares your boats, to plan these as one run.
+port.boardOnce=Board your boat once so the run knows its hold.
+port.startTip=Ask the map for one run over every task you hold, starting from your boat
+run.changed=Your port tasks have changed since this run was planned. Reroute plans from what you hold now.
+run.birdhousePending=Ticks when Time Tracking sees it seeded
+run.unfollowTip=Keep this run and stop following it until you press Follow
+
+# RouteStepsView, ShortestPath and SearchPanel: a route's steps, Shortest Path and Search.
+steps.noOrigin=Planned without your position. Reroute plans from where you stand.
+steps.drawing=Shortest Path is drawing the walk for step
+steps.drawsEach=Shortest Path draws each walk when you reach it.
+path.takenOver=Shortest Path was given another path, so this route stopped drawing there. Follow draws it again.
+search.held=The map plans one route at a time, a few seconds apart. Pick again in a moment.
+search.boxTip=Search the map: a place, a character, a monster or an item. A pick plans the way there.
+
+# UpdateNotice: the one chat line an update says, on the first login after it. Every release writes
+# it again for what that release changed, and moves CompanionVersion.LINE_VERSION with it.
+update.line=connect and invite from the sidebar, farm and port-task runs, Route here on the world map, your step over the game, star routes on Stars, and sharing in six switches.

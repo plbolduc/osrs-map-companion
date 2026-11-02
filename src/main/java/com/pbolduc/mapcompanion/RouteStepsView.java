@@ -206,7 +206,7 @@ final class RouteStepsView extends JPanel
 
 		boolean nowhere = view.origin == null && !view.rerouted;
 		origin.setVisible(nowhere && !there);
-		MapCompanionPanel.setWrapped(origin, "Planned without your position. Reroute plans from where you stand.", WIDTH);
+		MapCompanionPanel.setWrapped(origin, Words.of("steps.noOrigin"), WIDTH);
 
 		steps.setVisible(!there);
 		steps.removeAll();
@@ -496,9 +496,9 @@ final class RouteStepsView extends JPanel
 		}
 		if (drawing == view.step + 1)
 		{
-			return "Shortest Path is drawing the walk for step " + drawing + ".";
+			return Words.of("steps.drawing") + " " + drawing + ".";
 		}
-		return "Shortest Path draws each walk when you reach it.";
+		return Words.of("steps.drawsEach");
 	}
 
 	/** Everything this view would say, so an unchanged second does not rebuild it. */

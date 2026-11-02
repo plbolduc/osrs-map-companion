@@ -98,7 +98,7 @@ final class SearchPanel extends JPanel
 	/** The rows drawn while a pick would not go, whose tooltip says how long the map's wait has left. */
 	private final List<JPanel> heldRows = new ArrayList<>();
 	/** Such a row's tooltip while a route plans, with no wait to count. */
-	private static final String HELD = "The map plans one route at a time, a few seconds apart. Pick again in a moment.";
+	private static final String HELD = Words.of("search.held");
 	/** The row whose pick is out or was refused, so a refusal can name it; null once answered or typed past. */
 	@Nullable
 	private SearchClient.Hit picked;
@@ -129,7 +129,7 @@ final class SearchPanel extends JPanel
 		box.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		box.setPreferredSize(new Dimension(MapCompanionPanel.CARD_TEXT_WIDTH + 16, 28));
 		box.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28));
-		box.setToolTipText("Search the map: a place, a character, a monster or an item. A pick plans the way there.");
+		box.setToolTipText(Words.of("search.boxTip"));
 		MapCompanionPanel.left(box);
 		MapCompanionPanel.onEdit(box.getDocument(), this::changed);
 		box.addActionListener(e ->

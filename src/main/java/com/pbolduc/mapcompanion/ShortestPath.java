@@ -79,8 +79,7 @@ class ShortestPath
 	/** Shortest Path answers on the next client frame; this long without an answer is no plugin. */
 	static final int ANSWER_TICKS = 2;
 
-	static final String TAKEN_OVER = "Shortest Path was given another path, so this route stopped drawing there. "
-		+ "Follow draws it again.";
+	static final String TAKEN_OVER = Words.of("path.takenOver");
 
 	private final Consumer<PluginMessage> post;
 	@Nullable

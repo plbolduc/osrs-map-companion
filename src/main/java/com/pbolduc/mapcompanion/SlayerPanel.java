@@ -59,9 +59,9 @@ final class SlayerPanel extends JPanel
 	private static final Color MUTED = ColorScheme.LIGHT_GRAY_COLOR;
 	private static final Color GOLD = new Color(237, 189, 100);
 	static final String NO_TASK = "No Slayer task";
-	static final String GET_ONE = "Get one from a Slayer master and it shows here.";
-	static final String NEXT_TASK = "Get your next task from a Slayer master.";
-	static final String NONE_OPEN = "No place for this task is open to you yet.";
+	static final String GET_ONE = Words.of("slayer.getOne");
+	static final String NEXT_TASK = Words.of("slayer.nextTask");
+	static final String NONE_OPEN = Words.of("slayer.noneOpen");
 	private final SlayerState state;
 	private final MapCompanionConfig config;
 	private final ConfigManager configManager;
@@ -143,10 +143,10 @@ final class SlayerPanel extends JPanel
 		 * task is read, since a place and its Route are no use to a finished task.
 		 */
 		boolean finished = reading.task != null && reading.remaining != null && reading.remaining == 0;
-		String message = reading.task == null ? reading.settled ? GET_ONE : "The current assignment appears here once the game has settled."
+		String message = reading.task == null ? reading.settled ? GET_ONE : Words.of("slayer.settling")
 						 : finished ? NEXT_TASK
 						 : waiting ? rankingAgain(view.previous, view.order, view.hideWilderness)
-						 : view.options == null ? "Waiting for places from the map…" : view.stale ? "Waiting for the map to reconnect. These are the last places received." : reading.area;
+						 : view.options == null ? "Waiting for places from the map…" : view.stale ? Words.of("slayer.stale") : reading.area;
 		MapCompanionPanel.show(status, message, WIDTH);
 		if (!Objects.equals(shownTask, reading.task))
 		{
@@ -237,7 +237,7 @@ final class SlayerPanel extends JPanel
 				order.setFont(order.getFont().deriveFont(11f));
 				order.setPreferredSize(new java.awt.Dimension(WIDTH, order.getPreferredSize().height));
 				order.setName("slayer.order");
-				order.setToolTipText("Rank potential with an area attack, or one target at a time");
+				order.setToolTipText(Words.of("slayer.orderTip"));
 				order.addActionListener(e -> choose(order.getSelectedIndex() == 1 ? "single" : "best", config.slayerHideWilderness()));
 				body.add(MapCompanionPanel.left(order));
 				JCheckBox wilderness = new JCheckBox("Hide Wilderness", shownHide);
@@ -283,7 +283,7 @@ final class SlayerPanel extends JPanel
 				}
 			}
 			JButton wiki = MapCompanionPanel.linkButton("OSRS Wiki ↗");
-			wiki.setToolTipText("Open this task's source page in your browser");
+			wiki.setToolTipText(Words.of("slayer.wikiTip"));
 			wiki.addActionListener(e -> LinkBrowser.browse(wikiUrl(shown.page)));
 			body.add(wiki);
 			/*
@@ -294,7 +294,7 @@ final class SlayerPanel extends JPanel
 			{
 				JButton license = MapCompanionPanel.linkButton("CC BY-NC-SA 3.0 ↗");
 				license.setFont(license.getFont().deriveFont(10f));
-				license.setToolTipText("The licence for the Wiki's locations and rates");
+				license.setToolTipText(Words.of("slayer.licenceTip"));
 				license.addActionListener(e -> LinkBrowser.browse("https://creativecommons.org/licenses/by-nc-sa/3.0/"));
 				body.add(license);
 			}
@@ -354,7 +354,7 @@ final class SlayerPanel extends JPanel
 		routeButtons.add(route);
 		actions.add(route);
 		JButton pin = MapCompanionPanel.smallButton("Pin");
-		pin.setToolTipText("Pin this spot as your destination: world map, arrow and Home");
+		pin.setToolTipText(Words.of("slayer.pinTip"));
 		pin.setName(source + ".map");
 		pin.addActionListener(e ->
 		{
@@ -389,11 +389,11 @@ final class SlayerPanel extends JPanel
 	{
 		if (!Objects.equals(previous.order, order))
 		{
-			return "single".equals(order) ? "Ranking again for one target at a time…" : "Ranking again for best spot…";
+			return "single".equals(order) ? Words.of("slayer.rankingSingle") : "Ranking again for best spot…";
 		}
 		if (previous.hideWilderness != hide)
 		{
-			return hide ? "Ranking again without Wilderness places…" : "Ranking again with Wilderness places…";
+			return hide ? Words.of("slayer.rankingSafe") : Words.of("slayer.rankingAll");
 		}
 		return "Waiting for places from the map…";
 	}

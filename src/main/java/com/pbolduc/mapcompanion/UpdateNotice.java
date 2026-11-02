@@ -45,11 +45,10 @@ final class UpdateNotice
 	static final String KEY_TOLD = "updateNoticeVersion";
 
 	/**
-	 * What this version changed, in a sentence a player reads between kills. Written for
-	 * {@link CompanionVersion#LINE_VERSION}, and written again by every release.
+	 * What this version changed, in a sentence a player reads between kills: update.line in
+	 * words.txt. Written for {@link CompanionVersion#LINE_VERSION}, and written again by every release.
 	 */
-	static final String LINE = "connect and invite from the sidebar, farm and port-task runs, Route here on the world map, "
-		+ "your step over the game, star routes on Stars, and sharing in six switches.";
+	static final String LINE = Words.of("update.line");
 
 	/** Where the rest of it is written, as words: a game message cannot carry a link. */
 	static final String WHERE = "What's new: osrs-map.com/whats-new";
