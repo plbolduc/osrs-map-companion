@@ -25,11 +25,15 @@
  */
 package com.pbolduc.mapcompanion;
 
+import java.awt.AlphaComposite;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridLayout;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -37,10 +41,13 @@ import java.util.Objects;
 import javax.annotation.Nullable;
 import javax.swing.BoxLayout;
 import javax.swing.BorderFactory;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import net.runelite.client.ui.ColorScheme;
+import net.runelite.client.util.ImageUtil;
 
 /**
  * One received run as the sidebar follows it: its stops, the current leg's steps, and Follow,
@@ -113,6 +120,8 @@ final class RunView extends JPanel
 	private final JLabel paused = label(11f, MapPin.AMBER);
 	private final JLabel message = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
 	private boolean bringOpen;
+	/** The checklist's teleports the client can see are not carried, as of its last rebuild. */
+	private int missing;
 	private String shown;
 	private String shownRun;
 
@@ -295,6 +304,7 @@ final class RunView extends JPanel
 			shownRun = null;
 			stops.removeAll();
 			bring.removeAll();
+			missing = 0;
 		}
 		showBring();
 		DestinationRoute.View route = routes.view();
@@ -382,17 +392,60 @@ final class RunView extends JPanel
 			+ " " + name + "</body></html>";
 	}
 
+	/**
+	 * The bank checklist, a picture to a line. A teleport the client can see is not carried is drawn
+	 * amber, the colour the bank overlay outlines it in, beside its picture greyed; one carried, or
+	 * one nothing here can check, is drawn as it is, since no claim is made about it.
+	 */
 	private void showBringList(FarmRunState.View view)
 	{
 		bring.removeAll();
+		missing = 0;
 		for (RelayResponse.FarmBring line : view.run.bring)
 		{
 			Boolean carrying = line.kind.equals("teleport") ? CapabilityEvaluator.carrying(line.name, view.carried) : null;
+			boolean absent = Boolean.FALSE.equals(carrying);
+			missing += absent ? 1 : 0;
 			String words = line.name + (line.uses == null ? "" : " · " + line.uses + (line.uses == 1 ? " leg" : " legs"))
-						   + (Boolean.FALSE.equals(carrying) ? " · not on you" : "")
+						   + (absent ? " · not on you" : "")
 						   + (line.note == null ? "" : " · " + line.note);
-			bring.add(MapCompanionPanel.left(wrapped(words, 11f, ColorScheme.LIGHT_GRAY_COLOR)));
+			Picture picture = new Picture(absent);
+			bringPicture(picture, line, view.run);
+			JPanel row = new JPanel(new BorderLayout(4, 0));
+			row.setOpaque(false);
+			row.setBorder(BorderFactory.createEmptyBorder(1, 0, 1, 0));
+			JPanel top = new JPanel(new BorderLayout());
+			top.setOpaque(false);
+			top.add(picture, BorderLayout.NORTH);
+			row.add(top, BorderLayout.WEST);
+			JLabel said = label(11f, absent ? MapPin.AMBER : ColorScheme.LIGHT_GRAY_COLOR);
+			MapCompanionPanel.setWrapped(said, words, WIDTH - PICTURE - 4);
+			row.add(said, BorderLayout.CENTER);
+			bring.add(MapCompanionPanel.left(row));
 		}
+	}
+
+	/**
+	 * A checklist line's picture: for a teleport, the one its stop's own step carries, the map naming
+	 * the stop's item as the checklist names it, else the item by name; for a supply, the item by its
+	 * exact name, so "Rake" has one and "4 herb seeds" none.
+	 */
+	private void bringPicture(JLabel picture, RelayResponse.FarmBring line, RelayResponse.FarmRun run)
+	{
+		if (!line.kind.equals("teleport"))
+		{
+			sprites.itemNamed(picture, line.name, PICTURE);
+			return;
+		}
+		for (RelayResponse.FarmStop stop : run.stops)
+		{
+			if (line.name.equalsIgnoreCase(stop.item) && firstPictured(stop) != null)
+			{
+				picture(picture, stop);
+				return;
+			}
+		}
+		sprites.farmTravelItem(picture, line.name, PICTURE);
 	}
 
 	private void showStops(FarmRunState.View view)
@@ -513,10 +566,57 @@ final class RunView extends JPanel
 		}
 	}
 
+	/**
+	 * The fold's opener: closed, it carries its answer, how many teleports are not on you, when any
+	 * are, and is drawn amber while it does. One run of one colour: a coloured span after the words is
+	 * placed by their width at one scale, so when the sidebar is painted at another, as the README's
+	 * pictures are, a gap opens in front of it.
+	 */
 	private void showBring()
 	{
-		before.setText((bringOpen ? "▾ " : "▸ ") + "Before you leave");
+		boolean counts = !bringOpen && missing > 0;
+		before.setText((bringOpen ? "▾ " : "▸ ") + "Before you leave" + (counts ? " · " + missing + " not on you" : ""));
+		before.setForeground(counts ? MapPin.AMBER : ColorScheme.LIGHT_GRAY_COLOR);
 		bring.setVisible(before.isVisible() && bringOpen);
+	}
+
+	/**
+	 * A 16-pixel picture in a fixed slot, so the words beside it start in one column whether or not a
+	 * picture comes. One for an item not on you is drawn grey and faint, as Drop luck draws a drop not
+	 * had yet, the collection log's own way of saying "not yet"; greyed on every paint, since the
+	 * sprite may land after the row is built. Nothing is drawn behind it.
+	 */
+	static final class Picture extends JLabel
+	{
+		private static final long serialVersionUID = 1L;
+		final boolean faded;
+
+		Picture(boolean faded)
+		{
+			this.faded = faded;
+			Dimension size = new Dimension(PICTURE, PICTURE);
+			setPreferredSize(size);
+			setMinimumSize(size);
+			setMaximumSize(size);
+			setHorizontalAlignment(CENTER);
+		}
+
+		@Override
+		protected void paintComponent(Graphics g)
+		{
+			Icon icon = getIcon();
+			if (!faded || !(icon instanceof ImageIcon) || !(((ImageIcon) icon).getImage() instanceof BufferedImage))
+			{
+				super.paintComponent(g);
+				return;
+			}
+			BufferedImage image = (BufferedImage) ((ImageIcon) icon).getImage();
+			Graphics2D g2 = (Graphics2D) g.create();
+			g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.35f));
+			g2.drawImage(ImageUtil.grayscaleImage(image), (getWidth() - image.getWidth()) / 2,
+				(getHeight() - image.getHeight()) / 2, null);
+			g2.dispose();
+		}
 	}
 
 	private static JPanel column()
