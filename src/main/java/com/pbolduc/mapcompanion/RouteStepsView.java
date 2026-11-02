@@ -224,8 +224,7 @@ final class RouteStepsView extends JPanel
 			steps.add(step(i, list.get(i), place, slot, sprites, i == sails ? current.voyage.gates : null));
 		}
 
-		boat.setVisible(view.boatAway != null);
-		MapCompanionPanel.setWrapped(boat, view.boatAway == null ? "" : boatAwayLine(view.boatAway), WIDTH);
+		MapCompanionPanel.show(boat, view.boatAway == null ? null : boatAwayLine(view.boatAway), WIDTH);
 
 		arrived.setVisible(there);
 		MapCompanionPanel.setWrapped(arrived, "Arrived", WIDTH);
@@ -258,8 +257,7 @@ final class RouteStepsView extends JPanel
 			otherWays.add(pictured ? led(option, pick, sprites) : pick);
 		}
 
-		drawn.setVisible(shortestPath != null);
-		MapCompanionPanel.setWrapped(drawn, shortestPath == null ? "" : shortestPath, WIDTH);
+		MapCompanionPanel.show(drawn, shortestPath, WIDTH);
 
 		sayMessage(view);
 
@@ -277,8 +275,7 @@ final class RouteStepsView extends JPanel
 		String status = view.rerouting ? "Planning from where you stand…"
 			: MapWait.waits(view.message) ? MapWait.tryAgain(view.message, view.nextRerouteMs - System.currentTimeMillis())
 			: view.message;
-		message.setVisible(status != null);
-		MapCompanionPanel.setWrapped(message, status == null ? "" : status, WIDTH);
+		MapCompanionPanel.show(message, status, WIDTH);
 		MapCompanionPanel.tone(message, !view.rerouting && view.refused);
 	}
 

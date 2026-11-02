@@ -1217,11 +1217,7 @@ final class ConnectCard extends JPanel
 		statusLabel.setToolTipText(live ? "Group code " + JoinCode.forDisplay(code) + " · " + dot.getToolTipText()
 			: dot.getToolTipText());
 		/* Before a group, no second line: the map's address is in Settings, and is not news. */
-		groupLabel.setVisible(paired && !live);
-		if (paired && !live)
-		{
-			setWrapped(groupLabel, group, CARD_TEXT_WIDTH);
-		}
+		MapCompanionPanel.showKeeping(groupLabel, paired && !live ? group : null, CARD_TEXT_WIDTH);
 		groupLabel.setToolTipText(paired ? "Group code " + JoinCode.forDisplay(code) : null);
 		/* Not under a group that refuses the player: the map would refuse the rename too. */
 		nameLink.setVisible(refused == null
@@ -1231,11 +1227,7 @@ final class ConnectCard extends JPanel
 		 * Character fields are separate from membership: all opt-ins off still sends the latter
 		 * after Connect. The tooltip and Advanced preview keep the precise disclosure reachable.
 		 */
-		sharingLabel.setVisible(live);
-		if (live)
-		{
-			setWrapped(sharingLabel, sharingLine(), CARD_TEXT_WIDTH);
-		}
+		MapCompanionPanel.showKeeping(sharingLabel, live ? sharingLine() : null, CARD_TEXT_WIDTH);
 		sharingLabel.setToolTipText(paired ? sharingList() : null);
 	}
 
@@ -1295,12 +1287,8 @@ final class ConnectCard extends JPanel
 		joinBlock.setVisible(!paired || !pairing.hasServerConsent() || joinOpen || step != null);
 		/* "Have an invite?" says which way in the field is; once in a group it is only Join another. */
 		joinHeading.setVisible(!paired || step != null);
-		nextStep.setVisible(step != null);
 		refusedGap.setVisible(step != null);
-		if (step != null)
-		{
-			setWrapped(nextStep, step);
-		}
+		MapCompanionPanel.showKeeping(nextStep, step, CARD_TEXT_WIDTH + 16);
 		/* A line about a field that has folded away has nothing to point at. */
 		if (!joinBlock.isVisible())
 		{
