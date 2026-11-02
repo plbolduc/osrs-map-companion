@@ -226,11 +226,11 @@ public class SidebarWordsTest
 	@Test
 	public void aDeathSaysWhenAndWhichFloorWithTheTileBehindAHover()
 	{
-		assertEquals("You died just now", MapCompanionPanel.deathLine(30_000L, 0));
-		assertEquals("You died 7m ago", MapCompanionPanel.deathLine(7 * 60_000L + 5_000L, 0));
-		assertEquals("You died 7m ago on floor 1", MapCompanionPanel.deathLine(7 * 60_000L, 1));
-		assertEquals("3222, 3218", MapCompanionPanel.deathTile(3222, 3218, 0));
-		assertEquals("3222, 3218 (floor 1)", MapCompanionPanel.deathTile(3222, 3218, 1));
+		assertEquals("You died just now", NowCards.deathLine(30_000L, 0));
+		assertEquals("You died 7m ago", NowCards.deathLine(7 * 60_000L + 5_000L, 0));
+		assertEquals("You died 7m ago on floor 1", NowCards.deathLine(7 * 60_000L, 1));
+		assertEquals("3222, 3218", NowCards.deathTile(3222, 3218, 0));
+		assertEquals("3222, 3218 (floor 1)", NowCards.deathTile(3222, 3218, 1));
 	}
 
 	/** The death card's button opens the website and says so; "Show on map" also meant the game's map. */
@@ -239,7 +239,7 @@ public class SidebarWordsTest
 	{
 		assertEquals("Open website", MapCompanionPanel.OPEN_WEBSITE);
 		/* An explicit ground floor matters too: it must not resolve to a named place upstairs. */
-		assertEquals("/map?p=3222,3218,0", MapCompanionPanel.deathMapPath(3222, 3218, 0));
-		assertEquals("/map?p=2272,4058,2", MapCompanionPanel.deathMapPath(2272, 4058, 2));
+		assertEquals("/map?p=3222,3218,0", NowCards.deathMapPath(3222, 3218, 0));
+		assertEquals("/map?p=2272,4058,2", NowCards.deathMapPath(2272, 4058, 2));
 	}
 }

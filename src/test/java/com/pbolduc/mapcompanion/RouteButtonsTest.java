@@ -51,8 +51,8 @@ public class RouteButtonsTest
 		coordinate.text = "01 degrees 18 minutes south 14 degrees 15 minutes east";
 		coordinate.coordTile = ClueReader.parseCoordinate(coordinate.text);
 		assertSame(coordinate.coordTile, ClueReader.routeTile(coordinate));
-		assertEquals("Hard clue", MapCompanionPanel.clueTitle(coordinate.tier));
-		assertEquals("Coordinate · dig at 2896, 3119", MapCompanionPanel.clueDetail(coordinate));
+		assertEquals("Hard clue", NowCards.clueTitle(coordinate.tier));
+		assertEquals("Coordinate · dig at 2896, 3119", NowCards.clueDetail(coordinate));
 
 		CompanionSnapshot.Clue picture = new CompanionSnapshot.Clue();
 		picture.tier = "beginner";
@@ -69,7 +69,7 @@ public class RouteButtonsTest
 		words.text = "Speak to the bartender of the Rusty Anchor.";
 		assertNull(ClueReader.routeTile(words));
 		assertTrue(ClueReader.routesByWords(words));
-		assertEquals("Speak to the bartender of the Rusty Anchor.", MapCompanionPanel.clueDetail(words));
+		assertEquals("Speak to the bartender of the Rusty Anchor.", NowCards.clueDetail(words));
 		assertFalse("a step with a tile goes as that tile", ClueReader.routesByWords(coordinate));
 		assertFalse(ClueReader.routesByWords(picture));
 		assertNull(ClueReader.routeTile(null));
@@ -81,9 +81,9 @@ public class RouteButtonsTest
 	{
 		CompanionSnapshot.Clue unread = new CompanionSnapshot.Clue();
 		unread.tier = "elite";
-		assertEquals("Elite clue", MapCompanionPanel.clueTitle(unread.tier));
-		assertEquals("Read the scroll to see its step", MapCompanionPanel.clueDetail(unread));
-		assertEquals("Clue scroll", MapCompanionPanel.clueTitle(null));
+		assertEquals("Elite clue", NowCards.clueTitle(unread.tier));
+		assertEquals("Read the scroll to see its step", NowCards.clueDetail(unread));
+		assertEquals("Clue scroll", NowCards.clueTitle(null));
 	}
 
 	/** A clue or a death the player does not share leaves in a Route press, so the README says so. */
