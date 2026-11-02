@@ -38,6 +38,7 @@ import net.runelite.api.ItemContainer;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.plugins.cluescrolls.clues.BeginnerMapClue;
+import net.runelite.client.plugins.cluescrolls.clues.MapClue;
 
 /**
  * The clue step being carried, when one is.
@@ -242,8 +243,8 @@ public class ClueReader
 
 	/**
 	 * Where a Route press for this clue goes: the coordinate's dig spot or the beginner map's tile,
-	 * or null for a step that is words, which a press asks about by its words instead
-	 * ({@link #routesByWords}).
+	 * or null for a step that is words or a map known by its scroll, which a press sends as the clue
+	 * instead ({@link #routesByClue}).
 	 */
 	@Nullable
 	static CompanionSnapshot.Tile routeTile(@Nullable CompanionSnapshot.Clue clue)
@@ -256,13 +257,26 @@ public class ClueReader
 	}
 
 	/**
-	 * Whether a Route press sends this clue by its words: a step read off the scroll that names no
-	 * tile, whose place the map finds in its own clue table. The words leave only in that press.
+	 * Whether a Route press sends this clue as the clue itself: a step read off the scroll that names
+	 * no tile, whose place the map finds in its own clue table, or a map above beginner, whose scroll
+	 * alone says where. The words or the scroll leave only in that press.
 	 */
-	static boolean routesByWords(@Nullable CompanionSnapshot.Clue clue)
+	static boolean routesByClue(@Nullable CompanionSnapshot.Clue clue)
 	{
 		return clue != null && clue.tier != null && routeTile(clue) == null
-			&& clue.text != null && !clue.text.trim().isEmpty();
+			&& ((clue.text != null && !clue.text.trim().isEmpty()) || mapScroll(clue));
+	}
+
+	/**
+	 * Whether the scroll is a map whose picture is the item itself: every map above beginner is a
+	 * scroll of its own, which RuneLite's clue plugin knows by item id, and the map keeps the same
+	 * table by the same id. So the picture's place needs neither the picture nor any words, and the
+	 * press can send the scroll as it would send words. Beginner pictures share one item, so only
+	 * the opened window tells them apart ({@link #onMapWidget}) and they go as a tile instead.
+	 */
+	static boolean mapScroll(@Nullable CompanionSnapshot.Clue clue)
+	{
+		return clue != null && clue.itemId != null && MapClue.forItemId(clue.itemId) != null;
 	}
 
 	private boolean carried(int itemId)

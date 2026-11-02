@@ -645,6 +645,13 @@ and the press sends the clue as the snapshot carries it; the card takes the name
 map reads from the words, and an emote's way goes by its STASH unit first. A step with a tile still
 goes as that tile, so the words leave only when they are what the map needs.
 
+A map above beginner has neither words nor a tile, so its card said *Read the scroll to see its step*
+over a scroll the player had just read, with no Route. Each such map is a scroll of its own, which
+RuneLite's clue plugin and the map's table both know by item id, so Route now sends the clue as a
+worded step is sent, with its tier and scroll alone, and the map names the picture's place; the
+card says *Map · Route finds where it shows*. Nothing new goes over the wire. A beginner's pictures
+share one scroll, so they still go as the tile of the picture opened.
+
 ### The farm run's picker steps aside
 
 The farm run card kept its kind of run and *Start run* above a run being walked, and there is one run

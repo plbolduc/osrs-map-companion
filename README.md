@@ -25,7 +25,7 @@ Reroute and Follow a key of your own. The website uses the progress and travel c
 to suggest routes around your account's quests, diaries, items and transport unlocks.
 
 You can also plan a route to a friend, a meetup or a precise star site, back to where you died,
-and to the step of the clue you carry: a coordinate, a beginner map, or a step in words, which the
+and to the step of the clue you carry: a coordinate, a map, or a step in words, which the
 map places for you. Or right-click any spot on the game's world map and choose **Route here**.
 
 <p>
@@ -251,8 +251,9 @@ Reroute does, so the way is planned from there.
 **Route**, beside your clue, your last death, a star or a meetup, sends the tile you are standing on
 and the tile it goes to, once per press. That includes your clue's tile and where you died when you
 do not share them: they leave in that one request and the map plans with them and keeps neither.
-For a clue step that is words, Route sends the clue instead, its tier, words and scroll, the same
-way. Your clue is read in this client whether or not you share it, so the sidebar can offer Route.
+For a clue step that is words, or a map above beginner, Route sends the clue instead, its tier, any
+words and its scroll, the same way. Your clue is read in this client whether or not you share it, so
+the sidebar can offer Route.
 
 **Start run** sends your chosen run kind and the tile you stand on, once per press, even with
 position sharing off. A run's **Reroute** also sends its id and which numbered stops are
