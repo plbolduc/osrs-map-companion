@@ -182,14 +182,10 @@ final class NowCards extends JPanel
 	/** Which Route button a press came from, so its answer is said under this card. */
 	static final String DESTINATION = "destination";
 	/* Each Route's own tooltip, which the map's wait stands in for while it greys the button; see MapWait#tip. */
-	private static final String CLUE_ROUTE_TIP = "Plan the way to this step from where you stand. Its tile, or for a step "
-		+ "that is words or a map the clue itself, go to the map in this request only, whether or not you share your clue; "
-		+ "the map plans with them and does not keep them.";
-	private static final String MEETUP_ROUTE_TIP = "Plan the way to this meetup from where you stand. Nobody is told you are coming.";
-	private static final String REROUTE_TIP = "Plan the way again from where you stand. Sends your tile to the map once; "
-		+ "the map plans with it and does not keep it.";
-	private static final String ROUTE_TIP = "Plan the way here from where you stand. Sends your tile and this one to the map once; "
-		+ "the map plans with them and does not keep them.";
+	private static final String CLUE_ROUTE_TIP = Words.of("now.clueRouteTip");
+	private static final String MEETUP_ROUTE_TIP = Words.of("meetup.routeTip");
+	private static final String REROUTE_TIP = Words.of("now.rerouteTip");
+	private static final String ROUTE_TIP = Words.of("now.routeTip");
 
 	NowCards(MapCompanionConfig config, DestinationState destinationState, DeathWatcher deathWatcher,
 		DestinationMarker destinationMarker, DestinationRoute destinationRoute, RouteClient routeClient,
@@ -269,7 +265,7 @@ final class NowCards extends JPanel
 			destinationRoute.follow(route == null || !route.following);
 			refresh.run();
 		});
-		dismissButton.setToolTipText("Hide this destination on this client. The map is not told.");
+		dismissButton.setToolTipText(Words.of("now.dismissTip"));
 		dismissButton.addActionListener(e ->
 		{
 			destinationState.dismiss();
@@ -302,13 +298,9 @@ final class NowCards extends JPanel
 	{
 		if (following)
 		{
-			return "Keep this route and stop following it until you press Follow"
-				+ (drawable ? ", and clear the path Shortest Path drew" : "");
+			return Words.of("now.unfollowTip") + (drawable ? Words.of("now.clearPath") : "");
 		}
-		return !drawable ? "Show the step you're on in a box over the game"
-			: box ? "Show the step you're on in a box over the game, and have Shortest Path draw each walking step. "
-				+ "It is sent nothing for a teleport or a ride."
-			: "Have Shortest Path draw each walking step of this route. It is sent nothing for a teleport or a ride.";
+		return !drawable ? Words.of("now.boxTip") : box ? Words.of("now.boxAndPathTip") : Words.of("now.pathTip");
 	}
 
 	/**
@@ -664,14 +656,8 @@ final class NowCards extends JPanel
 				graveBar.setMaximumValue(stone.ticksFull);
 				graveBar.setValue(stone.ticksLeft);
 			}
-			deathMapButton.setToolTipText(config.shareDeath()
-										  ? "Open osrs-map.com at the tile where you died"
-										  : "Open osrs-map.com at the tile where you died. Sharing it is off, so it leaves this "
-										  + "client only in the address of the page this opens, and only when you press it.");
-			String routeBackTip = config.shareDeath()
-				? "Plan the way back from where you stand"
-				: "Plan the way back from where you stand. Sharing it is off, so the tile goes to the map in "
-				+ "this request only, and the map plans with it and does not keep it.";
+			deathMapButton.setToolTipText(config.shareDeath() ? Words.of("now.deathMapTip") : Words.of("now.deathMapUnsharedTip"));
+			String routeBackTip = config.shareDeath() ? Words.of("now.routeBackTip") : Words.of("now.routeBackUnsharedTip");
 			List<JButton> deathRow = new ArrayList<>();
 			deathRow.add(deathMapButton);
 			if (ready)
