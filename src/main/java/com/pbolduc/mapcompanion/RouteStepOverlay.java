@@ -41,7 +41,7 @@ import net.runelite.client.util.Text;
 
 /**
  * The step being walked, in a small box over the game, so a followed route can be walked with the
- * sidebar closed: where it goes, the step as the sidebar numbers it, and the step's own detail.
+ * sidebar closed: where it goes, the step the sidebar marks, and the step's own detail.
  *
  * <p>Only while the route is followed, which the player chose, and gone once arrived; the scene's
  * tile, the minimap's dot and the arrow already say where the step ends. Nothing inside an
@@ -52,6 +52,10 @@ import net.runelite.client.util.Text;
  * in the tile label's words, whole, and with the world the label gives while the player is on
  * another. A destination's name was typed by somebody in the group, and an overlay draws colour
  * tags, so every line has its tags taken out first.
+ *
+ * <p>A step keeps the number its pin carries on the world map. A run's leg has no step pins, and its
+ * stop's number heads the box as it heads the stop's pin, so on a leg the step is its words alone:
+ * a second number under the first would point at nothing on the map.
  */
 class RouteStepOverlay extends OverlayPanel
 {
@@ -69,14 +73,17 @@ class RouteStepOverlay extends OverlayPanel
 	private final MapCompanionConfig config;
 	private final DestinationState destinations;
 	private final DestinationRoute route;
+	private final FarmRunRoute run;
 
 	@Inject
-	RouteStepOverlay(Client client, MapCompanionConfig config, DestinationState destinations, DestinationRoute route)
+	RouteStepOverlay(Client client, MapCompanionConfig config, DestinationState destinations, DestinationRoute route,
+		FarmRunRoute run)
 	{
 		this.client = client;
 		this.config = config;
 		this.destinations = destinations;
 		this.route = route;
+		this.run = run;
 		setPosition(OverlayPosition.TOP_LEFT);
 	}
 
@@ -93,7 +100,7 @@ class RouteStepOverlay extends OverlayPanel
 			return null;
 		}
 		RelayResponse.Destination destination = destinations.getDestination();
-		Box box = box(route.view(), destination == null ? null : destination.name);
+		Box box = box(destination);
 		if (box == null)
 		{
 			return null;
@@ -102,7 +109,7 @@ class RouteStepOverlay extends OverlayPanel
 		/*
 		 * A line, which wraps: RuneLite's title component centres a single line, and a long name
 		 * overruns it on both sides. Bold keeps it the heading, where a farm run's "2. Catherby" over
-		 * "1. Use Catherby tablet" in one weight reads as a list.
+		 * "Use Catherby tablet" in one weight reads as a list.
 		 */
 		panelComponent.getChildren().add(LineComponent.builder()
 			.left(title(box, destination, client.getWorld()))
@@ -132,9 +139,28 @@ class RouteStepOverlay extends OverlayPanel
 		}
 	}
 
-	/** The box for a route as it stands, or null when nothing is being followed to a step. */
+	/** The box as {@link #render} draws it: the route followed now, a run's leg read as one. */
+	@Nullable
+	Box box(@Nullable RelayResponse.Destination destination)
+	{
+		DestinationRoute.View view = route.view();
+		return box(view, destination == null ? null : destination.name, run.ownsDestinationRoute(view));
+	}
+
+	/** The box for a destination's route as it stands, or null when nothing is being followed to a step. */
 	@Nullable
 	static Box box(@Nullable DestinationRoute.View view, @Nullable String name)
+	{
+		return box(view, name, false);
+	}
+
+	/**
+	 * The box for a route as it stands, or null when nothing is being followed to a step.
+	 *
+	 * @param leg whether the route is a run's leg, whose steps have no pins to share a number with
+	 */
+	@Nullable
+	static Box box(@Nullable DestinationRoute.View view, @Nullable String name, boolean leg)
 	{
 		if (view == null || !view.following || !view.hasRoute() || view.arrived())
 		{
@@ -149,7 +175,8 @@ class RouteStepOverlay extends OverlayPanel
 		String named = DestinationSceneOverlay.name(name, NAME_MAX);
 		String title = named == null ? "Route" : named;
 		String detail = step.detail == null || Text.removeTags(step.detail).trim().isEmpty() ? null : Text.removeTags(step.detail).trim();
-		return new Box(title, Text.removeTags(RouteStepsView.stepLine(view.step, step, false)), detail);
+		String line = leg ? step.title : RouteStepsView.stepLine(view.step, step, false);
+		return new Box(title, Text.removeTags(line), detail);
 	}
 
 	/** The box's first line: the destination's name, and its world while the player is on another. */
