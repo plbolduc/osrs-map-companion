@@ -396,6 +396,10 @@ of `docs/plan-where-to-go-for-a-task.md` in `osrs-stars-map`.
 - **A teleport step's picture** sits before its number: the item's sprite or the spell's icon, at
   16px, as the card's sprite for that row. The map sends the game's id for it and the client's own
   cache draws it; a walk, a ride, or a teleport the map has no id for stays words alone.
+- **Beside the destination's name**, when a Route pressed here made it, is the picture the row that
+  asked drew: the clue's scroll, a search row's sprite or world-map icon, a friend's disc as the
+  world map draws them, at 16px. It stays with that press's answer, so a destination the map sends
+  has none, and it is never sent: the request is built from the id, the clue and the tile alone.
 - **The current step** is marked with ▸ and drawn bold and white; the steps behind it go grey. It
   moves on when you stand within four tiles of where it ends, on its floor. Inside a raid's rooms
   nothing moves, because the tile there is not a place.

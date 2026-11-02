@@ -316,7 +316,7 @@ final class SearchPanel extends JPanel
 		picture.setHorizontalAlignment(SwingConstants.CENTER);
 		picture.setVerticalAlignment(SwingConstants.TOP);
 		picture.setPreferredSize(new Dimension(PICTURE, PICTURE));
-		picture(picture, hit);
+		picture(picture, hit, PICTURE);
 		row.add(picture, BorderLayout.WEST);
 		JPanel words = MapCompanionPanel.column(ColorScheme.DARKER_GRAY_COLOR);
 		words.setOpaque(false);
@@ -382,8 +382,11 @@ final class SearchPanel extends JPanel
 		};
 	}
 
-	/** The row's picture, from the game: an item's sprite, a world-map icon, or the character dot. */
-	private void picture(JLabel picture, SearchClient.Hit hit)
+	/**
+	 * The row's picture, from the game: an item's sprite, a world-map icon, or the character dot,
+	 * fitted to {@code box}. The destination's card draws the same one beside a pick's answer.
+	 */
+	private void picture(JLabel picture, SearchClient.Hit hit, int box)
 	{
 		if ("npc".equals(hit.kind))
 		{
@@ -396,18 +399,18 @@ final class SearchPanel extends JPanel
 		}
 		if (hit.itemId != null)
 		{
-			sprites.item(picture, hit.itemId, PICTURE);
+			sprites.item(picture, hit.itemId, box);
 			return;
 		}
 		if (SearchClient.ITEMS.equals(hit.section))
 		{
-			sprites.itemNamed(picture, hit.name, PICTURE);
+			sprites.itemNamed(picture, hit.name, box);
 			return;
 		}
 		int sprite = spriteFor(hit.kind, hit.section);
 		if (sprite > 0)
 		{
-			sprites.sprite(picture, sprite, PICTURE);
+			sprites.sprite(picture, sprite, box);
 		}
 	}
 
@@ -457,7 +460,8 @@ final class SearchPanel extends JPanel
 		WorldPoint stood = hit.tile == null ? null : new WorldPoint(hit.tile[0], hit.tile[1], hit.tile[2]);
 		picked = hit;
 		typedPast = false;
-		press.press(RoutePress.Target.place(SOURCE, hit.id, hit.name, stood, note(hit)));
+		press.press(RoutePress.Target.place(SOURCE, hit.id, hit.name, stood, note(hit))
+			.showing((label, box) -> picture(label, hit, box)));
 		refresh();
 	}
 

@@ -294,7 +294,8 @@ public class GroupState
 
 	/**
 	 * A Route to where a friend stands: their dot's tile, under the name their row gives them, with
-	 * their world and where they are in words as the destination's line.
+	 * their world and where they are in words as the destination's line, and their disc beside it as
+	 * the world map draws them. The disc has no presence dot: the card is not where they are now.
 	 */
 	static RoutePress.Target routeTarget(RelayResponse.MemberDot dot, @Nullable List<RelayResponse.RosterRow> roster)
 	{
@@ -310,8 +311,11 @@ public class GroupState
 			}
 		}
 		String name = row != null ? row.name : MapPin.safe(dot.name);
+		String called = name == null || name.isEmpty() ? "Member" : name;
+		java.awt.Color colour = GroupPanel.colour(row != null && row.colour != null ? row.colour : dot.colour);
 		return RoutePress.Target.tile(source(dot.id), new net.runelite.api.coords.WorldPoint(dot.x, dot.y, dot.plane),
-			name == null || name.isEmpty() ? "Member" : name, dot.world, row == null ? null : row.near);
+			called, dot.world, row == null ? null : row.near)
+			.showing((label, box) -> GameSprites.show(label, MapPin.memberDisc(colour, called), box));
 	}
 
 	@Nullable
