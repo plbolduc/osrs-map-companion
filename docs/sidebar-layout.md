@@ -498,7 +498,8 @@ fields that are on.
 The six switches are drawn as the step's rows are, bold, with a line under a partly shared group that
 starts under the switch's words; the loot row says *· kept two weeks* in Settings as in the step,
 because a player who turns it on there is owed the same notice. The name box sits under *Character
-name* now that its fold is gone. Painted at 225px with the review's renderers: Settings is 335px with
+name* now that its fold is gone, starting under the switch's words as a partly shared group's line
+does, rather than at the page's edge. Painted at 225px with the review's renderers: Settings is 335px with
 the switches the one press leaves on (359 before), and 409px with two groups partly shared and the
 name box out, where the same state was 457 with *Name and death location* open; *What each one sends*
 adds 316px when opened. The step after Connect is 532px closed and 1,054px with its fold open, as it
