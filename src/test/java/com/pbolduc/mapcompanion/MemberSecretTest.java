@@ -346,7 +346,11 @@ public class MemberSecretTest
 		 * standing credential, and the window exists to be read — and screenshotted into a channel
 		 * when somebody is asking for help. So it is named and never spelled out.
 		 */
-		String panel = read("src/main/java/com/pbolduc/mapcompanion/MapCompanionPanel.java");
+		/* The whole sidebar: the frame and the three parts it builds. The preview is Settings'. */
+		String panel = read("src/main/java/com/pbolduc/mapcompanion/MapCompanionPanel.java")
+			+ read("src/main/java/com/pbolduc/mapcompanion/ConnectCard.java")
+			+ read("src/main/java/com/pbolduc/mapcompanion/NowCards.java")
+			+ read("src/main/java/com/pbolduc/mapcompanion/SettingsPage.java");
 
 		assertTrue("the preview should say which header a snapshot carries", panel.contains(HEADER));
 		assertFalse("the preview must not print the secret itself",

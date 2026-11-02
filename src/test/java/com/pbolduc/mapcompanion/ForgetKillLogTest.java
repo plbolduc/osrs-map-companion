@@ -56,7 +56,7 @@ public class ForgetKillLogTest
 	public void onePressAloneDoesNotClearTheLog()
 	{
 		assertTrue(log.hasLog());
-		assertFalse(MapCompanionPanel.forgetKillLog(log, () -> false));
+		assertFalse(SettingsPage.forgetKillLog(log, () -> false));
 		assertTrue("the press was not followed by a yes", log.hasLog());
 		assertEquals(1, log.snapshot().npcs.get(0).kills);
 	}
@@ -64,7 +64,7 @@ public class ForgetKillLogTest
 	@Test
 	public void aYesClearsIt()
 	{
-		assertTrue(MapCompanionPanel.forgetKillLog(log, () -> true));
+		assertTrue(SettingsPage.forgetKillLog(log, () -> true));
 		assertFalse(log.hasLog());
 	}
 }
