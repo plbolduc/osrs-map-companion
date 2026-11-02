@@ -145,16 +145,15 @@ final class RunView extends JPanel
 		setOpaque(false);
 		MapCompanionPanel.left(this);
 		setName(port ? "portTaskRun" : "farmRunView");
-		add(MapCompanionPanel.left(title));
-		add(MapCompanionPanel.left(progress));
-		add(MapCompanionPanel.left(changed));
+		add(title);
+		add(progress);
+		add(changed);
 		add(before);
 		add(bring);
 		add(stops);
 		/* The paused line, This leg and its steps go under the next stop's row: see showStops. */
 		paused.setBorder(BorderFactory.createEmptyBorder(6, 0, 0, 0));
 		paused.setVisible(false);
-		MapCompanionPanel.left(paused);
 		legHead.setText(legHeading(null));
 		legHead.setFont(legHead.getFont().deriveFont(Font.BOLD));
 		legHead.setBorder(BorderFactory.createCompoundBorder(
@@ -164,17 +163,15 @@ final class RunView extends JPanel
 				BorderFactory.createEmptyBorder(5, 0, 1, 0))));
 		MapCompanionPanel.capped(legHead);
 		legHead.setVisible(false);
-		MapCompanionPanel.left(legHead);
 		legEnd.setBorder(BorderFactory.createCompoundBorder(
 			BorderFactory.createEmptyBorder(6, 0, 0, 0),
 			BorderFactory.createMatteBorder(1, 0, 0, 0, ColorScheme.MEDIUM_GRAY_COLOR)));
 		MapCompanionPanel.capped(legEnd);
 		legEnd.setVisible(false);
-		MapCompanionPanel.left(legEnd);
 		actions.setOpaque(false);
 		actions.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
 		add(MapCompanionPanel.left(actions));
-		add(MapCompanionPanel.left(message));
+		add(message);
 
 		reroute.addActionListener(e -> client.reroute());
 		end.addActionListener(e -> client.end());
@@ -506,13 +503,13 @@ final class RunView extends JPanel
 				JLabel line = label(12f, ColorScheme.MEDIUM_GRAY_COLOR);
 				line.setText("<html><body width='" + WIDTH + "'><strike>" + named + "</strike>"
 					+ MapCompanionPanel.escape(" · " + at) + "</body></html>");
-				row.add(MapCompanionPanel.left(line));
+				row.add(line);
 				stops.add(MapCompanionPanel.left(row));
 				continue;
 			}
 			JLabel name = label(12f, Color.WHITE);
 			name.setText(stopName(stop, next != null && stop.n == next.n));
-			row.add(MapCompanionPanel.left(name));
+			row.add(name);
 			JPanel method = new JPanel(new BorderLayout(4, 0));
 			method.setOpaque(false);
 			if (pictures)

@@ -896,7 +896,7 @@ final class StarsPanel extends JPanel
 		JLabel label = new JLabel(text);
 		label.setFont(label.getFont().deriveFont(11f));
 		label.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
-		return left(label);
+		return label;
 	}
 
 	private static JComponent heading(String text)
@@ -986,6 +986,6 @@ final class StarsPanel extends JPanel
 		JCheckBox check = new JCheckBox(text);
 		check.setFont(check.getFont().deriveFont(11f));
 		check.setBackground(ColorScheme.DARK_GRAY_COLOR);
-		return left(check);
+		return check;
 	}
 }

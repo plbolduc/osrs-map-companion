@@ -128,16 +128,16 @@ final class RouteStepsView extends JPanel
 		setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.Y_AXIS));
 		setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		MapCompanionPanel.left(this);
-		add(MapCompanionPanel.left(way));
-		add(MapCompanionPanel.left(origin));
+		add(way);
+		add(origin);
 		add(steps);
 		/* Under the steps it contradicts, whose board step names the mooring the boat has left. */
-		add(MapCompanionPanel.left(boat));
-		add(MapCompanionPanel.left(arrived));
+		add(boat);
+		add(arrived);
 		add(others);
 		add(otherWays);
-		add(MapCompanionPanel.left(drawn));
-		add(MapCompanionPanel.left(message));
+		add(drawn);
+		add(message);
 		setBorder(new EmptyBorder(5, 0, 0, 0));
 		others.addActionListener(e ->
 		{
@@ -327,7 +327,7 @@ final class RouteStepsView extends JPanel
 		int width = WIDTH - NUMBER - PICTURE_GAP - (slot ? PICTURE + PICTURE_GAP : 0);
 		JPanel words = MapCompanionPanel.column(ColorScheme.DARKER_GRAY_COLOR);
 		MapCompanionPanel.setWrapped(title, step.title, width);
-		words.add(MapCompanionPanel.left(title));
+		words.add(title);
 		if (place >= 0 && step.detail != null)
 		{
 			words.add(under(step.detail, width));

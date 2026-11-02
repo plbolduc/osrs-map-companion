@@ -422,7 +422,6 @@ final class RecommendedSharing extends JPanel
 		box.setBackground(BACK);
 		box.setFont(box.getFont().deriveFont(size));
 		box.setToolTipText(field.detail);
-		box.setAlignmentX(Component.LEFT_ALIGNMENT);
 		rows.put(box, Collections.singletonList(field));
 		return box;
 	}
@@ -477,7 +476,6 @@ final class RecommendedSharing extends JPanel
 			master.setName("recommended.group." + section.id);
 			master.setBackground(BACK);
 			master.setFont(master.getFont().deriveFont(Font.BOLD, 12f));
-			master.setAlignmentX(Component.LEFT_ALIGNMENT);
 			master.getAccessibleContext().setAccessibleDescription("Tick or untick every " + section.title + " field");
 			master.addActionListener(e -> refresh());
 			rows.put(master, section.fields);

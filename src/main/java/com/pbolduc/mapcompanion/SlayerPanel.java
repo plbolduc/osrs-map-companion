@@ -248,7 +248,7 @@ final class SlayerPanel extends JPanel
 				wilderness.setOpaque(false);
 				wilderness.setFont(wilderness.getFont().deriveFont(11f));
 				wilderness.addActionListener(e -> choose(config.slayerOrder(), wilderness.isSelected()));
-				body.add(MapCompanionPanel.left(wilderness));
+				body.add(wilderness);
 				JButton kinds = MapCompanionPanel.linkButton((kindsOpen ? "▾ " : "▸ ") + shown.kinds.size() + (shown.kinds.size() == 1 ? " kind counts" : " kinds count"));
 				kinds.setName("slayer.kinds");
 				kinds.addActionListener(e -> { kindsOpen = !kindsOpen; render(); refresh(connected); });

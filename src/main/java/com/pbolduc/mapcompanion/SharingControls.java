@@ -100,7 +100,6 @@ final class SharingControls extends JPanel
 		nameBox.setBorder(BorderFactory.createEmptyBorder(0, TEXT_INSET, 0, 0));
 		add(nameBox);
 		nicknameLabel.setFont(nicknameLabel.getFont().deriveFont(11f));
-		nicknameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 		nameBox.add(nicknameLabel);
 		nickname.setName("nickname");
 		MapCompanionPanel.capped(nickname);
@@ -150,7 +149,6 @@ final class SharingControls extends JPanel
 		box.setBackground(ColorScheme.DARK_GRAY_COLOR);
 		box.setFont(sharing ? box.getFont().deriveFont(Font.BOLD, 12f) : box.getFont().deriveFont(11f));
 		box.setToolTipText(field.detail);
-		box.setAlignmentX(Component.LEFT_ALIGNMENT);
 		/* A checkbox chooses data; only Connect may approve a server or start requests. */
 		box.addActionListener(e ->
 		{
@@ -280,7 +278,6 @@ final class SharingControls extends JPanel
 		header.setContentAreaFilled(false);
 		header.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
 		header.setMargin(new Insets(0, 0, 0, 0));
-		header.setAlignmentX(Component.LEFT_ALIGNMENT);
 		MapCompanionPanel.capped(header);
 		contents.setVisible(false);
 		header.addActionListener(e ->
@@ -324,7 +321,6 @@ final class SharingControls extends JPanel
 			box.setName(section.key);
 			box.setBackground(ColorScheme.DARK_GRAY_COLOR);
 			box.setFont(box.getFont().deriveFont(Font.BOLD, 12f));
-			box.setAlignmentX(Component.LEFT_ALIGNMENT);
 			StringBuilder tip = new StringBuilder("<html><body width='220'>On shares all of these, and off stops them:");
 			for (SharingFields.Field field : section.fields)
 			{

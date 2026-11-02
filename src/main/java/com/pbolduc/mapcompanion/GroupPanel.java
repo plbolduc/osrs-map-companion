@@ -219,11 +219,11 @@ final class GroupPanel extends JPanel
 		buildForm();
 		add(form);
 		meetSaid.setName("group.meetSaid");
-		add(MapCompanionPanel.left(line(meetSaid)));
+		add(line(meetSaid));
 		meetSaid.setBorder(new EmptyBorder(4, 0, 3, 0));
 		form.setVisible(false);
 		meetupsOff.setName("group.meetupsOff");
-		add(MapCompanionPanel.left(line(meetupsOff)));
+		add(line(meetupsOff));
 		MapCompanionPanel.setWrapped(meetupsOff, MEETUPS_OFF, WIDTH + 16);
 		add(meetupCards);
 	}
@@ -265,7 +265,7 @@ final class GroupPanel extends JPanel
 		buttons.add(make);
 		buttons.add(cancel);
 		form.add(fill(buttons));
-		form.add(MapCompanionPanel.left(line(formSaid)));
+		form.add(line(formSaid));
 	}
 
 	/** Open the form, or put it away: the player's own press, after which the form's last word is not news. */
@@ -626,7 +626,7 @@ final class GroupPanel extends JPanel
 			{
 				sprites.sprite(news, progress, NEWS_PICTURE);
 			}
-			card.add(MapCompanionPanel.left(news));
+			card.add(news);
 		}
 		boolean positioned = row.routable || row.near != null;
 		if (!positioned)
@@ -666,7 +666,7 @@ final class GroupPanel extends JPanel
 			line.setVisible(true);
 			MapCompanionPanel.setWrapped(line, message, WIDTH);
 			MapCompanionPanel.tone(line, true);
-			card.add(MapCompanionPanel.left(line));
+			card.add(line);
 			if (pressed)
 			{
 				ticking.add(at -> MapCompanionPanel.setWrapped(line, press.words(said, at), WIDTH));
@@ -733,13 +733,13 @@ final class GroupPanel extends JPanel
 		JLabel when = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
 		setWhen(when, when(meetup.startsAtMs, now, ZoneId.systemDefault(),
 			Locale.getDefault(Locale.Category.FORMAT)), meetup.startsAtMs, now, WIDTH);
-		card.add(MapCompanionPanel.left(when));
+		card.add(when);
 		String where = meetupWhere(meetup);
 		if (!where.isEmpty())
 		{
 			JLabel line = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
 			setMarkup(line, markup(where, onItsWorld(meetup) ? "W" + meetup.world : null, HERE, WIDTH));
-			card.add(MapCompanionPanel.left(line));
+			card.add(line);
 		}
 		if (!rollUp(meetup.who).isEmpty())
 		{
@@ -792,7 +792,7 @@ final class GroupPanel extends JPanel
 			line.setVisible(true);
 			MapCompanionPanel.setWrapped(line, message, WIDTH);
 			MapCompanionPanel.tone(line, true);
-			card.add(MapCompanionPanel.left(line));
+			card.add(line);
 			/* Each wait from its own gate: a Route's is the routes' wait, an answer's the meetups'. */
 			ticking.add(at -> MapCompanionPanel.setWrapped(line, routed ? press.words(said, at) : meetups.words(answer, at), WIDTH));
 		}
