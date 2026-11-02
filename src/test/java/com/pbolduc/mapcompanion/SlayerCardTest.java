@@ -26,6 +26,8 @@
 package com.pbolduc.mapcompanion;
 
 import com.google.gson.Gson;
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
 import java.awt.Component;
 import java.awt.Container;
 import java.nio.charset.StandardCharsets;
@@ -34,21 +36,26 @@ import java.util.List;
 import javax.swing.AbstractButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.SwingUtilities;
+import net.runelite.api.Client;
 import net.runelite.client.callback.ClientThread;
 import okhttp3.OkHttpClient;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 /**
- * What the Slayer card shows while something it stands on is not ready yet, read off the real
- * {@link SlayerPanel} as a player sees it: the map ranking the places again.
+ * What the Slayer card says, read off the real {@link SlayerPanel} as a player sees it, above all
+ * while something it stands on is not ready yet: the map ranking the places again, or the game
+ * still to say whether there is a task at all.
  *
- * <p>The places are the map's own Gargoyles list ({@code contract/slayer-options.json}). No press
- * reaches the map: nothing here is routed.
+ * <p>The places are the map's own Gargoyles lists ({@code contract/slayer-options.json}, and
+ * {@code slayer-blocked.json} for a profile below every place's requirement). No press reaches the
+ * map: nothing here is routed.
  */
 public class SlayerCardTest
 {
@@ -116,6 +123,93 @@ public class SlayerCardTest
 		assertTrue(button(panel, "Route").isEnabled());
 	}
 
+	/**
+	 * "No Slayer task" is said only once the game has said so, with the step that changes it. Before
+	 * the session settles every varbit reads zero, and a task this client cannot name reads as none
+	 * too: both are sent as no task, as they must be, and neither may tell a player with a task to go
+	 * and get one. The card then claims nothing but when the task will appear.
+	 */
+	@Test
+	public void noTaskIsSaidOnlyOnceTheGameHasSaidSo() throws Exception
+	{
+		game.login("Example", 444, 3222, 3218, 0);
+		QuestReader quests = new QuestReader(game.client());
+		SnapshotBuilder builder = Guice.createInjector(new AbstractModule()
+		{
+			@Override
+			protected void configure()
+			{
+				bind(Client.class).toInstance(game.client());
+				bind(Gson.class).toInstance(gson);
+				bind(MapCompanionConfig.class).toInstance(config);
+				bind(MemberIdentity.class).toInstance(identity);
+				bind(LootLog.class).toInstance(new LootLog(game.client(), store, gson));
+				bind(FarmingObserver.class).toInstance(new FarmingObserver(game.client(), store, gson));
+				bind(BirdhouseReader.class).toInstance(new BirdhouseReader(key -> null));
+				bind(QuestReader.class).toInstance(quests);
+				bind(SlayerState.class).toInstance(state);
+			}
+		}).getInstance(SnapshotBuilder.class);
+		quests.onSessionResumed(0);
+
+		assertNull(builder.build(14_999).slayer);
+		refresh();
+		List<String> unsettled = shown(panel);
+		assertFalse(unsettled.toString(), unsettled.contains(SlayerPanel.NO_TASK));
+		assertTrue(unsettled.toString(), unsettled.contains("The current assignment appears here once the game has settled."));
+
+		game.setVarp(VarPlayerIds.SLAYER_TARGET, 99);
+		game.setVarp(VarPlayerIds.SLAYER_COUNT, 40);
+		assertNull("a task this client cannot name is sent as none", builder.build(15_000).slayer);
+		refresh();
+		assertFalse(shown(panel).toString(), shown(panel).contains(SlayerPanel.NO_TASK));
+
+		game.setVarp(VarPlayerIds.SLAYER_TARGET, 0);
+		game.setVarp(VarPlayerIds.SLAYER_COUNT, 0);
+		assertNull(builder.build(16_000).slayer);
+		refresh();
+		List<String> none = shown(panel);
+		assertTrue(none.toString(), none.contains(SlayerPanel.NO_TASK));
+		assertTrue(none.toString(), none.contains(SlayerPanel.GET_ONE));
+	}
+
+	/**
+	 * Where every place asks for something not met yet, nothing wears Best for you and the card shows
+	 * the first place alone; one line above it says why, instead of leaving "Needs 75 Slayer" to.
+	 */
+	@Test
+	public void aListWithNoPlaceOpenYetSaysSo() throws Exception
+	{
+		state.local(identity.id(), gargoyles(), "best", true);
+		received(places("/contract/slayer-blocked.json", "best"), 1);
+		refresh();
+		List<String> blocked = shown(panel);
+		assertTrue(blocked.toString(), blocked.indexOf(SlayerPanel.NONE_OPEN) >= 0
+			&& blocked.indexOf(SlayerPanel.NONE_OPEN) < blocked.indexOf("1. Slayer Tower (basement)"));
+
+		received(places("best"), 2);
+		refresh();
+		assertFalse(shown(panel).contains(SlayerPanel.NONE_OPEN));
+	}
+
+	/** The closed order box says what it chooses, "Order: Best spot"; the open list keeps the choices' own names. */
+	@Test
+	public void theOrderBoxSaysWhatItChooses() throws Exception
+	{
+		state.local(identity.id(), gargoyles(), "best", true);
+		received(places("best"), 1);
+		refresh();
+		press("▸ All 3 places & options");
+		SwingUtilities.invokeAndWait(() ->
+		{
+			@SuppressWarnings("unchecked")
+			JComboBox<String> order = (JComboBox<String>) find(panel, "slayer.order");
+			JList<String> list = new JList<>();
+			assertEquals("Order: Best spot", ((JLabel) order.getRenderer().getListCellRendererComponent(list, "Best spot", -1, false, false)).getText());
+			assertEquals("One target at a time", ((JLabel) order.getRenderer().getListCellRendererComponent(list, "One target at a time", 1, false, false)).getText());
+		});
+	}
+
 	private CompanionSnapshot.Slayer gargoyles()
 	{
 		CompanionSnapshot.Slayer task = new CompanionSnapshot.Slayer();
@@ -127,7 +221,12 @@ public class SlayerCardTest
 
 	private RelayResponse.SlayerOptions places(String order) throws Exception
 	{
-		String json = new String(getClass().getResourceAsStream("/contract/slayer-options.json").readAllBytes(), StandardCharsets.UTF_8);
+		return places("/contract/slayer-options.json", order);
+	}
+
+	private RelayResponse.SlayerOptions places(String fixture, String order) throws Exception
+	{
+		String json = new String(getClass().getResourceAsStream(fixture).readAllBytes(), StandardCharsets.UTF_8);
 		RelayResponse.SlayerOptions options = SlayerWire.normalize(gson.fromJson(json, RelayResponse.SlayerOptions.class));
 		options.order = order;
 		return options;

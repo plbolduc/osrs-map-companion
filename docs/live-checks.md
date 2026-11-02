@@ -97,7 +97,9 @@ steps wait on these readings (`osrs-stars-map/docs/plan-where-to-go-for-a-task.m
 - [ ] **Slayer task name.** With *Slayer task* sharing on, the map names an ordinary task, a
       boss task if one is assigned, and a Konar task's area. Hop: the sidebar's Slayer card keeps
       the task, and its places greyed, until the new world settles, and never says there is no
-      task meanwhile; log out and in, and it waits for the new session's reading instead.
+      task meanwhile; log out and in, and it waits for the new session's reading instead. With no
+      assignment, `SLAYER_TARGET` (395) should read 0 once settled, and the card then says *No
+      Slayer task* and to get one from a master; note what it reads after a task is finished.
 - [ ] **Port task slots.** `PortTaskReader` is written from the Hub's Sailing and Port Tasks
       plugins and the game's script, not from a session; these settle it. With *Port tasks*
       sharing on:

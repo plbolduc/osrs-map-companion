@@ -255,13 +255,16 @@ public class SnapshotBuilder
 		{
 			boolean settled = questReader.settled(nowMs);
 			snapshot.slayer = settled ? slayerReader.read() : null;
-			if (settled)
+			if (settled && (snapshot.slayer != null || slayerReader.none()))
 			{
 				slayerState.local(identity.id(), snapshot.slayer, config.slayerOrder(), config.slayerHideWilderness());
 			}
 			else
 			{
-				/* Sent as no task all the same; the card is told the game has not said yet. */
+				/*
+				 * Unsettled, or a task this client cannot name: sent as no task all the same, and the
+				 * card is told the game has not said, so it never tells a player with a task to get one.
+				 */
 				slayerState.unread(identity.id(), config.slayerOrder(), config.slayerHideWilderness());
 			}
 			snapshot.slayerPreferences = slayerState.preferences();
