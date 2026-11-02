@@ -70,7 +70,8 @@ final class RouteClient
 	static final long FAILURE_GAP_MS = 30_000L;
 
 	static final String NEEDS_CONNECTION = "Connect to your map to plan a route.";
-	static final String NEEDS_TILE = "Reroute needs to know where you stand, and inside this instance the game does not say.";
+	/** The cause and the one step that fixes it: the game gives no tile inside a raid's rooms, and does outside. */
+	static final String NEEDS_TILE = "Reroute can't see where you are inside an instance. Press it again once you're out.";
 	static final String BUSY = "The map is busy. Try Reroute again in a few seconds.";
 	static final String NO_WAY = "The map found no way there from here.";
 	static final String NOT_FOUND = "The map has no way to plan to this place.";

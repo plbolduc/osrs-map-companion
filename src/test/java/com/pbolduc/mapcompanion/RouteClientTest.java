@@ -176,6 +176,45 @@ public class RouteClientTest
 		assertEquals("a second press inside the wait sends nothing", 1, sent.size());
 	}
 
+	/**
+	 * Inside a raid's rooms the game gives no tile to plan from, so Reroute sends nothing; its line
+	 * names the one step that fixes it as well as the cause.
+	 */
+	@Test
+	public void insideARaidsRoomsRerouteSendsNothingAndSaysWhatFixesIt() throws Exception
+	{
+		connect();
+		destination();
+		/* One chunk turned: rooms put together, as DestinationRouteTest's assembled table is. */
+		int[][][] rooms = new int[4][13][13];
+		for (int[][] plane : rooms)
+		{
+			for (int[] row : plane)
+			{
+				java.util.Arrays.fill(row, -1);
+			}
+		}
+		rooms[0][0][0] = (400 << 14) | (400 << 3) | (1 << 1);
+		Client raid = DestinationRouteTest.client(true, rooms);
+		Client loggedIn = (Client) Proxy.newProxyInstance(Client.class.getClassLoader(), new Class<?>[]{Client.class},
+			(proxy, method, args) -> "getGameState".equals(method.getName()) ? GameState.LOGGED_IN : method.invoke(raid, args));
+		new RouteClient(new OkHttpClient.Builder().addInterceptor(chain ->
+		{
+			sent.add(chain.request());
+			throw new java.io.IOException("nothing should be sent");
+		}).build(), new Gson(), loggedIn, new ClientThread()
+		{
+			@Override
+			public void invokeLater(Runnable r)
+			{
+				r.run();
+			}
+		}, pairing, identity, route).reroute();
+		assertTrue(sent.isEmpty());
+		assertEquals(RouteClient.NEEDS_TILE, route.view().message);
+		assertEquals("Reroute can't see where you are inside an instance. Press it again once you're out.", route.view().message);
+	}
+
 	@Test
 	public void readsEachRefusalAsASentenceAndKeepsTheSteps() throws Exception
 	{

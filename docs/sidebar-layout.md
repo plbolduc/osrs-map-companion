@@ -437,7 +437,8 @@ Step 8. Each card under *Now* that names a place gains the way there, planned fr
 *Hard clue* over *Coordinate · dig at 2896, 3119*, whose Route appears when the step names a tile.
 In Stars, Route sits beside *Pin destination* for a precise site; an approximate one has **Open on
 map** there instead. While the map answers the button reads *Planning…*, and a refusal is one line
-under it. The answer fills the destination's card, as a pick from Search does.
+under it, in the map's own words when it gives them, as it does for a clue step it cannot place.
+The answer fills the destination's card, as a pick from Search does.
 
 ### Friends and meetups under Group
 
@@ -445,7 +446,9 @@ Step 9, from `plan-companion-social.md`. Under the Group heading, one card per o
 disc in their map colour with presence as a dot in its corner, never as words; *near Lumbridge
 Castle · Near you*; their newest news, *Woodcutting 80 · 5m ago*; then **Route** and **Show on map**
 for a friend whose position the map draws. A friend sharing no position is a name and a dot. Route
-reads *Finding…* while their position is asked for, *Planning…*, then *Reroute*. With the group
+reads *Finding…* while their position is asked for, *Planning…*, then *Reroute*. A friend inside an
+instance has no tile the map can plan to, so Route asks nothing and the row says *Cara is inside an
+instance. Route works once they're out.* With the group
 layer on, Show on map reads *On the map* and is not pressable.
 
 Then *Meetups*: each with its title, *Today 7:42 PM · in 1h 20m*, *near Lumbridge Castle · W302*,

@@ -277,6 +277,60 @@ public class GroupPanelTest
 		assertFalse("asking for positions stops once the dot came", group.wantsPositions(now));
 	}
 
+	/**
+	 * A friend inside an instance has no tile the map can plan to, so Route asks nothing. Their row
+	 * says so and what fixes it, where Route used to go back to Route without a word — whether their
+	 * dot was fresh at the press or came with the frame the press asked for.
+	 */
+	@Test
+	public void aFriendInsideAnInstanceIsNotRoutedAndTheirRowSaysWhy() throws Exception
+	{
+		AtomicReference<GroupPanel> panel = new AtomicReference<>();
+		SwingUtilities.invokeAndWait(() -> panel.set(panel()));
+		social();
+		group.dots(Collections.singletonList(dot("cara", true)), System.currentTimeMillis());
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.get().refresh(true);
+			named(panel.get(), "group.route.cara").doClick();
+		});
+		assertTrue("nothing is asked for a friend the map cannot place", sent.isEmpty());
+		assertTrue(group.inside("cara"));
+		String said = "Cara is inside an instance. Route works once they're out.";
+		assertTrue(words(panel.get()), words(panel.get()).contains(said));
+
+		/* Out again and pressed again: the line goes with the press. */
+		group.dots(Collections.singletonList(dot("cara", false)), System.currentTimeMillis());
+		SwingUtilities.invokeAndWait(() -> named(panel.get(), "group.route.cara").doClick());
+		assertFalse(group.inside("cara"));
+
+		/* The same when the press had to wait for the dot, and it came from inside. */
+		group.stream(false, 0L);
+		long now = System.currentTimeMillis();
+		assertNull(group.routeTo("cara", now));
+		RelayResponse.MemberDot arrived = group.arrived(Collections.singletonList(dot("cara", true)), now);
+		assertTrue(arrived.instance);
+		assertTrue(group.inside("cara"));
+	}
+
+	/** Every label's words, for a sentence that has no button to be found by. */
+	private static String words(Container parent)
+	{
+		StringBuilder sb = new StringBuilder();
+		for (Component child : parent.getComponents())
+		{
+			if (child instanceof javax.swing.JLabel && child.isVisible())
+			{
+				sb.append(((javax.swing.JLabel) child).getText()).append('\n');
+			}
+			if (child instanceof Container)
+			{
+				sb.append(words((Container) child));
+			}
+		}
+		return sb.toString();
+	}
+
 	@Test
 	public void keepAlivesKeepAStationaryFriendRoutableWithoutNewFrames()
 	{

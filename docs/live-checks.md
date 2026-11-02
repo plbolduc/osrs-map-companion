@@ -255,8 +255,8 @@ The website plan's second session, once the routes in the game are built: a memb
       is words, an anagram or an emote, shows its words and Route: the card is named after the place
       the map reads from them, and an emote's way goes by its STASH unit first. Carry a medium or
       hard map: before and after opening it, the card says *Map · Route finds where it shows* with
-      Route, and Route names the place the picture shows. Nothing about the clue reaches the map's
-      member page.
+      Route, and Route names the place the picture shows. A step the map cannot place says why under
+      Route, in the map's own sentence. Nothing about the clue reaches the map's member page.
 - [ ] **Route back.** Die somewhere ordinary with *Share death* off, respawn and press Route back.
       Then, if convenient, die at a boss fought in an instance (Vorkath, Zulrah): note where the
       route goes. The map's half decides whether it is the boss's way in.
@@ -274,10 +274,12 @@ The website plan's second session, once the routes in the game are built: a memb
 - [ ] **Friends.** With two characters in one group and the group layer off, the other appears
       under Group with their disc, presence dot, *near* and news. World map draws only them; Route
       asks for their position, then fills the destination's card once and does not follow them.
-      Pressed again it reads Reroute. A friend in a raid has no Route.
+      Pressed again it reads Reroute. Route to a friend in a raid: nothing is planned, and their row
+      says they are inside an instance and that Route works once they are out.
 - [ ] **Meetups.** Answer a meetup from the sidebar and see the same answer on that member's browser
       on the website; On my way is one of the four. Meet here on W302 makes a
-      meetup at your tile whose copied link opens on the map; inside an instance it refuses.
+      meetup at your tile whose copied link opens on the map; inside an instance it refuses and says
+      to step outside first.
 - [ ] **The one press at Connect.** On a fresh RuneLite profile, the first Connect to osrs-map.com
       asks nothing and shows the step, with every group, the name and both drawing choices ticked
       and *Where you died* not; it fits 225px with no cut word. Customise, untick a field, then Not

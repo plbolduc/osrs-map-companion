@@ -75,6 +75,9 @@ public class GroupState
 	private long pendingAtMs;
 	@Nullable
 	private String lost;
+	/** The friend the last Route found inside an instance, where the map has no tile to plan to. */
+	@Nullable
+	private String inside;
 	private final Map<String, Answered> answered = new HashMap<>();
 
 	private static final class Answered
@@ -107,6 +110,7 @@ public class GroupState
 			dotsAtMs = 0L;
 			pending = null;
 			lost = null;
+			inside = null;
 			answered.clear();
 		}
 	}
@@ -186,10 +190,15 @@ public class GroupState
 	{
 		current();
 		lost = null;
+		inside = null;
 		RelayResponse.MemberDot dot = now - dotsAtMs < DOT_FRESH_MS ? find(dots, id) : null;
 		if (dot != null)
 		{
 			pending = null;
+			if (dot.instance)
+			{
+				inside = id;
+			}
 			return dot;
 		}
 		pending = id;
@@ -221,6 +230,10 @@ public class GroupState
 		{
 			lost = id;
 		}
+		else if (dot.instance)
+		{
+			inside = id;
+		}
 		return dot;
 	}
 
@@ -241,6 +254,16 @@ public class GroupState
 	{
 		current();
 		return id.equals(lost);
+	}
+
+	/**
+	 * Whether the last Route to this friend found them inside an instance. Nothing is asked then, so
+	 * their row says so rather than going back to Route without a word.
+	 */
+	synchronized boolean inside(String id)
+	{
+		current();
+		return id.equals(inside);
 	}
 
 	/** An answer just given, standing in for the roll-up's until the map has had time to say it. */

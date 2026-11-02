@@ -384,6 +384,7 @@ final class GroupPanel extends JPanel
 				sb.append(row.id).append(row.name).append(row.colour).append(row.presence).append(row.near)
 					.append(row.nearYou).append(row.routable).append(row.news == null ? "" : row.news.title + row.news.atMs)
 					.append(group.shown(row.id)).append(group.finding(row.id, now)).append(group.lost(row.id));
+				sb.append(group.inside(row.id));
 				appendSaid(sb, press.said(GroupState.source(row.id)));
 			}
 		}
@@ -535,7 +536,9 @@ final class GroupPanel extends JPanel
 		actions.add(map);
 		card.add(gap(5));
 		card.add(MapCompanionPanel.left(actions));
-		String message = said != null && said.message != null ? said.message
+		/* Inside an instance nothing was asked, so this is newer than any answer the press last gave. */
+		String message = group.inside(row.id) ? row.name + " is inside an instance. Route works once they're out."
+			: said != null && said.message != null ? said.message
 			: group.lost(row.id) ? row.name + " is not sharing a position just now." : null;
 		if (message != null)
 		{
