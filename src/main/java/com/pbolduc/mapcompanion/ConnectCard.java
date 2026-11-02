@@ -301,7 +301,7 @@ final class ConnectCard extends JPanel
 		block.add(joinHeading);
 		block.add(gap(3, ColorScheme.DARK_GRAY_COLOR));
 		joinField.setName("join.field");
-		joinField.setToolTipText("Paste the invite a friend sent you, or a connection code from the map's Companion panel");
+		joinField.setToolTipText("Paste the invite a friend sent you, or the code from osrs-map.com's Companion panel");
 		joinButton.setName("join.button");
 		joinButton.setToolTipText("Join the group this invite or code is for");
 		joinField.putClientProperty("JTextField.placeholderText", JOIN_PLACEHOLDER);
@@ -642,7 +642,7 @@ final class ConnectCard extends JPanel
 		{
 			say(pairingCode().isEmpty()
 				? "Paste the invite a friend sent you, or press Connect to start your own group."
-				: "Paste an invite, or the connection code from the map's Companion panel.");
+				: "Paste an invite, or the code from osrs-map.com's Companion panel.");
 			return;
 		}
 		if (joined.invite != null)

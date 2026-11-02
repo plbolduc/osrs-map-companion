@@ -26,9 +26,22 @@
 package com.pbolduc.mapcompanion;
 
 import com.pbolduc.mapcompanion.ConnectCard.OrangePress;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 /**
@@ -85,5 +98,51 @@ public class OrangePressTest
 		assertEquals("KQX482", joined.code);
 		assertEquals("K7PQ2M3XABCDEFGH", joined.invite);
 		assertNull(ConnectCard.joinsInstead("THANKS"));
+	}
+
+	/** A string literal, escapes and all, on a line of code. */
+	private static final Pattern LITERAL = Pattern.compile("\"((?:[^\"\\\\]|\\\\.)*)\"");
+
+	/**
+	 * <i>Open the map</i> is the orange button's request, the one that makes the browser the player.
+	 * Every other button that opens the browser is <i>Open website</i>, so a note or a tooltip that
+	 * calls the website "the map" — "Open the map at the tile where you died", "open it on the map",
+	 * "here and on your map" — makes two different presses read as one. Only the button's own
+	 * constant may say it.
+	 */
+	@Test
+	public void onlyTheOrangeButtonSaysOpenTheMap() throws IOException
+	{
+		List<Path> sources;
+		try (Stream<Path> files = Files.walk(Paths.get("src/main/java")))
+		{
+			sources = files.filter(f -> f.toString().endsWith(".java")).collect(Collectors.toList());
+		}
+		assertTrue("the plugin's sources were not found from " + Paths.get("").toAbsolutePath(), sources.size() > 10);
+		List<String> found = new ArrayList<>();
+		for (Path source : sources)
+		{
+			String[] lines = new String(Files.readAllBytes(source), StandardCharsets.UTF_8).split("\n", -1);
+			for (int i = 0; i < lines.length; i++)
+			{
+				String line = lines[i].trim();
+				if (line.startsWith("*") || line.startsWith("/*") || line.startsWith("//"))
+				{
+					continue;
+				}
+				Matcher literal = LITERAL.matcher(line);
+				while (literal.find())
+				{
+					String words = literal.group(1).toLowerCase(Locale.ROOT);
+					if (words.contains("open the map") || words.contains("open it on the map") || words.contains("on your map"))
+					{
+						found.add(source.getFileName() + ": " + line);
+					}
+				}
+			}
+		}
+		List<String> expected = new ArrayList<>();
+		expected.add("ConnectCard.java: static final String OPEN_MAP = \"Open the map\";");
+		assertEquals(expected, found);
 	}
 }

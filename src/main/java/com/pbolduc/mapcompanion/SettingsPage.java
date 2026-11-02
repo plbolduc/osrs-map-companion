@@ -143,7 +143,7 @@ final class SettingsPage extends JPanel
 		JButton whatsNew = linkButton("What's new in " + CompanionVersion.VERSION + " ›");
 		whatsNew.setName("settings.whatsNew");
 		whatsNew.setForeground(ColorScheme.BRAND_ORANGE);
-		whatsNew.setToolTipText("Open the map's What's new page, where every update is written down");
+		whatsNew.setToolTipText("osrs-map.com's What's new page, where every update is written down");
 		whatsNew.addActionListener(e -> LinkBrowser.browse(mapUrl.get() + "/whats-new"));
 		add(left(whatsNew));
 		add(gap(4, ColorScheme.DARK_GRAY_COLOR));

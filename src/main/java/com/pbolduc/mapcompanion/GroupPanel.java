@@ -421,7 +421,7 @@ final class GroupPanel extends JPanel
 	 * goes, giving the button back to the row under the tab, the moment a friend's row arrives.
 	 */
 	static final String ALONE = "Just you so far. Send a friend an invite; they paste it into their sidebar "
-		+ "and appear here and on your map.";
+		+ "and appear here and on osrs-map.com.";
 
 	private JPanel alone()
 	{
