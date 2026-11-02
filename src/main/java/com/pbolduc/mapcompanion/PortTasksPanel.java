@@ -128,9 +128,13 @@ final class PortTasksPanel extends JPanel
 	{
 		List<PortTaskReader.Slot> slots = config.sharePortTasks() ? reader.latest() : null;
 		boolean worth = slots != null && slots.stream().anyMatch(s -> s.held() || PortTaskReader.UNKNOWN.equals(s.state));
-		boolean running = run.refresh(connected);
-		setVisible(worth || running);
-		/* A run already held is the order: no second Start beside it. */
+		boolean showing = run.refresh(connected);
+		setVisible(worth || showing);
+		/*
+		 * A run already held is the order: no second Start beside it. A refusal or "Run ended." is
+		 * said under the card with no run behind it, so the tasks stay, and the Start that can try again.
+		 */
+		boolean running = run.busy();
 		boolean offer = startable(slots) && !running;
 		starter.setVisible(offer && config.shareBoats());
 		start.setEnabled(connected && client.ready());
