@@ -83,8 +83,9 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RouteClient`, `RoutePress
 `MeetupClient`, `FarmRunClient` and `ConnectClient` construct HTTP requests:
 
 - **POST /api/companion/connect** — one **Connect** press with no group, or one **Join** press with a
-  pasted invite. Header: `X-Companion-Installation`. JSON is empty, or the group code and the
-  invite's token from the pasted link. No character data, member id or secret. The answer is a
+  pasted invite (or **Connect** with one in the field). Header: `X-Companion-Installation`. JSON is
+  empty, or the group code and the invite's token from the pasted link. No character data, member id
+  or secret. The answer is a
   connection code, kept exactly as a pasted one; a refusal is printed. One at a time, no retry.
 - **POST /api/companion/link** — one **Open the map** press while connected. Headers:
   `X-Companion-Code`, `X-Companion-Member`, `X-Companion-Member-Secret`. The answer is a one-time

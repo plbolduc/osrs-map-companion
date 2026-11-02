@@ -233,7 +233,8 @@ on until you press, and you can untick any of it first. Each choice can send:
   Unknown reward details remain absent. Large snapshots include a flag saying some of it was left out.
 
 **Connect**, with no group yet, sends a random key for this RuneLite, once per press; the map makes
-your group with it. **Join** with a pasted invite sends that key and the invite. Neither sends
+your group with it. **Join** with a pasted invite, or **Connect** with one in the field, sends that
+key and the invite. Neither sends
 anything about your character. If you have changed **Settings → Advanced → Map address** to a server
 other than osrs-map.com, the first Connect to it asks you first, naming it.
 **Open the map** sends your group's credentials once per press, and opens a one-time link that

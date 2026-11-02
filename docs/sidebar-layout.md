@@ -499,6 +499,13 @@ because it makes a group, and *Open the map* once there is one. A small *Have an
 goes over the field, its placeholder *Paste an invite or code*, and **Paste** and **Join** under it:
 the field is the other way in now, and the heading says which of the two a friend's message is for.
 
+With an invite or a RuneLite code in the field, **Connect** joins it as Join would. Pasting a friend's
+message and pressing the loud button is what an invited friend does first, and it made them a group
+of their own and emptied the field the invite was in. The button still says *Connect*, as the
+plugin-first plan has it, and its tooltip says *Join the group this invite is for*. A code alone
+does not count, because its alphabet spells ordinary words; Join takes that. After Paste the field
+shows the start of the message rather than the tail of the link's token.
+
 ### The step after Connect
 
 It said *Waiting for the map* twice, once beside the dot and once under the field, and the tabs and

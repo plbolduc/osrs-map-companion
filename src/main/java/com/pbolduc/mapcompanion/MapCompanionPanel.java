@@ -56,6 +56,8 @@ import javax.annotation.Nullable;
 import javax.swing.border.EmptyBorder;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -813,6 +815,27 @@ public class MapCompanionPanel extends PluginPanel
 		joinButton.setToolTipText("Join the group this invite or code is for");
 		joinField.putClientProperty("JTextField.placeholderText", JOIN_PLACEHOLDER);
 		joinField.addActionListener(e -> joinFromField());
+		/* Connect joins an invite in the field, so its tooltip follows a paste or a keystroke at once. */
+		joinField.getDocument().addDocumentListener(new DocumentListener()
+		{
+			@Override
+			public void insertUpdate(DocumentEvent e)
+			{
+				refresh();
+			}
+
+			@Override
+			public void removeUpdate(DocumentEvent e)
+			{
+				refresh();
+			}
+
+			@Override
+			public void changedUpdate(DocumentEvent e)
+			{
+				refresh();
+			}
+		});
 		block.add(fill(joinField, ColorScheme.DARK_GRAY_COLOR));
 		block.add(gap(4, ColorScheme.DARK_GRAY_COLOR));
 		JPanel buttons = row(ColorScheme.DARK_GRAY_COLOR);
@@ -905,23 +928,65 @@ public class MapCompanionPanel extends PluginPanel
 	 *
 	 * <p>Connect with a code already set — a changed map address, say — connects to that code again
 	 * rather than making another group: "Connect" always means "connect me", and only a player with
-	 * no group at all is given a new one.
+	 * no group at all is given a new one. See {@link #orangePress} for which.
 	 */
 	private void pressOrange()
 	{
-		String code = pairingCode();
-		if (!code.isEmpty() && pairing.hasServerConsent())
+		switch (orangePress(pairingCode(), pairing.hasServerConsent(), joinField.getText()))
 		{
-			openMap();
+			case OPEN_MAP:
+				openMap();
+				break;
+			case JOIN:
+				joinFromField();
+				break;
+			default:
+				startGroup();
+				break;
 		}
-		else if (!code.isEmpty())
+	}
+
+	/** What a press of the orange button does. */
+	enum OrangePress
+	{
+		/** {@link #openMap}: the website, already in the group. */
+		OPEN_MAP,
+		/** {@link #joinFromField}: the field's invite or code, else the code already set. */
+		JOIN,
+		/** {@link #startGroup}: a new group, made by the map. */
+		START
+	}
+
+	/**
+	 * Which press the orange button makes, from the code set, the map's approval and the field.
+	 *
+	 * <p>With no group, a friend's invite in the field is joined rather than left behind. Pasting it
+	 * and pressing the loudest button on the page is the likeliest thing an invited friend does, and
+	 * making a group then would put them alone in a new one and empty the field the invite was in.
+	 * The button keeps the word Connect, which says what it does for every other player.
+	 */
+	static OrangePress orangePress(String code, boolean consent, @Nullable String field)
+	{
+		if (!code.isEmpty())
 		{
-			joinFromField();
+			return consent ? OrangePress.OPEN_MAP : OrangePress.JOIN;
 		}
-		else
-		{
-			startGroup();
-		}
+		return joinsInstead(field) != null ? OrangePress.JOIN : OrangePress.START;
+	}
+
+	/**
+	 * What Connect joins rather than making a group beside: an invite, or a RuneLite code with its
+	 * suffix, or null.
+	 *
+	 * <p>Never a code alone, though Join takes one. Its alphabet admits ordinary words — see
+	 * {@link JoinCode} — so a word left in the field would send this press to whatever group it
+	 * spells instead of making the player's own; Join is the press that says a code is meant.
+	 */
+	@Nullable
+	static JoinCode joinsInstead(@Nullable String field)
+	{
+		JoinCode found = JoinCode.parse(field);
+		return found != null && (found.invite != null || found.suffix != null) ? found : null;
 	}
 
 	/**
@@ -1069,10 +1134,12 @@ public class MapCompanionPanel extends PluginPanel
 
 		if (pasted == null || pasted.trim().isEmpty())
 		{
-			say("There is nothing to paste.");
+			say("There is nothing to paste. Copy the invite first, then press Paste.");
 			return;
 		}
 		joinField.setText(pasted.trim());
+		/* The start of the message, which says what it is, rather than the tail of a link's token. */
+		joinField.setCaretPosition(0);
 		JoinCode found = JoinCode.parse(pasted);
 		say(found == null
 			? "No invite or code found. Ask a friend in the group for an invite."
@@ -1767,8 +1834,10 @@ public class MapCompanionPanel extends PluginPanel
 			joinButton.setEnabled(!asking);
 			openMapButton.setText(asking ? (ready ? "Opening…" : "Connecting…") : ready ? OPEN_MAP : CONNECT);
 			openMapButton.setEnabled(!asking);
+			JoinCode pasted = joinsInstead(joinField.getText());
 			openMapButton.setToolTipText(ready
 				? "Open " + pairing.serverLabel() + " in your browser, already in your group as you"
+				: pasted != null ? "Join the group this " + (pasted.invite != null ? "invite" : "code") + " is for"
 				: paired ? "Connect to this group again"
 				: "Make a group for you on " + pairing.serverLabel() + ". Play alone, or invite friends to it.");
 			/* Offered for the group just joined; leaving it, or a changed map, takes the offer away. */

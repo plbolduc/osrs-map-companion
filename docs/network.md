@@ -19,8 +19,9 @@ anything is sent there, and changing the address pauses requests until you conne
 carrying this RuneLite's random installation key and nothing else. The map makes a group called
 *Our group* whose maker is this installation, and answers with a connection code, which the plugin
 keeps exactly as a pasted one. **Join** with a pasted invite makes the same request with the group
-code and the invite's token. Neither request carries character data, a member id or a secret, and
-neither is retried: a refusal is printed under the field.
+code and the invite's token, and so does **Connect** while the field holds an invite: it joins what
+was pasted rather than making a group beside it. Neither request carries character data, a member
+id or a secret, and neither is retried: a refusal is printed under the field.
 
 **Rename group.** The groups menu offers **Rename group…** only when the map's last reply said this
 member may (`groupOwner`): its RuneLite made the group, or it is bound to an owner's browser. A press
