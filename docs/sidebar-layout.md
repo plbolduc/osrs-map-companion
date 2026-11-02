@@ -499,8 +499,9 @@ filled, an answer pressed included while it is on its way: the pick ignores a pr
 greying, since a greyed button loses its fill. *On my way* is one of the four, and Route beside them tells nobody. Each meetup after
 the next is one line, *▸ Wintertodt · Today 7:24 PM · W307*, that opens to the same card in place and
 reads ▾ while open, as the website lists them; it is answered in the card, not from the line. A map that sends no `events` leaves the one meetup under *Now*,
-as before. **Meet here…** opens a form under them: a title, a day of the coming week, an hour and a
-minute in fives, defaulting to half an hour from now, and **Make meetup**, which copies the link.
+as before. **Meet here…** opens a form under the heading it sits on, above the meetups, and says what
+became of the press there: a title, a day of the coming week, an hour and a minute in fives,
+defaulting to half an hour from now, and **Make meetup**, which copies the link.
 Like the single meetup under *Now*, the week's meetups are taken only while *Show map destinations*
 is on; while it is off, one grey line under the heading says why the section is empty and where the
 setting is.

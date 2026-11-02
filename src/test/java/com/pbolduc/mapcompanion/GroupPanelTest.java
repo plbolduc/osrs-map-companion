@@ -587,6 +587,40 @@ public class GroupPanelTest
 	}
 
 	/**
+	 * Meet here… opens its form under the heading it is on, above the meetups, and the form's answer is
+	 * said there too, rather than under the last meetup card, a screen below the press with a few.
+	 */
+	@Test
+	public void meetHereOpensItsFormUnderItsLink() throws Exception
+	{
+		AtomicReference<GroupPanel> panel = new AtomicReference<>();
+		SwingUtilities.invokeAndWait(() -> panel.set(panel()));
+		twoMeetups();
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.get().refresh(true);
+			named(panel.get(), "group.meetHere").doClick();
+			int head = row(panel.get(), namedComponent(panel.get(), "group.meetupsHead"));
+			int form = row(panel.get(), namedComponent(panel.get(), "group.meetTitle"));
+			int said = row(panel.get(), namedComponent(panel.get(), "group.meetSaid"));
+			int meetups = row(panel.get(), namedComponent(panel.get(), "group.meetup.star-hunt"));
+			assertEquals("the form is the row under the heading", head + 1, form);
+			assertTrue("and what it says is above the meetups too", said < meetups);
+		});
+	}
+
+	/** Which of the panel's own rows holds a component. */
+	private static int row(Container panel, Component component)
+	{
+		Component at = component;
+		while (at.getParent() != panel)
+		{
+			at = at.getParent();
+		}
+		return Arrays.asList(panel.getComponents()).indexOf(at);
+	}
+
+	/**
 	 * Show map destinations is off until the player turns it on, and while it is off the map's meetups
 	 * are not taken, so the section under the heading is empty and a meetup made here never shows.
 	 * One line says why and where the setting is, and goes once the setting is on.
