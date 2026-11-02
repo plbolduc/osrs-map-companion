@@ -1,0 +1,52 @@
+# The quests a transport on the map gates on, one a line, spelled as the game spells them: the
+# join with the map's transport table is on the name. QuestReader reads these and no others
+# unless the full quest log is shared; the map's contract test holds every name to a transport.
+Between a Rock...
+Biohazard
+Bone Voyage
+Cabin Fever
+Children of the Sun
+Client of Kourend
+Cold War
+Death to the Dorgeshuun
+Desert Treasure I
+Desert Treasure II - The Fallen Empire
+Dragon Slayer II
+Eadgar's Ruse
+Fishing Contest
+Haunted Mine
+Holy Grail
+In Search of the Myreque
+Lunar Diplomacy
+Making Friends with My Arm
+Monkey Madness I
+Monkey Madness II
+Mourning's End Part II
+Nature Spirit
+One Small Favour
+Pandemonium
+Plague City
+Priest in Peril
+Ratcatchers
+Recipe for Disaster - King Awowogei
+Regicide
+Rum Deal
+Sea Slug
+Shades of Mort'ton
+Shilo Village
+Sins of the Father
+Song of the Elves
+Tai Bwo Wannai Trio
+Temple of the Eye
+The Corsair Curse
+The Fremennik Exiles
+The Fremennik Trials
+The Giant Dwarf
+The Grand Tree
+The Great Brain Robbery
+The Path of Glouphrie
+Throne of Miscellania
+Tree Gnome Village
+Troubled Tortugans
+Twilight's Promise
+Watchtower

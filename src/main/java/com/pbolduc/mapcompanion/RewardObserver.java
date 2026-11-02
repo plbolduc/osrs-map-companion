@@ -88,46 +88,11 @@ public final class RewardObserver
 			"You feel something weird sneaking into your backpack."));
 	private static final Pattern PICKPOCKET_MESSAGE = Pattern.compile("You pick (the )?.+'s? pocket.*");
 	/**
-	 * Exact core LootTrackerPlugin event labels. Chest and shade-key names are transcribed from
-	 * <a href="https://github.com/runelite/runelite/blob/ac79ed8bd8926bec7bf172aa291574b4d944b0e7/runelite-client/src/main/java/net/runelite/client/plugins/loottracker/LootTrackerPlugin.java#L204">its source maps</a>;
-	 * core publishes them as EVENT records at the inventory-change boundary, including repeat rolls.
+	 * Exact core LootTrackerPlugin event labels, listed in reward-activities.txt with the source they
+	 * are transcribed from. Core publishes them as EVENT records at the inventory-change boundary,
+	 * including repeat rolls.
 	 */
-	private static final Set<String> ACTIVITIES = new HashSet<>(Arrays.asList(
-			"Chambers of Xeric", "Theatre of Blood", "Tombs of Amascut", "Barrows",
-			"Lunar Chest", "Fortis Colosseum", "Doom of Mokhaiotl", "Fishing Trawler",
-			"Kingdom of Miscellania", "Drift Net",
-			"H.A.M. chest (steel)", "H.A.M. chest (bronze)", "H.A.M. chest (silver)", "H.A.M. chest (iron)",
-			"Regular Bird House", "Oak Bird House", "Willow Bird House", "Teak Bird House", "Maple Bird House",
-			"Mahogany Bird House", "Yew Bird House", "Magic Bird House", "Redwood Bird House",
-			"Brimstone Chest", "Larran's big chest", "Larran's small chest", "Elven Crystal Chest",
-			"Crystal Chest", "Stone chest", "Dorgesh-Kaan Chest", "Grubby Chest", "Isle of Souls Chest",
-			"Dark Chest", "Rogues' Chest", "Chest (Ancient Vault)", "Muddy Chest", "Chest (Aldarin Villas)",
-			"Chest (Moon key)", "Chest (Alchemist's signet)", "Rusty chest", "Tarnished chest", "Reinforced chest",
-			"Bronze key red", "Bronze key brown", "Bronze key crimson", "Bronze key black", "Bronze key purple",
-			"Steel key red", "Steel key brown", "Steel key crimson", "Steel key black", "Steel key purple",
-			"Black key red", "Black key brown", "Black key crimson", "Black key black", "Black key purple",
-			"Silver key red", "Silver key brown", "Silver key crimson", "Silver key black", "Silver key purple",
-			"Gold key red", "Gold key brown", "Gold key crimson", "Gold key black", "Gold key purple",
-			"Simple lockbox", "Elaborate lockbox", "Ornate lockbox", "Cache of runes", "Intricate pouch",
-			"Frozen cache", "Bounty crate (tier 1)", "Bounty crate (tier 2)", "Bounty crate (tier 3)",
-			"Bounty crate (tier 4)", "Bounty crate (tier 5)", "Bounty crate (tier 6)", "Bounty crate (tier 7)",
-			"Bounty crate (tier 8)", "Bounty crate (tier 9)", "Apprentice potion pack", "Adept potion pack",
-			"Expert potion pack", "Castle wars supply crate", "Forgotten lockbox", "Dossier",
-			"Hunters' loot sack", "Hunters' loot sack (basic)", "Hunters' loot sack (adept)",
-			"Hunters' loot sack (expert)", "Hunters' loot sack (master)",
-			"Tarnished 2h sword", "Tarnished amulet", "Tarnished battleaxe", "Tarnished halberd",
-			"Tarnished longsword", "Tarnished necklace", "Tarnished ring", "Tarnished spear", "Tarnished bracelet",
-			"Vale offerings", "Dirty arrowtips", "Rubium geode",
-			"Small salvage", "Fishy salvage", "Barracuda salvage", "Large salvage", "Plundered salvage",
-			"Martial salvage", "Fremennik salvage", "Opulent salvage",
-			"Herbiboar", "Zombie Pirate's Locker", "Golem Crafting", "Seed pack", "Bird nest", "Casket",
-			"Ore Pack (Volcanic Mine)", "Bag full of gems (Percy)", "Bag full of gems (Belona)",
-			"Bag full of gems (Dusuri)", "Spoils of war",
-			"Reward pool (Tempoross)", "Casket (Tempoross)", "Guardians of the Rift",
-			"Supply crate (Wintertodt)", "Reward cart (Wintertodt)", "Hallowed Sack",
-			"Barbarian Assault high gamble", "Unsired", "Supply crate (Mahogany Homes)",
-			"Clue Scroll (Beginner)", "Clue Scroll (Easy)", "Clue Scroll (Medium)",
-			"Clue Scroll (Hard)", "Clue Scroll (Elite)", "Clue Scroll (Master)"));
+	private static final Set<String> ACTIVITIES = new HashSet<>(Resources.lines("/reward-activities.txt"));
 	private final Client client;
 	private final CollectionItemCatalog catalog;
 	private final Predicate<Integer> includedItem;
