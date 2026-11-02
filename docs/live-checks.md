@@ -278,8 +278,13 @@ The website plan's second session, once the routes in the game are built: a memb
       fresh profile and log in a few days later: the group is still there.
 - [ ] **Copy invite.** In a group Connect made, Copy invite says the invite expires in 7 days. With
       the map stopped it says nothing was copied, and pasting gives what the clipboard held before.
-- [ ] **The reminder.** With *Notify before a meetup* on and the minutes set to 2, a meetup two
-      minutes off raises one RuneLite notification and no second one; with it off, none.
+- [ ] **The reminder.** Leave RuneLite's own *Send notifications when focused* off, as it ships. Tick
+      *Meetup notifications* in the sidebar and set *Minutes before a meetup* to 2. With RuneLite
+      focused and the game being played, a meetup two minutes off raises one notification, with the
+      tray and sound RuneLite's settings give, and no second one; with the box unticked, none. In
+      RuneLite's configuration, the cog beside *Notify before a meetup* shows *Customize notification*
+      and *Send notifications when focused* ticked. Untick the latter there: the next reminder waits
+      while RuneLite is focused, and unticking and ticking the sidebar's box keeps that choice.
 
 ## Route review follow-up
 

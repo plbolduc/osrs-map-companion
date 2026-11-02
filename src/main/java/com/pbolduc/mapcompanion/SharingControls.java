@@ -138,7 +138,14 @@ final class SharingControls extends JPanel
 		/* A checkbox chooses data; only Connect may approve a server or start requests. */
 		box.addActionListener(e ->
 		{
-			store.set(key, Boolean.toString(box.isSelected()));
+			if (field.notification)
+			{
+				store.chooseNotification(key, box.isSelected());
+			}
+			else
+			{
+				store.set(key, Boolean.toString(box.isSelected()));
+			}
 			refresh();
 		});
 		choices.add(new Choice(key, label, box, read));

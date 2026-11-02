@@ -51,13 +51,16 @@ final class SharingFields
 		final String label;
 		final String detail;
 		final Predicate<MapCompanionConfig> read;
+		/** A RuneLite notification setting, which a press writes as one; see {@link NotificationChoice}. */
+		final boolean notification;
 
-		private Field(String key, String label, Predicate<MapCompanionConfig> read, String detail)
+		private Field(String key, String label, Predicate<MapCompanionConfig> read, String detail, boolean notification)
 		{
 			this.key = key;
 			this.label = label;
 			this.detail = detail;
 			this.read = read;
+			this.notification = notification;
 		}
 	}
 
@@ -78,7 +81,7 @@ final class SharingFields
 
 	private static Field field(String key, String label, Predicate<MapCompanionConfig> read, String detail)
 	{
-		return new Field(key, label, read, detail);
+		return new Field(key, label, read, detail, false);
 	}
 
 	static final Section PRESENCE = new Section("presence", "Map presence",
@@ -157,8 +160,9 @@ final class SharingFields
 		"When you follow a route, the Shortest Path plugin draws each walking step. Nothing leaves this computer.");
 	static final Field ROUTE_HERE = field("routeHereOnWorldMap", "Route here on the world map", MapCompanionConfig::routeHereOnWorldMap,
 		"Right-click the world map for the way to that spot. A press sends that spot and where you stand, as Route does.");
-	static final Field NOTIFY_MEETUPS = field("notifyMeetups", "Meetup notifications", MapCompanionConfig::notifyMeetups,
-		"Receive a notification before a meetup starts.");
+	static final Field NOTIFY_MEETUPS = new Field("notifyMeetups", "Meetup notifications", config -> config.notifyMeetups().isEnabled(),
+		"A RuneLite notification before a meetup starts. Ticked here, it comes while you play too; how it arrives follows RuneLite's own notification settings.",
+		true);
 	static final Field DROP_LUCK_CHAT = field("dropLuckChat", "Drop luck in chat", MapCompanionConfig::dropLuckChat,
 		"One chat line when a drop with a known rate lands. Nothing leaves this computer.");
 	static final Field BANK_MARKS = field("markFarmRunInBank", "Farm run teleports in the bank", MapCompanionConfig::markFarmRunInBank,

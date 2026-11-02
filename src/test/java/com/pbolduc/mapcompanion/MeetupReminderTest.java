@@ -44,12 +44,12 @@ public class MeetupReminderTest
 		MapCompanionConfig defaults = new MapCompanionConfig()
 		{
 		};
-		assertFalse("the reminder is opt-in", defaults.notifyMeetups());
+		assertFalse("the reminder is opt-in", defaults.notifyMeetups().isEnabled());
 		assertEquals(5, defaults.meetupReminderMinutes());
 
 		MeetupReminder reminder = new MeetupReminder();
 		List<MeetupReminder.Upcoming> soon = Collections.singletonList(new MeetupReminder.Upcoming("hunt", "Star hunt", NOW + 60_000L));
-		assertTrue("nothing is said while it is off", reminder.due(soon, NOW, defaults.notifyMeetups(), 5).isEmpty());
+		assertTrue("nothing is said while it is off", reminder.due(soon, NOW, defaults.notifyMeetups().isEnabled(), 5).isEmpty());
 	}
 
 	@Test

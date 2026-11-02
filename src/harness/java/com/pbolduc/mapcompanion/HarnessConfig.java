@@ -27,6 +27,7 @@ package com.pbolduc.mapcompanion;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
+import net.runelite.client.config.Notification;
 
 /**
  * The plugin's settings, as a real object rather than as RuneLite's dynamic proxy.
@@ -264,10 +265,12 @@ final class HarnessConfig implements MapCompanionConfig
 		return on("showDestination", MapCompanionConfig.super.showDestination());
 	}
 
+	/** A notification setting toggled here is on or off with the rest as it ships, as a stored "true" reads. */
 	@Override
-	public boolean notifyMeetups()
+	public Notification notifyMeetups()
 	{
-		return on("notifyMeetups", MapCompanionConfig.super.notifyMeetups());
+		Notification shipped = MapCompanionConfig.super.notifyMeetups();
+		return shipped.withEnabled(on("notifyMeetups", shipped.isEnabled()));
 	}
 
 	@Override

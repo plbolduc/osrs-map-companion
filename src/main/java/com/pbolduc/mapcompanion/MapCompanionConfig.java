@@ -30,6 +30,7 @@ import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.ConfigSection;
 import net.runelite.client.config.Keybind;
+import net.runelite.client.config.Notification;
 import net.runelite.client.config.Range;
 import net.runelite.client.config.Units;
 
@@ -652,18 +653,26 @@ public interface MapCompanionConfig extends Config
 		return true;
 	}
 
+	/**
+	 * A RuneLite notification rather than a plain box, so RuneLite's panel offers how it arrives behind
+	 * a cog. A "true" or "false" stored before reads as on or off; see {@link NotificationChoice} for
+	 * what the sidebar's box writes.
+	 */
 	@ConfigItem(
 		keyName = "notifyMeetups",
 		name = "Notify before a meetup",
 		description =
 			"Raise a RuneLite notification before each of your group's meetups starts, as many minutes "
-			+ "ahead as the setting below says, so one does not pass while the sidebar is closed.",
+			+ "ahead as the setting below says, so one does not pass while the sidebar is closed. RuneLite "
+			+ "holds notifications while its window is focused unless they are sent when focused. Turned on "
+			+ "in the sidebar, this one is, and otherwise arrives as your other notifications do; the cog "
+			+ "beside this box changes how.",
 		position = 31,
 		section = clientSection
 	)
-	default boolean notifyMeetups()
+	default Notification notifyMeetups()
 	{
-		return false;
+		return Notification.OFF;
 	}
 
 	@Range(
