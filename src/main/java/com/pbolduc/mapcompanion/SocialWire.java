@@ -97,10 +97,51 @@ final class SocialWire
 		}
 	}
 
-	private interface Clean<R>
+	interface Clean<R>
 	{
 		@Nullable
 		R clean(@Nullable R row);
+	}
+
+	/**
+	 * One object's adapter, for a field annotated with a factory that returns it: what it reads
+	 * goes through {@code clean}, and a value it cannot read is null rather than an exception, so
+	 * one bad field never costs the rest of the reply. The route, farm-run and Slayer wires use
+	 * it; list() is the same for a list of rows.
+	 *
+	 * <p>A factory on the field rather than an adapter registered on a Gson of our own: the Hub
+	 * asks plugins to use the client's Gson, and this keeps every other field read exactly as it
+	 * was. The class itself carries no annotation, so asking the Gson for its adapter here gets
+	 * the ordinary reflective one and does not come back to this.
+	 */
+	@SuppressWarnings("unchecked")
+	static <T, R> TypeAdapter<T> object(Gson gson, Class<R> type, Clean<R> clean)
+	{
+		TypeAdapter<R> fields = gson.getAdapter(type);
+		TypeAdapter<JsonElement> whole = gson.getAdapter(JsonElement.class);
+		return (TypeAdapter<T>) new TypeAdapter<R>()
+		{
+			@Override
+			public void write(JsonWriter out, R value) throws IOException
+			{
+				fields.write(out, value);
+			}
+
+			@Override
+			public R read(JsonReader in) throws IOException
+			{
+				/* The whole value first, so a bad field inside it leaves the reader where it should be. */
+				JsonElement tree = whole.read(in);
+				try
+				{
+					return tree == null || tree.isJsonNull() ? null : clean.clean(fields.fromJsonTree(tree));
+				}
+				catch (RuntimeException unreadable)
+				{
+					return null;
+				}
+			}
+		};
 	}
 
 	@SuppressWarnings("unchecked")

@@ -26,13 +26,9 @@
 package com.pbolduc.mapcompanion;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.TypeAdapter;
 import com.google.gson.TypeAdapterFactory;
 import com.google.gson.reflect.TypeToken;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -99,38 +95,9 @@ final class RouteWire
 	public static final class Lenient implements TypeAdapterFactory
 	{
 		@Override
-		@SuppressWarnings("unchecked")
 		public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type)
 		{
-			if (type.getRawType() != RelayResponse.Route.class)
-			{
-				return null;
-			}
-			TypeAdapter<RelayResponse.Route> fields = gson.getAdapter(RelayResponse.Route.class);
-			TypeAdapter<JsonElement> whole = gson.getAdapter(JsonElement.class);
-			return (TypeAdapter<T>) new TypeAdapter<RelayResponse.Route>()
-			{
-				@Override
-				public void write(JsonWriter out, RelayResponse.Route value) throws IOException
-				{
-					fields.write(out, value);
-				}
-
-				@Override
-				public RelayResponse.Route read(JsonReader in) throws IOException
-				{
-					/* The whole value first, so a bad field inside it leaves the reader where it should be. */
-					JsonElement tree = whole.read(in);
-					try
-					{
-						return tree == null || tree.isJsonNull() ? null : normalize(fields.fromJsonTree(tree));
-					}
-					catch (RuntimeException unreadable)
-					{
-						return null;
-					}
-				}
-			};
+			return type.getRawType() != RelayResponse.Route.class ? null : SocialWire.object(gson, RelayResponse.Route.class, RouteWire::normalize);
 		}
 	}
 
