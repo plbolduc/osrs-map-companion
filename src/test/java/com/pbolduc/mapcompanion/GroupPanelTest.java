@@ -527,7 +527,13 @@ public class GroupPanelTest
 		ZoneId zone = ZoneId.of("Europe/London");
 		long now = ZonedDateTime.of(2026, 10, 29, 18, 0, 0, 0, zone).toInstant().toEpochMilli();
 		assertEquals("Today 7:20 PM · in 1h 20m", GroupPanel.when(now + 80 * 60_000L, now, zone, Locale.US));
-		assertEquals("Tomorrow 19:00 · in 1d", GroupPanel.when(now + 25 * 3_600_000L, now, zone, Locale.UK));
+		assertEquals("Tomorrow 05:59 · in 11h 59m", GroupPanel.when(now + 719 * 60_000L, now, zone, Locale.UK));
+		/*
+		 * Past twelve hours the day and the clock say it alone, as the Now line does; this read
+		 * "Tomorrow 19:00 · in 1d", the day said twice.
+		 */
+		assertEquals("Tomorrow 06:00", GroupPanel.when(now + 12 * 3_600_000L, now, zone, Locale.UK));
+		assertEquals("Tomorrow 19:00", GroupPanel.when(now + 25 * 3_600_000L, now, zone, Locale.UK));
 		assertEquals("1 here · 1 coming · 1 maybe", GroupPanel.whoLine(Arrays.asList(face("arrived"), face("on_my_way"),
 			face("maybe"), face("no"))));
 	}

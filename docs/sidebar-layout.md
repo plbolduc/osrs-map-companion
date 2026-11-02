@@ -489,7 +489,8 @@ instance has no tile the map can plan to, so Route asks nothing and the row says
 instance. Route works once they're out.* With the group
 layer on, Show on map reads *On the map* and is not pressable.
 
-Then *Meetups*: each with its title, *Today 7:42 PM · in 1h 20m*, *near Lumbridge Castle · W302*,
+Then *Meetups*: each with its title, *Today 7:42 PM · in 1h 20m* — past twelve hours the day and
+the clock alone, *Wednesday 8:59 PM*, as the line under *Now* counts — *near Lumbridge Castle · W302*,
 who is coming as discs (solid for coming or here, a ring for maybe, faint for can't) with *1 here ·
 1 coming · 1 maybe*, **Route**, and the four answers in a two-by-two grid with this member's own
 filled. *On my way* is one of the four, and Route beside them tells nobody. A map that sends no `events` leaves the one meetup under *Now*,
