@@ -638,7 +638,11 @@ goes as that tile, so the words leave only when they are what the map needs.
 The farm run card kept its kind of run and *Start run* above a run being walked, and there is one run
 at a time, so one press replaced it. The Port tasks card already held the rule "a run already held is
 the order: no second Start beside it". The farm card follows it now: the picker hides while a run is
-shown, planned or ended, and comes back when the card has no run.
+shown, planned or ended, and comes back when the card has no run. The rule holds across the two cards
+too, since the map keeps one run a member and either card's Start replaces it: while one card's run
+is walked, planned or ended, the other offers no Start, and one muted line stands where it was,
+*Start a farm run after the port run ends.* or *Start run after the farm run ends.* A finished run
+holds nothing back.
 
 ### Outside the sidebar
 

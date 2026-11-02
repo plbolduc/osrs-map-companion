@@ -50,9 +50,10 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 /**
- * The card that starts a port-task run, read off its real components as a player sees them.
+ * The two cards that start a run, Farm run and Port tasks, read off their real components as a
+ * player sees them, over the one run the map keeps a member.
  *
- * <p>Presses go through the card's own buttons, {@link FarmRunClient} and {@link FarmRunState}. The
+ * <p>Presses go through the cards' own buttons, {@link FarmRunClient} and {@link FarmRunState}. The
  * map's reply is made here and handed back inside the press, so nothing leaves the machine and a
  * press has landed by the time it returns.
  */
@@ -109,6 +110,7 @@ public class RunCardsTest
 		}
 	};
 	private PortTasksPanel ports;
+	private FarmRunPanel farm;
 
 	public RunCardsTest() throws Exception
 	{
@@ -118,7 +120,58 @@ public class RunCardsTest
 		assertTrue(pairing.connect(JoinCode.parse("ABC234"), () -> true));
 		pairing.rememberSecret(pairing.code(), identity.id(), SECRET);
 		state.bind(identity.id());
-		SwingUtilities.invokeAndWait(() -> ports = new PortTasksPanel(tasks, config, sprites, state, client, follower, route, shortest));
+		SwingUtilities.invokeAndWait(() ->
+		{
+			ports = new PortTasksPanel(tasks, config, sprites, state, client, follower, route, shortest);
+			farm = new FarmRunPanel(state, client, follower, route, shortest, sprites, config);
+		});
+	}
+
+	/**
+	 * Either card's Start replaces the run held, so a farm run being walked holds back Port tasks'
+	 * Start run, and a line where it was says why. The tasks still show; Start comes back when the
+	 * farm run ends.
+	 */
+	@Test
+	public void aFarmRunBeingWalkedHoldsBackPortTasksStartRun() throws Exception
+	{
+		state.acceptFor(identity.id(), EPOCH, run("/contract/farm-run.json"), 1, System.currentTimeMillis());
+		refresh();
+		List<String> waiting = shown(ports);
+		assertTrue(waiting.toString(), waiting.contains(HONEY));
+		assertFalse(waiting.toString(), waiting.contains("Start run"));
+		assertTrue(waiting.toString(), waiting.contains(PortTasksPanel.AFTER_FARM_RUN));
+
+		status = 204;
+		press(farm, "End run");
+		refresh();
+		List<String> free = shown(ports);
+		assertTrue(free.toString(), free.contains("Start run"));
+		assertFalse(free.toString(), free.contains(PortTasksPanel.AFTER_FARM_RUN));
+	}
+
+	/**
+	 * And a port-task run being walked holds back the farm card's kind of run and Start run, with one
+	 * line in their place. A finished run has nothing left to lose, so the picker comes back with it.
+	 */
+	@Test
+	public void aPortRunBeingWalkedHoldsBackTheFarmPicker() throws Exception
+	{
+		state.acceptFor(identity.id(), EPOCH, portRun(), 1, System.currentTimeMillis());
+		refresh();
+		List<String> waiting = shown(farm);
+		assertFalse(waiting.toString(), waiting.contains("Start run"));
+		assertTrue(waiting.toString(), waiting.contains(FarmRunPanel.AFTER_PORT_RUN));
+
+		/* The fixture's slots, every stop's counters reached, then every slot let go. */
+		state.observePorts(Arrays.asList(empty(0), courier(1, 84, 3, 0), courier(2, 121, 0, 0), bounty(3, 466, 9), empty(4)));
+		state.observePorts(Arrays.asList(empty(0), courier(1, 84, 3, 3), courier(2, 121, 3, 3), bounty(3, 466, 0), empty(4)));
+		state.observePorts(Arrays.asList(empty(0), empty(1), empty(2), empty(3), empty(4)));
+		refresh();
+		assertTrue(shown(ports).contains("Route finished."));
+		List<String> free = shown(farm);
+		assertTrue(free.toString(), free.contains("Start run"));
+		assertFalse(free.toString(), free.contains(FarmRunPanel.AFTER_PORT_RUN));
 	}
 
 	/**
@@ -162,13 +215,38 @@ public class RunCardsTest
 
 	private RelayResponse.FarmRun portRun() throws Exception
 	{
-		String json = new String(getClass().getResourceAsStream("/contract/port-task-run.json").readAllBytes(), StandardCharsets.UTF_8);
+		return run("/contract/port-task-run.json");
+	}
+
+	private RelayResponse.FarmRun run(String fixture) throws Exception
+	{
+		String json = new String(getClass().getResourceAsStream(fixture).readAllBytes(), StandardCharsets.UTF_8);
 		return gson.fromJson(json, RelayResponse.FarmRun.class);
 	}
 
+	private static PortTaskReader.Slot courier(int slot, int taskId, int taken, int delivered)
+	{
+		return new PortTaskReader.Slot(slot, PortTaskReader.COURIER, taskId, null, null, null, 3, taken, delivered, 0, null);
+	}
+
+	private static PortTaskReader.Slot bounty(int slot, int taskId, int remaining)
+	{
+		return new PortTaskReader.Slot(slot, PortTaskReader.BOUNTY, taskId, null, null, null, 15, 0, 0, remaining, "Osprey feather");
+	}
+
+	private static PortTaskReader.Slot empty(int slot)
+	{
+		return PortTaskReader.Slot.plain(slot, PortTaskReader.EMPTY);
+	}
+
+	/** Both cards, as the sidebar's one-second refresh does them. */
 	private void refresh() throws Exception
 	{
-		SwingUtilities.invokeAndWait(() -> ports.refresh(true));
+		SwingUtilities.invokeAndWait(() ->
+		{
+			farm.refresh(true);
+			ports.refresh(true);
+		});
 	}
 
 	/** A click on a button the player can see and press, on the event thread as Swing makes it. */

@@ -42,12 +42,13 @@ import net.runelite.client.ui.ColorScheme;
  * One ordered farm run: the runs the map can build, and the run being followed ({@link RunView}).
  *
  * <p>Time Tracking remains the patch timer. This adds only the itinerary and the evidence that
- * advances it. A port-task run is followed on the Port tasks card instead; while one is held, this
- * card shows only its picker.
+ * advances it. A port-task run is followed on the Port tasks card instead; while one is going, this
+ * card says a farm run waits for it, since a Start here would replace it.
  */
 final class FarmRunPanel extends JPanel
 {
 	private static final long serialVersionUID = 1L;
+	static final String AFTER_PORT_RUN = "Start a farm run after the port run ends.";
 	private static final String[][] STARTS =
 	{
 		{"ready-now", "Ready now"}, {"preset:herb", "Herb run"}, {"preset:tree", "Tree run"},
@@ -66,6 +67,8 @@ final class FarmRunPanel extends JPanel
 	 * rule; the picker comes back when the run ends.
 	 */
 	private final JPanel picker = new JPanel(new BorderLayout(0, 4));
+	/* Where the picker was while the Port tasks card's run is going, so its absence is explained. */
+	private final JLabel waiting = new JLabel();
 	private final RunView run;
 
 	@Inject
@@ -96,6 +99,11 @@ final class FarmRunPanel extends JPanel
 		picker.add(start, BorderLayout.SOUTH);
 		picker.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
 		add(MapCompanionPanel.left(picker));
+		waiting.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+		waiting.setFont(waiting.getFont().deriveFont(11f));
+		waiting.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
+		MapCompanionPanel.setWrapped(waiting, AFTER_PORT_RUN, MapCompanionPanel.CARD_TEXT_WIDTH);
+		add(MapCompanionPanel.left(waiting));
 		add(run);
 
 		start.addActionListener(e -> client.start(STARTS[kind.getSelectedIndex()][0]));
@@ -113,7 +121,8 @@ final class FarmRunPanel extends JPanel
 	{
 		boolean showing = run.refresh(connected);
 		setVisible(connected || showing);
-		picker.setVisible(!run.busy());
+		picker.setVisible(!run.busy() && !run.otherBusy());
+		waiting.setVisible(!run.busy() && run.otherBusy());
 		boolean ready = connected && client.ready();
 		start.setEnabled(ready);
 		kind.setEnabled(ready);

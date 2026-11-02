@@ -47,10 +47,11 @@ import net.runelite.client.ui.ColorScheme;
  * Reroute and End. Shared by the two cards that start a run, each showing only its own kind.
  *
  * <p>The farm run card shows every kind but {@code port-tasks}; the Port tasks card shows that one.
- * There is one run at a time — the map keeps one a member — so starting either replaces the other,
- * and the card that did not start it simply stops showing it. What a stop says under its name is
- * its own evidence: a farm stop's way there and the Time Tracking note; a port-task stop's way and
- * one line a task, the words the map ticks it by.
+ * There is one run at a time — the map keeps one a member — so a Start on either card replaces the
+ * run held. Neither offers one beside a run still being walked, planned or ended, its own or the
+ * other card's, and the card that did not start a run simply stops showing it. What a stop says
+ * under its name is its own evidence: a farm stop's way there and the Time Tracking note; a
+ * port-task stop's way and one line a task, the words the map ticks it by.
  *
  * <p>The list rebuilds when its content changes, not on the sidebar's one-second refresh, so an
  * unchanged frame cannot swallow a press or close the bank checklist under the pointer. EDT only.
@@ -87,6 +88,8 @@ final class RunView extends JPanel
 	private List<JButton> shownActions = Collections.emptyList();
 	/** A run shown, or one being planned or ended: the card's own Start would replace it. EDT. */
 	private boolean busy;
+	/** The same of the other card's run, with stops left: a Start here would replace that one. EDT. */
+	private boolean otherBusy;
 	/*
 	 * A hairline and its own heading over the steps of the leg being walked. Without them the leg's
 	 * Walk, Board, Sail and Dock read as more stops at the bottom of the list. Shown with the steps.
@@ -165,6 +168,15 @@ final class RunView extends JPanel
 		return busy;
 	}
 
+	/**
+	 * Whether the other card holds a run with stops left, or one being planned or ended, as of this
+	 * card's last refresh. A finished run holds nothing back: there is nothing left of it to lose. EDT.
+	 */
+	boolean otherBusy()
+	{
+		return otherBusy;
+	}
+
 	/** The button a hotkey presses here: Reroute, or Follow and Pause, while this card shows a run. EDT. */
 	@Nullable
 	JButton hotkey(boolean rerouting)
@@ -204,6 +216,10 @@ final class RunView extends JPanel
 		before.setVisible(active && !view.run.bring.isEmpty());
 		actions.setVisible(active || planning || ending);
 		busy = active || planning || ending;
+		// The other card's held run, its press in flight, or its End whose run id never arrived.
+		otherBusy = (any != null && !ours(any.run) && any.next() != null)
+			|| (said != null && said.port != port && said.planning)
+			|| (state.ending() && (said == null ? port : said.port != port));
 		if (active)
 		{
 			boolean newRun = !Objects.equals(shownRun, view.run.id);
