@@ -2262,15 +2262,19 @@ public class MapCompanionPanel extends PluginPanel
 	 * minted, which expires and can be revoked, so the group keeps a way to stop admitting people
 	 * without ending the group. Only the map can mint one.
 	 *
-	 * <p><b>And why the old message is still here.</b> A map that has not shipped that endpoint
-	 * answers this request with a 404, and a friend waiting to be invited is not the person to make
-	 * pay for that. The fallback is today's text, unchanged, and it still works against today's
-	 * server — which is exactly the server that would refuse the request.
+	 * <p><b>And why the old message is still here.</b> A group nobody owns still admits by its bare
+	 * code, and the map's invite door answers 404 for one, as a map without the door does; a friend
+	 * waiting to be invited there is not the person to make pay for that. The fallback is the old
+	 * text, unchanged, and it works for exactly those groups ({@link RelayClient#admitsByCode}).
+	 *
+	 * <p><b>And why it is not copied for anything else.</b> Every group Connect makes is owned, and an
+	 * owned group refuses a bare code from anybody new. Copied there, it would say "Invite copied" to
+	 * an inviter whose friend's paste is certain to fail, and neither of them could tell why. A
+	 * failure copies nothing and says so, while the inviter can still try again.
 	 *
 	 * <p>The request carries the member secret the map issued this installation, because minting an
 	 * invite is the one thing a member can do that admits a stranger and a member id is not a
-	 * secret. A map that wants one and does not get it refuses, and a refusal here is already
-	 * handled: it is the same null the callback gets from a 404.
+	 * secret. A map that wants one and does not get it refuses, which is a failure like any other.
 	 */
 	private void copyInvite()
 	{
@@ -2290,8 +2294,9 @@ public class MapCompanionPanel extends PluginPanel
 		copyingInvite = true;
 		copyInviteButton.setEnabled(false);
 		copyInviteButton.setText("Asking the map…");
-		relay.requestInvite(server, code, memberId, pairing.secret(server, code, memberId), invite ->
-							SwingUtilities.invokeLater(() -> finishInvite(server, code, invite)));
+		String secret = pairing.secret(server, code, memberId);
+		relay.requestInvite(server, code, memberId, secret, (invite, status) ->
+							SwingUtilities.invokeLater(() -> finishInvite(server, code, invite, status, secret != null)));
 	}
 
 	/**
@@ -2308,8 +2313,31 @@ public class MapCompanionPanel extends PluginPanel
 		return "Join my group on the OSRS map: paste this into OSRS Map Companion in RuneLite, or open " + url;
 	}
 
-	/** Put the invitation on the clipboard, whichever kind of invitation we ended up with. */
-	private void finishInvite(String server, String code, @Nullable RelayClient.Invite invite)
+	/** What Copy invite says when the map made no invite a friend could use: the clipboard is as it was. */
+	static final String INVITE_FAILED = "Couldn't make an invite, so nothing was copied. Try again in a minute.";
+
+	/**
+	 * What Copy invite puts on the clipboard for the map's answer, or null for nothing at all: the
+	 * link when the map made one, and the plain message only for a group that still admits by its
+	 * code. Package-private so every answer can be pinned without a clipboard or a server.
+	 */
+	@Nullable
+	static String inviteText(@Nullable RelayClient.Invite invite, int status, boolean heldSecret, String map, String code)
+	{
+		if (invite != null && invite.url != null && !invite.url.isEmpty())
+		{
+			return inviteMessage(invite.url);
+		}
+		if (RelayClient.admitsByCode(status, heldSecret))
+		{
+			return "Join my OSRS map: " + map + "/map?join=" + code + "&task=companion"
+				+ " — then install the \"OSRS Map Companion\" RuneLite plugin and enter code " + code;
+		}
+		return null;
+	}
+
+	/** Put the invitation on the clipboard, or say that there was none to put there. */
+	private void finishInvite(String server, String code, @Nullable RelayClient.Invite invite, int status, boolean heldSecret)
 	{
 		copyingInvite = false;
 		copyInviteButton.setText("Copy invite");
@@ -2320,12 +2348,13 @@ public class MapCompanionPanel extends PluginPanel
 			return;
 		}
 
+		String message = inviteText(invite, status, heldSecret, mapUrl(), code);
+		if (message == null)
+		{
+			say(INVITE_FAILED);
+			return;
+		}
 		boolean linked = invite != null && invite.url != null && !invite.url.isEmpty();
-		/* The plain-text form is for a map too old to mint a link, where the code alone still admits. */
-		String message = linked
-						 ? inviteMessage(invite.url)
-						 : "Join my OSRS map: " + mapUrl() + "/map?join=" + code + "&task=companion"
-						 + " — then install the \"OSRS Map Companion\" RuneLite plugin and enter code " + code;
 
 		try
 		{
@@ -2343,12 +2372,16 @@ public class MapCompanionPanel extends PluginPanel
 	}
 
 	/**
-	 * "It expires in 6 days.", from the instant the map stated — or nothing at all.
+	 * "It expires in 7 days.", from the instant the map stated — or nothing at all.
 	 *
 	 * <p>Nothing at all is the important half. The expiry is the map's number in the map's units,
 	 * and this only ever prints it: anything that is not a future instant in milliseconds produces
 	 * no sentence rather than a confident wrong one, which is the right way to be wrong about
 	 * somebody else's field.
+	 *
+	 * <p>Days are rounded, because the map's seven days arrive here a moment short of seven, and a
+	 * floor would call the invite the website labels <i>7 days</i> six. Below a day it counts whole
+	 * hours, so twenty hours is not "1 day".
 	 *
 	 * <p>Package-private so the cases can be pinned without a clipboard or a server.
 	 */
@@ -2372,9 +2405,9 @@ public class MapCompanionPanel extends PluginPanel
 		{
 			return "";
 		}
-		long days = remaining / 86_400_000L;
-		if (days >= 1L)
+		if (remaining >= 86_400_000L)
 		{
+			long days = Math.round(remaining / 86_400_000.0);
 			return " It expires in " + days + (days == 1L ? " day." : " days.");
 		}
 		long hours = remaining / 3_600_000L;

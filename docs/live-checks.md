@@ -269,6 +269,8 @@ The website plan's second session, once the routes in the game are built: a memb
       browser opens in the group as that player, the maker's as owner, with no `#link` left in the
       address. Log out and press Open the map on the login screen: the same. Press Connect on the
       login screen of a fresh profile and log in a few days later: the group is still there.
+- [ ] **Copy invite.** In a group Connect made, Copy invite says the invite expires in 7 days. With
+      the map stopped it says nothing was copied, and pasting gives what the clipboard held before.
 - [ ] **The reminder.** With *Notify before a meetup* on and the minutes set to 2, a meetup two
       minutes off raises one RuneLite notification and no second one; with it off, none.
 

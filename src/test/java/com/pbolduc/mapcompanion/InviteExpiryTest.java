@@ -49,6 +49,20 @@ public class InviteExpiryTest
 						 Long.toString(NOW + 86_400_000L + 60_000L), NOW));
 	}
 
+	/**
+	 * The map's seven days are counted from when it minted the link, so they arrive here a moment
+	 * short; a floor called the invite the website labels "7 days" six. Rounded, but only once it
+	 * is a day or more: twenty-three hours is not one day.
+	 */
+	@Test
+	public void aNewInviteIsTheSevenDaysTheMapGaveIt()
+	{
+		assertEquals(" It expires in 7 days.", MapCompanionPanel.describeExpiry(
+						 Long.toString(NOW + 7 * 86_400_000L - 1_500L), NOW));
+		assertEquals(" It expires in 23 hours.", MapCompanionPanel.describeExpiry(
+						 Long.toString(NOW + 86_400_000L - 60_000L), NOW));
+	}
+
 	@Test
 	public void fallsBackToHoursAndThenToSoon()
 	{

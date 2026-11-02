@@ -148,7 +148,7 @@ public class MemberSecretTest
 		Doorman door = new Doorman(201, "{\"url\":\"https://example.invalid/map?join=ABC234\"}");
 		RelayClient relay = new RelayClient(door.client(), gson);
 
-		relay.requestInvite(MAP, "ABC234", "member-1", SECRET, invite ->
+		relay.requestInvite(MAP, "ABC234", "member-1", SECRET, (invite, status) ->
 		{
 		});
 
