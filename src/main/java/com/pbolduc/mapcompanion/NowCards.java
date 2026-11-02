@@ -234,6 +234,9 @@ final class NowCards extends JPanel
 		deathRouteButton.addActionListener(e -> routeToDeath());
 		clueRouteButton.addActionListener(e -> routeToClue());
 		eventRouteButton.addActionListener(e -> routeToMeetup());
+		deathRouteButton.setName("now.death.route");
+		clueRouteButton.setName("now.clue.route");
+		eventRouteButton.setName("now.meetup.route");
 		clueRouteButton.setToolTipText("Plan the way to this step from where you stand. Its tile, or for a step that is words "
 			+ "or a map the clue itself, go to the map in this request only, whether or not you share your clue; the map "
 			+ "plans with them and does not keep them.");
@@ -300,13 +303,18 @@ final class NowCards extends JPanel
 
 	/**
 	 * A Route button and the line under it, from what its last press said: "Planning…" while the map
-	 * answers, its refusal in the line, and pressable only when a press would be sent.
+	 * answers, its refusal in the line, and pressable only when a press would be sent. While the
+	 * destination on Home is the answer this card's last press made, it reads Reroute, as a friend's
+	 * row does: pressed, it asks again from where you stand, where Route would offer as new the very
+	 * card above it.
 	 */
 	private void routeState(JButton button, JLabel line, String source, String label, boolean ready)
 	{
 		RoutePress.Said said = routePress.said(source);
 		boolean planning = said != null && said.planning;
-		button.setText(planning ? "Planning…" : label);
+		boolean routedHere = said != null && said.key != null
+			&& said.key.equals(DestinationRoute.keyOf(destinationState.getDestination()));
+		button.setText(planning ? "Planning…" : routedHere ? "Reroute" : label);
 		button.setEnabled(ready && !planning && routePress.ready());
 		String message = said == null ? null : said.message;
 		line.setVisible(message != null);
@@ -384,7 +392,11 @@ final class NowCards extends JPanel
 		refresh.run();
 	}
 
-	/** The way back to where you died, read again at the press, as Open website reads it. */
+	/**
+	 * The way back to where you died, read again at the press, as Open website reads it. The answer's
+	 * card carries no line of its own: the death card under it counts the age on every refresh, and
+	 * an age written at the press would sit above it, older by the minute.
+	 */
 	private void routeToDeath()
 	{
 		long now = System.currentTimeMillis();
@@ -392,7 +404,7 @@ final class NowCards extends JPanel
 		if (death != null)
 		{
 			routePress.press(RoutePress.Target.tile("death", new WorldPoint(death.tile.x, death.tile.y, death.tile.plane),
-				"Where you died", null, deathLine(death.msAgo, death.tile.plane)));
+				"Where you died", null, null));
 		}
 		refresh.run();
 	}
