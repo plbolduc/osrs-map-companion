@@ -1250,8 +1250,11 @@ public class LootLog
 			   + " across " + monsters + (monsters == 1 ? " monster" : " monsters");
 	}
 
-	/** What {@link #summary()} says on a world whose kills are not counted. */
-	static final String PAUSED = "Drop luck paused on this world";
+	/**
+	 * What {@link #summary()} says on a world whose kills are not counted, with the reason: a player who
+	 * hops to a free world should not read it as their kill log stopping for good.
+	 */
+	static final String PAUSED = "Not counted on this world: drop luck counts normal members worlds only.";
 
 	/**
 	 * Whether there is anything to forget.
