@@ -372,14 +372,20 @@ public class MapCompanionPanel extends PluginPanel
 		return row;
 	}
 
+	/** No taller than it asks to be: a vertical BoxLayout stretches any child whose maximum allows it. */
+	static <T extends JComponent> T capped(T component)
+	{
+		component.setMaximumSize(new Dimension(Integer.MAX_VALUE, component.getPreferredSize().height));
+		return component;
+	}
+
 	/** One component the full width of the column, at its own height. */
 	static JPanel fill(JComponent component, Color background)
 	{
 		JPanel holder = new JPanel(new GridLayout(1, 1));
 		holder.setBackground(background);
 		holder.add(component);
-		holder.setMaximumSize(new Dimension(Integer.MAX_VALUE, component.getPreferredSize().height));
-		return left(holder);
+		return left(capped(holder));
 	}
 
 	/** One component at its own width, on the left. */
@@ -388,8 +394,7 @@ public class MapCompanionPanel extends PluginPanel
 		JPanel holder = new JPanel(new BorderLayout());
 		holder.setBackground(background);
 		holder.add(component, BorderLayout.WEST);
-		holder.setMaximumSize(new Dimension(Integer.MAX_VALUE, component.getPreferredSize().height));
-		return left(holder);
+		return left(capped(holder));
 	}
 
 	/** A line in one size and ink, its words set later: the shape most of the sidebar's labels start from. */
@@ -668,7 +673,7 @@ public class MapCompanionPanel extends PluginPanel
 		{
 			row.add(button);
 		}
-		row.setMaximumSize(new Dimension(Integer.MAX_VALUE, row.getPreferredSize().height));
+		capped(row);
 		row.revalidate();
 		row.repaint();
 		return wanted;

@@ -27,7 +27,6 @@ package com.pbolduc.mapcompanion;
 
 import java.awt.Color;
 import java.awt.Cursor;
-import java.awt.Dimension;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -69,7 +68,7 @@ final class SidebarPages extends JPanel
 		back.setFocusPainted(false);
 		back.setBorder(BorderFactory.createEmptyBorder(0, 0, 8, 0));
 		back.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		back.setMaximumSize(new Dimension(Integer.MAX_VALUE, back.getPreferredSize().height));
+		MapCompanionPanel.capped(back);
 		back.addActionListener(e -> open(false));
 		settings.add(MapCompanionPanel.left(back));
 		settings.add(settingsContent);

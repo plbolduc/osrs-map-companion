@@ -413,8 +413,7 @@ final class DropLuckPanel extends JPanel
 			count.add(chip);
 		}
 		row.add(count, BorderLayout.EAST);
-		row.setMaximumSize(new Dimension(Integer.MAX_VALUE, row.getPreferredSize().height));
-		row.setAlignmentX(Component.LEFT_ALIGNMENT);
+		left(MapCompanionPanel.capped(row));
 		clickable(row, () ->
 		{
 			chosen.put(monster.npc, drop.item);
@@ -597,8 +596,7 @@ final class DropLuckPanel extends JPanel
 			side.add(chip);
 			row.add(side, BorderLayout.EAST);
 		}
-		row.setMaximumSize(new Dimension(Integer.MAX_VALUE, row.getPreferredSize().height));
-		row.setAlignmentX(Component.LEFT_ALIGNMENT);
+		left(MapCompanionPanel.capped(row));
 		clickable(row, () -> open(monster.npc, drop.item));
 		return row;
 	}
@@ -636,7 +634,7 @@ final class DropLuckPanel extends JPanel
 			icons.add(small("No notable drops yet", ColorScheme.LIGHT_GRAY_COLOR));
 		}
 		row.add(fillIn(icons, ColorScheme.DARK_GRAY_COLOR));
-		row.setMaximumSize(new Dimension(Integer.MAX_VALUE, row.getPreferredSize().height));
+		MapCompanionPanel.capped(row);
 		clickable(row, () -> open(monster.npc, null));
 		return row;
 	}
@@ -897,8 +895,7 @@ final class DropLuckPanel extends JPanel
 		JPanel holder = new JPanel(new BorderLayout());
 		holder.setBackground(background);
 		holder.add(component, BorderLayout.CENTER);
-		holder.setMaximumSize(new Dimension(Integer.MAX_VALUE, component.getPreferredSize().height));
-		return left(holder);
+		return left(MapCompanionPanel.capped(holder));
 	}
 
 	private static <T extends JComponent> T left(T component)

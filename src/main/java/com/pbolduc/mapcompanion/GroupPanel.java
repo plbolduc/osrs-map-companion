@@ -213,7 +213,7 @@ final class GroupPanel extends JPanel
 		head.add(meetupsHead, java.awt.BorderLayout.WEST);
 		head.add(meetHere, java.awt.BorderLayout.EAST);
 		head.setBorder(new EmptyBorder(4, 0, 3, 0));
-		head.setMaximumSize(new java.awt.Dimension(Integer.MAX_VALUE, head.getPreferredSize().height));
+		MapCompanionPanel.capped(head);
 		add(MapCompanionPanel.left(head));
 		/*
 		 * The form opens under the link that opened it, above the meetups, and its answer is said there;
@@ -784,7 +784,7 @@ final class GroupPanel extends JPanel
 			});
 			answers.add(button);
 		}
-		answers.setMaximumSize(new java.awt.Dimension(Integer.MAX_VALUE, answers.getPreferredSize().height));
+		MapCompanionPanel.capped(answers);
 		card.add(MapCompanionPanel.left(answers));
 		boolean routed = said != null && said.message != null;
 		String message = routed ? said.message : answer != null ? answer.message : null;
@@ -1144,7 +1144,7 @@ final class GroupPanel extends JPanel
 		hug.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		hug.add(button, java.awt.BorderLayout.NORTH);
 		top.add(hug, java.awt.BorderLayout.EAST);
-		top.setMaximumSize(new java.awt.Dimension(Integer.MAX_VALUE, top.getPreferredSize().height));
+		MapCompanionPanel.capped(top);
 		return top;
 	}
 
@@ -1153,8 +1153,7 @@ final class GroupPanel extends JPanel
 		JPanel holder = new JPanel(new GridLayout(1, 1));
 		holder.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		holder.add(component);
-		holder.setMaximumSize(new java.awt.Dimension(Integer.MAX_VALUE, component.getPreferredSize().height));
-		return MapCompanionPanel.left(holder);
+		return MapCompanionPanel.left(MapCompanionPanel.capped(holder));
 	}
 
 	private static JPanel gap(int height)

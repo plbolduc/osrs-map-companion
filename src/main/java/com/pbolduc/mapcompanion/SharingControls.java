@@ -27,7 +27,6 @@ package com.pbolduc.mapcompanion;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.FocusAdapter;
@@ -104,7 +103,7 @@ final class SharingControls extends JPanel
 		nicknameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 		nameBox.add(nicknameLabel);
 		nickname.setName("nickname");
-		nickname.setMaximumSize(new Dimension(Integer.MAX_VALUE, nickname.getPreferredSize().height));
+		MapCompanionPanel.capped(nickname);
 		nickname.setAlignmentX(Component.LEFT_ALIGNMENT);
 		nickname.setToolTipText("What your group sees beside your dot. Saves on Enter or when you leave the field.");
 		nickname.addActionListener(e -> saveNickname());
@@ -282,7 +281,7 @@ final class SharingControls extends JPanel
 		header.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
 		header.setMargin(new Insets(0, 0, 0, 0));
 		header.setAlignmentX(Component.LEFT_ALIGNMENT);
-		header.setMaximumSize(new Dimension(Integer.MAX_VALUE, header.getPreferredSize().height));
+		MapCompanionPanel.capped(header);
 		contents.setVisible(false);
 		header.addActionListener(e ->
 		{

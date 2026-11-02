@@ -33,7 +33,6 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -344,7 +343,7 @@ final class ConnectCard extends JPanel
 		knownGroupsRow = row(ColorScheme.DARK_GRAY_COLOR);
 		knownGroupsRow.add(knownGroupsButton);
 		knownGroupsRow.setBorder(new EmptyBorder(4, 0, 0, 0));
-		knownGroupsRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, knownGroupsButton.getPreferredSize().height + 4));
+		MapCompanionPanel.capped(knownGroupsRow);
 		add(left(knownGroupsRow));
 
 		groupActions.add(left(groupButtons));

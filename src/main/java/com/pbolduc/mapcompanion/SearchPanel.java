@@ -257,7 +257,7 @@ final class SearchPanel extends JPanel
 				});
 				JPanel holder = MapCompanionPanel.fill(mean, ColorScheme.DARK_GRAY_COLOR);
 				holder.setBorder(new EmptyBorder(3, 0, 0, 0));
-				holder.setMaximumSize(new Dimension(Integer.MAX_VALUE, holder.getPreferredSize().height));
+				MapCompanionPanel.capped(holder);
 				rows.add(holder);
 			}
 		}
@@ -382,7 +382,7 @@ final class SearchPanel extends JPanel
 		slot.setBackground(ColorScheme.DARK_GRAY_COLOR);
 		slot.setBorder(new EmptyBorder(0, 0, 2, 0));
 		slot.add(row);
-		slot.setMaximumSize(new Dimension(Integer.MAX_VALUE, slot.getPreferredSize().height));
+		MapCompanionPanel.capped(slot);
 		return MapCompanionPanel.left(slot);
 	}
 
