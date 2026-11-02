@@ -43,6 +43,7 @@ import java.util.Locale;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.swing.AbstractButton;
+import javax.swing.JButton;
 import javax.swing.SwingUtilities;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.ui.ColorScheme;
@@ -115,8 +116,12 @@ public class GroupPanelTest
 			});
 		MeetupClient meetups = new MeetupClient(http("{\"eventId\":\"star-hunt\",\"answer\":\"going\"}"), new Gson(),
 			MeetupClientTest.game(false), now(), pairing, identity, destinations, group, link -> { });
-		return new GroupPanel(destinations, group, press, meetups, config, pictures);
+		invite = MapCompanionPanel.smallButton("Copy invite");
+		return new GroupPanel(destinations, group, press, meetups, config, pictures, invite);
 	}
+
+	/** Copy invite, which the sidebar hands the Group tab for the card of a group of one. */
+	private JButton invite;
 
 	/** What the panel asked the game's sprites for, by the label it asked for. */
 	private final List<String> drawn = new CopyOnWriteArrayList<>();
@@ -152,24 +157,39 @@ public class GroupPanelTest
 	}
 
 	/**
-	 * A group of one says so where the friends will be, and names the button that changes it. Most
-	 * groups start this way now that Connect makes one for a player alone; a blank tab read as
-	 * "nothing works". The card goes the moment a friend arrives.
+	 * A group of one says so where the friends will be, and holds the button that changes it: Copy
+	 * invite sits in the card, under the sentence that is about it, rather than being named there and
+	 * found a section further down. Most groups start this way now that Connect makes one for a player
+	 * alone; a blank tab read as "nothing works". The card comes with the map's empty roster, not when
+	 * the next minute redraws the rows, and goes the moment a friend arrives, giving the button back.
 	 */
 	@Test
-	public void aGroupOfOneSaysSoAndNamesCopyInvite() throws Exception
+	public void aGroupOfOneSaysSoAtOnceAndHoldsCopyInvite() throws Exception
 	{
 		AtomicReference<GroupPanel> panel = new AtomicReference<>();
-		SwingUtilities.invokeAndWait(() -> panel.set(panel()));
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.set(panel());
+			/* Drawn before the map has sent a roster at all: nothing to say yet. */
+			panel.get().refresh(true);
+		});
+		assertFalse(SidebarWords.words(panel.get()).contains(GroupPanel.ALONE));
+		assertFalse(panel.get().holdsInvite());
+
 		RelayResponse.StreamDirective alone = new Gson().fromJson("{\"roster\":[],\"events\":[]}",
 			RelayResponse.StreamDirective.class);
 		destinations.acceptSocial(alone, true);
 		SwingUtilities.invokeAndWait(() -> panel.get().refresh(true));
-		assertTrue(SidebarWords.words(panel.get()).toString(), SidebarWords.words(panel.get()).contains(GroupPanel.ALONE));
+		assertTrue("the card comes with the empty roster, within the same minute: " + SidebarWords.words(panel.get()),
+			SidebarWords.words(panel.get()).contains(GroupPanel.ALONE));
+		assertTrue(panel.get().holdsInvite());
+		assertTrue("Copy invite is in the card", SwingUtilities.isDescendingFrom(invite, namedComponent(panel.get(), "group.alone")));
 
 		social();
 		SwingUtilities.invokeAndWait(() -> panel.get().refresh(true));
 		assertFalse(SidebarWords.words(panel.get()).contains(GroupPanel.ALONE));
+		assertFalse("with a friend in, the button is the row's under the tab again", panel.get().holdsInvite());
+		assertFalse(SwingUtilities.isDescendingFrom(invite, panel.get()));
 	}
 
 	private void social() throws Exception

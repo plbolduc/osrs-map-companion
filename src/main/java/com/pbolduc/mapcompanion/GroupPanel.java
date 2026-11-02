@@ -128,9 +128,16 @@ final class GroupPanel extends JPanel
 	@Nullable
 	private String drawn;
 	private boolean ready;
+	/**
+	 * Copy invite, which {@link MapCompanionPanel} owns, presses and words. The card of a group of one
+	 * holds it, under the sentence that is about it; otherwise it sits beside Switch ▾ under the tab.
+	 */
+	private final JButton invite;
+	/** Whether the rows last drawn are that card, so the row under the tab leaves the button out. */
+	private boolean holdsInvite;
 
 	GroupPanel(DestinationState destinations, GroupState group, RoutePress press, MeetupClient meetups,
-		MapCompanionConfig config, GameSprites sprites)
+		MapCompanionConfig config, GameSprites sprites, JButton invite)
 	{
 		this.destinations = destinations;
 		this.group = group;
@@ -138,6 +145,7 @@ final class GroupPanel extends JPanel
 		this.meetups = meetups;
 		this.config = config;
 		this.sprites = sprites;
+		this.invite = invite;
 		setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.Y_AXIS));
 		setBackground(ColorScheme.DARK_GRAY_COLOR);
 		MapCompanionPanel.left(this);
@@ -324,6 +332,7 @@ final class GroupPanel extends JPanel
 		}
 		drawn = words;
 		friends.removeAll();
+		holdsInvite = roster != null && roster.isEmpty();
 		if (roster != null)
 		{
 			for (RelayResponse.RosterRow row : roster)
@@ -355,6 +364,8 @@ final class GroupPanel extends JPanel
 	{
 		StringBuilder sb = new StringBuilder().append(ready).append(press.ready()).append(meetups.ready())
 			.append(config.showGroupOnWorldMap()).append('|').append(destinationKey).append('|').append(now / 60_000L);
+		/* No roster draws nothing and an empty one draws the card of a group of one, so they sign apart. */
+		sb.append('|').append(roster == null ? "none" : Integer.toString(roster.size()));
 		if (roster != null)
 		{
 			for (RelayResponse.RosterRow row : roster)
@@ -393,11 +404,12 @@ final class GroupPanel extends JPanel
 	 * A group of one: what the tab is for, said where the friends will be.
 	 *
 	 * <p>Most groups start this way now, because Connect makes one for a player alone. An empty tab
-	 * reads as "nothing works"; this reads as "nobody yet", and names the button under it that
-	 * changes that. Gone the moment a friend's row arrives.
+	 * reads as "nothing works"; this reads as "nobody yet", and holds the button that changes that,
+	 * Copy invite, under the sentence that is about it. It comes with the map's empty roster, and
+	 * goes, giving the button back to the row under the tab, the moment a friend's row arrives.
 	 */
-	static final String ALONE = "Just you so far. Copy invite and send it to a friend; they paste it into "
-		+ "their sidebar and appear here and on your map.";
+	static final String ALONE = "Just you so far. Send a friend an invite; they paste it into their sidebar "
+		+ "and appear here and on your map.";
 
 	private JPanel alone()
 	{
@@ -406,7 +418,21 @@ final class GroupPanel extends JPanel
 		JLabel words = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
 		MapCompanionPanel.setWrapped(words, ALONE, WIDTH);
 		card.add(MapCompanionPanel.left(words));
+		JPanel actions = actions();
+		actions.add(invite);
+		card.add(gap(5));
+		card.add(MapCompanionPanel.left(actions));
 		return slot(card);
+	}
+
+	/**
+	 * Whether the card of a group of one is drawn, holding Copy invite, so the row under the tab leaves
+	 * it out. It says what was drawn rather than what the roster says now, so the two places never both
+	 * want the button and never both let it go.
+	 */
+	boolean holdsInvite()
+	{
+		return holdsInvite;
 	}
 
 	/** One friend: their disc and name, where they are, their news, and the two buttons. */
