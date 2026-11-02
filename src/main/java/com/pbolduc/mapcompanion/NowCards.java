@@ -147,8 +147,9 @@ final class NowCards extends JPanel
 	/** Ask the map for the way again from where the player stands. See {@link RouteClient}. */
 	private final JButton rerouteButton = smallButton("Reroute");
 	/**
-	 * Follow this route with Shortest Path, or stop. The only door to Shortest Path besides Reroute,
-	 * so a destination that merely arrives never draws on the player's own path.
+	 * Follow this route, or stop: the step in the box over the game, and Shortest Path's walks where
+	 * it is running. The only door to Shortest Path besides Reroute, so a destination that merely
+	 * arrives never draws on the player's own path.
 	 */
 	private final JButton followButton = smallButton("Follow");
 	private final ShortestPath shortestPath;
@@ -291,6 +292,27 @@ final class NowCards extends JPanel
 		}
 		JButton own = rerouting ? rerouteButton : followButton;
 		return shownDestinationActions.contains(own) ? own : null;
+	}
+
+	/**
+	 * What Follow does here, or Stop while following: the step in the box over the game, Shortest
+	 * Path's walks, or both, as far as each is on.
+	 *
+	 * @param drawable Shortest Path is running and the setting lets it draw
+	 * @param box the step on screen is on
+	 */
+	static String followTip(boolean following, boolean drawable, boolean box)
+	{
+		if (following)
+		{
+			return !drawable ? "Stop showing the step you're on over the game"
+				: box ? "Stop showing the step you're on over the game, and clear the path Shortest Path drew"
+				: "Stop drawing this route with Shortest Path, and clear the path it drew";
+		}
+		return !drawable ? "Show the step you're on in a box over the game"
+			: box ? "Show the step you're on in a box over the game, and have Shortest Path draw each walking step. "
+				+ "It is sent nothing for a teleport or a ride."
+			: "Have Shortest Path draw each walking step of this route. It is sent nothing for a teleport or a ride.";
 	}
 
 	/**
@@ -486,15 +508,20 @@ final class NowCards extends JPanel
 		boolean steps = destination != null && route != null && route.hasRoute()
 			&& route.key.equals(DestinationRoute.keyOf(destination));
 		boolean drawable = steps && config.drawWithShortestPath() && shortestPath.installed() && !route.arrived();
+		/*
+		 * Following puts the step in the box over the game as well as drawing in Shortest Path, so
+		 * Follow is offered for either. A route pressed here is followed from the start, and without
+		 * Shortest Path the box it put up had no button to take it down.
+		 */
+		boolean box = config.showStepOnScreen();
+		boolean followable = steps && !route.arrived() && (drawable || box);
 		routeSteps.show(steps ? route : null,
 			steps ? RouteStepsView.shortestPathLine(route, drawable, shortestPath.drawing()) : null);
 		List<JButton> destinationRow = new ArrayList<>();
-		if (drawable)
+		if (followable)
 		{
 			followButton.setText(route.following ? "Stop" : "Follow");
-			followButton.setToolTipText(route.following
-				? "Stop drawing this route with Shortest Path, and clear the path it drew"
-				: "Have Shortest Path draw each walking step of this route. It is sent nothing for a teleport or a ride.");
+			followButton.setToolTipText(followTip(route.following, drawable, box));
 			destinationRow.add(followButton);
 		}
 		if (steps)

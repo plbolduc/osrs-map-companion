@@ -241,8 +241,9 @@ The website plan's second session, once the routes in the game are built: a memb
 - [ ] **Shortest Path keeps its own target.** Set a target of your own in Shortest Path while
       following: the sidebar stops following and says why, and finishing the walk does not clear
       your target. Press Stop while it draws one of ours: that path is cleared.
-- [ ] **Shortest Path, not installed.** Without it, no Follow button and nothing about it in the
-      sidebar; the steps and pins still work.
+- [ ] **Shortest Path, not installed.** Without it, Follow still shows the step you're on in the
+      box over the game, and nothing about Shortest Path is in the sidebar; the steps and pins still
+      work. With *Step on screen* off as well, there is no Follow.
 - [ ] **Three buttons fit.** Follow, Reroute and Dismiss sit on one row in the 225px sidebar
       without cutting a word.
 - [ ] **Search.** Connected, type *bank* in the box at the top of Home: the rows match the
