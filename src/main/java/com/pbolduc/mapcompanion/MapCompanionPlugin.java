@@ -1003,6 +1003,11 @@ public class MapCompanionPlugin extends Plugin
 	public void onGameStateChanged(GameStateChanged event)
 	{
 		GameState state = event.getGameState();
+		if (state == GameState.LOGIN_SCREEN || state == GameState.HOPPING)
+		{
+			/* On no world until the next tick names one, so no meetup's world reads as this one meanwhile. */
+			groupState.onWorld(0);
+		}
 		if (state == GameState.LOGIN_SCREEN || state == GameState.HOPPING || state == GameState.CONNECTION_LOST)
 		{
 			/*
@@ -1936,6 +1941,8 @@ public class MapCompanionPlugin extends Plugin
 		{
 			return;
 		}
+		/* For the Group tab, which shows a meetup's world green while this client is on it. */
+		groupState.onWorld(client.getWorld());
 		/**
 		 * Idempotent, and called from here rather than from the login event so that enabling the
 		 * plugin while already logged in starts the settling clock too — that path raises no game

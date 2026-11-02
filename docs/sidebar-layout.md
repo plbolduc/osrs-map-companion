@@ -492,7 +492,8 @@ layer on, Show on map reads *On the map* and is not pressable.
 Then *Meetups*: the next one whole, with its title, *Today 7:42 PM · in 1h 20m* — past twelve hours the day and
 the clock alone, *Wednesday 8:59 PM*, as the line under *Now* counts, and from a quarter of an hour
 before the start until it stops saying *now* the countdown in the map's amber, there as here, as the
-map's own meetup card turns amber in the same window — *near Lumbridge Castle · W302*,
+map's own meetup card turns amber in the same window — *near Lumbridge Castle · W302*, the world
+green while you are on it, as the game's friends list greens your own,
 who is coming as discs (solid for coming or here, a ring for maybe, faint for can't) with *1 here ·
 1 coming · 1 maybe*, **Route**, and the four answers in a two-by-two grid with this member's own
 filled, an answer pressed included while it is on its way: the pick ignores a press then rather than
