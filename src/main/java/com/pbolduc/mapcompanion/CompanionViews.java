@@ -30,6 +30,7 @@ import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.Insets;
 import java.util.function.Consumer;
+import javax.annotation.Nullable;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -70,6 +71,9 @@ final class CompanionViews extends JPanel
 	private final JToggleButton groupTab = tab("Group", "group");
 	private final JToggleButton starsTab = tab("Stars", "stars");
 	private View selected = View.HOME;
+	/** The last press's answer {@link #showAnswer} has seen, so each answer turns the page at most once. */
+	@Nullable
+	private RoutePress.Said seen;
 
 	CompanionViews(JPanel home, JPanel group, JPanel stars, Consumer<Boolean> starsVisibility)
 	{
@@ -129,6 +133,37 @@ final class CompanionViews extends JPanel
 	View selected()
 	{
 		return selected;
+	}
+
+	/**
+	 * Home, once, when a Route pressed on Group comes back with a way while Group is still the tab
+	 * showing. A friend's or a meetup's answer fills Home's destination card, a tab away from the
+	 * button, where its steps, Follow and Reroute were unannounced; a search pick already folds its
+	 * list to show the card in the same way. A refusal stays under the button that asked, a tab the
+	 * player has since left is not taken from them, and Stars draws a star's way under the star.
+	 *
+	 * @param said what the last press said, from any button
+	 * @return whether Home was brought forward, so the sidebar can bring the card into view
+	 */
+	boolean showAnswer(@Nullable RoutePress.Said said)
+	{
+		if (said == null || said == seen)
+		{
+			return false;
+		}
+		seen = said;
+		if (said.key == null || selected != View.GROUP || !pressedOnGroup(said.source))
+		{
+			return false;
+		}
+		select(View.HOME);
+		return true;
+	}
+
+	/** A Route on the Group tab: a friend's, {@link GroupState#source}, or a meetup's, {@link GroupPanel#source}. */
+	static boolean pressedOnGroup(String source)
+	{
+		return source.startsWith(GroupState.source("")) || source.startsWith("meetup:");
 	}
 
 	/**
