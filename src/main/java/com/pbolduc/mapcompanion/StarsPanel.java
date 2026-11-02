@@ -38,6 +38,8 @@ import java.awt.Rectangle;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
+import javax.annotation.Nullable;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -59,6 +61,11 @@ import net.runelite.client.ui.PluginPanel;
  * The controls share the website's meanings; expansion and the selected world stay on this
  * screen. Only a button can pin. A star's world is printed, and hopping is left to
  * the game's own world switcher.
+ *
+ * <p>The way to the picked star is drawn under it once the map has answered, the same steps and
+ * buttons Home's destination card shows, because a star hunter lives on this tab while they hop and
+ * sending them to Home for the steps lost their place in the list. It is one route seen twice: the
+ * steps are read from {@link DestinationRoute}, and Follow and Reroute are Home's own buttons.
  *
  * <p>Every child of a vertical stack here is left-aligned and as wide as the column. BoxLayout
  * lines children up by their alignment point, so one centred child among left-aligned ones
@@ -86,6 +93,21 @@ final class StarsPanel extends JPanel
 	private final DestinationMarker marker;
 	private final RoutePress press;
 	private final java.util.function.Supplier<String> mapUrl;
+	private final DestinationRoute route;
+	@Nullable
+	private final ShortestPath shortestPath;
+	@Nullable
+	private final MapCompanionConfig config;
+	/**
+	 * Home's destination card's Follow (false) or Reroute (true) while that card offers it, else
+	 * null: {@link NowCards#hotkey}. The buttons under a routed star press these very buttons, as a
+	 * key does, so the rules for when each is offered and pressable are written once, on Home.
+	 */
+	private final Function<Boolean, JButton> homeButton;
+	/** The sidebar's own refresh, so a way chosen here is the way Home's card shows at once. */
+	private final Runnable sidebar;
+	/** The way to the picked star, kept across rebuilds of the block it sits in; see {@link #selection}. */
+	private final RouteStepsView steps;
 	private final JCheckBox sync = check("Sync filters with website");
 	private final JComboBox<String> tier = new JComboBox<>(new String[]{"T1+", "T2+", "T3+", "T4+", "T5+", "T6+", "T7+", "T8+", "T9+"});
 	private final JToggleButton members = toggle("P2P"), free = toggle("F2P"), safe = toggle("Safe");
@@ -99,8 +121,17 @@ final class StarsPanel extends JPanel
 	private boolean selected, active, updating;
 	private String rendered;
 
+	/**
+	 * @param shortestPath and {@code config}, for the line under the steps saying Shortest Path draws
+	 *     a walk; null draws no such line
+	 * @param sprites the client's pictures for a step's item or spell, or null to draw words alone
+	 * @param homeButton Home's Follow or Reroute while its card offers one; see {@link #homeButton}
+	 * @param sidebar the sidebar's refresh
+	 */
 	StarsPanel(StarsClient service, DestinationState destinations, ClientThread clientThread,
-		DestinationMarker marker, RoutePress press, java.util.function.Supplier<String> mapUrl)
+		DestinationMarker marker, RoutePress press, java.util.function.Supplier<String> mapUrl, DestinationRoute route,
+		@Nullable ShortestPath shortestPath, @Nullable MapCompanionConfig config, @Nullable GameSprites sprites,
+		Function<Boolean, JButton> homeButton, Runnable sidebar)
 	{
 		this.press = press;
 		this.mapUrl = mapUrl;
@@ -108,6 +139,16 @@ final class StarsPanel extends JPanel
 		this.destinations = destinations;
 		this.clientThread = clientThread;
 		this.marker = marker;
+		this.route = route;
+		this.shortestPath = shortestPath;
+		this.config = config;
+		this.homeButton = homeButton;
+		this.sidebar = sidebar;
+		this.steps = new RouteStepsView(way ->
+		{
+			route.choose(way);
+			sidebar.run();
+		}, sprites);
 		setName("companionStars");
 		setBackground(ColorScheme.DARK_GRAY_COLOR);
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -293,6 +334,19 @@ final class StarsPanel extends JPanel
 		signature.append(model.selected).append(destination == null ? "" : destination.name + destination.world + destination.x + destination.y);
 		RoutePress.Said said = press.said(SOURCE);
 		signature.append(press.ready()).append(said == null ? "" : said.planning + "|" + said.message);
+		/*
+		 * The steps are drawn only under the star they lead to, and only the route of the destination
+		 * being shown: for a tick after a change the two can differ, as on Home's card. The view says
+		 * itself on every refresh, as Home's does, and rebuilds only when its words change.
+		 */
+		StarsModel.Star picked = model.find(model.selected);
+		DestinationRoute.View way = route.view();
+		boolean routed = picked != null && model.passes(picked, elapsed) && pins(destination, picked)
+			&& way != null && way.hasRoute() && way.key.equals(DestinationRoute.keyOf(destination));
+		boolean drawable = routed && config != null && shortestPath != null && config.drawWithShortestPath()
+			&& shortestPath.installed() && !way.arrived();
+		steps.show(routed ? way : null, routed ? RouteStepsView.shortestPathLine(way, drawable, drawable ? shortestPath.drawing() : 0) : null);
+		signature.append(routed).append(offered(routed, false)).append(offered(routed, true));
 		if (signature.toString().equals(rendered)) return;
 		rendered = signature.toString();
 		rows.removeAll();
@@ -333,13 +387,26 @@ final class StarsPanel extends JPanel
 		 * a press acts on, so it never offers a star the list has just hidden. It is kept, though, and
 		 * comes back when the filter lets it.
 		 */
-		StarsModel.Star chosen = model.find(model.selected);
-		if (chosen != null && model.passes(chosen, elapsed))
+		if (picked != null && model.passes(picked, elapsed))
 		{
-			selection(chosen, elapsed, destination);
+			selection(picked, elapsed, destination, routed);
 		}
 		revalidate();
 		repaint();
+	}
+
+	/** Whether the destination is this star: its tile and its world, which a name cannot tell apart. */
+	private static boolean pins(@Nullable RelayResponse.Destination destination, StarsModel.Star star)
+	{
+		return destination != null && destination.world != null && destination.world == star.world
+			&& destination.x == star.x && destination.y == star.y;
+	}
+
+	/** What Home's Follow or Reroute says now, so a change to it redraws the copy under the star. */
+	private String offered(boolean routed, boolean rerouting)
+	{
+		JButton own = routed ? homeButton.apply(rerouting) : null;
+		return own == null ? "|" : "|" + own.getText() + own.isEnabled() + own.getToolTipText();
 	}
 
 	private JComponent site(StarsModel.Site site, long elapsed)
@@ -457,33 +524,13 @@ final class StarsPanel extends JPanel
 		SwingUtilities.invokeLater(() -> selection.scrollRectToVisible(new Rectangle(0, 0, selection.getWidth(), selection.getHeight())));
 	}
 
-	private void selection(StarsModel.Star star, long elapsed, RelayResponse.Destination destination)
+	private void selection(StarsModel.Star star, long elapsed, @Nullable RelayResponse.Destination destination, boolean routed)
 	{
-		boolean pinned = destination != null && destination.world != null && destination.world == star.world
-			&& destination.x == star.x && destination.y == star.y;
+		boolean pinned = pins(destination, star);
 		selection.setBorder(BorderFactory.createCompoundBorder(
 			BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(0, 0, 8, 0), BorderFactory.createMatteBorder(0, 0, 1, 0, EDGE)),
 			BorderFactory.createEmptyBorder(0, 0, 8, 0)));
-		JPanel title = new JPanel(new BorderLayout());
-		title.setBackground(getBackground());
-		title.add(heading(pinned ? "Pinned destination" : "Selected world"), BorderLayout.CENTER);
-		if (pinned)
-		{
-			JButton unpin = flat("Unpin");
-			unpin.setName("stars.unpin");
-			unpin.setToolTipText("Unpin destination");
-			unpin.setForeground(MUTED);
-			unpin.getAccessibleContext().setAccessibleName("Unpin destination");
-			unpin.addActionListener(e ->
-			{
-				destinations.dismiss();
-				clientThread.invokeLater(marker::sync);
-				rendered = null;
-				refresh();
-			});
-			title.add(unpin, BorderLayout.EAST);
-		}
-		selection.add(fill(title));
+		selection.add(heading(pinned ? "Pinned destination" : "Selected world"));
 		JLabel name = label("");
 		wrap(name, star.name, TEXT);
 		name.setForeground(GOLD);
@@ -491,31 +538,54 @@ final class StarsPanel extends JPanel
 		selection.add(name);
 		selection.add(label("W" + star.world + " · T" + star.tier(elapsed) + " · " + StarsModel.timeLeft(star.left(elapsed))));
 		selection.add(gap(5));
-		if (!pinned)
+		if (routed)
 		{
-			JButton pin = new JButton("Pin destination");
-			pin.setName("stars.pin");
-			pin.setEnabled(star.precise && star.left(elapsed) > 0);
-			pin.addActionListener(e -> {
-				RelayResponse.Destination next = new RelayResponse.Destination();
-				next.x = star.x;
-				next.y = star.y;
-				next.plane = star.plane;
-				next.name = star.name;
-				next.world = star.world;
-				next.note = "T" + star.tier(service.model.elapsed()) + " · " + StarsModel.timeLeft(star.left(service.model.elapsed()));
-				destinations.selectLocal(next);
-				clientThread.invokeLater(marker::sync);
-				rendered = null;
-				refresh();
-			}); primary(pin);
 			/*
-			 * Beside the pin, the way there: by the star's own tile, which is the one the game draws.
-			 * A site whose tile is a guess gets the map instead, which can say where it might be.
+			 * The way there in a card, as Home draws it, between the star's own live line and the
+			 * buttons that act on the way. On Home the view's top inset parts it from the card's name;
+			 * here it opens the card, so the card's own is the smaller.
 			 */
+			JPanel way = MapCompanionPanel.card();
+			way.setBorder(BorderFactory.createEmptyBorder(2, 8, 7, 8));
+			way.add(steps);
+			selection.add(fill(way));
+			selection.add(gap(5));
 			JPanel actions = new JPanel(new java.awt.GridLayout(1, 0, 4, 0));
 			actions.setBackground(getBackground());
-			actions.add(pin);
+			home(actions, false, "stars.follow");
+			home(actions, true, "stars.reroute");
+			actions.add(unpin());
+			selection.add(fill(actions));
+		}
+		else
+		{
+			JPanel actions = new JPanel(new java.awt.GridLayout(1, 0, 4, 0));
+			actions.setBackground(getBackground());
+			if (!pinned)
+			{
+				JButton pin = new JButton("Pin destination");
+				pin.setName("stars.pin");
+				pin.setEnabled(star.precise && star.left(elapsed) > 0);
+				pin.addActionListener(e -> {
+					RelayResponse.Destination next = new RelayResponse.Destination();
+					next.x = star.x;
+					next.y = star.y;
+					next.plane = star.plane;
+					next.name = star.name;
+					next.world = star.world;
+					next.note = "T" + star.tier(service.model.elapsed()) + " · " + StarsModel.timeLeft(star.left(service.model.elapsed()));
+					destinations.selectLocal(next);
+					clientThread.invokeLater(marker::sync);
+					rendered = null;
+					refresh();
+				}); primary(pin);
+				actions.add(pin);
+			}
+			/*
+			 * Beside the pin, the way there: by the star's own tile, which is the one the game draws.
+			 * A site whose tile is a guess gets the map instead, which can say where it might be. A star
+			 * pinned with no way yet keeps it, beside Unpin, so the way there is still one press.
+			 */
 			if (star.precise)
 			{
 				RoutePress.Said said = press.said(SOURCE);
@@ -548,8 +618,12 @@ final class StarsPanel extends JPanel
 					+ java.net.URLEncoder.encode(star.name, java.nio.charset.StandardCharsets.UTF_8)));
 				actions.add(open);
 			}
+			if (pinned)
+			{
+				actions.add(unpin());
+			}
 			selection.add(fill(actions));
-			if (!star.precise)
+			if (!star.precise && !pinned)
 			{
 				JLabel note = label("");
 				wrap(note, "This spot is approximate. Open website shows where it might be.", TEXT);
@@ -563,6 +637,41 @@ final class StarsPanel extends JPanel
 				selection.add(line);
 			}
 		}
+	}
+
+	/** Unpin, where Dismiss sits on Home's card: the same act, and the map is not told. */
+	private JButton unpin()
+	{
+		JButton unpin = button("Unpin");
+		unpin.setName("stars.unpin");
+		unpin.setToolTipText("Unpin destination");
+		unpin.addActionListener(e ->
+		{
+			destinations.dismiss();
+			clientThread.invokeLater(marker::sync);
+			rendered = null;
+			refresh();
+		});
+		return unpin;
+	}
+
+	/**
+	 * Home's own Follow or Reroute under the routed star, while Home's card offers it: its words, its
+	 * tip and whether it can be pressed now, and a press of that very button, as a key presses it.
+	 */
+	private void home(JPanel actions, boolean rerouting, String name)
+	{
+		JButton own = homeButton.apply(rerouting);
+		if (own == null)
+		{
+			return;
+		}
+		JButton here = button(own.getText());
+		here.setName(name);
+		here.setToolTipText(own.getToolTipText());
+		here.setEnabled(own.isEnabled());
+		here.addActionListener(e -> MapCompanionPanel.press(homeButton.apply(rerouting)));
+		actions.add(here);
 	}
 
 	/** Which Route button a press came from, so its answer is said beside it. */
@@ -724,6 +833,15 @@ final class StarsPanel extends JPanel
 		button.setHorizontalAlignment(SwingConstants.LEFT);
 		button.setBorder(BorderFactory.createEmptyBorder(1, 0, 1, 0));
 		button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		return button;
+	}
+
+	/** One of the picked world's buttons, in small type with the inset Route has always had. */
+	private static JButton button(String text)
+	{
+		JButton button = new JButton(text);
+		button.setFont(button.getFont().deriveFont(11f));
+		button.setMargin(new Insets(4, 4, 4, 4));
 		return button;
 	}
 

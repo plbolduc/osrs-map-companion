@@ -438,7 +438,8 @@ Step 8. Each card under *Now* that names a place gains the way there, planned fr
 In Stars, Route sits beside *Pin destination* for a precise site; an approximate one has **Open on
 map** there instead. While the map answers the button reads *Planning…*, and a refusal is one line
 under it, in the map's own words when it gives them, as it does for a clue step it cannot place.
-The answer fills the destination's card, as a pick from Search does. While it is there, the death's,
+The answer fills the destination's card, as a pick from Search does, and a star's is drawn under the
+star on Stars too (see *Stars* under 29 October). While it is there, the death's,
 the clue's and the meetup's button reads **Reroute**, as a friend's does, so the card above is not
 offered again as new; Dismiss gives back their own word. Route back's answer has no line under its
 name: the death card keeps the age counting, and an age written at the press sat above it, older.
@@ -629,6 +630,14 @@ line says what it hides: *For Mining 72: up to T7 · worlds up to 1620 total*. *
 stays at the top, once the player picks one: nothing is picked for them, so the tab opens on the
 list, a pick goes when its star leaves the feed rather than moving to another, and a pick the
 filters hide is not offered until they show it again.
+
+Once a star's Route is answered, its way is drawn under the star, in a card between the star's
+live line and its buttons: the steps Home's destination card draws, read from the same route, with
+Home's own Follow and Reroute, offered and pressable exactly when Home's are, and **Unpin** as a
+button where Home has Dismiss. Star hunters hop from this tab, and steps a tab away cost them their
+place in the list; Home's card still shows the same route, and nothing switches tabs. A star pinned
+with no way yet keeps **Route** beside Unpin, so the way there is one press rather than Unpin, then
+Route.
 
 ### Drop luck's heading
 

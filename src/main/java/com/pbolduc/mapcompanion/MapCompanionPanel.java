@@ -203,7 +203,8 @@ public class MapCompanionPanel extends PluginPanel
 		this.nowCards = new NowCards(config, destinationState, deathWatcher, destinationMarker, destinationRoute, routeClient,
 			shortestPath, routePress, clueReader, farmRunRoute, sprites, this::refresh, this::mapUrl);
 		this.dropLuck = new DropLuckPanel(lootLog, DropLuckPanel.Pictures.of(itemManager));
-		this.starsPanel = new StarsPanel(starsClient, destinationState, clientThread, destinationMarker, routePress, this::mapUrl);
+		this.starsPanel = new StarsPanel(starsClient, destinationState, clientThread, destinationMarker, routePress, this::mapUrl,
+			destinationRoute, shortestPath, config, sprites, nowCards::hotkey, this::refresh);
 		this.starsPanel.pictures(sprites);
 
 		setLayout(new BorderLayout());
@@ -467,7 +468,6 @@ public class MapCompanionPanel extends PluginPanel
 	{
 		SwingUtilities.invokeLater(() ->
 		{
-			starsPanel.refresh();
 			Health health = plugin.getHealth();
 			String code = pairingCode();
 			boolean paired = !code.isEmpty();
@@ -488,6 +488,8 @@ public class MapCompanionPanel extends PluginPanel
 			}
 
 			nowCards.refresh(paired, ready);
+			/* After Now: under a routed star, Stars offers the destination card's own buttons as they stand. */
+			starsPanel.refresh();
 
 			/* Redraws only when its words change, so a click or a search is never painted over. */
 			boolean paused = LootLog.PAUSED.equals(lootLog.summary());

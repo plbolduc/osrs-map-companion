@@ -230,7 +230,7 @@ public class LatePicturesTest
 		RoutePress press = new RoutePress(new OkHttpClient(), new Gson(), null, new ClientThread(), pairing, identity,
 			new DestinationRoute(), destinations, new TestDestinationMarker());
 		StarsPanel stars = new StarsPanel(service, destinations, new ClientThread(), new TestDestinationMarker(), press,
-			() -> MapCompanionConfig.DEFAULT_MAP_URL);
+			() -> MapCompanionConfig.DEFAULT_MAP_URL, new DestinationRoute(), null, null, null, rerouting -> null, () -> { });
 		stars.pictures(later);
 		service.model.accept(new Gson().fromJson(new InputStreamReader(
 			LatePicturesTest.class.getResourceAsStream("/companion-stars.sample.json"), StandardCharsets.UTF_8), StarsModel.Feed.class));

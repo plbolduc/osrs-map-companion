@@ -30,8 +30,14 @@ import java.awt.Component;
 import java.awt.Container;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.swing.AbstractButton;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
 import net.runelite.client.callback.ClientThread;
@@ -58,7 +64,8 @@ public class StarsPanelTest
 			StarsClient service = new StarsClient(new OkHttpClient(), new Gson(), null, new ClientThread(),
 				new HarnessConfig(store, MapCompanionConfig.DEFAULT_MAP_URL), new Pairing(store, new Gson()),
 				new MemberIdentity(store), store);
-			StarsPanel stars = new StarsPanel(service, null, null, null, null, () -> MapCompanionConfig.DEFAULT_MAP_URL);
+			StarsPanel stars = new StarsPanel(service, null, null, null, null, () -> MapCompanionConfig.DEFAULT_MAP_URL,
+				new DestinationRoute(), null, null, null, rerouting -> null, () -> { });
 			Component sync = named(stars, "stars.sync");
 			assertNotNull(sync);
 			assertFalse("hidden until More filters is opened", showing(sync, stars));
@@ -78,7 +85,8 @@ public class StarsPanelTest
 			StarsClient service = new StarsClient(new OkHttpClient(), new Gson(), null, new ClientThread(),
 				new HarnessConfig(store, MapCompanionConfig.DEFAULT_MAP_URL), new Pairing(store, new Gson()),
 				new MemberIdentity(store), store);
-			StarsPanel stars = new StarsPanel(service, null, null, null, null, () -> MapCompanionConfig.DEFAULT_MAP_URL);
+			StarsPanel stars = new StarsPanel(service, null, null, null, null, () -> MapCompanionConfig.DEFAULT_MAP_URL,
+				new DestinationRoute(), null, null, null, rerouting -> null, () -> { });
 			stars.pictures(new GameSprites(null, null, null)
 			{
 				@Override
@@ -110,7 +118,7 @@ public class StarsPanelTest
 			RoutePress press = new RoutePress(new OkHttpClient(), new Gson(), null, new ClientThread(), pairing, identity,
 				new DestinationRoute(), destinations, new TestDestinationMarker());
 			StarsPanel stars = new StarsPanel(service, destinations, new ClientThread(), new TestDestinationMarker(), press,
-				() -> MapCompanionConfig.DEFAULT_MAP_URL);
+				() -> MapCompanionConfig.DEFAULT_MAP_URL, new DestinationRoute(), null, null, null, rerouting -> null, () -> { });
 			service.model.accept(feed());
 			service.model.miningLevel = 72;
 			stars.refresh();
@@ -126,6 +134,221 @@ public class StarsPanelTest
 			tier.setSelectedIndex(0);
 			assertNotNull("and shows again when the filter lets it", named(stars, "stars.pin"));
 		});
+	}
+
+	/**
+	 * A star hunter stays on Stars while they hop, so the way to the picked star is drawn under it
+	 * once the map answers: the steps Home's card draws, and Home's own Follow and Reroute as Home
+	 * offers them, pressed through rather than copied, so Stars never offers a press Home would not.
+	 */
+	@Test
+	public void theWayToThePickedStarShowsUnderItWithHomesOwnButtons() throws Exception
+	{
+		SwingUtilities.invokeAndWait(() ->
+		{
+			Tab tab = new Tab();
+			tab.pick();
+			tab.routeTo(302);
+			tab.offer(tab.follow, tab.reroute);
+			tab.reroute.setEnabled(false);
+			tab.stars.refresh();
+
+			assertTrue(words(tab.stars).toString(), words(tab.stars).contains("Pinned destination"));
+			RouteStepsView steps = steps(tab.stars);
+			assertNotNull("a view of the steps under the star", steps);
+			assertTrue("showing", showing(steps, tab.stars));
+			assertTrue(words(steps).toString(), words(steps).stream().anyMatch(line -> line.contains("Walk 12 tiles to the bank")));
+			AbstractButton follow = (AbstractButton) named(tab.stars, "stars.follow");
+			assertEquals("Home's own words", "Pause", follow.getText());
+			follow.doClick();
+			assertEquals("a press of Home's very button", 1, tab.followed.get());
+			assertFalse("pressable only while Home's is", named(tab.stars, "stars.reroute").isEnabled());
+			assertNotNull(named(tab.stars, "stars.unpin"));
+			assertNull("the way is planned, so Route gives way to Reroute", named(tab.stars, "stars.route"));
+
+			/* Home stops offering Follow, as it does on arrival: so does Stars. */
+			tab.offer(tab.reroute);
+			tab.stars.refresh();
+			assertNull(named(tab.stars, "stars.follow"));
+			assertNotNull(named(tab.stars, "stars.reroute"));
+		});
+	}
+
+	/** The same mine on another world is another star: the pick keeps its plain block and its own Route. */
+	@Test
+	public void aDestinationElsewhereLeavesThePlainSelection() throws Exception
+	{
+		SwingUtilities.invokeAndWait(() ->
+		{
+			Tab tab = new Tab();
+			tab.pick();
+			tab.routeTo(330);
+			tab.offer(tab.follow, tab.reroute);
+			tab.stars.refresh();
+
+			assertTrue(words(tab.stars).contains("Selected world"));
+			assertFalse("no steps", stepsShowing(tab.stars));
+			assertNotNull(named(tab.stars, "stars.pin"));
+			assertNotNull(named(tab.stars, "stars.route"));
+			assertNull(named(tab.stars, "stars.follow"));
+			assertNull(named(tab.stars, "stars.unpin"));
+		});
+	}
+
+	@Test
+	public void unpinIsAButtonThatDismissesTheDestination() throws Exception
+	{
+		SwingUtilities.invokeAndWait(() ->
+		{
+			Tab tab = new Tab();
+			tab.pick();
+			tab.routeTo(302);
+			tab.offer(tab.follow, tab.reroute);
+			tab.stars.refresh();
+
+			Component unpin = named(tab.stars, "stars.unpin");
+			assertTrue("a button, as Dismiss is on Home", unpin instanceof JButton && ((JButton) unpin).isContentAreaFilled());
+			((AbstractButton) unpin).doClick();
+			assertNull(tab.destinations.getDestination());
+			assertTrue(words(tab.stars).contains("Selected world"));
+			assertFalse("no steps", stepsShowing(tab.stars));
+			assertNotNull(named(tab.stars, "stars.pin"));
+		});
+	}
+
+	/** Pin, then the way there, on one block: a star pinned with no way yet keeps its Route. */
+	@Test
+	public void aStarPinnedWithNoWayYetOffersRoute() throws Exception
+	{
+		SwingUtilities.invokeAndWait(() ->
+		{
+			Tab tab = new Tab();
+			tab.pick();
+			((AbstractButton) named(tab.stars, "stars.pin")).doClick();
+
+			assertTrue(words(tab.stars).contains("Pinned destination"));
+			AbstractButton route = (AbstractButton) named(tab.stars, "stars.route");
+			assertNotNull("Route stays beside Unpin", route);
+			assertTrue(route.isEnabled());
+			assertNotNull(named(tab.stars, "stars.unpin"));
+			assertNull(named(tab.stars, "stars.pin"));
+			assertFalse("no steps", stepsShowing(tab.stars));
+		});
+	}
+
+	/**
+	 * The tab over the website's own feed with a real destination and route, and two buttons standing
+	 * in for the destination card's Follow and Reroute, which Home offers as {@link #offer} says.
+	 */
+	private static final class Tab
+	{
+		final DestinationState destinations = new DestinationState(new Gson());
+		final DestinationRoute route = new DestinationRoute();
+		final JButton follow = new JButton("Pause");
+		final JButton reroute = new JButton("Reroute");
+		final AtomicInteger followed = new AtomicInteger();
+		final List<JButton> offered = new ArrayList<>();
+		final StarsClient service;
+		final StarsPanel stars;
+
+		Tab()
+		{
+			HarnessStore store = new HarnessStore();
+			Pairing pairing = new Pairing(store, new Gson());
+			MemberIdentity identity = new MemberIdentity(store);
+			service = new StarsClient(new OkHttpClient(), new Gson(), null, new ClientThread(),
+				new HarnessConfig(store, MapCompanionConfig.DEFAULT_MAP_URL), pairing, identity, store);
+			RoutePress press = new RoutePress(new OkHttpClient(), new Gson(), null, new ClientThread(), pairing, identity,
+				route, destinations, new TestDestinationMarker());
+			follow.addActionListener(e -> followed.incrementAndGet());
+			stars = new StarsPanel(service, destinations, new ClientThread(), new TestDestinationMarker(), press,
+				() -> MapCompanionConfig.DEFAULT_MAP_URL, route, null, null, null, rerouting ->
+				{
+					JButton own = rerouting ? reroute : follow;
+					return offered.contains(own) ? own : null;
+				}, () -> { });
+			service.model.accept(feed());
+			service.model.miningLevel = 72;
+			stars.refresh();
+		}
+
+		/** Rimmington mine's first world, W302, picked by a press as a player picks it. */
+		void pick()
+		{
+			((AbstractButton) named(stars, "stars.site.tile:2974,3241")).doClick();
+		}
+
+		/** A Route's answer as RoutePress lands it: Rimmington mine on that world, with the reply fixture's way. */
+		void routeTo(int world)
+		{
+			RelayResponse.Destination there = new RelayResponse.Destination();
+			there.x = 2974;
+			there.y = 3241;
+			there.plane = 0;
+			there.name = "Rimmington mine";
+			there.world = world;
+			there.route = new Gson().fromJson(new InputStreamReader(StarsPanelTest.class.getResourceAsStream("/contract/reply.json"),
+				StandardCharsets.UTF_8), RelayResponse.class).directive.destination.route;
+			destinations.selectLocal(there);
+			route.adoptPressed(there);
+		}
+
+		void offer(JButton... home)
+		{
+			offered.clear();
+			offered.addAll(Arrays.asList(home));
+		}
+	}
+
+	/** Whether a view of the steps is in the tab and showing. */
+	private static boolean stepsShowing(Container root)
+	{
+		RouteStepsView steps = steps(root);
+		return steps != null && showing(steps, root);
+	}
+
+	private static RouteStepsView steps(Container root)
+	{
+		for (Component child : root.getComponents())
+		{
+			if (child instanceof RouteStepsView)
+			{
+				return (RouteStepsView) child;
+			}
+			if (child instanceof Container)
+			{
+				RouteStepsView found = steps((Container) child);
+				if (found != null)
+				{
+					return found;
+				}
+			}
+		}
+		return null;
+	}
+
+	/** The words showing, as a player reads them: label and button text without its markup. */
+	private static List<String> words(Container root)
+	{
+		List<String> found = new ArrayList<>();
+		for (Component child : root.getComponents())
+		{
+			if (!child.isVisible())
+			{
+				continue;
+			}
+			String text = child instanceof JLabel ? ((JLabel) child).getText()
+				: child instanceof AbstractButton ? ((AbstractButton) child).getText() : null;
+			if (text != null && !text.isEmpty())
+			{
+				found.add(text.replaceAll("<[^>]+>", "").trim());
+			}
+			if (child instanceof Container)
+			{
+				found.addAll(words((Container) child));
+			}
+		}
+		return found;
 	}
 
 	private static StarsModel.Feed feed()

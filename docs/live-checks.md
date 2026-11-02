@@ -279,7 +279,9 @@ The website plan's second session, once the routes in the game are built: a memb
       Between the press and the answer the spot has a faded amber pin, *Planning the way here…*,
       which stays put when the map is panned away and goes with the answer or the chat box's refusal.
 - [ ] **Route on a star and a meetup.** In Stars, a precise site's Route sits beside Pin
-      destination without cutting a word; an approximate one shows Open website. A meetup's Route
+      destination without cutting a word; an approximate one shows Open website. Press Route: the
+      steps show under the star, Stars stays the tab, and Follow and Reroute there act as Home's do
+      while you walk and hop; Unpin clears the star and Home's card together. A meetup's Route
       prints its world in the destination's line and nobody in the group is told.
 - [ ] **Friends.** With two characters in one group and the group layer off, the other appears
       under Group with their disc, presence dot, *near* and news. World map draws only them; Route
