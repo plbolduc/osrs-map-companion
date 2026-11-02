@@ -52,7 +52,6 @@ import net.runelite.client.ui.ColorScheme;
  */
 final class FarmRunPanel extends JPanel
 {
-	private static final long serialVersionUID = 1L;
 	static final String AFTER_PORT_RUN = "Start a farm run after the port run ends.";
 	/* Settings names its groups, not their fields: patches and contracts both share under Tasks and timers. */
 	static final String NEEDS_PATCHES = "Ready now reads your patches. Turn on Tasks and timers in Settings.";
@@ -66,8 +65,8 @@ final class FarmRunPanel extends JPanel
 		{"birdhouses", "Birdhouses"}, {"contract", "Farming contract"}
 	};
 
-	private final transient FarmRunClient client;
-	private final transient MapCompanionConfig config;
+	private final FarmRunClient client;
+	private final MapCompanionConfig config;
 	private final JComboBox<String> kind = new JComboBox<>();
 	/* A button under the picker, the picker's width: it acts, and a link is a fold's own opener. */
 	private final JButton start = MapCompanionPanel.smallButton("Start run");

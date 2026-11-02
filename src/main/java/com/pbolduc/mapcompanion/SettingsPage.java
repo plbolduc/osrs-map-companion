@@ -80,8 +80,6 @@ import static com.pbolduc.mapcompanion.MapCompanionPanel.syncRow;
 @Slf4j
 final class SettingsPage extends JPanel
 {
-	private static final long serialVersionUID = 1L;
-
 	private final MapCompanionConfig config;
 	private final DestinationState destinationState;
 	private final LootLog lootLog;

@@ -67,7 +67,6 @@ import net.runelite.client.util.ImageUtil;
  */
 final class RunView extends JPanel
 {
-	private static final long serialVersionUID = 1L;
 	private static final int WIDTH = MapCompanionPanel.CARD_TEXT_WIDTH;
 	/** A stop's picture, at the size This leg draws a step's. */
 	private static final int PICTURE = 16;
@@ -78,13 +77,13 @@ final class RunView extends JPanel
 	/** A birdhouse stop not yet done: what will tick it, in the player's words rather than the evidence's. */
 	static final String BIRDHOUSE_PENDING = "Ticks when Time Tracking sees it seeded";
 
-	private final transient FarmRunState state;
-	private final transient FarmRunClient client;
-	private final transient FarmRunRoute follower;
-	private final transient DestinationRoute routes;
-	private final transient ShortestPath shortest;
-	private final transient GameSprites sprites;
-	private final transient MapCompanionConfig config;
+	private final FarmRunState state;
+	private final FarmRunClient client;
+	private final FarmRunRoute follower;
+	private final DestinationRoute routes;
+	private final ShortestPath shortest;
+	private final GameSprites sprites;
+	private final MapCompanionConfig config;
 	/** True on the Port tasks card: it shows port-task runs, and the farm run card every other. */
 	private final boolean port;
 	private final JLabel title = label(12f, Color.WHITE);
@@ -624,7 +623,6 @@ final class RunView extends JPanel
 	 */
 	static final class Picture extends JLabel
 	{
-		private static final long serialVersionUID = 1L;
 		final boolean faded;
 
 		Picture(boolean faded)

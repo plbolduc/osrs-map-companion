@@ -53,8 +53,6 @@ import net.runelite.client.ui.ColorScheme;
  */
 final class CompanionViews extends JPanel
 {
-	private static final long serialVersionUID = 1L;
-
 	enum View
 	{
 		HOME,

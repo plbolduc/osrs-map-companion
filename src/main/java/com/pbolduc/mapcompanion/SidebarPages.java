@@ -46,8 +46,6 @@ import net.runelite.client.ui.ColorScheme;
  */
 final class SidebarPages extends JPanel
 {
-	private static final long serialVersionUID = 1L;
-
 	private final JPanel daily;
 	private final JPanel settings;
 

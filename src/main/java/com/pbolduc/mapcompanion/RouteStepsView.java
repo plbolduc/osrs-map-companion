@@ -80,7 +80,6 @@ import net.runelite.client.ui.ColorScheme;
  */
 final class RouteStepsView extends JPanel
 {
-	private static final long serialVersionUID = 1L;
 	private static final int WIDTH = MapCompanionPanel.CARD_TEXT_WIDTH;
 	/** The step numbers' column: two digits, right-aligned, so 9 and 10 end at one x. */
 	private static final int NUMBER = 14;
@@ -92,9 +91,9 @@ final class RouteStepsView extends JPanel
 	/** An unmet gate, in the Slayer list's colour for one: the sidebar's refusal pink. */
 	private static final Color UNMET = MapCompanionPanel.REFUSED;
 
-	private final transient IntConsumer choose;
+	private final IntConsumer choose;
 	@Nullable
-	private final transient GameSprites sprites;
+	private final GameSprites sprites;
 	private final JLabel way = label(11f, AHEAD);
 	private final JLabel origin = label(11f, AHEAD);
 	private final JPanel steps = MapCompanionPanel.column(ColorScheme.DARKER_GRAY_COLOR);
@@ -110,7 +109,7 @@ final class RouteStepsView extends JPanel
 	@Nullable
 	private String said;
 	@Nullable
-	private transient DestinationRoute.View shown;
+	private DestinationRoute.View shown;
 
 	/** @param choose shows another of the ways, by its place in the map's list */
 	RouteStepsView(IntConsumer choose)

@@ -102,8 +102,6 @@ import static com.pbolduc.mapcompanion.MapCompanionPanel.syncRow;
 @Slf4j
 final class ConnectCard extends JPanel
 {
-	private static final long serialVersionUID = 1L;
-
 	private final MapCompanionConfig config;
 	private final MapCompanionPlugin plugin;
 	private final MemberIdentity identity;
@@ -1000,8 +998,6 @@ final class ConnectCard extends JPanel
 		JOptionPane question = new JOptionPane(new Object[]{RENAME_PROMPT, typed}, JOptionPane.PLAIN_MESSAGE,
 			JOptionPane.OK_CANCEL_OPTION, null, choices, choices[0])
 		{
-			private static final long serialVersionUID = 1L;
-
 			/* Into the field, as an input dialog's own is, rather than onto the button. Enter still renames. */
 			@Override
 			public void selectInitialValue()

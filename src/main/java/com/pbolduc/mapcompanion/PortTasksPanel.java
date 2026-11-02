@@ -64,24 +64,23 @@ import net.runelite.client.ui.ColorScheme;
  */
 final class PortTasksPanel extends JPanel
 {
-	private static final long serialVersionUID = 1L;
 	private static final int WIDTH = MapCompanionPanel.CARD_TEXT_WIDTH;
 	private static final Color MUTED = ColorScheme.LIGHT_GRAY_COLOR;
 	static final String NEEDS_BOATS = "Turn on Progress and travel, which shares your boats, to plan these as one run.";
 	static final String AFTER_FARM_RUN = "Start run after the farm run ends.";
 	static final String BOARD_ONCE = "Board your boat once so the run knows its hold.";
-	private final transient PortTaskReader reader;
-	private final transient MapCompanionConfig config;
-	private final transient FarmRunClient client;
+	private final PortTaskReader reader;
+	private final MapCompanionConfig config;
+	private final FarmRunClient client;
 	private final JPanel body = new JPanel();
 	/* The card's width, as the farm run's Start run is: it acts, so it is a button and not a link. */
 	private final JButton start = MapCompanionPanel.smallButton("Start run");
 	private final JLabel hint = new JLabel();
 	private final JPanel starter = new JPanel(new GridLayout(1, 1));
 	private final RunView run;
-	private transient List<PortTaskReader.Slot> shown;
-	private transient Integer shownHold;
-	private transient boolean shownRunning;
+	private List<PortTaskReader.Slot> shown;
+	private Integer shownHold;
+	private boolean shownRunning;
 
 	@Inject
 	PortTasksPanel(PortTaskReader reader, MapCompanionConfig config, GameSprites sprites, FarmRunState state,

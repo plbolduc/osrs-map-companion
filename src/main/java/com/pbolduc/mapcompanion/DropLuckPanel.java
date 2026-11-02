@@ -79,8 +79,6 @@ import net.runelite.client.util.ImageUtil;
  */
 final class DropLuckPanel extends JPanel
 {
-	private static final long serialVersionUID = 1L;
-
 	/** The sidebar's column inside the companion panel's ten-pixel insets. */
 	private static final int WIDTH = PluginPanel.PANEL_WIDTH - 20;
 	/** Text beside a 32px picture and a count, inside a card's eight-pixel insets. */
@@ -663,7 +661,6 @@ final class DropLuckPanel extends JPanel
 	 */
 	private final class Picture extends JComponent
 	{
-		private static final long serialVersionUID = 1L;
 		private final int size;
 		private final boolean had;
 		/** Drawn on the corner when positive; -1 for none. */
@@ -731,7 +728,6 @@ final class DropLuckPanel extends JPanel
 	 */
 	static final class Strip extends JComponent
 	{
-		private static final long serialVersionUID = 1L;
 		/**
 		 * The website's LuckStrip, colours and stops: grey through the typical middle, Dry's amber inside
 		 * the Dry band and Very dry's red at the end, so a wait sits on the colour its verdict's chip has.
