@@ -51,7 +51,9 @@ import net.runelite.client.ui.ColorScheme;
  * run held. Neither offers one beside a run still being walked, planned or ended, its own or the
  * other card's, and the card that did not start a run simply stops showing it. What a stop says
  * under its name is its own evidence: a farm stop's way there and the Time Tracking note; a
- * port-task stop's way and one line a task, the words the map ticks it by.
+ * port-task stop's way and one line a task, the words the map ticks it by. A stop behind the
+ * player folds to one line with its Done or Visited, and the leg being walked sits under the stop
+ * it leads to.
  *
  * <p>The list rebuilds when its content changes, not on the sidebar's one-second refresh, so an
  * unchanged frame cannot swallow a press or close the bank checklist under the pointer. EDT only.
@@ -92,10 +94,12 @@ final class RunView extends JPanel
 	private boolean otherBusy;
 	/*
 	 * A hairline and its own heading over the steps of the leg being walked. Without them the leg's
-	 * Walk, Board, Sail and Dock read as more stops at the bottom of the list. Shown with the steps.
+	 * Walk, Board, Sail and Dock read as more stops. Shown with the steps, under the leg's own stop.
 	 */
 	private final JLabel legHead = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
 	private final RouteStepsView steps;
+	/* And one under them, so the leg's last numbered step does not run on into the next stop's number. */
+	private final JLabel legEnd = new JLabel();
 	/*
 	 * Where the leg was, while another destination has paused the run: what it waits for and the way
 	 * back. Without it a detour reads as the run's opposite, the destination above being followed while
@@ -129,9 +133,10 @@ final class RunView extends JPanel
 		add(before);
 		add(bring);
 		add(stops);
+		/* The paused line, This leg and its steps go under the next stop's row: see showStops. */
 		paused.setBorder(BorderFactory.createEmptyBorder(6, 0, 0, 0));
 		paused.setVisible(false);
-		add(MapCompanionPanel.left(paused));
+		MapCompanionPanel.left(paused);
 		legHead.setText("This leg");
 		legHead.setFont(legHead.getFont().deriveFont(Font.BOLD));
 		legHead.setBorder(BorderFactory.createCompoundBorder(
@@ -141,8 +146,13 @@ final class RunView extends JPanel
 				BorderFactory.createEmptyBorder(5, 0, 1, 0))));
 		legHead.setMaximumSize(new Dimension(Integer.MAX_VALUE, legHead.getPreferredSize().height));
 		legHead.setVisible(false);
-		add(MapCompanionPanel.left(legHead));
-		add(steps);
+		MapCompanionPanel.left(legHead);
+		legEnd.setBorder(BorderFactory.createCompoundBorder(
+			BorderFactory.createEmptyBorder(6, 0, 0, 0),
+			BorderFactory.createMatteBorder(1, 0, 0, 0, ColorScheme.MEDIUM_GRAY_COLOR)));
+		legEnd.setMaximumSize(new Dimension(Integer.MAX_VALUE, legEnd.getPreferredSize().height));
+		legEnd.setVisible(false);
+		MapCompanionPanel.left(legEnd);
 		actions.setOpaque(false);
 		actions.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
 		add(MapCompanionPanel.left(actions));
@@ -287,6 +297,7 @@ final class RunView extends JPanel
 		boolean drawable = following && config.drawWithShortestPath() && shortest.installed() && !route.arrived();
 		steps.showRunLeg(following ? route : null, following ? RouteStepsView.shortestPathLine(route, drawable, shortest.drawing()) : null);
 		legHead.setVisible(steps.isVisible());
+		legEnd.setVisible(steps.isVisible());
 		String detour = left && !view.following ? follower.pausedFor() : null;
 		paused.setVisible(detour != null);
 		MapCompanionPanel.setWrapped(paused, detour == null ? "" : pausedLine(detour), WIDTH);
@@ -378,12 +389,21 @@ final class RunView extends JPanel
 			String at = status(view, stop, next);
 			JPanel row = column();
 			row.setBorder(BorderFactory.createEmptyBorder(6, 0, 0, 0));
-			JLabel name = wrapped(stop.n + ". " + stop.name, 12f, done ? ColorScheme.MEDIUM_GRAY_COLOR : Color.WHITE);
-			if (done)
+			/*
+			 * A stop behind the player is one line that keeps its status word: its way there and its
+			 * tasks are spent, and the rows left are the ones still to walk.
+			 */
+			if (done || view.visited.contains(stop.n))
 			{
-				String safe = MapCompanionPanel.escape(stop.n + ". " + stop.name);
-				name.setText("<html><body width='" + WIDTH + "'><strike>" + safe + "</strike></body></html>");
+				String named = MapCompanionPanel.escape(stop.n + ". " + stop.name);
+				JLabel line = label(12f, ColorScheme.MEDIUM_GRAY_COLOR);
+				line.setText("<html><body width='" + WIDTH + "'>" + (done ? "<strike>" + named + "</strike>" : named)
+					+ MapCompanionPanel.escape(" · " + at) + "</body></html>");
+				row.add(MapCompanionPanel.left(line));
+				stops.add(MapCompanionPanel.left(row));
+				continue;
 			}
+			JLabel name = wrapped(stop.n + ". " + stop.name, 12f, Color.WHITE);
 			row.add(MapCompanionPanel.left(name));
 			JPanel method = new JPanel(new BorderLayout(4, 0));
 			method.setOpaque(false);
@@ -405,18 +425,30 @@ final class RunView extends JPanel
 			{
 				for (RelayResponse.RunTask task : stop.tasks)
 				{
-					row.add(MapCompanionPanel.left(wrapped(task.text, 11f, done ? ColorScheme.MEDIUM_GRAY_COLOR : ColorScheme.LIGHT_GRAY_COLOR)));
+					row.add(MapCompanionPanel.left(wrapped(task.text, 11f, ColorScheme.LIGHT_GRAY_COLOR)));
 				}
 			}
 			if (!at.isEmpty())
 			{
-				row.add(MapCompanionPanel.left(wrapped(at, 11f, done ? ColorScheme.MEDIUM_GRAY_COLOR : MapPin.AMBER)));
+				row.add(MapCompanionPanel.left(wrapped(at, 11f, MapPin.AMBER)));
 			}
-			if (stop.birdhouseId != null && !done)
+			if (stop.birdhouseId != null)
 			{
 				row.add(MapCompanionPanel.left(wrapped("Tracked by Time Tracking sightings", 10f, ColorScheme.LIGHT_GRAY_COLOR)));
 			}
 			stops.add(MapCompanionPanel.left(row));
+			if (next != null && stop.n == next.n)
+			{
+				/*
+				 * The leg being walked, under the stop it leads to, so the step a player reads rises as
+				 * stops are finished instead of sinking under them. Single components, re-parented here
+				 * at every rebuild; with no stop left they belong to no row and show nowhere.
+				 */
+				stops.add(paused);
+				stops.add(legHead);
+				stops.add(steps);
+				stops.add(legEnd);
+			}
 		}
 	}
 

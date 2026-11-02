@@ -727,6 +727,11 @@ heading now sit over them, shown with the steps. The steps keep words where the 
 a walk, a ride, or a teleport the map has no id for stays words alone, and the client names no
 constant for a boat's icons, so none was added.
 
+The leg came after the last stop, so the step being walked sank as stops were finished, two stops
+below the one it served. It now sits directly under the stop it leads to, between its hairline and a
+second one that keeps its last numbered step from running on into the next stop's number. A stop
+behind the player folds to one line that keeps its *Done* or *Visited*.
+
 ### Rename beside a new group's name
 
 A group made by Connect is *Our group* until somebody names it, and renaming lives in the menu under
