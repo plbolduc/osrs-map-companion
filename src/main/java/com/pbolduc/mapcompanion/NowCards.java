@@ -129,7 +129,8 @@ final class NowCards extends JPanel
 	 */
 	private final JButton deathRouteButton = smallButton("Route back");
 	private final JLabel deathSaid = new JLabel();
-	private final JPanel deathActions = row(ColorScheme.DARKER_GRAY_COLOR);
+	/* The card's width, as Dismiss is in the card above: the same shape for "act on this card". */
+	private final JPanel deathActions = row(ColorScheme.DARKER_GRAY_COLOR, deathMapButton);
 	private List<JButton> shownDeathActions = new ArrayList<>();
 	private final JPanel clueActions = row(ColorScheme.DARKER_GRAY_COLOR);
 	/*
@@ -232,17 +233,13 @@ final class NowCards extends JPanel
 		destinationPicture.setVisible(false);
 		destinationSlot = nowCard(destinationActions, destinationSaid, MapCompanionPanel.bar(DESTINATION_PICTURE_GAP,
 			ColorScheme.DARKER_GRAY_COLOR, destinationPicture, destinationName, null), destinationDetail, routeSteps);
-		JPanel eventActions = row(ColorScheme.DARKER_GRAY_COLOR);
-		eventActions.add(eventRouteButton);
-		eventSlot = nowCard(eventActions, eventSaid, eventWhen, eventTitle);
+		eventSlot = nowCard(row(ColorScheme.DARKER_GRAY_COLOR, eventRouteButton), eventSaid, eventWhen, eventTitle);
 		graveLabel.setName("now.death.grave");
 		grave.add(graveLabel);
 		grave.add(gap(3, ColorScheme.DARKER_GRAY_COLOR));
 		graveBar.setForeground(ColorScheme.PROGRESS_INPROGRESS_COLOR);
 		grave.add(left(graveBar));
 		grave.setVisible(false);
-		/* The card's width, as Dismiss is in the card above: the same shape for "act on this card". */
-		deathActions.add(deathMapButton);
 		deathSlot = nowCard(deathActions, deathSaid, deathLabel, grave);
 		clueActions.add(clueRouteButton);
 		clueSlot = nowCard(clueActions, clueSaid, clueTitle, clueDetail);

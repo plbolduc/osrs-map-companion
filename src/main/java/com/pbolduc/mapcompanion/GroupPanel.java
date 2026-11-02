@@ -248,20 +248,14 @@ final class GroupPanel extends JPanel
 		minute.setFont(minute.getFont().deriveFont(11f));
 		form.add(fill(day));
 		form.add(gap(4));
-		JPanel time = actions();
-		time.add(hour);
-		time.add(minute);
-		form.add(fill(time));
+		form.add(fill(actions(hour, minute)));
 		form.add(gap(6));
-		JPanel buttons = actions();
 		make.setName("group.meetMake");
 		make.setToolTipText("Make the meetup at the tile and world you are on, and copy its link");
 		make.addActionListener(e -> makeMeetup());
 		JButton cancel = MapCompanionPanel.smallButton("Cancel");
 		cancel.addActionListener(e -> openForm(false));
-		buttons.add(make);
-		buttons.add(cancel);
-		form.add(fill(buttons));
+		form.add(fill(actions(make, cancel)));
 		form.add(line(formSaid));
 	}
 
@@ -535,10 +529,8 @@ final class GroupPanel extends JPanel
 		JPanel card = card();
 		card.setName("group.alone");
 		card.add(MapCompanionPanel.wrapped(ALONE, 11f, ColorScheme.LIGHT_GRAY_COLOR, WIDTH));
-		JPanel actions = actions();
-		actions.add(invite);
 		card.add(gap(5));
-		card.add(MapCompanionPanel.left(actions));
+		card.add(MapCompanionPanel.left(actions(invite)));
 		return slot(card);
 	}
 
@@ -630,7 +622,6 @@ final class GroupPanel extends JPanel
 		{
 			return slot(card);
 		}
-		JPanel actions = actions();
 		boolean layer = config.showGroupOnWorldMap();
 		boolean shown = group.shown(row.id);
 		/*
@@ -648,9 +639,8 @@ final class GroupPanel extends JPanel
 			drawn = null;
 			refresh(ready);
 		});
-		actions.add(map);
 		card.add(gap(5));
-		card.add(MapCompanionPanel.left(actions));
+		card.add(MapCompanionPanel.left(actions(map)));
 		/* Inside an instance nothing was asked, so this is newer than any answer the press last gave. */
 		boolean pressed = !group.inside(row.id) && said != null && said.message != null;
 		String message = group.inside(row.id) ? row.name + " is inside an instance. Route works once they're out."
@@ -1114,9 +1104,9 @@ final class GroupPanel extends JPanel
 		}
 	}
 
-	private static JPanel actions()
+	private static JPanel actions(JComponent... items)
 	{
-		return MapCompanionPanel.row(ColorScheme.DARKER_GRAY_COLOR);
+		return MapCompanionPanel.row(ColorScheme.DARKER_GRAY_COLOR, items);
 	}
 
 	/**

@@ -332,8 +332,7 @@ final class ConnectCard extends JPanel
 		/* Between the field and the tabs, which follow it only while the map refuses the group. */
 		refusedGap.setVisible(false);
 		add(refusedGap);
-		knownGroupsRow = row(ColorScheme.DARK_GRAY_COLOR);
-		knownGroupsRow.add(knownGroupsButton);
+		knownGroupsRow = row(ColorScheme.DARK_GRAY_COLOR, knownGroupsButton);
 		knownGroupsRow.setBorder(new EmptyBorder(4, 0, 0, 0));
 		MapCompanionPanel.capped(knownGroupsRow);
 		add(left(knownGroupsRow));
@@ -383,10 +382,7 @@ final class ConnectCard extends JPanel
 		MapCompanionPanel.onEdit(joinField.getDocument(), refresh);
 		block.add(fill(joinField, ColorScheme.DARK_GRAY_COLOR));
 		block.add(gap(4, ColorScheme.DARK_GRAY_COLOR));
-		JPanel buttons = row(ColorScheme.DARK_GRAY_COLOR);
-		buttons.add(pasteButton);
-		buttons.add(joinButton);
-		block.add(left(buttons));
+		block.add(left(row(ColorScheme.DARK_GRAY_COLOR, pasteButton, joinButton)));
 		nextStep.setVisible(false);
 		block.add(nextStep);
 		joinMessage.setFont(joinMessage.getFont().deriveFont(11f));
