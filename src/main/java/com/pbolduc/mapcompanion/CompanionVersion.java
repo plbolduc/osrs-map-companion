@@ -39,6 +39,14 @@ final class CompanionVersion
 {
 	static final String VERSION = "1.3.0";
 
+	/**
+	 * The version {@link UpdateNotice#LINE} was written for. That line is said under {@link #VERSION}
+	 * as what this version changed, so a release that moves the number writes the line again and
+	 * moves this with it; {@code UpdateNoticeTest} fails while the two differ, because the last
+	 * release's news under a new number tells an updated player nothing true.
+	 */
+	static final String LINE_VERSION = "1.3.0";
+
 	/** How every request this plugin makes identifies itself. */
 	static final String USER_AGENT = "osrs-map-companion/" + VERSION + " (RuneLite plugin)";
 

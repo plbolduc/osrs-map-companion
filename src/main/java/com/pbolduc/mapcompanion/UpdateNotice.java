@@ -44,7 +44,10 @@ final class UpdateNotice
 	/** The last version whose line was said, or recorded without one. */
 	static final String KEY_TOLD = "updateNoticeVersion";
 
-	/** What this version changed, in a sentence a player reads between kills. */
+	/**
+	 * What this version changed, in a sentence a player reads between kills. Written for
+	 * {@link CompanionVersion#LINE_VERSION}, and written again by every release.
+	 */
 	static final String LINE = "a new sidebar: Home, Group and Stars, settings behind the gear, and the game's own "
 		+ "pictures in search, friends' news and Stars.";
 

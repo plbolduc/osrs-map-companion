@@ -57,4 +57,16 @@ public class UpdateNoticeTest
 		store.set(UpdateNotice.KEY_TOLD, "1.0.0");
 		assertEquals(UpdateNotice.LINE, UpdateNotice.due(store, false));
 	}
+
+	/**
+	 * The line is said under the version number as what that version changed, so a release that moves
+	 * the number without writing a new line would greet every updated player with the last release's
+	 * news. Write the line for the new version, then move {@link CompanionVersion#LINE_VERSION}.
+	 */
+	@Test
+	public void theLineWasWrittenForTheVersionItIsSaidUnder()
+	{
+		assertEquals("CompanionVersion.VERSION moved and UpdateNotice.LINE still describes " + CompanionVersion.LINE_VERSION
+			+ ": write what this version changed, then move LINE_VERSION", CompanionVersion.VERSION, CompanionVersion.LINE_VERSION);
+	}
 }
