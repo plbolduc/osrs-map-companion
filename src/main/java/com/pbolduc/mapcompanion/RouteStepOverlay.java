@@ -33,10 +33,10 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import net.runelite.api.Client;
 import net.runelite.api.WorldView;
+import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.overlay.OverlayPanel;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.components.LineComponent;
-import net.runelite.client.ui.overlay.components.TitleComponent;
 import net.runelite.client.util.Text;
 
 /**
@@ -48,13 +48,22 @@ import net.runelite.client.util.Text;
  * instance: no directions inside a boss fight. The box is RuneLite's own, so it can be moved like
  * any other, and it draws only what the sidebar already holds; nothing leaves this computer.
  *
- * <p>A destination's name was typed by somebody in the group, and an overlay draws colour tags, so
- * every line has its tags taken out first.
+ * <p>The box is the one place the route is read with the sidebar shut, so it names the destination
+ * in the tile label's words, whole, and with the world the label gives while the player is on
+ * another. A destination's name was typed by somebody in the group, and an overlay draws colour
+ * tags, so every line has its tags taken out first.
  */
 class RouteStepOverlay extends OverlayPanel
 {
-	/** Wide enough for most step titles on one line; longer ones wrap. */
+	/** Wide enough for most names and steps on one line; longer ones wrap. */
 	private static final int WIDTH = 180;
+
+	/**
+	 * How much of a name the box keeps. It wraps, so it keeps a whole place name, a clue step's
+	 * sentence included, where the tile's one line cuts it short; a name somebody typed is still cut
+	 * here before it can fill the screen.
+	 */
+	private static final int NAME_MAX = 120;
 
 	private final Client client;
 	private final MapCompanionConfig config;
@@ -90,7 +99,15 @@ class RouteStepOverlay extends OverlayPanel
 			return null;
 		}
 		panelComponent.setPreferredSize(new Dimension(WIDTH, 0));
-		panelComponent.getChildren().add(TitleComponent.builder().text(box.title).color(Color.WHITE).build());
+		/*
+		 * A line, which wraps: RuneLite's title component centres a single line, and a long name
+		 * overruns it on both sides. Bold keeps it the heading, where a farm run's "2. Catherby" over
+		 * "1. Use Catherby tablet" in one weight reads as a list.
+		 */
+		panelComponent.getChildren().add(LineComponent.builder()
+			.left(title(box, destination, client.getWorld()))
+			.leftFont(FontManager.getRunescapeBoldFont())
+			.build());
 		panelComponent.getChildren().add(LineComponent.builder().left(box.step).build());
 		if (box.detail != null)
 		{
@@ -129,8 +146,15 @@ class RouteStepOverlay extends OverlayPanel
 			return null;
 		}
 		RelayResponse.RouteStep step = steps.get(view.step);
-		String title = name == null || Text.removeTags(name).trim().isEmpty() ? "Route" : Text.removeTags(name).trim();
+		String named = DestinationSceneOverlay.name(name, NAME_MAX);
+		String title = named == null ? "Route" : named;
 		String detail = step.detail == null || Text.removeTags(step.detail).trim().isEmpty() ? null : Text.removeTags(step.detail).trim();
 		return new Box(title, Text.removeTags(RouteStepsView.stepLine(view.step, step, false)), detail);
+	}
+
+	/** The box's first line: the destination's name, and its world while the player is on another. */
+	static String title(Box box, @Nullable RelayResponse.Destination destination, int currentWorld)
+	{
+		return destination == null ? box.title : box.title + DestinationSceneOverlay.elsewhere(destination, currentWorld);
 	}
 }

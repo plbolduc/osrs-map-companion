@@ -74,14 +74,18 @@ public class SafeTitleTest
 		assertEquals("somewhere", MapCompanionPlugin.safeTitle("   "));
 	}
 
-	/** The destination's name is drawn in the game scene, where RuneLite would read a colour tag. */
+	/**
+	 * The destination's name is drawn in the game scene, where RuneLite would read a colour tag. The
+	 * world is not part of the name: the scene adds it only while the player is on another world, so
+	 * it is asked for with the world the player is on.
+	 */
 	@Test
 	public void aDestinationNameCannotColourOrCrowdTheScene()
 	{
 		RelayResponse.Destination destination = new RelayResponse.Destination();
 		destination.name = "<col=ff0000>Official notice</col>";
 		destination.world = 302;
-		assertEquals("Official notice (W302)", DestinationSceneOverlay.label(destination));
+		assertEquals("Official notice (W302)", DestinationSceneOverlay.label(destination) + DestinationSceneOverlay.elsewhere(destination, 444));
 		destination.name = "a".repeat(200);
 		destination.world = null;
 		assertEquals(40, DestinationSceneOverlay.label(destination).length());
