@@ -422,10 +422,13 @@ Step 6 of the same plan. A box at the top of Overview while connected, as the dr
 box is drawn, and under it up to eight places in the website's order, each with the website's
 grey line and the effort it measured, *Bank · 2nd floor · ~40 tiles*. An item's sources carry the
 website's *Sold at* or *Dropped by* heading, and a name a partial query could mean is a row of its
-own, *Item · dropped by 3*. A misspelling is one line, *Did you mean abyssal whip?*, which searches
-for it. A pick plans the way and fills the destination's card, so the list folds as soon as one is
-pressed; typing or Enter opens it again. One line under the box says *Searching…*, *Planning the
-way there…* or the map's refusal.
+own, *Item · dropped by 3*. A misspelling is one button, *Did you mean abyssal whip?*, which searches
+for it. A pick plans the way and fills the destination's card, so the list folds once that answer
+lands; typing or Enter opens it again. A refusal leaves the rows up, so the next one is a press
+away. While any card's route plans, or inside the map's wait between two, the rows take no pick and
+grey their names, as every Route button greys: a pick then would only be refused, and would replace
+the other card's *Planning…*. One line under the box, above the rows, says *Searching…*, *Planning
+the way there…* or the map's refusal with the row's name, *Al Kharid bank: …*.
 
 ### Route beside a clue, a death, a star and a meetup
 
