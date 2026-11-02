@@ -410,11 +410,13 @@ of `docs/plan-where-to-go-for-a-task.md` in `osrs-stars-map`.
   While the current step's pin holds the edge, the destination's own pin lets go of it: two amber
   discs side by side there, one numbered, said nothing about which way to go. It is drawn as
   before while its place is in view, and holds the edge again on the last step.
-- **Follow**, beside Reroute while the Shortest Path plugin is running, has it draw each walking
-  step as you reach it; it reads **Stop** while following. A line under the steps says when
-  Shortest Path is drawing one, *Shortest Path is drawing the walk for step 2.*, so its line on the
-  ground is never taken for this plugin's. Reroute follows too, being your own press; a
-  destination that merely arrives never does.
+- **Follow**, beside Reroute, shows the step you're on in the box over the game and, while the
+  Shortest Path plugin is running, has it draw each walking step as you reach it; it reads **Stop**
+  while following. It is offered wherever following shows either, so a route somebody sends reaches
+  the box without Shortest Path, and one pressed here can take the box down. A line under the
+  steps says when Shortest Path is drawing one, *Shortest Path is drawing the walk for step 2.*,
+  so its line on the ground is never taken for this plugin's. Reroute follows too, being your own
+  press; a destination that merely arrives never does.
 
 ### Search, at the top of Overview
 

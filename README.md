@@ -18,8 +18,8 @@ A teleport step shows what to click: the item's sprite or the spell's icon, from
 Each step gets a numbered pin on the game's world map; the game's arrow points at the current
 step when it is in the loaded area.
 
-With **Shortest Path** installed, press **Follow** to draw each walking step as you reach it.
-While you follow a route, the step you're on also shows in a small box over the game, so the
+Press **Follow** to show the step you're on in a small box over the game; with **Shortest Path**
+installed, it also draws each walking step as you reach it. With the box over the game, the
 sidebar can stay closed. **Reroute** plans again from where you stand, and the settings can give
 Reroute and Follow a key of your own. The website uses the progress and travel choices you share
 to suggest routes around your account's quests, diaries, items and transport unlocks.
