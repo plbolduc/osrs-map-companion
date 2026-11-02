@@ -173,4 +173,27 @@ public class RelayClientRefusalsTest
 		/** Never latched: a zero timestamp is not "expired", it is "there is nothing to retry". */
 		assertFalse(RelayClient.fatalExpired(0L, System.currentTimeMillis()));
 	}
+
+	/**
+	 * Which refusal the sidebar is told of reads the status and the word as the sentences do, so the
+	 * card's few words and the dot's sentence never disagree; a 403 or a 507 the sentences retry is
+	 * none of them.
+	 */
+	@Test
+	public void eachRefusalIsReadAsItsSentenceIs()
+	{
+		assertEquals(RelayClient.Refused.NEEDS_INVITE, RelayClient.refusedFor(403, " NEEDS_CODE "));
+		assertNull(RelayClient.refusedFor(403, null));
+		assertNull(RelayClient.refusedFor(403, "forbidden"));
+		assertEquals(RelayClient.Refused.REMOVED, RelayClient.refusedFor(410, "removed"));
+		assertEquals(RelayClient.Refused.CLOSED, RelayClient.refusedFor(410, "Closed"));
+		assertEquals(RelayClient.Refused.GONE, RelayClient.refusedFor(410, null));
+		assertEquals(RelayClient.Refused.FULL, RelayClient.refusedFor(507, "group_full"));
+		assertEquals("a map older than the words", RelayClient.Refused.FULL, RelayClient.refusedFor(507, null));
+		assertNull("a full relay clears by itself", RelayClient.refusedFor(507, "capacity"));
+		assertEquals(RelayClient.Refused.BAD_CODE, RelayClient.refusedFor(400, null));
+		assertEquals(RelayClient.Refused.OUT_OF_DATE, RelayClient.refusedFor(422, null));
+		assertNull("a body too large is this plugin's to fix", RelayClient.refusedFor(413, null));
+		assertNull(RelayClient.refusedFor(503, "removed"));
+	}
 }

@@ -197,6 +197,61 @@ public class RelayResponsePolicyTest
 		relay.handle(reply(403, "<html><body>Forbidden</body></html>"), null);
 		assertNull(relay.getFatalError());
 		assertEquals(1, relay.getConsecutiveFailures());
+		assertNull("and the sidebar is not told the group refused", relay.getRefused());
+	}
+
+	/**
+	 * The sidebar draws a refusal's words and the invite field from this, so it has to outlast the
+	 * five minutes the sentence keeps for its one retry: read from the sentence, the field went and
+	 * the group's name came back between two refusals, as if the group had taken the player back.
+	 */
+	@Test
+	public void aRefusalIsKeptThroughItsRetriesUntilAPostLands() throws IOException
+	{
+		relay.handle(reply(410, "{\"reason\":\"removed\"}"), null);
+		assertEquals(RelayClient.Refused.REMOVED, relay.getRefused());
+		assertNull("the sentence ages out for the one retry",
+			relay.getFatalError(System.currentTimeMillis() + RelayClient.FATAL_RETRY_MS));
+		assertEquals("and the refusal does not", RelayClient.Refused.REMOVED, relay.getRefused());
+
+		relay.handle(reply(503, "<html>Service Unavailable</html>"), null);
+		relay.handle(reply(429, "{}", "Retry-After", "60"), null);
+		assertEquals("a retry that fails for another reason answers nothing", RelayClient.Refused.REMOVED, relay.getRefused());
+
+		relay.handle(reply(200, "{}"), null);
+		assertNull("a post that lands is the group taking the player back", relay.getRefused());
+	}
+
+	/** A new code is a new group, and a new suffix or a spent invite is the player answering it. */
+	@Test
+	public void aRefusalGoesWithTheCodeOrAnAnswerToIt() throws IOException
+	{
+		relay.handle(reply(403, "{\"reason\":\"needs_code\"}"), null);
+		assertEquals(RelayClient.Refused.NEEDS_INVITE, relay.getRefused());
+		relay.clearRefusal();
+		assertNull(relay.getRefused());
+
+		relay.handle(reply(507, "{\"reason\":\"group_full\"}"), null);
+		assertEquals(RelayClient.Refused.FULL, relay.getRefused());
+		relay.reset();
+		assertNull(relay.getRefused());
+	}
+
+	/**
+	 * Only a refusal the player can see a reason for is kept: a full relay clears by itself, and a
+	 * redirect is an address to type, which the sentence already says.
+	 */
+	@Test
+	public void aRefusalThatIsNotThePlayersToAnswerIsNotKept() throws IOException
+	{
+		relay.handle(reply(507, "{\"reason\":\"capacity\"}"), null);
+		assertNull(relay.getRefused());
+
+		relay.handle(reply(400, "{}"), null);
+		assertEquals(RelayClient.Refused.BAD_CODE, relay.getRefused());
+		relay.handle(reply(301, "", "Location", "https://www.example.invalid/api/companion/snapshot"), null);
+		assertNotNull(relay.getFatalError());
+		assertNull("a later refusal of another kind replaces it", relay.getRefused());
 	}
 
 	@Test

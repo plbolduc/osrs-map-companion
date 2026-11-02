@@ -316,6 +316,13 @@ The website plan's second session, once the routes in the game are built: a memb
       buttons are Leave group and Cancel, and Enter cancels; leave a group made by Connect while a
       second Connect group and a legacy code are remembered, and Your groups ▾ lists only the legacy
       code. Pointed at a local map, Connect's question wraps with no word alone on a line.
+- [ ] **A refused group.** Remove a member on the website. Their status card says *Removed from this
+      group* in pink beside a red dot, *Have an invite?* and the field show under the orange button
+      with the way out under Paste and Join, and all of it stays through the next five minutes and
+      the retry after them rather than flashing the group's name. Join with an invite to another
+      group: the card is that group's at once. Paste a bare code of a group Connect made into a
+      fresh RuneLite: *Needs an invite*, and an invite to the same group pasted and joined puts it
+      back without waiting for the retry.
 - [ ] **The reminder.** Leave RuneLite's own *Send notifications when focused* off, as it ships. Tick
       *Meetup notifications* in the sidebar and set *Minutes before a meetup* to 2. With RuneLite
       focused and the game being played, a meetup two minutes off raises one notification, with the
