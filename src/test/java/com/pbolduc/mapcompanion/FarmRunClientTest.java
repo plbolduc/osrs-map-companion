@@ -71,6 +71,11 @@ public class FarmRunClientTest
 
 	private FarmRunClient client()
 	{
+		return client(gate);
+	}
+
+	private FarmRunClient client(DestinationRoute gate)
+	{
 		OkHttpClient http = new OkHttpClient.Builder().addInterceptor(chain ->
 		{
 			sent.add(chain.request());
@@ -221,6 +226,67 @@ public class FarmRunClientTest
 		client.start("birdhouses");
 		assertEquals(1, sent.size());
 		assertFalse(gate.pressReady(System.currentTimeMillis() + 89_000));
+	}
+
+	/**
+	 * "Nothing the client has seen needs a visit yet" is Ready now's commonest answer, and it held
+	 * every Route, Reroute and Start for half a minute, as if the map had failed. A refusal the map
+	 * words is an answer: it holds the five seconds between presses that Route keeps after a 404.
+	 */
+	@Test
+	public void aRefusalTheMapWordsHoldsOnlyTheWaitBetweenPresses() throws Exception
+	{
+		connect();
+		for (int code : new int[] {409, 404, 400})
+		{
+			DestinationRoute held = new DestinationRoute();
+			status.set(code);
+			answer.set("{\"reason\":\"nothing_due\",\"error\":\"Nothing the client has seen needs a visit yet.\"}");
+			FarmRunClient client = client(held);
+			client.start("ready-now");
+			settled(client);
+			assertEquals("Nothing the client has seen needs a visit yet.", client.said().message);
+			assertFalse(code + " still holds the next press", held.pressReady(System.currentTimeMillis()));
+			assertTrue(code + " holds it five seconds, not thirty",
+				held.pressReady(System.currentTimeMillis() + RouteClient.MIN_GAP_MS + 1_000));
+		}
+	}
+
+	@Test
+	public void aWordedRefusalStillKeepsTheWaitTheMapNames() throws Exception
+	{
+		connect();
+		status.set(409);
+		retry.set("20");
+		answer.set("{\"reason\":\"no_run\",\"error\":\"That run has ended. Start another.\"}");
+		FarmRunClient client = client();
+		client.start("birdhouses");
+		settled(client);
+		assertFalse(gate.pressReady(System.currentTimeMillis() + 15_000));
+		assertTrue(gate.pressReady(System.currentTimeMillis() + 21_000));
+	}
+
+	/** No answer to read, a failing map, or a refusal whose words cannot be read: still the half minute. */
+	@Test
+	public void aFailureOrAnUnreadableRefusalStillBacksOff() throws Exception
+	{
+		connect();
+		String[][] replies = {
+			{"500", "{\"error\":\"The map could not plan that run just now.\"}"},
+			{"409", "<html>Conflict</html>"},
+			{"404", ""}
+		};
+		for (String[] reply : replies)
+		{
+			DestinationRoute held = new DestinationRoute();
+			status.set(Integer.parseInt(reply[0]));
+			answer.set(reply[1]);
+			FarmRunClient client = client(held);
+			client.start("birdhouses");
+			settled(client);
+			assertFalse(reply[0] + " " + reply[1] + " backs off",
+				held.pressReady(System.currentTimeMillis() + RouteClient.FAILURE_GAP_MS - 5_000));
+		}
 	}
 
 	@Test

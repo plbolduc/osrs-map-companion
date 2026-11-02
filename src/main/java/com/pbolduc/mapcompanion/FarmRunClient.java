@@ -316,8 +316,10 @@ final class FarmRunClient
 			}
 			if (!close.isSuccessful())
 			{
-				String why = close.code() == 429 || close.code() == 503 ? "The map is busy. Try the run again shortly."
-							 : close.code() == 403 || close.code() == 410 ? RouteClient.NEEDS_CONNECTION : "The map could not prepare that run.";
+				int code = close.code();
+				String why = code == 429 || code == 503 ? "The map is busy. Try the run again shortly."
+							 : code == 403 || code == 410 ? RouteClient.NEEDS_CONNECTION : "The map could not prepare that run.";
+				boolean worded = false;
 				String body = CompanionHttp.readBounded(close.body(), CompanionHttp.MAX_REPLY_BYTES);
 				try
 				{
@@ -329,11 +331,21 @@ final class FarmRunClient
 						if (words != null)
 						{
 							why = words;
+							worded = true;
 						}
 					}
 				}
 				catch (RuntimeException ignored) { /* The status still has a useful sentence. */ }
-				finish(ticket, null, 0, why, Math.max(next, now + RouteClient.FAILURE_GAP_MS));
+				/*
+				 * A refusal the map words (409, 404, 400) is an answer, not a failure: the map is up, read
+				 * the press and said why it will not plan it — nothing is due yet, no patch seen, no such
+				 * run. Backing off spares a map that is struggling, and this one is not; the next press is
+				 * the player's own, after they change something. So it keeps the five seconds between
+				 * presses, or the wait the map named, as Route does after a 404. No answer, a 5xx or a
+				 * reply that cannot be read keeps the half minute.
+				 */
+				boolean answered = worded && (code == 409 || code == 404 || code == 400);
+				finish(ticket, null, 0, why, answered ? next : Math.max(next, now + RouteClient.FAILURE_GAP_MS));
 				return;
 			}
 			if (ticket.end)

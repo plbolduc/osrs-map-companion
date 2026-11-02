@@ -44,11 +44,17 @@ import net.runelite.client.ui.ColorScheme;
  * <p>Time Tracking remains the patch timer. This adds only the itinerary and the evidence that
  * advances it. A port-task run is followed on the Port tasks card instead; while one is going, this
  * card says a farm run waits for it, since a Start here would replace it.
+ *
+ * <p>Ready now and a contract are planned from what this client shares, so with that choice off the
+ * map could only refuse. The card checks first, as the Port tasks card checks Boats and moorings:
+ * Start run waits, a line under it names the choice to turn on, and nothing is sent.
  */
 final class FarmRunPanel extends JPanel
 {
 	private static final long serialVersionUID = 1L;
 	static final String AFTER_PORT_RUN = "Start a farm run after the port run ends.";
+	static final String NEEDS_PATCHES = "Ready now reads your patches. Turn on Farming patches in Settings.";
+	static final String NEEDS_CONTRACT = "Turn on Farming contracts in Settings to plan your contract.";
 	private static final String[][] STARTS =
 	{
 		{"ready-now", "Ready now"}, {"preset:herb", "Herb run"}, {"preset:tree", "Tree run"},
@@ -58,9 +64,14 @@ final class FarmRunPanel extends JPanel
 	};
 
 	private final transient FarmRunClient client;
+	private final transient MapCompanionConfig config;
 	private final JComboBox<String> kind = new JComboBox<>();
 	/* A button under the picker, the picker's width: it acts, and a link is a fold's own opener. */
 	private final JButton start = MapCompanionPanel.smallButton("Start run");
+	/* Under Start run while the kind chosen plans from a sharing choice that is off. */
+	private final JLabel needs = new JLabel();
+	/** Connected and free to press, as of the last refresh: a new pick of kind is offered by it. EDT. */
+	private boolean ready;
 	/*
 	 * The kind of run and Start run, hidden while a run is going or being planned: there is one run at
 	 * a time, so a press here would replace the run being walked. The Port tasks card holds the same
@@ -76,6 +87,7 @@ final class FarmRunPanel extends JPanel
 				 ShortestPath shortest, GameSprites sprites, MapCompanionConfig config)
 	{
 		this.client = client;
+		this.config = config;
 		this.run = new RunView(false, state, client, follower, routes, shortest, sprites, config);
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		setBackground(ColorScheme.DARKER_GRAY_COLOR);
@@ -99,6 +111,10 @@ final class FarmRunPanel extends JPanel
 		picker.add(start, BorderLayout.SOUTH);
 		picker.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
 		add(MapCompanionPanel.left(picker));
+		needs.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+		needs.setFont(needs.getFont().deriveFont(11f));
+		needs.setVisible(false);
+		add(MapCompanionPanel.left(needs));
 		waiting.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
 		waiting.setFont(waiting.getFont().deriveFont(11f));
 		waiting.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
@@ -106,7 +122,49 @@ final class FarmRunPanel extends JPanel
 		add(MapCompanionPanel.left(waiting));
 		add(run);
 
-		start.addActionListener(e -> client.start(STARTS[kind.getSelectedIndex()][0]));
+		start.addActionListener(e ->
+		{
+			String chosen = STARTS[kind.getSelectedIndex()][0];
+			if (needs(chosen, config) == null)
+			{
+				client.start(chosen);
+			}
+		});
+		/* At once, not at the next refresh: a pick that needs a choice off must not leave Start pressable. */
+		kind.addActionListener(e ->
+		{
+			offer();
+			revalidate();
+			repaint();
+		});
+	}
+
+	/**
+	 * The line a kind of run says while the sharing choice it is planned from is off, or null when it
+	 * needs none or that choice is on. Ready now reads the patches this client has shared and a contract
+	 * the contract it shared; the presets and Birdhouses are planned from the map's own tables.
+	 */
+	@Nullable
+	static String needs(String kind, MapCompanionConfig config)
+	{
+		if ("ready-now".equals(kind) && !config.shareFarming())
+		{
+			return NEEDS_PATCHES;
+		}
+		if ("contract".equals(kind) && !config.shareFarmingContracts())
+		{
+			return NEEDS_CONTRACT;
+		}
+		return null;
+	}
+
+	/** Start run, and the line under it, for the kind chosen now. EDT. */
+	private void offer()
+	{
+		String missing = needs(STARTS[kind.getSelectedIndex()][0], config);
+		start.setEnabled(ready && missing == null);
+		needs.setVisible(picker.isVisible() && missing != null);
+		MapCompanionPanel.setWrapped(needs, missing == null ? "" : missing, MapCompanionPanel.CARD_TEXT_WIDTH);
 	}
 
 	/** The button a hotkey presses on this card's run, or null with none shown here. EDT. */
@@ -123,9 +181,9 @@ final class FarmRunPanel extends JPanel
 		setVisible(connected || showing);
 		picker.setVisible(!run.busy() && !run.otherBusy());
 		waiting.setVisible(!run.busy() && run.otherBusy());
-		boolean ready = connected && client.ready();
-		start.setEnabled(ready);
+		ready = connected && client.ready();
 		kind.setEnabled(ready);
+		offer();
 		revalidate();
 		repaint();
 	}
