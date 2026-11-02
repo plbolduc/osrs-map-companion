@@ -213,6 +213,56 @@ public class SidebarWordsTest
 		assertFalse(ConnectCard.isDefaultMap(null));
 	}
 
+	/**
+	 * RuneLite's dialogs wrap a line at 80 characters themselves, so a break written into a paragraph
+	 * as well left "what you" alone on a line. The question, a blank line, then one paragraph.
+	 */
+	@Test
+	public void theOtherMapQuestionLeavesItsWrappingToTheDialog()
+	{
+		String question = ConnectCard.otherMapQuestion("127.0.0.1:9");
+		int paragraph = question.indexOf("\n\n");
+		assertTrue(question, question.startsWith("Send your data to 127.0.0.1:9 instead of osrs-map.com?\n\n"));
+		assertEquals("one break, between the question and its paragraph", paragraph, question.indexOf('\n'));
+		assertEquals(question, -1, question.indexOf('\n', paragraph + 2));
+	}
+
+	/**
+	 * Rename's field keeps a name to what the map takes, typed or pasted, so the dialog has no
+	 * refusal to give and nothing typed is thrown away; its prompt says the limit before anyone meets it.
+	 */
+	@Test
+	public void renameKeepsANameToWhatTheMapTakes()
+	{
+		assertEquals("Our group", ConnectCard.nameField("Our group").getText());
+		assertEquals("", ConnectCard.nameField(null).getText());
+
+		javax.swing.JTextField field = ConnectCard.nameField("Sunday raids");
+		field.setCaretPosition(field.getText().length());
+		field.replaceSelection(" and the rest of the week too");
+		assertEquals("a paste keeps what fits", "Sunday raids and the res", field.getText());
+		field.setText("A name far longer than any group's name could be");
+		assertEquals(Pairing.MAX_GROUP_NAME, field.getText().length());
+
+		assertEquals("The name everybody in the group sees (up to 24 characters):", ConnectCard.RENAME_PROMPT);
+	}
+
+	/**
+	 * Leave says what it costs in the player's words before it is pressed: the way back, the other
+	 * groups that keep members and leave the list with this one, and the kill log it keeps.
+	 */
+	@Test
+	public void leaveSaysWhatItCostsBeforeItIsPressed()
+	{
+		assertEquals("Your group stops seeing you, and you stop seeing them. Coming back needs a new invite, "
+			+ "and you'll join as a new member. Your kill log stays.", SettingsPage.leaveMessage(0));
+		assertTrue(SettingsPage.leaveMessage(1).contains(
+			" Your other group will need a new invite too, so it leaves your list. Your kill log stays."));
+		assertTrue(SettingsPage.leaveMessage(3).contains(
+			" Your 3 other groups will need a new invite too, so they leave your list. Your kill log stays."));
+		assertFalse("one paragraph, which the dialog wraps", SettingsPage.leaveMessage(3).contains("\n"));
+	}
+
 	/** The invite says both ways in, and keeps the link last so a chat client links all of it. */
 	@Test
 	public void anInviteSaysWhereToPasteItAndEndsWithTheLink()

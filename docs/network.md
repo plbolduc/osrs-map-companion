@@ -239,7 +239,9 @@ member id and installation key are the same for every map and group this RuneLit
 `X-Companion-Member-Secret` is a random credential for one server, group and character, used on
 snapshots, invites, the receive stream, star-preference sync and **Open the map**. It is never displayed
 or logged. **Leave group** deletes every one of these member secrets and replaces the installation
-identity; your local kill log remains.
+identity; your local kill log remains. A remembered group that issued one keeps its members and
+admits the new identity only by invite, so it leaves **Switch ▾** with the group left; a group that
+never issued one still admits by its code, and stays.
 
 Local game messages provide bounded reward and assignment facts only. **Settings → Advanced → Show what's
 sent** previews the current snapshot; credentials are named without displaying standing secrets.

@@ -47,6 +47,7 @@ import javax.swing.BoxLayout;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -54,6 +55,10 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DocumentFilter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.util.LinkBrowser;
@@ -361,12 +366,21 @@ final class ConnectCard extends JPanel
 		{
 			return true;
 		}
-		return JOptionPane.showOptionDialog(sidebar,
-			"Send your data to " + pairing.serverLabel() + " instead of osrs-map.com?\n\n"
-			+ "It is a map server RuneLite has not checked. It receives your IP address, and what you\n"
-			+ "choose to share goes to it and to your group there.",
+		return JOptionPane.showOptionDialog(sidebar, otherMapQuestion(pairing.serverLabel()),
 			"Connect to another map", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE,
 			null, new Object[]{"Connect", "Cancel"}, "Cancel") == JOptionPane.OK_OPTION;
+	}
+
+	/**
+	 * The question {@link #confirmMap} asks, a paragraph to a line. RuneLite's look and feel wraps a
+	 * dialog's line at 80 characters itself, so a break written in here as well would leave two words
+	 * of a sentence on a line of their own.
+	 */
+	static String otherMapQuestion(String server)
+	{
+		return "Send your data to " + server + " instead of osrs-map.com?\n\n"
+			+ "It is a map server RuneLite has not checked. It receives your IP address, and what you "
+			+ "choose to share goes to it and to your group there.";
 	}
 
 	/** The map the plugin is installed for, whose install warning already said all of this. */
@@ -772,6 +786,11 @@ final class ConnectCard extends JPanel
 	 * <p>A group made by Connect is "Our group" until somebody names it, and this is where its maker
 	 * does, without opening the map. The menu offers it only to a member the map said may, and asks
 	 * as one of this RuneLite's members of the group even on the login screen.
+	 *
+	 * <p>The dialog's own button says Rename, and its field holds no more than the map takes
+	 * ({@link #nameField}): a limit kept while typing has nothing to explain afterwards, where a
+	 * refusal would close the dialog on what was typed and say why somewhere else. An empty name
+	 * sends nothing, as Cancel does.
 	 */
 	private void renameGroup()
 	{
@@ -784,16 +803,30 @@ final class ConnectCard extends JPanel
 			say("Log in once while connected, then rename the group.");
 			return;
 		}
-		Object typed = JOptionPane.showInputDialog(sidebar, "The name everybody in the group sees:", "Rename group",
-			JOptionPane.PLAIN_MESSAGE, null, null, pairing.name(code));
-		if (!(typed instanceof String))
+		JTextField typed = nameField(pairing.name(code));
+		Object[] choices = {"Rename", "Cancel"};
+		JOptionPane question = new JOptionPane(new Object[]{RENAME_PROMPT, typed}, JOptionPane.PLAIN_MESSAGE,
+			JOptionPane.OK_CANCEL_OPTION, null, choices, choices[0])
+		{
+			private static final long serialVersionUID = 1L;
+
+			/* Into the field, as an input dialog's own is, rather than onto the button. Enter still renames. */
+			@Override
+			public void selectInitialValue()
+			{
+				typed.requestFocusInWindow();
+			}
+		};
+		JDialog dialog = question.createDialog(sidebar, "Rename group");
+		dialog.setVisible(true);
+		dialog.dispose();
+		if (!choices[0].equals(question.getValue()))
 		{
 			return;
 		}
-		String name = ((String) typed).replaceAll("\\s+", " ").trim();
-		if (name.isEmpty() || name.length() > Pairing.MAX_GROUP_NAME)
+		String name = typed.getText().replaceAll("\\s+", " ").trim();
+		if (name.isEmpty())
 		{
-			say("A group name is 1 to " + Pairing.MAX_GROUP_NAME + " characters.");
 			return;
 		}
 		say("Renaming…");
@@ -810,6 +843,40 @@ final class ConnectCard extends JPanel
 			}
 			refresh.run();
 		}));
+	}
+
+	/** What Rename asks, with the one rule a name has. */
+	static final String RENAME_PROMPT = "The name everybody in the group sees (up to " + Pairing.MAX_GROUP_NAME
+		+ " characters):";
+
+	/**
+	 * Rename's field: the current name, and never more characters than the map takes for one. A paste
+	 * that would run past the limit keeps what fits, so the dialog has no refusal to give.
+	 */
+	static JTextField nameField(@Nullable String current)
+	{
+		JTextField field = new JTextField();
+		((AbstractDocument) field.getDocument()).setDocumentFilter(new DocumentFilter()
+		{
+			@Override
+			public void insertString(FilterBypass bypass, int offset, String text, AttributeSet attributes)
+				throws BadLocationException
+			{
+				replace(bypass, offset, 0, text, attributes);
+			}
+
+			@Override
+			public void replace(FilterBypass bypass, int offset, int length, String text, AttributeSet attributes)
+				throws BadLocationException
+			{
+				String added = text == null ? "" : text;
+				int room = Pairing.MAX_GROUP_NAME - (bypass.getDocument().getLength() - length);
+				super.replace(bypass, offset, length, added.substring(0, Math.max(0, Math.min(added.length(), room))),
+					attributes);
+			}
+		});
+		field.setText(current);
+		return field;
 	}
 
 	/**

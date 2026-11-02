@@ -331,18 +331,31 @@ final class SettingsPage extends JPanel
 	 *
 	 * <p>The group also leaves the remembered list, because a one-press way back into a group
 	 * somebody deliberately left is the opposite of what this button says.
+	 *
+	 * <p>The question names the group in its title and the act on its button, with Cancel the default
+	 * so Enter does not leave, and it says what the press costs in the player's words rather than
+	 * the plugin's: the way back is a new invite, and so is the way back to any other group that
+	 * keeps members, which goes from the list with this one ({@link Pairing#leave}).
 	 */
 	private void leaveGroup()
 	{
-		int answer = JOptionPane.showConfirmDialog(
+		String code = pairingCode();
+		int others = 0;
+		for (String held : pairing.codesHoldingSecrets())
+		{
+			if (!held.equalsIgnoreCase(code))
+			{
+				others++;
+			}
+		}
+		Object[] choices = {"Leave group", "Cancel"};
+		int answer = JOptionPane.showOptionDialog(
 						 SwingUtilities.getWindowAncestor(this),
-						 "Clear your pairing code and forget the ids every account on this RuneLite had?\n\n"
-						 + "Friends holding the code stop seeing you. Rejoining later arrives as a new\n"
-						 + "person rather than as you, and needs an invite that still works. This group\n"
-						 + "leaves your list of groups. Your kill log is not touched.",
-						 "Leave group",
+						 leaveMessage(others),
+						 "Leave " + ConnectCard.statusGroup(code, pairing.name(code)) + "?",
 						 JOptionPane.OK_CANCEL_OPTION,
-						 JOptionPane.QUESTION_MESSAGE);
+						 JOptionPane.WARNING_MESSAGE,
+						 null, choices, choices[1]);
 		if (answer != JOptionPane.OK_OPTION)
 		{
 			return;
@@ -359,21 +372,39 @@ final class SettingsPage extends JPanel
 	}
 
 	/**
-	 * Forget kill log's question, put the way Leave group beside it puts its own.
+	 * What Leave group's question says, one paragraph that RuneLite's dialog wraps itself: what
+	 * leaving does, the way back, what it costs the {@code others} remembered groups that keep
+	 * members, and the one thing it keeps.
+	 */
+	static String leaveMessage(int others)
+	{
+		return "Your group stops seeing you, and you stop seeing them. Coming back needs a new invite, "
+			+ "and you'll join as a new member."
+			+ (others == 1 ? " Your other group will need a new invite too, so it leaves your list."
+			: others > 1 ? " Your " + others + " other groups will need a new invite too, so they leave your list."
+			: "")
+			+ " Your kill log stays.";
+	}
+
+	/**
+	 * Forget kill log's question, put the way Leave group beside it puts its own: the act on its
+	 * button, and Cancel the default.
 	 *
 	 * <p>Both buttons erase something and sit side by side, so both ask. One press would clear every
 	 * count this character has and its pinned drop, and the plugin keeps no other copy to give back.
 	 */
 	private boolean confirmForgetKillLog()
 	{
-		return JOptionPane.showConfirmDialog(
+		Object[] choices = {"Forget kill log", "Cancel"};
+		return JOptionPane.showOptionDialog(
 				   SwingUtilities.getWindowAncestor(this),
 				   "Forget every kill and drop counted for this character?\n\n"
 				   + "Drop luck starts again from zero, and your pinned drop goes with it.\n"
 				   + "This cannot be undone.",
 				   "Forget kill log",
 				   JOptionPane.OK_CANCEL_OPTION,
-				   JOptionPane.QUESTION_MESSAGE) == JOptionPane.OK_OPTION;
+				   JOptionPane.WARNING_MESSAGE,
+				   null, choices, choices[1]) == JOptionPane.OK_OPTION;
 	}
 
 	/** Clear the kill log once the player has said yes, and only then. True when it was cleared. */

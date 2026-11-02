@@ -49,7 +49,7 @@ the change.
   441 and the unpaired one 296 rather than 283, and about 12px of each is that third line. Both
   sides of the table carry the same item, so it compares like with like.
 - **Two words each, everywhere they are named.** *Leave group* and *Forget kill log* are short so
-  they sit side by side, and the confirm dialog's title, the README, the Hub submission notes and
+  they sit side by side, and the confirm dialog's button, the README, the Hub submission notes and
   `MemberSecretTest`'s assertion on the README now name them as they are printed. A button a
   document calls something else is a button a reader cannot find.
 - **The remembered groups are a menu even before a group.** With groups remembered and none

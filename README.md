@@ -278,7 +278,8 @@ osrs-map.com keeps live positions and progress in memory only, with no movement 
 the names last shared in them, invites, meetups and group pins are kept. A new group keeps two
 weeks of its members' notable drops, levels, quests and diaries, up to 200 entries; its owner can
 turn this off. See the [privacy policy](https://osrs-map.com/privacy). **Leave group** stops
-sharing and deletes the plugin's saved credentials; your kill log stays on your computer.
+sharing, deletes the plugin's saved credentials and forgets any other group you would need a new
+invite to rejoin; your kill log stays on your computer.
 
 Shooting star data comes from Star Miners by way of osrs-map.com. The plugin never contacts Star
 Miners, who do not endorse it.
