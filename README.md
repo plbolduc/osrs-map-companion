@@ -120,14 +120,14 @@ Completed farming contracts point back to Guildmaster Jane to hand them in.
 ## Slayer in RuneLite
 
 <p>
-  <img src="docs/mockups/sidebar-slayer.png" width="225" alt="The RuneLite Slayer card: remaining task count, best usable place, requirements and Route or World map actions">
+  <img src="docs/mockups/sidebar-slayer.png" width="225" alt="The RuneLite Slayer card: remaining task count, best usable place, requirements and Route or Pin actions">
 </p>
 
 Share your Slayer task to see the website's ranked places in Home. The counter follows kills
 in this client. Better places you cannot use yet stay visible with their requirements; expand
 the list for other places, ranking choices, the Wilderness filter and the kinds that count.
-Wilderness places start hidden. **Route** plans from where you stand; **World map** pins the
-spot locally. Locations and rates are from the [OSRS Wiki](https://oldschool.runescape.wiki/w/Slayer_training),
+Wilderness places start hidden. **Route** plans from where you stand; **Pin** makes the spot
+your destination in this client. Locations and rates are from the [OSRS Wiki](https://oldschool.runescape.wiki/w/Slayer_training),
 [CC BY-NC-SA 3.0](https://creativecommons.org/licenses/by-nc-sa/3.0/).
 
 The website offers the same ranking with a larger map:
