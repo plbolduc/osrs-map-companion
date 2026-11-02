@@ -240,7 +240,7 @@ The website plan's second session, once the routes in the game are built: a memb
       walking step (the owner's reason for not sending `config` yet).
 - [ ] **Shortest Path keeps its own target.** Set a target of your own in Shortest Path while
       following: the sidebar stops following and says why, and finishing the walk does not clear
-      your target. Press Stop while it draws one of ours: that path is cleared.
+      your target. Press Pause while it draws one of ours: that path is cleared.
 - [ ] **Shortest Path, not installed.** Without it, Follow still shows the step you're on in the
       box over the game, and nothing about Shortest Path is in the sidebar; the steps and pins still
       work. With *Step on screen* off as well, there is no Follow.

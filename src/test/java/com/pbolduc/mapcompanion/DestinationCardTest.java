@@ -42,6 +42,7 @@ import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.callback.ClientThread;
 import okhttp3.OkHttpClient;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -129,9 +130,34 @@ public class DestinationCardTest
 
 		press("Follow");
 		assertNotNull("the box over the game shows the step", RouteStepOverlay.box(route.view(), NAME));
-		assertEquals(Arrays.asList("Stop", "Reroute", "Dismiss"), actions());
-		press("Stop");
+		assertEquals(Arrays.asList("Pause", "Reroute", "Dismiss"), actions());
+		press("Pause");
 		assertNull(RouteStepOverlay.box(route.view(), NAME));
+	}
+
+	/**
+	 * While following, the button reads Pause, as a run's card and the "Follow and pause key" name
+	 * the same act; it read Stop here alone. Its tip still says the path Shortest Path drew goes.
+	 */
+	@Test
+	public void followingReadsPauseAsARunsCardAndTheKeyDo() throws Exception
+	{
+		shortestPathRunning = true;
+		received();
+		refresh();
+		press("Follow");
+		assertEquals(Arrays.asList("Pause", "Reroute", "Dismiss"), actions());
+		assertEquals("Keep this route and stop following it until you press Follow, and clear the path Shortest Path drew",
+			button("Pause").getToolTipText());
+		assertSame("the key presses the same button", button("Pause"), cards.hotkey(false));
+
+		press("Pause");
+		assertFalse(route.view().following);
+		assertEquals(Arrays.asList("Follow", "Reroute", "Dismiss"), actions());
+		shortestPathRunning = false;
+		press("Follow");
+		assertEquals("without Shortest Path there is no path to clear", "Keep this route and stop following it until you press Follow",
+			button("Pause").getToolTipText());
 	}
 
 	/** With the box off and no Shortest Path, following would show nothing, so it is not offered. */
