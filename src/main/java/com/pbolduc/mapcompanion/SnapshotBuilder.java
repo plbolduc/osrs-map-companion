@@ -253,8 +253,17 @@ public class SnapshotBuilder
 
 		if (config.shareSlayer())
 		{
-			snapshot.slayer = questReader.settled(nowMs) ? slayerReader.read() : null;
-			slayerState.local(identity.id(), snapshot.slayer, config.slayerOrder(), config.slayerHideWilderness());
+			boolean settled = questReader.settled(nowMs);
+			snapshot.slayer = settled ? slayerReader.read() : null;
+			if (settled)
+			{
+				slayerState.local(identity.id(), snapshot.slayer, config.slayerOrder(), config.slayerHideWilderness());
+			}
+			else
+			{
+				/* Sent as no task all the same; the card is told the game has not said yet. */
+				slayerState.unread(identity.id(), config.slayerOrder(), config.slayerHideWilderness());
+			}
 			snapshot.slayerPreferences = slayerState.preferences();
 		}
 		else

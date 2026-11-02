@@ -42,6 +42,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
@@ -225,18 +226,42 @@ public class PortTaskReaderTest
 		assertFalse(json, json.contains("Tern"));
 	}
 
+	/**
+	 * A hop withholds the reading until the new session settles: nothing is sent from it, and nothing
+	 * a run ticks by. Rewritten when the sidebar stopped forgetting it too. The same character holds
+	 * the same tasks across a hop, and the card vanished for those seconds; it now shows the reading
+	 * from before the hop until a settled one replaces it.
+	 */
 	@Test
-	public void aHopForgetsTheReadingUntilTheNewSessionSettles()
+	public void aHopWithholdsTheReadingWhileTheSidebarKeepsTheLastSettledOne()
 	{
 		settle();
 		varbits.put(VarbitID.PORT_TASK_SLOT_0_ID, SPICES);
 		reader.read(20_000);
 		assertTrue(reader.latest().get(0).held());
-		reader.onSessionEnded();
-		assertNull("the sidebar stops showing a reading the session no longer stands behind", reader.latest());
+		reader.onHop();
+		assertNull("nothing the session no longer stands behind is sent or ticks a run", reader.latest());
+		assertTrue(reader.shown().get(0).held());
 		reader.onSessionResumed(30_000);
+		varbits.clear();
 		assertNull(reader.wire(40_000));
+		assertTrue("the window's zeroes are not shown either", reader.shown().get(0).held());
+		varbits.put(VarbitID.PORT_TASK_SLOT_0_ID, SPICES);
 		assertEquals(PortTaskReader.COURIER, reader.wire(45_000).slots.get(0).state);
+		assertSame(reader.latest(), reader.shown());
+	}
+
+	/** A logout or another character ends the session: the sidebar's copy goes with the reading. */
+	@Test
+	public void aLogoutForgetsTheReadingAndTheSidebarsCopy()
+	{
+		settle();
+		varbits.put(VarbitID.PORT_TASK_SLOT_0_ID, SPICES);
+		reader.read(20_000);
+		reader.onHop();
+		reader.onSessionEnded();
+		assertNull(reader.latest());
+		assertNull("a second character never sees the first one's tasks", reader.shown());
 	}
 
 	@Test
@@ -250,7 +275,7 @@ public class PortTaskReaderTest
 		assertEquals("a teak skiff's hold", Integer.valueOf(60), reader.wire(21_000).hold);
 		varbits.put(AccountTypes.VARBIT, 2);
 		assertEquals("an Ultimate Ironman's teak hold", Integer.valueOf(6), reader.wire(22_000).hold);
-		reader.onSessionEnded();
+		reader.onHop();
 		reader.onSessionResumed(30_000);
 		assertNull("a hop forgets the boat until it is stood on again", reader.wire(50_000).hold);
 	}

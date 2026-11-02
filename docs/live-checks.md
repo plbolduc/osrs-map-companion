@@ -95,7 +95,9 @@ steps wait on these readings (`osrs-stars-map/docs/plan-where-to-go-for-a-task.m
 *Order of work*).
 
 - [ ] **Slayer task name.** With *Slayer task* sharing on, the map names an ordinary task, a
-      boss task if one is assigned, and a Konar task's area.
+      boss task if one is assigned, and a Konar task's area. Hop: the sidebar's Slayer card keeps
+      the task, and its places greyed, until the new world settles, and never says there is no
+      task meanwhile; log out and in, and it waits for the new session's reading instead.
 - [ ] **Port task slots.** `PortTaskReader` is written from the Hub's Sailing and Port Tasks
       plugins and the game's script, not from a session; these settle it. With *Port tasks*
       sharing on:
@@ -110,7 +112,8 @@ steps wait on these readings (`osrs-stars-map/docs/plan-where-to-go-for-a-task.m
         drop. Repeat in another slot for the other four counters if convenient.
   - [ ] An empty slot reads 0 or the *No Task* row and shows as free; a slot not yet bought is
         *locked*. Log out and in, and hop: for fifteen seconds nothing is sent, then the same
-        tasks come back, never five empty slots.
+        tasks come back, never five empty slots. Through the hop the sidebar's Port tasks card
+        keeps showing the tasks; after the logout it is gone until they are read again.
   - [ ] Cancel a task, and take a new one into the slot it left: the page replaces it.
 - [ ] **A port-task run in the sidebar (built from the same sourced encodings, not yet seen live).**
       With *Port tasks* and *Boats and moorings* on, press **Start run** on the Port tasks card:
