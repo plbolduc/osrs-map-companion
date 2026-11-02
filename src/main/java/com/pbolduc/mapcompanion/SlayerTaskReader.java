@@ -110,6 +110,16 @@ public class SlayerTaskReader
 		return slayer;
 	}
 
+	/**
+	 * Whether the game says there is no assignment at all. {@link #read} returns null for that and
+	 * for a task this client cannot name alike, and only the first may be shown as "no task": the
+	 * other is the honest gap above, not an empty one. Client thread.
+	 */
+	boolean none()
+	{
+		return varPlayer(VarPlayerIds.SLAYER_TARGET) == 0;
+	}
+
 	private int varPlayer(int id)
 	{
 		try

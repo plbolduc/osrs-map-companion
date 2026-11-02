@@ -36,8 +36,10 @@ import net.runelite.api.gameval.DBTableID;
 import net.runelite.api.gameval.VarPlayerID;
 import net.runelite.api.gameval.VarbitID;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 /**
@@ -146,6 +148,23 @@ public class SlayerTaskReaderTest
 		assign(50, BOSS_SENTINEL, 0);
 		varbits.put(VarbitID.SLAYER_TARGET_BOSSID, 77);
 		assertNull(reader.read());
+	}
+
+	/**
+	 * Nothing is read both for no assignment and for one the tables cannot name. Only the game's own
+	 * zero is no task, which the sidebar may say as such; a task without a name is a gap, not none.
+	 */
+	@Test
+	public void onlyTheGamesZeroIsNoTask()
+	{
+		assign(0, 0, 0);
+		assertNull(reader.read());
+		assertTrue(reader.none());
+		assign(50, 77, 0);
+		assertNull(reader.read());
+		assertFalse(reader.none());
+		assign(142, ABYSSAL_DEMONS, 0);
+		assertFalse(reader.none());
 	}
 
 	@Test

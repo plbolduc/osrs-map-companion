@@ -42,6 +42,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.ListCellRenderer;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
@@ -59,6 +60,9 @@ final class SlayerPanel extends JPanel
 	private static final int WIDTH = MapCompanionPanel.CARD_TEXT_WIDTH;
 	private static final Color MUTED = ColorScheme.LIGHT_GRAY_COLOR;
 	private static final Color GOLD = new Color(237, 189, 100);
+	static final String NO_TASK = "No Slayer task";
+	static final String GET_ONE = "Get one from a Slayer master and it shows here.";
+	static final String NONE_OPEN = "No place for this task is open to you yet.";
 	private final transient SlayerState state;
 	private final transient MapCompanionConfig config;
 	private final transient ConfigManager configManager;
@@ -129,9 +133,15 @@ final class SlayerPanel extends JPanel
 		 */
 		boolean waiting = view.options == null && view.previous != null;
 		RelayResponse.SlayerOptions places = waiting ? view.previous : view.options;
-		String title = reading.task == null ? "No readable Slayer task" : reading.task + (reading.remaining == null ? "" : reading.remaining == 0 ? " · Complete" : " · " + reading.remaining + " left");
+		/*
+		 * "No Slayer task" only once the game has said so. Before it settles, or for a task this
+		 * client cannot name, the card claims nothing: a player with a task is never told to get one.
+		 */
+		String title = reading.task == null ? reading.settled ? NO_TASK : null
+					   : reading.task + (reading.remaining == null ? "" : reading.remaining == 0 ? " · Complete" : " · " + reading.remaining + " left");
 		MapCompanionPanel.setWrapped(task, title, WIDTH);
-		String message = reading.task == null ? "The current assignment appears here once the game has settled."
+		task.setVisible(title != null);
+		String message = reading.task == null ? reading.settled ? GET_ONE : "The current assignment appears here once the game has settled."
 						 : waiting ? rankingAgain(view.previous, view.order, view.hideWilderness)
 						 : view.options == null ? "Waiting for places from the map…" : view.stale ? "Waiting for the map to reconnect. These are the last places received." : reading.area;
 		MapCompanionPanel.setWrapped(status, message, WIDTH);
@@ -188,6 +198,11 @@ final class SlayerPanel extends JPanel
 					count = i + 1;
 					break;
 				}
+			/* Best for you is the first place not asking for something unmet; with none, say why the list stops. */
+			if (!shown.rows.isEmpty() && shown.rows.stream().noneMatch(row -> row.bestForYou))
+			{
+				body.add(line(NONE_OPEN, MUTED));
+			}
 			int visible = expanded ? shown.rows.size() : Math.min(count, shown.rows.size());
 			for (int i = 0; i < visible; i++)
 			{
@@ -208,6 +223,10 @@ final class SlayerPanel extends JPanel
 			if (expanded)
 			{
 				JComboBox<String> order = new JComboBox<>(new String[] {"Best spot", "One target at a time"});
+				/* The closed box says what it chooses; the open list keeps the choices' own names. */
+				ListCellRenderer<? super String> names = order.getRenderer();
+				order.setRenderer((list, value, index, selected, focused) -> names.getListCellRendererComponent(list,
+					index < 0 && value != null ? "Order: " + value : value, index, selected, focused));
 				order.setSelectedIndex("single".equals(shownOrder) ? 1 : 0);
 				order.setFont(order.getFont().deriveFont(11f));
 				order.setPreferredSize(new java.awt.Dimension(WIDTH, order.getPreferredSize().height));
