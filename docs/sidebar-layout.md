@@ -538,7 +538,8 @@ the group's name. The connect step is 532px.
 ### Stars
 
 *Sync filters with website* and *Mining 72 · Skill total 1620* sat above the list as daily
-controls, though both are set once. They are now the first rows of ⋯ More filters. *Selected world*
+controls, though both are set once. They are now the first rows of ⋯ More filters, and the levels
+line says what it hides: *For Mining 72: up to T7 · worlds up to 1620 total*. *Selected world*
 stays at the top.
 
 ### Drop luck's heading
