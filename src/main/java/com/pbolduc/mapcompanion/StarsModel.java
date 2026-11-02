@@ -117,7 +117,6 @@ final class StarsModel
 		Boolean members;
 		int requiredTotal;
 		boolean wilderness, pvp, deadman, league;
-		String country;
 
 		int tier(long elapsed)
 		{

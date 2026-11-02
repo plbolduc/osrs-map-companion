@@ -191,12 +191,6 @@ public class DeathWatcher
 		return death;
 	}
 
-	/** Whether there is a death to report at all, for the sidebar to decide whether to draw a line. */
-	public boolean hasRecent(long nowMs)
-	{
-		return snapshot(nowMs) != null;
-	}
-
 	/** The client is up: starts the settling clock. Client thread; see {@link SessionSettle}. */
 	public void onSessionResumed(long nowMs)
 	{

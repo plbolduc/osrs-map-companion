@@ -165,13 +165,10 @@ final class DropLuckView
 		return monster.lastKillMs > 0 ? "Last killed " + ago(now - monster.lastKillMs) + " · " + kills : kills;
 	}
 
-	/** A drop row's second line: the average, or the rate where the average would be a fraction. */
-	static String rowDetail(LootLog.Monster monster, LootLog.Drop drop)
-	{
-		return rowDetail(monster, drop, false);
-	}
-
-	/** The same, knowing whether the next kill gets the drop's better rate. */
+	/**
+	 * A drop row's second line: the average, or the rate where the average would be a fraction,
+	 * knowing whether the next kill gets the drop's better rate.
+	 */
 	static String rowDetail(LootLog.Monster monster, LootLog.Drop drop, boolean boostedNow)
 	{
 		if (drop.oneIn == null)

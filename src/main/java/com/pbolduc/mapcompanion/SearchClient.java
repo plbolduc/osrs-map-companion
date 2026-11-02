@@ -107,7 +107,6 @@ final class SearchClient
 		int x;
 		int y;
 		Integer plane;
-		Integer spawnCount;
 		Integer effortTiles;
 	}
 
