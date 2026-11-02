@@ -82,7 +82,7 @@ final class SharingControls extends JPanel
 	private final List<Group> groups = new ArrayList<>();
 	private final JTextField nickname = new JTextField();
 	private final JLabel nicknameLabel = new JLabel("Name to show instead");
-	private final JLabel nicknameHint = new JLabel("Leave it empty to show as Member.");
+	private final JLabel nicknameHint = MapCompanionPanel.label(11f, ColorScheme.LIGHT_GRAY_COLOR);
 	private String displayedNickname;
 
 	SharingControls(MapCompanionConfig config, ConfigStore store)
@@ -117,9 +117,7 @@ final class SharingControls extends JPanel
 			}
 		});
 		nameBox.add(nickname);
-		nicknameHint.setFont(nicknameHint.getFont().deriveFont(11f));
-		nicknameHint.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
-		nicknameHint.setAlignmentX(Component.LEFT_ALIGNMENT);
+		nicknameHint.setText("Leave it empty to show as Member.");
 		nameBox.add(nicknameHint);
 		for (SharingFields.Section section : SharingFields.GROUPS)
 		{
@@ -234,12 +232,8 @@ final class SharingControls extends JPanel
 
 	private static JLabel line(String text, Color colour, int above)
 	{
-		JLabel line = new JLabel();
-		line.setFont(line.getFont().deriveFont(11f));
-		line.setForeground(colour);
+		JLabel line = MapCompanionPanel.wrapped(text, 11f, colour, TEXT);
 		line.setBorder(BorderFactory.createEmptyBorder(above, 0, 0, 0));
-		line.setAlignmentX(Component.LEFT_ALIGNMENT);
-		MapCompanionPanel.setWrapped(line, text, TEXT);
 		return line;
 	}
 
@@ -318,7 +312,7 @@ final class SharingControls extends JPanel
 		final SharingFields.Section section;
 		final JPanel panel = column();
 		final JCheckBox box;
-		final JLabel partly = new JLabel();
+		final JLabel partly = MapCompanionPanel.label(11f, ColorScheme.LIGHT_GRAY_COLOR);
 
 		Group(SharingFields.Section section)
 		{
@@ -346,10 +340,7 @@ final class SharingControls extends JPanel
 			});
 			panel.add(box);
 			partly.setName("sharingPartly." + section.id);
-			partly.setFont(partly.getFont().deriveFont(11f));
-			partly.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
 			partly.setBorder(BorderFactory.createEmptyBorder(0, TEXT_INSET, 2, 0));
-			partly.setAlignmentX(Component.LEFT_ALIGNMENT);
 			panel.add(partly);
 		}
 

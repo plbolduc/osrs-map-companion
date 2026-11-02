@@ -454,9 +454,8 @@ final class RunView extends JPanel
 			top.setOpaque(false);
 			top.add(picture, BorderLayout.NORTH);
 			row.add(top, BorderLayout.WEST);
-			JLabel said = label(11f, absent ? MapPin.AMBER : ColorScheme.LIGHT_GRAY_COLOR);
-			MapCompanionPanel.setWrapped(said, words, WIDTH - PICTURE - 4);
-			row.add(said, BorderLayout.CENTER);
+			row.add(MapCompanionPanel.wrapped(words, 11f, absent ? MapPin.AMBER : ColorScheme.LIGHT_GRAY_COLOR,
+				WIDTH - PICTURE - 4), BorderLayout.CENTER);
 			bring.add(MapCompanionPanel.left(row));
 		}
 	}
@@ -526,24 +525,23 @@ final class RunView extends JPanel
 				picture(icon, stop);
 				method.add(icon, BorderLayout.WEST);
 			}
-			JLabel way = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
-			MapCompanionPanel.setWrapped(way, stop.method == null ? "Walk" : stop.method, pictures ? WIDTH - PICTURE - 4 : WIDTH);
-			method.add(way, BorderLayout.CENTER);
+			method.add(MapCompanionPanel.wrapped(stop.method == null ? "Walk" : stop.method, 11f, ColorScheme.LIGHT_GRAY_COLOR,
+				pictures ? WIDTH - PICTURE - 4 : WIDTH), BorderLayout.CENTER);
 			row.add(MapCompanionPanel.left(method));
 			if (stop.tasks != null)
 			{
 				for (RelayResponse.RunTask task : stop.tasks)
 				{
-					row.add(MapCompanionPanel.left(wrapped(task.text, 11f, ColorScheme.LIGHT_GRAY_COLOR)));
+					row.add(MapCompanionPanel.wrapped(task.text, 11f, ColorScheme.LIGHT_GRAY_COLOR, WIDTH));
 				}
 			}
 			if (!at.isEmpty())
 			{
-				row.add(MapCompanionPanel.left(wrapped(at, 11f, MapPin.AMBER)));
+				row.add(MapCompanionPanel.wrapped(at, 11f, MapPin.AMBER, WIDTH));
 			}
 			if (stop.birdhouseId != null)
 			{
-				row.add(MapCompanionPanel.left(wrapped(BIRDHOUSE_PENDING, 11f, ColorScheme.LIGHT_GRAY_COLOR)));
+				row.add(MapCompanionPanel.wrapped(BIRDHOUSE_PENDING, 11f, ColorScheme.LIGHT_GRAY_COLOR, WIDTH));
 			}
 			stops.add(MapCompanionPanel.left(row));
 			if (next != null && stop.n == next.n)
@@ -659,12 +657,5 @@ final class RunView extends JPanel
 		JPanel column = MapCompanionPanel.column(ColorScheme.DARKER_GRAY_COLOR);
 		column.setOpaque(false);
 		return column;
-	}
-
-	private static JLabel wrapped(String words, float size, Color colour)
-	{
-		JLabel label = label(size, colour);
-		MapCompanionPanel.setWrapped(label, words, WIDTH);
-		return label;
 	}
 }

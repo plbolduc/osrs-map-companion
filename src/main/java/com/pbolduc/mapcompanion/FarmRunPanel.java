@@ -71,7 +71,7 @@ final class FarmRunPanel extends JPanel
 	/* A button under the picker, the picker's width: it acts, and a link is a fold's own opener. */
 	private final JButton start = MapCompanionPanel.smallButton("Start run");
 	/* Under Start run while the kind chosen plans from a sharing choice that is off. */
-	private final JLabel needs = new JLabel();
+	private final JLabel needs = MapCompanionPanel.label(11f, ColorScheme.LIGHT_GRAY_COLOR);
 	/** Connected and free to press, as of the last refresh: a new pick of kind is offered by it. EDT. */
 	private boolean ready;
 	/*
@@ -81,7 +81,8 @@ final class FarmRunPanel extends JPanel
 	 */
 	private final JPanel picker = new JPanel(new BorderLayout(0, 4));
 	/* Where the picker was while the Port tasks card's run is going, so its absence is explained. */
-	private final JLabel waiting = new JLabel();
+	private final JLabel waiting = MapCompanionPanel.wrapped(AFTER_PORT_RUN, 11f, ColorScheme.LIGHT_GRAY_COLOR,
+		MapCompanionPanel.CARD_TEXT_WIDTH);
 	private final RunView run;
 
 	@Inject
@@ -118,15 +119,10 @@ final class FarmRunPanel extends JPanel
 		picker.add(start, BorderLayout.SOUTH);
 		picker.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
 		add(MapCompanionPanel.left(picker));
-		needs.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
-		needs.setFont(needs.getFont().deriveFont(11f));
 		needs.setVisible(false);
-		add(MapCompanionPanel.left(needs));
-		waiting.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
-		waiting.setFont(waiting.getFont().deriveFont(11f));
+		add(needs);
 		waiting.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
-		MapCompanionPanel.setWrapped(waiting, AFTER_PORT_RUN, MapCompanionPanel.CARD_TEXT_WIDTH);
-		add(MapCompanionPanel.left(waiting));
+		add(waiting);
 		add(run);
 
 		start.addActionListener(e ->

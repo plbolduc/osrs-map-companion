@@ -47,6 +47,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 import net.runelite.client.ui.ColorScheme;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.label;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.wrapped;
 
 /**
  * The step after a first Connect: what the map uses, ticked, and one press to share it.
@@ -147,13 +149,10 @@ final class RecommendedSharing extends JPanel
 		card.setBorder(BorderFactory.createEmptyBorder(7, 8, 8, 8));
 		add(card, java.awt.BorderLayout.CENTER);
 
-		JLabel title = label(12f, Color.WHITE);
+		JLabel title = wrapped("Choose what to share", 12f, Color.WHITE, TEXT);
 		title.setFont(title.getFont().deriveFont(Font.BOLD));
-		MapCompanionPanel.setWrapped(title, "Choose what to share", TEXT);
 		card.add(title);
-		JLabel intro = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
-		MapCompanionPanel.setWrapped(intro, INTRO, TEXT);
-		card.add(intro);
+		card.add(wrapped(INTRO, 11f, ColorScheme.LIGHT_GRAY_COLOR, TEXT));
 		card.add(gap(6));
 
 		/*
@@ -402,18 +401,16 @@ final class RecommendedSharing extends JPanel
 	/** A row's name in the fold, small and bold, over the line that says what it sends. */
 	private static JLabel heading(String text)
 	{
-		JLabel heading = label(11f, Color.WHITE);
+		JLabel heading = wrapped(text, 11f, Color.WHITE, TEXT);
 		heading.setFont(heading.getFont().deriveFont(Font.BOLD));
 		heading.setBorder(BorderFactory.createEmptyBorder(4, 0, 0, 0));
-		MapCompanionPanel.setWrapped(heading, text, TEXT);
 		return heading;
 	}
 
 	private static JLabel detailLine(String name, String text)
 	{
-		JLabel line = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
+		JLabel line = wrapped(text, 11f, ColorScheme.LIGHT_GRAY_COLOR, TEXT);
 		line.setName(name);
-		MapCompanionPanel.setWrapped(line, text, TEXT);
 		return line;
 	}
 
@@ -437,15 +434,6 @@ final class RecommendedSharing extends JPanel
 		panel.setBackground(BACK);
 		panel.setAlignmentX(Component.LEFT_ALIGNMENT);
 		return panel;
-	}
-
-	private static JLabel label(float size, Color colour)
-	{
-		JLabel label = new JLabel();
-		label.setFont(label.getFont().deriveFont(size));
-		label.setForeground(colour);
-		label.setAlignmentX(Component.LEFT_ALIGNMENT);
-		return label;
 	}
 
 	private static <T extends JComponent> T indented(T component)
@@ -500,10 +488,9 @@ final class RecommendedSharing extends JPanel
 			if (section == SharingFields.LOOT)
 			{
 				/* In full beside the loot fields; the row itself says "kept two weeks". */
-				JLabel kept = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
+				JLabel kept = wrapped(MapCompanionConfig.FEED_KEPT, 11f, ColorScheme.LIGHT_GRAY_COLOR, TEXT);
 				kept.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
 				kept.setName("recommended.kept");
-				MapCompanionPanel.setWrapped(kept, MapCompanionConfig.FEED_KEPT, TEXT);
 				details.add(kept);
 			}
 		}

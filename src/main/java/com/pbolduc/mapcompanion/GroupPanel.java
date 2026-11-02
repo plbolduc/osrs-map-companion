@@ -236,10 +236,9 @@ final class GroupPanel extends JPanel
 	{
 		form.setBorder(javax.swing.BorderFactory.createCompoundBorder(
 			new javax.swing.border.MatteBorder(0, 0, 3, 0, ColorScheme.DARK_GRAY_COLOR), new EmptyBorder(6, 8, 6, 8)));
-		JLabel heading = new JLabel("A meetup where you stand");
-		heading.setFont(heading.getFont().deriveFont(11f));
-		heading.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
-		form.add(MapCompanionPanel.left(heading));
+		JLabel heading = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
+		heading.setText("A meetup where you stand");
+		form.add(heading);
 		title.setName("group.meetTitle");
 		title.putClientProperty("JTextField.placeholderText", "What for");
 		title.setToolTipText("The meetup's title, up to sixty characters. Everybody in the group sees it.");
@@ -541,9 +540,7 @@ final class GroupPanel extends JPanel
 	{
 		JPanel card = card();
 		card.setName("group.alone");
-		JLabel words = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
-		MapCompanionPanel.setWrapped(words, ALONE, WIDTH);
-		card.add(MapCompanionPanel.left(words));
+		card.add(MapCompanionPanel.wrapped(ALONE, 11f, ColorScheme.LIGHT_GRAY_COLOR, WIDTH));
 		JPanel actions = actions();
 		actions.add(invite);
 		card.add(gap(5));
@@ -596,9 +593,7 @@ final class GroupPanel extends JPanel
 		String where = whereLine(row);
 		if (where != null)
 		{
-			JLabel line = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
-			MapCompanionPanel.setWrapped(line, where, WIDTH);
-			card.add(MapCompanionPanel.left(line));
+			card.add(MapCompanionPanel.wrapped(where, 11f, ColorScheme.LIGHT_GRAY_COLOR, WIDTH));
 		}
 		if (row.news != null)
 		{

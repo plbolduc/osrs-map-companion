@@ -102,8 +102,8 @@ final class SettingsPage extends JPanel
 	private final JButton previewButton = smallButton("Show what's sent");
 	private final SharingControls sharingControls;
 	private final JTextField mapAddress = new JTextField();
-	/** Under Apply: why the address typed was not taken. */
-	private final JLabel addressSaid = new JLabel();
+	/** Under Apply: why the address typed was not taken. It only ever says why Apply refused an address. */
+	private final JLabel addressSaid = MapCompanionPanel.label(11f, MapCompanionPanel.REFUSED);
 	private String displayedAddress;
 
 	/*
@@ -177,11 +177,8 @@ final class SettingsPage extends JPanel
 		JButton apply = smallButton("Apply");
 		apply.addActionListener(e -> applyMapAddress(true));
 		contents.add(hug(apply, ColorScheme.DARK_GRAY_COLOR));
-		addressSaid.setFont(addressSaid.getFont().deriveFont(11f));
-		/* It only ever says why Apply refused an address. */
-		addressSaid.setForeground(MapCompanionPanel.REFUSED);
 		addressSaid.setVisible(false);
-		contents.add(left(addressSaid));
+		contents.add(addressSaid);
 		contents.add(gap(8, ColorScheme.DARK_GRAY_COLOR));
 		contents.add(hug(previewButton, ColorScheme.DARK_GRAY_COLOR));
 		contents.add(gap(8, ColorScheme.DARK_GRAY_COLOR));

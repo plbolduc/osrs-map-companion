@@ -236,11 +236,10 @@ final class SearchPanel extends JPanel
 			{
 				if (hit.section != null && !hit.section.equals(section))
 				{
-					JLabel head = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
+					JLabel head = MapCompanionPanel.wrapped(hit.section, 11f, ColorScheme.LIGHT_GRAY_COLOR, WIDTH);
 					head.setFont(head.getFont().deriveFont(java.awt.Font.BOLD));
 					head.setBorder(new EmptyBorder(4, 0, 1, 0));
-					MapCompanionPanel.setWrapped(head, hit.section, WIDTH);
-					rows.add(MapCompanionPanel.left(head));
+					rows.add(head);
 				}
 				section = hit.section;
 				rows.add(row(hit, live));
@@ -361,15 +360,12 @@ final class SearchPanel extends JPanel
 		JPanel words = MapCompanionPanel.column(ColorScheme.DARKER_GRAY_COLOR);
 		words.setOpaque(false);
 		int width = WIDTH - PICTURE - 6;
-		JLabel name = label(12f, live ? Color.WHITE : greyed());
+		JLabel name = MapCompanionPanel.wrapped(hit.name, 12f, live ? Color.WHITE : greyed(), width);
 		name.setName("search.name");
-		MapCompanionPanel.setWrapped(name, hit.name, width);
-		words.add(MapCompanionPanel.left(name));
+		words.add(name);
 		if (!hit.line.isEmpty())
 		{
-			JLabel line = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
-			MapCompanionPanel.setWrapped(line, hit.line, width);
-			words.add(MapCompanionPanel.left(line));
+			words.add(MapCompanionPanel.wrapped(hit.line, 11f, ColorScheme.LIGHT_GRAY_COLOR, width));
 		}
 		row.add(words, BorderLayout.CENTER);
 		if (!live)

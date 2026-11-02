@@ -75,7 +75,7 @@ final class PortTasksPanel extends JPanel
 	private final JPanel body = new JPanel();
 	/* The card's width, as the farm run's Start run is: it acts, so it is a button and not a link. */
 	private final JButton start = MapCompanionPanel.smallButton("Start run");
-	private final JLabel hint = new JLabel();
+	private final JLabel hint = MapCompanionPanel.label(11f, MUTED);
 	private final JPanel starter = new JPanel(new GridLayout(1, 1));
 	private final RunView run;
 	private List<PortTaskReader.Slot> shown;
@@ -111,9 +111,7 @@ final class PortTasksPanel extends JPanel
 		starter.add(start);
 		starter.setMaximumSize(new Dimension(Integer.MAX_VALUE, starter.getPreferredSize().height));
 		add(MapCompanionPanel.left(starter));
-		hint.setForeground(MUTED);
-		hint.setFont(hint.getFont().deriveFont(11f));
-		add(MapCompanionPanel.left(hint));
+		add(hint);
 		add(run);
 		start.addActionListener(e -> client.start(FarmRunWire.PORT_TASKS));
 		setVisible(false);
@@ -274,11 +272,8 @@ final class PortTasksPanel extends JPanel
 
 	private static JLabel line(String text, Color color, float size, int top)
 	{
-		JLabel label = new JLabel();
-		label.setForeground(color);
-		label.setFont(label.getFont().deriveFont(size));
+		JLabel label = MapCompanionPanel.wrapped(text, size, color, WIDTH);
 		label.setBorder(BorderFactory.createEmptyBorder(top, 0, 0, 0));
-		MapCompanionPanel.setWrapped(label, text, WIDTH);
-		return MapCompanionPanel.left(label);
+		return label;
 	}
 }

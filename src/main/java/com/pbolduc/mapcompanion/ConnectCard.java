@@ -138,7 +138,7 @@ final class ConnectCard extends JPanel
 	 * says so beside the name, and the link goes once the group has one. A link, as Meet here… is.
 	 */
 	private final JButton nameLink = linkButton(RENAME);
-	private final JLabel sharingLabel = new JLabel();
+	private final JLabel sharingLabel = MapCompanionPanel.label(11f, ColorScheme.LIGHT_GRAY_COLOR);
 	/** Settings, as a page in place of this one. See {@link SidebarPages}. */
 	private final JButton gearButton = new JButton(SidebarIcons.gear());
 
@@ -241,7 +241,7 @@ final class ConnectCard extends JPanel
 	 */
 	private final JLabel joinHeading = sectionHead("Have an invite?");
 	/** Under Paste and Join while the map refuses the group: what to put in the field. See {@link #refusedNextStep}. */
-	private final JLabel nextStep = new JLabel();
+	private final JLabel nextStep = MapCompanionPanel.label(11f, ColorScheme.LIGHT_GRAY_COLOR);
 	private final JPanel refusedGap = gap(8, ColorScheme.DARK_GRAY_COLOR);
 
 	/**
@@ -307,9 +307,7 @@ final class ConnectCard extends JPanel
 		status.add(left(statusRow));
 		groupLabel.setFont(groupLabel.getFont().deriveFont(12f));
 		status.add(left(groupLabel));
-		sharingLabel.setFont(sharingLabel.getFont().deriveFont(11f));
-		sharingLabel.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
-		status.add(left(sharingLabel));
+		status.add(sharingLabel);
 		nameLink.setName("companion.rename");
 		nameLink.setForeground(ColorScheme.BRAND_ORANGE);
 		nameLink.setToolTipText("Change the name everybody in the group sees");
@@ -417,10 +415,8 @@ final class ConnectCard extends JPanel
 		buttons.add(pasteButton);
 		buttons.add(joinButton);
 		block.add(left(buttons));
-		nextStep.setFont(nextStep.getFont().deriveFont(11f));
-		nextStep.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
 		nextStep.setVisible(false);
-		block.add(left(nextStep));
+		block.add(nextStep);
 		joinMessage.setFont(joinMessage.getFont().deriveFont(11f));
 		joinMessage.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
 		joinMessage.setVisible(false);

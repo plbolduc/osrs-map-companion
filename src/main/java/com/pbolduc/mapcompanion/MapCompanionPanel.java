@@ -135,7 +135,7 @@ public class MapCompanionPanel extends PluginPanel
 	/* Drop luck: one monster's card, or every monster tracked. See {@link DropLuckPanel}. */
 	private final JPanel drySection = column(ColorScheme.DARK_GRAY_COLOR);
 	private final DropLuckPanel dropLuck;
-	private final JLabel dropLuckPaused = new JLabel();
+	private final JLabel dropLuckPaused = wrapped(LootLog.PAUSED, 11f, ColorScheme.LIGHT_GRAY_COLOR, TEXT_WIDTH);
 	/** Drop luck's heading, given up while the card's own first row says it (see DropLuckPanel.namesItself). */
 	private final JLabel dryHeading = sectionHead(DropLuckPanel.HEADING);
 	private final JPanel dryHeadingGap = gap(3, ColorScheme.DARK_GRAY_COLOR);
@@ -257,10 +257,7 @@ public class MapCompanionPanel extends PluginPanel
 		/* Drop luck works with no pairing code set, so it sits above everything the group needs. */
 		drySection.add(dryHeading);
 		drySection.add(dryHeadingGap);
-		dropLuckPaused.setFont(dropLuckPaused.getFont().deriveFont(11f));
-		dropLuckPaused.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
-		setWrapped(dropLuckPaused, LootLog.PAUSED);
-		drySection.add(left(dropLuckPaused));
+		drySection.add(dropLuckPaused);
 		drySection.add(dropLuck);
 		drySection.add(gap(10, ColorScheme.DARK_GRAY_COLOR));
 		overview.add(drySection);
@@ -401,6 +398,14 @@ public class MapCompanionPanel extends PluginPanel
 		JLabel label = new JLabel();
 		label.setFont(label.getFont().deriveFont(size));
 		label.setForeground(colour);
+		return label;
+	}
+
+	/** The same with its words, wrapped at {@code width}: see {@link #setWrapped}. */
+	static JLabel wrapped(String text, float size, Color colour, int width)
+	{
+		JLabel label = label(size, colour);
+		setWrapped(label, text, width);
 		return label;
 	}
 
