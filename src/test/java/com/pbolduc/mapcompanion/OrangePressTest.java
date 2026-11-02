@@ -141,6 +141,21 @@ public class OrangePressTest
 				}
 			}
 		}
+		/* Words a player reads live in the text resources too, a line each; they are held to the same rule. */
+		try (Stream<Path> files = Files.walk(Paths.get("src/main/resources")))
+		{
+			for (Path resource : files.filter(f -> f.toString().endsWith(".txt")).collect(Collectors.toList()))
+			{
+				for (String line : new String(Files.readAllBytes(resource), StandardCharsets.UTF_8).split("\n", -1))
+				{
+					String words = line.toLowerCase(Locale.ROOT);
+					if (!line.startsWith("#") && (words.contains("open the map") || words.contains("open it on the map") || words.contains("on your map")))
+					{
+						found.add(resource.getFileName() + ": " + line.trim());
+					}
+				}
+			}
+		}
 		List<String> expected = new ArrayList<>();
 		expected.add("ConnectCard.java: static final String OPEN_MAP = \"Open the map\";");
 		assertEquals(expected, found);
