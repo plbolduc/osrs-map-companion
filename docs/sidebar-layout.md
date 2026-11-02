@@ -648,6 +648,13 @@ place in the list; Home's card still shows the same route, and nothing switches 
 with no way yet keeps **Route** beside Unpin, so the way there is one press rather than Unpin, then
 Route.
 
+A star's tier is drawn in the map's own colour for it, the dark ramp of `lib/tier-color.ts`, so T7
+is one pink here and in the map's list; its time left keeps the line's ink until it is under twenty
+minutes, then turns amber, and red under five, the website's tones by the minutes printed. A
+depleted star's *Depleted* is grey. The picked world's row is darker than it was so that every
+tier's colour still reads on it, and the soon-ending red is deeper than the pink a refusal and the
+Wilderness are written in.
+
 ### Drop luck's heading
 
 The section's heading took a row of its own over a row that was empty on the left: the card's

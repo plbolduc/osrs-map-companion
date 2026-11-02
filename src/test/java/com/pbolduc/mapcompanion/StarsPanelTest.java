@@ -26,6 +26,7 @@
 package com.pbolduc.mapcompanion;
 
 import com.google.gson.Gson;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.io.InputStreamReader;
@@ -41,6 +42,7 @@ import javax.swing.JLabel;
 import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
 import net.runelite.client.callback.ClientThread;
+import net.runelite.client.ui.ColorScheme;
 import okhttp3.OkHttpClient;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -234,6 +236,106 @@ public class StarsPanelTest
 			assertNull(named(tab.stars, "stars.pin"));
 			assertFalse("no steps", stepsShowing(tab.stars));
 		});
+	}
+
+	/**
+	 * A tier is drawn in the map's own colour for it, and a time left warns before the star ends: amber
+	 * under twenty minutes and red under five, as the website tones them, grey once it is depleted, and
+	 * the line's own ink while there is time. The same on a site card, a world row and the picked line.
+	 */
+	@Test
+	public void aTierIsTheMapsColourAndATimeLeftWarnsBeforeItEnds() throws Exception
+	{
+		SwingUtilities.invokeAndWait(() ->
+		{
+			HarnessStore store = new HarnessStore();
+			Pairing pairing = new Pairing(store, new Gson());
+			MemberIdentity identity = new MemberIdentity(store);
+			StarsClient service = new StarsClient(new OkHttpClient(), new Gson(), null, new ClientThread(),
+				new HarnessConfig(store, MapCompanionConfig.DEFAULT_MAP_URL), pairing, identity, store);
+			DestinationState destinations = new DestinationState(new Gson());
+			RoutePress press = new RoutePress(new OkHttpClient(), new Gson(), null, new ClientThread(), pairing, identity,
+				new DestinationRoute(), destinations, new TestDestinationMarker());
+			StarsPanel stars = new StarsPanel(service, destinations, new ClientThread(), new TestDestinationMarker(), press,
+				() -> MapCompanionConfig.DEFAULT_MAP_URL, new DestinationRoute(), null, null, null, rerouting -> null, () -> { });
+			StarsModel.Feed feed = feed();
+			for (StarsModel.Star star : feed.rows)
+			{
+				if (star.world == 306)
+				{
+					star.remainingMs = 3 * 60_000L;
+				}
+				if (star.world == 444)
+				{
+					star.remainingMs = -30_000L;
+				}
+			}
+			service.model.accept(feed);
+			service.model.miningLevel = 72;
+			service.model.preferences.filters.hideDepleted = false;
+			stars.refresh();
+
+			String rimmington = ((AbstractButton) named(stars, "stars.site.tile:2974,3241")).getText();
+			assertTrue(rimmington, rimmington.contains("<font color='#f472b6'>T7</font>"));
+			assertTrue("time to spare keeps the card's ink: " + rimmington, rimmington.contains("<font color='#b8b8b8'>~46m left</font>"));
+			String alKharid = ((AbstractButton) named(stars, "stars.site.tile:3296,3298")).getText();
+			assertTrue(alKharid, alKharid.contains("<font color='#84cc16'>T3</font>"));
+			assertTrue(alKharid, alKharid.contains("<font color='#ff6568'>~3m left</font>"));
+
+			((AbstractButton) named(stars, "stars.expand.tile:2974,3241")).doClick();
+			assertEquals(StarsPanel.TIERS[6], cell(stars, "302|rimmington mine", 0).getForeground());
+			assertEquals(Color.WHITE, cell(stars, "302|rimmington mine", 3).getForeground());
+			assertEquals(StarsPanel.TIERS[4], cell(stars, "330|rimmington mine", 0).getForeground());
+			assertEquals("~34m", cell(stars, "330|rimmington mine", 3).getText());
+			assertEquals("Depleted", cell(stars, "444|rimmington mine", 3).getText());
+			assertEquals(ColorScheme.MEDIUM_GRAY_COLOR, cell(stars, "444|rimmington mine", 3).getForeground());
+
+			service.model.feed.rows.stream().filter(star -> star.world == 330).findFirst().get().remainingMs = 15 * 60_000L;
+			((AbstractButton) named(stars, "stars.world.330|rimmington mine")).doClick();
+			assertEquals("under twenty minutes", StarsPanel.FADING_TONE, cell(stars, "330|rimmington mine", 3).getForeground());
+			String picked = words(stars).stream().filter(line -> line.startsWith("W330")).findFirst().get();
+			assertEquals("W330 · T5 · ~15m left", picked);
+		});
+	}
+
+	/** Each colour reads on a site card's grey and on the picked world's row, which is darkened for them. */
+	@Test
+	public void everyTierAndBothWarningsReadOnACardAndOnThePickedRow()
+	{
+		for (Color colour : StarsPanel.TIERS)
+		{
+			assertTrue(colour + " on a card", contrast(colour, ColorScheme.DARKER_GRAY_COLOR) >= 5.5);
+			assertTrue(colour + " on the picked row", contrast(colour, StarsPanel.PICKED) >= 4.5);
+		}
+		for (Color colour : new Color[]{StarsPanel.FADING_TONE, StarsPanel.DYING_TONE})
+		{
+			assertTrue(colour + " on a card", contrast(colour, ColorScheme.DARKER_GRAY_COLOR) >= 4.5);
+			assertTrue(colour + " on the picked row", contrast(colour, StarsPanel.PICKED) >= 4.5);
+		}
+	}
+
+	/** WCAG's contrast ratio between two colours. */
+	private static double contrast(Color a, Color b)
+	{
+		double x = luminance(a), y = luminance(b);
+		return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+	}
+
+	private static double luminance(Color colour)
+	{
+		return 0.2126 * linear(colour.getRed()) + 0.7152 * linear(colour.getGreen()) + 0.0722 * linear(colour.getBlue());
+	}
+
+	private static double linear(int channel)
+	{
+		double c = channel / 255.0;
+		return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+	}
+
+	/** One cell of a world's row: its tier, world, age and time left, left to right. */
+	private static JLabel cell(Container stars, String star, int column)
+	{
+		return (JLabel) ((Container) named(stars, "stars.world." + star)).getComponent(column);
 	}
 
 	/**

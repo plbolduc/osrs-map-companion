@@ -78,7 +78,26 @@ final class StarsPanel extends JPanel
 	private static final Color GOLD = new Color(237, 189, 100);
 	/** The world switcher's stars, at their own size. */
 	private static final int WORLD_STAR = 14;
-	private static final Color PICKED = new Color(68, 59, 43);
+	/** The picked world's row: dark enough that every tier's colour on it still clears 4.5:1. */
+	static final Color PICKED = new Color(48, 42, 30);
+	/**
+	 * A tier in the map's own colour for it, T1 to T9: the dark ramp of the website's
+	 * lib/tier-color.ts, so a T7 is one colour here and in the map's star list.
+	 */
+	static final Color[] TIERS = {
+		new Color(0x94a3b8), new Color(0x22c55e), new Color(0x84cc16), new Color(0xeab308), new Color(0xf97316),
+		new Color(0xf87171), new Color(0xf472b6), new Color(0xc084fc), new Color(0x818cf8)
+	};
+	/**
+	 * A time left under twenty minutes, and under five, in the website's colours for them: Tailwind's
+	 * amber-400 and red-400 as the map's stylesheet writes them for sRGB, #fcbb00 and #ff6568. The red
+	 * is deeper than the pink the sidebar writes a refusal and the Wilderness in, so neither is taken
+	 * for the other. Twenty minutes or more keeps the line's own ink, so a colour only ever says hurry.
+	 */
+	static final Color FADING_TONE = new Color(252, 187, 0);
+	static final Color DYING_TONE = new Color(255, 101, 104);
+	/** The rest of a site card's second line. */
+	private static final Color CARD_INK = new Color(184, 184, 184);
 	private static final Color EDGE = new Color(65, 65, 65);
 	private static final Color MUTED = new Color(160, 160, 160);
 	private static final Color DANGER = new Color(239, 150, 150);
@@ -422,8 +441,9 @@ final class StarsPanel extends JPanel
 		head.setBackground(box.getBackground());
 		String name = "<font color='" + (primary == null ? "#a0a0a0" : primary.wilderness ? "#ef9696" : "#ffffff") + "'>" + escape(site.name) + "</font>";
 		String detail = primary == null ? "<font color='#a0a0a0'>" + (site.hiddenByFilters ? "Hidden by filters" : "No star right now") + "</font>"
-			: "<font color='#edbd64'>T" + primary.tier(elapsed) + "</font><font color='#b8b8b8'> · W" + primary.world + " · "
-				+ StarsModel.timeLeft(primary.left(elapsed)) + (primary.wilderness ? " · Wilderness" : "") + "</font>";
+			: font(tierColour(primary.tier(elapsed)), "T" + primary.tier(elapsed)) + font(CARD_INK, " · W" + primary.world + " · ")
+				+ font(lifeColour(primary.left(elapsed), CARD_INK), StarsModel.timeLeft(primary.left(elapsed)))
+				+ (primary.wilderness ? font(CARD_INK, " · Wilderness") : "");
 		String text = "<html><body width='" + CARD_TEXT + "'>" + name + "<br>" + detail + "</body></html>";
 		if (primary == null)
 		{
@@ -492,13 +512,13 @@ final class StarsPanel extends JPanel
 		c.anchor = GridBagConstraints.WEST;
 		c.insets = new Insets(0, 4, 0, 0);
 		c.ipadx = 0;
-		world.add(cell("T" + star.tier(elapsed), GOLD, 22), c);
+		world.add(cell("T" + star.tier(elapsed), tierColour(star.tier(elapsed)), 22), c);
 		world.add(cell("W" + star.world, Color.WHITE, 40), c);
 		world.add(cell(age(star.ageMs + elapsed), MUTED, 60), c);
 		c.weightx = 1;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = new Insets(0, 0, 0, 4);
-		world.add(cell(StarsModel.minutes(star.left(elapsed)), Color.WHITE, 0), c);
+		world.add(cell(StarsModel.minutes(star.left(elapsed)), lifeColour(star.left(elapsed), Color.WHITE), 0), c);
 		world.setName("stars.world." + star.id);
 		world.setBackground(picked ? PICKED : background);
 		world.setBorder(picked ? BorderFactory.createLineBorder(GOLD.darker()) : BorderFactory.createEmptyBorder(1, 1, 1, 1));
@@ -536,7 +556,8 @@ final class StarsPanel extends JPanel
 		name.setForeground(GOLD);
 		name.setFont(name.getFont().deriveFont(12f));
 		selection.add(name);
-		selection.add(label("W" + star.world + " · T" + star.tier(elapsed) + " · " + StarsModel.timeLeft(star.left(elapsed))));
+		selection.add(label("<html>W" + star.world + " · " + font(tierColour(star.tier(elapsed)), "T" + star.tier(elapsed)) + " · "
+			+ font(lifeColour(star.left(elapsed), ColorScheme.LIGHT_GRAY_COLOR), StarsModel.timeLeft(star.left(elapsed))) + "</html>"));
 		selection.add(gap(5));
 		if (routed)
 		{
@@ -714,6 +735,34 @@ final class StarsPanel extends JPanel
 			return tiers == null ? "Levels not read yet: every tier and world shows" : tiers;
 		}
 		return tiers == null ? "Worlds up to " + total + " total" : tiers + " · worlds up to " + total + " total";
+	}
+
+	/** A tier's colour on the map's ramp; a tier the feed could never send is held to the ramp's ends. */
+	static Color tierColour(int tier)
+	{
+		return TIERS[Math.max(1, Math.min(9, tier)) - 1];
+	}
+
+	/** A time left's colour: amber under twenty minutes, red under five, grey once depleted, else the line's own ink. */
+	static Color lifeColour(long remaining, Color ink)
+	{
+		switch (StarsModel.life(remaining))
+		{
+			case FADING:
+				return FADING_TONE;
+			case DYING:
+				return DYING_TONE;
+			case DEPLETED:
+				return ColorScheme.MEDIUM_GRAY_COLOR;
+			default:
+				return ink;
+		}
+	}
+
+	/** Words in one colour, inside a label that is already HTML. */
+	private static String font(Color colour, String words)
+	{
+		return "<font color='" + String.format("#%06x", colour.getRGB() & 0xffffff) + "'>" + escape(words) + "</font>";
 	}
 
 	private static String age(long ms)

@@ -245,7 +245,43 @@ final class StarsModel
 	/** "~46m", or "Depleted": the last column of a world's row, a column too narrow for more. */
 	static String minutes(long remaining)
 	{
-		return remaining <= 0 ? "Depleted" : "~" + Math.max(1, (remaining + 59_999) / 60_000) + "m";
+		return remaining <= 0 ? "Depleted" : "~" + shownMinutes(remaining) + "m";
+	}
+
+	/** The whole minutes a time left is printed as, never under one while there is any. */
+	private static long shownMinutes(long remaining)
+	{
+		return Math.max(1, (remaining + 59_999) / 60_000);
+	}
+
+	/** How soon a star ends, as the website tones it: lib/star-life.ts's starLifeTone, and depleted. */
+	enum Life
+	{
+		/** Twenty minutes or more. */
+		FRESH,
+		/** Under twenty: worth going, but it will not last. */
+		FADING,
+		/** Under five: plausibly gone before the hop is done. */
+		DYING,
+		DEPLETED
+	}
+
+	/** The website's FADING_MINUTES and DYING_MINUTES: minutes on the clock, whatever the tier. */
+	static final int FADING_MINUTES = 20;
+	static final int DYING_MINUTES = 5;
+
+	/**
+	 * A time left's tone, judged on the minutes {@link #minutes} prints rather than the milliseconds
+	 * under them, as the website judges the number it shows: "~20m" is never drawn as under twenty.
+	 */
+	static Life life(long remaining)
+	{
+		if (remaining <= 0)
+		{
+			return Life.DEPLETED;
+		}
+		long shown = shownMinutes(remaining);
+		return shown < DYING_MINUTES ? Life.DYING : shown < FADING_MINUTES ? Life.FADING : Life.FRESH;
 	}
 
 	/** "~46m left", or "Depleted": the time left in a sentence, the one way every line says it. */

@@ -106,6 +106,24 @@ public class StarsModelTest
 		model.accept(model.feed);
 		assertNull("the star gone, the pick goes with it", model.selected);
 	}
+	/**
+	 * The website's tones for a time left, lib/star-life.ts: under twenty minutes, under five, by the
+	 * minutes printed, so "~20m" is never drawn as under twenty and "~5m" never as under five.
+	 */
+	@Test
+	public void aTimeLeftIsTonedByTheMinutesItPrints()
+	{
+		assertEquals(StarsModel.Life.FRESH, StarsModel.life(46 * 60_000L));
+		assertEquals("~20m", StarsModel.minutes(19 * 60_000L + 1));
+		assertEquals(StarsModel.Life.FRESH, StarsModel.life(19 * 60_000L + 1));
+		assertEquals(StarsModel.Life.FADING, StarsModel.life(19 * 60_000L));
+		assertEquals("~5m", StarsModel.minutes(4 * 60_000L + 1));
+		assertEquals(StarsModel.Life.FADING, StarsModel.life(4 * 60_000L + 1));
+		assertEquals(StarsModel.Life.DYING, StarsModel.life(4 * 60_000L));
+		assertEquals(StarsModel.Life.DYING, StarsModel.life(1));
+		assertEquals(StarsModel.Life.DEPLETED, StarsModel.life(0));
+		assertEquals(StarsModel.Life.DEPLETED, StarsModel.life(-30_000L));
+	}
 	@Test public void nativeLabelsCannotInterpretNamesAsRemoteImages()
 	{
 		assertEquals("&lt;html&gt;&lt;img src=&quot;http://example&quot;&gt;&amp;", StarsPanel.escape("<html><img src=\"http://example\">&"));
