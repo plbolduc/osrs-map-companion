@@ -109,7 +109,8 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RouteClient`, `RoutePress
   `X-Companion-Member-Secret`, `X-Companion-Installation`, and `X-Companion-Suffix`
   until the browser-link suffix is claimed.
 - **POST /api/companion/invite** — one **Copy invite** press. Group code and optional member-secret
-  headers; random member id in JSON. A failure copies a plain-text invite message.
+  headers; random member id in JSON. A failure copies nothing and says so; only a group that still
+  admits by its code (a 404, or no member secret held) gets a plain-text invite message instead.
 - **GET /api/companion/stream** — SSE while destinations or group markers are enabled and logged in.
   Group code and member id are the `code` and `for` query parameters; the member secret is a
   header. `members=1` is added only for group markers, or for a friend the player pressed **Show on

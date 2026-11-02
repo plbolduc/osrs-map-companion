@@ -31,6 +31,7 @@ import com.google.inject.Singleton;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.Locale;
 import javax.annotation.Nullable;
@@ -60,8 +61,9 @@ import okhttp3.ResponseBody;
  *       been claimed, the suffix of the reader's RuneLite code as a third.
  *   <li>{@code POST /api/companion/invite} — once, when somebody presses <i>Copy invite</i>, to
  *       ask for a link that expires. It carries the pairing code, the same member secret, and this
- *       installation's member id, and a failure means the button copies the old plain-text message
- *       instead.
+ *       installation's member id. A failure means the button copies nothing and says so, unless the
+ *       group still admits by its code ({@link #admitsByCode}), which gets the old plain-text
+ *       message instead.
  * </ul>
  *
  * <p>{@link DirectiveStream} holds one more connection, to {@code /api/companion/stream}, which
@@ -128,13 +130,16 @@ public class RelayClient
 	private static final String INSTALLATION_HEADER = "X-Companion-Installation";
 
 	/**
-	 * How long the invite request may take before the button gives up and copies the old message.
+	 * How long the invite request may take before the button gives up.
 	 *
 	 * <p>Short on purpose. The player is standing there with a chat window open waiting to paste,
 	 * so a request still trying after a few seconds has already failed at the only thing that
-	 * mattered, and the fallback text works.
+	 * mattered, and saying so lets them try again while they are still there.
 	 */
 	private static final long INVITE_TIMEOUT_MS = 6_000L;
+
+	/** The status an invite's callback is handed when no answer arrived at all. */
+	static final int NO_ANSWER = 0;
 
 	/**
 	 * The four statuses the relay actually emits with meaning, and the only ones retrying
@@ -704,15 +709,17 @@ public class RelayClient
 	}
 
 	/**
-	 * Ask the map for an invite link, and hand back what it says or null.
+	 * Ask the map for an invite link, and hand back what it says or null, with the status it came
+	 * with.
 	 *
 	 * <p>An invite that expires cannot be built from a code alone — the
 	 * link carries a token only the map can mint — and because the alternative was a plain-text
 	 * message that admits anyone who finds it in a Discord channel three months later.
 	 *
 	 * <p>The callback always runs, with null for every failure there is: unreachable, refused,
-	 * unparseable, or answered without a URL. The panel copies today's message in that case, so a
-	 * map that has not shipped this endpoint yet behaves exactly as it did before.
+	 * unparseable, or answered without a URL. The status beside it is the map's, or
+	 * {@link #NO_ANSWER} when none arrived, and it is what tells a group that still admits by its
+	 * code from one that refused: see {@link #admitsByCode}.
 	 *
 	 * <p>Its own call timeout rather than the client's, because a player is standing at a chat
 	 * window waiting to paste. Derived from the injected client so the connection pool, the proxy
@@ -723,8 +730,8 @@ public class RelayClient
 	 * from a member was a member id — which the map publishes to every other member on every read.
 	 * So the secret goes on this request too, and a map that wants one answers
 	 * {@code 403 needs_code} without it. That is a failure like any other here: the callback gets
-	 * null and the button copies the plain-text message, which is also what happens against a map
-	 * that has never heard of the endpoint.
+	 * null with the 403, and the button copies nothing, because the group that refused is one that
+	 * refuses a bare code too.
 	 */
 	/**
 	 * Whether an invite link is one to hand a player to paste to friends: on the map that was asked,
@@ -749,12 +756,12 @@ public class RelayClient
 		String code,
 		String memberId,
 		@Nullable String memberSecret,
-		Consumer<Invite> onResult)
+		BiConsumer<Invite, Integer> onResult)
 	{
 		HttpUrl url = pathUnder(baseUrl, "api/companion/invite");
 		if (url == null || code == null || code.isEmpty())
 		{
-			onResult.accept(null);
+			onResult.accept(null, NO_ANSWER);
 			return;
 		}
 
@@ -782,13 +789,14 @@ public class RelayClient
 			public void onFailure(Call call, IOException e)
 			{
 				log.debug("companion invite request failed", e);
-				onResult.accept(null);
+				onResult.accept(null, NO_ANSWER);
 			}
 
 			@Override
 			public void onResponse(Call call, Response response)
 			{
 				Invite invite = null;
+				int status = response.code();
 				try
 					(Response r = response)
 				{
@@ -806,9 +814,25 @@ public class RelayClient
 				{
 					log.debug("companion invite reply unreadable", e);
 				}
-				onResult.accept(invite);
+				onResult.accept(invite, status);
 			}
 		});
+	}
+
+	/**
+	 * Whether a group the map made no invite for still admits by its bare code, so the plain
+	 * message Copy invite falls back to is one that works.
+	 *
+	 * <p>The map's invite door answers 404 for a group nobody owns, whose code still admits anybody,
+	 * and a map with no such door answers 404 too. Only an owned group issues member secrets, so a
+	 * character holding none is taken to be in a group that admits by code, unless the answer says
+	 * otherwise: 403 and 410 come only from an owned group's door, as they do in the second or two
+	 * before its first secret arrives. Anything else, to a character holding a secret, is an owned
+	 * group failing to answer, and an owned group refuses a bare code from anybody new.
+	 */
+	static boolean admitsByCode(int status, boolean heldSecret)
+	{
+		return status == 404 || (!heldSecret && status != 403 && status != 410);
 	}
 
 	/** What {@code POST /api/companion/invite} sends. One field, and it is not the player's. */

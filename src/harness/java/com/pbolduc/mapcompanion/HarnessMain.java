@@ -712,7 +712,10 @@ public final class HarnessMain
 			   && !config.pairingCode().trim().isEmpty();
 	}
 
-	/** The sidebar's <i>Copy invite</i>, including the plain-text message it falls back to. */
+	/**
+	 * The sidebar's <i>Copy invite</i>, including the plain-text message it falls back to for a group
+	 * that admits by its code, and no text at all when the map made no invite a friend could use.
+	 */
 	private void copyInvite()
 	{
 		String code = config.pairingCode().trim();
@@ -721,15 +724,18 @@ public final class HarnessMain
 			emit("invite", one("ok", false));
 			return;
 		}
-		relay.requestInvite(config.relayUrl(), code, identity.id(), pairing.secret(identity.id()), invite ->
+		String secret = pairing.secret(identity.id());
+		relay.requestInvite(config.relayUrl(), code, identity.id(), secret, (invite, status) ->
 		{
 			boolean linked = invite != null && invite.url != null && !invite.url.isEmpty();
 			Map<String, Object> event = new LinkedHashMap<>();
 			event.put("ok", linked);
 			event.put("text", linked
 					  ? "Join my OSRS map: " + invite.url + " — code " + code
-					  : "Join my OSRS map: " + config.relayUrl() + "/map?join=" + code + "&task=companion"
-					  + " — then install the \"OSRS Map Companion\" RuneLite plugin and enter code " + code);
+					  : RelayClient.admitsByCode(status, secret != null)
+					  ? "Join my OSRS map: " + config.relayUrl() + "/map?join=" + code + "&task=companion"
+					  + " — then install the \"OSRS Map Companion\" RuneLite plugin and enter code " + code
+					  : null);
 			emit("invite", event);
 		});
 	}
