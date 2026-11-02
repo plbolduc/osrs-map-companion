@@ -51,13 +51,13 @@ import net.runelite.client.ui.ColorScheme;
  * The step after a first Connect: what the map uses, ticked, and one press to share it.
  *
  * <p>Every sharing setting still starts off. What this adds is the press: on the first Connect to a
- * map, a new player is shown the four sharing groups, their character name and the two things this
- * client draws from the map, all ticked, one short row each so the press is in reach without
- * scrolling. Every field and the one stream they open are named in <i>What each one sends</i>, one
- * tap below the rows, and pressing <i>Share what's ticked</i> writes those settings exactly as the
- * group shortcuts in Settings write them. Until then nothing is stored: ticking, unticking and
- * <i>Customise</i> change this step and nothing else, and <i>Not now</i> leaves every setting as it
- * was.
+ * map, a new player is shown the six sharing switches Settings has — their character name, the four
+ * groups and where they died — and the two things this client draws from the map, all but where they
+ * died ticked, one short row each so the press is in reach without scrolling. A group is all of its
+ * fields or none, as its switch in Settings is; every field and the one stream they open are named in
+ * <i>What each one sends</i>, one tap below the rows. Pressing <i>Share what's ticked</i> writes those
+ * fields exactly as the switches in Settings write them. Until then nothing is stored: ticking and
+ * unticking change this step and nothing else, and <i>Not now</i> leaves every setting as it was.
  *
  * <p><b>Who sees it.</b> Only the first Connect to a map — the one that approves it, asking nothing
  * of osrs-map.com and a question of any other — and only while every choice it offers is still off.
@@ -115,12 +115,10 @@ final class RecommendedSharing extends JPanel
 	private final MapCompanionConfig config;
 	private final ConfigStore store;
 	private final Runnable closed;
-	private final Map<String, SharingFields.Field> fields = new LinkedHashMap<>();
-	private final Map<String, JCheckBox> boxes = new LinkedHashMap<>();
+	/** Each row's box, in the order drawn, and the fields a tick of it writes: one, or a group's all. */
+	private final Map<JCheckBox, List<SharingFields.Field>> rows = new LinkedHashMap<>();
 	private final List<Group> groups = new ArrayList<>();
 	private final JLabel where = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
-	private final JButton customise = MapCompanionPanel.linkButton("Customise");
-	private boolean customising = false;
 
 	RecommendedSharing(MapCompanionConfig config, ConfigStore store, Runnable closed)
 	{
@@ -152,13 +150,14 @@ final class RecommendedSharing extends JPanel
 		 */
 		JPanel details = column();
 		details.setName("recommended.details");
+		/* The six switches, in the order Settings and RuneLite's list give them. */
+		card.add(single(SharingFields.NAME, SharingFields.NAME.detail, details));
 		for (SharingFields.Section section : SharingFields.GROUPS)
 		{
 			Group group = new Group(section, details);
 			groups.add(group);
 			card.add(group.panel);
 		}
-		card.add(single(SharingFields.NAME, SharingFields.NAME.detail, details));
 		card.add(single(SharingFields.DEATH, DEATH_DETAIL, details));
 		card.add(gap(4));
 
@@ -185,7 +184,7 @@ final class RecommendedSharing extends JPanel
 		JButton share = new JButton("Share what's ticked");
 		share.setName("recommended.share");
 		share.setFont(share.getFont().deriveFont(12f));
-		share.setToolTipText("Turn on the ticked settings, as the group shortcuts in Settings do. Nothing else changes.");
+		share.setToolTipText("Turn on the ticked settings, as the switches in Settings do. Nothing else changes.");
 		share.addActionListener(e -> share());
 		JPanel shareRow = new JPanel(new GridLayout(1, 1));
 		shareRow.setBackground(BACK);
@@ -197,10 +196,6 @@ final class RecommendedSharing extends JPanel
 		JPanel links = new JPanel(new GridLayout(1, 2, 4, 0));
 		links.setBackground(BACK);
 		links.setAlignmentX(Component.LEFT_ALIGNMENT);
-		customise.setName("recommended.customise");
-		customise.setToolTipText("Show each field to tick or untick. Nothing is saved until you press Share.");
-		customise.addActionListener(e -> customise(!customising));
-		links.add(customise);
 		JButton skip = MapCompanionPanel.linkButton("Not now");
 		skip.setName("recommended.skip");
 		skip.setToolTipText("Share nothing yet. Every choice stays off until you turn it on in Settings.");
@@ -259,8 +254,11 @@ final class RecommendedSharing extends JPanel
 	static List<SharingFields.Field> all()
 	{
 		List<SharingFields.Field> all = new ArrayList<>();
-		for (SharingFields.Section section : SharingFields.GROUPS) all.addAll(section.fields);
 		all.add(SharingFields.NAME);
+		for (SharingFields.Section section : SharingFields.GROUPS)
+		{
+			all.addAll(section.fields);
+		}
 		all.add(SharingFields.DEATH);
 		all.add(SharingFields.DESTINATIONS);
 		all.add(SharingFields.GROUP_ON_WORLD_MAP);
@@ -270,11 +268,15 @@ final class RecommendedSharing extends JPanel
 	/** Show the step with the recommended set ticked, naming the map the fields will go to. */
 	void offer(String server)
 	{
-		for (Map.Entry<String, JCheckBox> box : boxes.entrySet())
+		for (Map.Entry<JCheckBox, List<SharingFields.Field>> row : rows.entrySet())
 		{
-			box.getValue().setSelected(KEYS.contains(box.getKey()));
+			boolean recommended = true;
+			for (SharingFields.Field field : row.getValue())
+			{
+				recommended &= KEYS.contains(field.key);
+			}
+			row.getKey().setSelected(recommended);
 		}
-		customise(false);
 		MapCompanionPanel.setWrapped(where, "Sent to " + server + " while you're logged in; your group sees it.", TEXT);
 		refreshGroups();
 		setVisible(true);
@@ -287,25 +289,38 @@ final class RecommendedSharing extends JPanel
 		setVisible(false);
 	}
 
-	/** The keys a press would turn on now: what is ticked, in the step's order. */
+	/** The keys a press would turn on now: what is ticked, a group's every field, in the step's order. */
 	Set<String> ticked()
 	{
 		Set<String> ticked = new LinkedHashSet<>();
-		for (Map.Entry<String, JCheckBox> box : boxes.entrySet())
+		for (SharingFields.Field field : tickedFields())
 		{
-			if (box.getValue().isSelected()) ticked.add(box.getKey());
+			ticked.add(field.key);
 		}
 		return ticked;
 	}
 
-	/** Write the ticked settings that are off, the way a group shortcut writes its fields, and nothing else. */
+	private List<SharingFields.Field> tickedFields()
+	{
+		List<SharingFields.Field> ticked = new ArrayList<>();
+		for (Map.Entry<JCheckBox, List<SharingFields.Field>> row : rows.entrySet())
+		{
+			if (row.getKey().isSelected())
+			{
+				ticked.addAll(row.getValue());
+			}
+		}
+		return ticked;
+	}
+
+	/** Write the ticked settings that are off, the way a switch in Settings writes its fields, and nothing else. */
 	private void share()
 	{
-		for (String key : ticked())
+		for (SharingFields.Field field : tickedFields())
 		{
-			if (!fields.get(key).read.test(config))
+			if (!field.read.test(config))
 			{
-				store.set(key, "true");
+				store.set(field.key, "true");
 			}
 		}
 		close();
@@ -315,15 +330,6 @@ final class RecommendedSharing extends JPanel
 	{
 		setVisible(false);
 		closed.run();
-	}
-
-	private void customise(boolean open)
-	{
-		customising = open;
-		customise.setText(open ? "Fewer details" : "Customise");
-		for (Group group : groups) group.customise(open);
-		revalidate();
-		repaint();
 	}
 
 	private void refreshGroups()
@@ -391,9 +397,7 @@ final class RecommendedSharing extends JPanel
 		box.setFont(box.getFont().deriveFont(size));
 		box.setToolTipText(field.detail);
 		box.setAlignmentX(Component.LEFT_ALIGNMENT);
-		box.addActionListener(e -> refreshGroups());
-		fields.put(field.key, field);
-		boxes.put(field.key, box);
+		rows.put(box, Collections.singletonList(field));
 		return box;
 	}
 
@@ -434,9 +438,9 @@ final class RecommendedSharing extends JPanel
 	}
 
 	/**
-	 * One sharing group: its row, a checkbox each under Customise, and in the fold the fields a
-	 * press would share, named in a line. The line names only what is ticked, so it always says
-	 * exactly what the press will send.
+	 * One sharing group: its row, which stands for every field in it as its switch in Settings does,
+	 * and in the fold the fields a press would share, named in a line. The line follows the tick, so
+	 * it always says exactly what the press will send.
 	 */
 	private final class Group
 	{
@@ -444,8 +448,6 @@ final class RecommendedSharing extends JPanel
 		final JPanel panel = column();
 		final JCheckBox master;
 		final JLabel summary = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
-		final JPanel options = column();
-		final List<JCheckBox> members = new ArrayList<>();
 
 		Group(SharingFields.Section section, JPanel details)
 		{
@@ -460,60 +462,27 @@ final class RecommendedSharing extends JPanel
 			master.setFont(master.getFont().deriveFont(Font.BOLD, 12f));
 			master.setAlignmentX(Component.LEFT_ALIGNMENT);
 			master.getAccessibleContext().setAccessibleDescription("Tick or untick every " + section.title + " field");
-			master.addActionListener(e ->
-			{
-				for (JCheckBox member : members) member.setSelected(master.isSelected());
-				refresh();
-			});
+			master.addActionListener(e -> refresh());
+			rows.put(master, section.fields);
 			panel.add(master);
 			summary.setName("recommended.summary." + section.id);
 			details.add(heading(section.title));
 			details.add(summary);
-			options.setBorder(BorderFactory.createEmptyBorder(0, INDENT, 0, 0));
-			for (SharingFields.Field field : section.fields)
-			{
-				JCheckBox box = box(field, 11f);
-				members.add(box);
-				options.add(box);
-				if (field.key.equals(MapCompanionConfig.KEY_SHARE_MILESTONES))
-				{
-					/* Inside the indented options, lined up with the checkbox labels. */
-					options.add(keptLine("recommended.keptOpen", 24, TEXT - INDENT - 24));
-				}
-			}
-			options.setVisible(false);
-			panel.add(options);
 			if (section == SharingFields.LOOT)
 			{
 				/* In full beside the loot fields; the row itself says "kept two weeks". */
-				details.add(keptLine("recommended.kept", 0, TEXT));
+				JLabel kept = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
+				kept.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
+				kept.setName("recommended.kept");
+				MapCompanionPanel.setWrapped(kept, MapCompanionConfig.FEED_KEPT, TEXT);
+				details.add(kept);
 			}
-		}
-
-		void customise(boolean open)
-		{
-			options.setVisible(open);
-		}
-
-		JLabel keptLine(String name, int left, int width)
-		{
-			JLabel line = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
-			line.setBorder(BorderFactory.createEmptyBorder(0, left, 2, 0));
-			line.setName(name);
-			MapCompanionPanel.setWrapped(line, MapCompanionConfig.FEED_KEPT, width);
-			return line;
 		}
 
 		void refresh()
 		{
-			List<String> on = new ArrayList<>();
-			for (int i = 0; i < members.size(); i++)
-			{
-				if (members.get(i).isSelected()) on.add(section.fields.get(i).label);
-			}
-			master.setSelected(on.size() == members.size());
-			master.putClientProperty("JButton.selectedState", !on.isEmpty() && on.size() < members.size() ? "indeterminate" : null);
-			MapCompanionPanel.setWrapped(summary, on.isEmpty() ? "Nothing from this group" : String.join(" · ", on), TEXT);
+			MapCompanionPanel.setWrapped(summary, master.isSelected() ? SharingControls.labels(section.fields, " · ")
+				: "Nothing from this group", TEXT);
 		}
 	}
 }

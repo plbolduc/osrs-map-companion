@@ -387,9 +387,11 @@ as `connect`, `connect-fold-open` and `connect-customise`, pointed at a port not
 
 ## Sharing by group, 2 November 2026
 
-Status: **the design**, written before it was built, in the commits that follow the one that put it
-here. Asked on 1 November whether the plugin had too many settings and whether sharing should simply
-be by group, with less granularity, the owner said yes.
+Status: **built**, after the design below was written down: the switches in RuneLite's list and
+what keeps them in step, then the six switches in Settings and the step after Connect; the client
+settings' names and the status card's line follow in commits of their own. Asked on 1 November
+whether the plugin had too many settings and whether sharing should simply be by group, with less
+granularity, the owner said yes.
 
 RuneLite's list for the plugin showed 39 settings: 26 about sharing, in four sections with a name
 and a death among them, and 13 about what this client draws. Settings drew the same 26, one checkbox
@@ -490,6 +492,18 @@ everything*; *Sharing all but where you died* when one or two are off; the one o
 when only those are; *Sharing 3 of 6 choices* otherwise; and *part of tasks and timers* for a group
 partly shared. Its tooltip gives each switch a line of its own, wrapped to fit: on, off, or the
 fields that are on.
+
+### As built
+
+The six switches are drawn as the step's rows are, bold, with a line under a partly shared group that
+starts under the switch's words; the loot row says *· kept two weeks* in Settings as in the step,
+because a player who turns it on there is owed the same notice. The name box sits under *Character
+name* now that its fold is gone. Painted at 225px with the review's renderers: Settings is 335px with
+the switches the one press leaves on (359 before), and 409px with two groups partly shared and the
+name box out, where the same state was 457 with *Name and death location* open; *What each one sends*
+adds 316px when opened. The step after Connect is 532px closed and 1,054px with its fold open, as it
+was, and 1,156px with *Customise* is gone with *Customise*. `SharingGroupsTest` proves the update on
+a mixed group with the real snapshot builder.
 
 ## The way there, step by step
 

@@ -153,8 +153,9 @@ public class CompanionViewsTest
 			assertFalse(daily.isVisible());
 			assertTrue(pages.settingsOpen());
 			assertTrue(pages.getPreferredSize().height > quiet);
-			((JCheckBox) named(sharing, "sharePosition")).doClick();
-			((JButton) named(sharing, "customise.presence")).doClick();
+			/* A switch and an open fold, which were a field's box and its group's Customise before sharing went by group. */
+			((JCheckBox) named(sharing, MapCompanionConfig.KEY_SHARE_MAP_PRESENCE)).doClick();
+			assertTrue(SidebarWords.press(sharing, "▸ What each one sends"));
 
 			((JButton) named(pages, "settings.back")).doClick();
 			assertTrue(daily.isVisible());
@@ -164,10 +165,10 @@ public class CompanionViewsTest
 
 			pages.open(true);
 			assertTrue(config.sharePosition());
-			assertFalse(config.shareActivity());
+			assertTrue(config.shareActivity());
 			assertFalse(config.shareName());
-			assertTrue(named(sharing, "sharingOptions.presence").isVisible());
-			assertEquals("indeterminate", ((JCheckBox) named(sharing, MapCompanionConfig.KEY_SHARE_MAP_PRESENCE)).getClientProperty("JButton.selectedState"));
+			assertTrue(named(sharing, "sharing.details").isVisible());
+			assertTrue(((JCheckBox) named(sharing, MapCompanionConfig.KEY_SHARE_MAP_PRESENCE)).isSelected());
 			assertNull(store.get(Pairing.KEY_SERVER_CONSENT));
 		});
 	}

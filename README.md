@@ -35,8 +35,8 @@ map places for you. Or right-click any spot on the game's world map and choose *
 A voyage in your own boat is its own steps: board your boat, sail, and dock, where the boat then
 stays. They tick when you step on deck, reach the far mooring and step ashore, the sail is drawn
 as a line on the world map, and the docking mooring's Sailing level and quests show under it.
-Shortest Path draws only the walks. With **Boats and moorings** shared, voyages start where your
-boats are.
+Shortest Path draws only the walks. With **Progress and travel** shared, which includes your boats
+and moorings, voyages start where your boats are.
 
 ## Search for a place or item
 
@@ -158,8 +158,8 @@ expected hunting. A bounty's pin opens the creature on the map.
 </p>
 
 Share your port tasks to list the ones you hold in Home: the crates still to collect and where
-they go, or the bounty parts still owed and the board to hand them in at. With **Boats and
-moorings** shared too, **Start run** turns them into one run: every pickup and drop-off in the
+they go, or the bounty parts still owed and the board to hand them in at. With **Progress and
+travel** shared too, for your boats, **Start run** turns them into one run: every pickup and drop-off in the
 order that fits your boat's hold, then each bounty out to its creature and back to its board. Each
 stop's voyage starts where your boat docked last, draws on the world map, and ticks off from the
 task's own counters. The website's **You → Port tasks** shows the same order.
@@ -172,8 +172,8 @@ The pictures use made-up characters and stars.
 2. Press **Connect**. The plugin makes a group for you, called *Our group*; you can use it on your
    own, and rename it with **Rename group…** under its name, or **Switch ▾ → Rename group…** under
    **Group**.
-3. Press **Share what's ticked**, or **Customise** to choose field by field first, or **Not now** to
-   share nothing yet. The gear opens **Settings** whenever you want to change your choices.
+3. Press **Share what's ticked**, or untick what you would rather keep to yourself first, or
+   **Not now** to share nothing yet. The gear opens **Settings** whenever you want to change your choices.
 4. To play with friends, press **Copy invite** under **Group** and send it. A friend pastes it into
    their own sidebar, under **Have an invite?**, and presses **Join**.
 
@@ -195,22 +195,22 @@ sharing choice off.
   <img src="docs/mockups/sidebar-settings.png" width="300" alt="Settings with its four sharing categories, Name and death location, In the client and Advanced; Advanced is closed">
 </p>
 
-Every choice starts off. After your first Connect, one press of **Share what's ticked** turns on
-everything below except where you died, and draws destinations, meetups and your group on the
-world map, which keeps one connection open to the map while you are logged in. Nothing is turned
-on until you press, and you can untick any of it first. Each choice can send:
+Sharing is six switches, and every one starts off. After your first Connect, one press of
+**Share what's ticked** turns on all of them except **Where you died**, and draws destinations,
+meetups and your group on the world map, which keeps one connection open to the map while you are
+logged in. Nothing is turned on until you press, and you can untick any of them first. A switch
+turns on, or off, everything it can send:
 
-- **Name and presence:** the display name of the character you are logged in as; your account type;
-  your position, your world and what kind of world it is; whether you are inside an instance and
-  whether that instance is one place or rooms put together; which skill you are currently training,
-  recent experience and how long since you last moved.
+- **Character name:** the display name of the character you are logged in as.
+- **Map presence:** your position, your world and what kind of world it is; whether you are inside
+  an instance and whether that instance is one place or rooms put together; which skill you are
+  currently training, recent experience and how long since you last moved; your account type.
 - **Progress and travel:** skill levels; started, finished, or neither for the 49 quests that unlock
   travel; optionally the full quest and miniquest log; which achievement diary tier you have finished
   and which of those rewards you have collected; derived travel unlocks from carried/equipped items
   as yes/no flags; verified permanent transport unlocks, your house town and which STASH units you
-  have built. STASH contents are not read. With **Boats and moorings**, where each of your boats is
-  moored and whether it carries a teleport focus, so the map's voyages start at your boat; boat
-  names are not sent.
+  have built; and where each of your boats is moored and whether it carries a teleport focus, so the
+  map's voyages start at your boat. STASH contents are not read, and boat names are not sent.
 - **Tasks and timers:** your current slayer task and remaining count; your active clue step
   (tier, item id, observed clue text and resolved tile); your observed hunter rumour;
   your Mahogany Homes customer and tier; the crop requested by your farming contract and whether
@@ -221,17 +221,19 @@ on until you press, and you can untick any of it first. Each choice can send:
   which Sailing port task each of your five slots holds, with crates collected and delivered or
   bounty parts still owed, and whether a slot is empty, locked or unreadable; and how many crates
   the cargo hold of the boat you last stood on carries. Cargo is not read.
-- With **Slayer task** shared: the Slayer list's order, Wilderness filter and delivery receipt.
-  These request your own sidebar list through the existing connection. They add no poll.
-- **Loot:** observed loot kills for every monster, how long ago each was last killed, notable drop
-  counts and observation baselines, kills since a drop, slayer-task/diary rate conditions, the
-  monster currently being killed and your pinned drop. Completeness flags identify omitted history.
-- **Announcements and death:** an announcement of a notable reward, a real level gained, or a quest or
+  With your Slayer task, the Slayer list's order, Wilderness filter and delivery receipt. These
+  request your own sidebar list through the existing connection. They add no poll.
+- **Loot and milestones:** observed loot kills for every monster, how long ago each was last killed,
+  notable drop counts and observation baselines, kills since a drop, slayer-task/diary rate
+  conditions, the monster currently being killed and your pinned drop. Completeness flags identify
+  omitted history. It also sends an announcement of a notable reward, a real level gained, or a quest or
   achievement diary tier finished while the plugin watched, with observed item name/id, quantity,
   NPC/activity source and optional pet/collection badge, or the quest's name or the diary's region
-  and tier; the tile where you most recently died and its age. A quest or diary is announced only
-  when its own choice above is shared too, and never for what was done before the plugin was watching.
-  Unknown reward details remain absent. Large snapshots include a flag saying some of it was left out.
+  and tier. A quest or diary is announced only when **Progress and travel** is shared too, and never
+  for what was done before the plugin was watching. Unknown reward details remain absent.
+- **Where you died:** the tile where you most recently died and its age.
+
+Large snapshots include a flag saying some of it was left out.
 
 **Connect**, with no group yet, sends a random key for this RuneLite, once per press; the map makes
 your group with it. **Join** with a pasted invite, or **Connect** with one in the field, sends that

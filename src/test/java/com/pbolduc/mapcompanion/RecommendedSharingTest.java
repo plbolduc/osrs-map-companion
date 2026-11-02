@@ -119,21 +119,25 @@ public class RecommendedSharingTest
 		});
 	}
 
+	/**
+	 * Ticking and unticking rows changes nothing until the press, which then writes each ticked
+	 * group's every field and nothing of an unticked one. Rewritten when the step lost Customise: a
+	 * group is all of its fields or none, as its switch in Settings is, so a field is no longer
+	 * unticked on its own.
+	 */
 	@Test
-	public void customiseChangesNothingUntilTheShareIsPressed() throws Exception
+	public void untickingChangesNothingUntilTheShareIsPressed() throws Exception
 	{
 		SwingUtilities.invokeAndWait(() ->
 		{
 			Fixture fixture = new Fixture();
 			fixture.step.offer("osrs-map.com");
-			click(fixture.step, "recommended.customise");
-			assertTrue("Customise shows each field", box(fixture.step, "recommended.shareQuestLog").getParent().isVisible());
-			box(fixture.step, "recommended.shareQuestLog").doClick();
+			box(fixture.step, "recommended.group.progress").doClick();
 			box(fixture.step, "recommended.group.tasks").doClick();
 			box(fixture.step, "recommended.shareDeath").doClick();
 			box(fixture.step, "recommended.showGroupOnWorldMap").doClick();
 			assertTrue("ticking and unticking in the step writes nothing", fixture.written.isEmpty());
-			assertEquals("indeterminate", box(fixture.step, "recommended.group.progress").getClientProperty("JButton.selectedState"));
+			assertFalse(box(fixture.step, "recommended.group.progress").isSelected());
 			assertFalse(box(fixture.step, "recommended.group.tasks").isSelected());
 
 			click(fixture.step, "recommended.skip");
@@ -141,21 +145,21 @@ public class RecommendedSharingTest
 			assertEquals(1, fixture.closed.get());
 
 			fixture.step.offer("osrs-map.com");
-			assertTrue("a second offer starts from the recommended set", box(fixture.step, "recommended.shareQuestLog").isSelected());
+			assertTrue("a second offer starts from the recommended set", box(fixture.step, "recommended.group.progress").isSelected());
 			assertFalse(box(fixture.step, "recommended.shareDeath").isSelected());
-			click(fixture.step, "recommended.customise");
-			box(fixture.step, "recommended.shareQuestLog").doClick();
 			box(fixture.step, "recommended.group.tasks").doClick();
 			box(fixture.step, "recommended.shareDeath").doClick();
 			assertTrue(fixture.written.isEmpty());
 			click(fixture.step, "recommended.share");
 			Set<String> expected = new LinkedHashSet<>(RecommendedSharing.KEYS);
-			expected.remove("shareQuestLog");
 			expected.removeAll(keys(SharingFields.TASKS));
 			expected.add("shareDeath");
 			assertEquals(expected, new LinkedHashSet<>(fixture.written));
 			assertEquals("true", fixture.store.get("shareDeath"));
-			assertNull(fixture.store.get("shareQuestLog"));
+			for (String task : keys(SharingFields.TASKS))
+			{
+				assertNull("nothing of an unticked group: " + task, fixture.store.get(task));
+			}
 		});
 	}
 
@@ -277,13 +281,22 @@ public class RecommendedSharingTest
 			assertTrue(open.contains(RecommendedSharing.GROUP_DETAIL));
 			assertTrue("opening the fold writes nothing", fixture.written.isEmpty());
 
-			click(fixture.step, "recommended.customise");
-			String customised = visibleText(fixture.step);
-			for (SharingFields.Field field : RecommendedSharing.all())
+			/*
+			 * Customise drew a box per field under each row; a group is all of its fields or none now,
+			 * as its switch in Settings is, so there is no box for a field of a group, and no Customise.
+			 */
+			assertNull(named(fixture.step, "recommended.customise"));
+			for (SharingFields.Section section : SharingFields.GROUPS)
 			{
-				assertNotNull("Customise has a box for " + field.key, named(fixture.step, "recommended." + field.key));
-				assertTrue(field.key, customised.contains(field.label));
+				assertNotNull(named(fixture.step, "recommended.group." + section.id));
+				for (SharingFields.Field field : section.fields)
+				{
+					assertNull("no box of its own: " + field.key, named(fixture.step, "recommended." + field.key));
+				}
 			}
+			box(fixture.step, "recommended.group.loot").doClick();
+			assertTrue("an unticked group says the press shares none of it",
+				visibleText(fixture.step).contains("Nothing from this group"));
 			assertTrue(fixture.written.isEmpty());
 		});
 	}

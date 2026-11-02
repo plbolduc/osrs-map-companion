@@ -67,7 +67,7 @@ final class PortTasksPanel extends JPanel
 	private static final long serialVersionUID = 1L;
 	private static final int WIDTH = MapCompanionPanel.CARD_TEXT_WIDTH;
 	private static final Color MUTED = ColorScheme.LIGHT_GRAY_COLOR;
-	static final String NEEDS_BOATS = "Turn on Boats and moorings to plan these as one run.";
+	static final String NEEDS_BOATS = "Turn on Progress and travel, which shares your boats, to plan these as one run.";
 	static final String AFTER_FARM_RUN = "Start run after the farm run ends.";
 	static final String BOARD_ONCE = "Board your boat once so the run knows its hold.";
 	private final transient PortTaskReader reader;

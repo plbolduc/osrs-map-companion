@@ -54,8 +54,9 @@ final class FarmRunPanel extends JPanel
 {
 	private static final long serialVersionUID = 1L;
 	static final String AFTER_PORT_RUN = "Start a farm run after the port run ends.";
-	static final String NEEDS_PATCHES = "Ready now reads your patches. Turn on Farming patches in Settings.";
-	static final String NEEDS_CONTRACT = "Turn on Farming contracts in Settings to plan your contract.";
+	/* Settings names its groups, not their fields: patches and contracts both share under Tasks and timers. */
+	static final String NEEDS_PATCHES = "Ready now reads your patches. Turn on Tasks and timers in Settings.";
+	static final String NEEDS_CONTRACT = "Turn on Tasks and timers in Settings to plan your contract.";
 	static final String PICKED = "Run: ";
 	private static final String[][] STARTS =
 	{

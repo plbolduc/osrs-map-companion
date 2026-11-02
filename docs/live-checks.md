@@ -112,7 +112,7 @@ steps wait on these readings (`osrs-stars-map/docs/plan-where-to-go-for-a-task.m
       the task stays with 0 left, the card folds to *Gargoyles · Complete* (or whichever task) and
       *Get your next task from a Slayer master.* until the next task is read.
 - [ ] **Port task slots.** `PortTaskReader` is written from the Hub's Sailing and Port Tasks
-      plugins and the game's script, not from a session; these settle it. With *Port tasks*
+      plugins and the game's script, not from a session; these settle it. With *Tasks and timers*
       sharing on:
   - [ ] Take a courier task and note `PORT_TASK_SLOT_0_ID` (19574): the map's Port tasks page
         should name the same task. Collect some crates, then the rest, and watch
@@ -129,7 +129,7 @@ steps wait on these readings (`osrs-stars-map/docs/plan-where-to-go-for-a-task.m
         keeps showing the tasks; after the logout it is gone until they are read again.
   - [ ] Cancel a task, and take a new one into the slot it left: the page replaces it.
 - [ ] **A port-task run in the sidebar (built from the same sourced encodings, not yet seen live).**
-      With *Port tasks* and *Boats and moorings* on, press **Start run** on the Port tasks card:
+      With *Tasks and timers* and *Progress and travel* on, press **Start run** on the Port tasks card:
   - [ ] The stops are the website's *Port tasks* order, one per port visit, then each bounty's hunt
         and its board. The first leg starts from where you stand and boards the boat the snapshot
         named; every later leg boards at the port the stop before docked at.
@@ -154,7 +154,7 @@ steps wait on these readings (`osrs-stars-map/docs/plan-where-to-go-for-a-task.m
       encodings are sourced (the map's `docs/review-evidence/sailing-reader-sources-2026-10-30.md`):
       a stored port is a `SailingDock` `dock_id` value joined by value, 253–255 are lost, capsized
       and bottled, and the focus is 0, 1 or 2. What only a client can show:
-      - with *Boats and moorings* on, the map names the port each boat is moored at, after a login
+      - with *Progress and travel* on, the map names the port each boat is moored at, after a login
         and after a hop, and never before the 15-second settle;
       - a boat moored at Port Sarim (dock id 0) is read as a boat: its owned flag, or a name part,
         is set. If neither is, the reader takes that slot for empty, and Port Sarim voyages start
@@ -165,7 +165,7 @@ steps wait on these readings (`osrs-stars-map/docs/plan-where-to-go-for-a-task.m
       - `SAILING_BOAT_1_TELEPORT_FOCUS` (19270) reads 0, 1 and 2 for no focus, a teleportation
         focus and a greater one.
 - [ ] **Following a voyage (`DestinationRoute`, built and tested, not yet seen live).** Send a
-      place across the water with *Boats and moorings* on, press **Follow**, and sail it:
+      place across the water with *Progress and travel* on, press **Follow**, and sail it:
       - *Board your boat* ticks on stepping onto the deck, not at the gangplank. The deck test is
         the one `WorldTiles` already uses to place a sailing friend;
       - *Sail to …* ticks with the boat alongside the far mooring, within 15 tiles of its pin while
@@ -186,8 +186,8 @@ steps wait on these readings (`osrs-stars-map/docs/plan-where-to-go-for-a-task.m
       value beside what the game shows.
 - [ ] **Farming.** The farming items above, and a herb patch replanted while the map's farm run
       is open: the stop should tick.
-- [ ] **A quest and a diary tier announced.** With *Drops and levels*, *Full quest progress* and
-      *Achievement diaries* on, log in: nothing already done is announced. Finish a short quest:
+- [ ] **A quest and a diary tier announced.** With *Loot and milestones* and
+      *Progress and travel* on, log in: nothing already done is announced. Finish a short quest:
       the group's feed shows it within about thirty seconds, once. Finish a diary tier's last task:
       the feed shows that tier, once, and nothing when its reward is claimed. Hop worlds and log
       out and in: nothing is announced. Note whether the tier's completion varbit moves on the
@@ -262,7 +262,7 @@ The website plan's second session, once the routes in the game are built: a memb
       stops. Pick one: the destination's card fills with its steps, Shortest Path draws the first
       walk, and the list folds. Type *abysal whip* and see *Did you mean*. Clear the box while a
       search is out: nothing comes back. Check RuneLite's log holds nothing that was typed.
-- [ ] **Route on a clue.** With *Share clue* off, read a coordinate clue and a beginner map: the
+- [ ] **Route on a clue.** With *Tasks and timers* off, read a coordinate clue and a beginner map: the
       clue card appears under *Now* with Route, and Route fills the destination's card. A step that
       is words, an anagram or an emote, shows its words and Route: the card is named after the place
       the map reads from them, and an emote's way goes by its STASH unit first. Carry a medium or
@@ -308,15 +308,16 @@ The website plan's second session, once the routes in the game are built: a memb
       to step outside first.
 - [ ] **The one press at Connect.** On a fresh RuneLite profile, the first Connect to osrs-map.com
       asks nothing and shows the step, with every group, the name and both drawing choices ticked
-      and *Where you died* not; it fits 225px with no cut word. Customise, untick a field, then Not
+      and *Where you died* not; it fits 225px with no cut word. Untick a group, then Not
       now: the Settings page still shows everything off. Change the map address to a local map and
       Connect: one question names that server, and Cancel sends nothing. Connect and press Share
-      what's ticked: Settings shows the four groups full, the receive stream opens, *Where you died*
-      and *Notify before a meetup* stay off. Restart RuneLite and reconnect: no step. In RuneLite's
+      what's ticked: Settings shows every switch on but *Where you died*, the receive stream opens,
+      and *Notify before a meetup* stays off. Restart RuneLite and reconnect: no step. In RuneLite's
       own config panel, ticking a sharing setting asks no "Are you sure?".
 - [ ] **Sharing as six switches after an update.** On a RuneLite profile that ran 1.3.0 with all of
       Map presence and two fields of Tasks and timers ticked, start this version. RuneLite's list
-      shows *What you share* with Map presence on and Tasks and timers off, Show what's sent carries
+      shows *What you share* with Map presence on and Tasks and timers off, the sidebar's Settings
+      says *Partly shared* under Tasks and timers with the same two fields, Show what's sent carries
       the same fields as before, and the profile's settings file holds `mapcompanion.sharingGroups=1`.
       Tick Tasks and timers in RuneLite's list: Show what's sent then carries all eight of its fields.
       Turn the plugin off, untick Map presence in RuneLite's list and turn the plugin on: no position
