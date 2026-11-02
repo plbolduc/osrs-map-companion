@@ -75,12 +75,18 @@ final class FarmRunClient
 
 	static final class Said
 	{
+		/** How long a confirmation is news; a refusal stays until the next press. */
+		static final long CONFIRMATION_MS = 10_000L;
+
 		final boolean planning;
 		final String message;
 		final long lifetime;
 		final long runGeneration;
 		/** Said about a port-task run, so the Port tasks card shows it and the farm run card does not. */
 		final boolean port;
+		/** A press that did what it asked, "Run ended.": said for a moment, then left out. */
+		final boolean confirms;
+		final long atMs;
 
 		Said(boolean planning, @Nullable String message, long lifetime)
 		{
@@ -94,11 +100,28 @@ final class FarmRunClient
 
 		Said(boolean planning, @Nullable String message, long lifetime, long runGeneration, boolean port)
 		{
+			this(planning, message, lifetime, runGeneration, port, false);
+		}
+
+		Said(boolean planning, @Nullable String message, long lifetime, long runGeneration, boolean port, boolean confirms)
+		{
 			this.port = port;
 			this.runGeneration = runGeneration;
 			this.planning = planning;
 			this.message = message;
 			this.lifetime = lifetime;
+			this.confirms = confirms;
+			this.atMs = System.currentTimeMillis();
+		}
+
+		/**
+		 * Whether there are words to draw at {@code now}. A line on the card says what is true now: a
+		 * confirmation stops being news after ten seconds and gives its row back, while a refusal keeps
+		 * its line until the next press says something else.
+		 */
+		boolean shown(long now)
+		{
+			return message != null && (!confirms || now - atMs < CONFIRMATION_MS);
 		}
 	}
 
@@ -419,8 +442,14 @@ final class FarmRunClient
 				return;
 			}
 		}
-		said = new Said(false, why == null ? ticket.end ? "Run ended." : "Run ready." : why, ticket.lifetime,
-						why == null && run != null ? state.generation() : -1, ticket.port);
+		/*
+		 * A run that lands says nothing: its stops appearing on the card are the answer, and a line
+		 * saying so would sit under them for the run's whole life. An End that worked is said, for a
+		 * moment, since what it leaves is an empty card.
+		 */
+		boolean ended = why == null && ticket.end;
+		said = new Said(false, why != null ? why : ended ? "Run ended." : null, ticket.lifetime,
+						why == null && run != null ? state.generation() : -1, ticket.port, ended);
 	}
 
 	/** A connection or profile ended. A cancelled reply must not release a newer press's gate. */

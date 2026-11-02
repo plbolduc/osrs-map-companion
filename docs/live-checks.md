@@ -404,7 +404,7 @@ continuously witnessed empty-to-newly-planted transition mints a stable completi
       The replacement character never sees the old run. End and shutdown remove its numbered pins.
 - [ ] Leave the client connected through a local map-server restart. Its lost run disappears;
       Start makes another immediately after the ordinary press wait, without reconnecting the
-      plugin. A delayed old-process heartbeat cannot restore the old run or Run ready message.
+      plugin. A delayed old-process heartbeat cannot restore the old run.
 
 Automated reader, protocol and concurrency tests complement these checks. A fake client cannot
 establish the events a real game session emits or verify every marker visually.

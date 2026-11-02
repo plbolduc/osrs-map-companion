@@ -305,6 +305,55 @@ public class RunCardsTest
 		assertTrue(enabled(farm, "End run"));
 	}
 
+	/**
+	 * A run that lands is answered by its stops: "Run ready." stayed under them for the run's whole
+	 * life. "Run ended." is news for ten seconds, then gives the card's row back.
+	 */
+	@Test
+	public void aConfirmationIsSaidOnlyWhileItIsNews() throws Exception
+	{
+		refresh();
+		choose("Herb run");
+		RelayResponse.Directive reply = new RelayResponse.Directive();
+		reply.relayEpoch = EPOCH;
+		reply.run = run("/contract/farm-run.json");
+		reply.runRevision = 1;
+		body = gson.toJson(reply);
+		press(farm, "Start run");
+		refresh();
+		List<String> ready = shown(farm);
+		assertTrue(ready.toString(), ready.contains("1. Falador farm"));
+		assertFalse(ready.toString(), ready.contains("Run ready."));
+
+		status = 204;
+		press(farm, "End run");
+		refresh();
+		assertTrue(shown(farm).toString(), shown(farm).contains("Run ended."));
+		RunView card = runView(farm);
+		SwingUtilities.invokeAndWait(() -> card.refresh(true, System.currentTimeMillis() + FarmRunClient.Said.CONFIRMATION_MS));
+		assertFalse(shown(farm).toString(), shown(farm).contains("Run ended."));
+	}
+
+	private static RunView runView(Component component)
+	{
+		if (component instanceof RunView)
+		{
+			return (RunView) component;
+		}
+		if (component instanceof Container)
+		{
+			for (Component child : ((Container) component).getComponents())
+			{
+				RunView found = runView(child);
+				if (found != null)
+				{
+					return found;
+				}
+			}
+		}
+		return null;
+	}
+
 	/** Lumbridge Castle bank, picked from the search: a destination of the player's own. */
 	private static RelayResponse.Destination bank()
 	{
