@@ -112,6 +112,13 @@ final class GroupPanel extends JPanel
 
 	private final JPanel friends = MapCompanionPanel.column(ColorScheme.DARK_GRAY_COLOR);
 	private final JLabel meetupsHead = MapCompanionPanel.left(new JLabel("Meetups"));
+	/**
+	 * Under the Meetups heading while Show map destinations is off. The map's meetups are taken only
+	 * with it on ({@link DestinationState#acceptSocial}), so the section is empty, and a meetup made
+	 * with Meet here never shows; this says why, and where the setting is, in the sidebar's own names.
+	 */
+	static final String MEETUPS_OFF = "Meetups show here with Show map destinations on (Settings → In the client).";
+	private final JLabel meetupsOff = new JLabel();
 	private final JPanel meetupCards = MapCompanionPanel.column(ColorScheme.DARK_GRAY_COLOR);
 	private final JButton meetHere = MapCompanionPanel.linkButton("Meet here…");
 	private final JLabel meetSaid = new JLabel();
@@ -166,6 +173,9 @@ final class GroupPanel extends JPanel
 		head.setBorder(new EmptyBorder(4, 0, 3, 0));
 		head.setMaximumSize(new java.awt.Dimension(Integer.MAX_VALUE, head.getPreferredSize().height));
 		add(MapCompanionPanel.left(head));
+		meetupsOff.setName("group.meetupsOff");
+		add(MapCompanionPanel.left(line(meetupsOff)));
+		MapCompanionPanel.setWrapped(meetupsOff, MEETUPS_OFF, WIDTH + 16);
 		add(meetupCards);
 		buildForm();
 		add(form);
@@ -324,6 +334,7 @@ final class GroupPanel extends JPanel
 		}
 		make.setEnabled(ready && meetups.ready() && (meet == null || !meet.sending));
 		meetHere.setEnabled(ready);
+		meetupsOff.setVisible(events == null && !config.showDestination());
 
 		String words = signature(roster, events, destinationKey, now);
 		if (Objects.equals(words, drawn))

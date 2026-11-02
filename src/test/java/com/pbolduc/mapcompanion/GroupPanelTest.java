@@ -371,6 +371,36 @@ public class GroupPanelTest
 		});
 	}
 
+	/**
+	 * Show map destinations is off until the player turns it on, and while it is off the map's meetups
+	 * are not taken, so the section under the heading is empty and a meetup made here never shows.
+	 * One line says why and where the setting is, and goes once the setting is on.
+	 */
+	@Test
+	public void meetupsSayWhyTheyAreMissingWhileDestinationsAreOff() throws Exception
+	{
+		AtomicReference<GroupPanel> panel = new AtomicReference<>();
+		SwingUtilities.invokeAndWait(() -> panel.set(panel()));
+		String stream = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "contract", "stream.json")),
+			StandardCharsets.UTF_8);
+		RelayResponse.StreamDirective directive = new Gson().fromJson(stream, RelayResponse.StreamDirective.class);
+		directive.events.get(0).startsAtMs = System.currentTimeMillis() + 3_600_000L;
+		/* As the plugin takes a directive: the meetups only with the setting on. */
+		assertFalse(config.showDestination());
+		destinations.acceptSocial(directive, config.showDestination());
+		SwingUtilities.invokeAndWait(() -> panel.get().refresh(true));
+		Component off = namedComponent(panel.get(), "group.meetupsOff");
+		assertTrue("the line is up while the meetups are kept out", off.isVisible());
+		assertEquals(Collections.singletonList(GroupPanel.MEETUPS_OFF), SidebarWords.words(off));
+		assertNull(namedComponent(panel.get(), "group.meetup.star-hunt"));
+
+		config.set("showDestination", true);
+		destinations.acceptSocial(directive, config.showDestination());
+		SwingUtilities.invokeAndWait(() -> panel.get().refresh(true));
+		assertFalse(off.isVisible());
+		assertNotNull(namedComponent(panel.get(), "group.meetup.star-hunt"));
+	}
+
 	private static Component namedComponent(Container parent, String name)
 	{
 		for (Component child : parent.getComponents())
