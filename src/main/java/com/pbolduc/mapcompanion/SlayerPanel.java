@@ -326,7 +326,11 @@ final class SlayerPanel extends JPanel
 
 	private void actions(String source, String id, RelayResponse.RouteTile tile, String name)
 	{
-		/* Route and World map side by side, as on a friend's card: they act, so they are buttons. */
+		/*
+		 * Route and Pin side by side, as on a friend's card: they act, so they are buttons. Pin does
+		 * what Stars' Pin destination does, Home's card, the arrow and the world map's pin, and says
+		 * so: a friend's World map draws only that friend's dot, and one name for both would mislead.
+		 */
 		JPanel actions = new JPanel(new GridLayout(1, 0, 4, 0));
 		actions.setOpaque(false);
 		actions.setBorder(BorderFactory.createEmptyBorder(3, 0, 1, 0));
@@ -336,8 +340,8 @@ final class SlayerPanel extends JPanel
 		route.addActionListener(e -> { routes.press(id == null ? RoutePress.Target.tile(source, at, name, null, null) : RoutePress.Target.place(source, id, name, at, null)); refresh(connected); });
 		routeButtons.add(route);
 		actions.add(route);
-		JButton pin = MapCompanionPanel.smallButton("World map");
-		pin.setToolTipText("Pin this spot on the game's world map and hint arrow");
+		JButton pin = MapCompanionPanel.smallButton("Pin");
+		pin.setToolTipText("Pin this spot as your destination: world map, arrow and Home");
 		pin.setName(source + ".map");
 		pin.addActionListener(e ->
 		{

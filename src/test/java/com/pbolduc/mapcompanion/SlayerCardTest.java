@@ -40,6 +40,8 @@ import javax.swing.JList;
 import javax.swing.SwingUtilities;
 import net.runelite.api.Client;
 import net.runelite.client.callback.ClientThread;
+import net.runelite.client.ui.overlay.worldmap.WorldMapPoint;
+import net.runelite.client.ui.overlay.worldmap.WorldMapPointManager;
 import okhttp3.OkHttpClient;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -75,13 +77,35 @@ public class SlayerCardTest
 			action.run();
 		}
 	};
+	private final DestinationState destinations = new DestinationState(gson);
+	/** What the game's world map is handed, with the game's thread run at once. */
+	private final List<WorldMapPoint> drawn = new ArrayList<>();
 	private SlayerPanel panel;
 
 	public SlayerCardTest() throws Exception
 	{
 		config.set("shareSlayer", true);
-		DestinationState destinations = new DestinationState(gson);
-		TestDestinationMarker marker = new TestDestinationMarker();
+		DestinationMarker marker = new DestinationMarker(new WorldMapPointManager()
+		{
+			@Override
+			public void add(WorldMapPoint point)
+			{
+				drawn.add(point);
+			}
+
+			@Override
+			public void remove(WorldMapPoint point)
+			{
+				drawn.remove(point);
+			}
+		}, destinations, config, new ClientThread()
+		{
+			@Override
+			public void invoke(Runnable action)
+			{
+				action.run();
+			}
+		}, new DestinationRoute(), null);
 		RoutePress routes = new RoutePress(new OkHttpClient(), gson, game.client(), thread, new Pairing(store, gson),
 			identity, new DestinationRoute(), destinations, marker);
 		/* No choice is pressed here, so the settings it would write have nowhere to go. */
@@ -208,6 +232,29 @@ public class SlayerCardTest
 			assertEquals("Order: Best spot", ((JLabel) order.getRenderer().getListCellRendererComponent(list, "Best spot", -1, false, false)).getText());
 			assertEquals("One target at a time", ((JLabel) order.getRenderer().getListCellRendererComponent(list, "One target at a time", 1, false, false)).getText());
 		});
+	}
+
+	/**
+	 * The button beside a place's Route makes it this client's destination, as Stars' Pin destination
+	 * does: Home's card, the arrow and a pin on the game's world map. So it says Pin, the act, and not
+	 * World map, which on a friend's card draws only that friend's dot.
+	 */
+	@Test
+	public void theButtonBesideRoutePinsThePlaceAsYourDestination() throws Exception
+	{
+		state.local(identity.id(), gargoyles(), "best", true);
+		received(places("best"), 1);
+		refresh();
+		List<String> card = shown(panel);
+		assertFalse(card.toString(), card.contains("World map"));
+		AbstractButton pin = button(panel, "Pin");
+		assertNotNull(card.toString(), pin);
+		assertEquals("Pin this spot as your destination: world map, arrow and Home", pin.getToolTipText());
+
+		press("Pin");
+		assertTrue(destinations.hasLocalDestination());
+		assertEquals("Home's card is the place", "Slayer Tower (basement)", destinations.getDestination().name);
+		assertEquals("and the world map has its pin", 1, drawn.size());
 	}
 
 	private CompanionSnapshot.Slayer gargoyles()

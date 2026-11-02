@@ -535,6 +535,10 @@ star site's, which said *Open on map* — and a friend's says **World map** (*Sh
 not fit beside Route), *Hide on map* once pressed, and *On world map* while the whole group layer is
 on.
 
+Slayer's button beside Route says **Pin**. It said *World map*, but it makes the place this client's
+destination, as Stars' *Pin destination* does: Home's card, the arrow and the world map's pin. A
+friend's *World map* draws only that friend's dot, so the one word named two acts.
+
 ### The group's buttons
 
 They were three loose rows under the meetups: *Meet here…*, *Copy invite*, and *▸ Join another

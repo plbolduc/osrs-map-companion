@@ -222,7 +222,7 @@ Say these in the description of the next Hub update, as changes from what was ap
   pins, and Start, Reroute and End requests as disclosed above. No input or movement is automated.
 - Slayer places: the map's ranked list in Home, received through existing replies/stream until
   acknowledged. Sharing the task also sends the order, Wilderness filter and receipt. Route
-  uses the existing endpoint with a public spot id; World map sets only a local pin. The Wiki
+  uses the existing endpoint with a public spot id; Pin sets only a local destination. The Wiki
   and licence are linked. No ranking table, automatic route request or additional poll is added.
 - **Boats and moorings**, a new sharing choice that starts off and joins the one press at
   Connect: each boat's slot, dock id and dock name from the game's `SailingDock` table, and its
