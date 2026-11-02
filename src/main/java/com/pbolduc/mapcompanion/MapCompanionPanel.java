@@ -464,6 +464,23 @@ public class MapCompanionPanel extends PluginPanel
 		return localized.contains("h") || localized.contains("K") ? "h:mm a" : "HH:mm";
 	}
 
+	/**
+	 * "Today 7:52 PM": a meetup's day and clock in the player's zone, as the Group tab's line begins.
+	 *
+	 * <p>The note a Route press writes under the destination's name is written once and never
+	 * redrawn, so it carries no countdown: a day and a clock stay true however long the card is up.
+	 */
+	static String meetupStarts(long startsAtMs, long nowMs, ZoneId zone, Locale locale)
+	{
+		ZonedDateTime at = Instant.ofEpochMilli(startsAtMs).atZone(zone);
+		long days = ChronoUnit.DAYS.between(Instant.ofEpochMilli(nowMs).atZone(zone).toLocalDate(), at.toLocalDate());
+		String day = days == 0 ? "Today"
+			: days == 1 ? "Tomorrow"
+			: days > 1 && days < 7 ? at.format(DateTimeFormatter.ofPattern("EEEE", Locale.ENGLISH))
+			: at.format(DateTimeFormatter.ofPattern("d MMM", Locale.ENGLISH));
+		return day + " " + at.format(DateTimeFormatter.ofPattern(clockPattern(locale), Locale.ENGLISH));
+	}
+
 	private void refresh()
 	{
 		SwingUtilities.invokeLater(() ->

@@ -433,7 +433,7 @@ final class NowCards extends JPanel
 		refresh.run();
 	}
 
-	/** The way to the meetup, with its world and when it starts in the card's words. Nobody is told. */
+	/** The way to the meetup, with its world and its day and clock in the card's words. Nobody is told. */
 	private void routeToMeetup()
 	{
 		RelayResponse.Event event = destinationState.getEvent();
@@ -441,8 +441,8 @@ final class NowCards extends JPanel
 		{
 			routePress.press(RoutePress.Target.tile("meetup", new WorldPoint(event.x, event.y, event.plane),
 				event.title == null ? "Meetup" : event.title, event.world,
-				meetupWhen(event.startsAtMs, System.currentTimeMillis(), ZoneId.systemDefault(),
-					Locale.getDefault(Locale.Category.FORMAT), null)));
+				MapCompanionPanel.meetupStarts(event.startsAtMs, System.currentTimeMillis(), ZoneId.systemDefault(),
+					Locale.getDefault(Locale.Category.FORMAT))));
 		}
 		refresh.run();
 	}

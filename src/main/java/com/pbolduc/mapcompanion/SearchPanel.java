@@ -465,7 +465,8 @@ final class SearchPanel extends JPanel
 	 * The destination card's second line for a pick. An item's route goes to whatever drops or sells
 	 * it, and the card takes that source's name, so its line says which item it is for: the row's own
 	 * count under a monster's name would read as a fact about the monster and never name the item.
-	 * Any other row keeps its own line.
+	 * Any other row keeps its own words, without the distance the row measured from where the search
+	 * was typed: the card's line is written once, and the way line under it gives the route's own.
 	 */
 	@Nullable
 	static String note(SearchClient.Hit hit)
@@ -474,7 +475,7 @@ final class SearchPanel extends JPanel
 		{
 			return "For " + hit.name;
 		}
-		return hit.line.isEmpty() ? null : hit.line;
+		return hit.note.isEmpty() ? null : hit.note;
 	}
 
 	private static JLabel label(float size, Color colour)

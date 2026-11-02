@@ -580,7 +580,7 @@ final class GroupPanel extends JPanel
 		route.addActionListener(e ->
 		{
 			press.press(RoutePress.Target.tile(source, new WorldPoint(meetup.x, meetup.y, meetup.plane), meetup.title,
-				meetup.world, when(meetup.startsAtMs, System.currentTimeMillis(), ZoneId.systemDefault(),
+				meetup.world, MapCompanionPanel.meetupStarts(meetup.startsAtMs, System.currentTimeMillis(), ZoneId.systemDefault(),
 					Locale.getDefault(Locale.Category.FORMAT))));
 			drawn = null;
 			refresh(ready);
