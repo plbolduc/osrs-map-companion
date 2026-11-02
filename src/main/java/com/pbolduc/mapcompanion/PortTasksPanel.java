@@ -171,8 +171,10 @@ final class PortTasksPanel extends JPanel
 			{
 				continue;
 			}
-			body.add(line(title(slot), Color.WHITE, 12f, 4));
-			body.add(line(next(slot), MUTED, 11f, 0));
+			/* A courier with every crate in is finished, and greyed as a finished stop on a run is. */
+			boolean finished = delivered(slot);
+			body.add(line(title(slot), finished ? ColorScheme.MEDIUM_GRAY_COLOR : Color.WHITE, 12f, 4));
+			body.add(line(next(slot), finished ? ColorScheme.MEDIUM_GRAY_COLOR : MUTED, 11f, 0));
 		}
 		body.add(line(footer(slots, hold), MUTED, 11f, running ? 4 : 6));
 		revalidate();
@@ -183,6 +185,12 @@ final class PortTasksPanel extends JPanel
 	static boolean startable(@Nullable List<PortTaskReader.Slot> slots)
 	{
 		return slots != null && slots.stream().anyMatch(PortTaskReader.Slot::held);
+	}
+
+	/** A courier whose every crate is delivered: what {@link #next} says as "All 3 crates delivered". */
+	static boolean delivered(PortTaskReader.Slot slot)
+	{
+		return PortTaskReader.COURIER.equals(slot.state) && slot.needed > 0 && slot.delivered >= slot.needed;
 	}
 
 	/** The game's own name for the task, or its kind where the table gave none. */

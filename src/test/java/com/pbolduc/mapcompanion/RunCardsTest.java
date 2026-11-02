@@ -26,6 +26,7 @@
 package com.pbolduc.mapcompanion;
 
 import com.google.gson.Gson;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Insets;
@@ -42,6 +43,7 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 import net.runelite.client.callback.ClientThread;
+import net.runelite.client.ui.ColorScheme;
 import okhttp3.Dispatcher;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -419,6 +421,168 @@ public class RunCardsTest
 		assertTrue(second.toString(), moved > second.indexOf("2. Catherby") && moved < second.indexOf("4. My bank · Visited"));
 	}
 
+	/**
+	 * The next stop had a separate amber "Next" line, and a visited stop kept a white name while the
+	 * world map faded its pin with the done ones. The next stop's number is amber, as its pin is, and
+	 * a stop behind the player is struck and grey whether done or visited; its word tells them apart.
+	 */
+	@Test
+	public void theNextStopIsItsAmberNumberAndAStopBehindIsStruck() throws Exception
+	{
+		state.acceptFor(identity.id(), EPOCH, run("/contract/farm-run.json"), 1, System.currentTimeMillis());
+		refresh();
+		assertFalse(shown(farm).toString(), shown(farm).contains("Next"));
+		String next = raw(farm, "1. Falador farm");
+		assertTrue(next, next.contains("<b><font color='#f59e0b'>1.</font></b> Falador farm"));
+		assertFalse("only the next stop's number", raw(farm, "2. Catherby").contains("#f59e0b"));
+		assertTrue(raw(farm, "4. My bank · Visited").contains("<strike>4. My bank</strike>"));
+	}
+
+	/**
+	 * A stop's picture came from the item it names alone, so a spell such as Draynor Manor Teleport
+	 * had none though This leg drew one for the same step, and a stop with no picture lost its place,
+	 * moving its way twenty pixels left of the others'. The picture is the one This leg draws, and
+	 * every stop of a run keeps a picture's place when any has one; a run with none keeps none.
+	 */
+	@Test
+	public void eachStopShowsTheTeleportThisLegDrawsInOneColumn() throws Exception
+	{
+		List<String> asked = new ArrayList<>();
+		GameSprites recording = new GameSprites(null, null, null)
+		{
+			@Override
+			void item(JLabel label, int itemId, int box)
+			{
+				asked.add("item " + itemId);
+			}
+
+			@Override
+			void sprite(JLabel label, int spriteId, int box)
+			{
+				asked.add("sprite " + spriteId);
+			}
+
+			@Override
+			void farmTravelItem(JLabel label, String name, int box)
+			{
+				asked.add("named " + name);
+			}
+		};
+		RelayResponse.FarmRun herbs = run("/contract/farm-run.json");
+		for (RelayResponse.FarmStop stop : herbs.stops)
+		{
+			stop.done = false;
+			stop.visited = false;
+		}
+		state.acceptFor(identity.id(), EPOCH, herbs, 1, System.currentTimeMillis());
+		FarmRunPanel[] card = new FarmRunPanel[1];
+		SwingUtilities.invokeAndWait(() ->
+		{
+			card[0] = new FarmRunPanel(state, client, follower, route, shortest, recording, config);
+			card[0].refresh(true);
+		});
+		assertEquals(Arrays.asList("item 13126", "item 24961", "sprite 1253"), asked);
+		assertEquals("the birdhouse's walk keeps a picture's place too", 4, slots(card[0]));
+
+		state.acceptFor(identity.id(), EPOCH, portRun(), 2, System.currentTimeMillis());
+		refresh();
+		assertEquals("a run with no picture keeps no place for one", 0, slots(ports));
+	}
+
+	/** A courier with every crate delivered is finished, and greyed as a finished stop is. */
+	@Test
+	public void aDeliveredCourierIsGreyed() throws Exception
+	{
+		PortTaskReader delivered = new PortTaskReader(game.client(), new CargoHolds())
+		{
+			@Override
+			List<Slot> latest()
+			{
+				return Arrays.asList(
+					new PortTaskReader.Slot(0, PortTaskReader.COURIER, 6, HONEY, "Catherby", "Port Sarim", 3, 3, 3, 0, null),
+					new PortTaskReader.Slot(1, PortTaskReader.BOUNTY, 438, "Port Sarim tern bounty", null, "Port Sarim", 15, 0, 0, 9, "Tern feather"));
+			}
+
+			@Override
+			Integer latestHold()
+			{
+				return 30;
+			}
+		};
+		Color[] colours = new Color[2];
+		SwingUtilities.invokeAndWait(() ->
+		{
+			PortTasksPanel card = new PortTasksPanel(delivered, config, sprites, state, client, follower, route, shortest);
+			card.refresh(true);
+			colours[0] = label(card, HONEY).getForeground();
+			colours[1] = label(card, "Port Sarim tern bounty").getForeground();
+		});
+		assertEquals(ColorScheme.MEDIUM_GRAY_COLOR, colours[0]);
+		assertEquals("a task still to do stays white", Color.WHITE, colours[1]);
+	}
+
+	/** The raw text of the shown label whose words are these, tags and all. */
+	private static String raw(Component root, String words) throws Exception
+	{
+		String[] text = new String[1];
+		SwingUtilities.invokeAndWait(() -> text[0] = label(root, words).getText());
+		return text[0];
+	}
+
+	private static JLabel label(Component component, String words)
+	{
+		if (!component.isVisible())
+		{
+			return null;
+		}
+		if (component instanceof JLabel && words.equals(plain(((JLabel) component).getText())))
+		{
+			return (JLabel) component;
+		}
+		if (component instanceof Container)
+		{
+			for (Component child : ((Container) component).getComponents())
+			{
+				JLabel found = label(child, words);
+				if (found != null)
+				{
+					return found;
+				}
+			}
+		}
+		return null;
+	}
+
+	/** Shown labels with no words that hold a picture's 16 pixels: the stops' picture places. */
+	private static int slots(Component component) throws Exception
+	{
+		int[] count = new int[1];
+		SwingUtilities.invokeAndWait(() -> count[0] = countSlots(component));
+		return count[0];
+	}
+
+	private static int countSlots(Component component)
+	{
+		if (!component.isVisible())
+		{
+			return 0;
+		}
+		int count = 0;
+		if (component instanceof JLabel && plain(((JLabel) component).getText()).isEmpty()
+			&& component.getPreferredSize().width == 16 && component.getPreferredSize().height == 16)
+		{
+			count++;
+		}
+		if (component instanceof Container)
+		{
+			for (Component child : ((Container) component).getComponents())
+			{
+				count += countSlots(child);
+			}
+		}
+		return count;
+	}
+
 	private JButton hotkey(boolean rerouting) throws Exception
 	{
 		JButton[] button = new JButton[1];
@@ -601,7 +765,7 @@ public class RunCardsTest
 			: component instanceof AbstractButton ? ((AbstractButton) component).getText() : null;
 		if (text != null && !text.isEmpty())
 		{
-			out.add(text.replaceAll("<[^>]+>", "").replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&").trim());
+			out.add(plain(text));
 		}
 		if (component instanceof Container)
 		{
@@ -610,6 +774,12 @@ public class RunCardsTest
 				collect(child, out);
 			}
 		}
+	}
+
+	/** A label's words as a player reads them: its markup dropped and its escapes read back. */
+	private static String plain(String text)
+	{
+		return text == null ? "" : text.replaceAll("<[^>]+>", "").replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&").trim();
 	}
 
 	/**
