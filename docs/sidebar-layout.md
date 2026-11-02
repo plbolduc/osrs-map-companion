@@ -385,6 +385,112 @@ At 225px the card is 443px tall with the fold closed, so the press is in reach w
 953px with *What each one sends* open and 1,015px with Customise. `WhereToGoShot` paints the three
 as `connect`, `connect-fold-open` and `connect-customise`, pointed at a port nothing listens on.
 
+## Sharing by group, 2 November 2026
+
+Status: **the design**, written before it was built, in the commits that follow the one that put it
+here. Asked on 1 November whether the plugin had too many settings and whether sharing should simply
+be by group, with less granularity, the owner said yes.
+
+RuneLite's list for the plugin showed 39 settings: 26 about sharing, in four sections with a name
+and a death among them, and 13 about what this client draws. Settings drew the same 26, one checkbox
+each under a shortcut per group, and the step after Connect offered a box per field under
+*Customise*. Two pairs read as the same thing — *Quest completion* beside *Full quest progress*, and
+*Travel unlocks*, which is the items you carry, beside *Permanent travel unlocks and house* — and the
+sidebar, RuneLite's list and the README often called one setting by three names.
+
+### Six switches
+
+Sharing is six switches, in this order wherever it is drawn: Settings, the step after Connect and
+RuneLite's list.
+
+- **Character name**, with *Name to show instead* under it while it is off.
+- **Map presence**: *Position and world*, *Training and idle time* and *Account type*. It is the
+  live-position switch, since training and the badge only ever show on your own dot.
+- **Progress and travel**: the eight fields routes are ranked by.
+- **Tasks and timers**: the eight tasks and observed timers.
+- **Loot and milestones · kept two weeks**: the four kill, drop and announcement fields.
+- **Where you died**.
+
+A group's switch turns every field in it on, or every field off. No box is drawn per field any more,
+in Settings or in the step, whose *Customise* has nothing left to open and goes; *Not now* stays.
+*What each one sends*, a fold under the switches in both, still names every field in the sidebar's
+words, and each switch's tooltip says what each of its fields sends, so the disclosure is as complete
+as it was. RuneLite's list goes from 39 settings to 20. The 13 client settings stay as they are: they
+send nothing, and that many is ordinary for a RuneLite plugin.
+
+### What is sent does not change
+
+The 23 fields under the four groups stay settings of their own, under the keys they always had, and
+stay what `SnapshotBuilder` and the readers read: a switch is never a permission of its own, only a
+way of writing fields. RuneLite's list hides them (`hidden = true`) and the sidebar no longer draws
+them one by one, so the wire, the map and every test of what is sent are untouched. The one press after Connect still writes exactly
+the fields it names, and every one of them still starts off.
+
+### A group shows as on only when all of it is
+
+A player who ticked some fields of a group before this keeps exactly those. The group's switch shows
+off — in Settings with the dash a partial group already had — and Settings names what is on under
+it, *Partly shared: Slayer task, Clue step*, rather than hiding it. Pressing the switch turns all of
+the group on, as pressing any switch that is off does, and pressing it again turns all of it off.
+Nothing is shared that the player did not choose, and nothing they chose is dropped by an update.
+
+### A stored switch for RuneLite's list
+
+RuneLite draws a box from a stored value, so each group's switch is a setting of its own —
+`shareMapPresence`, `shareProgressAndTravel`, `shareTasksAndTimers` and `shareLootAndMilestones` — in
+a *What you share* section with *Character name*, *Name to show instead* and *Where you died*.
+`SharingGroups` keeps each switch in step with its fields in both directions, from the plugin's
+`ConfigChanged`:
+
+- **A switch written**, by a press in RuneLite's list, writes each of its fields that differs from it.
+- **A field written**, by Settings, the step after Connect or a switch's own fan-out, turns its switch
+  off when the field goes off, and on when the field goes on and is the last of its group to.
+
+A field going on never turns its switch off, which is what lets a switch's fan-out finish, and the
+sidebar and the step write fields only. So nothing loops: a fan-out writes only the fields that
+differ, each of their events finds the switch already agreeing, and a switch written because of a
+field agrees with its fields, so its own event writes nothing.
+
+**Which way wins is the newer press.** While the plugin runs, that is whichever was written. At a
+start it cannot see the order, so it goes by what it can see:
+
+- **The first start of this version** on a RuneLite profile writes each switch from its fields — on
+  only when every field is — and never writes a field. The fields are the player's own choices from
+  before switches existed, and a switch written from them only describes what is already shared. A
+  marker, `sharingGroups`, then says the profile has been read. It is not one of RuneLite's settings,
+  so RuneLite never writes a default for it and *Reset* leaves it alone.
+- **Every later start**, and every change of RuneLite profile, finds a switch that disagrees with its
+  fields only when it was pressed while the plugin was not listening — RuneLite's list shows a
+  disabled plugin's settings too — so the switch wins and its fields are written. Off over a partly
+  shared group agrees with its fields and changes nothing.
+
+The fields winning every time would have been simpler and wrong once: a group switched off in
+RuneLite's list while the plugin was disabled would come back on at the next start, and be shared. A
+switch's event on a profile not yet read is ignored for the same reason, because RuneLite writes every
+setting's default into a profile when it loads one, and so is a switch being unset, which *Reset*
+does on its way to writing the default; the start that reads the profile decides.
+
+### One name for each setting
+
+The sidebar's words win, since the website cites them, and they are written wherever a setting is
+named: Settings, the step after Connect, RuneLite's list, the README's *What you share*,
+`docs/network.md` and the reviewer notes. *Travel unlocks*, the items you carry, is *Carried travel
+items*, so it no longer reads like the permanent unlocks beside it; *Quest completion* is *Travel
+quest completion*; *Drops and levels as they happen* is *Notable drops and levels*. The client
+settings take their sidebar names too, *Show map destinations* becoming *Destinations and meetups*
+because it also brings the meetups, and *In the client* is *In RuneLite* in all three places, with a
+line at the foot of its fold saying that the two keys and the reminder's minutes are in RuneLite's
+own settings for the plugin.
+
+### What the status card says
+
+*Sharing 24 character fields* named nothing, and its tooltip was one line wider than the screen in
+words Settings did not use. The status card's second line speaks in the switches: *Sharing
+everything*; *Sharing all but where you died* when one or two are off; the one or two that are on
+when only those are; *Sharing 3 of 6 choices* otherwise; and *part of tasks and timers* for a group
+partly shared. Its tooltip gives each switch a line of its own, wrapped to fit: on, off, or the
+fields that are on.
+
 ## The way there, step by step
 
 Status: **built**, on `claude/where-to-go`, and not yet seen in a real client. It is steps 5a to 5c
