@@ -27,11 +27,6 @@ package com.pbolduc.mapcompanion;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -298,22 +293,7 @@ public class AssignmentReader
 
 	private static List<String> names(String resource)
 	{
-		List<String> names = new ArrayList<>();
-		try (InputStream stream = AssignmentReader.class.getResourceAsStream("/" + resource))
-		{
-			if (stream == null)
-			{
-				return names;
-			}
-			try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8)))
-			{
-				reader.lines().filter(line -> !line.trim().isEmpty()).forEach(names::add);
-			}
-		}
-		catch (java.io.IOException ignored)
-		{
-			return new ArrayList<>();
-		}
+		List<String> names = Resources.lines("/" + resource);
 		// A red salamander must not be accepted as a generic salamander by substring order.
 		names.sort(Comparator.comparingInt(String::length).reversed());
 		return names;

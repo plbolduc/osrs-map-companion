@@ -28,14 +28,13 @@ package com.pbolduc.mapcompanion;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import net.runelite.api.Client;
 import net.runelite.api.Quest;
 import net.runelite.api.QuestState;
@@ -55,61 +54,10 @@ public class QuestReader
 {
 	/**
 	 * Display names, spelled as the game spells them, because that is also how the map's transport
-	 * table spells them — the join is on the string and there is no translation layer.
+	 * table spells them — the join is on the string and there is no translation layer. Listed in
+	 * travel-quests.txt.
 	 */
-	static final Set<String> GATED_QUESTS = Collections.unmodifiableSet(
-			Arrays.stream(new String[]
-						  {
-							  "Between a Rock...",
-							  "Biohazard",
-							  "Bone Voyage",
-							  "Cabin Fever",
-							  "Children of the Sun",
-							  "Client of Kourend",
-							  "Cold War",
-							  "Death to the Dorgeshuun",
-							  "Desert Treasure I",
-							  "Desert Treasure II - The Fallen Empire",
-							  "Dragon Slayer II",
-							  "Eadgar's Ruse",
-							  "Fishing Contest",
-							  "Haunted Mine",
-							  "Holy Grail",
-							  "In Search of the Myreque",
-							  "Lunar Diplomacy",
-							  "Making Friends with My Arm",
-							  "Monkey Madness I",
-							  "Monkey Madness II",
-							  "Mourning's End Part II",
-							  "Nature Spirit",
-							  "One Small Favour",
-							  "Pandemonium",
-							  "Plague City",
-							  "Priest in Peril",
-							  "Ratcatchers",
-							  "Recipe for Disaster - King Awowogei",
-							  "Regicide",
-							  "Rum Deal",
-							  "Sea Slug",
-							  "Shades of Mort'ton",
-							  "Shilo Village",
-							  "Sins of the Father",
-							  "Song of the Elves",
-							  "Tai Bwo Wannai Trio",
-							  "Temple of the Eye",
-							  "The Corsair Curse",
-							  "The Fremennik Exiles",
-							  "The Fremennik Trials",
-							  "The Giant Dwarf",
-							  "The Grand Tree",
-							  "The Great Brain Robbery",
-							  "The Path of Glouphrie",
-							  "Throne of Miscellania",
-							  "Tree Gnome Village",
-							  "Troubled Tortugans",
-							  "Twilight's Promise",
-							  "Watchtower",
-						  }).collect(Collectors.toSet()));
+	static final Set<String> GATED_QUESTS = Collections.unmodifiableSet(new HashSet<>(Resources.lines("/travel-quests.txt")));
 
 	/**
 	 * Client spelling to the map's, for the quests where the two differ.
