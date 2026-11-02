@@ -53,6 +53,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JViewport;
 import javax.swing.SwingConstants;
@@ -680,6 +681,16 @@ public class MapCompanionPanel extends PluginPanel
 			button = nowCards.hotkey(rerouting);
 		}
 		press(button);
+	}
+
+	/**
+	 * A question before a press that cannot be taken back: a warning whose first button names the act, with
+	 * Cancel beside it as the default. True only when the act was chosen.
+	 */
+	static boolean confirm(Component parent, Object message, String title, String yes)
+	{
+		return JOptionPane.showOptionDialog(parent, message, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE,
+			null, new Object[]{yes, "Cancel"}, "Cancel") == JOptionPane.OK_OPTION;
 	}
 
 	/** Click a button only as a player could: one in its row and enabled. True when it was pressed. */
