@@ -26,13 +26,9 @@
 package com.pbolduc.mapcompanion;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.TypeAdapter;
 import com.google.gson.TypeAdapterFactory;
 import com.google.gson.reflect.TypeToken;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -49,36 +45,9 @@ final class SlayerWire
 	public static final class Lenient implements TypeAdapterFactory
 	{
 		@Override
-		@SuppressWarnings("unchecked")
 		public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type)
 		{
-			if (type.getRawType() != RelayResponse.SlayerOptions.class)
-			{
-				return null;
-			}
-			TypeAdapter<RelayResponse.SlayerOptions> fields = gson.getAdapter(RelayResponse.SlayerOptions.class);
-			TypeAdapter<JsonElement> whole = gson.getAdapter(JsonElement.class);
-			return (TypeAdapter<T>) new TypeAdapter<RelayResponse.SlayerOptions>()
-			{
-				@Override
-				public void write(JsonWriter out, RelayResponse.SlayerOptions value) throws IOException
-				{
-					fields.write(out, value);
-				}
-				@Override
-				public RelayResponse.SlayerOptions read(JsonReader in) throws IOException
-				{
-					JsonElement tree = whole.read(in);
-					try
-					{
-						return tree == null || tree.isJsonNull() ? null : normalize(fields.fromJsonTree(tree));
-					}
-					catch (RuntimeException unreadable)
-					{
-						return null;
-					}
-				}
-			};
+			return type.getRawType() != RelayResponse.SlayerOptions.class ? null : SocialWire.object(gson, RelayResponse.SlayerOptions.class, SlayerWire::normalize);
 		}
 	}
 

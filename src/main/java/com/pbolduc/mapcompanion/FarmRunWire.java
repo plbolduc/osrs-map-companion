@@ -114,37 +114,9 @@ final class FarmRunWire
 	public static final class Lenient implements TypeAdapterFactory
 	{
 		@Override
-		@SuppressWarnings("unchecked")
 		public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type)
 		{
-			if (type.getRawType() != RelayResponse.FarmRun.class)
-			{
-				return null;
-			}
-			TypeAdapter<RelayResponse.FarmRun> fields = gson.getAdapter(RelayResponse.FarmRun.class);
-			TypeAdapter<JsonElement> whole = gson.getAdapter(JsonElement.class);
-			return (TypeAdapter<T>) new TypeAdapter<RelayResponse.FarmRun>()
-			{
-				@Override
-				public void write(JsonWriter out, RelayResponse.FarmRun value) throws IOException
-				{
-					fields.write(out, value);
-				}
-
-				@Override
-				public RelayResponse.FarmRun read(JsonReader in) throws IOException
-				{
-					JsonElement tree = whole.read(in);
-					try
-					{
-						return tree == null || tree.isJsonNull() ? null : normalize(fields.fromJsonTree(tree));
-					}
-					catch (RuntimeException unreadable)
-					{
-						return null;
-					}
-				}
-			};
+			return type.getRawType() != RelayResponse.FarmRun.class ? null : SocialWire.object(gson, RelayResponse.FarmRun.class, FarmRunWire::normalize);
 		}
 	}
 
