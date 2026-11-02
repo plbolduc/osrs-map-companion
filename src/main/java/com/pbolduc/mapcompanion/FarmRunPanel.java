@@ -91,14 +91,15 @@ final class FarmRunPanel extends JPanel
 		this.run = new RunView(false, state, client, follower, routes, shortest, sprites, config);
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		setBackground(ColorScheme.DARKER_GRAY_COLOR);
-		setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(7, 0, 7, 0),
-				BorderFactory.createEmptyBorder(8, 8, 8, 8)));
+		/* The Slayer and Port tasks cards' inset; the gap between cards is the Tasks column's to draw. */
+		setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
 		MapCompanionPanel.left(this);
 		setName("farmRun");
 
 		JLabel heading = new JLabel("Farm run");
 		heading.setForeground(Color.WHITE);
 		heading.setFont(heading.getFont().deriveFont(Font.BOLD, 13f));
+		sprites.skill(heading, "Farming", 16);
 		add(MapCompanionPanel.left(heading));
 		picker.setBackground(getBackground());
 		for (String[] choice : STARTS)
