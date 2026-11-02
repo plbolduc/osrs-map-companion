@@ -403,7 +403,10 @@ of `docs/plan-where-to-go-for-a-task.md` in `osrs-stars-map`.
   Pressing one shows its steps instead; the best one says so.
 - **Reroute** sits beside **Dismiss**, and plans again from where you stand. While the answer is
   on its way the card says *Planning from where you stand…*, and a refusal is one plain sentence
-  under the steps. A route ranked from no position says so above the steps.
+  under the steps. A route ranked from no position says so above the steps. A destination with no
+  way yet, a star pinned on Stars or a place the map sent bare, has **Route** in Reroute's cell
+  instead: it asks by the destination's own tile, as a star's Route does, so the card that shows a
+  place can always lead there.
 - **On the world map** each step's end has a pin with the step's number. The current one is amber
   and holds the map's edge, the ones behind it fade, and the last step leaves the destination's
   own pin uncovered. The game's arrow points at the current step's end once it is loaded.
