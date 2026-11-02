@@ -33,12 +33,12 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Insets;
+import java.awt.LinearGradientPaint;
 import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -94,7 +94,7 @@ final class DropLuckPanel extends JPanel
 	private static final Color DRY = new Color(0xf59e0b);
 	private static final Color VERY_DRY = new Color(0xf87171);
 	private static final Color NORMAL = new Color(0xa1a1aa);
-	private static final Color TRACK_MIDDLE = new Color(0x6b7280);
+	private static final Color TRACK_MIDDLE = new Color(0x71717a);
 
 	/**
 	 * Where an item's picture comes from: the game's own sprite through {@link ItemManager}, which
@@ -404,7 +404,7 @@ final class DropLuckPanel extends JPanel
 		JPanel count = column(background);
 		JLabel n = new JLabel(DropOdds.count(drop.obtained), SwingConstants.RIGHT);
 		n.setFont(n.getFont().deriveFont(16f));
-		n.setForeground(drop.obtained > 0 ? Color.WHITE : ColorScheme.MEDIUM_GRAY_COLOR);
+		n.setForeground(drop.obtained > 0 ? Color.WHITE : ColorScheme.LIGHT_GRAY_COLOR);
 		n.setAlignmentX(Component.RIGHT_ALIGNMENT);
 		count.add(n);
 		DropOdds.Luck luck = DropLuckView.rowLuck(monster, drop);
@@ -471,11 +471,11 @@ final class DropLuckPanel extends JPanel
 			card.add(new Strip(detail.drierThan));
 			JPanel ends = new JPanel(new GridLayout(1, 3));
 			ends.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-			ends.add(small("Lucky", ColorScheme.MEDIUM_GRAY_COLOR));
-			JLabel typical = small("Typical", ColorScheme.MEDIUM_GRAY_COLOR);
+			ends.add(small("Lucky", ColorScheme.LIGHT_GRAY_COLOR));
+			JLabel typical = small("Typical", ColorScheme.LIGHT_GRAY_COLOR);
 			typical.setHorizontalAlignment(SwingConstants.CENTER);
 			ends.add(typical);
-			JLabel dry = small("Dry", ColorScheme.MEDIUM_GRAY_COLOR);
+			JLabel dry = small("Dry", ColorScheme.LIGHT_GRAY_COLOR);
 			dry.setHorizontalAlignment(SwingConstants.RIGHT);
 			ends.add(dry);
 			card.add(fillIn(ends, ColorScheme.DARKER_GRAY_COLOR));
@@ -635,7 +635,7 @@ final class DropLuckPanel extends JPanel
 		}
 		if (monster.drops.isEmpty())
 		{
-			icons.add(small("No notable drops yet", ColorScheme.MEDIUM_GRAY_COLOR));
+			icons.add(small("No notable drops yet", ColorScheme.LIGHT_GRAY_COLOR));
 		}
 		row.add(fillIn(icons, ColorScheme.DARK_GRAY_COLOR));
 		row.setMaximumSize(new Dimension(Integer.MAX_VALUE, row.getPreferredSize().height));
@@ -729,9 +729,15 @@ final class DropLuckPanel extends JPanel
 	 * dot moves right as a wait grows past what most players see and jumps back left when the drop
 	 * lands. The middle tick is the median player.
 	 */
-	private static final class Strip extends JComponent
+	static final class Strip extends JComponent
 	{
 		private static final long serialVersionUID = 1L;
+		/**
+		 * The website's LuckStrip, colours and stops: grey through the typical middle, Dry's amber inside
+		 * the Dry band and Very dry's red at the end, so a wait sits on the colour its verdict's chip has.
+		 */
+		private static final float[] STOPS = {0f, 0.35f, 0.65f, 0.85f, 1f};
+		private static final Color[] BANDS = {LUCKY, TRACK_MIDDLE, TRACK_MIDDLE, DRY, VERY_DRY};
 		private final double at;
 
 		Strip(double at)
@@ -752,10 +758,9 @@ final class DropLuckPanel extends JPanel
 			int x0 = 4;
 			int y = 5;
 			int half = w / 2;
-			g2.setPaint(new GradientPaint(x0, 0, LUCKY, x0 + (int) (w * 0.35), 0, TRACK_MIDDLE));
-			g2.fillRect(x0, y, half, 6);
-			g2.setPaint(new GradientPaint(x0 + (int) (w * 0.65), 0, TRACK_MIDDLE, x0 + w, 0, VERY_DRY));
-			g2.fillRect(x0 + half, y, w - half, 6);
+			/* A gradient needs two distinct points, which a strip squeezed to nothing would not give it. */
+			g2.setPaint(new LinearGradientPaint(x0, 0, x0 + Math.max(1, w), 0, STOPS, BANDS));
+			g2.fillRect(x0, y, w, 6);
 			g2.setColor(new Color(0x9ca3af));
 			g2.fillRect(x0 + half, y - 3, 1, 12);
 			int cx = x0 + (int) Math.round(w * at);
