@@ -171,6 +171,15 @@ class MapPin extends WorldMapPoint
 		return new Color(Integer.parseInt(hex.substring(1), 16));
 	}
 
+	/**
+	 * A member's disc as the world map draws it at its edge, their colour and initials, for the
+	 * sidebar to draw beside their name: the same person in the same picture in both places.
+	 */
+	static BufferedImage memberDisc(Color colour, @Nullable String name)
+	{
+		return disc(colour, initials(name), false);
+	}
+
 	private static BufferedImage disc(Color colour, String text, boolean faded)
 	{
 		BufferedImage image = new BufferedImage(DISC + 2, DISC + 2, BufferedImage.TYPE_INT_ARGB);

@@ -29,6 +29,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.image.BufferedImage;
 import java.lang.reflect.Constructor;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -39,6 +40,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.AbstractExecutorService;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nullable;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
@@ -119,6 +122,28 @@ public class DestinationCardTest
 			return shortestPathRunning;
 		}
 	};
+	/** What the cards asked the client's cache for, in order; each answers at once with a blank picture. */
+	private final List<String> asked = new ArrayList<>();
+	private final GameSprites sprites = new GameSprites(null, null, null)
+	{
+		@Override
+		void item(JLabel label, int itemId, int box)
+		{
+			asked.add("item " + itemId + " at " + box);
+			label.setIcon(new ImageIcon(new BufferedImage(box, box, BufferedImage.TYPE_INT_ARGB)));
+		}
+
+		@Override
+		void sprite(JLabel label, int spriteId, int box)
+		{
+			asked.add("sprite " + spriteId + " at " + box);
+			label.setIcon(new ImageIcon(new BufferedImage(box, box, BufferedImage.TYPE_INT_ARGB)));
+		}
+	};
+	/** The clue the inventory holds, as the reader last read it. */
+	@Nullable
+	private CompanionSnapshot.Clue carried;
+	private RoutePress press;
 	private NowCards cards;
 
 	public DestinationCardTest() throws Exception
@@ -128,13 +153,18 @@ public class DestinationCardTest
 		pairing.rememberSecret(pairing.code(), identity.id(), SECRET);
 		DeathWatcher deaths = construct(DeathWatcher.class);
 		RouteClient rerouter = new RouteClient(new OkHttpClient(), gson, game.client(), thread, pairing, identity, route);
-		RoutePress press = new RoutePress(answering(), gson, game.client(), thread, pairing, identity, route,
-			destinations, marker);
+		press = new RoutePress(answering(), gson, game.client(), thread, pairing, identity, route, destinations, marker);
 		FarmRunRoute runs = new FarmRunRoute(new FarmRunState(), destinations, route, thread);
-		ClueReader clues = new ClueReader(game.client());
+		ClueReader clues = new ClueReader(game.client())
+		{
+			@Override
+			CompanionSnapshot.Clue current()
+			{
+				return carried;
+			}
+		};
 		SwingUtilities.invokeAndWait(() -> cards = new NowCards(config, destinations, deaths, marker, route, rerouter,
-			shortestPath, press, clues, runs, new GameSprites(null, null, null), this::refreshNow,
-			() -> MapCompanionConfig.DEFAULT_MAP_URL));
+			shortestPath, press, clues, runs, sprites, this::refreshNow, () -> MapCompanionConfig.DEFAULT_MAP_URL));
 	}
 
 	/**
@@ -240,6 +270,7 @@ public class DestinationCardTest
 		assertEquals("T7 · 16m left", routed.note);
 		assertTrue(route.view().hasRoute());
 		assertEquals("a press of the player's own is followed", Arrays.asList("Pause", "Reroute", "Dismiss"), actions());
+		assertFalse("a press that drew nothing beside it shows no picture", picture().isVisible());
 	}
 
 	/** A refusal is said under the card, and Route stays for another try once the map's wait is over. */
@@ -276,6 +307,138 @@ public class DestinationCardTest
 		destinations.accept(gson.fromJson(reply, RelayResponse.class).directive);
 		refresh();
 		assertEquals(Arrays.asList("Dismiss"), actions());
+	}
+
+	/**
+	 * The card shows what it leads to, drawn by the row that asked: a clue's Route answered with the
+	 * place the map read from its words draws the scroll beside that place's name, at a step's size.
+	 */
+	@Test
+	public void aCluesAnswerShowsItsScroll() throws Exception
+	{
+		carried = new CompanionSnapshot.Clue();
+		carried.tier = "medium";
+		carried.itemId = 2801;
+		carried.text = "Speak to the bartender of the Rusty Anchor in Port Sarim.";
+		refresh();
+		assertEquals("the clue card's own scroll", Arrays.asList("item 2801 at 32"), asked);
+		asked.clear();
+
+		body = answer("Bartender, the Rusty Anchor", 3045, 3257);
+		press("Route");
+		refresh();
+		assertEquals("Bartender, the Rusty Anchor", destinations.getDestination().name);
+		assertEquals(Arrays.asList("item 2801 at " + RouteStepsView.PICTURE), asked);
+		assertNotNull(picture().getIcon());
+		assertTrue(picture().isVisible());
+
+		refresh();
+		assertEquals("asked once, not every second", 1, asked.size());
+	}
+
+	/** A search pick draws its row's own picture: here a bank's world-map icon. */
+	@Test
+	public void aSearchPickShowsItsRowsPicture() throws Exception
+	{
+		body = answer("Lumbridge Castle bank", 3208, 3220);
+		SwingUtilities.invokeAndWait(() ->
+		{
+			SearchPanel search = new SearchPanel(new SearchClient(new OkHttpClient(), gson, pairing, identity), press, sprites);
+			search.pick(new SearchClient.Hit("bank:lumbridge", "Lumbridge Castle bank", "Bank · 2nd floor", null,
+				new int[]{3208, 3220, 2}, "bank", null));
+		});
+		refresh();
+		assertEquals(Arrays.asList("sprite " + SearchPanel.spriteFor("bank", null) + " at " + RouteStepsView.PICTURE), asked);
+		assertNotNull(picture().getIcon());
+	}
+
+	/** A friend's Route draws their disc, as the world map draws them, without a presence dot. */
+	@Test
+	public void aFriendsAnswerShowsTheirDisc() throws Exception
+	{
+		RelayResponse.MemberDot dot = new RelayResponse.MemberDot();
+		dot.id = "cara";
+		dot.name = "Cara";
+		dot.colour = "#38bdf8";
+		dot.x = 3215;
+		dot.y = 3226;
+		dot.world = 302;
+		RelayResponse.RosterRow row = new RelayResponse.RosterRow();
+		row.id = "cara";
+		row.name = "Cara";
+		row.colour = "#38bdf8";
+		row.near = "near Lumbridge Castle";
+		body = answer(null, 3215, 3226);
+		press.press(GroupState.routeTarget(dot, Collections.singletonList(row)));
+		refresh();
+		/* The disc is drawn now and set on Swing's next turn, as a picture from the cache is. */
+		SwingUtilities.invokeAndWait(() -> { });
+		assertEquals("Cara", destinations.getDestination().name);
+		assertNotNull(picture().getIcon());
+		assertEquals(RouteStepsView.PICTURE, picture().getIcon().getIconWidth());
+	}
+
+	/**
+	 * The picture is the press's alone: it goes when the card holds another destination, and nothing
+	 * of it is in what the press sends. A press that drew none shows none; see the star's Route above.
+	 */
+	@Test
+	public void thePictureStaysWithItsOwnAnswer() throws Exception
+	{
+		aCluesAnswerShowsItsScroll();
+		received();
+		refresh();
+		assertFalse("a destination the map sent since has no picture", picture().isVisible());
+
+		RoutePress.Target bare = RoutePress.Target.tile("star", new WorldPoint(2974, 3240, 0), "Rimmington mine", 302, null);
+		RoutePress.Target pictured = bare.showing((label, box) -> label.setIcon(null));
+		assertEquals("the request is built without it", bodyOf(bare), bodyOf(pictured));
+	}
+
+	/** The map's answer to a press: a one-step walk to the tile it planned to, and its name for it. */
+	private static String answer(@Nullable String name, int x, int y)
+	{
+		return "{\"target\":{\"x\":" + x + ",\"y\":" + y + ",\"plane\":0" + (name == null ? "" : ",\"name\":\"" + name + "\"")
+			+ "},\"origin\":\"request\",\"options\":[{\"id\":\"walk\",\"label\":\"Walk\",\"best\":true,\"blocked\":false,"
+			+ "\"tiles\":30,\"steps\":[{\"slot\":\"walk-leg\",\"title\":\"Walk 30 tiles\",\"walk\":true,"
+			+ "\"at\":{\"x\":" + x + ",\"y\":" + y + ",\"plane\":0}}]}]}";
+	}
+
+	/** The body a press would send for a target, from where the test's player stands. */
+	private String bodyOf(RoutePress.Target target) throws Exception
+	{
+		Buffer buffer = new Buffer();
+		press.request("https://osrs-map.com", "ABC234", identity.id(), SECRET, target, new WorldPoint(3222, 3218, 0))
+			.body().writeTo(buffer);
+		return buffer.readString(StandardCharsets.UTF_8);
+	}
+
+	/** The picture's place beside the destination's name. */
+	private JLabel picture()
+	{
+		JLabel found = named(cards, "now.destination.picture");
+		assertNotNull(found);
+		return found;
+	}
+
+	private static JLabel named(Component component, String name)
+	{
+		if (component instanceof JLabel && name.equals(component.getName()))
+		{
+			return (JLabel) component;
+		}
+		if (component instanceof Container)
+		{
+			for (Component child : ((Container) component).getComponents())
+			{
+				JLabel found = named(child, name);
+				if (found != null)
+				{
+					return found;
+				}
+			}
+		}
+		return null;
 	}
 
 	/** Pin destination on a precise star, as StarsPanel makes it: no route. */

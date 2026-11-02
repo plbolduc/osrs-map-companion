@@ -32,6 +32,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
 import javax.annotation.Nullable;
+import javax.swing.JLabel;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.coords.WorldPoint;
@@ -108,9 +109,12 @@ final class RoutePress
 		 */
 		@Nullable
 		final CompanionSnapshot.Clue clue;
+		/** What the row that asked drew beside it, for the destination's card; never sent. */
+		@Nullable
+		final Picture picture;
 
 		private Target(String source, @Nullable String id, @Nullable WorldPoint tile, String name,
-			@Nullable Integer world, @Nullable String note, @Nullable CompanionSnapshot.Clue clue)
+			@Nullable Integer world, @Nullable String note, @Nullable CompanionSnapshot.Clue clue, @Nullable Picture picture)
 		{
 			this.source = source;
 			this.id = id;
@@ -119,21 +123,55 @@ final class RoutePress
 			this.world = world;
 			this.note = note;
 			this.clue = clue;
+			this.picture = picture;
 		}
 
 		static Target place(String source, String id, String name, @Nullable WorldPoint stood, @Nullable String note)
 		{
-			return new Target(source, id, stood, name, null, note, null);
+			return new Target(source, id, stood, name, null, note, null, null);
 		}
 
 		static Target tile(String source, WorldPoint tile, String name, @Nullable Integer world, @Nullable String note)
 		{
-			return new Target(source, null, tile, name, world, note, null);
+			return new Target(source, null, tile, name, world, note, null, null);
 		}
 
 		static Target clue(String source, CompanionSnapshot.Clue clue, String name, @Nullable String note)
 		{
-			return new Target(source, null, null, name, null, note, clue);
+			return new Target(source, null, null, name, null, note, clue, null);
+		}
+
+		/** The same target, with the picture the destination's card draws beside the answer. */
+		Target showing(@Nullable Picture shown)
+		{
+			return new Target(source, id, tile, name, world, note, clue, shown);
+		}
+	}
+
+	/**
+	 * The picture a press's own row drew beside what it asked about — a clue's scroll, a search row's
+	 * sprite or icon, a friend's disc — for the destination's card to draw beside the answer, so the
+	 * card shows what it leads to before it is read. Local only: it stays here and on the card, and
+	 * {@link #request} builds the body from the id, the clue and the tile alone.
+	 */
+	interface Picture
+	{
+		/** Put the picture on {@code label}, fitted to {@code box} square, now or when the cache answers. EDT. */
+		void draw(JLabel label, int box);
+	}
+
+	/** The picture of the destination the last answered press made, by that destination's key. */
+	private static final class Shown
+	{
+		final String key;
+		final Picture picture;
+		final long generation;
+
+		Shown(String key, Picture picture, long generation)
+		{
+			this.key = key;
+			this.picture = picture;
+			this.generation = generation;
 		}
 	}
 
@@ -215,6 +253,12 @@ final class RoutePress
 
 	@Nullable
 	private volatile Said said;
+	/**
+	 * Kept apart from {@link #said}, which the next press replaces even when it is refused: the card
+	 * still shows this answer then, and its picture with it.
+	 */
+	@Nullable
+	private volatile Shown shown;
 
 	@Inject
 	RoutePress(OkHttpClient http, Gson gson, Client client, ClientThread clientThread, Pairing pairing,
@@ -260,6 +304,19 @@ final class RoutePress
 	{
 		Said now = said;
 		return now != null && now.generation == destinations.generation() ? now : null;
+	}
+
+	/**
+	 * The picture for the destination on the card, while it is the one a press made: the same place,
+	 * by {@link DestinationRoute#keyOf}, since the destinations were last cleared. Null otherwise, so
+	 * a destination sent since, or a press that drew nothing, shows no picture.
+	 */
+	@Nullable
+	Picture picture(@Nullable RelayResponse.Destination destination)
+	{
+		Shown now = shown;
+		return now != null && destination != null && now.generation == destinations.generation()
+			&& now.key.equals(DestinationRoute.keyOf(destination)) ? now.picture : null;
 	}
 
 	/** Client thread: the credentials, the tile, then the call. */
@@ -372,6 +429,7 @@ final class RoutePress
 				}
 				destinations.selectLocal(destination);
 				route.adoptPressed(destination);
+				shown = target.picture == null ? null : new Shown(DestinationRoute.keyOf(destination), target.picture, asked);
 			}
 			said = new Said(target.source, false, null, DestinationRoute.keyOf(destination), asked);
 			marker.sync();

@@ -25,6 +25,8 @@
  */
 package com.pbolduc.mapcompanion;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.function.Supplier;
@@ -37,6 +39,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.components.ThinProgressBar;
@@ -74,6 +77,9 @@ final class NowCards extends JPanel
 	private static final long serialVersionUID = 1L;
 	/** The clue scroll's sprite beside the card's title, at the size the inventory draws it. */
 	private static final int CLUE_PICTURE = 32;
+	/** The picture beside a destination's name, at the size a route step's is drawn, and its gap. */
+	private static final int DESTINATION_PICTURE = RouteStepsView.PICTURE;
+	private static final int DESTINATION_PICTURE_GAP = 5;
 
 	private final MapCompanionConfig config;
 	private final DestinationState destinationState;
@@ -84,6 +90,14 @@ final class NowCards extends JPanel
 	private final Supplier<String> mapUrl;
 
 	private final JLabel destinationName = new JLabel();
+	/**
+	 * What the destination leads to, drawn by the row that asked for it: the clue's scroll, the
+	 * search row's sprite or icon, the friend's disc. A slot of fixed size beside the name, so the
+	 * name does not move when the client's cache answers. See {@link RoutePress#picture}.
+	 */
+	private final JLabel destinationPicture = new JLabel();
+	@Nullable
+	private RoutePress.Picture shownPicture;
 	private final JLabel destinationDetail = new JLabel();
 	private final JPanel destinationActions = row(ColorScheme.DARKER_GRAY_COLOR);
 	private List<JButton> shownDestinationActions = new ArrayList<>();
@@ -199,7 +213,18 @@ final class NowCards extends JPanel
 		add(gap(3, ColorScheme.DARK_GRAY_COLOR));
 		JPanel destination = card();
 		destinationName.setFont(destinationName.getFont().deriveFont(12f));
-		destination.add(left(destinationName));
+		destinationPicture.setName("now.destination.picture");
+		destinationPicture.setHorizontalAlignment(SwingConstants.CENTER);
+		destinationPicture.setVerticalAlignment(SwingConstants.TOP);
+		Dimension square = new Dimension(DESTINATION_PICTURE, DESTINATION_PICTURE);
+		destinationPicture.setPreferredSize(square);
+		destinationPicture.setMinimumSize(square);
+		destinationPicture.setVisible(false);
+		JPanel named = new JPanel(new BorderLayout(DESTINATION_PICTURE_GAP, 0));
+		named.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		named.add(destinationPicture, BorderLayout.WEST);
+		named.add(destinationName, BorderLayout.CENTER);
+		destination.add(left(named));
 		destinationDetail.setFont(destinationDetail.getFont().deriveFont(11f));
 		destinationDetail.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
 		destination.add(left(destinationDetail));
@@ -443,13 +468,22 @@ final class NowCards extends JPanel
 		if (tile != null)
 		{
 			routePress.press(RoutePress.Target.tile("clue", new WorldPoint(tile.x, tile.y, tile.plane),
-				clueTitle(clue.tier), null, clue.coordTile != null ? "Coordinate" : "Beginner map"));
+				clueTitle(clue.tier), null, clue.coordTile != null ? "Coordinate" : "Beginner map").showing(scroll(clue)));
 		}
 		else if (ClueReader.routesByClue(clue))
 		{
-			routePress.press(RoutePress.Target.clue("clue", clue, clueTitle(clue.tier), clueTitle(clue.tier)));
+			routePress.press(RoutePress.Target.clue("clue", clue, clueTitle(clue.tier), clueTitle(clue.tier))
+				.showing(scroll(clue)));
 		}
 		refresh.run();
+	}
+
+	/** The clue's scroll, as its own card draws it, for the destination's card beside the answer. */
+	@Nullable
+	private RoutePress.Picture scroll(CompanionSnapshot.Clue clue)
+	{
+		Integer itemId = clue.itemId != null && clue.itemId > 0 ? clue.itemId : null;
+		return itemId == null ? null : (label, box) -> sprites.item(label, itemId, box);
 	}
 
 	/**
@@ -527,7 +561,20 @@ final class NowCards extends JPanel
 		destinationSlot.setVisible(destination != null && !farmDestination);
 		if (destination != null)
 		{
-			setWrapped(destinationName, destination.name, CARD_TEXT_WIDTH);
+			/* Drawn once per press's answer rather than every second, and gone with another destination. */
+			RoutePress.Picture picture = routePress.picture(destination);
+			if (picture != shownPicture)
+			{
+				shownPicture = picture;
+				destinationPicture.setIcon(null);
+				if (picture != null)
+				{
+					picture.draw(destinationPicture, DESTINATION_PICTURE);
+				}
+			}
+			destinationPicture.setVisible(picture != null);
+			setWrapped(destinationName, destination.name,
+				picture != null ? CARD_TEXT_WIDTH - DESTINATION_PICTURE - DESTINATION_PICTURE_GAP : CARD_TEXT_WIDTH);
 			String detail = destinationDetail(destination);
 			destinationDetail.setVisible(!detail.isEmpty());
 			setWrapped(destinationDetail, detail, CARD_TEXT_WIDTH);
