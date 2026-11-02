@@ -435,6 +435,25 @@ public class MapCompanionPanel extends PluginPanel
 		return label;
 	}
 
+	/**
+	 * A card under Tasks: the farm run's, Slayer's or the port tasks', each a darker column under a white
+	 * heading in bold with its skill's icon, so the three read as one kind of thing. Returns the heading.
+	 */
+	static JLabel taskCard(JPanel card, String name, String title, GameSprites sprites, String skill)
+	{
+		card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
+		card.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		/* Each card's inset; the gap between cards is the Tasks column's to draw. */
+		card.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+		card.setName(name);
+		JLabel heading = new JLabel(title);
+		heading.setForeground(Color.WHITE);
+		heading.setFont(heading.getFont().deriveFont(Font.BOLD, 13f));
+		sprites.skill(heading, skill, 16);
+		left(card).add(heading);
+		return heading;
+	}
+
 	/** A section's name: bold, small and grey, the way the old join heading was. */
 	static JLabel sectionHead(String text)
 	{

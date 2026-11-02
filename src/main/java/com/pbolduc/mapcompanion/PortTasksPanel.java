@@ -27,7 +27,6 @@ package com.pbolduc.mapcompanion;
 
 import com.google.inject.Inject;
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.List;
@@ -89,18 +88,9 @@ final class PortTasksPanel extends JPanel
 		this.config = config;
 		this.client = client;
 		this.run = new RunView(true, state, client, follower, routes, shortest, sprites, config);
-		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		setBackground(ColorScheme.DARKER_GRAY_COLOR);
-		setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
-		setName("portTasks");
-		MapCompanionPanel.left(this);
-		JLabel heading = new JLabel("Port tasks");
-		heading.setForeground(Color.WHITE);
-		heading.setFont(heading.getFont().deriveFont(Font.BOLD, 13f));
 		/* The bold face's last "s" draws past its advance; two pixels keep it inside the label. */
-		heading.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 2));
-		sprites.skill(heading, "Sailing", 16);
-		add(MapCompanionPanel.left(heading));
+		MapCompanionPanel.taskCard(this, "portTasks", "Port tasks", sprites, "Sailing")
+			.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 2));
 		body.setOpaque(false);
 		body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
 		add(MapCompanionPanel.left(body));
