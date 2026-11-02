@@ -312,7 +312,7 @@ The website plan's second session, once the routes in the game are built: a memb
       now: the Settings page still shows everything off. Change the map address to a local map and
       Connect: one question names that server, and Cancel sends nothing. Connect and press Share
       what's ticked: Settings shows every switch on but *Where you died*, the receive stream opens,
-      and *Notify before a meetup* stays off. Restart RuneLite and reconnect: no step. In RuneLite's
+      and *Meetup reminder* stays off. Restart RuneLite and reconnect: no step. In RuneLite's
       own config panel, ticking a sharing setting asks no "Are you sure?".
 - [ ] **Sharing as six switches after an update.** On a RuneLite profile that ran 1.3.0 with all of
       Map presence and two fields of Tasks and timers ticked, start this version. RuneLite's list
@@ -356,10 +356,10 @@ The website plan's second session, once the routes in the game are built: a memb
       fresh RuneLite: *Needs an invite*, and an invite to the same group pasted and joined puts it
       back without waiting for the retry.
 - [ ] **The reminder.** Leave RuneLite's own *Send notifications when focused* off, as it ships. Tick
-      *Meetup notifications* in the sidebar and set *Minutes before a meetup* to 2. With RuneLite
+      *Meetup reminder* in the sidebar and set *Minutes before a meetup* to 2. With RuneLite
       focused and the game being played, a meetup two minutes off raises one notification, with the
       tray and sound RuneLite's settings give, and no second one; with the box unticked, none. In
-      RuneLite's configuration, the cog beside *Notify before a meetup* shows *Customize notification*
+      RuneLite's configuration, the cog beside *Meetup reminder* shows *Customize notification*
       and *Send notifications when focused* ticked. Untick the latter there: the next reminder waits
       while RuneLite is focused, and unticking and ticking the sidebar's box keeps that choice.
 

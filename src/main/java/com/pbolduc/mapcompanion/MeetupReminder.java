@@ -36,7 +36,7 @@ import java.util.Set;
  * <p>A countdown that only exists in the sidebar is a countdown you miss, because the sidebar is
  * shut and the game is on the other screen. So this is the one moment the plugin interrupts, through
  * RuneLite's own notifier, which the player's notification settings already govern, and only when
- * <i>Notify before a meetup</i> is on, which it is not until the player turns it on. It still does
+ * <i>Meetup reminder</i> is on, which it is not until the player turns it on. It still does
  * not act: a notification is a sentence, and walking there remains the player's own business.
  *
  * <p>Every meetup of the week is watched, not only the next, and each is said once — by its id, its

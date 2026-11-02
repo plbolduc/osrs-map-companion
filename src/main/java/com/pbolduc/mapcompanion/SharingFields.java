@@ -162,7 +162,7 @@ final class SharingFields
 	 * What this client draws or does. The first two open the receive stream, and Route here asks the map
 	 * on a press, as every Route does; the rest stay here.
 	 */
-	static final Field DESTINATIONS = field("showDestination", "Show map destinations", MapCompanionConfig::showDestination,
+	static final Field DESTINATIONS = field("showDestination", "Destinations and meetups", MapCompanionConfig::showDestination,
 		"Receive destinations and meetup details. Nothing is clicked or walked for you.");
 	static final Field GROUP_ON_WORLD_MAP = field("showGroupOnWorldMap", "Group on the world map", MapCompanionConfig::showGroupOnWorldMap,
 		"Receive the positions your group already shares and draw them on the world map.");
@@ -174,7 +174,7 @@ final class SharingFields
 		"When you follow a route, the Shortest Path plugin draws each walking step. Nothing leaves this computer.");
 	static final Field ROUTE_HERE = field("routeHereOnWorldMap", "Route here on the world map", MapCompanionConfig::routeHereOnWorldMap,
 		"Right-click the world map for the way to that spot. A press sends that spot and where you stand, as Route does.");
-	static final Field NOTIFY_MEETUPS = new Field("notifyMeetups", "Meetup notifications", config -> config.notifyMeetups().isEnabled(),
+	static final Field NOTIFY_MEETUPS = new Field("notifyMeetups", "Meetup reminder", config -> config.notifyMeetups().isEnabled(),
 		"A RuneLite notification before a meetup starts. Ticked here, it comes while you play too; how it arrives follows RuneLite's own notification settings.",
 		true);
 	static final Field DROP_LUCK_CHAT = field("dropLuckChat", "Drop luck in chat", MapCompanionConfig::dropLuckChat,

@@ -75,8 +75,8 @@ shows a boat; the map treats that absence as unknown, not as owning no boat. Boa
 type and cargo are never sent. The same values are read locally, whatever the setting, to follow a
 voyage's steps; that sends nothing.
 
-**The step after a first Connect.** Every sharing setting, **Show destinations from the map** and
-**Show my group on the world map** start off. After the first Connect to a map, the sidebar shows a row each for the
+**The step after a first Connect.** Every sharing setting, **Destinations and meetups** and
+**Group on the world map** start off. After the first Connect to a map, the sidebar shows a row each for the
 character name, the four sharing groups and those two drawing choices, all ticked, and *Where you
 died* unticked, with a line saying the drawing choices open one connection. A group's row is all of
 its fields or none, as its switch in Settings is. *What each one sends*,
@@ -84,8 +84,8 @@ a fold under the rows, names every field and describes the receive stream in ful
 do, and is the only thing in the step that changes anything: ticking and
 **Not now** write nothing, and nothing in the step makes a request. It follows only the Connect that
 approved its map, which happens once per map, and only while every choice it could turn on is still
-off, so a player who connected before, or chose first, is never offered it. Meetup notifications
-are not in it.
+off, so a player who connected before, or chose first, is never offered it. The meetup reminder
+is not in it.
 
 Enabling either drawing choice opens a receive stream; group positions are requested only with
 the latter. **Copy invite**
@@ -121,7 +121,7 @@ baseline, and nothing done before it is announced. Quest starts, single diary ta
 Recipe for Disaster subquests are never announced. The map keeps a quest only under a name its
 own quest list carries.
 
-**Farm runs.** With **Show destinations from the map** enabled, snapshots include the plumbing
+**Farm runs.** With **Destinations and meetups** enabled, snapshots include the plumbing
 field `runReceiverVersion: 1`. It contains no character data and is omitted with that setting off.
 The website offers Send run only for a fresh, compatible receiver belonging to its own reader.
 An itinerary arrives as `run` and a monotonic `runRevision` in the existing reply/stream; its
@@ -208,10 +208,10 @@ so the sidebar has it to offer; the snapshot still carries it only with that cho
 **The Group section** is read from what the map already sends: `roster`, one row per other member
 with their name, colour, presence, *near*, *Near you* and newest news, arrives on every snapshot
 reply and stream frame and is shown whatever the destination setting; `events`, the week's meetups
-with their answers, is shown only with **Show destinations from the map**, as the single `event`
+with their answers, is shown only with **Destinations and meetups**, as the single `event`
 always was. A map that sends neither leaves the sidebar as it was. Neither carries a tile.
 **World map** beside a friend, or **Route** to a friend whose position this client has not been
-sent, opens the receive stream with `members=1`, the same question *Show my group on the world map*
+sent, opens the receive stream with `members=1`, the same question *Group on the world map*
 asks, and draws only that friend; it sends nothing of yours. A Route to a friend goes once to the
 tile in their dot, under Reroute's rules, and never into an instance.
 
@@ -220,7 +220,7 @@ The meetup answers are `PUT /api/companion/event/answer` with the meetup's id an
 time, the tile you stand on and your world, and copies the link the map answers with after checking
 it is a path on the map address. Both carry the group code, member id and member secret, one at a
 time, and none before a `Retry-After` has passed. Neither is ever sent without a press.
-**Notify before a meetup** (off) raises one RuneLite notification per meetup, the chosen number of
+**Meetup reminder** (off) raises one RuneLite notification per meetup, the chosen number of
 minutes before it starts; it reads only what the map already sent.
 
 **Draw paths with Shortest Path** (on) talks to the Shortest Path plugin, if it is installed,
