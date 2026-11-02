@@ -248,7 +248,8 @@ public class StarsWordsTest
 			pairing, identity, store);
 		RoutePress press = new RoutePress(http, new Gson(), game, now, pairing, identity, new DestinationRoute(), destinations,
 			new TestDestinationMarker());
-		panel = new StarsPanel(service, destinations, now, new TestDestinationMarker(), press, () -> MapCompanionConfig.DEFAULT_MAP_URL);
+		panel = new StarsPanel(service, destinations, now, new TestDestinationMarker(), press, () -> MapCompanionConfig.DEFAULT_MAP_URL,
+			new DestinationRoute(), null, null, null, rerouting -> null, () -> { });
 	}
 
 	/** The sidebar open on Stars: the client asks the game, and hands its answer back to Swing. */
