@@ -1,9 +1,10 @@
 # Plugin Hub submission
 
 **On the Plugin Hub since 27 October 2026**, merged in
-[runelite/plugin-hub#19494](https://github.com/runelite/plugin-hub/pull/19494). The steps below
-are how it was submitted; a release after that is a merged plugin commit, then `commit=` updated
-in the Hub's `plugins/osrs-map-companion`. Completed and outstanding game checks
+[runelite/plugin-hub#19494](https://github.com/runelite/plugin-hub/pull/19494), and updated to 1.3.0
+(`fbf96fa`) in [runelite/plugin-hub#19712](https://github.com/runelite/plugin-hub/pull/19712) on
+30 October. The steps below are how it was submitted; a release after that is a merged plugin
+commit, then `commit=` updated in the Hub's `plugins/osrs-map-companion`. Completed and outstanding game checks
 are recorded in [Live checks](live-checks.md). A successful build does not establish live-event
 coverage or guarantee RuneLite approval.
 
@@ -20,7 +21,7 @@ coverage or guarantee RuneLite approval.
    warning=This plugin sends your IP address and selected character data, including your name, world, position and progress, to a third-party map server not controlled or verified by RuneLite developers.
    ```
 
-4. Open a PR titled **osrs-map-companion: update to 1.3.0**, using the reviewer notes below.
+4. Open a PR titled **osrs-map-companion: update to 1.4.0**, using the reviewer notes below.
    Include the actual validation results and outstanding live checks.
 5. Address reviewer feedback in the plugin repository, then update `commit=` in the same Hub PR.
 
@@ -31,7 +32,7 @@ The warning belongs in the Hub manifest. The root `runelite-plugin.properties` d
 
 ## Reviewer notes
 
-The next update expands the existing **Farming patches** choice to all 99 crop patches in
+This update expands the existing **Farming patches** field, shared under *Tasks and timers*, to all 99 crop patches in
 RuneLite 1.13.4's Time Tracking catalogue, excluding compost bins. The decoder is bundled data
 with source attribution and a full parity check; it does not call another plugin's internals.
 The existing cadence, consent, byte cap and local empty-to-newly-planted receipt rule remain.
@@ -299,6 +300,13 @@ Say these in the description of the next Hub update, as changes from what was ap
   the sidebar, it is written as RuneLite's panel initialises a customised notification, from
   RuneLite's own settings, with *Send notifications when focused* on, so it reaches a player whose
   RuneLite window is focused. It still goes only through `Notifier`, and nothing leaves the machine.
+- **A review of every sidebar state** (plugin #25 to #37): words, layout and fixes on every card, none
+  of which adds a request. A world hop keeps the Stars list and the task cards; a pasted invite joins
+  on Connect; a refused press is drawn in one colour and a Route held by the map's wait counts it
+  down; at the login screen the presses that need a character are greyed. A farm run whose sharing
+  field is off is refused in the sidebar and sends nothing; after a refusal the map gave in words, the
+  next press waits five seconds or the Retry-After, and a failure still backs off thirty seconds. The
+  death card reads the gravestone's own timer as above, and nothing about it is sent.
 
 ## Before submission
 
