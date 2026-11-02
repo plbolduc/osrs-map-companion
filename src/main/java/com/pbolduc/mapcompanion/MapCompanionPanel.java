@@ -797,6 +797,27 @@ public class MapCompanionPanel extends PluginPanel
 	}
 
 	/**
+	 * A wrapped line shown only while it has words, and given none while hidden. Two shapes, because the
+	 * lines differ in what a hidden one keeps: this empties it, and {@link #showKeeping} leaves the words
+	 * it last showed.
+	 */
+	static void show(JLabel label, @Nullable String text, int width)
+	{
+		label.setVisible(text != null);
+		setWrapped(label, text, width);
+	}
+
+	/** The same for a line whose hidden words stay as they were: see {@link #show}. */
+	static void showKeeping(JLabel label, @Nullable String text, int width)
+	{
+		label.setVisible(text != null);
+		if (text != null)
+		{
+			setWrapped(label, text, width);
+		}
+	}
+
+	/**
 	 * The ink of a line a press left under its button: {@link #REFUSED} while it says the press did
 	 * not happen, and the line's grey for a press on its way, a wait being kept, or one that worked.
 	 */

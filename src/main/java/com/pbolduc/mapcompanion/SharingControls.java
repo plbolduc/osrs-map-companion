@@ -343,11 +343,7 @@ final class SharingControls extends JPanel
 			boolean part = !on.isEmpty() && !whole;
 			box.setSelected(whole);
 			box.putClientProperty("JButton.selectedState", part ? "indeterminate" : null);
-			partly.setVisible(part);
-			if (part)
-			{
-				MapCompanionPanel.setWrapped(partly, "Partly shared: " + labels(on, ", "), TEXT - TEXT_INSET);
-			}
+			MapCompanionPanel.showKeeping(partly, part ? "Partly shared: " + labels(on, ", ") : null, TEXT - TEXT_INSET);
 		}
 	}
 }

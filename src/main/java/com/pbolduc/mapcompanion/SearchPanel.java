@@ -190,12 +190,8 @@ final class SearchPanel extends JPanel
 		boolean refused = shown != null && (shown.planning || shown.message != null) ? shown.refused()
 			: !result.searching && result.refused;
 		/* Drawn on every refresh rather than with the rows: a wait it says counts its seconds down. */
-		status.setVisible(line != null);
-		if (line != null)
-		{
-			MapCompanionPanel.setWrapped(status, line, WIDTH + 16);
-			MapCompanionPanel.tone(status, refused);
-		}
+		MapCompanionPanel.showKeeping(status, line, WIDTH + 16);
+		MapCompanionPanel.tone(status, refused);
 		boolean live = press.ready();
 		String words = folded + "|" + live + "|" + result.query + "|" + result.suggestion + "|"
 			+ result.hits.size() + "|" + hitsKey(result);
