@@ -152,7 +152,8 @@ public class MeetupClientTest
 		MeetupClient busy = client(429, "{\"reason\":\"busy\"}", "20", false);
 		busy.answer("star-hunt", "maybe");
 		settle(busy, "answer:star-hunt");
-		assertEquals(MeetupClient.BUSY, busy.said("answer:star-hunt").message);
+		/* "Try again in a few seconds." for a twenty-second wait: the seconds are said from the gate now. */
+		assertEquals(MapWait.BUSY, busy.said("answer:star-hunt").message);
 		assertFalse(busy.ready());
 		busy.answer("star-hunt", "maybe");
 		assertEquals("nothing goes inside the map's wait", 1, sent.size());

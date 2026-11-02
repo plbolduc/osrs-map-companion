@@ -323,10 +323,17 @@ final class SearchClient
 		if (wait > 0)
 		{
 			pendingTimer = debouncer.schedule(this::due, wait);
-			show(new Result(query, result.hits, null, waitSentence(wait), false));
+			/* Not refused: the search goes by itself, and the box's line counts the wait down; see MapWait. */
+			show(new Result(query, result.hits, null, MapWait.ASKED, false));
 			return;
 		}
 		due();
+	}
+
+	/** How long the map's wait before the next search has left at {@code now}, or 0. */
+	long waitMs(long now)
+	{
+		return Math.max(0L, nextAllowedMs - now);
 	}
 
 	/**
@@ -431,7 +438,8 @@ final class SearchClient
 					if (status == 429 || status == 503)
 					{
 						next = now + StarsClient.retryDelay(wait);
-						why = busySentence(next - now);
+						/* Nothing is asked again until the player types or presses Enter; the line counts the wait down. */
+						why = MapWait.BUSY;
 					}
 					else if (!close.isSuccessful())
 					{
@@ -622,22 +630,5 @@ final class SearchClient
 		}
 		String folded = text.replaceAll("[\\p{Cntrl}\\s]+", " ").trim();
 		return folded.length() > MAX_QUERY ? folded.substring(0, MAX_QUERY).trim() : folded;
-	}
-
-	/** Enter pressed inside the map's wait: the search goes by itself once the wait is over. */
-	static String waitSentence(long waitMs)
-	{
-		return "The map asked to wait. Searching in " + seconds(waitMs) + "s.";
-	}
-
-	/** A refusal with a wait: nothing is asked again until the player types or presses Enter. */
-	static String busySentence(long waitMs)
-	{
-		return "The map is busy. Try again in " + seconds(waitMs) + "s.";
-	}
-
-	private static long seconds(long ms)
-	{
-		return Math.max(1, (ms + 999) / 1000);
 	}
 }

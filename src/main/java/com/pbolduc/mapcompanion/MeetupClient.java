@@ -80,7 +80,6 @@ final class MeetupClient
 	static final String NEEDS_CONNECTION = "Connect to your map to answer or make a meetup.";
 	/** The cause and the one step that fixes it: a meetup is made on the tile you stand on, which an instance does not give. */
 	static final String NEEDS_TILE = "You can't make a meetup inside an instance. Step outside, then press Make meetup.";
-	static final String BUSY = "The map asked to wait. Try again in a few seconds.";
 	static final String ONE_AT_A_TIME = "The last answer is still on its way.";
 	static final String GONE = "That meetup isn't in this group any more.";
 	static final String REFUSED = "The map would not take that meetup. A title and a time within the month are needed.";
@@ -213,6 +212,18 @@ final class MeetupClient
 		return !busy && System.currentTimeMillis() >= nextAllowedMs;
 	}
 
+	/** How long the map's wait before the next write has left at {@code now}, or 0. */
+	synchronized long waitMs(long now)
+	{
+		return Math.max(0L, nextAllowedMs - now);
+	}
+
+	/** What a write said, as it is drawn at {@code now}: a wait it met counts down; see {@link MapWait}. */
+	String words(Said said, long now)
+	{
+		return MapWait.waits(said.message) ? MapWait.tryAgain(said.message, waitMs(now)) : said.message;
+	}
+
 	/** Answer a meetup: one of the map's four. A press, on any thread. */
 	void answer(String eventId, String answer)
 	{
@@ -275,7 +286,7 @@ final class MeetupClient
 			}
 			if (System.currentTimeMillis() < nextAllowedMs)
 			{
-				said = new Said(source, false, BUSY, asked);
+				said = new Said(source, false, MapWait.ASKED, asked);
 				return;
 			}
 			busy = true;
@@ -319,7 +330,7 @@ final class MeetupClient
 			int status = close.code();
 			if (status == 429 || status == 503)
 			{
-				finish(source, asked, BUSY, now + StarsClient.retryDelay(wait));
+				finish(source, asked, MapWait.BUSY, now + StarsClient.retryDelay(wait));
 				return;
 			}
 			if (!close.isSuccessful())

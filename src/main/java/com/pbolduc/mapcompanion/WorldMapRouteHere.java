@@ -157,8 +157,9 @@ class WorldMapRouteHere
 		{
 			return;
 		}
-		String refusal = refusal(before, routePress.said(SOURCE));
-		if (refusal == null && !answered(before, routePress.said(SOURCE)))
+		RoutePress.Said said = routePress.said(SOURCE);
+		String refusal = refusal(before, said);
+		if (refusal == null && !answered(before, said))
 		{
 			return;
 		}
@@ -166,11 +167,12 @@ class WorldMapRouteHere
 		marker.planning(null);
 		if (refusal != null)
 		{
+			/* Said once, so a wait is the seconds left as it is said: "The map is busy. Try again in 25s." */
 			chat.queue(QueuedMessage.builder()
 				.type(ChatMessageType.GAMEMESSAGE)
 				.runeLiteFormattedMessage(new ChatMessageBuilder()
 					.append(ChatColorType.HIGHLIGHT).append(OPTION + ": ")
-					.append(ChatColorType.NORMAL).append(refusal)
+					.append(ChatColorType.NORMAL).append(routePress.words(said, System.currentTimeMillis()))
 					.build())
 				.build());
 		}

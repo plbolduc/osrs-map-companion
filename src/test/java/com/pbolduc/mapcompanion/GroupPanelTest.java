@@ -714,6 +714,40 @@ public class GroupPanelTest
 		});
 	}
 
+	/**
+	 * A meetup answer refused while the map was busy said "Try again in a few seconds." for twenty.
+	 * The line under the answers counts the meetups' own wait down on every refresh, between two
+	 * rebuilds of the card, and says so once it is over.
+	 */
+	@Test
+	public void aBusyAnswerCountsTheMeetupsWaitDown() throws Exception
+	{
+		OkHttpClient busy = new OkHttpClient.Builder().addInterceptor(chain ->
+		{
+			sent.add(chain.request());
+			return new Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1).code(429).message("")
+				.header("Retry-After", "20").body(ResponseBody.create(JSON, "{\"reason\":\"busy\"}")).build();
+		}).build();
+		AtomicReference<GroupPanel> panel = new AtomicReference<>();
+		SwingUtilities.invokeAndWait(() -> panel.set(panel(busy)));
+		social();
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.get().refresh(true);
+			named(panel.get(), "group.answer.star-hunt.going").doClick();
+		});
+		until(() -> meetups.said("answer:star-hunt") != null && !meetups.said("answer:star-hunt").sending);
+		long now = System.currentTimeMillis();
+		long opens = now + meetups.waitMs(now);
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.get().refresh(true, opens - 12_000L);
+			assertNotNull(words(panel.get()), saying(panel.get(), "The map is busy. Try again in 12s."));
+			panel.get().refresh(true, opens);
+			assertNotNull(words(panel.get()), saying(panel.get(), "The map was busy."));
+		});
+	}
+
 	/** The shown label whose words, markup taken out, are these. */
 	private static javax.swing.JLabel saying(Container parent, String words)
 	{

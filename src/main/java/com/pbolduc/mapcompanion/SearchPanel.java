@@ -31,6 +31,8 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nullable;
 import javax.swing.JButton;
@@ -96,6 +98,10 @@ final class SearchPanel extends JPanel
 	private final JLabel status = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
 	/** The list is folded once a pick's answer has filled the destination's card; typing or Enter opens it again. */
 	private boolean folded;
+	/** The rows drawn while a pick would not go, whose tooltip says how long the map's wait has left. */
+	private final transient List<JPanel> heldRows = new ArrayList<>();
+	/** Such a row's tooltip while a route plans, with no wait to count. */
+	private static final String HELD = "The map plans one route at a time, a few seconds apart. Pick again in a moment.";
 	/** The row whose pick is out or was refused, so a refusal can name it; null once answered or typed past. */
 	@Nullable
 	private transient SearchClient.Hit picked;
@@ -197,22 +203,32 @@ final class SearchPanel extends JPanel
 		RoutePress.Said said = press.said(SOURCE);
 		heard(said);
 		RoutePress.Said shown = said == quiet ? null : said;
+		long now = System.currentTimeMillis();
 		String line = shown != null && shown.planning ? "Planning the way there…"
-			: shown != null && shown.message != null ? named(shown.message)
+			: shown != null && shown.message != null ? named(press.words(shown, now))
 			: result.searching ? "Searching…"
-			: result.message;
+			: searchLine(result, now);
 		/* A pick or a search that did not happen, in the refusal pink; what is on its way, or an empty answer, in grey. */
 		boolean refused = shown != null && (shown.planning || shown.message != null) ? shown.refused()
 			: !result.searching && result.refused;
+		/* Drawn on every refresh rather than with the rows: a wait it says counts its seconds down. */
+		status.setVisible(line != null);
+		if (line != null)
+		{
+			MapCompanionPanel.setWrapped(status, line, WIDTH + 16);
+			MapCompanionPanel.tone(status, refused);
+		}
 		boolean live = press.ready();
-		String words = folded + "|" + live + "|" + result.query + "|" + result.suggestion + "|" + line + "|" + refused + "|"
+		String words = folded + "|" + live + "|" + result.query + "|" + result.suggestion + "|"
 			+ result.hits.size() + "|" + hitsKey(result);
 		if (Objects.equals(words, drawn))
 		{
+			holdTips(now);
 			return;
 		}
 		drawn = words;
 		rows.removeAll();
+		heldRows.clear();
 		if (!folded)
 		{
 			String section = null;
@@ -246,15 +262,35 @@ final class SearchPanel extends JPanel
 				rows.add(holder);
 			}
 		}
-		status.setVisible(line != null);
-		if (line != null)
-		{
-			MapCompanionPanel.setWrapped(status, line, WIDTH + 16);
-			MapCompanionPanel.tone(status, refused);
-		}
+		holdTips(now);
 		rows.revalidate();
 		rows.repaint();
 		revalidate();
+	}
+
+	/**
+	 * The search's own line at {@code now}: a busy map counts its wait down, and Enter pressed inside
+	 * the wait says when the search goes by itself. Either is the search's own wait, not the routes'.
+	 */
+	@Nullable
+	private String searchLine(SearchClient.Result result, long now)
+	{
+		if (!MapWait.waits(result.message))
+		{
+			return result.message;
+		}
+		long wait = search.waitMs(now);
+		return result.refused ? MapWait.tryAgain(result.message, wait) : MapWait.searching(wait);
+	}
+
+	/** A row that takes no pick says why, and while the map's wait holds the routes, how long it has left. */
+	private void holdTips(long now)
+	{
+		long wait = press.waitMs(now);
+		for (JPanel row : heldRows)
+		{
+			row.setToolTipText(wait > 0L ? MapWait.tip(wait) : HELD);
+		}
 	}
 
 	/**
@@ -338,7 +374,7 @@ final class SearchPanel extends JPanel
 		row.add(words, BorderLayout.CENTER);
 		if (!live)
 		{
-			row.setToolTipText("The map plans one route at a time, a few seconds apart. Pick again in a moment.");
+			heldRows.add(row);
 		}
 		else
 		{

@@ -168,7 +168,8 @@ public class RouteClientTest
 		busy.reroute();
 		settle();
 		DestinationRoute.View view = route.view();
-		assertEquals(RouteClient.BUSY, view.message);
+		/* The wait it met, whose seconds are said as the line is drawn: "Try Reroute again in a few seconds" never counted. */
+		assertEquals(MapWait.BUSY, view.message);
 		assertTrue("Retry-After is honoured", view.nextRerouteMs >= before + 20_000L);
 		assertEquals("the steps it had are kept", "item:ring-of-dueling", view.way().id);
 
@@ -220,7 +221,7 @@ public class RouteClientTest
 	{
 		connect();
 		Object[][] cases = {
-			{503, "{\"reason\":\"busy\"}", RouteClient.BUSY},
+			{503, "{\"reason\":\"busy\"}", MapWait.BUSY},
 			{404, "{\"reason\":\"not_found\"}", RouteClient.NOT_FOUND},
 			{403, "{\"reason\":\"needs_code\"}", RouteClient.NEEDS_CONNECTION},
 			{500, "oops", RouteClient.FAILED},

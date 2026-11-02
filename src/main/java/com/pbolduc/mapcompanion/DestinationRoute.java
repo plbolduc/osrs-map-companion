@@ -433,7 +433,8 @@ public class DestinationRoute
 		}
 		if (now < nextRerouteMs)
 		{
-			message = "The map asked to wait. Try again in " + ((nextRerouteMs - now + 999) / 1000) + "s.";
+			/* The seconds are said as the line is drawn, from the wait itself: see MapWait. */
+			message = MapWait.ASKED;
 			refused = true;
 			return null;
 		}
@@ -493,7 +494,7 @@ public class DestinationRoute
 		}
 		if (now < nextRerouteMs)
 		{
-			return "The map asked to wait. Try again in " + ((nextRerouteMs - now + 999) / 1000) + "s.";
+			return MapWait.ASKED;
 		}
 		pressing = true;
 		return null;
@@ -510,6 +511,12 @@ public class DestinationRoute
 	synchronized boolean pressReady(long now)
 	{
 		return !pressing && !rerouting && now >= nextRerouteMs;
+	}
+
+	/** How long the map's wait between presses has left at {@code now}, or 0 once it is over. */
+	synchronized long pressWait(long now)
+	{
+		return Math.max(0L, nextRerouteMs - now);
 	}
 
 	/**

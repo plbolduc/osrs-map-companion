@@ -89,13 +89,24 @@ public class SourceCardsTest
 	/** The cards, connected, with the map answering every route with {@code answer}. */
 	private void cards(DeathWatcher deaths, String answer) throws Exception
 	{
+		cards(deaths, 200, answer, null);
+	}
+
+	/** The same, with the map's status and its Retry-After, or none. */
+	private void cards(DeathWatcher deaths, int status, String answer, String retryAfter) throws Exception
+	{
 		assertTrue(pairing.connect(JoinCode.parse("ABC234"), () -> true));
 		pairing.rememberSecret(pairing.code(), identity.id(), SECRET);
 		OkHttpClient http = new OkHttpClient.Builder().addInterceptor(chain ->
 		{
 			sent.add(chain.request());
-			return new Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1)
-				.code(200).message("").body(ResponseBody.create(JSON, answer)).build();
+			Response.Builder reply = new Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1)
+				.code(status).message("").body(ResponseBody.create(JSON, answer));
+			if (retryAfter != null)
+			{
+				reply.header("Retry-After", retryAfter);
+			}
+			return reply.build();
 		}).build();
 		DestinationMarker marker = new DestinationMarker(null, null, null, null, null, null)
 		{
@@ -234,6 +245,28 @@ public class SourceCardsTest
 		assertTrue(said.isVisible());
 		assertTrue(said.getText(), said.getText().contains(RouteClient.NO_WAY));
 		assertEquals(MapCompanionPanel.REFUSED, said.getForeground());
+	}
+
+	/**
+	 * A busy Route back said "Try Reroute again in a few seconds." for a twenty-second wait, under a
+	 * button that is not Reroute, while the clue's Route beside it went grey with no reason. The line
+	 * says the wait in seconds, and every Route the wait greys says it in its tooltip.
+	 */
+	@Test
+	public void aBusyRouteSaysItsWaitAndEveryRouteItGreysSaysItToo() throws Exception
+	{
+		items.define(ItemID.TRAIL_CLUE_MEDIUM_MAP003, "Clue scroll (medium)", false);
+		items.carry(ItemID.TRAIL_CLUE_MEDIUM_MAP003);
+		assertNotNull(clues.read());
+		cards(died(), 429, "{\"reason\":\"busy\"}", "20");
+		SwingUtilities.invokeAndWait(button(cards, "now.death.route")::doClick);
+		settle("death");
+		refresh();
+		String said = label(cards, "now.death.said").getText();
+		assertTrue(said, said.matches(".*The map is busy\\. Try again in (19|20)s\\..*"));
+		JButton clue = button(cards, "now.clue.route");
+		assertFalse(clue.isEnabled());
+		assertTrue(clue.getToolTipText(), clue.getToolTipText().matches("The map asked to wait: (19|20)s"));
 	}
 
 	/**

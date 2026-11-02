@@ -259,6 +259,8 @@ final class RunView extends JPanel
 		/* A run with every stop behind it has nothing to follow or reorder: End run is its one press. */
 		boolean left = active && view.next() != null;
 		reroute.setEnabled(ready && left);
+		/* Greyed by the wait every Route shares, it says how long that wait has left. */
+		MapWait.tip(reroute, null, routes.pressWait(now));
 		end.setEnabled(!client.endingRequest() && (active || planning || (ending && ready)));
 		/* While a new run is planned there is no run to end yet: the same press calls the plan off. */
 		end.setText(!active && planning && !client.endingRequest() ? "Cancel" : "End run");
@@ -329,7 +331,7 @@ final class RunView extends JPanel
 		MapCompanionPanel.setWrapped(paused, detour == null ? "" : pausedLine(detour), WIDTH);
 		boolean speaks = mine && said.shown(now);
 		message.setVisible(speaks);
-		MapCompanionPanel.setWrapped(message, speaks ? said.message : "", WIDTH);
+		MapCompanionPanel.setWrapped(message, speaks ? client.words(said, now) : "", WIDTH);
 		/* A refusal in pink; Planning…, Ending run… and Run ended. in the line's grey. */
 		MapCompanionPanel.tone(message, speaks && said.refused());
 		return active || speaks || planning || ending;

@@ -168,11 +168,13 @@ final class SlayerPanel extends JPanel
 			render();
 		}
 		body.setVisible(!finished);
+		long now = System.currentTimeMillis();
 		for (JButton button : routeButtons)
 		{
 			RoutePress.Said said = routes.said(button.getName());
 			button.setEnabled(ready && !view.stale && !waiting && routes.ready());
 			button.setText(said != null && said.planning ? "Planning…" : "Route");
+			MapWait.tip(button, null, routes.waitMs(now));
 		}
 		for (JButton button : pinButtons)
 		{
@@ -181,7 +183,7 @@ final class SlayerPanel extends JPanel
 		for (JLabel label : routeMessages)
 		{
 			RoutePress.Said said = routes.said(label.getName());
-			String text = said == null || said.planning ? null : said.message;
+			String text = said == null || said.planning || said.message == null ? null : routes.words(said, now);
 			MapCompanionPanel.setWrapped(label, text, WIDTH);
 			label.setVisible(text != null);
 			/* Pink, so a Route that did not happen does not read as the card's next note. */

@@ -281,7 +281,8 @@ public class RoutePressTest
 		RoutePress busy = press(429, "{\"reason\":\"busy\"}", "20");
 		busy.press(RoutePress.Target.place("search", "bank:lumbridge", "Lumbridge bank", null, null));
 		settle(busy, "search");
-		assertEquals(RouteClient.BUSY, busy.said("search").message);
+		/* Its own words, not Reroute's: the wait's seconds are said where it is drawn, from the gate. */
+		assertEquals(MapWait.BUSY, busy.said("search").message);
 		assertNull("a refusal leaves the card as it was", destinations.getDestination());
 		assertFalse(busy.ready());
 
@@ -292,6 +293,33 @@ public class RoutePressTest
 		route.sync(DestinationRouteTest.destination("Al Kharid bank",
 			DestinationRouteTest.route("item:ring-of-dueling", DestinationRouteTest.alKharid())));
 		assertNull("nor does Reroute", route.beginReroute(System.currentTimeMillis()));
+	}
+
+	/**
+	 * A busy press under a friend's or a star's Route said "Try Reroute again in a few seconds.", the
+	 * Reroute client's sentence, for a wait of half a minute. It says its own words and the wait the
+	 * shared gate holds, counted down as it is drawn and gone when the wait is over — the wait the gate
+	 * holds, so a later press that made it longer is the one counted.
+	 */
+	@Test
+	public void aBusyPressSaysTheWaitTheGateHoldsAndCountsItDown() throws Exception
+	{
+		connect();
+		RoutePress busy = press(429, "{\"reason\":\"busy\"}", "20");
+		busy.press(RoutePress.Target.place("search", "bank:lumbridge", "Lumbridge bank", null, null));
+		settle(busy, "search");
+		RoutePress.Said said = busy.said("search");
+		long now = System.currentTimeMillis();
+		long opens = now + busy.waitMs(now);
+		assertTrue("the map's twenty seconds", opens - now > 19_000L);
+		assertEquals("The map is busy. Try again in 20s.", busy.words(said, opens - 20_000L));
+		assertEquals("The map is busy. Try again in 4s.", busy.words(said, opens - 4_000L));
+		assertEquals("The map was busy.", busy.words(said, opens));
+		assertFalse(busy.words(said, now).contains("Reroute"));
+
+		/* A run that failed since holds every Route for its half minute, and that is the wait said. */
+		route.finishPress(now + 30_000L);
+		assertEquals("The map is busy. Try again in 30s.", busy.words(said, now));
 	}
 
 	@Test

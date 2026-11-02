@@ -778,6 +778,18 @@ Shortest Path's notices do, and the death card keeps the card's ink, since nothi
 The status card's own lines are as they were. It is one pink, from one constant: a step's unmet
 gate, Slayer's *Needs* line and a Wilderness star site's name are drawn in it too.
 
+A press that meets the map's wait says how long the wait has left, and counts it down: *The map is
+busy. Try again in 25s.*, or *in 2m* past a minute and a half, until the clause goes and *The map
+was busy.* is left. The seconds are the wait the press's own gate holds as the line is drawn — the
+one every Route, Reroute and run shares, the search's, the meetups' — five seconds after a refusal
+the map words, half a minute after a failure, or the map's own Retry-After. They had been written
+into the sentence when the refusal arrived, *Try again in 4s.* a minute later, or left out, *Try
+Reroute again in a few seconds.* under a friend's Route for half a minute; a busy Route now says
+its own words, so Reroute is named only under Reroute. Every Route the wait greys says it in its
+tooltip, *The map asked to wait: 25s*, as a search row that takes no pick does, and Route here's
+chat line gives the seconds left as it is said. The gates are what they were: nothing is asked
+sooner, and the sidebar only says them.
+
 ### A meetup's Route
 
 A meetup was three rows of buttons: Route, then the four answers two by two. Route now sits beside

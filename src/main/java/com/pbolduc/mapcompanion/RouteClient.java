@@ -72,7 +72,6 @@ final class RouteClient
 	static final String NEEDS_CONNECTION = "Connect to your map to plan a route.";
 	/** The cause and the one step that fixes it: the game gives no tile inside a raid's rooms, and does outside. */
 	static final String NEEDS_TILE = "Reroute can't see where you are inside an instance. Press it again once you're out.";
-	static final String BUSY = "The map is busy. Try Reroute again in a few seconds.";
 	static final String NO_WAY = "The map found no way there from here.";
 	static final String NOT_FOUND = "The map has no way to plan to this place.";
 	static final String UNREACHABLE = "The map could not be reached.";
@@ -184,7 +183,7 @@ final class RouteClient
 			int code = close.code();
 			if (code == 429 || code == 503)
 			{
-				route.finishReroute(ticket, null, BUSY, now + StarsClient.retryDelay(wait));
+				route.finishReroute(ticket, null, MapWait.BUSY, now + StarsClient.retryDelay(wait));
 				return;
 			}
 			if (!close.isSuccessful())
