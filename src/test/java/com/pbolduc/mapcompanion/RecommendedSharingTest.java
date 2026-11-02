@@ -69,6 +69,34 @@ public class RecommendedSharingTest
 		assertTrue("a fresh install is offered the step", RecommendedSharing.offered(fresh));
 	}
 
+	/**
+	 * While the step is up its own press is the page's one filled button, and Open the map is drawn
+	 * plain, in the look and feel's own colours, rather than hidden; given the orange back, it is the
+	 * filled one again. Before, the loudest thing on the page invited a new player to the browser
+	 * before choosing, and the step's press was a grey button at its foot.
+	 */
+	@Test
+	public void theStepsPressHasTheOrangeWhileItIsUp() throws Exception
+	{
+		SwingUtilities.invokeAndWait(() ->
+		{
+			Fixture fixture = new Fixture();
+			fixture.step.offer("osrs-map.com");
+			AbstractButton share = (AbstractButton) named(fixture.step, "recommended.share");
+			assertEquals(net.runelite.client.ui.ColorScheme.BRAND_ORANGE, share.getBackground());
+			assertEquals(java.awt.Color.WHITE, share.getForeground());
+
+			javax.swing.JButton openMap = new javax.swing.JButton("Open the map");
+			RecommendedSharing.orange(openMap, false);
+			assertTrue("plain is the look and feel's own", openMap.getBackground() instanceof javax.swing.plaf.UIResource);
+			assertFalse(net.runelite.client.ui.ColorScheme.BRAND_ORANGE.equals(openMap.getBackground()));
+			assertEquals("by its own name", "Open the map", openMap.getText());
+			RecommendedSharing.orange(openMap, true);
+			assertEquals(net.runelite.client.ui.ColorScheme.BRAND_ORANGE, openMap.getBackground());
+			assertEquals(java.awt.Color.WHITE, openMap.getForeground());
+		});
+	}
+
 	@Test
 	public void onePressWritesExactlyTheRecommendedKeysAndNothingElse() throws Exception
 	{

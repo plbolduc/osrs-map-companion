@@ -711,6 +711,11 @@ is up, and its intro is one line: *Ticked is what the map uses. Change any of it
 Settings.* The one press, every field named, *What each one sends* and *kept two weeks* are as they
 were. 738px to 544.
 
+Since 2 November, while the step is up *Share what's ticked* is the page's one filled button, in the
+orange, and *Open the map* waits above it under its own name, drawn plain rather than hidden: the
+loudest thing on the page had invited a new player to the browser before choosing, where they would
+appear sharing nothing. *Share what's ticked* or *Not now* closes the step and gives the orange back.
+
 ### Which map a button opens
 
 *Show on map* opened the website on the death card and drew on the game's world map on a friend's.

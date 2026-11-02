@@ -1283,6 +1283,8 @@ final class ConnectCard extends JPanel
 			: pasted != null ? "Join the group this " + (pasted.invite != null ? "invite" : "code") + " is for"
 			: paired ? "Connect to this group again"
 			: "Make a group for you on " + pairing.serverLabel() + ". Play alone, or invite friends to it.");
+		/* While the step after Connect is up, its press has the orange and this waits, plain, by name. */
+		RecommendedSharing.orange(openMapButton, !recommendedSharing.isVisible());
 	}
 
 	/**
