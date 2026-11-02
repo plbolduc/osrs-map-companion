@@ -42,8 +42,6 @@ import java.util.List;
 import javax.annotation.Nullable;
 import javax.swing.border.EmptyBorder;
 import javax.swing.BoxLayout;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -382,26 +380,7 @@ final class ConnectCard extends JPanel
 		joinField.putClientProperty("JTextField.placeholderText", JOIN_PLACEHOLDER);
 		joinField.addActionListener(e -> joinFromField());
 		/* Connect joins an invite in the field, so its tooltip follows a paste or a keystroke at once. */
-		joinField.getDocument().addDocumentListener(new DocumentListener()
-		{
-			@Override
-			public void insertUpdate(DocumentEvent e)
-			{
-				refresh.run();
-			}
-
-			@Override
-			public void removeUpdate(DocumentEvent e)
-			{
-				refresh.run();
-			}
-
-			@Override
-			public void changedUpdate(DocumentEvent e)
-			{
-				refresh.run();
-			}
-		});
+		MapCompanionPanel.onEdit(joinField.getDocument(), refresh);
 		block.add(fill(joinField, ColorScheme.DARK_GRAY_COLOR));
 		block.add(gap(4, ColorScheme.DARK_GRAY_COLOR));
 		JPanel buttons = row(ColorScheme.DARK_GRAY_COLOR);

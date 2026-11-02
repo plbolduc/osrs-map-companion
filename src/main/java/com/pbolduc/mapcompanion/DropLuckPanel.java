@@ -56,8 +56,6 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
@@ -153,26 +151,7 @@ final class DropLuckPanel extends JPanel
 		search.setPreferredSize(new Dimension(WIDTH, 28));
 		search.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28));
 		search.setAlignmentX(Component.LEFT_ALIGNMENT);
-		search.getDocument().addDocumentListener(new DocumentListener()
-		{
-			@Override
-			public void insertUpdate(DocumentEvent e)
-			{
-				redrawResults();
-			}
-
-			@Override
-			public void removeUpdate(DocumentEvent e)
-			{
-				redrawResults();
-			}
-
-			@Override
-			public void changedUpdate(DocumentEvent e)
-			{
-				redrawResults();
-			}
-		});
+		MapCompanionPanel.onEdit(search.getDocument(), this::redrawResults);
 	}
 
 	/**

@@ -41,8 +41,6 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.gameval.SpriteID;
 import net.runelite.client.ui.ColorScheme;
@@ -133,26 +131,7 @@ final class SearchPanel extends JPanel
 		box.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28));
 		box.setToolTipText("Search the map: a place, a character, a monster or an item. A pick plans the way there.");
 		MapCompanionPanel.left(box);
-		box.getDocument().addDocumentListener(new DocumentListener()
-		{
-			@Override
-			public void insertUpdate(DocumentEvent e)
-			{
-				changed();
-			}
-
-			@Override
-			public void removeUpdate(DocumentEvent e)
-			{
-				changed();
-			}
-
-			@Override
-			public void changedUpdate(DocumentEvent e)
-			{
-				changed();
-			}
-		});
+		MapCompanionPanel.onEdit(box.getDocument(), this::changed);
 		box.addActionListener(e ->
 		{
 			movedOn();
