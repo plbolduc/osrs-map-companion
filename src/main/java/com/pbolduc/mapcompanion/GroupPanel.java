@@ -86,9 +86,14 @@ final class GroupPanel extends JPanel
 	private static final long serialVersionUID = 1L;
 	private static final int WIDTH = MapCompanionPanel.CARD_TEXT_WIDTH;
 	private static final Color FALLBACK = new Color(161, 161, 170);
-	private static final Color ONLINE = new Color(74, 222, 128);
-	private static final Color IDLE = new Color(250, 204, 21);
-	private static final Color OFFLINE = new Color(113, 113, 122);
+	/*
+	 * The website's presence colours, from its MemberDisc: Tailwind's emerald-500, amber-500 and
+	 * zinc-400, as the map's stylesheet writes them for sRGB (#00bb7f, #f99c00, #9f9fa9). None is one of
+	 * the map's eight disc colours, so a dot never takes the colour of the disc it sits on.
+	 */
+	private static final Color ONLINE = new Color(0, 187, 127);
+	private static final Color IDLE = new Color(249, 156, 0);
+	private static final Color OFFLINE = new Color(159, 159, 169);
 	private static final Color CHOSEN = new Color(117, 94, 52);
 	/** A friend's button for the game's own world map; "Show on world map" does not fit beside Route. */
 	static final String WORLD_MAP = "World map";
@@ -864,7 +869,14 @@ final class GroupPanel extends JPanel
 		return label;
 	}
 
-	/** A friend's disc in their map colour, with presence as a small dot in its corner. */
+	/**
+	 * A friend's disc in their map colour, with presence as a small dot in its corner.
+	 *
+	 * <p>The dot sits in a halo of the card's own colour two pixels wide, as the website's does, so it
+	 * reads as a dot on the disc rather than as a second disc touching it, whatever the disc's colour.
+	 * Past the disc's edge the halo is the card's colour on the card, so the icon's size stays the disc
+	 * and its dot, and a friend's row is no taller for it.
+	 */
 	static final class Disc implements Icon
 	{
 		private static final int SIZE = 13;
@@ -888,7 +900,7 @@ final class GroupPanel extends JPanel
 			int dx = x + SIZE - dot + 1;
 			int dy = y + SIZE - dot + 1;
 			g2.setColor(ColorScheme.DARKER_GRAY_COLOR);
-			g2.fillOval(dx - 1, dy - 1, dot + 2, dot + 2);
+			g2.fillOval(dx - 2, dy - 2, dot + 4, dot + 4);
 			g2.setColor(presence);
 			g2.fillOval(dx, dy, dot, dot);
 			g2.dispose();
