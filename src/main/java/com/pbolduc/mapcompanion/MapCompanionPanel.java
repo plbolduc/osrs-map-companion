@@ -50,6 +50,8 @@ import javax.annotation.Nullable;
 import javax.swing.border.EmptyBorder;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -58,6 +60,7 @@ import javax.swing.JPanel;
 import javax.swing.JViewport;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.text.Document;
 import javax.swing.Timer;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
@@ -691,6 +694,31 @@ public class MapCompanionPanel extends PluginPanel
 	{
 		return JOptionPane.showOptionDialog(parent, message, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE,
 			null, new Object[]{yes, "Cancel"}, "Cancel") == JOptionPane.OK_OPTION;
+	}
+
+	/** Run {@code edited} on every change to a field's words, whether typed, deleted or pasted. */
+	static void onEdit(Document document, Runnable edited)
+	{
+		document.addDocumentListener(new DocumentListener()
+		{
+			@Override
+			public void insertUpdate(DocumentEvent e)
+			{
+				edited.run();
+			}
+
+			@Override
+			public void removeUpdate(DocumentEvent e)
+			{
+				edited.run();
+			}
+
+			@Override
+			public void changedUpdate(DocumentEvent e)
+			{
+				edited.run();
+			}
+		});
 	}
 
 	/** Click a button only as a player could: one in its row and enabled. True when it was pressed. */
