@@ -219,6 +219,23 @@ public class GroupPanelTest
 		social(System.currentTimeMillis() + 3_600_000L);
 	}
 
+	/** The contract's group of three with two meetups: its star hunt in an hour, and a raid tomorrow on W416. */
+	private void twoMeetups() throws Exception
+	{
+		String stream = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "contract", "stream.json")),
+			StandardCharsets.UTF_8);
+		RelayResponse.StreamDirective directive = new Gson().fromJson(stream, RelayResponse.StreamDirective.class);
+		long now = System.currentTimeMillis();
+		directive.events.get(0).startsAtMs = now + 3_600_000L;
+		RelayResponse.Meetup raid = new Gson().fromJson(new Gson().toJson(directive.events.get(0)), RelayResponse.Meetup.class);
+		raid.id = "raids";
+		raid.title = "Chambers of Xeric";
+		raid.world = 416;
+		raid.startsAtMs = now + 26 * 3_600_000L;
+		directive.events.add(raid);
+		destinations.acceptSocial(directive, true);
+	}
+
 	/** The contract's group of three, its one meetup starting at {@code startsAtMs}. */
 	private void social(long startsAtMs) throws Exception
 	{
@@ -523,6 +540,36 @@ public class GroupPanelTest
 		});
 	}
 
+	/**
+	 * The next meetup whole, with its answers; each after it one line, its title, day, clock and world,
+	 * that opens to the same card in place and folds again, as the website lists a group's meetups.
+	 */
+	@Test
+	public void aLaterMeetupIsOneLineThatOpensToItsCard() throws Exception
+	{
+		AtomicReference<GroupPanel> panel = new AtomicReference<>();
+		SwingUtilities.invokeAndWait(() -> panel.set(panel()));
+		twoMeetups();
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.get().refresh(true);
+			assertNotNull("the next meetup is whole", named(panel.get(), "group.answer.star-hunt.going"));
+			assertNull("and has no line of its own", namedComponent(panel.get(), "group.meetupFold.star-hunt"));
+			assertNull("the later one is folded", namedComponent(panel.get(), "group.meetup.raids"));
+			AbstractButton line = named(panel.get(), "group.meetupFold.raids");
+			long raidAt = destinations.getEvents().stream().filter(m -> m.id.equals("raids")).findFirst().get().startsAtMs;
+			String at = GroupPanel.dayAndClock(raidAt, System.currentTimeMillis(), ZoneId.systemDefault(),
+				Locale.getDefault(Locale.Category.FORMAT));
+			assertEquals("▸ Chambers of Xeric · " + at + " · W416", plain(line));
+			line.doClick();
+			assertNotNull("pressed, it opens to the same card", namedComponent(panel.get(), "group.meetup.raids"));
+			assertNotNull(named(panel.get(), "group.answer.raids.going"));
+			assertTrue(plain(named(panel.get(), "group.meetupFold.raids")).startsWith("▾ "));
+			named(panel.get(), "group.meetupFold.raids").doClick();
+			assertNull("and folds again", namedComponent(panel.get(), "group.meetup.raids"));
+		});
+	}
+
 	/** Meet here is on the Meetups heading, which is drawn with no meetup under it, so the press is always there. */
 	@Test
 	public void meetHereIsOnTheMeetupsHeadingEvenWithNoMeetup() throws Exception
@@ -648,6 +695,12 @@ public class GroupPanelTest
 		GroupPanel.setWhen(line, MapCompanionPanel.meetupWhen(now + 25 * 60_000L, now, zone, Locale.UK, 302),
 			now + 25 * 60_000L, now, 100);
 		assertFalse("twenty-five minutes off is only a time: " + line.getText(), line.getText().contains("<font"));
+	}
+
+	/** A button's words without the markup that wraps them. */
+	private static String plain(AbstractButton button)
+	{
+		return button.getText().replaceAll("<[^>]+>", "").replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&");
 	}
 
 	/** Every label's text under a component, markup and all. */
