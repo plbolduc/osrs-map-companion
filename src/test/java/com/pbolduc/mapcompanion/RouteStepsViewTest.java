@@ -147,6 +147,19 @@ public class RouteStepsViewTest
 		assertFalse("and This leg's heading, which follows it, with it", view.isVisible());
 	}
 
+	/**
+	 * On a run's leg the stop's own line names the way, so the way line said it a second time; the
+	 * leg starts at its first step, and its length is the view's to hand This leg's heading.
+	 */
+	@Test
+	public void aRunLegLeavesItsWayToTheStopAndItsLengthToTheHeading() throws IOException
+	{
+		receive();
+		view.showRunLeg(route.view(), null);
+		assertTrue(shown(), shown().startsWith("1 | Lumbridge Home Teleport | Standard spellbook"));
+		assertEquals(Integer.valueOf(52), view.tiles());
+	}
+
 	@Test
 	public void anotherWayShowsItsOwnSteps() throws IOException
 	{

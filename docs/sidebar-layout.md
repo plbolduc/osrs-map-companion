@@ -881,6 +881,11 @@ below the one it served. It now sits directly under the stop it leads to, betwee
 second one that keeps its last numbered step from running on into the next stop's number. A stop
 behind the player folds to one line that keeps its *Done* or *Visited*.
 
+Under the heading, the leg's way line said the way the stop's own line just above it says,
+*Explorer's ring 2: Teleport* twice in four lines. The stop says it once now, and the leg's length
+is in the heading, *This leg · 26 tiles*, read from the way the steps show. A voyage's leg is *This
+leg* alone, as its way line had no length either: its *Sail* step says how far it sails.
+
 ### Rename beside a new group's name
 
 A group made by Connect is *Our group* until somebody names it, and renaming lives in the menu under

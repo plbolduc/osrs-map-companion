@@ -408,7 +408,8 @@ public class RunCardsTest
 		follower.sync();
 		refresh();
 		List<String> first = shown(farm);
-		int leg = first.indexOf("This leg");
+		/* The heading carries its leg's length, so it is found by its whole words. */
+		int leg = first.indexOf("This leg · 26 tiles");
 		assertTrue(first.toString(), leg > first.indexOf("1. Falador farm") && leg < first.indexOf("2. Catherby"));
 		assertTrue(first.toString(), first.contains("4. My bank · Visited"));
 		assertFalse("a visited stop's way there is spent", first.contains("Draynor Manor Teleport"));
@@ -419,8 +420,26 @@ public class RunCardsTest
 		List<String> second = shown(farm);
 		assertTrue(second.toString(), second.contains("1. Falador farm · Done"));
 		assertFalse("a done stop's way there is spent", second.contains("Explorer's ring 2: Teleport"));
-		int moved = second.indexOf("This leg");
+		int moved = second.indexOf("This leg · 29 tiles");
 		assertTrue(second.toString(), moved > second.indexOf("2. Catherby") && moved < second.indexOf("4. My bank · Visited"));
+	}
+
+	/**
+	 * Under This leg, the leg's way line said the way the stop's own line just above it says,
+	 * "Explorer's ring 2: Teleport" twice in four lines. The stop says it once, and the leg's length
+	 * is in the heading. A voyage's leg has no length there: its Sail step says how far it sails.
+	 */
+	@Test
+	public void thisLegSaysItsLengthAndTheStopSaysItsWay() throws Exception
+	{
+		state.acceptFor(identity.id(), EPOCH, run("/contract/farm-run.json"), 1, System.currentTimeMillis());
+		follower.sync();
+		refresh();
+		List<String> words = shown(farm);
+		assertTrue(words.toString(), words.contains("This leg · 26 tiles"));
+		assertEquals(words.toString(), 1, Collections.frequency(words, "Explorer's ring 2: Teleport"));
+		assertFalse(words.toString(), words.contains("Explorer's ring 2: Teleport · 26 tiles"));
+		assertEquals("This leg", RunView.legHeading(null));
 	}
 
 	/**

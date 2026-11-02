@@ -109,6 +109,8 @@ final class RunView extends JPanel
 	/*
 	 * A hairline and its own heading over the steps of the leg being walked. Without them the leg's
 	 * Walk, Board, Sail and Dock read as more stops. Shown with the steps, under the leg's own stop.
+	 * The heading says the leg's length, which the steps' way line said under it in the words of the
+	 * stop's own line just above.
 	 */
 	private final JLabel legHead = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
 	private final RouteStepsView steps;
@@ -153,7 +155,7 @@ final class RunView extends JPanel
 		paused.setBorder(BorderFactory.createEmptyBorder(6, 0, 0, 0));
 		paused.setVisible(false);
 		MapCompanionPanel.left(paused);
-		legHead.setText("This leg");
+		legHead.setText(legHeading(null));
 		legHead.setFont(legHead.getFont().deriveFont(Font.BOLD));
 		legHead.setBorder(BorderFactory.createCompoundBorder(
 			BorderFactory.createEmptyBorder(6, 0, 0, 0),
@@ -316,6 +318,11 @@ final class RunView extends JPanel
 		boolean drawable = following && config.drawWithShortestPath() && shortest.installed() && !route.arrived();
 		steps.showRunLeg(following ? route : null, following ? RouteStepsView.shortestPathLine(route, drawable, shortest.drawing()) : null);
 		legHead.setVisible(steps.isVisible());
+		String heading = legHeading(steps.tiles());
+		if (!heading.equals(legHead.getText()))
+		{
+			legHead.setText(heading);
+		}
 		legEnd.setVisible(steps.isVisible());
 		String detour = left && !view.following ? follower.pausedFor() : null;
 		paused.setVisible(detour != null);
@@ -365,6 +372,15 @@ final class RunView extends JPanel
 				: view.visited.size() + " of " + view.run.stops.size() + " visited";
 		}
 		return view.following ? count : "Paused · " + count;
+	}
+
+	/**
+	 * "This leg · 26 tiles": the heading over the leg's steps, with the leg's length where the map
+	 * priced one. A voyage's leg has none, since its Sail step says the sailed distance.
+	 */
+	static String legHeading(@Nullable Integer tiles)
+	{
+		return "This leg" + (tiles == null ? "" : " · " + tiles + " tiles");
 	}
 
 	/** Where the leg was, while a destination shown since has paused the run. */

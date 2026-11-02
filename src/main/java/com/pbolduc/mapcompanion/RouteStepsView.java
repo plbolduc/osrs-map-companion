@@ -156,16 +156,29 @@ final class RouteStepsView extends JPanel
 		show(view, null);
 	}
 
-	/** A run leg was planned from its preceding stop; the destination card's origin warning is inapplicable. */
+	/**
+	 * A run leg was planned from its preceding stop, so the destination card's origin warning is
+	 * inapplicable. Its way line goes too: the stop's own line just above names the same way, and
+	 * the leg's length is This leg's heading's to say, from {@link #tiles}.
+	 */
 	void showRunLeg(@Nullable DestinationRoute.View view, @Nullable String shortestPath)
 	{
 		show(view, shortestPath);
 		origin.setVisible(false);
+		way.setVisible(false);
 		/* Arrived, the stop the leg led to says You're here, and the leg has nothing left to say. */
 		if (view != null && view.arrived())
 		{
 			setVisible(false);
 		}
+	}
+
+	/** The length of the way being shown, in run tiles, where the map priced one; null otherwise. */
+	@Nullable
+	Integer tiles()
+	{
+		RelayResponse.RouteOption current = shown == null ? null : shown.way();
+		return current == null ? null : current.tiles;
 	}
 
 	/** @param shortestPath what Shortest Path is drawing for it, in words, or null */
