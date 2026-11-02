@@ -186,11 +186,25 @@ final class RunView extends JPanel
 		return otherBusy;
 	}
 
-	/** The button a hotkey presses here: Reroute, or Follow and Pause, while this card shows a run. EDT. */
+	/**
+	 * The button a hotkey presses here: Reroute, or Follow and Pause, while this card shows a run and
+	 * no other route is being followed. During a detour — a search pick, Route here, a friend's
+	 * destination followed — the keys belong to the route being walked, so the destination card's own
+	 * buttons answer them and the paused run is left as it is; its Follow is still a click away. EDT.
+	 */
 	@Nullable
 	JButton hotkey(boolean rerouting)
 	{
-		return shownActions.contains(follow) ? (rerouting ? reroute : follow) : null;
+		if (!shownActions.contains(follow))
+		{
+			return null;
+		}
+		DestinationRoute.View route = routes.view();
+		if (route != null && route.following && !follower.ownsDestinationRoute(route))
+		{
+			return null;
+		}
+		return rerouting ? reroute : follow;
 	}
 
 	/**
