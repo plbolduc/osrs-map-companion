@@ -228,17 +228,11 @@ final class ConnectClient
 	{
 		try (Response close = response)
 		{
-			int status = close.code();
 			String text = CompanionHttp.readBounded(close.body(), CompanionHttp.MAX_REPLY_BYTES);
-			if (status == 429 || status == 503)
+			Outcome refused = whenRefused(close, text);
+			if (refused != null)
 			{
-				return Outcome.refused(BUSY);
-			}
-			if (!close.isSuccessful())
-			{
-				Refusal refusal = gson.fromJson(text, Refusal.class);
-				String sentence = refusal == null ? null : sentence(refusal.error);
-				return Outcome.refused(sentence != null ? sentence : FAILED);
+				return refused;
 			}
 			Answer answer = gson.fromJson(text, Answer.class);
 			if (answer == null || !JoinCode.isWellFormedCode(answer.code)
@@ -297,17 +291,11 @@ final class ConnectClient
 	{
 		try (Response close = response)
 		{
-			int status = close.code();
 			String text = CompanionHttp.readBounded(close.body(), CompanionHttp.MAX_REPLY_BYTES);
-			if (status == 429 || status == 503)
+			Outcome refused = whenRefused(close, text);
+			if (refused != null)
 			{
-				return Outcome.refused(BUSY);
-			}
-			if (!close.isSuccessful())
-			{
-				Refusal refusal = gson.fromJson(text, Refusal.class);
-				String sentence = refusal == null ? null : sentence(refusal.error);
-				return Outcome.refused(sentence != null ? sentence : FAILED);
+				return refused;
 			}
 			Answer answer = gson.fromJson(text, Answer.class);
 			String named = answer == null ? null : Pairing.tidyName(answer.name);
@@ -317,6 +305,26 @@ final class ConnectClient
 		{
 			return Outcome.refused(FAILED);
 		}
+	}
+
+	/**
+	 * What Connect, Join and Rename say to an answer the map refused: busy, the map's own sentence, or
+	 * FAILED when it wrote none. Null for an answer it did not refuse, which the caller reads.
+	 */
+	@Nullable
+	private Outcome whenRefused(Response response, String text)
+	{
+		if (response.code() == 429 || response.code() == 503)
+		{
+			return Outcome.refused(BUSY);
+		}
+		if (response.isSuccessful())
+		{
+			return null;
+		}
+		Refusal refusal = gson.fromJson(text, Refusal.class);
+		String sentence = refusal == null ? null : sentence(refusal.error);
+		return Outcome.refused(sentence != null ? sentence : FAILED);
 	}
 
 	/**
