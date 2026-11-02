@@ -54,6 +54,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
@@ -123,6 +124,16 @@ final class ConnectCard extends JPanel
 	/* The status card: connection, group and a short summary; the snapshot preview is in Advanced. */
 	private final JLabel dot = new JLabel("●");
 	private final JLabel statusLabel = new JLabel();
+	/** The first line's own colour, for every line that is not a refusal. */
+	private final Color statusInk = statusLabel.getForeground();
+	/**
+	 * The first line while the map refuses this member: the pink the sidebar gives what cannot be
+	 * done, a star site's danger and a route step's unmet requirement.
+	 */
+	private static final Color REFUSED = new Color(239, 150, 150);
+	/** What the map holds to refusing, from the status card's refresh for the buttons' just after it. */
+	@Nullable
+	private RelayClient.Refused refused;
 	private final JLabel groupLabel = new JLabel();
 	/**
 	 * Rename group…, in the status card, for whoever runs a group still called what Connect named it.
@@ -196,8 +207,14 @@ final class ConnectCard extends JPanel
 	private final JButton pasteButton = smallButton("Paste");
 	private final JButton joinButton = smallButton("Join");
 	private final JLabel joinMessage = new JLabel();
-	/** Over the field, before a group: the orange button makes one, and this is the other way in. */
+	/**
+	 * Over the field, before a group: the orange button makes one, and this is the other way in. And
+	 * over it while the map refuses the group, when the field is the way back in.
+	 */
 	private final JLabel joinHeading = sectionHead("Have an invite?");
+	/** Under Paste and Join while the map refuses the group: what to put in the field. See {@link #refusedNextStep}. */
+	private final JLabel nextStep = new JLabel();
+	private final JPanel refusedGap = gap(8, ColorScheme.DARK_GRAY_COLOR);
 
 	/**
 	 * True while the map is being asked for an invite link.
@@ -234,8 +251,20 @@ final class ConnectCard extends JPanel
 		JPanel statusRow = new JPanel(new BorderLayout(6, 0));
 		statusRow.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		dot.setFont(dot.getFont().deriveFont(12f));
-		statusRow.add(dot, BorderLayout.WEST);
 		statusLabel.setFont(statusLabel.getFont().deriveFont(12f));
+		/*
+		 * The dot, the words and the gear keep to the first line, so a sentence that wraps does not
+		 * draw the other two beside its middle, where they read as belonging to the group's name. The
+		 * gear is the tallest of the three, so the dot and the first line drop to where Swing centres
+		 * a line of their height beside it, and a line on its own sits as centred as a label would.
+		 */
+		int line = statusLabel.getFontMetrics(statusLabel.getFont()).getHeight();
+		int drop = Math.max(0, SidebarIcons.SIZE / 2 - line / 2);
+		dot.setVerticalAlignment(SwingConstants.TOP);
+		dot.setBorder(new EmptyBorder(drop, 0, 0, 0));
+		statusRow.add(dot, BorderLayout.WEST);
+		statusLabel.setVerticalAlignment(SwingConstants.TOP);
+		statusLabel.setBorder(new EmptyBorder(drop, 0, 0, 0));
 		statusRow.add(statusLabel, BorderLayout.CENTER);
 		gearButton.setName("companion.settings");
 		gearButton.setToolTipText("Settings: what you share, the map address and Show what's sent");
@@ -244,6 +273,7 @@ final class ConnectCard extends JPanel
 		gearButton.setContentAreaFilled(false);
 		gearButton.setFocusPainted(false);
 		gearButton.setBorder(new EmptyBorder(0, 4, 0, 0));
+		gearButton.setVerticalAlignment(SwingConstants.TOP);
 		gearButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		statusRow.add(gearButton, BorderLayout.EAST);
 		status.add(left(statusRow));
@@ -275,6 +305,9 @@ final class ConnectCard extends JPanel
 		joinBlock = buildJoinBlock();
 		add(joinBlock);
 		add(left(joinMessage));
+		/* Between the field and the tabs, which follow it only while the map refuses the group. */
+		refusedGap.setVisible(false);
+		add(refusedGap);
 		knownGroupsRow = row(ColorScheme.DARK_GRAY_COLOR);
 		knownGroupsRow.add(knownGroupsButton);
 		knownGroupsRow.setBorder(new EmptyBorder(4, 0, 0, 0));
@@ -338,6 +371,10 @@ final class ConnectCard extends JPanel
 		buttons.add(pasteButton);
 		buttons.add(joinButton);
 		block.add(left(buttons));
+		nextStep.setFont(nextStep.getFont().deriveFont(11f));
+		nextStep.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+		nextStep.setVisible(false);
+		block.add(left(nextStep));
 		joinMessage.setFont(joinMessage.getFont().deriveFont(11f));
 		joinMessage.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
 		joinMessage.setVisible(false);
@@ -541,6 +578,8 @@ final class ConnectCard extends JPanel
 			return;
 		}
 		pairing.rememberName(outcome.joined.code, outcome.name);
+		/* The map has just taken this installation in, which answers whatever it was refusing. */
+		relay.clearRefusal();
 		joinField.setText("");
 		joinOpen = false;
 		quiet();
@@ -985,8 +1024,71 @@ final class ConnectCard extends JPanel
 	}
 
 	/**
+	 * The status card's first line while the map refuses this member, in a few words beside the dot.
+	 * The map's sentence is a column of three lines in the 141px there, and a refusal the field can
+	 * answer has its next step under the field ({@link #refusedNextStep}); the whole sentence stays in
+	 * the dot's tooltip.
+	 */
+	static String refusedWords(RelayClient.Refused refusal)
+	{
+		switch (refusal)
+		{
+			case NEEDS_INVITE:
+				return "Needs an invite";
+			case REMOVED:
+				return "Removed from this group";
+			case CLOSED:
+				return "This group was closed";
+			case GONE:
+				return "Group gone from the map";
+			case FULL:
+				return "Group is full";
+			case BAD_CODE:
+				return "Group code not accepted";
+			default:
+				return "Plugin out of date";
+		}
+	}
+
+	/**
+	 * What to do about a refusal, under the field it is done in, or null when the field cannot answer
+	 * it — a plugin the map cannot read, or no refusal at all. {@code group} is the status line's own
+	 * name for it.
+	 *
+	 * <p>A group that keeps members takes an invite; one that has gone, or let this member go, takes
+	 * somebody else's, or Leave group to start a new one of the player's own.
+	 */
+	@Nullable
+	static String refusedNextStep(@Nullable RelayClient.Refused refusal, String group)
+	{
+		if (refusal == null)
+		{
+			return null;
+		}
+		switch (refusal)
+		{
+			case NEEDS_INVITE:
+				return "Ask someone in " + group + " for an invite and paste it here.";
+			case FULL:
+				return "Ask someone in " + group + " to make room, or paste another group's invite here.";
+			case BAD_CODE:
+				return "Paste the invite again.";
+			case REMOVED:
+			case CLOSED:
+			case GONE:
+				return "Paste another group's invite here, or use Leave group in Settings → Advanced to start over.";
+			default:
+				return null;
+		}
+	}
+
+	/**
 	 * The status card, from the connection the sidebar's refresh has just read: the dot and its
 	 * tooltip, the two lines beside and under it, Rename group… and what is shared. EDT.
+	 *
+	 * <p>A refusal the map holds to ({@link RelayClient#getRefused}) is the first line in a few words, in
+	 * the refusal pink beside a red dot, through the five-minute retries that would otherwise bring the
+	 * group's name back between two refusals. A press that may answer it is Connecting…, amber.
 	 */
 	void refreshStatus(Health health, String code, boolean paired, boolean ready)
 	{
@@ -995,7 +1097,9 @@ final class ConnectCard extends JPanel
 			/* A failed Connect is news until a group is had, by that press or any other. */
 			connectFailed = null;
 		}
-		dot.setForeground(dotHealth(paired, asking, health).getColor());
+		refused = paired ? relay.getRefused() : null;
+		Health shown = refused == null ? health : asking ? Health.WAITING : Health.ERROR;
+		dot.setForeground(dotHealth(paired, asking, shown).getColor());
 		/* The status a transient failure came with, which the first line leaves out, for a bug report. */
 		int answered = relay.getFatalError() == null ? relay.getLastTransientStatus() : 0;
 		dot.setToolTipText(plugin.getStatus()
@@ -1008,10 +1112,12 @@ final class ConnectCard extends JPanel
 		 * is shared. Otherwise the first line is what is wrong or awaited, and the group's name is
 		 * the second, because which group a "Connecting…" is for still matters.
 		 */
-		boolean live = ready && health == Health.LIVE;
+		boolean live = ready && shown == Health.LIVE;
 		String group = paired ? statusGroup(code, pairing.name(code)) : null;
-		setWrapped(statusLabel, statusWords(paired, ready, asking, connectFailed, health, plugin.getStatus(), group),
-			CARD_TEXT_WIDTH - 18 - SidebarIcons.SIZE - 4);
+		setWrapped(statusLabel, refused == null
+			? statusWords(paired, ready, asking, connectFailed, health, plugin.getStatus(), group)
+			: asking ? "Connecting…" : refusedWords(refused), CARD_TEXT_WIDTH - 18 - SidebarIcons.SIZE - 4);
+		statusLabel.setForeground(paired && shown == Health.ERROR ? REFUSED : statusInk);
 		statusLabel.setToolTipText(live ? "Group code " + JoinCode.forDisplay(code) + " · " + dot.getToolTipText()
 			: dot.getToolTipText());
 		/* Before a group, no second line: the map's address is in Settings, and is not news. */
@@ -1021,7 +1127,9 @@ final class ConnectCard extends JPanel
 			setWrapped(groupLabel, group, CARD_TEXT_WIDTH);
 		}
 		groupLabel.setToolTipText(paired ? "Group code " + JoinCode.forDisplay(code) : null);
-		nameLink.setVisible(offersRename(paired, paired && plugin.runsGroup(pairing.serverUrl(), code), pairing.name(code)));
+		/* Not under a group that refuses the player: the map would refuse the rename too. */
+		nameLink.setVisible(refused == null
+			&& offersRename(paired, paired && plugin.runsGroup(pairing.serverUrl(), code), pairing.name(code)));
 
 		/*
 		 * Character fields are separate from membership: all opt-ins off still sends the latter
@@ -1057,9 +1165,20 @@ final class ConnectCard extends JPanel
 		}
 		shownGroupActions = syncRow(groupActions, groupRow, shownGroupActions);
 		groupActions.setVisible(!groupRow.isEmpty());
-		joinBlock.setVisible(!paired || !pairing.hasServerConsent() || joinOpen);
+		/*
+		 * A refusal the field can answer opens it under the card that says so, as before a group: the
+		 * field Join another group… opens, with its heading, because it is the way back in.
+		 */
+		String step = refusedNextStep(refused, statusGroup(pairingCode(), pairing.name(pairingCode())));
+		joinBlock.setVisible(!paired || !pairing.hasServerConsent() || joinOpen || step != null);
 		/* "Have an invite?" says which way in the field is; once in a group it is only Join another. */
-		joinHeading.setVisible(!paired);
+		joinHeading.setVisible(!paired || step != null);
+		nextStep.setVisible(step != null);
+		refusedGap.setVisible(step != null);
+		if (step != null)
+		{
+			setWrapped(nextStep, step);
+		}
 		joinButton.setEnabled(!asking);
 		openMapButton.setText(asking ? (ready ? "Opening…" : "Connecting…") : ready ? OPEN_MAP : CONNECT);
 		openMapButton.setEnabled(!asking);

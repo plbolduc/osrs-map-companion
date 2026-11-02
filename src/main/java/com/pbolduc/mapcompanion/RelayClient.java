@@ -190,6 +190,37 @@ public class RelayClient
 
 	private volatile long fatalSinceMs = 0L;
 
+	/**
+	 * Which refusal the map last held to, kept until a post lands, the code changes or the player
+	 * answers it — not for {@link #getFatalError}'s five minutes.
+	 *
+	 * <p>The sidebar draws from this what a refusal asks of the player: a few words on the status card,
+	 * and the invite field where an invite is the answer. Read from the fatal window instead, the field
+	 * and the words would go every five minutes for the one retry, and the group's name would come back
+	 * green between two refusals, as if the group had taken the player back.
+	 */
+	@Nullable
+	private volatile Refused refused = null;
+
+	/** The refusals {@link #getRefused} names: those the map holds to that a player can see a reason for. */
+	enum Refused
+	{
+		/** 403 needs_code: a group that keeps members, and does not know this one. An invite answers it. */
+		NEEDS_INVITE,
+		/** 410 removed: an owner removed this member. */
+		REMOVED,
+		/** 410 closed: the group's owner ended it. */
+		CLOSED,
+		/** 410 with any other word, or none. */
+		GONE,
+		/** 507 group_full, or a 507 from a map older than the words: no room for another member. */
+		FULL,
+		/** 400: the code is not the shape of one. */
+		BAD_CODE,
+		/** 422: the map cannot read what this version sends. */
+		OUT_OF_DATE
+	}
+
 	@Getter
 	private volatile boolean everSucceeded = false;
 
@@ -264,11 +295,16 @@ public class RelayClient
 	 * pastes their code again, so the moment the map is asking everybody to slow down is the moment
 	 * this would have sped up. Nothing needs it cleared, either — a permanent refusal never sets it,
 	 * so the retry it exists to allow was already due.
+	 *
+	 * <p>The sidebar calls it too, when the map has just taken this installation into the group a
+	 * refusal was about: an invite spent by Join may bring no new suffix, and without this the card
+	 * would go on saying the group needs one for up to five minutes after it took it.
 	 */
 	public void clearRefusal()
 	{
 		fatalError = null;
 		fatalSinceMs = 0L;
+		refused = null;
 	}
 
 	/** Called when the code changes, so an earlier failure does not haunt a corrected one. */
@@ -284,6 +320,7 @@ public class RelayClient
 		}
 		fatalError = null;
 		fatalSinceMs = 0L;
+		refused = null;
 		nextAllowedPostMs = 0L;
 		everSucceeded = false;
 		lastSuccessMs = 0L;
@@ -301,12 +338,26 @@ public class RelayClient
 	@Nullable
 	public String getFatalError()
 	{
+		return getFatalError(System.currentTimeMillis());
+	}
+
+	/** The same, as it reads at {@code now}: package-private so a test can read it past the retry window. */
+	@Nullable
+	String getFatalError(long now)
+	{
 		String error = fatalError;
 		if (error == null)
 		{
 			return null;
 		}
-		return fatalExpired(fatalSinceMs, System.currentTimeMillis()) ? null : error;
+		return fatalExpired(fatalSinceMs, now) ? null : error;
+	}
+
+	/** The refusal the map last held to, through the retries, or null once a post has landed. See {@link #refused}. */
+	@Nullable
+	Refused getRefused()
+	{
+		return refused;
 	}
 
 	public boolean isReady(long now)
@@ -536,6 +587,7 @@ public class RelayClient
 		{
 			fatalError = code == 507 ? describeFull(reason) : describeClientError(code);
 			fatalSinceMs = now;
+			refused = refusedFor(code, reason);
 			return;
 		}
 
@@ -554,6 +606,7 @@ public class RelayClient
 			{
 				fatalError = permanent;
 				fatalSinceMs = now;
+				refused = refusedFor(code, reason);
 				return;
 			}
 		}
@@ -568,6 +621,7 @@ public class RelayClient
 			 */
 			fatalError = redirectMessage(response.request().url(), response.header("Location"));
 			fatalSinceMs = now;
+			refused = null;
 			return;
 		}
 
@@ -590,6 +644,7 @@ public class RelayClient
 		lastTransientError = null;
 		lastTransientStatus = 0;
 		lastSuccessMs = now;
+		refused = null;
 
 		long interval = parsed != null && parsed.pollIntervalMs > 0
 						? parsed.pollIntervalMs
@@ -699,6 +754,33 @@ public class RelayClient
 			return "Map is full · retrying";
 		}
 		return "That group is full.";
+	}
+
+	/**
+	 * Which {@link Refused} a permanent refusal is, or null for one that is not this player's to
+	 * answer: a full relay, which clears by itself, a body too large, or a status this does not know.
+	 * The same readings as {@link #permanentReason} and {@link #describeFull}, so the sentence and
+	 * the refusal never disagree. Package-private so every case can be pinned without OkHttp.
+	 */
+	@Nullable
+	static Refused refusedFor(int status, @Nullable String reason)
+	{
+		String tidy = reason == null ? "" : reason.trim().toLowerCase(Locale.ROOT);
+		switch (status)
+		{
+			case 400:
+				return Refused.BAD_CODE;
+			case 403:
+				return permanentReason(status, reason) != null ? Refused.NEEDS_INVITE : null;
+			case 410:
+				return "closed".equals(tidy) ? Refused.CLOSED : "removed".equals(tidy) ? Refused.REMOVED : Refused.GONE;
+			case 422:
+				return Refused.OUT_OF_DATE;
+			case 507:
+				return "capacity".equals(tidy) ? null : Refused.FULL;
+			default:
+				return null;
+		}
 	}
 
 	/**

@@ -593,6 +593,22 @@ retrying* would leave *retrying* on a line of its own. A plugin turned on while 
 the login screen says *Logged out*, as a client start does, rather than *Not paired* beside the
 group's name.
 
+A refusal the map holds to is a few words in the refusal pink beside the red dot — *Needs an
+invite*, *Removed from this group*, *This group was closed*, *Group gone from the map*, *Group is
+full*, *Group code not accepted*, *Plugin out of date* — with the map's whole sentence in the dot's
+tooltip. It was the sentence, a white column of three lines beside a dot and a gear centred on it,
+and it stopped there: the field it named opened only from Switch ▾. Where an invite or a new code
+answers the refusal, *Have an invite?* and the field now show under the orange button, the field
+Join another group… opens, with the next step under Paste and Join: *Ask someone in Sunday raids
+for an invite and paste it here.*, or, for a group that has let the player go, *Paste another
+group's invite here, or use Leave group in Settings → Advanced to start over.* The relay keeps which
+refusal it was until a post lands or the code changes, not for the five minutes its sentence keeps
+for one retry, so the field and the words do not go, and the group's name does not come back
+green, between two refusals. The dot, the first line and the gear keep to the first line. Every
+other refusal, a redirect among them, is its sentence in the same pink without the field. The rest
+of the page stays as it was: drawing the page a player without a group sees, with Connect starting
+a new one, would reverse Connect's rule that it reconnects a saved code, and waits for the owner.
+
 ### Stars
 
 *Sync filters with website* and *Mining 72 · Skill total 1620* sat above the list as daily
