@@ -74,9 +74,9 @@ final class RunView extends JPanel
 	/** The next stop's number, in its world-map pin's colour. */
 	private static final String AMBER_HTML = String.format("#%02x%02x%02x",
 		MapPin.AMBER.getRed(), MapPin.AMBER.getGreen(), MapPin.AMBER.getBlue());
-	static final String CHANGED = "Your port tasks have changed since this run was planned. Reroute plans from what you hold now.";
+	static final String CHANGED = Words.of("run.changed");
 	/** A birdhouse stop not yet done: what will tick it, in the player's words rather than the evidence's. */
-	static final String BIRDHOUSE_PENDING = "Ticks when Time Tracking sees it seeded";
+	static final String BIRDHOUSE_PENDING = Words.of("run.birdhousePending");
 
 	private final FarmRunState state;
 	private final FarmRunClient client;
@@ -303,7 +303,7 @@ final class RunView extends JPanel
 			progress.setForeground(left ? ColorScheme.LIGHT_GRAY_COLOR : Color.WHITE);
 			MapCompanionPanel.setWrapped(changed, CHANGED, WIDTH);
 			follow.setText(view.following ? "Pause" : "Follow");
-			follow.setToolTipText(view.following ? "Keep this run and stop following it until you press Follow" : null);
+			follow.setToolTipText(view.following ? Words.of("run.unfollowTip") : null);
 			follow.setEnabled(left);
 			String key = view.run.id + "|" + view.revision + "|" + view.done + "|" + view.visited + "|" + view.here + "|" + view.carried;
 			if (!key.equals(shown))

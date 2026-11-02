@@ -230,7 +230,7 @@ final class DropLuckView
 		if (drop.oneIn == null)
 		{
 			return new Detail(drop.obtained > 0
-				? DropOdds.count(drop.obtained) + " recorded. No drop rate on file, so no odds."
+				? DropOdds.count(drop.obtained) + Words.of("luck.recordedNoRate")
 				: "No drop rate on file, so no odds.", sinceLabel, sinceValue, null, -1, null, null, null);
 		}
 		DropOdds.Rate rate = drop.rate();

@@ -317,9 +317,9 @@ answering a reviewer:
 ## Before submission
 
 - [ ] Review and commit the final source; match `build.gradle` and `CompanionVersion.VERSION`.
-- [ ] Write `UpdateNotice.LINE`, the one chat line a player hears on the first login after updating,
-      for what this release changed, and move `CompanionVersion.LINE_VERSION` with `VERSION`;
-      `UpdateNoticeTest` fails until they match.
+- [ ] Write `update.line` in `src/main/resources/words.txt` (`UpdateNotice.LINE`), the one chat line
+      a player hears on the first login after updating, for what this release changed, and move
+      `CompanionVersion.LINE_VERSION` with `VERSION`; `UpdateNoticeTest` fails until they match.
 - [ ] Read the plugin's description and tags as a player searching the Hub would: `description=` and
       `tags=` in `runelite-plugin.properties`, and the same two on `MapCompanionPlugin`'s
       `@PluginDescriptor`, which RuneLite's plugin list shows. They must agree, which

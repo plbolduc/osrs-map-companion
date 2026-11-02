@@ -64,9 +64,9 @@ final class PortTasksPanel extends JPanel
 {
 	private static final int WIDTH = MapCompanionPanel.CARD_TEXT_WIDTH;
 	private static final Color MUTED = ColorScheme.LIGHT_GRAY_COLOR;
-	static final String NEEDS_BOATS = "Turn on Progress and travel, which shares your boats, to plan these as one run.";
+	static final String NEEDS_BOATS = Words.of("port.needsBoats");
 	static final String AFTER_FARM_RUN = "Start run after the farm run ends.";
-	static final String BOARD_ONCE = "Board your boat once so the run knows its hold.";
+	static final String BOARD_ONCE = Words.of("port.boardOnce");
 	private final PortTaskReader reader;
 	private final MapCompanionConfig config;
 	private final FarmRunClient client;
@@ -96,7 +96,7 @@ final class PortTasksPanel extends JPanel
 		add(MapCompanionPanel.left(body));
 		starter.setOpaque(false);
 		starter.setBorder(BorderFactory.createEmptyBorder(4, 0, 0, 0));
-		start.setToolTipText("Ask the map for one run over every task you hold, starting from your boat");
+		start.setToolTipText(Words.of("port.startTip"));
 		starter.add(start);
 		MapCompanionPanel.capped(starter);
 		add(MapCompanionPanel.left(starter));

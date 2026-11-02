@@ -148,8 +148,7 @@ final class StarsPanel extends JPanel
 	private JButton starRoute;
 	@Nullable
 	private JLabel starSaid;
-	private static final String STAR_ROUTE_TIP = "Plan the way to this star from where you stand. The world is printed in "
-		+ "the steps; hopping is left to the game's world switcher.";
+	private static final String STAR_ROUTE_TIP = Words.of("stars.routeTip");
 
 	/**
 	 * @param shortestPath and {@code config}, for the line under the steps saying Shortest Path draws
@@ -218,7 +217,7 @@ final class StarsPanel extends JPanel
 		safe.setName("stars.safe");
 		members.setToolTipText("Show members worlds");
 		free.setToolTipText("Show free-to-play worlds");
-		safe.setToolTipText("Hide Wilderness, PvP, high-risk and Deadman");
+		safe.setToolTipText(Words.of("stars.safeTip"));
 		filters.setToolTipText("More filters");
 		filters.getAccessibleContext().setAccessibleName("More filters");
 		filters.setName("stars.filters");
@@ -350,7 +349,7 @@ final class StarsPanel extends JPanel
 		/* The tab is a member's, so the group is there: logging in is the one thing left to do. */
 		String notice = loggedOut ? LOG_IN
 			: model.feed == null ? service.message
-			: f.safe() && !model.feed.worldsAvailable ? "World list unavailable: PvP and Deadman filters cannot be checked."
+			: f.safe() && !model.feed.worldsAvailable ? Words.of("stars.noWorldList")
 			: "Updated " + age(model.feed.snapshotAgeSeconds * 1000 + elapsed) + " · "
 				+ (service.message != null ? "couldn't refresh, retrying" : model.feed.stale ? "Star Miners not answering" : "estimates");
 		status.setVisible(notice != null);
@@ -670,7 +669,7 @@ final class StarsPanel extends JPanel
 			{
 				JButton open = button(MapCompanionPanel.OPEN_WEBSITE);
 				open.setName("stars.open");
-				open.setToolTipText("Show the possible spots on osrs-map.com in your browser");
+				open.setToolTipText(Words.of("stars.openTip"));
 				open.addActionListener(e -> net.runelite.client.util.LinkBrowser.browse(mapUrl.get() + "/map?q="
 					+ java.net.URLEncoder.encode(star.name, java.nio.charset.StandardCharsets.UTF_8)));
 				actions.add(open);
@@ -683,7 +682,7 @@ final class StarsPanel extends JPanel
 			if (!star.precise && !pinned)
 			{
 				JLabel note = label("");
-				wrap(note, "This spot is approximate. Open website shows where it might be.", TEXT);
+				wrap(note, Words.of("stars.approximate"), TEXT);
 				selection.add(note);
 			}
 			RoutePress.Said said = press.said(SOURCE);
@@ -744,10 +743,9 @@ final class StarsPanel extends JPanel
 		String map = mapUrl.get().replaceFirst("^https?://", "");
 		if (!service.sync)
 		{
-			return "These filters are kept for this character. Tick to keep them the same here and on " + map + ".";
+			return Words.of("stars.keptHere") + " " + map + ".";
 		}
-		return service.syncReady ? "Your filters and favourites are the same here and on " + map + "."
-			: "Not synced yet; these filters are kept for this character.";
+		return service.syncReady ? Words.of("stars.synced") + " " + map + "." : Words.of("stars.notSynced");
 	}
 
 	/**
@@ -760,7 +758,7 @@ final class StarsPanel extends JPanel
 			: "For Mining " + mining + ": " + (mining >= 90 ? "every tier" : mining < 10 ? "T1 needs 10" : "up to T" + mining / 10);
 		if (total == null)
 		{
-			return tiers == null ? "Levels not read yet: every tier and world shows" : tiers;
+			return tiers == null ? Words.of("stars.noLevels") : tiers;
 		}
 		return tiers == null ? "Worlds up to " + total + " total" : tiers + " · worlds up to " + total + " total";
 	}

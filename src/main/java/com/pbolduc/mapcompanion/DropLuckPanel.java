@@ -335,8 +335,7 @@ final class DropLuckPanel extends JPanel
 
 		if (monster.drops.isEmpty())
 		{
-			card.add(wrapped("No notable drops yet. Kills are counted; a drop gets odds where its rate is on file.",
-				TEXT_WIDTH, 11f, ColorScheme.LIGHT_GRAY_COLOR));
+			card.add(wrapped(Words.of("luck.noDrops"), TEXT_WIDTH, 11f, ColorScheme.LIGHT_GRAY_COLOR));
 			add(card);
 			return;
 		}
@@ -401,8 +400,7 @@ final class DropLuckPanel extends JPanel
 		{
 			pin.setForeground(ColorScheme.BRAND_ORANGE);
 		}
-		pin.setToolTipText(pinned ? "Unpin: the card goes back to the last monster you killed"
-			: "Keep this drop on the card when you are not killing anything");
+		pin.setToolTipText(pinned ? Words.of("luck.unpinTip") : Words.of("luck.pinTip"));
 		pin.addActionListener(e ->
 		{
 			if (pinned)

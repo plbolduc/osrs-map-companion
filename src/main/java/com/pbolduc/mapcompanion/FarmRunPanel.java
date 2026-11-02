@@ -49,10 +49,10 @@ import net.runelite.client.ui.ColorScheme;
  */
 final class FarmRunPanel extends JPanel
 {
-	static final String AFTER_PORT_RUN = "Start a farm run after the port run ends.";
+	static final String AFTER_PORT_RUN = Words.of("farm.afterPortRun");
 	/* Settings names its groups, not their fields: patches and contracts both share under Tasks and timers. */
-	static final String NEEDS_PATCHES = "Ready now reads your patches. Turn on Tasks and timers in Settings.";
-	static final String NEEDS_CONTRACT = "Turn on Tasks and timers in Settings to plan your contract.";
+	static final String NEEDS_PATCHES = Words.of("farm.needsPatches");
+	static final String NEEDS_CONTRACT = Words.of("farm.needsContract");
 	static final String PICKED = "Run: ";
 	private static final String[][] STARTS =
 	{
@@ -96,7 +96,7 @@ final class FarmRunPanel extends JPanel
 			kind.addItem(choice[1]);
 		}
 		kind.setFont(kind.getFont().deriveFont(11f));
-		kind.setToolTipText("Choose a run the map can build from your character's shared readings");
+		kind.setToolTipText(Words.of("farm.kindTip"));
 		/* Closed, the picker names what it picks: "Ready now" alone reads as a status. The list stays plain. */
 		ListCellRenderer<? super String> rows = kind.getRenderer();
 		kind.setRenderer((list, value, index, selected, focused) ->
