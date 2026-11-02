@@ -412,6 +412,17 @@ public class LootLogHistoryTest
 		assertFalse(log.hasLog());
 	}
 
+	/**
+	 * A free world pauses the count as a Leagues or Deadman world does, and the line says why and where
+	 * kills still count: "paused" alone read as a kill log stopped for good to a player who had hopped.
+	 */
+	@Test
+	public void aPausedWorldSaysWhyAndWhereKillsStillCount()
+	{
+		game.worldTypes(EnumSet.noneOf(WorldType.class));
+		assertEquals("Not counted on this world: drop luck counts normal members worlds only.", log.summary());
+	}
+
 	/** Anything that is not the default is information, and all of it still travels. */
 	@Test
 	public void anInformativeRowStillTravels()
