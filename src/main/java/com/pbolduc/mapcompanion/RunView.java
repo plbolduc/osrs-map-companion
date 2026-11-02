@@ -199,6 +199,12 @@ final class RunView extends JPanel
 	 */
 	boolean refresh(boolean connected)
 	{
+		return refresh(connected, System.currentTimeMillis());
+	}
+
+	/** The same, as of {@code now}: a confirmation is drawn only while it is news. */
+	boolean refresh(boolean connected, long now)
+	{
 		FarmRunState.View any = state.view();
 		FarmRunState.View view = any != null && ours(any.run) ? any : null;
 		boolean active = view != null;
@@ -270,7 +276,7 @@ final class RunView extends JPanel
 		String detour = left && !view.following ? follower.pausedFor() : null;
 		paused.setVisible(detour != null);
 		MapCompanionPanel.setWrapped(paused, detour == null ? "" : pausedLine(detour), WIDTH);
-		boolean speaks = mine && said.message != null;
+		boolean speaks = mine && said.shown(now);
 		message.setVisible(speaks);
 		MapCompanionPanel.setWrapped(message, speaks ? said.message : "", WIDTH);
 		return active || speaks || planning || ending;

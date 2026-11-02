@@ -371,18 +371,49 @@ public class FarmRunClientTest
 		assertEquals(1, sent.size());
 	}
 
+	/**
+	 * A run that lands is answered by its stops. "Run ready." used to be said too, and stayed under
+	 * them for the run's whole life, still there at the first stop; the answer is still the run's, so
+	 * an acknowledged server restart retires it with the run.
+	 */
 	@Test
-	public void anAcknowledgedServerRestartRetiresTheOldRunReadyMessage() throws Exception
+	public void aRunThatLandsIsAnsweredByItsStopsAndRetiresWithThem() throws Exception
 	{
 		connect();
 		readyAnswer();
 		FarmRunClient client = client();
 		client.start("birdhouses");
 		settled(client);
-		assertEquals("Run ready.", client.said().message);
+		assertNotNull(state.view());
+		assertNull("no Run ready. under the stops", client.said().message);
+		assertFalse(client.said().shown(System.currentTimeMillis()));
 		state.acceptFor(identity.id(), "second-server-epoch", null, 0, System.currentTimeMillis());
 		assertNull(state.view());
 		assertNull(client.said());
+	}
+
+	/** "Run ended." is news for a moment and then gives its row back; a refusal stays until the next press. */
+	@Test
+	public void aConfirmationGoesAfterTenSecondsAndARefusalStays() throws Exception
+	{
+		connect();
+		status.set(204);
+		removedRevision.set("1");
+		FarmRunClient client = client();
+		client.end();
+		settled(client);
+		FarmRunClient.Said ended = client.said();
+		assertEquals("Run ended.", ended.message);
+		assertTrue(ended.shown(ended.atMs + 9_000));
+		assertFalse(ended.shown(ended.atMs + FarmRunClient.Said.CONFIRMATION_MS));
+
+		status.set(409);
+		answer.set("{\"reason\":\"nothing_seen\",\"error\":\"The client has not seen a patch yet.\"}");
+		FarmRunClient refused = client(new DestinationRoute());
+		refused.start("ready-now");
+		settled(refused);
+		FarmRunClient.Said said = refused.said();
+		assertTrue("a refusal is still said a minute on", said.shown(said.atMs + 60_000));
 	}
 
 	@Test
