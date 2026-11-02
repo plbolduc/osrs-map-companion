@@ -50,6 +50,7 @@ import java.time.temporal.ChronoUnit;
 import java.time.ZonedDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.function.BooleanSupplier;
 import java.util.List;
 import java.util.Locale;
 import javax.annotation.Nullable;
@@ -642,7 +643,7 @@ public class MapCompanionPanel extends PluginPanel
 		});
 		forgetLootButton.addActionListener(e ->
 		{
-			lootLog.clear();
+			forgetKillLog(lootLog, this::confirmForgetKillLog);
 			refresh();
 		});
 
@@ -2057,6 +2058,35 @@ public class MapCompanionPanel extends PluginPanel
 		say("Left the group.");
 		pages.open(false);
 		refresh();
+	}
+
+	/**
+	 * Forget kill log's question, put the way Leave group beside it puts its own.
+	 *
+	 * <p>Both buttons erase something and sit side by side, so both ask. One press would clear every
+	 * count this character has and its pinned drop, and the plugin keeps no other copy to give back.
+	 */
+	private boolean confirmForgetKillLog()
+	{
+		return JOptionPane.showConfirmDialog(
+				   SwingUtilities.getWindowAncestor(this),
+				   "Forget every kill and drop counted for this character?\n\n"
+				   + "Drop luck starts again from zero, and your pinned drop goes with it.\n"
+				   + "This cannot be undone.",
+				   "Forget kill log",
+				   JOptionPane.OK_CANCEL_OPTION,
+				   JOptionPane.QUESTION_MESSAGE) == JOptionPane.OK_OPTION;
+	}
+
+	/** Clear the kill log once the player has said yes, and only then. True when it was cleared. */
+	static boolean forgetKillLog(LootLog log, BooleanSupplier confirmed)
+	{
+		if (!confirmed.getAsBoolean())
+		{
+			return false;
+		}
+		log.clear();
+		return true;
 	}
 
 	/**
