@@ -489,14 +489,16 @@ instance has no tile the map can plan to, so Route asks nothing and the row says
 instance. Route works once they're out.* With the group
 layer on, Show on map reads *On the map* and is not pressable.
 
-Then *Meetups*: each with its title, *Today 7:42 PM · in 1h 20m* — past twelve hours the day and
+Then *Meetups*: the next one whole, with its title, *Today 7:42 PM · in 1h 20m* — past twelve hours the day and
 the clock alone, *Wednesday 8:59 PM*, as the line under *Now* counts, and from a quarter of an hour
 before the start until it stops saying *now* the countdown in the map's amber, there as here, as the
 map's own meetup card turns amber in the same window — *near Lumbridge Castle · W302*,
 who is coming as discs (solid for coming or here, a ring for maybe, faint for can't) with *1 here ·
 1 coming · 1 maybe*, **Route**, and the four answers in a two-by-two grid with this member's own
 filled, an answer pressed included while it is on its way: the pick ignores a press then rather than
-greying, since a greyed button loses its fill. *On my way* is one of the four, and Route beside them tells nobody. A map that sends no `events` leaves the one meetup under *Now*,
+greying, since a greyed button loses its fill. *On my way* is one of the four, and Route beside them tells nobody. Each meetup after
+the next is one line, *▸ Wintertodt · Today 7:24 PM · W307*, that opens to the same card in place and
+reads ▾ while open, as the website lists them; it is answered in the card, not from the line. A map that sends no `events` leaves the one meetup under *Now*,
 as before. **Meet here…** opens a form under them: a title, a day of the coming week, an hour and a
 minute in fives, defaulting to half an hour from now, and **Make meetup**, which copies the link.
 Like the single meetup under *Now*, the week's meetups are taken only while *Show map destinations*

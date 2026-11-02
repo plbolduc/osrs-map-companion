@@ -46,6 +46,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
 import javax.annotation.Nullable;
 import javax.swing.Icon;
 import javax.swing.JButton;
@@ -73,7 +75,8 @@ import net.runelite.client.ui.ColorScheme;
  * <p><b>A meetup</b> says its title, with <b>Route</b> beside it, when in the player's own clock
  * with a countdown, where in words with its world, and who is coming as their discs. Route plans
  * the way and tells nobody; the <i>On my way</i> answer is the press that does. The four answers are the map's own
- * and answer for the browser this member is bound to.
+ * and answer for the browser this member is bound to. The next meetup is drawn whole, and each after
+ * it as one line, title, day, clock and world, that opens to the same card.
  *
  * <p><b>Meet here</b>, on the Meetups heading, opens a short form under the meetups: a title, a day
  * and a time. It makes the meetup at the tile and world the player stands on and copies its link.
@@ -146,6 +149,8 @@ final class GroupPanel extends JPanel
 	private boolean ready;
 	/** The answer last pressed on each meetup, by its id: the pick while that answer is on its way. */
 	private final Map<String, String> pressed = new HashMap<>();
+	/** The later meetups opened from their line, by id; sorted, so the rows' signature reads them in one order. */
+	private final Set<String> openMeetups = new TreeSet<>();
 	/**
 	 * Copy invite, which {@link ConnectCard} owns, presses and words. The card of a group of one
 	 * holds it, under the sentence that is about it; otherwise it sits beside Switch ▾ under the tab.
@@ -346,6 +351,11 @@ final class GroupPanel extends JPanel
 		make.setEnabled(ready && meetups.ready() && (meet == null || !meet.sending));
 		meetHere.setEnabled(ready);
 		meetupsOff.setVisible(events == null && !config.showDestination());
+		if (events != null)
+		{
+			/* A meetup gone from the list goes from the open ones too, so the set never outgrows the list. */
+			openMeetups.removeIf(id -> events.stream().noneMatch(meetup -> id.equals(meetup.id)));
+		}
 
 		String words = signature(roster, events, destinationKey, now);
 		if (Objects.equals(words, drawn))
@@ -369,9 +379,23 @@ final class GroupPanel extends JPanel
 		meetupCards.removeAll();
 		if (events != null)
 		{
-			for (RelayResponse.Meetup meetup : events)
+			/*
+			 * The next meetup whole, with its answers; each after it one line that opens to the same
+			 * card, as the website lists them, so meetups days away keep the one about to start, and
+			 * its answers, on the first screen.
+			 */
+			for (int i = 0; i < events.size(); i++)
 			{
-				meetupCards.add(meetup(meetup, destinationKey, now));
+				RelayResponse.Meetup meetup = events.get(i);
+				boolean open = i == 0 || openMeetups.contains(meetup.id);
+				if (i > 0)
+				{
+					meetupCards.add(fold(meetup, open, now));
+				}
+				if (open)
+				{
+					meetupCards.add(meetup(meetup, destinationKey, now));
+				}
 			}
 		}
 		friends.revalidate();
@@ -399,7 +423,7 @@ final class GroupPanel extends JPanel
 				appendSaid(sb, press.said(GroupState.source(row.id)));
 			}
 		}
-		sb.append(';');
+		sb.append(';').append(openMeetups);
 		if (events != null)
 		{
 			for (RelayResponse.Meetup meetup : events)
@@ -684,6 +708,31 @@ final class GroupPanel extends JPanel
 		refresh(ready);
 	}
 
+	/**
+	 * A meetup after the next, as one line: its title, day, clock and world, which opens to its card in
+	 * place and reads ▾ while open. Its answers are in the card, not on the line, as on the website.
+	 */
+	private JButton fold(RelayResponse.Meetup meetup, boolean open, long now)
+	{
+		String words = (open ? "▾ " : "▸ ") + meetup.title + " · " + dayAndClock(meetup.startsAtMs, now, ZoneId.systemDefault(),
+			Locale.getDefault(Locale.Category.FORMAT)) + (meetup.world == null ? "" : " · W" + meetup.world);
+		JButton line = MapCompanionPanel.linkButton("");
+		line.setName("group.meetupFold." + meetup.id);
+		/* Wrapped as a label is, since the title is whatever the group typed and a button's own text would widen the tab. */
+		line.setText("<html><body width='" + (WIDTH + 16) + "'>" + MapCompanionPanel.escape(words) + "</body></html>");
+		line.setToolTipText(open ? "Fold this meetup to its line" : "Open this meetup: who is coming, Route and your answer");
+		line.addActionListener(e ->
+		{
+			if (!openMeetups.remove(meetup.id))
+			{
+				openMeetups.add(meetup.id);
+			}
+			drawn = null;
+			refresh(ready);
+		});
+		return line;
+	}
+
 	static String source(RelayResponse.Meetup meetup)
 	{
 		return "meetup:" + meetup.id;
@@ -793,15 +842,21 @@ final class GroupPanel extends JPanel
 	 */
 	static String when(long startsAtMs, long nowMs, ZoneId zone, Locale locale)
 	{
+		String at = dayAndClock(startsAtMs, nowMs, zone, locale);
+		String countdown = countdown(startsAtMs, nowMs);
+		return countdown == null ? at : at + " · " + countdown;
+	}
+
+	/** "Today 7:42 PM", "Wednesday 8:59 PM", "4 Nov 18:00": the day and the clock alone, as a folded meetup's line says them. */
+	static String dayAndClock(long startsAtMs, long nowMs, ZoneId zone, Locale locale)
+	{
 		ZonedDateTime at = Instant.ofEpochMilli(startsAtMs).atZone(zone);
 		long days = ChronoUnit.DAYS.between(Instant.ofEpochMilli(nowMs).atZone(zone).toLocalDate(), at.toLocalDate());
 		String day = days == 0 ? "Today"
 			: days == 1 ? "Tomorrow"
 			: days > 1 && days < 7 ? at.format(DateTimeFormatter.ofPattern("EEEE", Locale.ENGLISH))
 			: at.format(DateTimeFormatter.ofPattern("d MMM", Locale.ENGLISH));
-		String clock = at.format(DateTimeFormatter.ofPattern(MapCompanionPanel.clockPattern(locale), Locale.ENGLISH));
-		String countdown = countdown(startsAtMs, nowMs);
-		return countdown == null ? day + " " + clock : day + " " + clock + " · " + countdown;
+		return day + " " + at.format(DateTimeFormatter.ofPattern(MapCompanionPanel.clockPattern(locale), Locale.ENGLISH));
 	}
 
 	/** The countdown a when line ends with: "in 25m", "in 3h 20m", "now", "started", or null past twelve hours. */
