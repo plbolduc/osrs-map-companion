@@ -39,6 +39,7 @@ import javax.annotation.Nullable;
 /**
  * What this sidebar holds about the group beyond what the map last said: whose dot the player
  * asked to see, a Route to a friend waiting for that friend's position, and answers just given.
+ * Beside them, the world the player is on, which says whether they are already on a meetup's.
  *
  * <p><b>World map</b> draws one friend's dot while the world-map group layer is off. Their tile is
  * in {@link RelayResponse.MemberDot}, which the held stream carries only when asked for
@@ -53,7 +54,7 @@ import javax.annotation.Nullable;
  * A dropped stream discards them, and silence past {@link #DOT_FRESH_MS} refuses them.
  *
  * <p>Swing presses, OkHttp's stream frames and the game tick all reach it, so every method holds
- * this object's lock.
+ * this object's lock, but for the world: one number, written by the tick and read by Swing, volatile.
  */
 @Singleton
 public class GroupState
@@ -79,6 +80,12 @@ public class GroupState
 	@Nullable
 	private String inside;
 	private final Map<String, Answered> answered = new HashMap<>();
+	/**
+	 * The world this client is on, or zero while it is on none: set on the game tick, cleared by a
+	 * logout or a hop, and read by the Group tab, which shows a meetup's world green while it is this
+	 * one. It is the player's rather than the group's, so a new group keeps it; never sent.
+	 */
+	private volatile int world;
 
 	private static final class Answered
 	{
@@ -96,6 +103,18 @@ public class GroupState
 	GroupState(DestinationState destinations)
 	{
 		this.destinations = destinations;
+	}
+
+	/** The world the game says this client is on; zero for none. Client thread. */
+	void onWorld(int world)
+	{
+		this.world = world;
+	}
+
+	/** The world this client is on, as the last game tick said, or zero. */
+	int world()
+	{
+		return world;
 	}
 
 	/** Forget the last group's choices once the destinations have been cleared for a new one. */

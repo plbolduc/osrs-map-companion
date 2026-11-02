@@ -107,6 +107,11 @@ final class GroupPanel extends JPanel
 	static final long IMMINENT_MS = 15 * 60_000L;
 	/** The map's amber, as a font colour: the colour of a meetup's countdown once it is imminent. */
 	private static final String AMBER = String.format("#%06x", MapPin.AMBER.getRGB() & 0xFFFFFF);
+	/**
+	 * A meetup's world while this client is on it: the green the website's friends list gives the
+	 * player's own world, after the game's own friends list. On any other world it keeps the line's grey.
+	 */
+	private static final String HERE = "#34d399";
 	/** A friend's button for the game's own world map; "Show on world map" does not fit beside Route. */
 	static final String WORLD_MAP = "World map";
 	/** A news line's picture: the game's 16px skill icons, and an item's sprite shrunk to match. */
@@ -147,6 +152,8 @@ final class GroupPanel extends JPanel
 	@Nullable
 	private String drawn;
 	private boolean ready;
+	/** The world this client is on, as the last refresh read it; zero for none. */
+	private int here;
 	/** The answer last pressed on each meetup, by its id: the pick while that answer is on its way. */
 	private final Map<String, String> pressed = new HashMap<>();
 	/** The later meetups opened from their line, by id; sorted, so the rows' signature reads them in one order. */
@@ -335,6 +342,7 @@ final class GroupPanel extends JPanel
 	void refresh(boolean ready)
 	{
 		this.ready = ready;
+		here = group.world();
 		long now = System.currentTimeMillis();
 		List<RelayResponse.RosterRow> roster = destinations.getRoster();
 		List<RelayResponse.Meetup> events = destinations.getEvents();
@@ -430,7 +438,7 @@ final class GroupPanel extends JPanel
 				appendSaid(sb, press.said(GroupState.source(row.id)));
 			}
 		}
-		sb.append(';').append(openMeetups);
+		sb.append(';').append(openMeetups).append(here);
 		if (events != null)
 		{
 			for (RelayResponse.Meetup meetup : events)
@@ -649,7 +657,7 @@ final class GroupPanel extends JPanel
 		if (!where.isEmpty())
 		{
 			JLabel line = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
-			MapCompanionPanel.setWrapped(line, where, WIDTH);
+			setMarkup(line, markup(where, onItsWorld(meetup) ? "W" + meetup.world : null, HERE, WIDTH));
 			card.add(MapCompanionPanel.left(line));
 		}
 		if (!meetup.who.isEmpty())
@@ -726,7 +734,7 @@ final class GroupPanel extends JPanel
 		JButton line = MapCompanionPanel.linkButton("");
 		line.setName("group.meetupFold." + meetup.id);
 		/* Wrapped as a label is, since the title is whatever the group typed and a button's own text would widen the tab. */
-		line.setText("<html><body width='" + (WIDTH + 16) + "'>" + MapCompanionPanel.escape(words) + "</body></html>");
+		line.setText(markup(words, onItsWorld(meetup) ? "W" + meetup.world : null, HERE, WIDTH + 16));
 		line.setToolTipText(open ? "Fold this meetup to its line" : "Open this meetup: who is coming, Route and your answer");
 		line.addActionListener(e ->
 		{
@@ -738,6 +746,12 @@ final class GroupPanel extends JPanel
 			refresh(ready);
 		});
 		return line;
+	}
+
+	/** Whether this client is on the meetup's world now, so its world is drawn green. */
+	private boolean onItsWorld(RelayResponse.Meetup meetup)
+	{
+		return meetup.world != null && here > 0 && meetup.world == here;
 	}
 
 	static String source(RelayResponse.Meetup meetup)
@@ -899,21 +913,30 @@ final class GroupPanel extends JPanel
 
 	/**
 	 * A meetup's when line — the Group tab's, or the one meetup's under Now — with its countdown in the
-	 * map's amber while the meetup is imminent, and the rest in the label's own colour. The words are
-	 * escaped here as {@link MapCompanionPanel#setWrapped} escapes them, since the line is markup.
+	 * map's amber while the meetup is imminent, and the rest in the label's own colour.
 	 */
 	static void setWhen(JLabel label, String line, long startsAtMs, long nowMs, int width)
 	{
-		String countdown = imminent(startsAtMs, nowMs) ? countdown(startsAtMs, nowMs) : null;
-		int at = countdown == null ? -1 : line.lastIndexOf(countdown);
-		if (at < 0)
-		{
-			MapCompanionPanel.setWrapped(label, line, width);
-			return;
-		}
-		String html = "<html><body width='" + width + "'>" + MapCompanionPanel.escape(line.substring(0, at))
-			+ "<font color='" + AMBER + "'>" + MapCompanionPanel.escape(countdown) + "</font>"
-			+ MapCompanionPanel.escape(line.substring(at + countdown.length())) + "</body></html>";
+		setMarkup(label, markup(line, imminent(startsAtMs, nowMs) ? countdown(startsAtMs, nowMs) : null, AMBER, width));
+	}
+
+	/**
+	 * A line wrapped as {@link MapCompanionPanel#setWrapped} wraps it, with one part, its last
+	 * occurrence, in a colour of its own; without the part, exactly what setWrapped would set. Every
+	 * word is escaped, since some of these lines carry what somebody in the group typed.
+	 */
+	static String markup(String line, @Nullable String part, String colour, int width)
+	{
+		int at = part == null ? -1 : line.lastIndexOf(part);
+		String words = at < 0 ? MapCompanionPanel.escape(line)
+			: MapCompanionPanel.escape(line.substring(0, at)) + "<font color='" + colour + "'>" + MapCompanionPanel.escape(part)
+				+ "</font>" + MapCompanionPanel.escape(line.substring(at + part.length()));
+		return "<html><body width='" + width + "'>" + words + "</body></html>";
+	}
+
+	/** Set a label's markup only when it changed: the same text set again still repaints it. */
+	private static void setMarkup(JLabel label, String html)
+	{
 		if (!html.equals(label.getText()))
 		{
 			label.setText(html);

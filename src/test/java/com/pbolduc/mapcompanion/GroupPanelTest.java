@@ -731,6 +731,50 @@ public class GroupPanelTest
 		assertFalse("twenty-five minutes off is only a time: " + line.getText(), line.getText().contains("<font"));
 	}
 
+	/**
+	 * A meetup's world is green while this client is on it, on its card and on a later meetup's line,
+	 * as the game's own friends list greens the world a player is on; on another world, or on none, it
+	 * keeps the line's grey. The world comes from the game tick, so a hop recolours it at the next refresh.
+	 */
+	@Test
+	public void aMeetupsWorldIsGreenWhileYouAreOnIt() throws Exception
+	{
+		AtomicReference<GroupPanel> panel = new AtomicReference<>();
+		SwingUtilities.invokeAndWait(() -> panel.set(panel()));
+		twoMeetups();
+		group.onWorld(330);
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.get().refresh(true);
+			assertFalse(String.join("\n", labelTexts(panel.get())).contains("#34d399"));
+			assertFalse(named(panel.get(), "group.meetupFold.raids").getText().contains("#34d399"));
+		});
+		group.onWorld(302);
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.get().refresh(true);
+			String card = String.join("\n", labelTexts((Container) namedComponent(panel.get(), "group.meetup.star-hunt")));
+			assertTrue("on W302 the star hunt's world is green: " + card,
+				card.contains("near Lumbridge Castle · <font color='#34d399'>W302</font>"));
+			assertFalse(named(panel.get(), "group.meetupFold.raids").getText().contains("#34d399"));
+		});
+		group.onWorld(416);
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.get().refresh(true);
+			assertTrue("a hop to W416 greens the raid's line",
+				named(panel.get(), "group.meetupFold.raids").getText().contains("<font color='#34d399'>W416</font>"));
+			assertFalse(String.join("\n", labelTexts(panel.get())).contains("#34d399"));
+		});
+		group.onWorld(0);
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.get().refresh(true);
+			assertFalse("on no world, no world is green", String.join("\n", labelTexts(panel.get())).contains("#34d399"));
+			assertFalse(named(panel.get(), "group.meetupFold.raids").getText().contains("#34d399"));
+		});
+	}
+
 	/** A button's words without the markup that wraps them. */
 	private static String plain(AbstractButton button)
 	{
