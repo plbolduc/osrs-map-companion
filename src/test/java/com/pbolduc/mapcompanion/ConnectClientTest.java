@@ -196,6 +196,20 @@ public class ConnectClientTest
 		assertEquals("Only an owner of this group can do that.", no.message);
 	}
 
+	/** Rename reads a refusal as Connect and Join do: a busy map is busy, and no sentence of its own is FAILED. */
+	@Test
+	public void renameReadsARefusalAsConnectDoes() throws Exception
+	{
+		ConnectClient busy = client(503, "");
+		assertEquals(ConnectClient.BUSY, outcome(done -> busy.rename(MAP, "ABC234", "zezima", SECRET, "Sunday raids", done)).message);
+		ConnectClient slow = client(429, "{\"reason\":\"busy\",\"error\":\"Slow down a moment.\"}");
+		assertEquals(ConnectClient.BUSY, outcome(done -> slow.rename(MAP, "ABC234", "zezima", SECRET, "Sunday raids", done)).message);
+		ConnectClient wordless = client(500, "<html>proxy</html>");
+		ConnectClient.Outcome failed = outcome(done -> wordless.rename(MAP, "ABC234", "zezima", SECRET, "Sunday raids", done));
+		assertNull(failed.name);
+		assertEquals(ConnectClient.FAILED, failed.message);
+	}
+
 	/** No secret means a request certain to be refused, so none is sent. */
 	@Test
 	public void renameAsksNothingWithoutASecret() throws Exception
