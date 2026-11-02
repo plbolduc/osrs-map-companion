@@ -93,8 +93,11 @@ final class MeetupReminder
 			said.add(key);
 			lastAtMs = now;
 			long minutes = Math.max(0L, Math.round(until / 60_000.0));
-			out.add("Meetup: " + MapCompanionPlugin.safeTitle(meetup.title)
-				+ (minutes <= 0 ? " is starting" : " starts in " + minutes + "m"));
+			String when = minutes <= 0 ? " is starting" : " starts in " + minutes + "m";
+			/* Untitled, it is "a meetup": safeTitle's "somewhere" would read as the meetup's place. */
+			out.add(meetup.title == null || meetup.title.trim().isEmpty()
+				? "A meetup" + when
+				: "Meetup: " + MapCompanionPlugin.safeTitle(meetup.title) + when);
 			break;
 		}
 		return out;
