@@ -196,12 +196,7 @@ final class RecommendedSharing extends JPanel
 		orange(share, true);
 		share.setToolTipText("Turn on the ticked settings, as the switches in Settings do. Nothing else changes.");
 		share.addActionListener(e -> share());
-		JPanel shareRow = new JPanel(new GridLayout(1, 1));
-		shareRow.setBackground(BACK);
-		shareRow.add(share);
-		shareRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, share.getPreferredSize().height));
-		shareRow.setAlignmentX(Component.LEFT_ALIGNMENT);
-		card.add(shareRow);
+		card.add(MapCompanionPanel.fill(share, BACK));
 
 		JPanel links = new JPanel(new GridLayout(1, 2, 4, 0));
 		links.setBackground(BACK);

@@ -605,8 +605,7 @@ final class StarsPanel extends JPanel
 			way.add(steps);
 			selection.add(fill(way));
 			selection.add(gap(5));
-			JPanel actions = new JPanel(new java.awt.GridLayout(1, 0, 4, 0));
-			actions.setBackground(getBackground());
+			JPanel actions = MapCompanionPanel.row(getBackground());
 			home(actions, false, "stars.follow");
 			home(actions, true, "stars.reroute");
 			actions.add(unpin());
@@ -614,8 +613,7 @@ final class StarsPanel extends JPanel
 		}
 		else
 		{
-			JPanel actions = new JPanel(new java.awt.GridLayout(1, 0, 4, 0));
-			actions.setBackground(getBackground());
+			JPanel actions = MapCompanionPanel.row(getBackground());
 			if (!pinned)
 			{
 				/*
@@ -653,10 +651,8 @@ final class StarsPanel extends JPanel
 			{
 				RoutePress.Said said = press.said(SOURCE);
 				boolean planning = said != null && said.planning;
-				JButton route = new JButton(planning ? "Planning…" : "Route");
+				JButton route = button(planning ? "Planning…" : "Route");
 				route.setName("stars.route");
-				route.setFont(route.getFont().deriveFont(11f));
-				route.setMargin(new Insets(4, 4, 4, 4));
 				route.setEnabled(star.left(elapsed) > 0 && !planning && press.ready());
 				route.setToolTipText(STAR_ROUTE_TIP);
 				starRoute = route;
@@ -672,10 +668,8 @@ final class StarsPanel extends JPanel
 			}
 			else
 			{
-				JButton open = new JButton(MapCompanionPanel.OPEN_WEBSITE);
+				JButton open = button(MapCompanionPanel.OPEN_WEBSITE);
 				open.setName("stars.open");
-				open.setFont(open.getFont().deriveFont(11f));
-				open.setMargin(new Insets(4, 4, 4, 4));
 				open.setToolTipText("Show the possible spots on osrs-map.com in your browser");
 				open.addActionListener(e -> net.runelite.client.util.LinkBrowser.browse(mapUrl.get() + "/map?q="
 					+ java.net.URLEncoder.encode(star.name, java.nio.charset.StandardCharsets.UTF_8)));

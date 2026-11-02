@@ -415,9 +415,7 @@ final class DropLuckPanel extends JPanel
 	private void buildDetail(JPanel card, LootLog.Monster monster, LootLog.Drop drop, boolean pinned, @Nullable Integer taskLeft)
 	{
 		DropLuckView.Detail detail = DropLuckView.detail(monster, drop, taskLeft, log.boostedNow(monster.npc, drop.boostWhen));
-		JButton pin = new JButton(pinned ? "Pinned" : "Pin");
-		pin.setFont(pin.getFont().deriveFont(11f));
-		pin.setMargin(new Insets(1, 6, 1, 6));
+		JButton pin = MapCompanionPanel.smallButton(pinned ? "Pinned" : "Pin");
 		pin.setFocusable(false);
 		if (pinned)
 		{
