@@ -69,6 +69,9 @@ often. A clean run is now 443 tests with no failures or skips.
 - [ ] On a meetup's world, Group draws its *W302* green, on its card or a later meetup's line. Hop
       away: it is grey again within a second of landing, and green once you hop back. Logged out,
       no meetup's world is green.
+- [ ] A friend's disc under Group carries the initials their world-map pin does, and its presence dot
+      leaves both letters readable. In a meetup's roll-up, hovering a disc names that member and
+      hovering an answer's word names everyone under it.
 - [ ] Receive a destination, preserve an existing quest hint arrow, and test clearing it.
 - [ ] Use two characters in one group: see only the other member on the game world map, including
       an edge pin when panned away. Turn sharing off and log out; pins must disappear.

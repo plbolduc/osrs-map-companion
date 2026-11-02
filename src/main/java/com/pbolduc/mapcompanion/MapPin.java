@@ -180,7 +180,11 @@ class MapPin extends WorldMapPoint
 		return disc(colour, initials(name), false);
 	}
 
-	private static BufferedImage disc(Color colour, String text, boolean faded)
+	/**
+	 * A member's disc: their colour, a black edge and their letters. The sidebar's Group tab draws a
+	 * friend and a meetup's faces with this same picture, so a member is one mark on both.
+	 */
+	static BufferedImage disc(Color colour, String text, boolean faded)
 	{
 		BufferedImage image = new BufferedImage(DISC + 2, DISC + 2, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = image.createGraphics();

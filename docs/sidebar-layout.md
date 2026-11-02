@@ -481,7 +481,8 @@ card is about; otherwise the card says only how long ago, as before. Nothing abo
 ### Friends and meetups under Group
 
 Step 9, from `plan-companion-social.md`. Under the Group heading, one card per other member: their
-disc in their map colour with presence as a dot in its corner, never as words; *near Lumbridge
+disc as the world map draws it, their map colour with their initials, so two friends of one colour
+are told apart by their letters, and presence as a dot in its corner, never as words; *near Lumbridge
 Castle · Near you*; their newest news, *Woodcutting 80 · 5m ago*; then **Route** and **Show on map**
 for a friend whose position the map draws. A friend sharing no position is a name and a dot. Route
 reads *Finding…* while their position is asked for, *Planning…*, then *Reroute*. A friend inside an
@@ -494,8 +495,9 @@ the clock alone, *Wednesday 8:59 PM*, as the line under *Now* counts, and from a
 before the start until it stops saying *now* the countdown in the map's amber, there as here, as the
 map's own meetup card turns amber in the same window — *near Lumbridge Castle · W302*, the world
 green while you are on it, as the game's friends list greens your own,
-who is coming as discs (solid for coming or here, a ring for maybe, faint for can't) with *1 here ·
-1 coming · 1 maybe*, **Route**, and the four answers in a two-by-two grid with this member's own
+who answered as the website rolls it up — each answer somebody gave, its word, then those people's
+discs with their initials, *Going* RO DA *Maybe* SU *Here* CA, starting a line of its own where the
+card's edge comes, each disc's name in its tooltip — **Route**, and the four answers in a two-by-two grid with this member's own
 filled, an answer pressed included while it is on its way: the pick ignores a press then rather than
 greying, since a greyed button loses its fill. *On my way* is one of the four, and Route beside them tells nobody. Each meetup after
 the next is one line, *▸ Wintertodt · Today 7:24 PM · W307*, that opens to the same card in place and

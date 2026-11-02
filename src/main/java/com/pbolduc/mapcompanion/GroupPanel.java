@@ -25,7 +25,6 @@
  */
 package com.pbolduc.mapcompanion;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
@@ -41,7 +40,9 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -63,20 +64,21 @@ import net.runelite.client.ui.ColorScheme;
 /**
  * The group in the sidebar: each friend's row, the week's meetups, and <i>Meet here</i>.
  *
- * <p><b>A friend's row</b> carries what the game's own friends list cannot say. Their disc in the
- * colour their dot has on the map, with presence as a small dot in its corner and never as words,
- * because online and world are the game's to say; where they are, <i>near</i> a landmark as the map
- * words it, and <i>Near you</i>; their newest level or drop. <b>Route</b>, beside their name, goes
- * once to where they stand now — pressed again it reads <b>Reroute</b> and asks again, and nothing
- * follows them on its own — and <b>World map</b>, under the card, draws that friend's dot on the
- * game's world map while its group layer is off. A friend who shares no position shows a name and
- * presence and nothing else.
+ * <p><b>A friend's row</b> carries what the game's own friends list cannot say. Their disc as the
+ * world map draws it, their map colour and their initials, with presence as a small dot in its corner
+ * and never as words, because online and world are the game's to say; where they are, <i>near</i> a
+ * landmark as the map words it, and <i>Near you</i>; their newest level or drop. <b>Route</b>,
+ * beside their name, goes once to where they stand now — pressed again it reads <b>Reroute</b> and
+ * asks again, and nothing follows them on its own — and <b>World map</b>, under the card, draws that
+ * friend's dot on the game's world map while its group layer is off. A friend who shares no position
+ * shows a name and presence and nothing else.
  *
  * <p><b>A meetup</b> says its title, with <b>Route</b> beside it, when in the player's own clock
- * with a countdown, where in words with its world, and who is coming as their discs. Route plans
- * the way and tells nobody; the <i>On my way</i> answer is the press that does. The four answers are the map's own
- * and answer for the browser this member is bound to. The next meetup is drawn whole, and each after
- * it as one line, title, day, clock and world, that opens to the same card.
+ * with a countdown, where in words with its world, and who answered: each answer's word, then those
+ * people's discs. Route plans the way and tells nobody; the <i>On my way</i> answer is the press that
+ * does. The four answers are the map's own and answer for the browser this member is bound to. The
+ * next meetup is drawn whole, and each after it as one line, title, day, clock and world, that opens
+ * to the same card.
  *
  * <p><b>Meet here</b>, on the Meetups heading, opens a short form under the heading, above the
  * meetups: a title, a day and a time. It makes the meetup at the tile and world the player stands on
@@ -518,9 +520,10 @@ final class GroupPanel extends JPanel
 			route.addActionListener(e -> routeToFriend(row.id));
 		}
 		JLabel name = label(12f, Color.WHITE);
-		name.setIcon(new Disc(colour(row.colour), presenceColour(row.presence)));
+		name.setIcon(new Disc(colour(row.colour), MapPin.initials(row.name), presenceColour(row.presence)));
 		name.setIconTextGap(6);
-		MapCompanionPanel.setWrapped(name, row.name, WIDTH - 20 - (route == null ? 0 : route.getPreferredSize().width + 4));
+		MapCompanionPanel.setWrapped(name, row.name, WIDTH - name.getIcon().getIconWidth() - name.getIconTextGap()
+			- (route == null ? 0 : route.getPreferredSize().width + 4));
 		name.setToolTipText(presenceWord(row.presence));
 		/* Route on the name's line, as a meetup's sits beside its title; World map keeps the row under the card. */
 		card.add(MapCompanionPanel.left(route == null ? name : beside(name, route)));
@@ -660,13 +663,11 @@ final class GroupPanel extends JPanel
 			setMarkup(line, markup(where, onItsWorld(meetup) ? "W" + meetup.world : null, HERE, WIDTH));
 			card.add(MapCompanionPanel.left(line));
 		}
-		if (!meetup.who.isEmpty())
+		if (!rollUp(meetup.who).isEmpty())
 		{
-			JLabel who = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
-			who.setIcon(new Discs(meetup.who));
-			who.setIconTextGap(6);
-			MapCompanionPanel.setWrapped(who, whoLine(meetup.who), WIDTH - Discs.width(meetup.who.size()) - 6);
-			who.setToolTipText(whoTooltip(meetup.who));
+			RollUp who = new RollUp(meetup.who, WIDTH);
+			who.setName("group.who." + meetup.id);
+			card.add(gap(3));
 			card.add(MapCompanionPanel.left(who));
 		}
 		String mine = group.mine(meetup, now);
@@ -790,52 +791,62 @@ final class GroupPanel extends JPanel
 		return String.join(" · ", parts);
 	}
 
-	/** "1 here · 2 coming · 1 maybe": the roll-up in counts, the names in the tooltip. */
-	static String whoLine(List<RelayResponse.MeetupAnswer> who)
+	/** The roll-up's answers in the order a reader asks them, who is coming before who is not. */
+	private static final List<String> ROLL_UP = Arrays.asList("going", "on_my_way", "maybe", "no", "arrived");
+
+	/**
+	 * Who answered what, in the roll-up's order and by the word it is said with, Here for those already
+	 * there: only the answers somebody gave, each with its people in the map's order.
+	 */
+	static Map<String, List<RelayResponse.MeetupAnswer>> rollUp(List<RelayResponse.MeetupAnswer> who)
 	{
-		int here = 0;
-		int coming = 0;
-		int maybe = 0;
-		for (RelayResponse.MeetupAnswer face : who)
+		Map<String, List<RelayResponse.MeetupAnswer>> answers = new LinkedHashMap<>();
+		for (String answer : ROLL_UP)
 		{
-			if ("arrived".equals(face.answer))
+			List<RelayResponse.MeetupAnswer> people = new ArrayList<>();
+			for (RelayResponse.MeetupAnswer face : who)
 			{
-				here++;
+				if (answer.equals(face.answer))
+				{
+					people.add(face);
+				}
 			}
-			else if ("going".equals(face.answer) || "on_my_way".equals(face.answer))
+			if (!people.isEmpty())
 			{
-				coming++;
-			}
-			else if ("maybe".equals(face.answer))
-			{
-				maybe++;
+				answers.put("arrived".equals(answer) ? "Here" : answerWord(answer), people);
 			}
 		}
-		List<String> parts = new ArrayList<>();
-		if (here > 0)
-		{
-			parts.add(here + " here");
-		}
-		if (coming > 0)
-		{
-			parts.add(coming + " coming");
-		}
-		if (maybe > 0)
-		{
-			parts.add(maybe + " maybe");
-		}
-		return parts.isEmpty() ? "Nobody yet" : String.join(" · ", parts);
+		return answers;
 	}
 
-	static String whoTooltip(List<RelayResponse.MeetupAnswer> who)
+	/** "Going: Rob, Dax · Maybe: Sunday (you) · Here: Cara": the roll-up in words, for a screen reader. */
+	static String rollUpWords(List<RelayResponse.MeetupAnswer> who)
 	{
 		List<String> parts = new ArrayList<>();
-		for (RelayResponse.MeetupAnswer face : who)
+		for (Map.Entry<String, List<RelayResponse.MeetupAnswer>> answer : rollUp(who).entrySet())
 		{
-			parts.add(face.name + (Boolean.TRUE.equals(face.you) ? " (you)" : "") + ": "
-				+ ("arrived".equals(face.answer) ? "here" : answerWord(face.answer).toLowerCase(Locale.ENGLISH)));
+			parts.add(answer.getKey() + ": " + names(answer.getValue()));
 		}
-		return String.join(", ", parts);
+		return String.join(" · ", parts);
+	}
+
+	private static String names(List<RelayResponse.MeetupAnswer> people)
+	{
+		List<String> names = new ArrayList<>();
+		for (RelayResponse.MeetupAnswer face : people)
+		{
+			names.add(name(face));
+		}
+		return String.join(", ", names);
+	}
+
+	/**
+	 * A member's name for a tooltip, with any tag taken out: Swing reads a tooltip that starts with
+	 * {@code <html>} as markup, and a disc's tooltip starts with whatever name the member typed.
+	 */
+	private static String name(RelayResponse.MeetupAnswer face)
+	{
+		return MapPin.plain(face.name) + (Boolean.TRUE.equals(face.you) ? " (you)" : "");
 	}
 
 	static String answerWord(String answer)
@@ -1084,22 +1095,27 @@ final class GroupPanel extends JPanel
 	}
 
 	/**
-	 * A friend's disc in their map colour, with presence as a small dot in its corner.
+	 * A friend's disc as the world map draws them — {@link MapPin}'s own, in their map colour with a
+	 * black edge and their initials, so two friends of one colour are told apart by their letters — with
+	 * presence as a small dot in its corner.
 	 *
 	 * <p>The dot sits in a halo of the card's own colour two pixels wide, as the website's does, so it
 	 * reads as a dot on the disc rather than as a second disc touching it, whatever the disc's colour.
-	 * Past the disc's edge the halo is the card's colour on the card, so the icon's size stays the disc
-	 * and its dot, and a friend's row is no taller for it.
+	 * It hangs a third of itself past the disc's edge, as the website's does, which keeps it off the
+	 * second letter; past the edge the halo is the card's colour on the card, so the icon is no larger
+	 * than the disc's own picture.
 	 */
 	static final class Disc implements Icon
 	{
-		private static final int SIZE = 13;
-		private final Color colour;
+		/** The presence dot's size, and where its corner sits on the icon, across and down. */
+		static final int DOT = 6;
+		static final int DOT_AT = 14;
+		private final java.awt.image.BufferedImage disc;
 		private final Color presence;
 
-		Disc(Color colour, Color presence)
+		Disc(Color colour, String initials, Color presence)
 		{
-			this.colour = colour;
+			this.disc = MapPin.disc(colour, initials, false);
 			this.presence = presence;
 		}
 
@@ -1108,88 +1124,89 @@ final class GroupPanel extends JPanel
 		{
 			Graphics2D g2 = (Graphics2D) g.create();
 			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-			g2.setColor(colour);
-			g2.fillOval(x, y, SIZE, SIZE);
-			int dot = 6;
-			int dx = x + SIZE - dot + 1;
-			int dy = y + SIZE - dot + 1;
+			g2.drawImage(disc, x, y, null);
+			int dx = x + DOT_AT;
+			int dy = y + DOT_AT;
 			g2.setColor(ColorScheme.DARKER_GRAY_COLOR);
-			g2.fillOval(dx - 2, dy - 2, dot + 4, dot + 4);
+			g2.fillOval(dx - 2, dy - 2, DOT + 4, DOT + 4);
 			g2.setColor(presence);
-			g2.fillOval(dx, dy, dot, dot);
+			g2.fillOval(dx, dy, DOT, DOT);
 			g2.dispose();
 		}
 
 		@Override
 		public int getIconWidth()
 		{
-			return SIZE + 1;
+			return disc.getWidth();
 		}
 
 		@Override
 		public int getIconHeight()
 		{
-			return SIZE + 1;
+			return disc.getHeight();
 		}
 	}
 
-	/** Who is coming, as their discs: solid for coming or here, a ring for maybe, faint for can't. */
-	static final class Discs implements Icon
+	/**
+	 * Who answered a meetup, as the website rolls them up: each answer somebody gave, its word, then
+	 * their discs with initials — Going, On my way, Maybe, Can't, then Here — so whether Rob is coming
+	 * is read rather than hovered for. A new line starts where the next answer would pass the card's
+	 * edge, and each disc's tooltip is its member's name.
+	 *
+	 * <p>Words and discs are labels placed by hand: the card's width is known, and a flow layout in a
+	 * column reports one line's height however many it wraps to.
+	 */
+	static final class RollUp extends JPanel
 	{
-		private static final int SIZE = 10;
-		private static final int STEP = 8;
-		private static final int MOST = 8;
-		private final List<RelayResponse.MeetupAnswer> who;
+		private static final long serialVersionUID = 1L;
+		/** A disc's picture, which leaves three pixels between two discs' edges. */
+		private static final int STEP = 20;
+		private static final int AFTER_WORD = 4;
+		private static final int BETWEEN = 10;
+		private static final int LINE = STEP + 2;
 
-		Discs(List<RelayResponse.MeetupAnswer> who)
+		RollUp(List<RelayResponse.MeetupAnswer> who, int width)
 		{
-			this.who = who;
-		}
-
-		static int width(int count)
-		{
-			int shown = Math.min(MOST, Math.max(1, count));
-			return SIZE + (shown - 1) * STEP;
-		}
-
-		@Override
-		public void paintIcon(Component c, Graphics g, int x, int y)
-		{
-			Graphics2D g2 = (Graphics2D) g.create();
-			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-			for (int i = 0; i < Math.min(MOST, who.size()); i++)
+			super(null);
+			setOpaque(false);
+			int x = 0;
+			int y = 0;
+			for (Map.Entry<String, List<RelayResponse.MeetupAnswer>> answer : rollUp(who).entrySet())
 			{
-				RelayResponse.MeetupAnswer face = who.get(i);
-				Color base = colour(face.colour);
-				int left = x + i * STEP;
-				g2.setColor(ColorScheme.DARKER_GRAY_COLOR);
-				g2.fillOval(left - 1, y - 1, SIZE + 2, SIZE + 2);
-				if ("maybe".equals(face.answer))
+				JLabel word = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
+				word.setText(answer.getKey());
+				word.setToolTipText(answer.getKey() + ": " + names(answer.getValue()));
+				java.awt.Dimension size = word.getPreferredSize();
+				if (x > 0 && x + size.width + AFTER_WORD + STEP * answer.getValue().size() > width)
 				{
-					g2.setColor(base);
-					g2.setStroke(new BasicStroke(2f));
-					g2.drawOval(left + 1, y + 1, SIZE - 2, SIZE - 2);
+					x = 0;
+					y += LINE;
 				}
-				else
+				word.setBounds(x, y + (STEP - size.height) / 2, size.width, size.height);
+				add(word);
+				x += size.width + AFTER_WORD;
+				for (RelayResponse.MeetupAnswer face : answer.getValue())
 				{
-					g2.setColor("no".equals(face.answer)
-						? new Color(base.getRed(), base.getGreen(), base.getBlue(), 70) : base);
-					g2.fillOval(left, y, SIZE, SIZE);
+					/* More people than one line holds carry on under it, word or no word. */
+					if (x + STEP > width)
+					{
+						x = 0;
+						y += LINE;
+					}
+					JLabel disc = new JLabel(new javax.swing.ImageIcon(
+						MapPin.disc(colour(face.colour), MapPin.initials(face.name), false)));
+					disc.setToolTipText(name(face));
+					disc.setBounds(x, y, STEP, STEP);
+					add(disc);
+					x += STEP;
 				}
+				x += BETWEEN;
 			}
-			g2.dispose();
-		}
-
-		@Override
-		public int getIconWidth()
-		{
-			return width(who.size());
-		}
-
-		@Override
-		public int getIconHeight()
-		{
-			return SIZE;
+			java.awt.Dimension size = new java.awt.Dimension(width, y + STEP);
+			setPreferredSize(size);
+			setMinimumSize(size);
+			setMaximumSize(new java.awt.Dimension(Integer.MAX_VALUE, size.height));
+			getAccessibleContext().setAccessibleName(rollUpWords(who));
 		}
 	}
 }

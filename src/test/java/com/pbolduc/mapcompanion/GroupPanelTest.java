@@ -695,8 +695,48 @@ public class GroupPanelTest
 		 */
 		assertEquals("Tomorrow 06:00", GroupPanel.when(now + 12 * 3_600_000L, now, zone, Locale.UK));
 		assertEquals("Tomorrow 19:00", GroupPanel.when(now + 25 * 3_600_000L, now, zone, Locale.UK));
-		assertEquals("1 here · 1 coming · 1 maybe", GroupPanel.whoLine(Arrays.asList(face("arrived"), face("on_my_way"),
-			face("maybe"), face("no"))));
+	}
+
+	/**
+	 * Who answered a meetup, as the website rolls them up: each answer somebody gave, its word, then
+	 * those people's discs with their initials, Going, On my way, Maybe, Can't and Here in that order,
+	 * each disc's name in its tooltip. It was counts, "1 here · 1 coming · 1 maybe", with the names only
+	 * in a tooltip, so whether Rob was coming meant hovering over a row of discs.
+	 */
+	@Test
+	public void aMeetupsAnswersAreEachAWordThenItsPeoplesDiscs() throws Exception
+	{
+		List<RelayResponse.MeetupAnswer> who = Arrays.asList(face("Cara", "arrived"), face("Rob", "on_my_way"),
+			face("Sunday", "maybe"), face("Dax", "no"), face("Ash", "going"), face("Tove", "going"));
+		assertEquals(Arrays.asList("Going", "On my way", "Maybe", "Can't", "Here"),
+			new java.util.ArrayList<>(GroupPanel.rollUp(who).keySet()));
+		assertEquals("Going: Ash, Tove · On my way: Rob · Maybe: Sunday · Can't: Dax · Here: Cara", GroupPanel.rollUpWords(who));
+		/* A tooltip that starts with <html> is markup to Swing, and a disc's starts with the name a member typed. */
+		GroupPanel.RollUp typed = new GroupPanel.RollUp(Collections.singletonList(
+			face("<html><img src='https://example.invalid/x.png'>Rob", "going")), MapCompanionPanel.CARD_TEXT_WIDTH);
+		for (Component part : typed.getComponents())
+		{
+			String tip = ((javax.swing.JLabel) part).getToolTipText();
+			assertFalse(tip, tip.contains("<") || tip.contains(">"));
+		}
+
+		AtomicReference<GroupPanel> panel = new AtomicReference<>();
+		SwingUtilities.invokeAndWait(() -> panel.set(panel()));
+		social();
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.get().refresh(true);
+			Container rollUp = (Container) namedComponent(panel.get(), "group.who.star-hunt");
+			List<String> seen = new java.util.ArrayList<>();
+			for (Component part : rollUp.getComponents())
+			{
+				javax.swing.JLabel label = (javax.swing.JLabel) part;
+				seen.add(label.getIcon() == null ? label.getText() : "(" + label.getToolTipText() + ")");
+				assertTrue(label.getToolTipText() + " stays inside the card",
+					part.getX() + part.getWidth() <= MapCompanionPanel.CARD_TEXT_WIDTH);
+			}
+			assertEquals(Arrays.asList("On my way", "(Rob)", "Maybe", "(Sunday (you))", "Can't", "(Dax)", "Here", "(Cara)"), seen);
+		});
 	}
 
 	/**
@@ -816,15 +856,64 @@ public class GroupPanelTest
 				Color disc = GroupPanel.colour(hex);
 				String what = presence + " on " + hex;
 				assertNotEquals(what, disc.getRGB(), dot.getRGB());
-				BufferedImage drawn = painted(new GroupPanel.Disc(disc, dot));
-				assertEquals(what + ": the middle of the dot", dot.getRGB(), drawn.getRGB(10, 10));
+				/*
+				 * The disc is the world map's, 18px with initials where it was a plain 13px one, so the
+				 * dot sits further in; it is the same dot in the same halo, measured from its corner.
+				 */
+				BufferedImage drawn = painted(new GroupPanel.Disc(disc, "CA", dot));
+				int corner = GroupPanel.Disc.DOT_AT;
+				assertEquals(what + ": the middle of the dot", dot.getRGB(), drawn.getRGB(corner + 2, corner + 2));
 				/* Left of the dot and above it, where it sits on the disc. */
-				for (int[] at : new int[][]{{6, 10}, {7, 10}, {10, 6}, {10, 7}})
+				for (int[] at : new int[][]{{corner - 2, corner + 2}, {corner - 1, corner + 2}, {corner + 2, corner - 2},
+					{corner + 2, corner - 1}})
 				{
 					assertCard(what + " at " + at[0] + "," + at[1], drawn.getRGB(at[0], at[1]));
 				}
 			}
 		}
+	}
+
+	/**
+	 * A friend's disc is the one the world map draws for them, so the sidebar and the map show one
+	 * picture, and two friends of one colour are told apart by the initials on it.
+	 */
+	@Test
+	public void aFriendsDiscIsTheWorldMapsWithTheirInitials()
+	{
+		Color pink = GroupPanel.colour("#f472b6");
+		Color online = GroupPanel.presenceColour("online");
+		BufferedImage cara = painted(new GroupPanel.Disc(pink, MapPin.initials("Cara"), online));
+		BufferedImage map = new BufferedImage(cara.getWidth(), cara.getHeight(), BufferedImage.TYPE_INT_RGB);
+		Graphics2D g = map.createGraphics();
+		g.setColor(ColorScheme.DARKER_GRAY_COLOR);
+		g.fillRect(0, 0, map.getWidth(), map.getHeight());
+		g.drawImage(MapPin.disc(pink, "CA", false), 0, 0, null);
+		g.dispose();
+		/* Away from the presence dot and its halo, every pixel is the world map's. */
+		double middle = GroupPanel.Disc.DOT_AT + GroupPanel.Disc.DOT / 2.0;
+		int compared = 0;
+		for (int y = 0; y < cara.getHeight(); y++)
+		{
+			for (int x = 0; x < cara.getWidth(); x++)
+			{
+				if (Math.hypot(x + 0.5 - middle, y + 0.5 - middle) > GroupPanel.Disc.DOT / 2.0 + 3)
+				{
+					assertEquals("at " + x + "," + y, map.getRGB(x, y), cara.getRGB(x, y));
+					compared++;
+				}
+			}
+		}
+		assertTrue(compared > 300);
+		BufferedImage rob = painted(new GroupPanel.Disc(pink, MapPin.initials("Rob"), online));
+		boolean told = false;
+		for (int y = 0; y < rob.getHeight() && !told; y++)
+		{
+			for (int x = 0; x < rob.getWidth() && !told; x++)
+			{
+				told = rob.getRGB(x, y) != cara.getRGB(x, y);
+			}
+		}
+		assertTrue("Cara and Rob are both pink, and their letters tell them apart", told);
 	}
 
 	private static BufferedImage painted(GroupPanel.Disc icon)
@@ -847,10 +936,10 @@ public class GroupPanelTest
 			&& Math.abs(seen.getGreen() - card.getGreen()) <= 16 && Math.abs(seen.getBlue() - card.getBlue()) <= 16);
 	}
 
-	private static RelayResponse.MeetupAnswer face(String answer)
+	private static RelayResponse.MeetupAnswer face(String name, String answer)
 	{
 		RelayResponse.MeetupAnswer face = new RelayResponse.MeetupAnswer();
-		face.name = "M";
+		face.name = name;
 		face.answer = answer;
 		return face;
 	}
