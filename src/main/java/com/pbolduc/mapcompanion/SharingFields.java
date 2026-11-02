@@ -33,10 +33,12 @@ import java.util.function.Predicate;
 /**
  * Every sharing choice the sidebar offers, by its setting key and in the words the sidebar uses.
  *
- * <p>Two places name these: Settings, one checkbox each, and the step after a first
- * Connect, which lists what one press will share. Both read this list, so the step cannot name a
- * field differently from the checkbox that later turns it off, and a field cannot be added to a
- * group in one without the other. The keys are the existing settings; nothing here is stored.
+ * <p>Two places draw these: Settings, and the step after a first Connect, which lists what one
+ * press will share. Both draw a switch for the name, each group and the death, in that order, and
+ * name every field of a group under <i>What each one sends</i>. Both read this list, so the step
+ * cannot name a field differently from the switch that later turns it off, and a field cannot be
+ * added to a group in one without the other. RuneLite's list names them the same way, which
+ * {@code SharingGroupsTest} holds it to. The keys are the existing settings; nothing here is stored.
  */
 final class SharingFields
 {

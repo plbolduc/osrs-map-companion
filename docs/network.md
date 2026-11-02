@@ -77,10 +77,11 @@ voyage's steps; that sends nothing.
 
 **The step after a first Connect.** Every sharing setting, **Show destinations from the map** and
 **Show my group on the world map** start off. After the first Connect to a map, the sidebar shows a row each for the
-four sharing groups, the character name and those two drawing choices, all ticked, and *Where you
-died* unticked, with a line saying the drawing choices open one connection. *What each one sends*,
-a fold under the rows, names every field and describes the receive stream in full. **Share what's ticked** writes exactly the ticked settings, as the group shortcuts in Settings
-do, and is the only thing in the step that changes anything: ticking, **Customise** and
+character name, the four sharing groups and those two drawing choices, all ticked, and *Where you
+died* unticked, with a line saying the drawing choices open one connection. A group's row is all of
+its fields or none, as its switch in Settings is. *What each one sends*,
+a fold under the rows, names every field and describes the receive stream in full. **Share what's ticked** writes exactly the ticked fields, as the switches in Settings
+do, and is the only thing in the step that changes anything: ticking and
 **Not now** write nothing, and nothing in the step makes a request. It follows only the Connect that
 approved its map, which happens once per map, and only while every choice it could turn on is still
 off, so a player who connected before, or chose first, is never offered it. Meetup notifications
@@ -107,11 +108,12 @@ five seconds between presses that reached it. The map plans with both tiles and 
 A teleport step's picture is the game's own, from the client's sprite cache: the step names an
 item's `itemId` or a spell icon's `spriteId`, and no picture is fetched from the map or elsewhere.
 
-**Quest and diary announcements.** With *Drops and levels* on, a quest or achievement diary tier
+**Quest and diary announcements.** With *Notable drops and levels* on, a quest or achievement diary tier
 finished while logged in rides the next snapshot as an announcement: the quest's name, or the
 diary's region and tier, with a random id, retried until the map names it, like a drop. Each kind
-also needs its own choice: **Full quest progress** for any quest, **Quest completion** for the 49
-travel quests, **Achievement diaries** for a tier. Announcements are built from those choices'
+also needs its own field, all three under **Progress and travel**: *Full quest progress* for any
+quest, *Travel quest completion* for the 49 travel quests, *Achievement diaries* for a tier.
+Announcements are built from those fields'
 existing readings, so watching adds no client reads beyond them and no requests. Only a change
 the plugin saw happen is announced: the first reading after a login, a world hop, a lost game
 connection, a change of character or group, or one of those choices turned back on is a new
@@ -194,13 +196,13 @@ or a death that is not shared leaves only in that request, once
 per press; the map plans with it and keeps nothing. A clue whose step is words names no tile, so
 its Route sends the clue as the snapshot carries it, `{ clue: { tier, text, itemId } }`, and the
 map places it with its own clue table; the words leave only in that request, whether or not
-**Share clue** is on. A map above beginner has no words and no tile either, but each is a scroll of
+*Clue step* is shared. A map above beginner has no words and no tile either, but each is a scroll of
 its own, which RuneLite's clue plugin and the map's table both know by item id: its Route sends the
 same shape with nothing but `{ clue: { tier, itemId } }`, and the map places the picture by the
 scroll. A death inside a boss's instance is recorded as the tile its arena is copied
 from, and the map decides whether that route goes to the boss's way in. A star whose tile is
 approximate offers **Open website** instead, which opens the map's search for the site's name in
-your browser and sends this client nothing. The clue is now read whether or not *Share clue* is on,
+your browser and sends this client nothing. The clue is now read whether or not *Clue step* is shared,
 so the sidebar has it to offer; the snapshot still carries it only with that choice.
 
 **The Group section** is read from what the map already sends: `roster`, one row per other member
@@ -262,7 +264,7 @@ On the default map server, live positions and progress stay in temporary memory;
 movement history. Group membership, last shared names, invites, meetups and group pins persist.
 A new group keeps an activity feed of its members' notable drops, levels, quests and diaries:
 up to 200 entries for 14 days. Its owner can turn this off, and a group made before 29 October 2026
-keeps the setting it had. *Drops and levels* and the step after Connect say *Your group keeps the
+keeps the setting it had. *Loot and milestones* and the step after Connect say *Your group keeps the
 last two weeks.*
 Leaving stops new sharing; retained announcements expire under the server's
 [privacy policy](https://osrs-map.com/privacy).

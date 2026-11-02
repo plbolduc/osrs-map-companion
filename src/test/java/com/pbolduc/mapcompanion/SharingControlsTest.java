@@ -59,42 +59,35 @@ public class SharingControlsTest
 			for (Method method : MapCompanionConfig.class.getDeclaredMethods())
 			{
 				ConfigItem item = method.getAnnotation(ConfigItem.class);
-				/*
-				 * Every box RuneLite's list shows, the meetup reminder's notification setting among them,
-				 * and the fields under the four groups, which the list hides and Settings still draws.
-				 */
-				if (item != null && (!item.hidden() || item.keyName().startsWith("share"))
-					&& (method.getReturnType() == boolean.class || method.getReturnType() == Notification.class))
+				/* Every box RuneLite's list shows, the meetup reminder's notification setting among them. */
+				if (item != null && !item.hidden() && (method.getReturnType() == boolean.class || method.getReturnType() == Notification.class))
 				{
 					expected.add(item.keyName());
 				}
 			}
 			assertEquals(expected, actual);
 			/*
-			 * 28 data and client choices; Route here on the world map, which asks the map only on a press
-			 * of its own, as every Route does; the five that only draw on this client: Drop luck's
-			 * chat line, the destination's hint arrow, the followed step's box over the game, a farm
-			 * run's teleports outlined in the bank, and a followed route's walks handed to Shortest
-			 * Path, which is a plugin message inside the client rather than anything sent; and the four
-			 * groups' boxes, named after the switches RuneLite's list stores for them, so the sidebar is
-			 * held to those too.
+			 * Sharing's six switches — the name, the four groups and where you died — and this client's
+			 * nine: the two that receive from the map, Route here on the world map, which asks the map
+			 * only on a press of its own, as every Route does, the meetup reminder, and the five that only
+			 * draw on this client: Drop luck's chat line, the destination's hint arrow, the followed step's
+			 * box over the game, a farm run's teleports outlined in the bank, and a followed route's walks
+			 * handed to Shortest Path, which is a plugin message inside the client rather than anything
+			 * sent. It was 34 while each field had a box; a group's switch writes those now.
 			 */
-			assertEquals(38, actual.size());
+			assertEquals(15, actual.size());
+			for (SharingFields.Section section : SharingFields.GROUPS)
+			{
+				for (SharingFields.Field field : section.fields)
+				{
+					assertNull("no box of its own, only its group's: " + field.key, find(controls, field.key));
+				}
+			}
 			for (String key : actual)
 			{
 				if (key.startsWith("share")) assertFalse("every data choice starts off: " + key, defaultOf(key));
 			}
-			for (String id : new String[]{"presence", "progress", "tasks", "loot"})
-			{
-				JPanel contents = (JPanel) named(controls, "sharingOptions." + id);
-				assertFalse(contents.isVisible());
-				((JButton) named(controls, "customise." + id)).doClick();
-				assertTrue(contents.isVisible());
-				assertAllAtDefaults(controls);
-				((JButton) named(controls, "customise." + id)).doClick();
-				assertFalse(contents.isVisible());
-			}
-			for (String title : new String[]{"Name and death location", "In the client"})
+			for (String title : new String[]{"What each one sends", "In the client"})
 			{
 				JButton header = buttonWithText(controls, "▸ " + title);
 				assertNotNull(header);
@@ -108,8 +101,15 @@ public class SharingControlsTest
 		});
 	}
 
+	/**
+	 * A group's switch is all of its fields or none. A group a player chose part of before shows the
+	 * dash and names what is on, in Settings' words; a press then turns all of it on, as a press of any
+	 * switch that is off does, and a second press all of it off. Rewritten when each field lost its own
+	 * box: the part a player chose is now made outside Settings, as an update from a version that had
+	 * those boxes makes it.
+	 */
 	@Test
-	public void presenceGroupSelectsOnlyItsFieldsAndSupportsPartialSelection() throws Exception
+	public void aGroupSwitchWritesAllOfItsFieldsAndNamesAPartlySharedOne() throws Exception
 	{
 		SwingUtilities.invokeAndWait(() ->
 		{
@@ -119,6 +119,8 @@ public class SharingControlsTest
 			Pairing pairing = new Pairing(store, new Gson());
 			SharingControls controls = new SharingControls(config, store);
 			JCheckBox master = find(controls, MapCompanionConfig.KEY_SHARE_MAP_PRESENCE);
+			javax.swing.JLabel partly = (javax.swing.JLabel) named(controls, "sharingPartly.presence");
+			assertFalse(partly.isVisible());
 			master.doClick();
 			assertTrue(config.sharePosition());
 			assertTrue(config.shareActivity());
@@ -129,15 +131,18 @@ public class SharingControlsTest
 			assertFalse(config.showDestination());
 			assertFalse(config.notifyMeetups().isEnabled());
 			assertFalse(pairing.hasServerConsent());
-			assertEquals("All 3 selected", ((javax.swing.JLabel) named(controls, "shareCount.presence")).getText());
-			find(controls, "sharePosition").doClick();
-			assertFalse(config.sharePosition());
-			assertFalse(master.isSelected());
+			assertFalse("a whole group needs no line", partly.isVisible());
+
+			store.set("sharePosition", "false");
+			controls.refresh();
+			assertFalse("on only while every field is", master.isSelected());
 			assertEquals("indeterminate", master.getClientProperty("JButton.selectedState"));
-			assertEquals("2 of 3 selected", ((javax.swing.JLabel) named(controls, "shareCount.presence")).getText());
+			assertTrue(partly.isVisible());
+			assertEquals("Partly shared: Training and idle time, Account type", partly.getText().replaceAll("<[^>]+>", ""));
 			master.doClick();
-			assertTrue(config.sharePosition());
+			assertTrue("a press turns all of it on", config.sharePosition() && config.shareActivity() && config.shareAccountType());
 			assertNull(master.getClientProperty("JButton.selectedState"));
+			assertFalse(partly.isVisible());
 			master.doClick();
 			assertFalse(config.sharePosition());
 			assertFalse(config.shareActivity());
@@ -190,6 +195,53 @@ public class SharingControlsTest
 		}
 	}
 
+	/**
+	 * Without a box per field the page still says all of what each switch shares: What each one sends
+	 * names every field in the sidebar's words, under its switch, and each group's switch says in its
+	 * tooltip what every field in it sends. Opening the fold writes nothing.
+	 */
+	@Test
+	public void whatEachOneSendsNamesEveryFieldUnderItsSwitch() throws Exception
+	{
+		SwingUtilities.invokeAndWait(() ->
+		{
+			HarnessStore store = new HarnessStore();
+			HarnessConfig config = new HarnessConfig(store, MapCompanionConfig.DEFAULT_MAP_URL);
+			SharingControls controls = new SharingControls(config, store);
+			JPanel details = (JPanel) named(controls, "sharing.details");
+			assertFalse("folded until asked for", details.isVisible());
+			buttonWithText(controls, "▸ What each one sends").doClick();
+			assertTrue(details.isVisible());
+			String text = String.join(" ", SidebarWords.words(details)).replaceAll("\\s+", " ");
+			int from = text.indexOf(SharingFields.NAME.label);
+			assertTrue(from >= 0 && text.contains(SharingFields.NAME.detail));
+			for (SharingFields.Section section : SharingFields.GROUPS)
+			{
+				from = text.indexOf(section.title, from);
+				assertTrue(section.title + " in order", from >= 0);
+				String tip = find(controls, section.key).getToolTipText();
+				for (SharingFields.Field field : section.fields)
+				{
+					int at = text.indexOf(field.label, from);
+					assertTrue(field.label + " under " + section.title, at >= 0);
+					from = at;
+					assertTrue(field.key + " in the switch's tooltip", tip.contains(field.label) && tip.contains(field.detail));
+				}
+			}
+			assertTrue(text.indexOf(MapCompanionConfig.FEED_KEPT, from) > 0);
+			assertTrue(text.indexOf(SharingFields.DEATH.label, from) > 0);
+			assertAllAtDefaults(controls);
+			for (Method method : MapCompanionConfig.class.getDeclaredMethods())
+			{
+				ConfigItem item = method.getAnnotation(ConfigItem.class);
+				if (item != null)
+				{
+					assertNull("opening the fold writes nothing: " + item.keyName(), store.get(item.keyName()));
+				}
+			}
+		});
+	}
+
 	@Test
 	public void aSettingsChangeIsReflectedWithoutWritingAnotherChoice() throws Exception
 	{
@@ -200,14 +252,16 @@ public class SharingControlsTest
 			SharingControls controls = new SharingControls(config, store);
 			config.set("sharePosition", true);
 			controls.refresh();
-			assertTrue(find(controls, "sharePosition").isSelected());
+			assertFalse(find(controls, MapCompanionConfig.KEY_SHARE_MAP_PRESENCE).isSelected());
 			assertEquals("indeterminate", find(controls, MapCompanionConfig.KEY_SHARE_MAP_PRESENCE).getClientProperty("JButton.selectedState"));
+			assertTrue(named(controls, "sharingPartly.presence").isVisible());
 			assertFalse(find(controls, "shareName").isSelected());
 			config.set("sharePosition", false);
 			controls.refresh();
-			assertFalse(find(controls, "sharePosition").isSelected());
 			assertNull(find(controls, MapCompanionConfig.KEY_SHARE_MAP_PRESENCE).getClientProperty("JButton.selectedState"));
+			assertFalse(named(controls, "sharingPartly.presence").isVisible());
 			assertNull(store.get("sharePosition"));
+			assertNull(store.get(MapCompanionConfig.KEY_SHARE_MAP_PRESENCE));
 		});
 	}
 
@@ -242,8 +296,8 @@ public class SharingControlsTest
 	 * Replaces per-checkbox modal assertions: a choice must never bypass the Connect disclosure.
 	 *
 	 * <p>Every box the sidebar draws, by the setting it is named after: a group's box writes its
-	 * fields, which are what it stands for, and any other box its own setting. Each box flips from
-	 * whatever it shows when pressed, since a group's press moves the boxes of its fields too.
+	 * fields, which are what it stands for, and any other box its own setting. Every box RuneLite's
+	 * list shows has one, and a field under a group has none.
 	 */
 	@Test
 	public void everySidebarChoiceSavesWithoutADialogButCannotApproveTheServer() throws Exception
@@ -264,7 +318,7 @@ public class SharingControlsTest
 				if (item == null || (method.getReturnType() != boolean.class && method.getReturnType() != Notification.class)) continue;
 				JCheckBox box = find(controls, item.keyName());
 				/* Hidden Slayer list preferences are owned by the task card, not sharing controls. */
-				assertEquals(item.keyName(), !item.hidden() || item.keyName().startsWith("share"), box != null);
+				assertEquals(item.keyName(), !item.hidden(), box != null);
 				if (box == null) continue;
 				boolean flipped = !box.isSelected();
 				box.doClick();
@@ -289,7 +343,7 @@ public class SharingControlsTest
 				}
 				assertFalse("choosing data is not permission to connect", pairing.hasServerConsent());
 			}
-			assertEquals(38, pressed);
+			assertEquals(15, pressed);
 			assertNull(store.get(Pairing.KEY_SERVER_CONSENT));
 		});
 	}
@@ -306,7 +360,7 @@ public class SharingControlsTest
 			AtomicInteger disclosures = new AtomicInteger();
 			assertTrue(pairing.connect(JoinCode.parse("ABC234-K7PQ2M3X"), () -> { disclosures.incrementAndGet(); return true; }));
 			SharingControls controls = new SharingControls(config, store);
-			JCheckBox position = find(controls, "sharePosition");
+			JCheckBox position = find(controls, MapCompanionConfig.KEY_SHARE_MAP_PRESENCE);
 			position.doClick();
 			assertTrue(config.sharePosition());
 			assertFalse(config.shareName());
@@ -331,11 +385,11 @@ public class SharingControlsTest
 			followStoredSettings(store, config);
 			Pairing pairing = new Pairing(store, new Gson());
 			SharingControls controls = new SharingControls(config, store);
-			find(controls, "sharePosition").doClick();
+			find(controls, MapCompanionConfig.KEY_SHARE_MAP_PRESENCE).doClick();
 			assertFalse(pairing.connect(JoinCode.parse("ABC234-K7PQ2M3X"), () -> false));
 			controls.refresh();
 			assertTrue(config.sharePosition());
-			assertTrue(find(controls, "sharePosition").isSelected());
+			assertTrue(find(controls, MapCompanionConfig.KEY_SHARE_MAP_PRESENCE).isSelected());
 			assertEquals("", pairing.code());
 			assertFalse(pairing.hasServerConsent());
 			assertNull(store.get(Pairing.KEY_SERVER_CONSENT));

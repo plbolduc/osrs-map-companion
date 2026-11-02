@@ -60,14 +60,14 @@ third-party warning is the manifest's `warning=` above, which RuneLite shows on 
 rule asks for it "either on the plugin, or on the configuration option", so no setting repeats it as
 an "Are you sure?" any more. The first Connect to osrs-map.com is that press and asks nothing more; a
 changed **Map address** is asked about once, naming the server, before any request goes there.
-After the first Connect to a map, and only then, the sidebar shows one step: a row each for the four
-sharing groups, the character name, and destinations and group markers, all ticked, with a line
+After the first Connect to a map, and only then, the sidebar shows one step: a row each for the
+character name, the four sharing groups, and destinations and group markers, all ticked, with a line
 saying those two open one connection. *What each one sends*, one tap below the rows and before the
 press, names every field in the sidebar's own words and the receive stream in full (one held
 connection carrying the group code and member id). *Where you died* is offered unticked; meetup
 notifications are not offered. One press, **Share what's ticked**, writes exactly those existing
-settings, as the group shortcuts in Settings do: the press is the opt-in, and nothing turns on
-without it. Ticking, **Customise** and **Not now** write nothing. The step follows only the Connect
+settings, as the switches in Settings do: the press is the opt-in, and nothing turns on
+without it. Ticking and **Not now** write nothing. The step follows only the Connect
 that approved its map and only while every choice it offers is still off, so an update changes no
 existing player's settings and opens no stream for them. `RecommendedSharing` is the step;
 `RecommendedSharingTest` holds it to these sentences.
@@ -75,8 +75,11 @@ existing player's settings and opens no stream for them. `RecommendedSharing` is
 **Sharing as six switches.** RuneLite's list shows sharing as the sidebar does: *Character name*,
 *Name to show instead*, a switch for each of the four groups, and *Where you died*. The 23 per-field
 settings under the groups keep their keys and stay what `SnapshotBuilder` reads; they are `hidden`
-from the list. `SharingGroups` writes a group's fields when its switch is pressed and moves the switch
-when they are written, so a switch shows on only while every field in it is. Every switch starts off.
+from the list, and Settings in the sidebar draws the same six switches, with *What each one sends*
+naming every field. `SharingGroups` writes a group's fields when its switch is pressed and moves the
+switch when they are written, so a switch shows on only while every field in it is; a group a player
+chose part of before the update shows off, and Settings names the fields that are on. Every switch
+starts off.
 The first start after the update writes each switch from the fields already chosen and never a field,
 so no existing player's sharing changes, a group they chose part of included; `SharingGroupsTest`
 holds that with the snapshot itself.
@@ -105,9 +108,9 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RouteClient`, `RoutePress
 
 - **POST /api/companion/snapshot** — logged-in state changes, at least two seconds apart, plus
   six-second idle heartbeats (twenty seconds with a stream). JSON comes from `SnapshotBuilder`;
-  each character field is gated independently. With Share Slayer task enabled it also sends
+  each character field is gated independently. With *Slayer task* shared it also sends
   the list's ranking order, Wilderness filter and delivery receipt (`slayerPreferences`).
-  With *Drops and levels* and the matching quest or diary choice on, `milestones` can carry a
+  With *Notable drops and levels* and the matching quest or diary field on, `milestones` can carry a
   quest's name or a diary's region and tier, only for a completion the plugin watched change
   while logged in; never one already done at login, after a hop or after re-enabling sharing.
   Its ranked places arrive on the existing member directive, only until acknowledged;
@@ -254,9 +257,9 @@ Say these in the description of the next Hub update, as changes from what was ap
 - **One press at Connect** (above): the recommended set is offered after the first Connect and
   shared only on the player's press, which names every field and the receive stream it opens. No
   config default changed.
-- **Sharing as six switches** (above): RuneLite's list shows a switch per sharing group over the
-  same per-field settings, now hidden. A switch writes its fields and nothing else, an update keeps
-  every choice, and nothing sent changes.
+- **Sharing as six switches** (above): RuneLite's list, Settings and the step after Connect show a
+  switch per sharing group over the same per-field settings, now hidden. A switch writes its fields
+  and nothing else, an update keeps every choice, and nothing sent changes.
 - The routes, Search, Route buttons, friends and meetups listed under *Network requests*, each a
   press of the player's own.
 - **Connect without the website**: Connect makes a group, Join takes a friend's pasted invite, Open
@@ -285,7 +288,7 @@ Say these in the description of the next Hub update, as changes from what was ap
   reads no bank contents beyond the items it is asked to draw, and sends nothing.
 - **Clue steps by their words**: Route beside a clue whose step is words, an anagram or an emote,
   now sends the clue itself, its tier, words and scroll item id, in that one request, whether or not
-  *Share clue* is on; the map places the step with its own clue table. Before, only a coordinate's
+  *Clue step* is shared; the map places the step with its own clue table. Before, only a coordinate's
   or a beginner map's tile was sent, and a worded step offered no Route.
 - **Map clues above beginner**: Route beside an easy, medium, hard or elite map sends that same clue
   with its tier and scroll item id alone, which RuneLite's own `MapClue` table and the map's both
