@@ -121,24 +121,26 @@ final class SlayerPanel extends JPanel
 			return;
 		}
 		SlayerState.View view = state.view(System.currentTimeMillis());
+		/* Through a hop's unsettled window, the last settled reading rather than the "no task" sent. */
+		SlayerState.Reading reading = view.shown;
 		/*
 		 * A choice just made keeps the old places on the card, greyed, until the map has ranked them
 		 * again: the picker stays under the pointer, and the card never empties itself on a slow map.
 		 */
 		boolean waiting = view.options == null && view.previous != null;
 		RelayResponse.SlayerOptions places = waiting ? view.previous : view.options;
-		String title = view.task == null ? "No readable Slayer task" : view.task + (view.remaining == null ? "" : view.remaining == 0 ? " · Complete" : " · " + view.remaining + " left");
+		String title = reading.task == null ? "No readable Slayer task" : reading.task + (reading.remaining == null ? "" : reading.remaining == 0 ? " · Complete" : " · " + reading.remaining + " left");
 		MapCompanionPanel.setWrapped(task, title, WIDTH);
-		String message = view.task == null ? "The current assignment appears here once the game has settled."
+		String message = reading.task == null ? "The current assignment appears here once the game has settled."
 						 : waiting ? rankingAgain(view.previous, view.order, view.hideWilderness)
-						 : view.options == null ? "Waiting for places from the map…" : view.stale ? "Waiting for the map to reconnect. These are the last places received." : view.area;
+						 : view.options == null ? "Waiting for places from the map…" : view.stale ? "Waiting for the map to reconnect. These are the last places received." : reading.area;
 		MapCompanionPanel.setWrapped(status, message, WIDTH);
 		status.setVisible(message != null);
-		if (!Objects.equals(shownTask, view.task))
+		if (!Objects.equals(shownTask, reading.task))
 		{
 			expanded = false;
 			kindsOpen = false;
-			shownTask = view.task;
+			shownTask = reading.task;
 		}
 		if (shown != places || shownWaiting != waiting || !Objects.equals(shownOrder, view.order) || shownHide != view.hideWilderness)
 		{

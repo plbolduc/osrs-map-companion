@@ -38,6 +38,12 @@ import javax.annotation.Nullable;
  * card can show them greyed under the controls just used until the new ones arrive. That copy is
  * for the eye only: {@link View#options} stays empty meanwhile, so nothing acts on places ranked
  * for another choice.
+ *
+ * <p>A world hop is the same kind of wait. For a moment after it every varbit reads zero, so the
+ * reading is unsettled and goes out as no task, which is what a reader that cannot know yet must
+ * send. The card meanwhile keeps the last settled reading ({@link View#shown}) and its places,
+ * greyed, until a settled reading replaces them. A logout drops that copy and another character
+ * clears everything, so a second character never sees the first one's task.
  */
 @Singleton
 final class SlayerState
@@ -52,9 +58,34 @@ final class SlayerState
 	private long revision;
 	private long seenRevision;
 	private RelayResponse.SlayerOptions options;
-	/** The places the last choice change hid, for the same task; display only. */
+	/** The places the last choice change or hop hid, for the task the card shows; display only. */
 	private RelayResponse.SlayerOptions previous;
 	private long receivedAt;
+	/** Whether the reading in task, area and remaining was taken after the session settled. */
+	private boolean settled;
+	/** Through a hop's unsettled window, the last settled reading; display only. */
+	private Reading kept;
+
+	/** One reading of the assignment, as the card shows it. */
+	static final class Reading
+	{
+		@Nullable
+		final String task;
+		@Nullable
+		final String area;
+		@Nullable
+		final Integer remaining;
+		/** Taken after the session settled; before that a missing task says nothing about the game. */
+		final boolean settled;
+
+		Reading(@Nullable String task, @Nullable String area, @Nullable Integer remaining, boolean settled)
+		{
+			this.task = task;
+			this.area = area;
+			this.remaining = remaining;
+			this.settled = settled;
+		}
+	}
 
 	static final class View
 	{
@@ -63,14 +94,16 @@ final class SlayerState
 		final Integer remaining;
 		final RelayResponse.SlayerOptions options;
 		final boolean stale;
-		/** Display only: the places received before the choice changed, while {@link #options} waits. */
+		/** Display only: the places kept from before a choice change or a hop, while {@link #options} waits. */
 		final RelayResponse.SlayerOptions previous;
 		/** The choice the places are ranked, or being ranked, for. */
 		final String order;
 		final boolean hideWilderness;
+		/** The reading the card shows: the last one taken or, through a hop's window, the last settled one. */
+		final Reading shown;
 
 		View(String task, String area, Integer remaining, RelayResponse.SlayerOptions options, boolean stale,
-			RelayResponse.SlayerOptions previous, String order, boolean hideWilderness)
+			RelayResponse.SlayerOptions previous, String order, boolean hideWilderness, Reading shown)
 		{
 			this.task = task;
 			this.area = area;
@@ -80,10 +113,31 @@ final class SlayerState
 			this.previous = previous;
 			this.order = order;
 			this.hideWilderness = hideWilderness;
+			this.shown = shown;
 		}
 	}
 
+	/** A settled reading: the task the game holds, or null for none. */
 	synchronized void local(@Nullable String incomingMember, @Nullable CompanionSnapshot.Slayer local, String incomingOrder, boolean hide)
+	{
+		read(incomingMember, local, incomingOrder, hide);
+		settled = true;
+		kept = null;
+		dropPlacesOfAnotherTask();
+	}
+
+	/**
+	 * No reading the session can stand behind yet. What it leaves for the next post is exactly what
+	 * a settled "no task" leaves; only the card goes on showing a reading a hop asked it to keep.
+	 */
+	synchronized void unread(@Nullable String incomingMember, String incomingOrder, boolean hide)
+	{
+		read(incomingMember, null, incomingOrder, hide);
+		settled = false;
+		dropPlacesOfAnotherTask();
+	}
+
+	private void read(@Nullable String incomingMember, @Nullable CompanionSnapshot.Slayer local, String incomingOrder, boolean hide)
 	{
 		if (!Objects.equals(member, incomingMember))
 		{
@@ -94,8 +148,6 @@ final class SlayerState
 		String nextArea = local == null ? null : local.areaName;
 		if (!Objects.equals(task, nextTask) || !Objects.equals(area, nextArea))
 		{
-			// Another task's places are never shown, greyed or not.
-			previous = null;
 			options = null;
 			seenRevision = 0;
 		}
@@ -108,6 +160,44 @@ final class SlayerState
 		remaining = local == null ? null : local.remaining;
 		order = "single".equals(incomingOrder) ? "single" : "best";
 		hideWilderness = hide;
+	}
+
+	/**
+	 * A world hop: the readings after it are unsettled for a moment. The card keeps the last settled
+	 * one, and its places to show greyed, until a settled reading replaces it. Client thread.
+	 */
+	synchronized void hop()
+	{
+		if (settled && kept == null)
+		{
+			kept = new Reading(task, area, remaining, true);
+		}
+		if (options != null)
+		{
+			previous = options;
+		}
+	}
+
+	/** Logged out: a reading kept through a hop does not outlive the session that read it. */
+	synchronized void loggedOut()
+	{
+		kept = null;
+		dropPlacesOfAnotherTask();
+	}
+
+	/** Places kept to show stay only while they are for the task the card shows: never another task's. */
+	private void dropPlacesOfAnotherTask()
+	{
+		Reading shown = shown();
+		if (previous != null && !(Objects.equals(previous.taskName, shown.task) && Objects.equals(previous.areaName, shown.area)))
+		{
+			previous = null;
+		}
+	}
+
+	private Reading shown()
+	{
+		return kept != null ? kept : new Reading(task, area, remaining, settled);
 	}
 
 	synchronized void choices(String incomingOrder, boolean hide)
@@ -174,7 +264,12 @@ final class SlayerState
 			return;
 		}
 		options = incoming;
-		previous = null;
+		if (incoming != null)
+		{
+			previous = null;
+		}
+		// The map answers a hop's unsettled reading with a removal; a kept reading's places outlast it.
+		dropPlacesOfAnotherTask();
 		revision = directive.slayerRevision;
 		seenRevision = revision;
 		receivedAt = now;
@@ -183,7 +278,7 @@ final class SlayerState
 	synchronized View view(long now)
 	{
 		return new View(task, area, remaining, options, receivedAt > 0 && now - receivedAt > 120_000,
-			previous, order, hideWilderness);
+			previous, order, hideWilderness, shown());
 	}
 	synchronized void clear()
 	{
@@ -193,6 +288,8 @@ final class SlayerState
 		remaining = null;
 		options = null;
 		previous = null;
+		settled = false;
+		kept = null;
 		revision = 0;
 		seenRevision = 0;
 		receivedAt = 0;

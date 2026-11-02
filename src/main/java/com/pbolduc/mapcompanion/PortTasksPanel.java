@@ -48,7 +48,8 @@ import net.runelite.client.ui.ColorScheme;
  * no table and no request. The Hub's Sailing plugins already draw the tasks over the game, so this
  * says the one line each that a player plans by — the crates still to collect and where, or the
  * parts still owed and where they go. Shown while the choice is on and something is held or
- * unreadable; a slot the client could not read is said, never folded into the free ones.
+ * unreadable, through a hop from the reading before it; a slot the client could not read is said,
+ * never folded into the free ones.
  *
  * <p>What those plugins do not draw is the order. <b>Start run</b> asks the map for it — the
  * couriers as one run within the hold, then each bounty out and back — and the run is followed
@@ -128,7 +129,9 @@ final class PortTasksPanel extends JPanel
 	/** Called on the EDT by the sidebar refresh, beside the farm run card. */
 	void refresh(boolean connected)
 	{
-		List<PortTaskReader.Slot> slots = config.sharePortTasks() ? reader.latest() : null;
+		List<PortTaskReader.Slot> slots = config.sharePortTasks() ? reader.shown() : null;
+		/* Through a hop's window these are the tasks from before it: shown, but not a reading to plan from. */
+		boolean kept = slots != null && reader.latest() == null;
 		boolean worth = slots != null && slots.stream().anyMatch(s -> s.held() || PortTaskReader.UNKNOWN.equals(s.state));
 		boolean showing = run.refresh(connected);
 		setVisible(worth || showing);
@@ -141,7 +144,7 @@ final class PortTasksPanel extends JPanel
 		/* The farm card's run being walked holds Start back too, and the line where it was says so. */
 		boolean after = offer && config.shareBoats() && run.otherBusy();
 		starter.setVisible(offer && config.shareBoats() && !after);
-		start.setEnabled(connected && client.ready());
+		start.setEnabled(connected && client.ready() && !kept);
 		hint.setVisible(offer && (!config.shareBoats() || after));
 		MapCompanionPanel.setWrapped(hint, after ? AFTER_FARM_RUN : NEEDS_BOATS, WIDTH);
 		if (!worth)
@@ -153,7 +156,7 @@ final class PortTasksPanel extends JPanel
 			return;
 		}
 		body.setVisible(true);
-		Integer hold = reader.latestHold();
+		Integer hold = reader.shownHold();
 		if (slots == shown && Objects.equals(hold, shownHold) && running == shownRunning)
 		{
 			return;

@@ -1028,7 +1028,20 @@ public class MapCompanionPlugin extends Plugin
 			travelUnlockReader.onSessionEnded();
 			stashReader.onSessionEnded();
 			boatReader.onSessionEnded();
-			portTaskReader.onSessionEnded();
+			if (state == GameState.HOPPING)
+			{
+				/*
+				 * The same character, back in seconds: the task cards keep the last settled reading
+				 * until the next one settles. Only what the sidebar shows; nothing unsettled is sent.
+				 */
+				portTaskReader.onHop();
+				slayerState.hop();
+			}
+			else
+			{
+				portTaskReader.onSessionEnded();
+				slayerState.loggedOut();
+			}
 			birdhouseReader.onSessionEnded();
 			questReader.onSessionEnded();
 			assignmentReader.onSessionEnded();

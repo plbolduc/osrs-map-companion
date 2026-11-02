@@ -61,7 +61,8 @@ import net.runelite.api.gameval.VarbitID;
  * {@code unknown} — said as such, so the map does not draw a held task as a free slot. And for a
  * moment after a login or a hop every varbit reads zero, which would be five confident empty
  * slots: {@link SessionSettle} holds the whole reading back until the session has settled, and a
- * reader that cannot know yet sends nothing.
+ * reader that cannot know yet sends nothing. Through a hop the sidebar alone keeps showing the
+ * reading from before it ({@link #shown}).
  *
  * <p><b>What leaves the machine.</b> {@link #wire} sends a slot's state, the task id and the
  * game's own counters, and how many crates the hold of the boat last stood on carries
@@ -200,6 +201,14 @@ public class PortTaskReader
 	private volatile List<Slot> latest;
 	/** The hold's crates as of that reading; null where no boat with a hold was stood on. */
 	private volatile Integer latestHold;
+	/*
+	 * The reading before a hop, which the sidebar shows until the new session settles. Kept beside
+	 * latest rather than in it: latest is what is sent and what ticks a run, and through a hop's
+	 * window neither may use a reading the session no longer stands behind. The same character holds
+	 * the same tasks across a hop, so the card need not vanish for those seconds.
+	 */
+	private volatile List<Slot> kept;
+	private volatile Integer keptHold;
 
 	@Inject
 	PortTaskReader(Client client, CargoHolds holds)
@@ -213,8 +222,30 @@ public class PortTaskReader
 		settle.resumed(nowMs);
 	}
 
-	/** Logged out, hopping, another character, or sharing withdrawn: forget the reading. */
+	/** Logged out, another character, or the plugin stopping: forget the reading, the sidebar's copy too. */
 	public void onSessionEnded()
+	{
+		end();
+		kept = null;
+		keptHold = null;
+	}
+
+	/**
+	 * A world hop: the reading is withheld as at a logout, since every varbit is about to read zero,
+	 * and the sidebar keeps the last settled one until the new session settles. Client thread.
+	 */
+	public void onHop()
+	{
+		List<Slot> held = latest;
+		if (held != null)
+		{
+			kept = held;
+			keptHold = latestHold;
+		}
+		end();
+	}
+
+	private void end()
 	{
 		settle.ended();
 		tasks.clear();
@@ -228,6 +259,8 @@ public class PortTaskReader
 	{
 		latest = null;
 		latestHold = null;
+		kept = null;
+		keptHold = null;
 	}
 
 	/**
@@ -252,6 +285,8 @@ public class PortTaskReader
 		List<Slot> reading = Collections.unmodifiableList(slots);
 		latestHold = hold();
 		latest = reading;
+		kept = null;
+		keptHold = null;
 		return reading;
 	}
 
@@ -267,6 +302,24 @@ public class PortTaskReader
 	List<Slot> latest()
 	{
 		return latest;
+	}
+
+	/**
+	 * What the sidebar shows, from any thread: the last settled reading, or through a hop's unsettled
+	 * window the one before the hop. Never sent, and never what ticks a run: {@link #latest} is.
+	 */
+	@Nullable
+	List<Slot> shown()
+	{
+		List<Slot> now = latest();
+		return now != null ? now : kept;
+	}
+
+	/** The hold as of the reading {@link #shown} gives. */
+	@Nullable
+	Integer shownHold()
+	{
+		return latest() != null ? latestHold() : keptHold;
 	}
 
 	/** What the snapshot carries: each slot's state, task id and counters. Client thread only. */
