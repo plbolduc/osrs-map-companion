@@ -48,8 +48,8 @@ final class UpdateNotice
 	 * What this version changed, in a sentence a player reads between kills. Written for
 	 * {@link CompanionVersion#LINE_VERSION}, and written again by every release.
 	 */
-	static final String LINE = "a new sidebar: Home, Group and Stars, settings behind the gear, and the game's own "
-		+ "pictures in search, friends' news and Stars.";
+	static final String LINE = "connect and invite from the sidebar, farm and port-task runs, Route here on the world map, "
+		+ "your step over the game, star routes on Stars, and sharing in six switches.";
 
 	/** Where the rest of it is written, as words: a game message cannot carry a link. */
 	static final String WHERE = "What's new: osrs-map.com/whats-new";
