@@ -570,6 +570,18 @@ the menu's last row, under a rule, reading *Hide the code field* while the field
 of one, which is how Connect starts every group, *Copy invite* sits instead in the card that says
 *Just you so far*, under the sentence about it, and goes back beside *Switch ▾* once a friend is in.
 
+Each of these presses is answered under itself. One line above the tabs said everything, so *Invite
+copied* and *Renamed to Sunday raids.* landed against the tab strip, out of sight once the Group tab
+had scrolled, and pushed the tabs down a line. Copy invite and the menu's *Rename group…* now answer
+on a line under *Copy invite · Switch ▾*, and Copy invite reads *Copied* for two seconds as well,
+since in a group of one it sits in the card at the top of the tab. The status card's own *Rename
+group…* answers in the card. *Join another group…* opens the field under the same row, *Hide the
+code field* folds it there, and a refused invite is said under its Paste and Join. Before a group,
+after a new map address and while the map refuses the group, the field stays under the orange button,
+where nothing else offers a way in. In Settings, Apply's refusal is said under Apply, where it waited
+behind Back before, and an address typed without its scheme gets https://, or http:// on this
+machine, in the field rather than a refusal. Connect's own answers were already on the status card.
+
 ### A meetup's Route
 
 A meetup was three rows of buttons: Route, then the four answers two by two. Route now sits beside

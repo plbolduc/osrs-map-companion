@@ -13,7 +13,8 @@ unless the map runs on this machine, and redirects are not followed. With no pai
 approval of the selected server, the plugin makes no requests. The warning RuneLite requires is the
 Hub manifest's, shown when the plugin is installed; no setting repeats it. The first **Connect** to
 osrs-map.com approves it with that press. A changed map address asks once, naming the server, before
-anything is sent there, and changing the address pauses requests until you connect there.
+anything is sent there, and changing the address pauses requests until you connect there. An address
+typed without its scheme is taken as https, or as http on this machine.
 
 **Connect and Join.** With no group, **Connect** makes one `POST /api/companion/connect` per press,
 carrying this RuneLite's random installation key and nothing else. The map makes a group called

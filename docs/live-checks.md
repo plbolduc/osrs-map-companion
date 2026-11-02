@@ -309,8 +309,14 @@ The website plan's second session, once the routes in the game are built: a memb
       the group as that player, the maker's as owner, with no `#link` left in the address. Log out
       and press Open the map on the login screen: the same. Press Connect on the login screen of a
       fresh profile and log in a few days later: the group is still there.
-- [ ] **Copy invite.** In a group Connect made, Copy invite says the invite expires in 7 days. With
-      the map stopped it says nothing was copied, and pasting gives what the clipboard held before.
+- [ ] **Copy invite.** In a group Connect made, Copy invite reads *Copied* for two seconds and the
+      line under Copy invite · Switch ▾ says the invite expires in 7 days, with the Group tab scrolled
+      to its foot and the tabs where they were. With the map stopped it says nothing was copied, and
+      pasting gives what the clipboard held before.
+- [ ] **Answered where pressed.** Switch ▾ → Join another group… opens the field under Copy invite ·
+      Switch ▾, and an expired invite is refused under its Paste and Join; Hide the code field folds
+      it. In Settings → Advanced, Apply with `osrs-map.com` writes `https://osrs-map.com` into the
+      field, and with `http://example.com` says why under Apply, with Settings still open.
 - [ ] **The group's dialogs.** Rename group… opens with the cursor in its field, stops at the 24th
       character and renames on Enter. Leave group's window is titled with the group's name, its
       buttons are Leave group and Cancel, and Enter cancels; leave a group made by Connect while a

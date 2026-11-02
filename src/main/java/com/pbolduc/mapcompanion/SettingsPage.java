@@ -34,6 +34,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -53,6 +54,7 @@ import static com.pbolduc.mapcompanion.MapCompanionPanel.left;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.linkButton;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.row;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.sectionHead;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.setWrapped;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.smallButton;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.syncRow;
 
@@ -61,9 +63,10 @@ import static com.pbolduc.mapcompanion.MapCompanionPanel.syncRow;
  * then Advanced with the map address, Show what's sent, Leave group and Forget kill log.
  *
  * <p>A class of its own because it is a page of its own ({@link SidebarPages}), set once and seldom
- * read again, and nothing on it is part of a session. What Apply and Leave group did is said on the
- * daily page, under the join field, through {@link ConnectCard}. {@link MapCompanionPanel} hands it
- * to the pages and calls {@link #refresh(boolean)} last in its own.
+ * read again, and nothing on it is part of a session. What Leave group and a new map address did is
+ * said on the daily page they turn back to, under the join field, through {@link ConnectCard}; an
+ * address Apply refuses is said under Apply. {@link MapCompanionPanel} hands it to the pages and
+ * calls {@link #refresh(boolean)} last in its own.
  *
  * <p>Two of the buttons are about trust rather than about the map. <b>Show what's sent</b> prints
  * the actual snapshot, built by the same code that would post it, because a plugin that claims to
@@ -89,7 +92,7 @@ final class SettingsPage extends JPanel
 	private final Gson gson;
 	private final FarmRunState farmRunState;
 	private final FarmRunClient farmRunClient;
-	/** Where Apply and Leave group say what they did, under the join field on the daily page. */
+	/** Where Leave group and a new map address say what they did, under the join field on the daily page. */
 	private final ConnectCard connectCard;
 	/** The sidebar's refresh, run after a press has changed what it should say. */
 	private final Runnable refresh;
@@ -100,6 +103,8 @@ final class SettingsPage extends JPanel
 	private final JButton previewButton = smallButton("Show what's sent");
 	private final SharingControls sharingControls;
 	private final JTextField mapAddress = new JTextField();
+	/** Under Apply: why the address typed was not taken. */
+	private final JLabel addressSaid = new JLabel();
 	private String displayedAddress;
 
 	/*
@@ -168,11 +173,15 @@ final class SettingsPage extends JPanel
 		JPanel contents = column(ColorScheme.DARK_GRAY_COLOR);
 		contents.add(sectionHead("Map address"));
 		mapAddress.setText(config.relayUrl());
-		mapAddress.addActionListener(e -> applyMapAddress());
+		mapAddress.addActionListener(e -> applyMapAddress(true));
 		contents.add(fill(mapAddress, ColorScheme.DARK_GRAY_COLOR));
 		JButton apply = smallButton("Apply");
-		apply.addActionListener(e -> applyMapAddress());
+		apply.addActionListener(e -> applyMapAddress(true));
 		contents.add(hug(apply, ColorScheme.DARK_GRAY_COLOR));
+		addressSaid.setFont(addressSaid.getFont().deriveFont(11f));
+		addressSaid.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+		addressSaid.setVisible(false);
+		contents.add(left(addressSaid));
 		contents.add(gap(8, ColorScheme.DARK_GRAY_COLOR));
 		contents.add(hug(previewButton, ColorScheme.DARK_GRAY_COLOR));
 		contents.add(gap(8, ColorScheme.DARK_GRAY_COLOR));
@@ -180,14 +189,36 @@ final class SettingsPage extends JPanel
 		return SharingControls.fold("Advanced", contents);
 	}
 
+	/** The address typed here, applied before Connect or Join asks, which answer on the page they are on. */
 	boolean applyMapAddress()
 	{
-		String server = Pairing.normalizeServer(mapAddress.getText());
+		return applyMapAddress(false);
+	}
+
+	/**
+	 * Apply the address typed, with a scheme left off put back ({@link Pairing#withScheme}), so what was
+	 * meant is written into the field rather than refused. A refusal is said where the press was:
+	 * under Apply for Apply and Enter, which leave Settings open, and under the join field for Connect
+	 * and Join, which are on the daily page.
+	 */
+	private boolean applyMapAddress(boolean here)
+	{
+		String server = Pairing.normalizeServer(Pairing.withScheme(mapAddress.getText()));
 		if (server == null)
 		{
-			connectCard.say("Enter an https:// map address without a login, query or fragment.");
+			String why = "Enter an https:// map address without a login, query or fragment.";
+			if (here)
+			{
+				setWrapped(addressSaid, why);
+				addressSaid.setVisible(true);
+			}
+			else
+			{
+				connectCard.say(why);
+			}
 			return false;
 		}
+		addressSaid.setVisible(false);
 		mapAddress.setText(server);
 		if (!server.equals(pairing.serverUrl()))
 		{
