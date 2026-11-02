@@ -33,7 +33,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import net.runelite.api.coords.WorldPoint;
@@ -172,6 +174,27 @@ public class RouteStepsViewTest
 		view.show(route.view());
 		assertTrue(shown(), shown().contains("2. Board your boat at Port Sarim | 3. Sail to Catherby | About 650 tiles"
 			+ " | ✓ 20 Sailing | 4. Dock at Catherby | Your boat stays there"));
+	}
+
+	/**
+	 * A boat moved since the route was planned is said under the steps it contradicts. It came last,
+	 * after the other ways' fold and the Shortest Path line, below every step.
+	 */
+	@Test
+	public void aBoatThatHasMovedIsSaidUnderTheSteps() throws IOException
+	{
+		receive();
+		assertTrue(SidebarWords.press(view, "▸ 3 other ways"));
+		assertTrue(SidebarWords.press(view, "Docking point · 1340 tiles"));
+		Map<Integer, String> moored = new HashMap<>();
+		moored.put(1, "Rimmington");
+		route.advance(new WorldPoint(3100, 3200, 0), new DestinationRoute.Sailing(false, moored));
+		view.show(route.view(), "Shortest Path draws each walk when you reach it.");
+		String said = shown();
+		int boat = said.indexOf(RouteStepsView.boatAwayLine("Port Sarim"));
+		assertTrue(said, boat > said.indexOf("Your boat stays there"));
+		assertTrue("before the other ways: " + said, boat < said.indexOf("3 other ways"));
+		assertTrue("and before Shortest Path's line: " + said, boat < said.indexOf("Shortest Path draws"));
 	}
 
 	@Test

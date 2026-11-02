@@ -127,11 +127,12 @@ final class RouteStepsView extends JPanel
 		add(MapCompanionPanel.left(way));
 		add(MapCompanionPanel.left(origin));
 		add(steps);
+		/* Under the steps it contradicts, whose board step names the mooring the boat has left. */
+		add(MapCompanionPanel.left(boat));
 		add(MapCompanionPanel.left(arrived));
 		add(others);
 		add(otherWays);
 		add(MapCompanionPanel.left(drawn));
-		add(MapCompanionPanel.left(boat));
 		add(MapCompanionPanel.left(message));
 		setBorder(new EmptyBorder(5, 0, 0, 0));
 		others.addActionListener(e ->
