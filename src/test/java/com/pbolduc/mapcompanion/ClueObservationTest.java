@@ -28,6 +28,7 @@ package com.pbolduc.mapcompanion;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 /** Widget events and snapshot reads can arrive in either order; text must belong to that scroll. */
@@ -134,6 +135,30 @@ public class ClueObservationTest
 		assertNull(reader.read().mapTile);
 		reader.reset();
 		assertNull(reader.read().mapTile);
+	}
+
+	/**
+	 * A medium map opens the same picture a beginner map can (south of Draynor's bank is both), and
+	 * has no words. Its scroll is the picture, so it routes by the scroll before it is opened and
+	 * after, and the shared window never turns it into a beginner's tile.
+	 */
+	@Test
+	public void aMapAboveBeginnerRoutesByItsScrollWhetherOrNotItIsOpen()
+	{
+		int scroll = net.runelite.api.gameval.ItemID.TRAIL_CLUE_MEDIUM_MAP001;
+		game.define(scroll, "Clue scroll (medium)", false);
+		game.carry(scroll);
+		CompanionSnapshot.Clue unopened = reader.read();
+		assertNull(unopened.text);
+		assertNull(ClueReader.routeTile(unopened));
+		assertTrue(ClueReader.routesByClue(unopened));
+
+		reader.onScrollRead(scroll);
+		reader.onMapWidget(net.runelite.api.gameval.InterfaceID.TRAIL_MAP03);
+		CompanionSnapshot.Clue opened = reader.read();
+		assertEquals(scroll, opened.itemId.intValue());
+		assertNull("a beginner's picture, but not a beginner's scroll", opened.mapTile);
+		assertTrue(ClueReader.routesByClue(opened));
 	}
 
 	@Test

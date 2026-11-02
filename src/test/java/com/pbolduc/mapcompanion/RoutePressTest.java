@@ -233,6 +233,25 @@ public class RoutePressTest
 		assertEquals(3408, shown.x);
 	}
 
+	/**
+	 * A map above beginner has no words and no tile: it goes as the clue a worded step goes as, with
+	 * nothing in it but its tier and its scroll, and the map places the picture by the scroll's id.
+	 */
+	@Test
+	public void aMapScrollTravelsAsTheClueWithNoWordsAndTakesTheMapsName() throws Exception
+	{
+		connect();
+		RoutePress press = press(200, ANSWER.replace("\"name\":\"Abyssal demon\"", "\"name\":\"West of the Crafting Guild\""), null);
+		CompanionSnapshot.Clue clue = new CompanionSnapshot.Clue();
+		clue.tier = "medium";
+		clue.itemId = net.runelite.api.gameval.ItemID.TRAIL_CLUE_MEDIUM_MAP003;
+		assertTrue(ClueReader.routesByClue(clue));
+		press.press(RoutePress.Target.clue("clue", clue, "Medium clue", "Medium clue"));
+		settle(press, "clue");
+		assertEquals("{\"clue\":{\"tier\":\"medium\",\"itemId\":3596}}", body(sent.get(0)).get("target").toString());
+		assertEquals("West of the Crafting Guild", destinations.getDestination().name);
+	}
+
 	@Test
 	public void aDestinationThatMerelyArrivesIsNeverFollowed()
 	{

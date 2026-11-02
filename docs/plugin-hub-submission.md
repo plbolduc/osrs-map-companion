@@ -130,7 +130,8 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RouteClient`, `RoutePress
   sharing off; the README says so. The answer replaces the sidebar's steps. Nothing is walked.
   `RoutePress` sends the same request for a pick from **Search**, with the row's id as the target,
   and for **Route** beside the carried clue, the last death, a star and a meetup, with that tile as
-  the target; a clue step that is words goes as the clue itself, its tier, words and scroll item id.
+  the target; a clue step that is words goes as the clue itself, its tier, words and scroll item id,
+  and a map above beginner as the same clue with its tier and scroll item id alone.
   A clue or death that is not shared leaves only in that request. Same
   one-at-a-time rule and wait; the answer becomes the destination. Nothing is walked. **Route here**
   on a right-click of the world map sends it too, with the clicked tile as the target.
@@ -269,6 +270,9 @@ Say these in the description of the next Hub update, as changes from what was ap
   now sends the clue itself, its tier, words and scroll item id, in that one request, whether or not
   *Share clue* is on; the map places the step with its own clue table. Before, only a coordinate's
   or a beginner map's tile was sent, and a worded step offered no Route.
+- **Map clues above beginner**: Route beside an easy, medium, hard or elite map sends that same clue
+  with its tier and scroll item id alone, which RuneLite's own `MapClue` table and the map's both
+  key the picture by. No field is added; before, such a map offered no Route.
 - **The meetup reminder while playing**: *Notify before a meetup* is now a RuneLite `Notification`
   setting, still off by default, and a stored `true` or `false` still reads as on or off. Ticked in
   the sidebar, it is written as RuneLite's panel initialises a customised notification, from

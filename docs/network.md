@@ -191,7 +191,10 @@ star's tile, the meetup's. A clue or a death that is not shared leaves only in t
 per press; the map plans with it and keeps nothing. A clue whose step is words names no tile, so
 its Route sends the clue as the snapshot carries it, `{ clue: { tier, text, itemId } }`, and the
 map places it with its own clue table; the words leave only in that request, whether or not
-**Share clue** is on. A death inside a boss's instance is recorded as the tile its arena is copied
+**Share clue** is on. A map above beginner has no words and no tile either, but each is a scroll of
+its own, which RuneLite's clue plugin and the map's table both know by item id: its Route sends the
+same shape with nothing but `{ clue: { tier, itemId } }`, and the map places the picture by the
+scroll. A death inside a boss's instance is recorded as the tile its arena is copied
 from, and the map decides whether that route goes to the boss's way in. A star whose tile is
 approximate offers **Open website** instead, which opens the map's search for the site's name in
 your browser and sends this client nothing. The clue is now read whether or not *Share clue* is on,

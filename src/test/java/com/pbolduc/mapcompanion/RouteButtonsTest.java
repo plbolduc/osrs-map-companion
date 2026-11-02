@@ -28,6 +28,7 @@ package com.pbolduc.mapcompanion;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import net.runelite.api.gameval.ItemID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -68,12 +69,50 @@ public class RouteButtonsTest
 		words.tier = "medium";
 		words.text = "Speak to the bartender of the Rusty Anchor.";
 		assertNull(ClueReader.routeTile(words));
-		assertTrue(ClueReader.routesByWords(words));
+		assertTrue(ClueReader.routesByClue(words));
 		assertEquals("Speak to the bartender of the Rusty Anchor.", NowCards.clueDetail(words));
-		assertFalse("a step with a tile goes as that tile", ClueReader.routesByWords(coordinate));
-		assertFalse(ClueReader.routesByWords(picture));
+		assertFalse("a step with a tile goes as that tile", ClueReader.routesByClue(coordinate));
+		assertFalse(ClueReader.routesByClue(picture));
 		assertNull(ClueReader.routeTile(null));
-		assertFalse(ClueReader.routesByWords(null));
+		assertFalse(ClueReader.routesByClue(null));
+	}
+
+	/**
+	 * A map above beginner has no words and no tile, but its scroll is the picture: RuneLite's clue
+	 * plugin and the map's own table both know the place by the item id. So it routes as the clue,
+	 * as a worded step does, before and after the scroll is opened, and the card no longer asks the
+	 * player to read a scroll whose picture they are looking at.
+	 */
+	@Test
+	public void aMapAboveBeginnerRoutesByItsScroll()
+	{
+		CompanionSnapshot.Clue map = new CompanionSnapshot.Clue();
+		map.tier = "hard";
+		map.itemId = ItemID.TRAIL_CLUE_HARD_MAP001;
+		assertNull(ClueReader.routeTile(map));
+		assertTrue(ClueReader.mapScroll(map));
+		assertTrue(ClueReader.routesByClue(map));
+		assertEquals("Map · Route finds where it shows", NowCards.clueDetail(map));
+
+		CompanionSnapshot.Clue easy = new CompanionSnapshot.Clue();
+		easy.tier = "easy";
+		easy.itemId = ItemID.TRAIL_CLUE_EASY_MAP001;
+		assertTrue("an easy map is a scroll of its own too", ClueReader.routesByClue(easy));
+
+		/* Every beginner picture is one item, so only its opened window says which: no Route until then. */
+		CompanionSnapshot.Clue beginner = new CompanionSnapshot.Clue();
+		beginner.tier = "beginner";
+		beginner.itemId = ItemID.TRAIL_CLUE_BEGINNER;
+		assertFalse(ClueReader.mapScroll(beginner));
+		assertFalse(ClueReader.routesByClue(beginner));
+		assertEquals("Read the scroll to see its step", NowCards.clueDetail(beginner));
+
+		/* A scroll that is not a map still has to be read for its words. */
+		CompanionSnapshot.Clue sextant = new CompanionSnapshot.Clue();
+		sextant.tier = "medium";
+		sextant.itemId = ItemID.TRAIL_CLUE_MEDIUM_SEXTANT001;
+		assertFalse(ClueReader.routesByClue(sextant));
+		assertEquals("Read the scroll to see its step", NowCards.clueDetail(sextant));
 	}
 
 	@Test
@@ -94,6 +133,8 @@ public class RouteButtonsTest
 			.replaceAll("\\s+", " ");
 		assertTrue(readme.contains("**Route**, beside your clue, your last death, a star or a meetup, sends the tile you are standing on and the tile it goes to"));
 		assertTrue(readme.contains("That includes your clue's tile and where you died when you do not share them"));
+		/* A map's Route sends its scroll as a worded step's sends its words, so the README names both. */
+		assertTrue(readme.contains("For a clue step that is words, or a map above beginner, Route sends the clue instead"));
 		/* Home is the tab that was Overview; the README follows the sidebar's own name for it. */
 		assertTrue(readme.contains("**Search**, at the top of Home once you are connected, sends what you type to the map"));
 	}

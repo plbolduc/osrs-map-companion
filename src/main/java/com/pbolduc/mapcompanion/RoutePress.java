@@ -57,7 +57,8 @@ import okhttp3.Response;
  * target and the tile the player stands on. The target is a public place's id where the thing has
  * one — a search result — and otherwise a tile: a clue's, a gravestone's, a star's, a meetup's, a
  * friend's. A clue step that is words names no tile, so it goes as the clue itself, its tier,
- * words and scroll, and the map places it with its own clue table. A clue or a death the player
+ * words and scroll, and the map places it with its own clue table; so does a map above beginner,
+ * whose scroll alone names the picture's place in that table. A clue or a death the player
  * does not share travels in this request only; the map plans with it and keeps nothing, as its
  * route endpoint says. Inside a raid's rooms the client
  * cannot say where the player stands, so no {@code from} is sent and the map ranks from the
@@ -97,8 +98,9 @@ final class RoutePress
 		@Nullable
 		final String note;
 		/**
-		 * A clue step that is words, sent as the snapshot carries it so the map places it from its own
-		 * clue table; a step with a tile of its own goes as that tile instead.
+		 * A clue step that is words, or a map known by its scroll, sent as the snapshot carries it so
+		 * the map places it from its own clue table; a step with a tile of its own goes as that tile
+		 * instead.
 		 */
 		@Nullable
 		final CompanionSnapshot.Clue clue;
@@ -175,7 +177,7 @@ final class RoutePress
 		RouteClient.Tile from;
 	}
 
-	/** A clue step by its words, which the map turns into a place with its own clue table. */
+	/** A clue step by its words or its scroll, which the map turns into a place with its own clue table. */
 	static final class ClueTarget
 	{
 		final CompanionSnapshot.Clue clue;

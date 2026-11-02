@@ -107,9 +107,9 @@ final class NowCards extends JPanel
 	private List<JButton> shownDeathActions = new ArrayList<>();
 	private final JPanel clueActions = row(ColorScheme.DARKER_GRAY_COLOR);
 	/*
-	 * The clue being carried: its tier, its step in a few words, and Route when the step names a tile
-	 * — a coordinate's dig spot or a beginner map's. RuneLite's clue plugin draws the tile and the
-	 * arrow already; what this adds is which teleport.
+	 * The clue being carried: its tier, its step in a few words, and Route when the map can place the
+	 * step — a coordinate's dig spot, a map's picture, or words. RuneLite's clue plugin draws the tile
+	 * and the arrow already; what this adds is which teleport.
 	 */
 	private final JLabel clueTitle = new JLabel();
 	private final JLabel clueDetail = new JLabel();
@@ -235,8 +235,8 @@ final class NowCards extends JPanel
 		clueRouteButton.addActionListener(e -> routeToClue());
 		eventRouteButton.addActionListener(e -> routeToMeetup());
 		clueRouteButton.setToolTipText("Plan the way to this step from where you stand. Its tile, or for a step that is words "
-			+ "the clue's words, go to the map in this request only, whether or not you share your clue; the map plans with "
-			+ "them and does not keep them.");
+			+ "or a map the clue itself, go to the map in this request only, whether or not you share your clue; the map "
+			+ "plans with them and does not keep them.");
 		eventRouteButton.setToolTipText("Plan the way to this meetup from where you stand. Nobody is told you are coming.");
 		rerouteButton.setToolTipText("Plan the way again from where you stand. Sends your tile to the map once; "
 									 + "the map plans with it and does not keep it.");
@@ -338,7 +338,9 @@ final class NowCards extends JPanel
 
 	/**
 	 * The step in a few words: where a Route goes, or the scroll's own words cut to two lines. A step
-	 * that is words is routed by those words, so the card shows them and Route under them.
+	 * that is words is routed by those words, so the card shows them and Route under them. A map
+	 * above beginner is known by its scroll before and after it is opened, so the card says Route
+	 * finds the place rather than asking for a scroll the player has just read.
 	 */
 	static String clueDetail(CompanionSnapshot.Clue clue)
 	{
@@ -354,12 +356,17 @@ final class NowCards extends JPanel
 		{
 			return clue.text.length() <= 80 ? clue.text : clue.text.substring(0, 79).trim() + "…";
 		}
+		if (ClueReader.mapScroll(clue))
+		{
+			return "Map · Route finds where it shows";
+		}
 		return "Read the scroll to see its step";
 	}
 
 	/**
 	 * Route to the clue, read again at the press: the scroll may have changed since the paint. A step
-	 * with a tile goes as that tile; one that is words goes as the clue, and the map names its place.
+	 * with a tile goes as that tile; one that is words, or a map known by its scroll, goes as the
+	 * clue, and the map names its place.
 	 */
 	private void routeToClue()
 	{
@@ -370,7 +377,7 @@ final class NowCards extends JPanel
 			routePress.press(RoutePress.Target.tile("clue", new WorldPoint(tile.x, tile.y, tile.plane),
 				clueTitle(clue.tier), null, clue.coordTile != null ? "Coordinate" : "Beginner map"));
 		}
-		else if (ClueReader.routesByWords(clue))
+		else if (ClueReader.routesByClue(clue))
 		{
 			routePress.press(RoutePress.Target.clue("clue", clue, clueTitle(clue.tier), clueTitle(clue.tier)));
 		}
@@ -524,7 +531,7 @@ final class NowCards extends JPanel
 			}
 			setWrapped(clueTitle, clueTitle(clue.tier), scroll != null ? CARD_TEXT_WIDTH - CLUE_PICTURE - 6 : CARD_TEXT_WIDTH);
 			setWrapped(clueDetail, clueDetail(clue), CARD_TEXT_WIDTH);
-			boolean routable = ClueReader.routeTile(clue) != null || ClueReader.routesByWords(clue);
+			boolean routable = ClueReader.routeTile(clue) != null || ClueReader.routesByClue(clue);
 			clueActions.setVisible(routable);
 			routeState(clueRouteButton, clueSaid, "clue", "Route", ready && routable);
 		}
