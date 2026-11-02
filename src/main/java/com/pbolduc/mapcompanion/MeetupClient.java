@@ -98,6 +98,8 @@ final class MeetupClient
 		@Nullable
 		final String message;
 		final long generation;
+		/** When it was said, so a confirmation is drawn only while it is news; see {@link #shown}. */
+		final long atMs;
 
 		Said(String source, boolean sending, @Nullable String message, long generation)
 		{
@@ -105,6 +107,23 @@ final class MeetupClient
 			this.sending = sending;
 			this.message = message;
 			this.generation = generation;
+			this.atMs = System.currentTimeMillis();
+		}
+
+		/** A meetup made: the one thing a write says that is done rather than still asking something of the player. */
+		boolean confirms()
+		{
+			return MADE.equals(message) || MADE_NO_LINK.equals(message);
+		}
+
+		/**
+		 * Whether there are words to draw at {@code now}: a confirmation for the ten seconds a run's
+		 * card gives one ({@link FarmRunClient.Said#CONFIRMATION_MS}), then its line back, while a
+		 * refusal is still true and stays until the next press says something else.
+		 */
+		boolean shown(long now)
+		{
+			return message != null && (!confirms() || now - atMs < FarmRunClient.Said.CONFIRMATION_MS);
 		}
 	}
 

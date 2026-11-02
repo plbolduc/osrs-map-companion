@@ -182,6 +182,13 @@ final class ConnectCard extends JPanel
 	/** The group the two lines above were said about: a line about one group is not news in the next. */
 	private String saidFor = "";
 	/**
+	 * When the line under the field, the one under the group's buttons and the card's own last said
+	 * a confirmation, or zero while each says anything else: see {@link #letGo}.
+	 */
+	private long joinConfirmedAtMs;
+	private long groupConfirmedAtMs;
+	private long cardConfirmedAtMs;
+	/**
 	 * Copy invite says Copied for a moment when the clipboard has the invite, on the button itself,
 	 * which in a group of one sits in the card at the top of the tab, far from the line under the row.
 	 */
@@ -769,8 +776,16 @@ final class ConnectCard extends JPanel
 	/** One line under the join field, hidden when there is nothing to say. */
 	void say(String message)
 	{
+		joinConfirmedAtMs = 0L;
 		setWrapped(joinMessage, message);
 		joinMessage.setVisible(true);
+	}
+
+	/** The same line, for a press that did what it asked: news for a moment, then gone. */
+	void confirm(String message)
+	{
+		say(message);
+		joinConfirmedAtMs = System.currentTimeMillis();
 	}
 
 	/**
@@ -783,19 +798,48 @@ final class ConnectCard extends JPanel
 	}
 
 	/** One line under Copy invite and Switch ▾, for what was pressed there. */
-	private void sayUnderGroup(String message)
+	void sayUnderGroup(String message)
 	{
 		saidFor = pairingCode();
+		groupConfirmedAtMs = 0L;
 		setWrapped(groupMessage, message);
 		groupMessage.setVisible(true);
+	}
+
+	/** The same line, for a press that did what it asked: news for a moment, then gone. */
+	void confirmUnderGroup(String message)
+	{
+		sayUnderGroup(message);
+		groupConfirmedAtMs = System.currentTimeMillis();
 	}
 
 	/** One line in the status card, under the Rename group… link that was pressed. */
 	private void sayOnCard(String message)
 	{
 		saidFor = pairingCode();
+		cardConfirmedAtMs = 0L;
 		setWrapped(cardMessage, message, CARD_TEXT_WIDTH);
 		cardMessage.setVisible(true);
+	}
+
+	/** The same line, for a rename that landed. */
+	private void confirmOnCard(String message)
+	{
+		sayOnCard(message);
+		cardConfirmedAtMs = System.currentTimeMillis();
+	}
+
+	/**
+	 * A confirmation is news for the ten seconds a run's card gives one
+	 * ({@link FarmRunClient.Said#CONFIRMATION_MS}) and then gives its line back, on the sidebar's
+	 * one-second refresh. Anything else a press said stays until the next press says something else.
+	 */
+	private static void letGo(JLabel line, long confirmedAtMs, long now)
+	{
+		if (confirmedAtMs > 0L && now - confirmedAtMs >= FarmRunClient.Said.CONFIRMATION_MS)
+		{
+			line.setVisible(false);
+		}
 	}
 
 	/**
@@ -915,6 +959,7 @@ final class ConnectCard extends JPanel
 	void renameGroup(boolean fromCard)
 	{
 		Consumer<String> answer = fromCard ? this::sayOnCard : this::sayUnderGroup;
+		Consumer<String> renamed = fromCard ? this::confirmOnCard : this::confirmUnderGroup;
 		String server = pairing.serverUrl();
 		String code = pairingCode();
 		String member = pairing.memberWithSecret(server, code, identity.id());
@@ -956,7 +1001,7 @@ final class ConnectCard extends JPanel
 			if (outcome.name != null && server.equals(pairing.serverUrl()) && code.equalsIgnoreCase(pairingCode()))
 			{
 				pairing.rememberName(code, outcome.name);
-				answer.accept("Renamed to " + outcome.name + ".");
+				renamed.accept("Renamed to " + outcome.name + ".");
 			}
 			else
 			{
@@ -1232,6 +1277,12 @@ final class ConnectCard extends JPanel
 	 */
 	void refreshButtons(boolean paired, boolean ready, List<String> known, GroupPanel groupPanel)
 	{
+		refreshButtons(paired, ready, known, groupPanel, System.currentTimeMillis());
+	}
+
+	/** The same, as of {@code now}: a confirmation is drawn only while it is news. */
+	void refreshButtons(boolean paired, boolean ready, List<String> known, GroupPanel groupPanel, long now)
+	{
 		copyInviteButton.setEnabled(paired && pairing.hasServerConsent() && !copyingInvite);
 		knownGroupsRow.setVisible(!paired && !known.isEmpty());
 		List<JButton> groupRow = new ArrayList<>();
@@ -1254,6 +1305,9 @@ final class ConnectCard extends JPanel
 			groupMessage.setVisible(false);
 			cardMessage.setVisible(false);
 		}
+		letGo(groupMessage, groupConfirmedAtMs, now);
+		letGo(cardMessage, cardConfirmedAtMs, now);
+		letGo(joinMessage, joinConfirmedAtMs, now);
 		/*
 		 * A refusal the field can answer opens it under the card that says so, as before a group: the
 		 * field Join another group… opens, with its heading, because it is the way back in.
@@ -1463,7 +1517,7 @@ final class ConnectCard extends JPanel
 			return;
 		}
 		showCopied(true);
-		sayUnderGroup("Invite copied."
+		confirmUnderGroup("Invite copied."
 			+ (linked ? describeExpiry(invite.expiresAt, System.currentTimeMillis()) : ""));
 	}
 

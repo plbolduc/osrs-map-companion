@@ -127,6 +127,35 @@ public class AnsweredWherePressedTest
 	}
 
 	/**
+	 * "Invite copied. It expires in 7 days.", "Renamed to Sunday raids." and "Left the group." stayed
+	 * on their lines until the next press, long after they were news. A confirmation is said for the
+	 * ten seconds a run's "Run ended." is, then gives its line back; a refusal stays, since it still
+	 * asks something of the player.
+	 */
+	@Test
+	public void aConfirmationGoesAfterTenSecondsAndARefusalStays()
+	{
+		long now = System.currentTimeMillis();
+		card.confirm("Left the group.");
+		draw(now);
+		JLabel left = label("Left the group.");
+		assertTrue(shown(left));
+		draw(now + FarmRunClient.Said.CONFIRMATION_MS + 1_000L);
+		assertFalse(shown(left));
+
+		assertTrue(pairing.connect(JoinCode.parse("ABC234"), () -> true));
+		card.confirmUnderGroup("Invite copied. It expires in 7 days.");
+		draw(now + 9_000L);
+		assertTrue("news for a moment", shown(named("group.message")));
+		draw(now + FarmRunClient.Said.CONFIRMATION_MS + 1_000L);
+		assertFalse(shown(named("group.message")));
+
+		card.sayUnderGroup(ConnectCard.INVITE_FAILED);
+		draw(now + 60_000L);
+		assertTrue("a refusal is still said a minute on", shown(named("group.message")));
+	}
+
+	/**
 	 * An address typed without its scheme is the map meant, not a mistake: https for a map anywhere,
 	 * http for one on this machine, and nothing else the address rule refuses is let through.
 	 */
@@ -147,6 +176,12 @@ public class AnsweredWherePressedTest
 
 	/** The sidebar's own order: the Group tab, then the status card, then the buttons under it. */
 	private void draw()
+	{
+		draw(System.currentTimeMillis());
+	}
+
+	/** The same, as of {@code atMs}. */
+	private void draw(long atMs)
 	{
 		boolean paired = !pairing.code().isEmpty();
 		boolean ready = paired && pairing.hasServerConsent();
@@ -175,9 +210,9 @@ public class AnsweredWherePressedTest
 			groupPanel = new GroupPanel(destinations, group, press, meetups, config, new GameSprites(null, null, null),
 				card.copyInviteButton);
 		}
-		groupPanel.refresh(ready);
+		groupPanel.refresh(ready, atMs);
 		card.refreshStatus(Health.LIVE, pairing.code(), paired, ready);
-		card.refreshButtons(paired, ready, pairing.knownCodes(), groupPanel);
+		card.refreshButtons(paired, ready, pairing.knownCodes(), groupPanel, atMs);
 	}
 
 	/** The first label reading these words, in the card above the tabs or in the Group tab's foot. */

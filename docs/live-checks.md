@@ -337,8 +337,8 @@ The website plan's second session, once the routes in the game are built: a memb
       fresh profile and log in a few days later: the group is still there.
 - [ ] **Copy invite.** In a group Connect made, Copy invite reads *Copied* for two seconds and the
       line under Copy invite · Switch ▾ says the invite expires in 7 days, with the Group tab scrolled
-      to its foot and the tabs where they were. With the map stopped it says nothing was copied, and
-      pasting gives what the clipboard held before.
+      to its foot and the tabs where they were; the line goes ten seconds later. With the map stopped
+      it says nothing was copied, and that stays, and pasting gives what the clipboard held before.
 - [ ] **Answered where pressed.** Switch ▾ → Join another group… opens the field under Copy invite ·
       Switch ▾, and an expired invite is refused under its Paste and Join; Hide the code field folds
       it. In Settings → Advanced, Apply with `osrs-map.com` writes `https://osrs-map.com` into the

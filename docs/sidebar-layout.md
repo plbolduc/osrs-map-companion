@@ -758,6 +758,14 @@ where nothing else offers a way in. In Settings, Apply's refusal is said under A
 behind Back before, and an address typed without its scheme gets https://, or http:// on this
 machine, in the field rather than a refusal. Connect's own answers were already on the status card.
 
+A line that says a press did what it asked is news for ten seconds, as a run's *Run ended.* is, and
+then gives its row back: *Invite copied. It expires in 7 days.*, *Renamed to Sunday raids.*, *Left
+the group.* and *Meetup made. Its link is copied.* A refusal stays until the next press, since it is
+still true and still asks something of the player. Meet here's form keeps its own refusal while it
+is open, and Cancel puts the refusal away with the form, where it went on under the heading. A
+meetup made closes the form once: it closed it again each time the form was opened, so a second
+meetup could not be made until the map's answer about the first was replaced.
+
 ### A meetup's Route
 
 A meetup was three rows of buttons: Route, then the four answers two by two. Route now sits beside
