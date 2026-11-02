@@ -62,6 +62,11 @@ final class RunView extends JPanel
 {
 	private static final long serialVersionUID = 1L;
 	private static final int WIDTH = MapCompanionPanel.CARD_TEXT_WIDTH;
+	/** A stop's picture, at the size This leg draws a step's. */
+	private static final int PICTURE = 16;
+	/** The next stop's number, in its world-map pin's colour. */
+	private static final String AMBER_HTML = String.format("#%02x%02x%02x",
+		MapPin.AMBER.getRed(), MapPin.AMBER.getGreen(), MapPin.AMBER.getBlue());
 	static final String CHANGED = "Your port tasks have changed since this run was planned. Reroute plans from what you hold now.";
 
 	private final transient FarmRunState state;
@@ -354,16 +359,27 @@ final class RunView extends JPanel
 		return "Paused for " + destination + ". Follow takes the run back.";
 	}
 
-	/** What a stop says it is at: done, visited, under the player, or next. */
-	static String status(FarmRunState.View view, RelayResponse.FarmStop stop, RelayResponse.FarmStop next)
+	/**
+	 * What a stop says it is at: done, visited, or under the player. The next stop says it by its
+	 * number, amber as its pin is on the world map, rather than by a line of its own.
+	 */
+	static String status(FarmRunState.View view, RelayResponse.FarmStop stop)
 	{
 		if (view.done.contains(stop.n))
 		{
 			return stop.birdhouseId == null ? "Done" : "Done · seeded sighting";
 		}
 		return view.visited.contains(stop.n) ? "Visited"
-			: view.here.contains(stop.n) ? "You're here"
-			: next != null && next.n == stop.n ? "Next" : "";
+			: view.here.contains(stop.n) ? "You're here" : "";
+	}
+
+	/** The stop's name, its number bold and amber when it is the next stop, as the world map draws its pin. */
+	static String stopName(RelayResponse.FarmStop stop, boolean next)
+	{
+		String name = MapCompanionPanel.escape(stop.name);
+		String number = stop.n + ".";
+		return "<html><body width='" + WIDTH + "'>" + (next ? "<b><font color='" + AMBER_HTML + "'>" + number + "</font></b>" : number)
+			+ " " + name + "</body></html>";
 	}
 
 	private void showBringList(FarmRunState.View view)
@@ -383,42 +399,46 @@ final class RunView extends JPanel
 	{
 		stops.removeAll();
 		RelayResponse.FarmStop next = view.next();
+		/* A picture's place on every stop when any has one, so the ways line up; none on a run with none. */
+		boolean pictures = view.run.stops.stream().anyMatch(RunView::pictured);
 		for (RelayResponse.FarmStop stop : view.run.stops)
 		{
 			boolean done = view.done.contains(stop.n);
-			String at = status(view, stop, next);
+			String at = status(view, stop);
 			JPanel row = column();
 			row.setBorder(BorderFactory.createEmptyBorder(6, 0, 0, 0));
 			/*
 			 * A stop behind the player is one line that keeps its status word: its way there and its
-			 * tasks are spent, and the rows left are the ones still to walk.
+			 * tasks are spent, and the rows left are the ones still to walk. Done and visited are drawn
+			 * alike, struck and grey, as the world map fades both their pins; the word tells them apart.
 			 */
 			if (done || view.visited.contains(stop.n))
 			{
 				String named = MapCompanionPanel.escape(stop.n + ". " + stop.name);
 				JLabel line = label(12f, ColorScheme.MEDIUM_GRAY_COLOR);
-				line.setText("<html><body width='" + WIDTH + "'>" + (done ? "<strike>" + named + "</strike>" : named)
+				line.setText("<html><body width='" + WIDTH + "'><strike>" + named + "</strike>"
 					+ MapCompanionPanel.escape(" · " + at) + "</body></html>");
 				row.add(MapCompanionPanel.left(line));
 				stops.add(MapCompanionPanel.left(row));
 				continue;
 			}
-			JLabel name = wrapped(stop.n + ". " + stop.name, 12f, Color.WHITE);
+			JLabel name = label(12f, Color.WHITE);
+			name.setText(stopName(stop, next != null && stop.n == next.n));
 			row.add(MapCompanionPanel.left(name));
 			JPanel method = new JPanel(new BorderLayout(4, 0));
 			method.setOpaque(false);
-			// A farm stop keeps its item's place even when it has none; a port stop names a boat, never an item.
-			if (!port)
+			if (pictures)
 			{
 				JLabel icon = new JLabel();
-				if (stop.item != null)
-				{
-					sprites.farmTravelItem(icon, stop.item, 16);
-				}
+				Dimension slot = new Dimension(PICTURE, PICTURE);
+				icon.setPreferredSize(slot);
+				icon.setMinimumSize(slot);
+				icon.setMaximumSize(slot);
+				picture(icon, stop);
 				method.add(icon, BorderLayout.WEST);
 			}
 			JLabel way = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
-			MapCompanionPanel.setWrapped(way, stop.method == null ? "Walk" : stop.method, WIDTH - 20);
+			MapCompanionPanel.setWrapped(way, stop.method == null ? "Walk" : stop.method, pictures ? WIDTH - PICTURE - 4 : WIDTH);
 			method.add(way, BorderLayout.CENTER);
 			row.add(MapCompanionPanel.left(method));
 			if (stop.tasks != null)
@@ -449,6 +469,47 @@ final class RunView extends JPanel
 				stops.add(steps);
 				stops.add(legEnd);
 			}
+		}
+	}
+
+	/** Whether a stop has a picture to show: a step the map gave an item or spell id, or an item it names. */
+	private static boolean pictured(RelayResponse.FarmStop stop)
+	{
+		return stop.item != null || firstPictured(stop) != null;
+	}
+
+	/** The stop's first step with an item or spell id: the teleport This leg draws for it. */
+	@Nullable
+	private static RelayResponse.RouteStep firstPictured(RelayResponse.FarmStop stop)
+	{
+		for (RelayResponse.RouteStep step : stop.steps)
+		{
+			if (step.itemId != null || step.spriteId != null)
+			{
+				return step;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * The stop's picture, by the id its own step carries, the one This leg draws, so a teleport the
+	 * map names no item for (a spell) still has one. The item's name is only the fallback.
+	 */
+	private void picture(JLabel icon, RelayResponse.FarmStop stop)
+	{
+		RelayResponse.RouteStep step = firstPictured(stop);
+		if (step != null && step.itemId != null)
+		{
+			sprites.item(icon, step.itemId, PICTURE);
+		}
+		else if (step != null)
+		{
+			sprites.sprite(icon, step.spriteId, PICTURE);
+		}
+		else if (stop.item != null)
+		{
+			sprites.farmTravelItem(icon, stop.item, PICTURE);
 		}
 	}
 
