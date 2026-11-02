@@ -154,8 +154,33 @@ public class RouteClientTest
 		destination();
 		client(200, ANSWER, null).reroute();
 		assertTrue(sent.isEmpty());
-		assertEquals(RouteClient.NEEDS_CONNECTION, route.view().message);
+		/* Logged in with no group: not connected, said apart from a logout, which asks to log in instead. */
+		assertEquals(RouteClient.NOT_CONNECTED, route.view().message);
 		assertEquals("item:ring-of-dueling", route.view().way().id);
+	}
+
+	/** At the login screen Reroute says to log in, not to connect a map the player is already in. */
+	@Test
+	public void atTheLoginScreenRerouteSaysToLogIn() throws Exception
+	{
+		connect();
+		destination();
+		Client loggedOut = (Client) Proxy.newProxyInstance(Client.class.getClassLoader(), new Class<?>[]{Client.class},
+			(proxy, method, args) -> "getGameState".equals(method.getName()) ? GameState.LOGIN_SCREEN : null);
+		new RouteClient(new OkHttpClient.Builder().addInterceptor(chain ->
+		{
+			sent.add(chain.request());
+			throw new java.io.IOException("nothing should be sent");
+		}).build(), new Gson(), loggedOut, new ClientThread()
+		{
+			@Override
+			public void invokeLater(Runnable r)
+			{
+				r.run();
+			}
+		}, pairing, identity, route).reroute();
+		assertTrue(sent.isEmpty());
+		assertEquals("Log in to plan a route.", route.view().message);
 	}
 
 	@Test
@@ -223,7 +248,8 @@ public class RouteClientTest
 		Object[][] cases = {
 			{503, "{\"reason\":\"busy\"}", MapWait.BUSY},
 			{404, "{\"reason\":\"not_found\"}", RouteClient.NOT_FOUND},
-			{403, "{\"reason\":\"needs_code\"}", RouteClient.NEEDS_CONNECTION},
+			/* The map refusing this member: one sentence for it, pointing at the card that says why. */
+			{403, "{\"reason\":\"needs_code\"}", RouteClient.NOT_CONNECTED},
 			{500, "oops", RouteClient.FAILED},
 			{200, "{\"options\":[]}", RouteClient.NO_WAY},
 			{200, "not json at all", RouteClient.UNREADABLE},

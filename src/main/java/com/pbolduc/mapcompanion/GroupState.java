@@ -268,6 +268,20 @@ public class GroupState
 		return id.equals(pending);
 	}
 
+	/**
+	 * Stop waiting for a friend's dot, and say whose it was; null when no Route was waiting. At the
+	 * login screen no stream brings one, and the half minute would end by saying the friend shares no
+	 * position when it was the player who left.
+	 */
+	@Nullable
+	synchronized String stopFinding()
+	{
+		current();
+		String id = pending;
+		pending = null;
+		return id;
+	}
+
 	/** Whether the last Route to this friend found no position to go to. */
 	synchronized boolean lost(String id)
 	{

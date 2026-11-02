@@ -80,6 +80,12 @@ often. A clean run is now 443 tests with no failures or skips.
 - [ ] With the map unreachable from the start, log in: once a post has failed the status card says
       *Can't reach the map · retrying* rather than *Connecting…*, and the dot stays amber. With a
       group saved, turn the plugin off and on at the login screen: the card says *Logged out*.
+- [ ] Log out with a route under Now and a friend's Route reading *Finding…*: within a second the
+      search box goes, and Reroute, every Route, the meetup answers, Meet here, Start run and Copy
+      invite grey, a Route's tooltip saying *Log in to plan a route.*; the friend's row says the same,
+      and half a minute later still does not say they share no position. Follow, Dismiss, End run,
+      World map, Switch ▾ and Open the map still work, and Stars says *Log in to see stars.* Log in
+      again: all of it comes back.
 - [ ] Replace a clue scroll and compare charged versus uncharged jewellery capabilities.
 - [ ] Verify an upstairs death's Open website opens the correct tile and floor.
 - [ ] Exercise farming, birdhouses, rumours and contracts on a members character.

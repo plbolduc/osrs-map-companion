@@ -88,6 +88,8 @@ final class SlayerPanel extends JPanel
 	private boolean expanded;
 	private boolean kindsOpen;
 	private boolean connected;
+	/** Whether a character is logged in, as of the last refresh: Route asks the map as one, and Pin does not. */
+	private boolean loggedIn = true;
 
 	@Inject
 	SlayerPanel(SlayerState state, MapCompanionConfig config, ConfigManager configManager, RoutePress routes,
@@ -119,7 +121,14 @@ final class SlayerPanel extends JPanel
 
 	void refresh(boolean ready)
 	{
+		refresh(ready, loggedIn);
+	}
+
+	/** The same, knowing whether a character is logged in: with none, Route waits for one and Pin stays. */
+	void refresh(boolean ready, boolean loggedIn)
+	{
 		connected = ready;
+		this.loggedIn = loggedIn;
 		setVisible(ready && config.shareSlayer());
 		if (!isVisible())
 		{
@@ -172,9 +181,9 @@ final class SlayerPanel extends JPanel
 		for (JButton button : routeButtons)
 		{
 			RoutePress.Said said = routes.said(button.getName());
-			button.setEnabled(ready && !view.stale && !waiting && routes.ready());
+			button.setEnabled(ready && loggedIn && !view.stale && !waiting && routes.ready());
 			button.setText(said != null && said.planning ? "Planning…" : "Route");
-			MapWait.tip(button, null, routes.waitMs(now));
+			MapWait.tip(button, loggedIn ? null : RouteClient.LOG_IN, routes.waitMs(now));
 		}
 		for (JButton button : pinButtons)
 		{

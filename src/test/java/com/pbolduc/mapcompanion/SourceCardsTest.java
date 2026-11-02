@@ -270,6 +270,22 @@ public class SourceCardsTest
 	}
 
 	/**
+	 * At the login screen Route back was pressable and answered "Connect to your map to plan a route."
+	 * It waits for a character, greyed, and says so in its tooltip; the death card itself stays.
+	 */
+	@Test
+	public void atTheLoginScreenRouteBackWaitsForACharacter() throws Exception
+	{
+		cards(died(), RoutePressTest.ANSWER);
+		SwingUtilities.invokeAndWait(() -> cards.refresh(true, true, false));
+		JButton back = button(cards, "now.death.route");
+		assertFalse(back.isEnabled());
+		assertEquals(RouteClient.LOG_IN, back.getToolTipText());
+		SwingUtilities.invokeAndWait(() -> cards.refresh(true, true, true));
+		assertTrue("logged in again, it is a press again", back.isEnabled());
+	}
+
+	/**
 	 * Under the death, the gravestone's time left by the game's own timer, with a bar full at the
 	 * first reading; with no stone standing the card says only how long ago, as it did.
 	 */

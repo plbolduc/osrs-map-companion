@@ -152,6 +152,20 @@ public class StarsWordsTest
 		});
 	}
 
+	/** Logged out, the tab says the one thing to do. It said to log in and connect a map the player is in. */
+	@Test
+	public void loggedOutTheTabSaysToLogIn() throws Exception
+	{
+		playing = GameState.LOGIN_SCREEN;
+		scene(fixture(), false);
+		open();
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.refresh();
+			assertEquals("Log in to see stars.", text(named(panel, "stars.status")));
+		});
+	}
+
 	@Test
 	public void anHourWithNoStarsIsNotThePlayersFilters() throws Exception
 	{
@@ -234,6 +248,9 @@ public class StarsWordsTest
 	 * The tab, its client and the fixture behind them. {@code hold} keeps the feed's reply waiting
 	 * until the test ends, so the tab can be looked at while its first answer is on its way.
 	 */
+	/** The game's state in the scene: logged in, unless a test is about the login screen. */
+	private GameState playing = GameState.LOGGED_IN;
+
 	private void scene(String feed, boolean hold)
 	{
 		assertTrue(pairing.connect(JoinCode.parse("ABC234"), () -> true));
@@ -252,7 +269,7 @@ public class StarsWordsTest
 				switch (method.getName())
 				{
 					case "getGameState":
-						return GameState.LOGGED_IN;
+						return playing;
 					case "getRealSkillLevel":
 						return 72;
 					case "getTotalLevel":

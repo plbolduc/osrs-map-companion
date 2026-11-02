@@ -249,6 +249,22 @@ public class SearchClientTest
 		assertFalse(empty.result().refused);
 	}
 
+	/** With no character logged in there is no member to search as, and the line says to log in. */
+	@Test
+	public void sendsNothingAtTheLoginScreenAndSaysToLogIn() throws Exception
+	{
+		held = null;
+		SearchClient search = new SearchClient(new OkHttpClient(), new Gson(), () -> held, () -> false, (action, delayMs) ->
+		{
+			Object[] entry = {action, delayMs};
+			waiting.add(entry);
+			return () -> waiting.remove(entry);
+		}, Runnable::run);
+		search.enter("bank");
+		assertTrue(sent.isEmpty());
+		assertEquals("Log in to search.", search.result().message);
+	}
+
 	@Test
 	public void sendsNothingWithoutAMemberToAskAs() throws Exception
 	{
@@ -256,7 +272,8 @@ public class SearchClientTest
 		SearchClient search = client(200, BANKS, null, null);
 		search.enter("bank");
 		assertTrue(sent.isEmpty());
-		assertEquals(SearchClient.NEEDS_CONNECTION, search.result().message);
+		/* A character to search as, and no member the map takes: not connected, where a logout says to log in. */
+		assertEquals(RouteClient.NOT_CONNECTED, search.result().message);
 	}
 
 	@Test

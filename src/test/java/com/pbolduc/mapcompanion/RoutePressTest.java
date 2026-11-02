@@ -269,9 +269,37 @@ public class RoutePressTest
 		RoutePress press = press(200, ANSWER, null);
 		press.press(RoutePress.Target.place("search", "bank:lumbridge", "Lumbridge bank", null, null));
 		assertTrue(sent.isEmpty());
-		assertEquals(RouteClient.NEEDS_CONNECTION, press.said("search").message);
+		/* Logged in with no group: not connected, said apart from a logout, which asks to log in instead. */
+		assertEquals(RouteClient.NOT_CONNECTED, press.said("search").message);
 		assertNull("another button's line is its own", press.said("death"));
 		assertNull(destinations.getDestination());
+	}
+
+	/**
+	 * At the login screen a press said "Connect to your map to plan a route." to a player in a group,
+	 * with no Connect on the page to press. It says the one thing that is true, and sends nothing.
+	 */
+	@Test
+	public void aPressAtTheLoginScreenSaysToLogIn()
+	{
+		connect();
+		Client loggedOut = (Client) Proxy.newProxyInstance(Client.class.getClassLoader(), new Class<?>[]{Client.class},
+			(proxy, method, args) -> "getGameState".equals(method.getName()) ? GameState.LOGIN_SCREEN : null);
+		RoutePress press = new RoutePress(new OkHttpClient.Builder().addInterceptor(chain ->
+		{
+			sent.add(chain.request());
+			throw new java.io.IOException("nothing should be sent");
+		}).build(), new Gson(), loggedOut, new ClientThread()
+		{
+			@Override
+			public void invokeLater(Runnable r)
+			{
+				r.run();
+			}
+		}, pairing, identity, route, destinations, new TestDestinationMarker());
+		press.press(RoutePress.Target.place("search", "bank:lumbridge", "Lumbridge bank", null, null));
+		assertTrue(sent.isEmpty());
+		assertEquals("Log in to plan a route.", press.said("search").message);
 	}
 
 	@Test
@@ -349,7 +377,8 @@ public class RoutePressTest
 			/* Its words were typed by somebody, so they are cleaned as everything else it sends is. */
 			{404, "{\"reason\":\"no_tile\",\"error\":\"<col=ff0000>No single\\u0007 place</col>\"}", "No single place"},
 			{404, "{\"reason\":\"no_tile\",\"error\":\"   \"}", RouteClient.NOT_FOUND},
-			{403, "{\"reason\":\"needs_code\"}", RouteClient.NEEDS_CONNECTION},
+			/* The map refusing this member: one sentence for it, pointing at the card that says why. */
+			{403, "{\"reason\":\"needs_code\"}", RouteClient.NOT_CONNECTED},
 			{500, "oops", RouteClient.FAILED},
 			{200, "{\"options\":[]}", RouteClient.NO_WAY},
 			{200, "not json at all", RouteClient.UNREADABLE},

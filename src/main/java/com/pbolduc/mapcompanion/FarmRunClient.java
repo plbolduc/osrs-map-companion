@@ -258,7 +258,8 @@ final class FarmRunClient
 		}
 		String secret = member == null ? null : pairing.secret(server, code, member);
 		long lifetime = destinations.generation();
-		boolean connected = client.getGameState() == GameState.LOGGED_IN && server != null && !code.isEmpty()
+		boolean playing = client.getGameState() == GameState.LOGGED_IN;
+		boolean connected = playing && server != null && !code.isEmpty()
 							&& pairing.hasServerConsent(server, code) && secret != null && HttpUrl.parse(server + PATH) != null;
 		Question question = new Question();
 		question.start = start;
@@ -296,7 +297,7 @@ final class FarmRunClient
 				{
 					gate.finishPress(System.currentTimeMillis() + RouteClient.MIN_GAP_MS);
 				}
-				said = new Said(false, end ? "Run ended here. Connect to end it on the map too." : RouteClient.NEEDS_CONNECTION, lifetime, -1, port);
+				said = new Said(false, unsent(playing, reroute, end), lifetime, -1, port);
 				return;
 			}
 			if (!held)
@@ -328,6 +329,24 @@ final class FarmRunClient
 				}
 			});
 		}
+	}
+
+	/**
+	 * Why a press could not be sent, by its cause: no character logged in, or none the map takes as a
+	 * member yet. End has already ended the run here, so it says what is left of it on the map.
+	 */
+	static String unsent(boolean playing, boolean reroute, boolean end)
+	{
+		if (end)
+		{
+			return playing ? "Run ended here. Not connected to the group yet, so the map still has it."
+				: "Run ended here. Log in to end it on the map too.";
+		}
+		if (!playing)
+		{
+			return reroute ? "Log in to reroute the run." : "Log in to start a run.";
+		}
+		return RouteClient.NOT_CONNECTED;
 	}
 
 	Request request(String server, String code, String member, String secret, Question question, boolean end, @Nullable String id)
@@ -362,7 +381,7 @@ final class FarmRunClient
 			{
 				int code = close.code();
 				String why = code == 429 || code == 503 ? MapWait.BUSY
-							 : code == 403 || code == 410 ? RouteClient.NEEDS_CONNECTION : "The map could not prepare that run.";
+							 : code == 403 || code == 410 ? RouteClient.NOT_CONNECTED : "The map could not prepare that run.";
 				boolean worded = false;
 				String body = CompanionHttp.readBounded(close.body(), CompanionHttp.MAX_REPLY_BYTES);
 				try

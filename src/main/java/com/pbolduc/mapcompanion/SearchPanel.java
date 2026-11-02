@@ -63,8 +63,8 @@ import net.runelite.client.ui.ColorScheme;
  * greyed. A pick then would only be refused, and its refusal would replace the other card's
  * <i>Planning…</i>, since the press keeps one answer for all of them.
  *
- * <p>Shown only while paired: the search is the map's, asked as a member, and a box that can only
- * ever say "connect first" is a row of nothing.
+ * <p>Shown only while paired and logged in: the search is the map's, asked as a member, a member is
+ * a character, and a box that can only ever say "connect first" or "log in first" is a row of nothing.
  *
  * <p>The rows are rebuilt only when what they say changes, as the drop-luck list is, because a
  * rebuild under the pointer eats the click and the sidebar refreshes every second.

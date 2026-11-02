@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.function.BooleanSupplier;
 import javax.annotation.Nullable;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
@@ -78,7 +79,8 @@ final class SearchClient
 	/** After a failure that named no wait of its own. */
 	static final long FAILURE_GAP_MS = 10_000L;
 
-	static final String NEEDS_CONNECTION = "Connect to your map and log in to search it.";
+	/** No character to search as: a search is asked as a member, and a member is a character. */
+	static final String LOG_IN = "Log in to search.";
 	static final String UNREACHABLE = "The map could not be reached.";
 	static final String FAILED = "The map could not search just now.";
 	static final String UNREADABLE = "The map returned unreadable data.";
@@ -225,6 +227,8 @@ final class SearchClient
 	private final OkHttpClient http;
 	private final Gson gson;
 	private final Credentials credentials;
+	/** Whether there is a character to search as, so a search with no credentials says why. */
+	private final BooleanSupplier character;
 	private final Debouncer debouncer;
 	private final Executor swing;
 
@@ -258,7 +262,7 @@ final class SearchClient
 				return null;
 			}
 			return new String[]{server, code, member, secret};
-		}, (action, delayMs) ->
+		}, () -> identity.id() != null, (action, delayMs) ->
 		{
 			Timer timer = new Timer((int) delayMs, e -> action.run());
 			timer.setRepeats(false);
@@ -267,11 +271,20 @@ final class SearchClient
 		}, SwingUtilities::invokeLater);
 	}
 
+	/** A search with a character always there to ask as, for a test that is not about logging in. */
 	SearchClient(OkHttpClient http, Gson gson, Credentials credentials, Debouncer debouncer, Executor swing)
+	{
+		this(http, gson, credentials, () -> true, debouncer, swing);
+	}
+
+	/** @param character whether a character is logged in, a member being a character; see {@link MemberIdentity#id} */
+	SearchClient(OkHttpClient http, Gson gson, Credentials credentials, BooleanSupplier character, Debouncer debouncer,
+		Executor swing)
 	{
 		this.http = CompanionHttp.pinnedToServer(http);
 		this.gson = gson;
 		this.credentials = credentials;
+		this.character = character;
 		this.debouncer = debouncer;
 		this.swing = swing;
 	}
@@ -400,7 +413,8 @@ final class SearchClient
 		HttpUrl base = held == null ? null : HttpUrl.parse(held[0] + PATH);
 		if (base == null)
 		{
-			show(new Result(query, Collections.<Hit>emptyList(), null, NEEDS_CONNECTION, false, true));
+			show(new Result(query, Collections.<Hit>emptyList(), null,
+				character.getAsBoolean() ? RouteClient.NOT_CONNECTED : LOG_IN, false, true));
 			return;
 		}
 		Request request = new Request.Builder()
@@ -444,7 +458,7 @@ final class SearchClient
 					else if (!close.isSuccessful())
 					{
 						next = now + Math.max(FAILURE_GAP_MS, wait == null ? 0L : StarsClient.retryDelay(wait));
-						why = status == 403 || status == 410 ? NEEDS_CONNECTION : FAILED;
+						why = status == 403 || status == 410 ? RouteClient.NOT_CONNECTED : FAILED;
 					}
 					else
 					{

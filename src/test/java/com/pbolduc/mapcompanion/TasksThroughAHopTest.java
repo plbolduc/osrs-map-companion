@@ -226,6 +226,30 @@ public class TasksThroughAHopTest
 		assertFalse(portCard.isVisible());
 	}
 
+	/**
+	 * At the login screen the Slayer card keeps its task and places, and Route waits for a character,
+	 * greyed and saying so, where it answered a press with "Connect to your map to plan a route.";
+	 * Pin, which acts here, stays. A hop keeps the character, as it keeps the cards.
+	 */
+	@Test
+	public void aLogoutGreysRouteAndAHopKeepsIt() throws Exception
+	{
+		settledWithPlaces();
+		hop();
+		assertTrue("a hop keeps the character", plugin.loggedIn());
+		plugin.onGameStateChanged(event(GameState.LOGIN_SCREEN));
+		assertFalse(plugin.loggedIn());
+		SwingUtilities.invokeAndWait(() -> slayerCard.refresh(true, plugin.loggedIn()));
+		assertTrue(words(slayerCard).toString(), words(slayerCard).contains(TASK));
+		AbstractButton route = button(slayerCard, "Route");
+		assertFalse(route.isEnabled());
+		assertEquals(RouteClient.LOG_IN, route.getToolTipText());
+		assertTrue(button(slayerCard, "Pin").isEnabled());
+		assertTrue("logging in, the character is not there until the game says so",
+			MapCompanionPlugin.loggedOutAfter(true, GameState.LOADING));
+		assertFalse(MapCompanionPlugin.loggedOutAfter(true, GameState.LOGGED_IN));
+	}
+
 	/** Another character clears everything: the first one's tasks never reach the second. */
 	@Test
 	public void anotherCharacterClearsWhatAHopKept() throws Exception

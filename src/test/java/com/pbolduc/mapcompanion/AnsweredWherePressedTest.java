@@ -184,6 +184,43 @@ public class AnsweredWherePressedTest
 	}
 
 	/**
+	 * An invite is asked for as a member, and a member is a character: at the login screen Copy invite
+	 * waits for one, where it answered a press with "Log in to a character to copy an invite.". Switch ▾
+	 * acts as the player, and stays.
+	 */
+	@Test
+	public void atTheLoginScreenCopyInviteWaitsAndSwitchStays()
+	{
+		assertTrue(pairing.connect(JoinCode.parse("ABC234"), () -> true));
+		draw();
+		assertTrue(card.copyInviteButton.isEnabled());
+		card.refreshButtons(true, true, false, pairing.knownCodes(), groupPanel, System.currentTimeMillis());
+		assertFalse(card.copyInviteButton.isEnabled());
+		assertTrue(labelled(card.groupActions, "Switch ▾").isEnabled());
+	}
+
+	/** The first button reading these words. */
+	private static AbstractButton labelled(Component component, String words)
+	{
+		if (component instanceof AbstractButton && words.equals(((AbstractButton) component).getText()))
+		{
+			return (AbstractButton) component;
+		}
+		if (component instanceof Container)
+		{
+			for (Component child : ((Container) component).getComponents())
+			{
+				AbstractButton found = labelled(child, words);
+				if (found != null)
+				{
+					return found;
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * An address typed without its scheme is the map meant, not a mistake: https for a map anywhere,
 	 * http for one on this machine, and nothing else the address rule refuses is let through.
 	 */

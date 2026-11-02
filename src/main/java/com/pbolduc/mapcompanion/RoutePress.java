@@ -287,6 +287,15 @@ final class RoutePress
 		clientThread.invokeLater(() -> start(target));
 	}
 
+	/**
+	 * A press that never reached the network, said beside the button it came from as the map's own
+	 * refusal would be: for one the sidebar turned away before it named a {@link Target}. Any thread.
+	 */
+	void refuse(String source, String why)
+	{
+		said = new Said(source, false, why, null, destinations.generation());
+	}
+
 	/** Whether a press would be sent now, for enabling a Route button. */
 	boolean ready()
 	{
@@ -347,10 +356,15 @@ final class RoutePress
 		String code = pairing.code();
 		String member = identity.id();
 		String secret = member == null ? null : pairing.secret(server, code, member);
-		if (client.getGameState() != GameState.LOGGED_IN || server == null || code.isEmpty()
-			|| !pairing.hasServerConsent(server, code) || secret == null || HttpUrl.parse(server + RouteClient.PATH) == null)
+		if (client.getGameState() != GameState.LOGGED_IN)
 		{
-			said = new Said(target.source, false, RouteClient.NEEDS_CONNECTION, null, destinations.generation());
+			refuse(target.source, RouteClient.LOG_IN);
+			return;
+		}
+		if (server == null || code.isEmpty() || !pairing.hasServerConsent(server, code) || secret == null
+			|| HttpUrl.parse(server + RouteClient.PATH) == null)
+		{
+			refuse(target.source, RouteClient.NOT_CONNECTED);
 			return;
 		}
 		if (target.id == null && target.tile == null && target.clue == null)
@@ -423,7 +437,7 @@ final class RoutePress
 			if (!close.isSuccessful())
 			{
 				String why = status == 404 ? notFound(close)
-					: status == 403 || status == 410 ? RouteClient.NEEDS_CONNECTION : RouteClient.FAILED;
+					: status == 403 || status == 410 ? RouteClient.NOT_CONNECTED : RouteClient.FAILED;
 				finish(asked, target, why,
 					now + Math.max(status == 404 ? RouteClient.MIN_GAP_MS : RouteClient.FAILURE_GAP_MS, waitMs));
 				return;
