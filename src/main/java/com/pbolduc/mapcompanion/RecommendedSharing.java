@@ -27,7 +27,6 @@ package com.pbolduc.mapcompanion;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.util.ArrayList;
@@ -438,14 +437,7 @@ final class RecommendedSharing extends JPanel
 
 	private static JPanel gap(int height)
 	{
-		JPanel spacer = new JPanel();
-		spacer.setBackground(BACK);
-		spacer.setPreferredSize(new Dimension(1, height));
-		spacer.setMaximumSize(new Dimension(Integer.MAX_VALUE, height));
-		/* A plain panel's FlowLayout asks for 10px at least, and a squeezed column grows a gap to that. */
-		spacer.setMinimumSize(new Dimension(0, height));
-		spacer.setAlignmentX(Component.LEFT_ALIGNMENT);
-		return spacer;
+		return MapCompanionPanel.gap(height, BACK);
 	}
 
 	/**

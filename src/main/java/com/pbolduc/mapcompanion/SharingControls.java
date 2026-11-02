@@ -144,7 +144,8 @@ final class SharingControls extends JPanel
 	{
 		String key = field.key;
 		BooleanSupplier read = () -> field.read.test(config);
-		JCheckBox box = new JCheckBox(sharing ? field.label : "<html><body width='150'>" + html(field.label) + "</body></html>");
+		JCheckBox box = new JCheckBox(sharing ? field.label
+			: "<html><body width='150'>" + MapCompanionPanel.escape(field.label) + "</body></html>");
 		box.setName(key);
 		box.setBackground(ColorScheme.DARK_GRAY_COLOR);
 		box.setFont(sharing ? box.getFont().deriveFont(Font.BOLD, 12f) : box.getFont().deriveFont(11f));
@@ -244,11 +245,6 @@ final class SharingControls extends JPanel
 		return String.join(between, labels);
 	}
 
-	private static String html(String text)
-	{
-		return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
-	}
-
 	/** One switch's row, with the room the groups' rows have. */
 	private static JPanel row(JCheckBox box)
 	{
@@ -324,7 +320,8 @@ final class SharingControls extends JPanel
 			StringBuilder tip = new StringBuilder("<html><body width='220'>On shares all of these, and off stops them:");
 			for (SharingFields.Field field : section.fields)
 			{
-				tip.append("<br><b>").append(html(field.label)).append("</b>: ").append(html(field.detail));
+				tip.append("<br><b>").append(MapCompanionPanel.escape(field.label)).append("</b>: ")
+					.append(MapCompanionPanel.escape(field.detail));
 			}
 			box.setToolTipText(tip.append("</body></html>").toString());
 			box.getAccessibleContext().setAccessibleDescription("Share or stop sharing every " + section.title + " field");
