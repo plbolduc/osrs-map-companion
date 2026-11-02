@@ -26,6 +26,7 @@
 package com.pbolduc.mapcompanion;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
@@ -291,57 +292,97 @@ final class SettingsPage extends JPanel
 
 	private void presentPreview(@Nullable String json)
 	{
-		String header = pairingCode().isEmpty() || !pairing.hasServerConsent()
-						? "Not connected to the selected server, so this is a preview of what would go out if "
-						+ "you pressed Connect.\n\n"
-						: "This is what goes out, every couple of seconds, to " + mapUrl.get() + ".\n\n";
-		/*
-		 * The body is not quite the whole request, and the difference is a header — so it is
-		 * printed here rather than left as the one thing this window does not show. It stops being
-		 * sent the moment the map says it has connected this installation to a browser.
-		 */
 		String suffix = pairing.suffix();
-		if (suffix != null)
-		{
-			header += "It also carries your RuneLite code, " + pairingCode() + "-" + masked(suffix)
-					  + ", as a header — until the map answers that it has connected your dot to your "
-					  + "browser, after which it is deleted from the settings and never sent again.\n\n";
-		}
-		/*
-		 * Named, never printed. The suffix above is shown by its ends because it is on the reader's own card on
-		 * the map and they may want to check the two agree; this is a standing credential, and a
-		 * window whose whole purpose is to be read — and screenshotted into a Discord channel when
-		 * somebody is asking for help — is the last place to spell one out. Which requests carry it
-		 * and what it proves is the part a reader is owed.
-		 */
-		if (pairing.secret(identity.id()) != null)
-		{
-			header += "It also carries X-Companion-Member-Secret, a credential this group's map "
-					  + "issued to this character, as a header — on this snapshot, on the connection "
-					  + "that receives destinations, and on the one request Copy invite makes. It says "
-					  + "which member of this group you are, so that somebody who was removed cannot "
-					  + "make invites or read the group by knowing your id. It is not shown here and is "
-					  + "never written to a log; Leave group deletes it.\n\n";
-		}
-		/* Named, never printed, for the same reason: it stands in for a pasted code. */
-		header += "It also carries X-Companion-Installation, a random key this RuneLite made for itself, "
-				  + "as a header on this snapshot only. It is how the map lets another account you log into "
-				  + "join a group this one is in, on the same browser, without another code. The map keeps "
-				  + "only a hash of it; Leave group replaces it.\n\n";
-		String body = json == null
-					  ? "Nothing can be built right now: a snapshot is only assembled while you are logged in."
-					  : json;
-
-		JTextArea area = new JTextArea(header + body, 22, 44);
+		String text = previewText(json, !pairingCode().isEmpty(), pairing.hasServerConsent(), pairing.serverLabel(),
+			suffix == null ? null : pairingCode() + "-" + masked(suffix), pairing.secret(identity.id()) != null,
+			config.shareName(), gson);
+		JTextArea area = new JTextArea(text, 22, 44);
 		area.setEditable(false);
 		area.setLineWrap(true);
 		area.setWrapStyleWord(true);
 		area.setCaretPosition(0);
-		JOptionPane.showMessageDialog(
+		/* Its one button only closes it, so it says so rather than agreeing to something with OK. */
+		JOptionPane.showOptionDialog(
 			SwingUtilities.getWindowAncestor(this),
 			new JScrollPane(area),
 			"What this plugin sends",
-			JOptionPane.PLAIN_MESSAGE);
+			JOptionPane.DEFAULT_OPTION,
+			JOptionPane.PLAIN_MESSAGE,
+			null,
+			new Object[]{"Close"},
+			"Close");
+	}
+
+	/**
+	 * The words around the snapshot, chosen by what is true now: a snapshot heads only a window that has
+	 * one, so logged out it says nothing goes out rather than how often something does, and before a
+	 * group, or before Connect approves the map, it says what Connect would start.
+	 *
+	 * <p>The keys are named, never printed. The RuneLite code is shown by its ends because it is on
+	 * the player's own card on the map and they may want to check the two agree; the member key and
+	 * this RuneLite's key are standing credentials, and a window whose whole purpose is to be read —
+	 * and screenshotted into a Discord channel when somebody is asking for help — is the last place to
+	 * spell one out. What each is for is the part a player is owed, in a sentence each, with its header
+	 * in brackets for anybody checking a network log.
+	 */
+	static String previewText(@Nullable String json, boolean grouped, boolean approved, String server,
+		@Nullable String runeLiteCode, boolean memberKey, boolean nameShared, Gson gson)
+	{
+		if (json == null)
+		{
+			return "Nothing goes out while you're logged out. Log in to see what would.";
+		}
+		StringBuilder text = new StringBuilder();
+		if (!grouped)
+		{
+			text.append("You're not in a group, so nothing goes out. Connect would start sending this to ")
+				.append(server).append(":\n\n");
+		}
+		else if (!approved)
+		{
+			text.append("You're not connected to ").append(server)
+				.append(", so nothing goes out. Connect would start sending this:\n\n");
+		}
+		else
+		{
+			text.append("This goes to ").append(server)
+				.append(" every couple of seconds while you're logged in. Your group sees it.\n\n");
+		}
+		text.append(memberKey
+			? "Two keys go with it and are never shown here: your member key (X-Companion-Member-Secret), which "
+			+ "proves you're this member of the group, and this RuneLite's own key (X-Companion-Installation), which "
+			+ "lets your other characters join the same group. Leave group deletes the first and replaces the second."
+			: "A key goes with it and is never shown here: this RuneLite's own key (X-Companion-Installation), which "
+			+ "lets your other characters join the same group." + (grouped ? " Leave group replaces it." : ""));
+		text.append("\n\n");
+		/* It stops being sent the moment the map says it has connected this RuneLite to a browser. */
+		if (runeLiteCode != null)
+		{
+			text.append("Your RuneLite code goes with it too (X-Companion-Suffix), ").append(runeLiteCode)
+				.append(", until the map says it has connected your dot to your browser; then it is deleted.\n\n");
+		}
+		text.append(json);
+		String nick = nick(json, gson);
+		if (SnapshotBuilder.NO_NICKNAME.equals(nick))
+		{
+			text.append("\n\n\"Me\" means you set no name of your own: your group sees ")
+				.append(nameShared ? "your character name." : "Member.");
+		}
+		return text.toString();
+	}
+
+	@Nullable
+	private static String nick(String json, Gson gson)
+	{
+		try
+		{
+			JsonObject member = gson.fromJson(json, JsonObject.class).getAsJsonObject("member");
+			return member == null || !member.has("nick") ? null : member.get("nick").getAsString();
+		}
+		catch (RuntimeException unreadable)
+		{
+			return null;
+		}
 	}
 
 	/**
