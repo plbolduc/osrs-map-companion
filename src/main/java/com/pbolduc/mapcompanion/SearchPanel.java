@@ -38,6 +38,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -49,9 +50,16 @@ import net.runelite.client.ui.ColorScheme;
  * Search the map from the sidebar: a box at the top of Home and up to eight places under it.
  *
  * <p>A pick asks for the way there ({@link RoutePress}) and the answer fills the destination's card
- * below, exactly as a destination the map sent does, so the list folds away as soon as one is
- * picked — the card is the answer, and two lists of places stacked in a 225-pixel column would be
- * the second version of the same answer the sidebar refuses. Enter or typing again brings it back.
+ * below, exactly as a destination the map sent does, so the list folds away once that answer lands
+ * — the card is the answer, and two lists of places stacked in a 225-pixel column would be the
+ * second version of the same answer the sidebar refuses. Enter or typing again brings it back. Not
+ * before it lands: a refusal leaves the rows up under a line that names the row, so trying the next
+ * one is a press rather than retyping the search.
+ *
+ * <p>A pick goes only when a press would: while any card's route is planning, or inside the map's
+ * wait between two, the rows take no click and draw their names greyed, as every Route button is
+ * greyed. A pick then would only be refused, and its refusal would replace the other card's
+ * <i>Planning…</i>, since the press keeps one answer for all of them.
  *
  * <p>Shown only while paired: the search is the map's, asked as a member, and a box that can only
  * ever say "connect first" is a row of nothing.
@@ -86,8 +94,19 @@ final class SearchPanel extends JPanel
 	private final JTextField box = new JTextField();
 	private final JPanel rows = MapCompanionPanel.column(ColorScheme.DARK_GRAY_COLOR);
 	private final JLabel status = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
-	/** The list is folded once a pick is pressed; typing or Enter opens it again. */
+	/** The list is folded once a pick's answer has filled the destination's card; typing or Enter opens it again. */
 	private boolean folded;
+	/** The row whose pick is out or was refused, so a refusal can name it; null once answered or typed past. */
+	@Nullable
+	private transient SearchClient.Hit picked;
+	/** The press's last word this list has acted on, so each answer folds or opens it once. */
+	@Nullable
+	private transient RoutePress.Said heard;
+	/** A word from a pick the player has typed past, which the line under the box no longer says. */
+	@Nullable
+	private transient RoutePress.Said quiet;
+	/** The player typed while a pick was planning, so its answer, when it lands, is typed past too. */
+	private boolean typedPast;
 	@Nullable
 	private String drawn;
 
@@ -131,21 +150,37 @@ final class SearchPanel extends JPanel
 		});
 		box.addActionListener(e ->
 		{
-			folded = false;
+			movedOn();
 			search.enter(box.getText());
 		});
 		add(box);
-		add(rows);
+		/* The one line under the box, above the rows, where the player is looking: under a full list it is out of sight. */
 		add(MapCompanionPanel.left(status));
-		status.setBorder(new EmptyBorder(3, 0, 0, 0));
+		add(rows);
+		status.setName("search.status");
+		status.setBorder(new EmptyBorder(3, 0, 1, 0));
 		status.setVisible(false);
 		search.listen(this::refresh);
 	}
 
 	private void changed()
 	{
-		folded = false;
+		movedOn();
 		search.typed(box.getText());
+	}
+
+	/**
+	 * The box changed or Enter was pressed: the list opens, and a pick made from the old one goes
+	 * quiet — its refusal no longer heads a list it was not picked from, and an answer still on its
+	 * way fills the card without folding the new list.
+	 */
+	private void movedOn()
+	{
+		folded = false;
+		picked = null;
+		RoutePress.Said said = press.said(SOURCE);
+		quiet = said;
+		typedPast = said != null && said.planning;
 	}
 
 	/** The text in the box, for the panel's own test. */
@@ -160,12 +195,15 @@ final class SearchPanel extends JPanel
 		search.checkScope();
 		SearchClient.Result result = search.result();
 		RoutePress.Said said = press.said(SOURCE);
-		String line = said != null && said.planning ? "Planning the way there…"
-			: said != null && said.message != null ? said.message
+		heard(said);
+		RoutePress.Said shown = said == quiet ? null : said;
+		String line = shown != null && shown.planning ? "Planning the way there…"
+			: shown != null && shown.message != null ? named(shown.message)
 			: result.searching ? "Searching…"
 			: result.message;
-		String words = folded + "|" + result.query + "|" + result.suggestion + "|" + line + "|" + result.hits.size()
-			+ "|" + hitsKey(result);
+		boolean live = press.ready();
+		String words = folded + "|" + live + "|" + result.query + "|" + result.suggestion + "|" + line + "|"
+			+ result.hits.size() + "|" + hitsKey(result);
 		if (Objects.equals(words, drawn))
 		{
 			return;
@@ -186,19 +224,23 @@ final class SearchPanel extends JPanel
 					rows.add(MapCompanionPanel.left(head));
 				}
 				section = hit.section;
-				rows.add(row(hit));
+				rows.add(row(hit, live));
 			}
 			if (result.suggestion != null)
 			{
 				String suggestion = result.suggestion;
-				JButton mean = MapCompanionPanel.linkButton("Did you mean " + suggestion + "?");
+				/* A search it will run, so a button: as grey link text it read as one more status line. */
+				JButton mean = MapCompanionPanel.smallButton("Did you mean " + suggestion + "?");
 				mean.setName("search.suggestion");
 				mean.addActionListener(e ->
 				{
 					box.setText(suggestion);
 					search.enter(suggestion);
 				});
-				rows.add(mean);
+				JPanel holder = MapCompanionPanel.fill(mean, ColorScheme.DARK_GRAY_COLOR);
+				holder.setBorder(new EmptyBorder(3, 0, 0, 0));
+				holder.setMaximumSize(new Dimension(Integer.MAX_VALUE, holder.getPreferredSize().height));
+				rows.add(holder);
 			}
 		}
 		status.setVisible(line != null);
@@ -211,6 +253,44 @@ final class SearchPanel extends JPanel
 		revalidate();
 	}
 
+	/**
+	 * Fold or open the list on each new word from a pick, once: an answer that filled the card folds
+	 * it, since the card is the answer now, and a refusal leaves the rows up to try the next one.
+	 */
+	private void heard(@Nullable RoutePress.Said said)
+	{
+		if (said == heard)
+		{
+			return;
+		}
+		heard = said;
+		if (said == null || said.planning)
+		{
+			return;
+		}
+		if (typedPast && picked == null)
+		{
+			/* The answer to a pick the player typed past changes neither the new list nor its line. */
+			quiet = said;
+		}
+		else if (said.key == null)
+		{
+			folded = false;
+		}
+		else if (picked != null)
+		{
+			folded = true;
+			picked = null;
+		}
+		typedPast = false;
+	}
+
+	/** A refusal by the row it refuses, which the line above the rows would otherwise leave unnamed. */
+	private String named(String message)
+	{
+		return picked == null ? message : picked.name + ": " + message;
+	}
+
 	private static String hitsKey(SearchClient.Result result)
 	{
 		StringBuilder sb = new StringBuilder();
@@ -221,8 +301,11 @@ final class SearchPanel extends JPanel
 		return sb.toString();
 	}
 
-	/** One place: its picture, its name, and the website's grey line under it. The whole row is the button. */
-	private JPanel row(SearchClient.Hit hit)
+	/**
+	 * One place: its picture, its name, and the website's grey line under it. The whole row is the
+	 * button, pressable only while a press would go: otherwise its name is greyed as a button's is.
+	 */
+	private JPanel row(SearchClient.Hit hit, boolean live)
 	{
 		JPanel row = new JPanel(new BorderLayout(6, 0));
 		row.setBackground(ColorScheme.DARKER_GRAY_COLOR);
@@ -238,7 +321,8 @@ final class SearchPanel extends JPanel
 		JPanel words = MapCompanionPanel.column(ColorScheme.DARKER_GRAY_COLOR);
 		words.setOpaque(false);
 		int width = WIDTH - PICTURE - 6;
-		JLabel name = label(12f, Color.WHITE);
+		JLabel name = label(12f, live ? Color.WHITE : greyed());
+		name.setName("search.name");
 		MapCompanionPanel.setWrapped(name, hit.name, width);
 		words.add(MapCompanionPanel.left(name));
 		if (!hit.line.isEmpty())
@@ -248,9 +332,35 @@ final class SearchPanel extends JPanel
 			words.add(MapCompanionPanel.left(line));
 		}
 		row.add(words, BorderLayout.CENTER);
-		row.setToolTipText("Plan the way to " + hit.name);
-		row.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		row.addMouseListener(new MouseAdapter()
+		if (!live)
+		{
+			row.setToolTipText("The map plans one route at a time, a few seconds apart. Pick again in a moment.");
+		}
+		else
+		{
+			row.setToolTipText("Plan the way to " + hit.name);
+			row.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+			row.addMouseListener(rowPresses(row, hit));
+		}
+		JPanel slot = new JPanel(new java.awt.BorderLayout());
+		slot.setBackground(ColorScheme.DARK_GRAY_COLOR);
+		slot.setBorder(new EmptyBorder(0, 0, 2, 0));
+		slot.add(row);
+		slot.setMaximumSize(new Dimension(Integer.MAX_VALUE, slot.getPreferredSize().height));
+		return MapCompanionPanel.left(slot);
+	}
+
+	/** The colour a disabled button's words are drawn in, so a row that takes no pick reads as one. */
+	private static Color greyed()
+	{
+		Color disabled = UIManager.getColor("Label.disabledForeground");
+		return disabled != null ? disabled : ColorScheme.LIGHT_GRAY_COLOR;
+	}
+
+	/** Hover and the press, for a row that takes a pick. */
+	private MouseAdapter rowPresses(JPanel row, SearchClient.Hit hit)
+	{
+		return new MouseAdapter()
 		{
 			@Override
 			public void mouseEntered(MouseEvent e)
@@ -269,13 +379,7 @@ final class SearchPanel extends JPanel
 			{
 				pick(hit);
 			}
-		});
-		JPanel slot = new JPanel(new java.awt.BorderLayout());
-		slot.setBackground(ColorScheme.DARK_GRAY_COLOR);
-		slot.setBorder(new EmptyBorder(0, 0, 2, 0));
-		slot.add(row);
-		slot.setMaximumSize(new Dimension(Integer.MAX_VALUE, slot.getPreferredSize().height));
-		return MapCompanionPanel.left(slot);
+		};
 	}
 
 	/** The row's picture, from the game: an item's sprite, a world-map icon, or the character dot. */
@@ -340,12 +444,20 @@ final class SearchPanel extends JPanel
 		}
 	}
 
-	/** A pick: the way there, by the row's id, which the map resolves as its own search did. */
+	/**
+	 * A pick: the way there, by the row's id, which the map resolves as its own search did. Nothing
+	 * while a press would not go, and the list stays up until the answer lands ({@link #heard}).
+	 */
 	void pick(SearchClient.Hit hit)
 	{
+		if (!press.ready())
+		{
+			return;
+		}
 		WorldPoint stood = hit.tile == null ? null : new WorldPoint(hit.tile[0], hit.tile[1], hit.tile[2]);
+		picked = hit;
+		typedPast = false;
 		press.press(RoutePress.Target.place(SOURCE, hit.id, hit.name, stood, hit.line.isEmpty() ? null : hit.line));
-		folded = true;
 		refresh();
 	}
 
