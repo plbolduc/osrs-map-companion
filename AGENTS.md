@@ -6,6 +6,9 @@ what, what may leave the machine, and how to commit.
 
 - **Done means** `./gradlew clean build -PruneLiteVersion=1.13.4` passes, and a test added for a
   fix fails when the fix is reverted.
+- **The Hub reviews an update automatically only under 200k tokens** of `src/main/java` without
+  comments. `SourceSizeTest` fails above 752,700 characters, about 195k; tables and words a player
+  reads go in `src/main/resources`, which it does not count.
 - **The plugin's game readers are unverified until seen in a live client.** A green build does not
   prove an id, a varbit or an event order; [`docs/live-checks.md`](docs/live-checks.md) lists
   what still needs checking in game.
