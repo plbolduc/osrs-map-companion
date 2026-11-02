@@ -326,6 +326,33 @@ public class PairingTest
 	}
 
 	@Test
+	public void leavingForgetsTheOtherGroupsItsSecretsWereFor()
+	{
+		/**
+		 * A group that issued a secret keeps members, and admits the new id Leave makes only by an
+		 * invite, so a pick from the menu afterwards would only ever say "This group needs an invite".
+		 * A group that issued none still admits by its code, and stays a pick away.
+		 */
+		FakeStore store = new FakeStore();
+		Pairing pairing = new Pairing(store, gson);
+		pairing.join(JoinCode.parse("ABC234"));
+		pairing.join(JoinCode.parse("DEF567"));
+		pairing.rememberSecret("DEF567", MEMBER, SECRET);
+		pairing.rememberName("DEF567", "Iron buddies");
+		pairing.join(JoinCode.parse("GHJ789"));
+		pairing.rememberSecret("GHJ789", MEMBER, SECRET);
+
+		assertEquals("the groups Leave will cost, before it is pressed",
+			Arrays.asList("GHJ789", "DEF567"), pairing.codesHoldingSecrets());
+
+		pairing.leave();
+
+		assertEquals(Arrays.asList("ABC234"), pairing.knownCodes());
+		assertNull("and the name goes with the group", pairing.name("DEF567"));
+		assertTrue(pairing.codesHoldingSecrets().isEmpty());
+	}
+
+	@Test
 	public void survivesAListThatIsNotAList()
 	{
 		FakeStore store = new FakeStore();

@@ -702,14 +702,51 @@ public class Pairing
 	 * member of a group this installation is. Leaving them behind would keep credentials for a
 	 * member that no longer exists anywhere, which is the sort of thing a button called <i>Leave
 	 * the group</i> is promising not to do.
+	 *
+	 * <p>So the remembered groups those secrets were for go from the list too. Only a group that keeps
+	 * members issues one, and such a group admits the new id the panel makes only by invite: a pick
+	 * from the menu would land on "This group needs an invite", for the same reason the group left
+	 * would. A group that never issued one still admits by its code, so it stays.
 	 */
 	public synchronized void leave()
 	{
 		String leaving = code();
+		List<String> keptMembers = codesHoldingSecrets();
 		store.set(MapCompanionConfig.KEY_PAIRING_CODE, "");
 		clearSuffix();
 		forgetSecrets();
 		forget(leaving);
+		for (String code : keptMembers)
+		{
+			if (!code.equalsIgnoreCase(leaving))
+			{
+				forget(code);
+			}
+		}
+	}
+
+	/**
+	 * The remembered groups that issued this installation a member secret, most recent first: the
+	 * groups {@link #leave} costs, which the panel names before it asks.
+	 */
+	public List<String> codesHoldingSecrets()
+	{
+		List<String> held = new ArrayList<>();
+		Map<String, String> secrets = secrets();
+		for (String code : knownCodes())
+		{
+			for (Map.Entry<String, String> secret : secrets.entrySet())
+			{
+				String key = secret.getKey();
+				int member = key == null ? -1 : key.indexOf('#');
+				if (member > 0 && key.substring(0, member).endsWith("|" + code) && JoinCode.isWellFormedSecret(secret.getValue()))
+				{
+					held.add(code);
+					break;
+				}
+			}
+		}
+		return held;
 	}
 
 	/** The remembered codes, most recent first. Anything unreadable is simply not there. */

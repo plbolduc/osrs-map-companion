@@ -311,6 +311,11 @@ The website plan's second session, once the routes in the game are built: a memb
       fresh profile and log in a few days later: the group is still there.
 - [ ] **Copy invite.** In a group Connect made, Copy invite says the invite expires in 7 days. With
       the map stopped it says nothing was copied, and pasting gives what the clipboard held before.
+- [ ] **The group's dialogs.** Rename group… opens with the cursor in its field, stops at the 24th
+      character and renames on Enter. Leave group's window is titled with the group's name, its
+      buttons are Leave group and Cancel, and Enter cancels; leave a group made by Connect while a
+      second Connect group and a legacy code are remembered, and Your groups ▾ lists only the legacy
+      code. Pointed at a local map, Connect's question wraps with no word alone on a line.
 - [ ] **The reminder.** Leave RuneLite's own *Send notifications when focused* off, as it ships. Tick
       *Meetup notifications* in the sidebar and set *Minutes before a meetup* to 2. With RuneLite
       focused and the game being played, a meetup two minutes off raises one notification, with the
