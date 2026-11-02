@@ -392,6 +392,33 @@ public class RunCardsTest
 		assertTrue(skills.toString(), skills.contains("Farming 16"));
 	}
 
+	/**
+	 * The leg's steps came after the last stop, two stops below the one they lead to, and a stop behind
+	 * the player kept every line. The leg sits under its own stop and moves on with it; a finished
+	 * stop is one line that keeps its status word.
+	 */
+	@Test
+	public void theLegSitsUnderItsStopAndAStopBehindIsOneLine() throws Exception
+	{
+		state.acceptFor(identity.id(), EPOCH, run("/contract/farm-run.json"), 1, System.currentTimeMillis());
+		follower.sync();
+		refresh();
+		List<String> first = shown(farm);
+		int leg = first.indexOf("This leg");
+		assertTrue(first.toString(), leg > first.indexOf("1. Falador farm") && leg < first.indexOf("2. Catherby"));
+		assertTrue(first.toString(), first.contains("4. My bank · Visited"));
+		assertFalse("a visited stop's way there is spent", first.contains("Draynor Manor Teleport"));
+
+		replant("falador-herb");
+		follower.sync();
+		refresh();
+		List<String> second = shown(farm);
+		assertTrue(second.toString(), second.contains("1. Falador farm · Done"));
+		assertFalse("a done stop's way there is spent", second.contains("Explorer's ring 2: Teleport"));
+		int moved = second.indexOf("This leg");
+		assertTrue(second.toString(), moved > second.indexOf("2. Catherby") && moved < second.indexOf("4. My bank · Visited"));
+	}
+
 	private JButton hotkey(boolean rerouting) throws Exception
 	{
 		JButton[] button = new JButton[1];
