@@ -78,10 +78,10 @@ import net.runelite.client.ui.ColorScheme;
  * and answer for the browser this member is bound to. The next meetup is drawn whole, and each after
  * it as one line, title, day, clock and world, that opens to the same card.
  *
- * <p><b>Meet here</b>, on the Meetups heading, opens a short form under the meetups: a title, a day
- * and a time. It makes the meetup at the tile and world the player stands on and copies its link.
- * It is a link on the heading rather than a button of its own under the cards, so the heading is
- * drawn whenever the group is, with or without a meetup to head.
+ * <p><b>Meet here</b>, on the Meetups heading, opens a short form under the heading, above the
+ * meetups: a title, a day and a time. It makes the meetup at the tile and world the player stands on
+ * and copies its link. It is a link on the heading rather than a button of its own under the cards,
+ * so the heading is drawn whenever the group is, with or without a meetup to head.
  *
  * <p>Every string was typed by somebody in the group and goes through
  * {@link MapCompanionPanel#setWrapped}, which escapes before Swing reads markup. The rows are
@@ -189,20 +189,27 @@ final class GroupPanel extends JPanel
 		head.setBorder(new EmptyBorder(4, 0, 3, 0));
 		head.setMaximumSize(new java.awt.Dimension(Integer.MAX_VALUE, head.getPreferredSize().height));
 		add(MapCompanionPanel.left(head));
+		/*
+		 * The form opens under the link that opened it, above the meetups, and its answer is said there;
+		 * each keeps a card's gap from the meetup under it.
+		 */
+		buildForm();
+		add(form);
+		meetSaid.setName("group.meetSaid");
+		add(MapCompanionPanel.left(line(meetSaid)));
+		meetSaid.setBorder(new EmptyBorder(4, 0, 3, 0));
+		form.setVisible(false);
 		meetupsOff.setName("group.meetupsOff");
 		add(MapCompanionPanel.left(line(meetupsOff)));
 		MapCompanionPanel.setWrapped(meetupsOff, MEETUPS_OFF, WIDTH + 16);
 		add(meetupCards);
-		buildForm();
-		add(form);
-		add(MapCompanionPanel.left(line(meetSaid)));
-		form.setVisible(false);
 	}
 
 	/** The form: a title, a day and a time, and the button that makes it. Built once. */
 	private void buildForm()
 	{
-		form.setBorder(new EmptyBorder(6, 8, 6, 8));
+		form.setBorder(javax.swing.BorderFactory.createCompoundBorder(
+			new javax.swing.border.MatteBorder(0, 0, 3, 0, ColorScheme.DARK_GRAY_COLOR), new EmptyBorder(6, 8, 6, 8)));
 		JLabel heading = new JLabel("A meetup where you stand");
 		heading.setFont(heading.getFont().deriveFont(11f));
 		heading.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
