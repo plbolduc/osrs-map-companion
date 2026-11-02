@@ -35,6 +35,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Insets;
+import java.awt.Rectangle;
 import java.time.chrono.IsoChronology;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -53,6 +54,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JViewport;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
@@ -135,6 +137,8 @@ public class MapCompanionPanel extends PluginPanel
 	private final CompanionViews views;
 	private final SidebarPages pages;
 	private final StarsPanel starsPanel;
+	/** Route, pressed anywhere in the sidebar; read here only to bring Home forward for its answer. */
+	private final RoutePress routePress;
 
 	/** The step after a first Connect: the recommended set, ticked, and one press. See {@link RecommendedSharing}. */
 	private final RecommendedSharing recommendedSharing;
@@ -194,6 +198,7 @@ public class MapCompanionPanel extends PluginPanel
 		this.farmRunPanel = farmRunPanel;
 		this.slayerPanel = slayerPanel;
 		this.portTasksPanel = portTasksPanel;
+		this.routePress = routePress;
 		this.searchPanel = new SearchPanel(searchClient, routePress, sprites);
 		/* Before the connect card, which offers it after a first Connect. */
 		this.recommendedSharing = new RecommendedSharing(config, ConfigStore.of(configManager), this::refresh);
@@ -529,6 +534,11 @@ public class MapCompanionPanel extends PluginPanel
 			 */
 			views.tabsShown(ready);
 			views.setVisible(!recommendedSharing.isVisible());
+			/* A friend's or a meetup's way, landed while Group still shows: Home, once, with the card in view. */
+			if (views.showAnswer(routePress.last()))
+			{
+				SwingUtilities.invokeLater(this::showNow);
+			}
 			List<RelayResponse.RosterRow> roster = destinationState.getRoster();
 			views.groupCount(ready && roster != null ? roster.size() : 0);
 			groupPanel.setVisible(ready);
@@ -545,6 +555,19 @@ public class MapCompanionPanel extends PluginPanel
 
 			settingsPage.refresh(paired);
 		});
+	}
+
+	/**
+	 * Now's top in view, where the destination's card is, after the tab has turned to Home: as much of
+	 * it as the sidebar shows at once. Asked after the turn's own layout, which is queued before it. A
+	 * taller rectangle would be lined up by its foot when the column had been scrolled past it, and the
+	 * card at its head would stay out of sight.
+	 */
+	private void showNow()
+	{
+		JViewport viewport = (JViewport) SwingUtilities.getAncestorOfClass(JViewport.class, nowCards);
+		int height = viewport == null ? nowCards.getHeight() : Math.min(nowCards.getHeight(), viewport.getExtentSize().height);
+		nowCards.scrollRectToVisible(new Rectangle(0, 0, nowCards.getWidth(), height));
 	}
 
 	/**

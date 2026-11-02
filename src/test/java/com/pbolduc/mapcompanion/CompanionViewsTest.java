@@ -85,6 +85,50 @@ public class CompanionViewsTest
 		});
 	}
 
+	/**
+	 * A friend's or a meetup's Route is answered on Home's destination card, so when the answer lands
+	 * while Group still shows, Home comes forward, once. A refusal stays under its button, a tab the
+	 * player has moved to is left alone, and a star's way is drawn on Stars, which stays where it is.
+	 */
+	@Test
+	public void aWayFromGroupBringsHomeForwardOnceItLands() throws Exception
+	{
+		SwingUtilities.invokeAndWait(() ->
+		{
+			JPanel home = sized(30);
+			CompanionViews views = new CompanionViews(home, sized(400), sized(600), shown -> { });
+			views.select(CompanionViews.View.GROUP);
+
+			assertFalse("still planning", views.showAnswer(said("friend:cara", true, null, null)));
+			assertFalse("refused: the line under the button says why", views.showAnswer(said("friend:cara", false, "The map is busy.", null)));
+			assertEquals(CompanionViews.View.GROUP, views.selected());
+
+			RoutePress.Said cara = said("friend:cara", false, null, "3222,3218,0|302|Cara|null");
+			assertTrue(views.showAnswer(cara));
+			assertEquals(CompanionViews.View.HOME, views.selected());
+			assertTrue(home.isVisible());
+
+			/* Back on Group with the same answer still the last one said: it has been shown. */
+			views.select(CompanionViews.View.GROUP);
+			assertFalse(views.showAnswer(cara));
+			assertEquals(CompanionViews.View.GROUP, views.selected());
+
+			assertTrue("a meetup's way too", views.showAnswer(said("meetup:star-hunt", false, null, "3222,3218,0|302|Star hunt|null")));
+			assertEquals(CompanionViews.View.HOME, views.selected());
+
+			views.select(CompanionViews.View.STARS);
+			assertFalse("a star's way stays on Stars", views.showAnswer(said("star", false, null, "2974,3241,0|302|Rimmington mine|null")));
+			assertFalse("a friend's way that lands after the player left Group", views.showAnswer(said("friend:ash", false, null,
+				"3165,3487,0|330|Ash|null")));
+			assertEquals(CompanionViews.View.STARS, views.selected());
+		});
+	}
+
+	private static RoutePress.Said said(String source, boolean planning, String message, String key)
+	{
+		return new RoutePress.Said(source, planning, message, key, 0);
+	}
+
 	@Test
 	public void settingsTakesThePageAndGivesItBackWithChoicesKept() throws Exception
 	{

@@ -478,6 +478,11 @@ Like the single meetup under *Now*, the week's meetups are taken only while *Sho
 is on; while it is off, one grey line under the heading says why the section is empty and where the
 setting is.
 
+A friend's or a meetup's way fills Home's destination card, a tab away from the button, so when it
+lands while Group is still the tab showing, the sidebar turns to Home once, with the card in view.
+A refusal stays under the button that asked, a tab the player has moved to since is left as it is,
+and a star's way stays on Stars, under the star.
+
 `docs/review-evidence/where-to-go-2026-10-29/WhereToGoShot.java` paints the real panel in each of
 these states (steps 5a, 6, 8 and 9) at 225px with made-up names; how to run it is in its docblock.
 No picture is committed yet; step 12 takes the README's.

@@ -254,6 +254,14 @@ final class RoutePress
 		return now != null && now.source.equals(source) && now.generation == destinations.generation() ? now : null;
 	}
 
+	/** What the last press said, whichever button made it; null as {@link #said} would be after a clear. */
+	@Nullable
+	Said last()
+	{
+		Said now = said;
+		return now != null && now.generation == destinations.generation() ? now : null;
+	}
+
 	/** Client thread: the credentials, the tile, then the call. */
 	private void start(Target target)
 	{
