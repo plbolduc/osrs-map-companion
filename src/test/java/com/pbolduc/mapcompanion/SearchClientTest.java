@@ -69,7 +69,7 @@ public class SearchClientTest
 	/** The debounce's waiting actions, with the delay each asked for. */
 	private final List<Object[]> waiting = new ArrayList<>();
 	@Nullable
-	private String[] held = {"https://osrs-map.com", "ABC234", "member-1", SECRET};
+	private Pairing.Signed held = new Pairing.Signed("https://osrs-map.com", "ABC234", "member-1", SECRET);
 
 	private SearchClient client(int status, String body, @Nullable String retryAfter, @Nullable CountDownLatch gate)
 	{
@@ -285,7 +285,7 @@ public class SearchClientTest
 		assertEquals(3, search.result().hits.size());
 		search.checkScope();
 		assertEquals("the same member keeps the list", 3, search.result().hits.size());
-		held = new String[]{"https://osrs-map.com", "DEF567", "member-1", SECRET};
+		held = new Pairing.Signed("https://osrs-map.com", "DEF567", "member-1", SECRET);
 		search.checkScope();
 		assertTrue("another group's list is not offered", search.result().hits.isEmpty());
 	}

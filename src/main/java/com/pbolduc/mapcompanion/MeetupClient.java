@@ -260,17 +260,13 @@ final class MeetupClient
 	private void send(String source, String path, Object body, boolean making, @Nullable Runnable onAnswered)
 	{
 		long asked = destinations.generation();
-		String server = pairing.serverUrl();
-		String code = pairing.code();
-		String member = identity.id();
-		String secret = member == null ? null : pairing.secret(server, code, member);
+		Pairing.Signed signed = pairing.signed(identity.id());
 		if (client.getGameState() != GameState.LOGGED_IN)
 		{
 			said = new Said(source, false, LOG_IN, asked);
 			return;
 		}
-		if (server == null || code.isEmpty() || !pairing.hasServerConsent(server, code) || secret == null
-			|| HttpUrl.parse(server + path) == null)
+		if (signed == null || HttpUrl.parse(signed.server + path) == null)
 		{
 			said = new Said(source, false, RouteClient.NOT_CONNECTED, asked);
 			return;
@@ -290,9 +286,9 @@ final class MeetupClient
 			busy = true;
 		}
 		said = new Said(source, true, null, asked);
-		CompanionHttp.enqueue(http.newCall(request(server, code, member, secret, path, body)),
+		CompanionHttp.enqueue(http.newCall(request(signed.server, signed.code, signed.member, signed.secret, path, body)),
 			(failed, error) -> finish(source, asked, UNREACHABLE, System.currentTimeMillis() + FAILURE_GAP_MS),
-			(completed, response) -> handle(source, asked, making, onAnswered, server, response));
+			(completed, response) -> handle(source, asked, making, onAnswered, signed.server, response));
 	}
 
 	Request request(String server, String code, String member, String secret, String path, Object body)

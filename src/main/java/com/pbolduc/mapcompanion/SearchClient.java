@@ -200,7 +200,7 @@ final class SearchClient
 	interface Credentials
 	{
 		@Nullable
-		String[] serverCodeMemberSecret();
+		Pairing.Signed signed();
 	}
 
 	private final OkHttpClient http;
@@ -230,18 +230,7 @@ final class SearchClient
 	@Inject
 	SearchClient(OkHttpClient http, Gson gson, Pairing pairing, MemberIdentity identity)
 	{
-		this(http, gson, () ->
-		{
-			String server = pairing.serverUrl();
-			String code = pairing.code();
-			String member = identity.id();
-			String secret = member == null ? null : pairing.secret(server, code, member);
-			if (server == null || code.isEmpty() || !pairing.hasServerConsent(server, code) || secret == null)
-			{
-				return null;
-			}
-			return new String[]{server, code, member, secret};
-		}, () -> identity.id() != null, (action, delayMs) ->
+		this(http, gson, () -> pairing.signed(identity.id()), () -> identity.id() != null, (action, delayMs) ->
 		{
 			Timer timer = new Timer((int) delayMs, e -> action.run());
 			timer.setRepeats(false);
@@ -335,16 +324,16 @@ final class SearchClient
 	 */
 	void checkScope()
 	{
-		if (scope != null && !scope.equals(scopeOf(credentials.serverCodeMemberSecret())))
+		if (scope != null && !scope.equals(scopeOf(credentials.signed())))
 		{
 			clear();
 		}
 	}
 
 	@Nullable
-	private static String scopeOf(@Nullable String[] held)
+	private static String scopeOf(@Nullable Pairing.Signed held)
 	{
-		return held == null ? null : held[0] + "|" + held[1] + "|" + held[2];
+		return held == null ? null : held.server + "|" + held.code + "|" + held.member;
 	}
 
 	/** The box was emptied: cancel what is on its way and forget the answer. */
@@ -388,15 +377,15 @@ final class SearchClient
 			pendingTimer = debouncer.schedule(this::due, wait);
 			return;
 		}
-		String[] held = credentials.serverCodeMemberSecret();
-		HttpUrl base = held == null ? null : HttpUrl.parse(held[0] + PATH);
+		Pairing.Signed held = credentials.signed();
+		HttpUrl base = held == null ? null : HttpUrl.parse(held.server + PATH);
 		if (base == null)
 		{
 			show(new Result(query, Collections.<Hit>emptyList(), null,
 				character.getAsBoolean() ? RouteClient.NOT_CONNECTED : LOG_IN, false, true));
 			return;
 		}
-		Request request = CompanionHttp.member(base.newBuilder().addQueryParameter("q", query).build(), held[1], held[2], held[3]).get()
+		Request request = CompanionHttp.member(base.newBuilder().addQueryParameter("q", query).build(), held.code, held.member, held.secret).get()
 			.build();
 		long asked = generation;
 		scope = scopeOf(held);

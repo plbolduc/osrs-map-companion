@@ -131,7 +131,7 @@ public class SearchPanelTest
 		OkHttpClient http = new OkHttpClient.Builder().addInterceptor(chain ->
 			new Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1)
 				.code(200).message("").body(ResponseBody.create(JSON, answer)).build()).build();
-		String[] held = {"https://osrs-map.com", pairing.code(), identity.id(), SECRET};
+		Pairing.Signed held = new Pairing.Signed("https://osrs-map.com", pairing.code(), identity.id(), SECRET);
 		SearchClient search = new SearchClient(http, new Gson(), () -> held, (action, delayMs) -> () -> { }, swing::add);
 		SearchPanel panel = new SearchPanel(search, press, null);
 		panel.box().setText("bank");
@@ -258,7 +258,7 @@ public class SearchPanelTest
 		OkHttpClient busy = new OkHttpClient.Builder().addInterceptor(chain ->
 			new Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1).code(429).message("")
 				.header("Retry-After", "20").body(ResponseBody.create(JSON, "{\"reason\":\"busy\"}")).build()).build();
-		String[] held = {"https://osrs-map.com", pairing.code(), identity.id(), SECRET};
+		Pairing.Signed held = new Pairing.Signed("https://osrs-map.com", pairing.code(), identity.id(), SECRET);
 		SearchClient search = new SearchClient(busy, new Gson(), () -> held, (action, delayMs) -> () -> { }, swing::add);
 		SearchPanel panel = new SearchPanel(search, press, null);
 		panel.box().setText("bank");
