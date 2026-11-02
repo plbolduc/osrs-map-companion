@@ -3,7 +3,9 @@
 **On the Plugin Hub since 27 October 2026**, merged in
 [runelite/plugin-hub#19494](https://github.com/runelite/plugin-hub/pull/19494), and updated to 1.3.0
 (`fbf96fa`) in [runelite/plugin-hub#19712](https://github.com/runelite/plugin-hub/pull/19712) on
-30 October. The steps below are how it was submitted; a release after that is a merged plugin
+30 October. 1.4.0 (`c0280e8`) is in review in
+[runelite/plugin-hub#19965](https://github.com/runelite/plugin-hub/pull/19965). The steps below are
+how it was submitted; a release after that is a merged plugin
 commit, then `commit=` updated in the Hub's `plugins/osrs-map-companion`. Completed and outstanding game checks
 are recorded in [Live checks](live-checks.md). A successful build does not establish live-event
 coverage or guarantee RuneLite approval.
@@ -21,8 +23,11 @@ coverage or guarantee RuneLite approval.
    warning=This plugin sends your IP address and selected character data, including your name, world, position and progress, to a third-party map server not controlled or verified by RuneLite developers.
    ```
 
-4. Open a PR titled **osrs-map-companion: update to 1.4.0**, using the reviewer notes below.
-   Include the actual validation results and outstanding live checks.
+4. Open a PR titled **osrs-map-companion: update to *version***. Its description is public, so keep
+   it short: one line, a short list of what changed, and only what a reviewer needs besides, such
+   as a new request or a changed warning, as in
+   [runelite/plugin-hub#19965](https://github.com/runelite/plugin-hub/pull/19965). Validation
+   results and live checks stay in this repository.
 5. Address reviewer feedback in the plugin repository, then update `commit=` in the same Hub PR.
 
 The warning belongs in the Hub manifest. The root `runelite-plugin.properties` declares
@@ -236,7 +241,8 @@ screenshot tools are outside `src/main`. Bundled third-party notices accompany t
 
 ## Changes since the approved submission
 
-Say these in the description of the next Hub update, as changes from what was approved:
+What the next Hub update brings. Its description names each in a few words; the detail here is for
+answering a reviewer:
 
 - Farm runs: a received ordered itinerary, local replant/seeded-house progress, numbered stop
   pins, and Start, Reroute and End requests as disclosed above. No input or movement is automated.

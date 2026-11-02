@@ -22,6 +22,11 @@ what, what may leave the machine, and how to commit.
   they fix before the first push, because GitHub keeps every commit a pull request ever showed. A
   pushed branch is not rewritten without the owner's say. These are merged with *Rebase and
   merge*, keeping the line straight; an outside contributor's pull request is squashed instead.
+- **What a pull request says is public, here and in runelite/plugin-hub, so it is short.** Its
+  title and description say what changed, in a line or a short list, plus only what a reviewer
+  needs besides, such as a new request or a changed warning. Test runs, live-check status and what
+  was not tested stay out of it. GitHub keeps every edit of a description and emails watchers the
+  first one, so it is right before it is opened.
 - **The README is the Plugin Hub page:** CONTRIBUTING's section of that name.
 - **Ask before** pushing, opening a Plugin Hub pull request, or anything else that leaves this
   checkout.
