@@ -26,8 +26,11 @@
 package com.pbolduc.mapcompanion;
 
 import com.google.gson.Gson;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -42,6 +45,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.swing.AbstractButton;
 import javax.swing.SwingUtilities;
 import net.runelite.client.callback.ClientThread;
+import net.runelite.client.ui.ColorScheme;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Protocol;
@@ -50,6 +54,7 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -387,6 +392,54 @@ public class GroupPanelTest
 		assertEquals("Tomorrow 19:00 · in 1d", GroupPanel.when(now + 25 * 3_600_000L, now, zone, Locale.UK));
 		assertEquals("1 here · 1 coming · 1 maybe", GroupPanel.whoLine(Arrays.asList(face("arrived"), face("on_my_way"),
 			face("maybe"), face("no"))));
+	}
+
+	/**
+	 * A friend's presence reads on every disc colour: the dot is never one of the map's disc colours,
+	 * and a halo of the card's colour two pixels wide cuts it out of the disc where the two meet.
+	 */
+	@Test
+	public void aPresenceDotReadsOnEveryDiscColour()
+	{
+		/* The map's eight disc colours, as osrs-stars-map's lib/companion-disc.ts lists them. */
+		String[] discs = {"#38bdf8", "#a78bfa", "#34d399", "#fb7185", "#facc15", "#f472b6", "#4ade80", "#60a5fa"};
+		for (String presence : new String[]{"online", "idle", "offline"})
+		{
+			Color dot = GroupPanel.presenceColour(presence);
+			for (String hex : discs)
+			{
+				Color disc = GroupPanel.colour(hex);
+				String what = presence + " on " + hex;
+				assertNotEquals(what, disc.getRGB(), dot.getRGB());
+				BufferedImage drawn = painted(new GroupPanel.Disc(disc, dot));
+				assertEquals(what + ": the middle of the dot", dot.getRGB(), drawn.getRGB(10, 10));
+				/* Left of the dot and above it, where it sits on the disc. */
+				for (int[] at : new int[][]{{6, 10}, {7, 10}, {10, 6}, {10, 7}})
+				{
+					assertCard(what + " at " + at[0] + "," + at[1], drawn.getRGB(at[0], at[1]));
+				}
+			}
+		}
+	}
+
+	private static BufferedImage painted(GroupPanel.Disc icon)
+	{
+		BufferedImage image = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_RGB);
+		Graphics2D g = image.createGraphics();
+		g.setColor(ColorScheme.DARKER_GRAY_COLOR);
+		g.fillRect(0, 0, image.getWidth(), image.getHeight());
+		icon.paintIcon(null, g, 0, 0);
+		g.dispose();
+		return image;
+	}
+
+	/** The card's own colour, give or take the antialiasing of the halo's edge. */
+	private static void assertCard(String what, int rgb)
+	{
+		Color seen = new Color(rgb);
+		Color card = ColorScheme.DARKER_GRAY_COLOR;
+		assertTrue(what + ": " + seen, Math.abs(seen.getRed() - card.getRed()) <= 16
+			&& Math.abs(seen.getGreen() - card.getGreen()) <= 16 && Math.abs(seen.getBlue() - card.getBlue()) <= 16);
 	}
 
 	private static RelayResponse.MeetupAnswer face(String answer)
