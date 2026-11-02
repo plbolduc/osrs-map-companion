@@ -317,8 +317,7 @@ final class FarmRunClient
 	{
 		if (end)
 		{
-			return playing ? "Run ended here. Not connected to the group yet, so the map still has it."
-				: "Run ended here. Log in to end it on the map too.";
+			return playing ? Words.of("farm.endedNotConnected") : Words.of("farm.endedLogIn");
 		}
 		if (!playing)
 		{

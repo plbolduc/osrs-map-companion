@@ -77,12 +77,12 @@ final class MeetupClient
 	/** A press with no character logged in: an answer and a meetup are a member's, and a member is a character. */
 	static final String LOG_IN = "Log in to answer or make a meetup.";
 	/** The cause and the one step that fixes it: a meetup is made on the tile you stand on, which an instance does not give. */
-	static final String NEEDS_TILE = "You can't make a meetup inside an instance. Step outside, then press Make meetup.";
+	static final String NEEDS_TILE = Words.of("meetup.needsTile");
 	static final String ONE_AT_A_TIME = "The last answer is still on its way.";
-	static final String GONE = "That meetup isn't in this group any more.";
-	static final String REFUSED = "The map would not take that meetup. A title and a time within the month are needed.";
+	static final String GONE = Words.of("meetup.gone");
+	static final String REFUSED = Words.of("meetup.refused");
 	static final String UNREACHABLE = "The map could not be reached.";
-	static final String FAILED = "The map could not save that just now.";
+	static final String FAILED = Words.of("meetup.failed");
 	static final String MADE = "Meetup made. Its link is copied.";
 	static final String MADE_NO_LINK = "Meetup made.";
 

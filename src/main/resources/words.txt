@@ -1,0 +1,32 @@
+# The longer things the plugin says to a player, by key: Words.of("key") in the Java is the text
+# after the = on that key's line. \n is a line break, a leading space is kept, and no line ends in
+# a space, which an editor would trim. The Plugin Hub counts every character of the Java when it
+# decides whether an update can be reviewed automatically, and does not count this file.
+# WordsTest holds every key the Java asks for to a line here, and every line to a key it asks for.
+
+# ConnectClient: Connect, Join and Rename.
+connect.unreachable=The map could not be reached. Try again in a moment.
+connect.busy=The map is busy. Try again in a minute.
+connect.failed=The map could not make that just now. Try again in a moment.
+
+# RouteClient and RoutePress: Route, Reroute and Search's picks; StarsClient says map.redirects too.
+route.notConnected=Not connected to the group yet. The top of the sidebar says why.
+route.needsTile=Reroute can't see where you are inside an instance. Press it again once you're out.
+route.noWay=The map found no way there from here.
+route.notFound=The map has no way to plan to this place.
+route.failed=The map could not plan a route just now.
+map.redirects=This map address redirects. Check Settings → Advanced → Map address.
+route.oneAtATime=The map is still planning the last route.
+
+# MeetupClient: making a meetup and answering one.
+meetup.needsTile=You can't make a meetup inside an instance. Step outside, then press Make meetup.
+meetup.gone=That meetup isn't in this group any more.
+meetup.refused=The map would not take that meetup. A title and a time within the month are needed.
+meetup.failed=The map could not save that just now.
+
+# StarsClient: the Stars list and its synced filters.
+stars.pairToSync=Pair with your personal RuneLite code to sync filters.
+
+# FarmRunClient: End pressed when the map cannot be told.
+farm.endedNotConnected=Run ended here. Not connected to the group yet, so the map still has it.
+farm.endedLogIn=Run ended here. Log in to end it on the map too.

@@ -348,12 +348,12 @@ final class StarsClient
 					long delay = retryDelay(close.header("Retry-After"));
 					if (close.isRedirect())
 					{
-						finish(null, "This map address redirects. Check Settings → Advanced → Map address.", 300_000);
+						finish(null, Words.of("map.redirects"), 300_000);
 						return;
 					}
 					if (!close.isSuccessful() && !(preference && close.code() == 409))
 					{
-						finish(null, preference ? "Pair with your personal RuneLite code to sync filters." : "Stars unavailable. Retrying shortly.", delay);
+						finish(null, preference ? Words.of("stars.pairToSync") : "Stars unavailable. Retrying shortly.", delay);
 						return;
 					}
 					finish(readBounded(close.body()), null, delay);
