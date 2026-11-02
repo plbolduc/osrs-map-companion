@@ -97,7 +97,7 @@ public class SafeTitleTest
 	@Test
 	public void thePreviewShowsOnlyTheEndsOfASuffix()
 	{
-		assertEquals("K7••••3X", MapCompanionPanel.masked("K7PQ2M3X"));
-		assertEquals("••••", MapCompanionPanel.masked("K7P"));
+		assertEquals("K7••••3X", SettingsPage.masked("K7PQ2M3X"));
+		assertEquals("••••", SettingsPage.masked("K7P"));
 	}
 }

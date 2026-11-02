@@ -249,7 +249,7 @@ public class PairingTest
 		/**
 		 * The panel forgets the member id in the same breath, and a secret says which member of a
 		 * group this installation is — so once the id is gone there is nothing for any of them to
-		 * prove. See {@link MapCompanionPanel#leaveGroup}.
+		 * prove. See {@link SettingsPage#leaveGroup}.
 		 */
 		FakeStore store = new FakeStore();
 		Pairing pairing = new Pairing(store, gson);
