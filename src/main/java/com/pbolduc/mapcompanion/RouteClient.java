@@ -110,16 +110,13 @@ final class RouteClient
 	/** Client thread: the tile, the credentials, then the call. */
 	private void start()
 	{
-		String server = pairing.serverUrl();
-		String code = pairing.code();
-		String member = identity.id();
-		String secret = member == null ? null : pairing.secret(server, code, member);
+		Pairing.Signed signed = pairing.signed(identity.id());
 		if (client.getGameState() != GameState.LOGGED_IN)
 		{
 			route.refuse(LOG_IN);
 			return;
 		}
-		if (server == null || code.isEmpty() || !pairing.hasServerConsent(server, code) || secret == null)
+		if (signed == null)
 		{
 			route.refuse(NOT_CONNECTED);
 			return;
@@ -130,7 +127,7 @@ final class RouteClient
 			route.refuse(NEEDS_TILE);
 			return;
 		}
-		if (HttpUrl.parse(server + PATH) == null)
+		if (HttpUrl.parse(signed.server + PATH) == null)
 		{
 			route.refuse(NOT_CONNECTED);
 			return;
@@ -140,7 +137,7 @@ final class RouteClient
 		{
 			return;
 		}
-		CompanionHttp.enqueue(http.newCall(request(server, code, member, secret, ticket.target, from)),
+		CompanionHttp.enqueue(http.newCall(request(signed.server, signed.code, signed.member, signed.secret, ticket.target, from)),
 			(failed, error) -> route.finishReroute(ticket, null, UNREACHABLE, System.currentTimeMillis() + FAILURE_GAP_MS),
 			(completed, response) -> handle(ticket, response));
 	}

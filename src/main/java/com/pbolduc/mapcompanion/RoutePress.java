@@ -321,17 +321,13 @@ final class RoutePress
 	/** Client thread: the credentials, the tile, then the call. */
 	private void start(Target target)
 	{
-		String server = pairing.serverUrl();
-		String code = pairing.code();
-		String member = identity.id();
-		String secret = member == null ? null : pairing.secret(server, code, member);
+		Pairing.Signed signed = pairing.signed(identity.id());
 		if (client.getGameState() != GameState.LOGGED_IN)
 		{
 			refuse(target.source, RouteClient.LOG_IN);
 			return;
 		}
-		if (server == null || code.isEmpty() || !pairing.hasServerConsent(server, code) || secret == null
-			|| HttpUrl.parse(server + RouteClient.PATH) == null)
+		if (signed == null || HttpUrl.parse(signed.server + RouteClient.PATH) == null)
 		{
 			refuse(target.source, RouteClient.NOT_CONNECTED);
 			return;
@@ -350,7 +346,7 @@ final class RoutePress
 			return;
 		}
 		said = new Said(target.source, true, null, null, asked);
-		CompanionHttp.enqueue(http.newCall(request(server, code, member, secret, target, from)),
+		CompanionHttp.enqueue(http.newCall(request(signed.server, signed.code, signed.member, signed.secret, target, from)),
 			(failed, error) -> finish(asked, target, RouteClient.UNREACHABLE, System.currentTimeMillis() + RouteClient.FAILURE_GAP_MS),
 			(completed, response) -> handle(asked, target, response));
 	}

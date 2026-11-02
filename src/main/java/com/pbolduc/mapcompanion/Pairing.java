@@ -363,6 +363,31 @@ public class Pairing
 		return JoinCode.isWellFormedSecret(held) ? held : null;
 	}
 
+	/** What a member's request is signed with: the map's address, the group's code, the member id and its secret. */
+	@AllArgsConstructor
+	static final class Signed
+	{
+		final String server;
+		final String code;
+		final String member;
+		final String secret;
+	}
+
+	/**
+	 * What this member's requests are signed with, or null while this installation may not send
+	 * one: no map, no group, no consent for that map, or no secret for that member yet. One place
+	 * decides it, so every client asks the same question.
+	 */
+	@Nullable
+	Signed signed(@Nullable String member)
+	{
+		String server = serverUrl();
+		String code = code();
+		String secret = member == null ? null : secret(server, code, member);
+		return server == null || code.isEmpty() || !hasServerConsent(server, code) || secret == null
+			? null : new Signed(server, code, member, secret);
+	}
+
 	/** Server, code and member: what a secret proves, and so what it is filed under. */
 	private static String secretKey(String server, String code, String memberId)
 	{
