@@ -72,7 +72,9 @@ public class PortTasksPanelTest
 	/**
 	 * The footer used to end by sending a courier's order to the map's Port tasks page. Start run now
 	 * asks for that order here, beneath the footer, so the footer says only what the slots and the hold
-	 * are; the order is the button's.
+	 * are; the order is the button's. It said "2 free", naming nothing, "hold carries 30 crates", which
+	 * read as cargo aboard, and "hold not seen yet", with nothing to do about it: it names the slots,
+	 * says what the hold fits, and an unseen hold is the step that shows it.
 	 */
 	@Test
 	public void theFooterTellsUnreadableFromFreeAndSaysWhenTheHoldIsUnknown()
@@ -80,13 +82,16 @@ public class PortTasksPanelTest
 		List<PortTaskReader.Slot> slots = Arrays.asList(courier(3, 0, 0), bounty(9),
 			PortTaskReader.Slot.plain(2, PortTaskReader.EMPTY), PortTaskReader.Slot.plain(3, PortTaskReader.UNKNOWN),
 			PortTaskReader.Slot.plain(4, PortTaskReader.LOCKED));
-		assertEquals("1 slot couldn't be read · 1 free · hold not seen yet.", PortTasksPanel.footer(slots, null));
-		assertEquals("1 slot couldn't be read · 1 free · hold carries 60 crates.", PortTasksPanel.footer(slots, 60));
-		assertEquals("Hold carries 30 crates.",
+		assertEquals("1 task couldn't be read · 1 slot free. Board your boat once so the run knows its hold.",
+			PortTasksPanel.footer(slots, null));
+		assertEquals("1 task couldn't be read · 1 slot free · hold fits 60 crates.", PortTasksPanel.footer(slots, 60));
+		assertEquals("Hold fits 30 crates.",
 			PortTasksPanel.footer(Arrays.asList(courier(3, 0, 0), PortTaskReader.Slot.plain(1, PortTaskReader.LOCKED)), 30));
-		assertEquals("4 free · hold not seen yet.", PortTasksPanel.footer(Arrays.asList(bounty(3),
+		assertEquals("4 slots free. Board your boat once so the run knows its hold.", PortTasksPanel.footer(Arrays.asList(bounty(3),
 			PortTaskReader.Slot.plain(1, PortTaskReader.EMPTY), PortTaskReader.Slot.plain(2, PortTaskReader.EMPTY),
 			PortTaskReader.Slot.plain(3, PortTaskReader.EMPTY), PortTaskReader.Slot.plain(4, PortTaskReader.EMPTY)), null));
+		assertEquals(PortTasksPanel.BOARD_ONCE, PortTasksPanel.footer(Arrays.asList(courier(3, 0, 0),
+			PortTaskReader.Slot.plain(1, PortTaskReader.LOCKED)), null));
 	}
 
 	@Test

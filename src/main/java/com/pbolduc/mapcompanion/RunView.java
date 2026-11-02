@@ -75,6 +75,8 @@ final class RunView extends JPanel
 	private static final String AMBER_HTML = String.format("#%02x%02x%02x",
 		MapPin.AMBER.getRed(), MapPin.AMBER.getGreen(), MapPin.AMBER.getBlue());
 	static final String CHANGED = "Your port tasks have changed since this run was planned. Reroute plans from what you hold now.";
+	/** A birdhouse stop not yet done: what will tick it, in the player's words rather than the evidence's. */
+	static final String BIRDHOUSE_PENDING = "Ticks when Time Tracking sees it seeded";
 
 	private final transient FarmRunState state;
 	private final transient FarmRunClient client;
@@ -256,6 +258,8 @@ final class RunView extends JPanel
 		boolean left = active && view.next() != null;
 		reroute.setEnabled(ready && left);
 		end.setEnabled(!client.endingRequest() && (active || planning || (ending && ready)));
+		/* While a new run is planned there is no run to end yet: the same press calls the plan off. */
+		end.setText(!active && planning && !client.endingRequest() ? "Cancel" : "End run");
 		List<JButton> wanted = new ArrayList<>();
 		if (left)
 		{
@@ -377,7 +381,8 @@ final class RunView extends JPanel
 	{
 		if (view.done.contains(stop.n))
 		{
-			return stop.birdhouseId == null ? "Done" : "Done · seeded sighting";
+			// A birdhouse is ticked by weaker evidence than a replant, so it says which.
+			return stop.birdhouseId == null ? "Done" : "Done · seen by Time Tracking";
 		}
 		return view.visited.contains(stop.n) ? "Visited"
 			: view.here.contains(stop.n) ? "You're here" : "";
@@ -406,7 +411,8 @@ final class RunView extends JPanel
 			Boolean carrying = line.kind.equals("teleport") ? CapabilityEvaluator.carrying(line.name, view.carried) : null;
 			boolean absent = Boolean.FALSE.equals(carrying);
 			missing += absent ? 1 : 0;
-			String words = line.name + (line.uses == null ? "" : " · " + line.uses + (line.uses == 1 ? " leg" : " legs"))
+			// A teleport for one leg is every teleport's default, as the website's checklist leaves it unsaid.
+			String words = line.name + (line.uses == null || line.uses == 1 ? "" : " · " + line.uses + " legs")
 						   + (absent ? " · not on you" : "")
 						   + (line.note == null ? "" : " · " + line.note);
 			Picture picture = new Picture(absent);
@@ -507,7 +513,7 @@ final class RunView extends JPanel
 			}
 			if (stop.birdhouseId != null)
 			{
-				row.add(MapCompanionPanel.left(wrapped("Tracked by Time Tracking sightings", 10f, ColorScheme.LIGHT_GRAY_COLOR)));
+				row.add(MapCompanionPanel.left(wrapped(BIRDHOUSE_PENDING, 11f, ColorScheme.LIGHT_GRAY_COLOR)));
 			}
 			stops.add(MapCompanionPanel.left(row));
 			if (next != null && stop.n == next.n)
