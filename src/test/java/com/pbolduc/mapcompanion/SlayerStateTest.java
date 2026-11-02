@@ -100,6 +100,38 @@ public class SlayerStateTest
 		state.accept("me", changed, 1_010);
 		assertNull(state.view(1_011).options);
 	}
+	/**
+	 * A new ranking choice for the same task keeps the places it hid, for the card to show greyed
+	 * while the map ranks again. They are never the options, so nothing that acts reads them; the new
+	 * answer replaces them, and another task drops them at once.
+	 */
+	@Test
+	public void aNewChoiceKeepsTheHiddenPlacesOnlyToShowUntilTheNewOnesArrive()
+	{
+		SlayerState state = new SlayerState();
+		state.local("me", task("Gargoyles", 143), "best", true);
+		RelayResponse.Directive best = answer(A, 1, "Gargoyles");
+		state.accept("me", best, 1_000);
+		state.choices("single", true);
+		SlayerState.View waiting = state.view(1_001);
+		assertNull(waiting.options);
+		assertSame(best.slayerOptions, waiting.previous);
+		assertEquals("single", waiting.order);
+		assertEquals(0, state.preferences().seenRevision);
+		state.choices("single", false);
+		assertSame("a second change keeps the last places received", best.slayerOptions, state.view(1_002).previous);
+		RelayResponse.Directive single = answer(A, 2, "Gargoyles");
+		single.slayerOptions.order = "single";
+		single.slayerOptions.hideWilderness = false;
+		state.accept("me", single, 1_003);
+		assertSame(single.slayerOptions, state.view(1_004).options);
+		assertNull(state.view(1_004).previous);
+		state.choices("best", false);
+		assertSame(single.slayerOptions, state.view(1_005).previous);
+		state.local("me", task("Dust Devils", 100), "best", false);
+		assertNull("another task's places are never shown", state.view(1_006).previous);
+	}
+
 	@Test
 	public void aRestartResetsTheCounterAndRejectsDelayedFramesFromTheRetiredProcess()
 	{

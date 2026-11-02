@@ -74,6 +74,11 @@ final class SlayerPanel extends JPanel
 	private final List<JButton> pinButtons = new ArrayList<>();
 	private final List<JLabel> routeMessages = new ArrayList<>();
 	private RelayResponse.SlayerOptions shown;
+	/* Whether the places drawn are the ones a new choice hid, waiting for the map to rank again. */
+	private boolean shownWaiting;
+	/* The choice the picker and the Wilderness box were drawn with: the state's, not the drawn list's. */
+	private String shownOrder;
+	private boolean shownHide;
 	private String shownTask;
 	private boolean expanded;
 	private boolean kindsOpen;
@@ -116,9 +121,16 @@ final class SlayerPanel extends JPanel
 			return;
 		}
 		SlayerState.View view = state.view(System.currentTimeMillis());
+		/*
+		 * A choice just made keeps the old places on the card, greyed, until the map has ranked them
+		 * again: the picker stays under the pointer, and the card never empties itself on a slow map.
+		 */
+		boolean waiting = view.options == null && view.previous != null;
+		RelayResponse.SlayerOptions places = waiting ? view.previous : view.options;
 		String title = view.task == null ? "No readable Slayer task" : view.task + (view.remaining == null ? "" : view.remaining == 0 ? " · Complete" : " · " + view.remaining + " left");
 		MapCompanionPanel.setWrapped(task, title, WIDTH);
 		String message = view.task == null ? "The current assignment appears here once the game has settled."
+						 : waiting ? rankingAgain(view.previous, view.order, view.hideWilderness)
 						 : view.options == null ? "Waiting for places from the map…" : view.stale ? "Waiting for the map to reconnect. These are the last places received." : view.area;
 		MapCompanionPanel.setWrapped(status, message, WIDTH);
 		status.setVisible(message != null);
@@ -128,20 +140,23 @@ final class SlayerPanel extends JPanel
 			kindsOpen = false;
 			shownTask = view.task;
 		}
-		if (shown != view.options)
+		if (shown != places || shownWaiting != waiting || !Objects.equals(shownOrder, view.order) || shownHide != view.hideWilderness)
 		{
-			shown = view.options;
+			shown = places;
+			shownWaiting = waiting;
+			shownOrder = view.order;
+			shownHide = view.hideWilderness;
 			render();
 		}
 		for (JButton button : routeButtons)
 		{
 			RoutePress.Said said = routes.said(button.getName());
-			button.setEnabled(ready && !view.stale && routes.ready());
+			button.setEnabled(ready && !view.stale && !waiting && routes.ready());
 			button.setText(said != null && said.planning ? "Planning…" : "Route");
 		}
 		for (JButton button : pinButtons)
 		{
-			button.setEnabled(ready && !view.stale);
+			button.setEnabled(ready && !view.stale && !waiting);
 		}
 		for (JLabel label : routeMessages)
 		{
@@ -191,14 +206,14 @@ final class SlayerPanel extends JPanel
 			if (expanded)
 			{
 				JComboBox<String> order = new JComboBox<>(new String[] {"Best spot", "One target at a time"});
-				order.setSelectedIndex("single".equals(shown.order) ? 1 : 0);
+				order.setSelectedIndex("single".equals(shownOrder) ? 1 : 0);
 				order.setFont(order.getFont().deriveFont(11f));
 				order.setPreferredSize(new java.awt.Dimension(WIDTH, order.getPreferredSize().height));
 				order.setName("slayer.order");
 				order.setToolTipText("Rank potential with an area attack, or one target at a time");
 				order.addActionListener(e -> choose(order.getSelectedIndex() == 1 ? "single" : "best", config.slayerHideWilderness()));
 				body.add(MapCompanionPanel.left(order));
-				JCheckBox wilderness = new JCheckBox("Hide Wilderness", shown.hideWilderness);
+				JCheckBox wilderness = new JCheckBox("Hide Wilderness", shownHide);
 				wilderness.setName("slayer.hideWilderness");
 				wilderness.setOpaque(false);
 				wilderness.setFont(wilderness.getFont().deriveFont(11f));
@@ -326,6 +341,23 @@ final class SlayerPanel extends JPanel
 		configManager.setConfiguration(MapCompanionConfig.GROUP, "slayerOrder", order);
 		configManager.setConfiguration(MapCompanionConfig.GROUP, "slayerHideWilderness", hide);
 		refresh(connected);
+	}
+
+	/**
+	 * What the card says while the places a choice hid wait for their replacement: the choice in the
+	 * picker's own words, and, where the old places already fit it, simply that the map is awaited.
+	 */
+	static String rankingAgain(RelayResponse.SlayerOptions previous, String order, boolean hide)
+	{
+		if (!Objects.equals(previous.order, order))
+		{
+			return "single".equals(order) ? "Ranking again for one target at a time…" : "Ranking again for best spot…";
+		}
+		if (previous.hideWilderness != hide)
+		{
+			return hide ? "Ranking again without Wilderness places…" : "Ranking again with Wilderness places…";
+		}
+		return "Waiting for places from the map…";
 	}
 
 	static String wikiUrl(String page)

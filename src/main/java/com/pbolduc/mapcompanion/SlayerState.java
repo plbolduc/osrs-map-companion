@@ -33,6 +33,11 @@ import javax.annotation.Nullable;
  * One character's local counter and the server's ranked places. Counts never invalidate the list.
  * The relay epoch and revision order both receive channels; a character/task/preferences change
  * hides the previous answer immediately, before a request or its replacement answer can finish.
+ *
+ * <p>A new ranking choice for the same task keeps the places it hid as {@link View#previous}, so the
+ * card can show them greyed under the controls just used until the new ones arrive. That copy is
+ * for the eye only: {@link View#options} stays empty meanwhile, so nothing acts on places ranked
+ * for another choice.
  */
 @Singleton
 final class SlayerState
@@ -47,6 +52,8 @@ final class SlayerState
 	private long revision;
 	private long seenRevision;
 	private RelayResponse.SlayerOptions options;
+	/** The places the last choice change hid, for the same task; display only. */
+	private RelayResponse.SlayerOptions previous;
 	private long receivedAt;
 
 	static final class View
@@ -56,13 +63,23 @@ final class SlayerState
 		final Integer remaining;
 		final RelayResponse.SlayerOptions options;
 		final boolean stale;
-		View(String task, String area, Integer remaining, RelayResponse.SlayerOptions options, boolean stale)
+		/** Display only: the places received before the choice changed, while {@link #options} waits. */
+		final RelayResponse.SlayerOptions previous;
+		/** The choice the places are ranked, or being ranked, for. */
+		final String order;
+		final boolean hideWilderness;
+
+		View(String task, String area, Integer remaining, RelayResponse.SlayerOptions options, boolean stale,
+			RelayResponse.SlayerOptions previous, String order, boolean hideWilderness)
 		{
 			this.task = task;
 			this.area = area;
 			this.remaining = remaining;
 			this.options = options;
 			this.stale = stale;
+			this.previous = previous;
+			this.order = order;
+			this.hideWilderness = hideWilderness;
 		}
 	}
 
@@ -75,11 +92,16 @@ final class SlayerState
 		}
 		String nextTask = local == null ? null : local.taskName;
 		String nextArea = local == null ? null : local.areaName;
-		if (!Objects.equals(task, nextTask) || !Objects.equals(area, nextArea)
-			|| !Objects.equals(order, incomingOrder) || hideWilderness != hide)
+		if (!Objects.equals(task, nextTask) || !Objects.equals(area, nextArea))
 		{
+			// Another task's places are never shown, greyed or not.
+			previous = null;
 			options = null;
 			seenRevision = 0;
+		}
+		else if (!Objects.equals(order, incomingOrder) || hideWilderness != hide)
+		{
+			rankAgain();
 		}
 		task = nextTask;
 		area = nextArea;
@@ -92,11 +114,21 @@ final class SlayerState
 	{
 		if (!Objects.equals(order, incomingOrder) || hideWilderness != hide)
 		{
-			options = null;
-			seenRevision = 0;
+			rankAgain();
 		}
 		order = "single".equals(incomingOrder) ? "single" : "best";
 		hideWilderness = hide;
+	}
+
+	/** A new choice for the same task: its answer is asked for again, and the old places kept to show. */
+	private void rankAgain()
+	{
+		if (options != null)
+		{
+			previous = options;
+		}
+		options = null;
+		seenRevision = 0;
 	}
 
 	synchronized CompanionSnapshot.SlayerPreferences preferences()
@@ -142,6 +174,7 @@ final class SlayerState
 			return;
 		}
 		options = incoming;
+		previous = null;
 		revision = directive.slayerRevision;
 		seenRevision = revision;
 		receivedAt = now;
@@ -149,7 +182,8 @@ final class SlayerState
 
 	synchronized View view(long now)
 	{
-		return new View(task, area, remaining, options, receivedAt > 0 && now - receivedAt > 120_000);
+		return new View(task, area, remaining, options, receivedAt > 0 && now - receivedAt > 120_000,
+			previous, order, hideWilderness);
 	}
 	synchronized void clear()
 	{
@@ -158,6 +192,7 @@ final class SlayerState
 		area = null;
 		remaining = null;
 		options = null;
+		previous = null;
 		revision = 0;
 		seenRevision = 0;
 		receivedAt = 0;
