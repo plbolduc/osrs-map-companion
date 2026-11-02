@@ -41,8 +41,10 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import javax.annotation.Nullable;
 import javax.swing.Icon;
@@ -96,7 +98,8 @@ final class GroupPanel extends JPanel
 	private static final Color ONLINE = new Color(0, 187, 127);
 	private static final Color IDLE = new Color(249, 156, 0);
 	private static final Color OFFLINE = new Color(159, 159, 169);
-	private static final Color CHOSEN = new Color(117, 94, 52);
+	/** This member's own answer to a meetup, filled. */
+	static final Color CHOSEN = new Color(117, 94, 52);
 	/** A friend's button for the game's own world map; "Show on world map" does not fit beside Route. */
 	static final String WORLD_MAP = "World map";
 	/** A news line's picture: the game's 16px skill icons, and an item's sprite shrunk to match. */
@@ -137,6 +140,8 @@ final class GroupPanel extends JPanel
 	@Nullable
 	private String drawn;
 	private boolean ready;
+	/** The answer last pressed on each meetup, by its id: the pick while that answer is on its way. */
+	private final Map<String, String> pressed = new HashMap<>();
 	/**
 	 * Copy invite, which {@link ConnectCard} owns, presses and words. The card of a group of one
 	 * holds it, under the sentence that is about it; otherwise it sits beside Switch ▾ under the tab.
@@ -624,6 +629,13 @@ final class GroupPanel extends JPanel
 		String mine = group.mine(meetup, now);
 		MeetupClient.Said answer = meetups.said("answer:" + meetup.id);
 		boolean sending = answer != null && answer.sending;
+		/*
+		 * The pick is the answer pressed while it is on its way, else the one given, and it keeps its
+		 * fill while the others cannot be pressed. FlatLaf paints a disabled button in its own disabled
+		 * colour whatever its background, so the pick stays enabled and ignores the press instead.
+		 */
+		String pick = sending ? pressed.getOrDefault(meetup.id, mine) : mine;
+		boolean pressable = ready && !sending && meetups.ready();
 		card.add(gap(5));
 		JPanel answers = new JPanel(new GridLayout(2, 2, 4, 4));
 		answers.setBackground(ColorScheme.DARKER_GRAY_COLOR);
@@ -631,14 +643,20 @@ final class GroupPanel extends JPanel
 		{
 			JButton button = MapCompanionPanel.smallButton(answerWord(option));
 			button.setName("group.answer." + meetup.id + "." + option);
-			boolean chosen = option.equals(mine);
+			boolean chosen = option.equals(pick);
 			if (chosen)
 			{
 				button.setBackground(CHOSEN);
 				button.setForeground(Color.WHITE);
 			}
-			button.setEnabled(ready && !sending && meetups.ready());
-			button.addActionListener(e -> answer(meetup.id, option));
+			button.setEnabled(pressable || chosen);
+			button.addActionListener(e ->
+			{
+				if (pressable)
+				{
+					answer(meetup.id, option);
+				}
+			});
 			answers.add(button);
 		}
 		answers.setMaximumSize(new java.awt.Dimension(Integer.MAX_VALUE, answers.getPreferredSize().height));
@@ -656,6 +674,7 @@ final class GroupPanel extends JPanel
 
 	private void answer(String eventId, String answer)
 	{
+		pressed.put(eventId, answer);
 		meetups.answer(eventId, answer);
 		drawn = null;
 		refresh(ready);
