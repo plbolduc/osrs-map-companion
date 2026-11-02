@@ -30,3 +30,34 @@ stars.pairToSync=Pair with your personal RuneLite code to sync filters.
 # FarmRunClient: End pressed when the map cannot be told.
 farm.endedNotConnected=Run ended here. Not connected to the group yet, so the map still has it.
 farm.endedLogIn=Run ended here. Log in to end it on the map too.
+
+# ConnectCard: Connect, Join, the group's menu, Rename and Copy invite. What Copy invite puts on a
+# clipboard stays in the Java, where the map's contract test reads it.
+connect.settingsTip=Settings: what you share, the map address and Show what's sent
+connect.renameTip=Change the name everybody in the group sees
+connect.pasteTip=Read the clipboard. Only ever when you press this.
+connect.joinFieldTip=Paste the invite a friend sent you, or the code from osrs-map.com's Companion panel
+connect.joinTip=Join the group this invite or code is for
+connect.otherMap= instead of osrs-map.com?\n\nIt is a map server RuneLite has not checked. It receives your IP address, and what you choose to share goes to it and to your group there.
+connect.nothingToPaste=There is nothing to paste. Copy the invite first, then press Paste.
+connect.noInvite=No invite or code found. Ask a friend in the group for an invite.
+connect.pasteOrStart=Paste the invite a friend sent you, or press Connect to start your own group.
+connect.pasteOrCode=Paste an invite, or the code from osrs-map.com's Companion panel.
+connect.switchTip=Post to this group instead. One group at a time, like a party.
+connect.anotherTip=Paste another group's connection code or invite
+connect.renameLogIn=Log in once while connected, then rename the group.
+connect.makeRoom= to make room, or paste another group's invite here.
+connect.startOver=Paste another group's invite here, or use Leave group in Settings → Advanced to start over.
+connect.openTip= in your browser, already in your group as you
+connect.inviteLogIn=Log in to a character to copy an invite.
+connect.inviteFailed=Couldn't make an invite, so nothing was copied. Try again in a minute.
+connect.clipboardFailed=Couldn't put the invite on the clipboard.
+
+# RecommendedSharing: the step after a first Connect.
+share.intro=Your group sees what's ticked. Change it any time in Settings.
+share.stream= open. It brings the places your group sends, meetups and your friends' positions, and carries your group's code, your member id and its key, and nothing about your character.
+share.deathDetail=Your last death's tile, kept for an hour. Route back works without it.
+share.destinationsDetail=Places your group sends you, and your group's meetups, in the sidebar and on the world map. Nothing is clicked or walked for you.
+share.groupDetail=Your group's dots on the game's world map, from what they already share.
+share.shareTip=Turn on the ticked settings, as the switches in Settings do. Nothing else changes.
+share.skipTip=Share nothing yet. Every choice stays off until you turn it on in Settings.
