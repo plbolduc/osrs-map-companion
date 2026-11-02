@@ -438,7 +438,10 @@ Step 8. Each card under *Now* that names a place gains the way there, planned fr
 In Stars, Route sits beside *Pin destination* for a precise site; an approximate one has **Open on
 map** there instead. While the map answers the button reads *Planning…*, and a refusal is one line
 under it, in the map's own words when it gives them, as it does for a clue step it cannot place.
-The answer fills the destination's card, as a pick from Search does.
+The answer fills the destination's card, as a pick from Search does. While it is there, the death's,
+the clue's and the meetup's button reads **Reroute**, as a friend's does, so the card above is not
+offered again as new; Dismiss gives back their own word. Route back's answer has no line under its
+name: the death card keeps the age counting, and an age written at the press sat above it, older.
 
 ### Friends and meetups under Group
 
