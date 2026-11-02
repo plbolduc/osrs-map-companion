@@ -1,0 +1,42 @@
+# The sidebar's words for every sharing choice, by setting key: the title of a group's switch, or
+# a field's label and the line that says what it sends. SharingFields reads them; Settings and the
+# step after Connect draw them, and SharingGroupsTest holds each label to RuneLite's own list.
+# {FEED_KEPT} is MapCompanionConfig.FEED_KEPT.
+sharePosition|Position and world|Your tile, world and instance type. Shows your dot where its location is known.
+shareActivity|Training and idle time|The skill last trained, recent experience and time since moving.
+shareAccountType|Account type|Your ironman or other account badge.
+shareSkills|Skill levels|Your levels, for usable routes.
+shareQuests|Travel quest completion|Progress in the quests that unlock travel; no individual steps.
+shareQuestLog|Full quest progress|Started or finished states for the full quest and miniquest log; no individual steps.
+shareDiaries|Achievement diaries|Completed tiers and collected rewards; no individual tasks.
+sharePermanentTravel|Permanent travel and house|Verified permanent travel unlocks and the town your house is in.
+shareCapabilities|Carried travel items|Derived yes/no travel flags; your inventory is never sent.
+shareStash|STASH construction|Built STASH units; stored equipment is never read.
+shareBoats|Boats and moorings|Where each boat is moored and its teleport focus, so voyages start at your boat; boat names are never sent.
+shareSlayer|Slayer task|Your current assignment and remaining count.
+shareClue|Clue step|Your current clue scroll step.
+shareFarming|Farming patches|Patch states you have observed, for planning runs.
+shareBirdhouses|Birdhouses|States observed by RuneLite Time Tracking, with their age.
+shareHunterRumours|Hunter rumours|The rumour observed after checking a quetzal whistle; recheck after login or hopping.
+shareMahoganyHomes|Mahogany Homes|The customer and tier observed in dialogue or game messages.
+shareFarmingContracts|Farming contracts|The crop requested by your current Farming Guild contract.
+sharePortTasks|Port tasks|Your Sailing port task slots and their counters; cargo is never read.
+shareLoot|Observed kills and drops|Locally observed tracked monster kills and rated drop totals on normal members worlds; not lifetime kill counts.
+shareMilestones|Notable drops and levels|Notable observed rewards and real levels, and quests and diary tiers finished while you play, if those are shared. Activity rewards require Loot Tracker. {FEED_KEPT}
+sharePets|Include pet rewards|Observed pet rewards while Notable drops and levels is enabled; unknown pets stay unnamed.
+shareCollectionLog|Include collection log additions|New collection notifications while Notable drops and levels is enabled; existing slots are never read.
+shareName|Character name|The display name of the character you are logged in as.
+shareDeath|Where you died|The tile of your most recent death, forgotten after an hour.
+showDestination|Destinations and meetups|Receive destinations and meetup details. Nothing is clicked or walked for you.
+showGroupOnWorldMap|Group on the world map|Receive the positions your group already shares and draw them on the world map.
+destinationHintArrow|Hint arrow to a destination|Point the game's own arrow at a destination once it is nearby. Nothing leaves this computer.
+showStepOnScreen|Step on screen|While you follow a route, the step you are on in a small box over the game. Nothing leaves this computer.
+drawWithShortestPath|Draw paths with Shortest Path|When you follow a route, the Shortest Path plugin draws each walking step. Nothing leaves this computer.
+routeHereOnWorldMap|Route here on the world map|Right-click the world map for the way to that spot. A press sends that spot and where you stand, as Route does.
+dropLuckChat|Drop luck in chat|One chat line when a drop with a known rate lands. Nothing leaves this computer.
+markFarmRunInBank|Farm run teleports in the bank|Outline in the bank the teleports a farm run needs that you are not carrying. Nothing leaves this computer.
+shareMapPresence|Map presence|
+shareProgressAndTravel|Progress and travel|
+shareTasksAndTimers|Tasks and timers|
+shareLootAndMilestones|Loot and milestones|
+notifyMeetups|Meetup reminder|A RuneLite notification before a meetup starts. Ticked here, it comes while you play too; how it arrives follows RuneLite's own notification settings.
