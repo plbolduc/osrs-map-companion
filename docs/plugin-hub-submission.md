@@ -255,6 +255,8 @@ Say these in the description of the next Hub update, as changes from what was ap
 - **The step on screen**: an `OverlayPanel` naming the followed route's destination and the step the
   sidebar marks, drawn only while the player follows a route, gone on arrival and inside instances.
   It draws what the sidebar already holds and sends nothing; it can be turned off under *In the client*.
+  A teleport step's picture comes from the client's own `ItemManager` and `SpriteManager`, as the
+  sidebar's does, asked for once and drawn when it has loaded.
 - **Two route keys**: `Keybind` settings, unset until the player picks one, read by `HotkeyListener`s
   registered through `KeyManager`. A key presses the sidebar's own Reroute or Follow button on the
   EDT, and only while that button is shown and enabled, so it sends nothing a click would not and

@@ -28,7 +28,12 @@ package com.pbolduc.mapcompanion;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.image.BufferedImage;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import net.runelite.api.Client;
@@ -36,7 +41,11 @@ import net.runelite.api.WorldView;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.overlay.OverlayPanel;
 import net.runelite.client.ui.overlay.OverlayPosition;
+import net.runelite.client.ui.overlay.components.ComponentOrientation;
+import net.runelite.client.ui.overlay.components.ImageComponent;
 import net.runelite.client.ui.overlay.components.LineComponent;
+import net.runelite.client.ui.overlay.components.SplitComponent;
+import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.Text;
 
 /**
@@ -56,11 +65,22 @@ import net.runelite.client.util.Text;
  * <p>A step keeps the number its pin carries on the world map. A run's leg has no step pins, and its
  * stop's number heads the box as it heads the stop's pin, so on a leg the step is its words alone:
  * a second number under the first would point at nothing on the map.
+ *
+ * <p>A teleport step has the game's picture of what to click before its words, as the sidebar's
+ * row does: the item's sprite or the spell's icon, by the id the map sent, from this client's own
+ * cache through {@link GameSprites}, drawn bare. The box is drawn every frame and cannot wait for
+ * it, so each picture is asked for once and drawn from the frame it arrives; until then its place
+ * is kept empty, so the words never move. A walk, a ride, or a step the map names no id for stays
+ * words alone, in a box no wider than before.
  */
 class RouteStepOverlay extends OverlayPanel
 {
 	/** Wide enough for most names and steps on one line; longer ones wrap. */
 	private static final int WIDTH = 180;
+	/** A step's picture, at the sidebar's size, and the gap RuneLite's own XP box leaves beside its icon. */
+	private static final int PICTURE = RouteStepsView.PICTURE;
+	private static final int PICTURE_GAP = 4;
+	private static final BufferedImage NO_PICTURE_YET = new BufferedImage(PICTURE, PICTURE, BufferedImage.TYPE_INT_ARGB);
 
 	/**
 	 * How much of a name the box keeps. It wraps, so it keeps a whole place name, a clue step's
@@ -74,16 +94,23 @@ class RouteStepOverlay extends OverlayPanel
 	private final DestinationState destinations;
 	private final DestinationRoute route;
 	private final FarmRunRoute run;
+	private final GameSprites sprites;
+	/**
+	 * Each picture asked for, by its id, holding null until it is drawn. Client thread only: the box
+	 * is drawn there, and both caches answer there.
+	 */
+	private final Map<String, BufferedImage> pictures = new HashMap<>();
 
 	@Inject
 	RouteStepOverlay(Client client, MapCompanionConfig config, DestinationState destinations, DestinationRoute route,
-		FarmRunRoute run)
+		FarmRunRoute run, GameSprites sprites)
 	{
 		this.client = client;
 		this.config = config;
 		this.destinations = destinations;
 		this.route = route;
 		this.run = run;
+		this.sprites = sprites;
 		setPosition(OverlayPosition.TOP_LEFT);
 	}
 
@@ -105,7 +132,9 @@ class RouteStepOverlay extends OverlayPanel
 		{
 			return null;
 		}
-		panelComponent.setPreferredSize(new Dimension(WIDTH, 0));
+		boolean pictured = box.itemId != null || box.spriteId != null;
+		/* Wider by the picture, so the words keep the width they have without one. */
+		panelComponent.setPreferredSize(new Dimension(WIDTH + (pictured ? PICTURE + PICTURE_GAP : 0), 0));
 		/*
 		 * A line, which wraps: RuneLite's title component centres a single line, and a long name
 		 * overruns it on both sides. Bold keeps it the heading, where a farm run's "2. Catherby" over
@@ -115,12 +144,48 @@ class RouteStepOverlay extends OverlayPanel
 			.left(title(box, destination, client.getWorld()))
 			.leftFont(FontManager.getRunescapeBoldFont())
 			.build());
-		panelComponent.getChildren().add(LineComponent.builder().left(box.step).build());
-		if (box.detail != null)
+		LineComponent step = LineComponent.builder().left(box.step).build();
+		LineComponent detail = box.detail == null ? null : LineComponent.builder().left(box.detail).leftColor(Color.LIGHT_GRAY).build();
+		if (pictured)
 		{
-			panelComponent.getChildren().add(LineComponent.builder().left(box.detail).leftColor(Color.LIGHT_GRAY).build());
+			/* The picture before the words, and the detail under them past it, as the sidebar's row has them. */
+			panelComponent.getChildren().add(SplitComponent.builder()
+				.orientation(ComponentOrientation.HORIZONTAL)
+				.gap(new Point(PICTURE_GAP, 0))
+				.first(new ImageComponent(picture(box)))
+				.second(detail == null ? step : SplitComponent.builder().first(step).second(detail).build())
+				.build());
+		}
+		else
+		{
+			panelComponent.getChildren().add(step);
+			if (detail != null)
+			{
+				panelComponent.getChildren().add(detail);
+			}
 		}
 		return super.render(graphics);
+	}
+
+	/** The step's picture once the client has drawn it, centred in its square, or an empty square until then. */
+	private BufferedImage picture(Box box)
+	{
+		String key = box.itemId != null ? "item " + box.itemId : "sprite " + box.spriteId;
+		if (!pictures.containsKey(key))
+		{
+			pictures.put(key, null);
+			Consumer<BufferedImage> drawn = picture -> pictures.put(key, ImageUtil.resizeCanvas(picture, PICTURE, PICTURE));
+			if (box.itemId != null)
+			{
+				sprites.item(box.itemId, PICTURE, drawn);
+			}
+			else
+			{
+				sprites.sprite(box.spriteId, PICTURE, drawn);
+			}
+		}
+		BufferedImage picture = pictures.get(key);
+		return picture == null ? NO_PICTURE_YET : picture;
 	}
 
 	/** What the box says. */
@@ -130,12 +195,19 @@ class RouteStepOverlay extends OverlayPanel
 		final String step;
 		@Nullable
 		final String detail;
+		/** The step's picture by the id the map sent, the item clicked or the spell's icon; both null for words alone. */
+		@Nullable
+		final Integer itemId;
+		@Nullable
+		final Integer spriteId;
 
-		Box(String title, String step, @Nullable String detail)
+		Box(String title, String step, @Nullable String detail, @Nullable Integer itemId, @Nullable Integer spriteId)
 		{
 			this.title = title;
 			this.step = step;
 			this.detail = detail;
+			this.itemId = itemId;
+			this.spriteId = spriteId;
 		}
 	}
 
@@ -176,7 +248,7 @@ class RouteStepOverlay extends OverlayPanel
 		String title = named == null ? "Route" : named;
 		String detail = step.detail == null || Text.removeTags(step.detail).trim().isEmpty() ? null : Text.removeTags(step.detail).trim();
 		String line = leg ? step.title : RouteStepsView.stepLine(view.step, step, false);
-		return new Box(title, Text.removeTags(line), detail);
+		return new Box(title, Text.removeTags(line), detail, step.itemId, step.spriteId);
 	}
 
 	/** The box's first line: the destination's name, and its world while the player is on another. */

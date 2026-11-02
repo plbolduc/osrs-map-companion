@@ -223,6 +223,10 @@ The website plan's second session, once the routes in the game are built: a memb
       hop to that world and both drop it.
       Follow a farm run: the box is headed by the stop's number, *2. Catherby*, as its pin on the
       world map is, and the step under it has no number of its own, *Use Catherby tablet*.
+      A teleport step shows its picture before its words, bare, as the sidebar's row does: the
+      Catherby tablet, Explorer's ring 2, the Lumbridge Home Teleport icon. The words stand a
+      picture's width in from the first frame, and the picture fills that place without the words
+      moving; a walk has no picture, and its box is narrower by one.
 - [ ] **Route keys.** Set *Reroute key* to Ctrl+R and *Follow and pause key* to Ctrl+F. On a farm run,
       Ctrl+F pauses and follows it and Ctrl+R reroutes it; twice within five seconds asks once. With
       no run, they act on the destination's own buttons, and do nothing with neither shown.
