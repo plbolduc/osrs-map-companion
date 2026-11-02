@@ -168,18 +168,11 @@ final class ConnectCard extends JPanel
 	private final JPanel groupButtons = row(ColorScheme.DARK_GRAY_COLOR);
 	private List<JButton> shownGroupActions = new ArrayList<>();
 	/** What Copy invite and the menu's Rename group… said, under the row they are pressed in. */
-	private final JLabel groupMessage = new JLabel();
+	private final Said groupMessage = new Said("group.message", CARD_TEXT_WIDTH + 16);
 	/** What the status card's own Rename group… said, in the card. */
-	private final JLabel cardMessage = new JLabel();
+	private final Said cardMessage = new Said("companion.cardMessage", CARD_TEXT_WIDTH);
 	/** The group the two lines above were said about: a line about one group is not news in the next. */
 	private String saidFor = "";
-	/**
-	 * When the line under the field, the one under the group's buttons and the card's own last said
-	 * a confirmation, or zero while each says anything else: see {@link #letGo}.
-	 */
-	private long joinConfirmedAtMs;
-	private long groupConfirmedAtMs;
-	private long cardConfirmedAtMs;
 	/**
 	 * Copy invite says Copied for a moment when the clipboard has the invite, on the button itself,
 	 * which in a group of one sits in the card at the top of the tab, far from the line under the row.
@@ -230,7 +223,7 @@ final class ConnectCard extends JPanel
 	static final String JOIN_PLACEHOLDER = "Paste an invite or code";
 	private final JButton pasteButton = smallButton("Paste");
 	private final JButton joinButton = smallButton("Join");
-	private final JLabel joinMessage = new JLabel();
+	private final Said joinMessage = new Said(null, CARD_TEXT_WIDTH + 16);
 	/**
 	 * Over the field, before a group: the orange button makes one, and this is the other way in. And
 	 * over it while the map refuses the group, when the field is the way back in.
@@ -305,10 +298,6 @@ final class ConnectCard extends JPanel
 		nameLink.addActionListener(e -> renameGroup(true));
 		nameLink.setVisible(false);
 		status.add(nameLink);
-		cardMessage.setName("companion.cardMessage");
-		cardMessage.setFont(cardMessage.getFont().deriveFont(11f));
-		cardMessage.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
-		cardMessage.setVisible(false);
 		status.add(cardMessage);
 		add(status);
 		add(gap(6, ColorScheme.DARK_GRAY_COLOR));
@@ -338,10 +327,6 @@ final class ConnectCard extends JPanel
 		add(left(knownGroupsRow));
 
 		groupActions.add(left(groupButtons));
-		groupMessage.setName("group.message");
-		groupMessage.setFont(groupMessage.getFont().deriveFont(11f));
-		groupMessage.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
-		groupMessage.setVisible(false);
 		groupActions.add(groupMessage);
 		fieldBelow.setBorder(new EmptyBorder(6, 0, 0, 0));
 		fieldBelow.setVisible(false);
@@ -385,9 +370,6 @@ final class ConnectCard extends JPanel
 		block.add(left(row(ColorScheme.DARK_GRAY_COLOR, pasteButton, joinButton)));
 		nextStep.setVisible(false);
 		block.add(nextStep);
-		joinMessage.setFont(joinMessage.getFont().deriveFont(11f));
-		joinMessage.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
-		joinMessage.setVisible(false);
 		return left(block);
 	}
 
@@ -737,24 +719,19 @@ final class ConnectCard extends JPanel
 	/** One line under the join field, hidden when there is nothing to say: here, a step on the way. */
 	void say(String message)
 	{
-		joinConfirmedAtMs = 0L;
-		setWrapped(joinMessage, message);
-		MapCompanionPanel.tone(joinMessage, false);
-		joinMessage.setVisible(true);
+		joinMessage.say(message, false, false);
 	}
 
 	/** The same line, for a press there that did not happen: in the refusal pink until the next press. */
 	void refuse(String message)
 	{
-		say(message);
-		MapCompanionPanel.tone(joinMessage, true);
+		joinMessage.say(message, true, false);
 	}
 
 	/** The same line, for a press that did what it asked: news for a moment, then gone. */
 	void confirm(String message)
 	{
-		say(message);
-		joinConfirmedAtMs = System.currentTimeMillis();
+		joinMessage.say(message, false, true);
 	}
 
 	/**
@@ -769,61 +746,71 @@ final class ConnectCard extends JPanel
 	/** One line under Copy invite and Switch ▾, for what was pressed there: here, a press on its way. */
 	void sayUnderGroup(String message)
 	{
-		saidFor = pairingCode();
-		groupConfirmedAtMs = 0L;
-		setWrapped(groupMessage, message);
-		MapCompanionPanel.tone(groupMessage, false);
-		groupMessage.setVisible(true);
+		under(groupMessage, message, false, false);
 	}
 
 	/** The same line, for a press that did not happen. */
 	void refuseUnderGroup(String message)
 	{
-		sayUnderGroup(message);
-		MapCompanionPanel.tone(groupMessage, true);
+		under(groupMessage, message, true, false);
 	}
 
 	/** The same line, for a press that did what it asked: news for a moment, then gone. */
 	void confirmUnderGroup(String message)
 	{
-		sayUnderGroup(message);
-		groupConfirmedAtMs = System.currentTimeMillis();
-	}
-
-	/** One line in the status card, under the Rename group… link that was pressed: here, a rename on its way. */
-	private void sayOnCard(String message)
-	{
-		saidFor = pairingCode();
-		cardConfirmedAtMs = 0L;
-		setWrapped(cardMessage, message, CARD_TEXT_WIDTH);
-		MapCompanionPanel.tone(cardMessage, false);
-		cardMessage.setVisible(true);
-	}
-
-	/** The same line, for a rename that did not happen. */
-	private void refuseOnCard(String message)
-	{
-		sayOnCard(message);
-		MapCompanionPanel.tone(cardMessage, true);
-	}
-
-	/** The same line, for a rename that landed. */
-	private void confirmOnCard(String message)
-	{
-		sayOnCard(message);
-		cardConfirmedAtMs = System.currentTimeMillis();
+		under(groupMessage, message, false, true);
 	}
 
 	/**
-	 * A confirmation is news for the ten seconds a run's card gives one
-	 * ({@link FarmRunClient.Said#CONFIRMATION_MS}) and then gives its line back, on the sidebar's
-	 * one-second refresh. Anything else a press said stays until the next press says something else.
+	 * A line about the group in use: under Copy invite and Switch ▾ for a press there, or in the status
+	 * card under the Rename group… link that was pressed. Either is said for this group only; see
+	 * {@link #saidFor}.
 	 */
-	private static void letGo(JLabel line, long confirmedAtMs, long now)
+	private void under(Said line, String message, boolean refused, boolean confirmed)
 	{
-		if (confirmedAtMs > 0L && now - confirmedAtMs >= FarmRunClient.Said.CONFIRMATION_MS)
+		saidFor = pairingCode();
+		line.say(message, refused, confirmed);
+	}
+
+	/**
+	 * One of the card's three answer lines: under the join field, under the group's buttons, or in the
+	 * status card. Small and grey, and hidden until a press has something to say.
+	 */
+	private static final class Said extends JLabel
+	{
+		private final int width;
+		/** When this line last said a confirmation, or zero while it says anything else: see {@link #letGo}. */
+		private long confirmedAtMs;
+
+		Said(@Nullable String name, int width)
 		{
-			line.setVisible(false);
+			this.width = width;
+			setName(name);
+			setFont(getFont().deriveFont(11f));
+			setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+			setVisible(false);
+		}
+
+		/** Say a step on the way, or a press that did not happen in the refusal pink, or one that worked. */
+		void say(String message, boolean refused, boolean confirmed)
+		{
+			confirmedAtMs = confirmed ? System.currentTimeMillis() : 0L;
+			setWrapped(this, message, width);
+			MapCompanionPanel.tone(this, refused);
+			setVisible(true);
+		}
+
+		/**
+		 * A confirmation is news for the ten seconds a run's card gives one
+		 * ({@link FarmRunClient.Said#CONFIRMATION_MS}) and then gives its line back, on the sidebar's
+		 * one-second refresh. Anything else a press said stays until the next press says something else.
+		 */
+		void letGo(long now)
+		{
+			if (confirmedAtMs > 0L && now - confirmedAtMs >= FarmRunClient.Said.CONFIRMATION_MS)
+			{
+				setVisible(false);
+			}
 		}
 	}
 
@@ -943,16 +930,14 @@ final class ConnectCard extends JPanel
 	 */
 	void renameGroup(boolean fromCard)
 	{
-		Consumer<String> answer = fromCard ? this::sayOnCard : this::sayUnderGroup;
-		Consumer<String> refused = fromCard ? this::refuseOnCard : this::refuseUnderGroup;
-		Consumer<String> renamed = fromCard ? this::confirmOnCard : this::confirmUnderGroup;
+		Said line = fromCard ? cardMessage : groupMessage;
 		String server = pairing.serverUrl();
 		String code = pairingCode();
 		String member = pairing.memberWithSecret(server, code, identity.id());
 		String secret = member == null ? null : pairing.secret(server, code, member);
 		if (server == null || member == null || secret == null)
 		{
-			refused.accept("Log in once while connected, then rename the group.");
+			under(line, "Log in once while connected, then rename the group.", true, false);
 			return;
 		}
 		JTextField typed = nameField(pairing.name(code));
@@ -979,17 +964,17 @@ final class ConnectCard extends JPanel
 		{
 			return;
 		}
-		answer.accept("Renaming…");
+		under(line, "Renaming…", false, false);
 		connectClient.rename(server, code, member, secret, name, outcome -> SwingUtilities.invokeLater(() ->
 		{
 			if (outcome.name != null && server.equals(pairing.serverUrl()) && code.equalsIgnoreCase(pairingCode()))
 			{
 				pairing.rememberName(code, outcome.name);
-				renamed.accept("Renamed to " + outcome.name + ".");
+				under(line, "Renamed to " + outcome.name + ".", false, true);
 			}
 			else
 			{
-				refused.accept(outcome.message != null ? outcome.message : ConnectClient.FAILED);
+				under(line, outcome.message != null ? outcome.message : ConnectClient.FAILED, true, false);
 			}
 			refresh.run();
 		}));
@@ -1299,9 +1284,9 @@ final class ConnectCard extends JPanel
 			groupMessage.setVisible(false);
 			cardMessage.setVisible(false);
 		}
-		letGo(groupMessage, groupConfirmedAtMs, now);
-		letGo(cardMessage, cardConfirmedAtMs, now);
-		letGo(joinMessage, joinConfirmedAtMs, now);
+		groupMessage.letGo(now);
+		cardMessage.letGo(now);
+		joinMessage.letGo(now);
 		/*
 		 * A refusal the field can answer opens it under the card that says so, as before a group: the
 		 * field Join another group… opens, with its heading, because it is the way back in.
