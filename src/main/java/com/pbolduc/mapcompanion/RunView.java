@@ -48,6 +48,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.util.ImageUtil;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.label;
 
 /**
  * One received run as the sidebar follows it: its stops, the current leg's steps, and Follow,
@@ -658,14 +659,6 @@ final class RunView extends JPanel
 		JPanel column = MapCompanionPanel.column(ColorScheme.DARKER_GRAY_COLOR);
 		column.setOpaque(false);
 		return column;
-	}
-
-	private static JLabel label(float size, Color colour)
-	{
-		JLabel label = new JLabel();
-		label.setFont(label.getFont().deriveFont(size));
-		label.setForeground(colour);
-		return label;
 	}
 
 	private static JLabel wrapped(String words, float size, Color colour)

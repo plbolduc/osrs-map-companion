@@ -39,6 +39,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import net.runelite.client.ui.ColorScheme;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.label;
 
 /**
  * The way to a destination, step by step, inside the destination's card.
@@ -540,13 +541,5 @@ final class RouteStepsView extends JPanel
 			}
 		}
 		return sb.toString();
-	}
-
-	private static JLabel label(float size, Color colour)
-	{
-		JLabel label = new JLabel();
-		label.setFont(label.getFont().deriveFont(size));
-		label.setForeground(colour);
-		return label;
 	}
 }
