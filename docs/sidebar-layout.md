@@ -388,8 +388,8 @@ as `connect`, `connect-fold-open` and `connect-customise`, pointed at a port not
 ## Sharing by group, 2 November 2026
 
 Status: **built**, after the design below was written down: the switches in RuneLite's list and
-what keeps them in step, then the six switches in Settings and the step after Connect; the client
-settings' names and the status card's line follow in commits of their own. Asked on 1 November
+what keeps them in step, the six switches in Settings and the step after Connect, the client
+settings' names, and the status card's line, each in a commit of its own. Asked on 1 November
 whether the plugin had too many settings and whether sharing should simply be by group, with less
 granularity, the owner said yes.
 
@@ -756,7 +756,7 @@ under the card, and with the group layer on it still reads *On world map* and is
 
 Three lines became two. While the map is being fed the dot's green is *Connected*, said in words in
 its tooltip with the last post and the stream, so the first line is the group's name and the second
-what is shared, *Sharing position, levels*, with the gear at the end of the first. While it is not,
+what is shared, *Sharing all but where you died*, with the gear at the end of the first. While it is not,
 the first line says what is happening — *Connecting…*, *Logged out*, a refusal — and the second is
 the group's name. The connect step is 532px.
 
