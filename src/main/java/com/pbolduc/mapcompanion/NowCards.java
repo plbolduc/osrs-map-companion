@@ -56,8 +56,8 @@ import static com.pbolduc.mapcompanion.MapCompanionPanel.syncRow;
 
 /**
  * Now, on Home: the destination the map sent, with its route steps and Follow, Reroute and
- * Dismiss; the next meetup, from a map that sends only the one; where you died; and the clue being
- * carried, each with its Route.
+ * Dismiss, or Route while it has no way yet; the next meetup, from a map that sends only the one;
+ * where you died; and the clue being carried, each with its Route.
  *
  * <p>What is happening now: what the map asked for, and where you died. Each is a card that is
  * hidden while there is nothing in it, and the heading goes with the last of them — see
@@ -154,6 +154,15 @@ final class NowCards extends JPanel
 	 */
 	private final JButton followButton = smallButton("Follow");
 	private final ShortestPath shortestPath;
+	/**
+	 * The way to a destination that came without one: a star pinned on Stars, a spot Slayer pinned, a
+	 * place the map sent bare. It asks by the destination's own tile, as a star's Route does, from the
+	 * cell Reroute takes once there are steps, so the card that shows a place can always lead there.
+	 */
+	private final JButton routeButton = smallButton("Route");
+	private final JLabel destinationSaid = new JLabel();
+	/** Which Route button a press came from, so its answer is said under this card. */
+	static final String DESTINATION = "destination";
 
 	NowCards(MapCompanionConfig config, DestinationState destinationState, DeathWatcher deathWatcher,
 		DestinationMarker destinationMarker, DestinationRoute destinationRoute, RouteClient routeClient,
@@ -197,6 +206,7 @@ final class NowCards extends JPanel
 		destination.add(routeSteps);
 		destination.add(gap(5, ColorScheme.DARKER_GRAY_COLOR));
 		destination.add(left(destinationActions));
+		destination.add(left(said(destinationSaid)));
 		destinationSlot = slot(destination);
 		add(destinationSlot);
 		JPanel meetup = card();
@@ -268,6 +278,9 @@ final class NowCards extends JPanel
 			routeClient.reroute();
 			refresh.run();
 		});
+		routeButton.setToolTipText("Plan the way here from where you stand. Sends your tile and this one to the map once; "
+			+ "the map plans with them and does not keep them.");
+		routeButton.addActionListener(e -> routeToDestination());
 		followButton.addActionListener(e ->
 		{
 			DestinationRoute.View route = destinationRoute.view();
@@ -471,6 +484,21 @@ final class NowCards extends JPanel
 	}
 
 	/**
+	 * The way to the destination on the card, read again at the press: by its tile, under its own
+	 * name, world and note, so the answer is the same place with its way, as a star's Route makes one.
+	 */
+	private void routeToDestination()
+	{
+		RelayResponse.Destination destination = destinationState.getDestination();
+		if (destination != null && destination.route == null)
+		{
+			routePress.press(RoutePress.Target.tile(DESTINATION, new WorldPoint(destination.x, destination.y, destination.plane),
+				destination.name, destination.world, destination.note));
+		}
+		refresh.run();
+	}
+
+	/**
 	 * Open that path in the reader's browser.
 	 *
 	 * <p>The death is read again at the press rather than taken from the label, because it can age
@@ -529,6 +557,20 @@ final class NowCards extends JPanel
 		{
 			destinationRow.add(rerouteButton);
 			rerouteButton.setEnabled(ready && !route.rerouting && System.currentTimeMillis() >= route.nextRerouteMs);
+		}
+		/*
+		 * No way yet, and none arriving with the destination itself for the tick before the route
+		 * takes it: the card asks for one, from Reroute's cell.
+		 */
+		boolean wayless = destination != null && !steps && destination.route == null && ready;
+		if (wayless)
+		{
+			destinationRow.add(routeButton);
+			routeState(routeButton, destinationSaid, DESTINATION, "Route", true);
+		}
+		else
+		{
+			destinationSaid.setVisible(false);
 		}
 		destinationRow.add(dismissButton);
 		shownDestinationActions = syncRow(destinationActions, destinationRow, shownDestinationActions);

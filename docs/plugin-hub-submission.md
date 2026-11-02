@@ -129,9 +129,10 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RouteClient`, `RoutePress
   JSON is the destination's tile and the player's own tile, sent on the press even with position
   sharing off; the README says so. The answer replaces the sidebar's steps. Nothing is walked.
   `RoutePress` sends the same request for a pick from **Search**, with the row's id as the target,
-  and for **Route** beside the carried clue, the last death, a star and a meetup, with that tile as
-  the target; a clue step that is words goes as the clue itself, its tier, words and scroll item id,
-  and a map above beginner as the same clue with its tier and scroll item id alone.
+  and for **Route** beside the carried clue, the last death, a star and a meetup, and on a
+  destination shown with no way yet, with that tile as the target; a clue step that is words goes
+  as the clue itself, its tier, words and scroll item id, and a map above beginner as the same clue
+  with its tier and scroll item id alone.
   A clue or death that is not shared leaves only in that request. Same
   one-at-a-time rule and wait; the answer becomes the destination. Nothing is walked. **Route here**
   on a right-click of the world map sends it too, with the clicked tile as the target.

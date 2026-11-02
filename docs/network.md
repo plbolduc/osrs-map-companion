@@ -186,9 +186,11 @@ Each row's picture is the game's own, from the client's sprite cache: the map's 
 a world-map icon, and an item's `itemId`, where the map names one, picks its sprite. No picture is
 ever fetched from the map or anywhere else.
 
-**Route** beside the clue being carried, the last death, a star in the Stars tab or a meetup is the
-same request with a tile as its target: the clue's dig spot or beginner map, the death's tile, the
-star's tile, the meetup's. A clue or a death that is not shared leaves only in that request, once
+**Route** beside the clue being carried, the last death, a star in the Stars tab or a meetup, or on
+the destination's card while it has no way yet, is the same request with a tile as its target: the
+clue's dig spot or beginner map, the death's tile, the star's tile, the meetup's, the destination's
+own: a star pinned on Stars, a Slayer spot set on the world map, a place the map sent bare. A clue
+or a death that is not shared leaves only in that request, once
 per press; the map plans with it and keeps nothing. A clue whose step is words names no tile, so
 its Route sends the clue as the snapshot carries it, `{ clue: { tier, text, itemId } }`, and the
 map places it with its own clue table; the words leave only in that request, whether or not

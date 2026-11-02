@@ -26,6 +26,7 @@
 package com.pbolduc.mapcompanion;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import java.awt.Component;
 import java.awt.Container;
 import java.lang.reflect.Constructor;
@@ -34,13 +35,24 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.AbstractExecutorService;
+import java.util.concurrent.TimeUnit;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 import net.runelite.api.Client;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.callback.ClientThread;
+import okhttp3.Dispatcher;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
+import okhttp3.Protocol;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+import okio.Buffer;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -54,12 +66,24 @@ import org.junit.Test;
  * buttons under a route, and what each press does.
  *
  * <p>The card is the real {@link NowCards} over the real route, presses and destination state. The
- * destination is the reply fixture's: Lumbridge Home Teleport, then a walk upstairs to the bank.
+ * destination is the reply fixture's: Lumbridge Home Teleport, then a walk upstairs to the bank. A
+ * Route press is answered here, inside the press, by a client whose calls never leave the machine,
+ * so a press has landed by the time it returns.
  */
 public class DestinationCardTest
 {
 	private static final String SECRET = "K7PQ2M3XABCDEFGHJKMNPQRSTVWXYZ23";
 	private static final String NAME = "Lumbridge";
+	/** The map's answer to a Route to Rimmington mine: a walk from the bank, ending on the star's tile. */
+	private static final String MINE_ANSWER = "{\"target\":{\"x\":2974,\"y\":3240,\"plane\":0},\"origin\":\"request\","
+		+ "\"options\":[{\"id\":\"walk\",\"label\":\"Walk\",\"best\":true,\"blocked\":false,\"tiles\":61,"
+		+ "\"steps\":[{\"slot\":\"walk-leg\",\"title\":\"Walk 61 tiles to the mine\",\"walk\":true,"
+		+ "\"at\":{\"x\":2974,\"y\":3240,\"plane\":0}}]}]}";
+
+	/** The map's answer to the next press, and every request a press made. */
+	private int status = 200;
+	private String body = "{}";
+	private final List<Request> sent = new ArrayList<>();
 
 	private final Gson gson = new Gson();
 	private final HarnessGame game = new HarnessGame();
@@ -104,7 +128,7 @@ public class DestinationCardTest
 		pairing.rememberSecret(pairing.code(), identity.id(), SECRET);
 		DeathWatcher deaths = construct(DeathWatcher.class);
 		RouteClient rerouter = new RouteClient(new OkHttpClient(), gson, game.client(), thread, pairing, identity, route);
-		RoutePress press = new RoutePress(new OkHttpClient(), gson, game.client(), thread, pairing, identity, route,
+		RoutePress press = new RoutePress(answering(), gson, game.client(), thread, pairing, identity, route,
 			destinations, marker);
 		FarmRunRoute runs = new FarmRunRoute(new FarmRunState(), destinations, route, thread);
 		ClueReader clues = new ClueReader(game.client());
@@ -188,6 +212,85 @@ public class DestinationCardTest
 		assertEquals(Arrays.asList("Reroute", "Dismiss"), actions());
 	}
 
+	/**
+	 * A destination with no way yet — here a star pinned on Stars — asks for one where it is shown:
+	 * Route, in the cell Reroute takes once there are steps, by the destination's own tile. Its card
+	 * had Dismiss alone, and the way there was Unpin, then Route, on another tab.
+	 */
+	@Test
+	public void aDestinationWithNoWayYetOffersRouteToItsOwnTile() throws Exception
+	{
+		destinations.selectLocal(mine());
+		route.sync(destinations.getDestination());
+		refresh();
+		assertEquals(Arrays.asList("Route", "Dismiss"), actions());
+
+		body = MINE_ANSWER;
+		press("Route");
+		assertEquals(1, sent.size());
+		JsonObject question = question(sent.get(0));
+		assertEquals("its own tile", 2974, question.getAsJsonObject("target").get("x").getAsInt());
+		assertEquals(3240, question.getAsJsonObject("target").get("y").getAsInt());
+		assertEquals("and where the player stands", 3222, question.getAsJsonObject("from").get("x").getAsInt());
+
+		refresh();
+		RelayResponse.Destination routed = destinations.getDestination();
+		assertEquals("the same place, with its way", "Rimmington mine", routed.name);
+		assertEquals(Integer.valueOf(302), routed.world);
+		assertEquals("T7 · 16m left", routed.note);
+		assertTrue(route.view().hasRoute());
+		assertEquals("a press of the player's own is followed", Arrays.asList("Pause", "Reroute", "Dismiss"), actions());
+	}
+
+	/** A refusal is said under the card, and Route stays for another try once the map's wait is over. */
+	@Test
+	public void aRefusedRouteIsSaidUnderTheCard() throws Exception
+	{
+		destinations.selectLocal(mine());
+		route.sync(destinations.getDestination());
+		refresh();
+		status = 404;
+		press("Route");
+		refresh();
+		assertEquals(Arrays.asList("Route", "Dismiss"), actions());
+		assertTrue(words().toString(), words().contains(RouteClient.NOT_FOUND));
+		assertEquals("no way came, so nothing is followed", null, route.view().way());
+	}
+
+	/** Route asks the map, so it waits for a group the map has let in, as Route back does. */
+	@Test
+	public void noRouteUntilConnected() throws Exception
+	{
+		destinations.selectLocal(mine());
+		route.sync(destinations.getDestination());
+		SwingUtilities.invokeAndWait(() -> cards.refresh(true, false));
+		assertEquals(Arrays.asList("Dismiss"), actions());
+	}
+
+	/** A destination whose way arrives with it never offers Route, even before the next tick reads it. */
+	@Test
+	public void aDestinationArrivingWithItsWayDoesNotOfferRoute() throws Exception
+	{
+		String reply = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "contract", "reply.json")),
+			StandardCharsets.UTF_8);
+		destinations.accept(gson.fromJson(reply, RelayResponse.class).directive);
+		refresh();
+		assertEquals(Arrays.asList("Dismiss"), actions());
+	}
+
+	/** Pin destination on a precise star, as StarsPanel makes it: no route. */
+	private static RelayResponse.Destination mine()
+	{
+		RelayResponse.Destination star = new RelayResponse.Destination();
+		star.x = 2974;
+		star.y = 3240;
+		star.plane = 0;
+		star.name = "Rimmington mine";
+		star.world = 302;
+		star.note = "T7 · 16m left";
+		return star;
+	}
+
 	/** The reply fixture's destination with its route, as the map sends it and the next tick takes it. */
 	private void received() throws Exception
 	{
@@ -268,10 +371,97 @@ public class DestinationCardTest
 		return null;
 	}
 
+	/** The words the cards show, in order: every label shown, inside parents that are shown. */
+	private List<String> words()
+	{
+		List<String> out = new ArrayList<>();
+		collectWords(cards, out);
+		return out;
+	}
+
+	private static void collectWords(Component component, List<String> out)
+	{
+		if (!component.isVisible())
+		{
+			return;
+		}
+		if (component instanceof JLabel && ((JLabel) component).getText() != null)
+		{
+			out.add(((JLabel) component).getText().replaceAll("<[^>]+>", "").replace("&lt;", "<").replace("&gt;", ">")
+				.replace("&amp;", "&").trim());
+		}
+		if (component instanceof Container)
+		{
+			for (Component child : ((Container) component).getComponents())
+			{
+				collectWords(child, out);
+			}
+		}
+	}
+
+	/** What a press asked the map, as its body says it. */
+	private JsonObject question(Request request) throws Exception
+	{
+		Buffer buffer = new Buffer();
+		request.body().writeTo(buffer);
+		return gson.fromJson(buffer.readString(StandardCharsets.UTF_8), JsonObject.class);
+	}
+
 	private <T> T construct(Class<T> type) throws Exception
 	{
 		Constructor<T> make = type.getDeclaredConstructor(Client.class);
 		make.setAccessible(true);
 		return make.newInstance(game.client());
+	}
+
+	/**
+	 * Calls run on the thread that makes them and are answered here, never sent: a press has landed
+	 * when it returns, and no test waits on another thread for it.
+	 */
+	private OkHttpClient answering()
+	{
+		AbstractExecutorService inline = new AbstractExecutorService()
+		{
+			@Override
+			public void execute(Runnable command)
+			{
+				command.run();
+			}
+
+			@Override
+			public void shutdown()
+			{
+			}
+
+			@Override
+			public List<Runnable> shutdownNow()
+			{
+				return Collections.emptyList();
+			}
+
+			@Override
+			public boolean isShutdown()
+			{
+				return false;
+			}
+
+			@Override
+			public boolean isTerminated()
+			{
+				return false;
+			}
+
+			@Override
+			public boolean awaitTermination(long timeout, TimeUnit unit)
+			{
+				return true;
+			}
+		};
+		return new OkHttpClient.Builder().dispatcher(new Dispatcher(inline)).addInterceptor(chain ->
+		{
+			sent.add(chain.request());
+			return new Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1).code(status).message("")
+				.body(ResponseBody.create(MediaType.get("application/json"), body)).build();
+		}).build();
 	}
 }

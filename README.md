@@ -250,8 +250,9 @@ answers with places and keeps nothing. Picking a result sends the tile you are s
 Reroute does, so the way is planned from there.
 
 **Route**, beside your clue, your last death, a star or a meetup, sends the tile you are standing on
-and the tile it goes to, once per press. That includes your clue's tile and where you died when you
-do not share them: they leave in that one request and the map plans with them and keeps neither.
+and the tile it goes to, once per press, as does **Route** on a destination that has no way yet.
+That includes your clue's tile and where you died when you do not share them: they leave in that
+one request and the map plans with them and keeps neither.
 For a clue step that is words, or a map above beginner, Route sends the clue instead, its tier, any
 words and its scroll, the same way. Your clue is read in this client whether or not you share it, so
 the sidebar can offer Route.
