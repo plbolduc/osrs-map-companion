@@ -15,14 +15,16 @@ and see your character and friends on the website.
 
 Send a place from the website or pick a search result, and the sidebar lists the way there.
 A teleport step shows what to click: the item's sprite or the spell's icon, from the game.
-Each step gets a numbered pin on the game's world map; the game's arrow points at the current
-step when it is in the loaded area.
+Each step gets a numbered pin on the game's world map, and the step you are on is numbered in amber
+in both; the game's arrow points at it when it is in the loaded area.
 
 Press **Follow** to show the step you're on in a small box over the game; with **Shortest Path**
-installed, it also draws each walking step as you reach it. With the box over the game, the
+installed, it also draws each walking step as you reach it. A route you ask for yourself is
+followed from the start, and **Pause** stops following it. With the box over the game, the
 sidebar can stay closed. **Reroute** plans again from where you stand, and RuneLite's settings for
-the plugin can give Reroute and Follow a key of your own. The website uses the progress and travel choices you share
-to suggest routes around your account's quests, diaries, items and transport unlocks.
+the plugin can give Reroute and Follow a key of your own. The website uses what you share under
+**Progress and travel** to suggest routes around your account's quests, diaries, items and
+transport unlocks.
 
 You can also plan a route to a friend, a meetup or a precise star site, back to where you died,
 and to the step of the clue you carry: a coordinate, a map, or a step in words, which the
@@ -57,9 +59,10 @@ Results use the game's map icons and item sprites.
 Build a run on the website and press **Send run to RuneLite**, or choose a preset, **Ready now**,
 **Birdhouses** or your **Farming contract** under **Farm run** on Home and press **Start run**;
 the choice steps aside while the run is going, so a stray press cannot replace it.
-The sidebar lists your stops, how to reach each one, and **Before you leave**, a bank checklist.
-In the bank, the checklist's teleports you are not carrying are outlined. Numbered pins mark the
-stops on the game's world map.
+The sidebar lists your stops and how to reach each one, with the steps to the next stop under it
+as **This leg**; a finished stop folds to one line. **Before you leave** is a bank checklist:
+closed, it counts the teleports it can tell you are not carrying, and in the bank it outlines them.
+Numbered pins mark the stops on the game's world map.
 
 A farm stop becomes **Done** after the plugin witnesses every patch it needs being replanted.
 Arriving or harvesting alone does not finish it. Birdhouses use a fresh seeded Time Tracking
@@ -76,9 +79,9 @@ can make a new one in the same client session.
   <img src="docs/mockups/sidebar-group.png" width="300" alt="The Group tab: three friends with their initials on their discs and a dot in each corner for online, idle or offline, Route beside a name, a Woodcutting level, an Abyssal whip drop and a quest finished, then a star-hunt meetup with each answer and who gave it, and tomorrow's raid folded to one line">
 </p>
 
-**Group** shows your friends' locations and latest levels and drops. Friends who share
-their position appear on the website and, if you enable it, on RuneLite's world map in the same
-colours. **Route** plans the way to a friend's current position.
+**Group** shows your friends' locations and their latest news: a level, a drop, a quest or an
+achievement diary. Friends who share their position appear on the website and, if you enable it,
+on RuneLite's world map in the same colours. **Route** plans the way to a friend's current position.
 
 Create a meetup with **Meet here…**, see who is coming, and answer **Going**, **Maybe**, **Can't**
 or **On my way**. You can turn on a reminder before it starts.
@@ -124,11 +127,12 @@ Completed farming contracts point back to Guildmaster Jane to hand them in.
   <img src="docs/mockups/sidebar-slayer.png" width="225" alt="The RuneLite Slayer card: remaining task count, best usable place, requirements and Route or Pin actions">
 </p>
 
-Share your Slayer task to see the website's ranked places in Home. The counter follows kills
-in this client. Better places you cannot use yet stay visible with their requirements; expand
-the list for other places, ranking choices, the Wilderness filter and the kinds that count.
-Wilderness places start hidden. **Route** plans from where you stand; **Pin** makes the spot
-your destination in this client. Locations and rates are from the [OSRS Wiki](https://oldschool.runescape.wiki/w/Slayer_training),
+With **Tasks and timers** shared, Home lists the website's ranked places for your Slayer task.
+The counter follows kills in this client. Better places you cannot use yet stay visible with their
+requirements; expand the list for other places, ranking choices, the Wilderness filter and the
+kinds that count. Wilderness places start hidden. **Route** plans from where you stand; **Pin**
+makes the spot your destination in this client. Locations and rates are from the
+[OSRS Wiki](https://oldschool.runescape.wiki/w/Slayer_training),
 [CC BY-NC-SA 3.0](https://creativecommons.org/licenses/by-nc-sa/3.0/).
 
 The website offers the same ranking with a larger map:
@@ -157,12 +161,13 @@ expected hunting. A bounty's pin opens the creature on the map.
   <img src="docs/mockups/sidebar-port-tasks.png" width="225" alt="A port-task run in the RuneLite Port tasks card: Port Khazard done and folded to one line, Ardougne next with its crates to deliver and This leg's steps under it, from the walk to the boat to the ledger table, then the osprey hunt and Brimhaven's task board">
 </p>
 
-Share your port tasks to list the ones you hold in Home: the crates still to collect and where
-they go, or the bounty parts still owed and the board to hand them in at. With **Progress and
-travel** shared too, for your boats, **Start run** turns them into one run: every pickup and drop-off in the
-order that fits your boat's hold, then each bounty out to its creature and back to its board. Each
-stop's voyage starts where your boat docked last, draws on the world map, and ticks off from the
-task's own counters. The website's **You → Port tasks** shows the same order.
+With **Tasks and timers** shared, Home lists the port tasks you hold: the crates still to collect
+and where they go, or the bounty parts still owed and the board to hand them in at. With
+**Progress and travel** shared too, for your boats, **Start run** turns them into one run: every
+pickup and drop-off in the order that fits your boat's hold, then each bounty out to its creature
+and back to its board. Each stop's voyage starts where your boat docked last, draws on the world
+map, and ticks off from the task's own counters. The website's **You → Port tasks** shows the
+same order.
 
 The pictures use made-up characters and stars.
 
@@ -296,10 +301,11 @@ rename it there.
 
 Under **In RuneLite**, **Destinations and meetups**, **Group on the world map** and **Meetup reminder**
 start off; the step after Connect ticks the first two for you to confirm. **Drop luck in chat**,
-**Hint arrow to a destination**, **Step on screen** and **Farm run teleports in the bank** start on;
-none of them sends anything. **Route here on the world map** starts on too, and sends only when you
-choose it. The keys for Reroute and Follow, and how many minutes before a meetup the reminder comes,
-are in RuneLite's own settings for the plugin.
+**Hint arrow to a destination**, **Step on screen**, **Draw paths with Shortest Path** and
+**Farm run teleports in the bank** start on; none of them sends anything.
+**Route here on the world map** starts on too, and sends only when you choose it. The keys for
+Reroute and Follow, and how many minutes before a meetup the reminder comes, are in RuneLite's own
+settings for the plugin.
 
 </details>
 
