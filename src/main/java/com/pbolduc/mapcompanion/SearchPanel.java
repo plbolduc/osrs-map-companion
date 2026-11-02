@@ -25,7 +25,6 @@
  */
 package com.pbolduc.mapcompanion;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -346,17 +345,12 @@ final class SearchPanel extends JPanel
 	 */
 	private JPanel row(SearchClient.Hit hit, boolean live)
 	{
-		JPanel row = new JPanel(new BorderLayout(6, 0));
-		row.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-		row.setName("search.row");
-		row.setBorder(new EmptyBorder(4, 8, 4, 8));
 		JLabel picture = new JLabel();
 		picture.setName("search.picture");
 		picture.setHorizontalAlignment(SwingConstants.CENTER);
 		picture.setVerticalAlignment(SwingConstants.TOP);
 		picture.setPreferredSize(new Dimension(PICTURE, PICTURE));
 		picture(picture, hit, PICTURE);
-		row.add(picture, BorderLayout.WEST);
 		JPanel words = MapCompanionPanel.column(ColorScheme.DARKER_GRAY_COLOR);
 		words.setOpaque(false);
 		int width = WIDTH - PICTURE - 6;
@@ -367,7 +361,9 @@ final class SearchPanel extends JPanel
 		{
 			words.add(MapCompanionPanel.wrapped(hit.line, 11f, ColorScheme.LIGHT_GRAY_COLOR, width));
 		}
-		row.add(words, BorderLayout.CENTER);
+		JPanel row = MapCompanionPanel.bar(6, ColorScheme.DARKER_GRAY_COLOR, picture, words, null);
+		row.setName("search.row");
+		row.setBorder(new EmptyBorder(4, 8, 4, 8));
 		if (!live)
 		{
 			heldRows.add(row);

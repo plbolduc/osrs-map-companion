@@ -25,7 +25,6 @@
  */
 package com.pbolduc.mapcompanion;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
@@ -275,8 +274,6 @@ final class ConnectCard extends JPanel
 
 		/* The status card. Dot beside the sentence, so the state reads at a glance and again in words. */
 		JPanel status = card();
-		JPanel statusRow = new JPanel(new BorderLayout(6, 0));
-		statusRow.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		dot.setFont(dot.getFont().deriveFont(12f));
 		statusLabel.setFont(statusLabel.getFont().deriveFont(12f));
 		/*
@@ -289,10 +286,8 @@ final class ConnectCard extends JPanel
 		int drop = Math.max(0, SidebarIcons.SIZE / 2 - line / 2);
 		dot.setVerticalAlignment(SwingConstants.TOP);
 		dot.setBorder(new EmptyBorder(drop, 0, 0, 0));
-		statusRow.add(dot, BorderLayout.WEST);
 		statusLabel.setVerticalAlignment(SwingConstants.TOP);
 		statusLabel.setBorder(new EmptyBorder(drop, 0, 0, 0));
-		statusRow.add(statusLabel, BorderLayout.CENTER);
 		gearButton.setName("companion.settings");
 		gearButton.setToolTipText("Settings: what you share, the map address and Show what's sent");
 		gearButton.getAccessibleContext().setAccessibleName("Settings");
@@ -302,8 +297,7 @@ final class ConnectCard extends JPanel
 		gearButton.setBorder(new EmptyBorder(0, 4, 0, 0));
 		gearButton.setVerticalAlignment(SwingConstants.TOP);
 		gearButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		statusRow.add(gearButton, BorderLayout.EAST);
-		status.add(left(statusRow));
+		status.add(left(MapCompanionPanel.bar(6, ColorScheme.DARKER_GRAY_COLOR, dot, statusLabel, gearButton)));
 		groupLabel.setFont(groupLabel.getFont().deriveFont(12f));
 		status.add(left(groupLabel));
 		status.add(sharingLabel);

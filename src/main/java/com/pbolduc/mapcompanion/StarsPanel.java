@@ -242,13 +242,9 @@ final class StarsPanel extends JPanel
 		add(more);
 
 		add(gap(6));
-		JPanel summary = new JPanel(new BorderLayout());
-		summary.setBackground(getBackground());
-		summary.add(order, BorderLayout.WEST);
-		summary.add(count, BorderLayout.EAST);
 		count.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
 		count.setFont(count.getFont().deriveFont(Font.BOLD, 11f));
-		add(fill(summary));
+		add(fill(MapCompanionPanel.bar(0, getBackground(), order, null, count)));
 		add(status);
 		add(gap(2));
 		add(rows);
