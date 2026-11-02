@@ -104,6 +104,12 @@ public class GroupPanelTest
 
 	private GroupPanel panel()
 	{
+		return panel(http("{\"eventId\":\"star-hunt\",\"answer\":\"going\"}"));
+	}
+
+	/** The panel, its meetup answers and Meet here going through {@code meetupHttp}. */
+	private GroupPanel panel(OkHttpClient meetupHttp)
+	{
 		assertTrue(pairing.connect(JoinCode.parse("ABC234"), () -> true));
 		pairing.rememberSecret(pairing.code(), identity.id(), SECRET);
 		RoutePress press = new RoutePress(http(RoutePressTest.ANSWER), new Gson(), MeetupClientTest.game(false), now(),
@@ -114,11 +120,14 @@ public class GroupPanelTest
 				{
 				}
 			});
-		MeetupClient meetups = new MeetupClient(http("{\"eventId\":\"star-hunt\",\"answer\":\"going\"}"), new Gson(),
+		meetups = new MeetupClient(meetupHttp, new Gson(),
 			MeetupClientTest.game(false), now(), pairing, identity, destinations, group, link -> { });
 		invite = MapCompanionPanel.smallButton("Copy invite");
 		return new GroupPanel(destinations, group, press, meetups, config, pictures, invite);
 	}
+
+	/** The panel's meetup writes, for a test that waits on one. */
+	private MeetupClient meetups;
 
 	/** Copy invite, which the sidebar hands the Group tab for the card of a group of one. */
 	private JButton invite;
@@ -441,6 +450,71 @@ public class GroupPanelTest
 		until(() -> sent.size() == 2);
 		assertEquals("Route goes to the route endpoint and answers nothing", "/api/companion/route",
 			sent.get(1).url().encodedPath());
+	}
+
+	/**
+	 * The brown fill means this member's pick, and keeps meaning it while the pick is sent and in the
+	 * pause after. The answer pressed is filled while it is on its way, where every answer greyed and
+	 * none was filled; it stays enabled, because FlatLaf paints a disabled button without its own
+	 * background, and ignores presses, and only the other three are disabled.
+	 */
+	@Test
+	public void thePressedAnswerKeepsItsFillWhileItIsSent() throws Exception
+	{
+		java.util.concurrent.CountDownLatch mapAnswers = new java.util.concurrent.CountDownLatch(1);
+		OkHttpClient held = new OkHttpClient.Builder().addInterceptor(chain ->
+		{
+			sent.add(chain.request());
+			try
+			{
+				mapAnswers.await(5, java.util.concurrent.TimeUnit.SECONDS);
+			}
+			catch (InterruptedException e)
+			{
+				Thread.currentThread().interrupt();
+			}
+			return new Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1).code(200).message("")
+				.body(ResponseBody.create(JSON, "{\"eventId\":\"star-hunt\",\"answer\":\"going\"}")).build();
+		}).build();
+		AtomicReference<GroupPanel> panel = new AtomicReference<>();
+		SwingUtilities.invokeAndWait(() -> panel.set(panel(held)));
+		social();
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.get().refresh(true);
+			assertEquals("Maybe is this member's answer", GroupPanel.CHOSEN, named(panel.get(), "group.answer.star-hunt.maybe").getBackground());
+			named(panel.get(), "group.answer.star-hunt.going").doClick();
+		});
+		until(() -> sent.size() == 1);
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.get().refresh(true);
+			AbstractButton going = named(panel.get(), "group.answer.star-hunt.going");
+			assertEquals("the answer on its way is the one filled", GroupPanel.CHOSEN, going.getBackground());
+			assertTrue("and enabled, so its fill is painted", going.isEnabled());
+			for (String other : Arrays.asList("maybe", "no", "on_my_way"))
+			{
+				AbstractButton button = named(panel.get(), "group.answer.star-hunt." + other);
+				assertFalse(other + " waits", button.isEnabled());
+				assertNotEquals(other + " is not filled", GroupPanel.CHOSEN, button.getBackground());
+			}
+			going.doClick();
+		});
+		assertEquals("pressing the pick while it is sent sends nothing", 1, sent.size());
+
+		mapAnswers.countDown();
+		until(() ->
+		{
+			MeetupClient.Said said = meetups.said("answer:star-hunt");
+			return said != null && !said.sending;
+		});
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.get().refresh(true);
+			AbstractButton going = named(panel.get(), "group.answer.star-hunt.going");
+			assertEquals("the map took it, and it stays filled through the pause after", GroupPanel.CHOSEN, going.getBackground());
+			assertTrue(going.isEnabled());
+		});
 	}
 
 	/** Meet here is on the Meetups heading, which is drawn with no meetup under it, so the press is always there. */
