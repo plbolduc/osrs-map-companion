@@ -152,15 +152,39 @@ public class SidebarWordsTest
 	@Test
 	public void aFreshInstallIsNotConnectedRatherThanNotPaired()
 	{
-		assertEquals("Not connected", MapCompanionPanel.statusWords(false, false, Health.IDLE, "Not paired", null));
-		assertEquals("Press Connect", MapCompanionPanel.statusWords(true, false, Health.WAITING, "Press Connect to choose osrs-map.com", "Sunday raids"));
-		assertEquals("Sunday raids", MapCompanionPanel.statusWords(true, true, Health.LIVE, "Connected to osrs-map.com", "Sunday raids"));
-		assertEquals("Logged out", MapCompanionPanel.statusWords(true, true, Health.WAITING, "Logged out", "Sunday raids"));
+		assertEquals("Not connected", MapCompanionPanel.statusWords(false, false, false, null, Health.IDLE, "Not paired", null));
+		assertEquals("Press Connect", MapCompanionPanel.statusWords(true, false, false, null, Health.WAITING, "Press Connect to choose osrs-map.com", "Sunday raids"));
+		assertEquals("Sunday raids", MapCompanionPanel.statusWords(true, true, false, null, Health.LIVE, "Connected to osrs-map.com", "Sunday raids"));
+		assertEquals("Logged out", MapCompanionPanel.statusWords(true, true, false, null, Health.WAITING, "Logged out", "Sunday raids"));
 		/**
 		 * The field asked for "your connection code", which only the map's panel could give. The orange
 		 * button makes a group now and the field is the other way in, so a friend's invite comes first.
 		 */
 		assertEquals("Paste an invite or code", MapCompanionPanel.JOIN_PLACEHOLDER);
+	}
+
+	/**
+	 * Before a group the card is where Connect and Join are answered. While the map is asked it says
+	 * "Connecting…", where it said "Not connected" over a button reading "Connecting…"; and a Connect
+	 * that made no group says why there until the next press, rather than under the invite field,
+	 * where it read as being about the invite. The dot is grey whatever the connection's own state,
+	 * and amber only while a press is asked.
+	 */
+	@Test
+	public void beforeAGroupTheCardAnswersConnect()
+	{
+		assertEquals("Connecting…", MapCompanionPanel.statusWords(false, false, true, null, Health.IDLE, "Not paired", null));
+		assertEquals(ConnectClient.UNREACHABLE,
+			MapCompanionPanel.statusWords(false, false, false, ConnectClient.UNREACHABLE, Health.IDLE, "Not paired", null));
+		/** A code without this map's approval joins through the field too, and is asked the same way. */
+		assertEquals("Connecting…", MapCompanionPanel.statusWords(true, false, true, null, Health.WAITING, "Press Connect", "Sunday raids"));
+		/** Open the map asks as well, and the card goes on naming the group it opens. */
+		assertEquals("Sunday raids", MapCompanionPanel.statusWords(true, true, true, null, Health.LIVE, "Connected to osrs-map.com", "Sunday raids"));
+
+		assertEquals("the login screen's Logged out", Health.IDLE, MapCompanionPanel.dotHealth(false, false, Health.WAITING));
+		assertEquals(Health.IDLE, MapCompanionPanel.dotHealth(false, false, Health.IDLE));
+		assertEquals(Health.WAITING, MapCompanionPanel.dotHealth(false, true, Health.IDLE));
+		assertEquals(Health.LIVE, MapCompanionPanel.dotHealth(true, false, Health.LIVE));
 	}
 
 	/**

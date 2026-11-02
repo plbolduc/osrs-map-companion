@@ -1052,22 +1052,8 @@ public final class HarnessMain
 	{
 		int failures = relay.getConsecutiveFailures();
 		boolean live = relay.isEverSucceeded();
-		String transientError = relay.getLastTransientError();
-		Health next = MapCompanionPlugin.healthFor(live, failures, null);
-		String sentence;
-		if (failures > 0 && live)
-		{
-			sentence = transientError != null && !transientError.isEmpty() ? transientError : "Reconnecting…";
-		}
-		else if (live)
-		{
-			sentence = "Connected";
-		}
-		else
-		{
-			sentence = "Connecting…";
-		}
-		setStatus(next, sentence);
+		setStatus(MapCompanionPlugin.healthFor(live, failures, null),
+			MapCompanionPlugin.healthSentence(live, failures, relay.getLastTransientError(), "Connected"));
 	}
 
 	private void setStatus(Health health, String status)

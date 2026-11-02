@@ -68,6 +68,9 @@ often. A clean run is now 443 tests with no failures or skips.
       an edge pin when panned away. Turn sharing off and log out; pins must disappear.
 - [ ] Recover after an unavailable map; switch groups with a snapshot outstanding and confirm the
       old reply cannot affect the new connection.
+- [ ] With the map unreachable from the start, log in: once a post has failed the status card says
+      *Can't reach the map · retrying* rather than *Connecting…*, and the dot stays amber. With a
+      group saved, turn the plugin off and on at the login screen: the card says *Logged out*.
 - [ ] Replace a clue scroll and compare charged versus uncharged jewellery capabilities.
 - [ ] Verify an upstairs death's Open website opens the correct tile and floor.
 - [ ] Exercise farming, birdhouses, rumours and contracts on a members character.

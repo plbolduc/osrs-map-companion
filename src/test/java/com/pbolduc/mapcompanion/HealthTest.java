@@ -59,6 +59,35 @@ public class HealthTest
 		assertEquals(Health.DEGRADED, MapCompanionPlugin.healthFor(true, 8, null));
 	}
 
+	/**
+	 * A map that has never answered — down, or unreachable from this network — says why once a post
+	 * has failed. "Connecting…" there never changed, and looked exactly like a connection about to
+	 * work. The colour still waits for a post to land.
+	 */
+	@Test
+	public void aMapThatNeverAnsweredSaysWhyOnceAPostHasFailed()
+	{
+		String connected = "Connected to osrs-map.com";
+		assertEquals("Connecting…", MapCompanionPlugin.healthSentence(false, 0, null, connected));
+		assertEquals(RelayClient.UNREACHABLE, MapCompanionPlugin.healthSentence(false, 1, RelayClient.UNREACHABLE, connected));
+		assertEquals(Health.WAITING, MapCompanionPlugin.healthFor(false, 1, null));
+		assertEquals(RelayClient.HAVING_TROUBLE, MapCompanionPlugin.healthSentence(true, 2, RelayClient.HAVING_TROUBLE, connected));
+		assertEquals(connected, MapCompanionPlugin.healthSentence(true, 0, null, connected));
+	}
+
+	/**
+	 * Turned on at the login screen with a group saved, the plugin hears no state change and no tick
+	 * until a login, so what it says first is what the card shows beside the group's name: "Logged
+	 * out", as a client start says it, rather than the word for having no group at all.
+	 */
+	@Test
+	public void aPluginTurnedOnAtTheLoginScreenIsLoggedOut()
+	{
+		assertEquals("Logged out", MapCompanionPlugin.restingStatus(true, false));
+		assertEquals("Connecting…", MapCompanionPlugin.restingStatus(true, true));
+		assertEquals("Not paired", MapCompanionPlugin.restingStatus(false, false));
+	}
+
 	@Test
 	public void errorsOnAFatalRefusal()
 	{
