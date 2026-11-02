@@ -69,6 +69,7 @@ final class PortTasksPanel extends JPanel
 	private static final Color MUTED = ColorScheme.LIGHT_GRAY_COLOR;
 	static final String NEEDS_BOATS = "Turn on Boats and moorings to plan these as one run.";
 	static final String AFTER_FARM_RUN = "Start run after the farm run ends.";
+	static final String BOARD_ONCE = "Board your boat once so the run knows its hold.";
 	private final transient PortTaskReader reader;
 	private final transient MapCompanionConfig config;
 	private final transient FarmRunClient client;
@@ -234,7 +235,11 @@ final class PortTasksPanel extends JPanel
 		return part + " · " + of + " still owed · hand in at " + to;
 	}
 
-	/** Free and unreadable slots, and the hold; the order is Start run's, beneath it. */
+	/**
+	 * Unreadable tasks, free slots and what the hold fits; the order is Start run's, beneath it. A
+	 * hold not seen yet is a step to take rather than a fact, so it is said as the step. The hold is
+	 * a capacity, and "carries 30 crates" reads as cargo aboard.
+	 */
 	static String footer(List<PortTaskReader.Slot> slots, @Nullable Integer hold)
 	{
 		List<String> said = new ArrayList<>();
@@ -242,15 +247,19 @@ final class PortTasksPanel extends JPanel
 		long unknown = slots.stream().filter(s -> PortTaskReader.UNKNOWN.equals(s.state)).count();
 		if (unknown > 0)
 		{
-			said.add(unknown + (unknown == 1 ? " slot" : " slots") + " couldn't be read");
+			said.add(unknown + (unknown == 1 ? " task" : " tasks") + " couldn't be read");
 		}
 		if (free > 0)
 		{
-			said.add(free + " free");
+			said.add(free + (free == 1 ? " slot" : " slots") + " free");
 		}
-		said.add(hold == null ? "hold not seen yet" : "hold carries " + hold + " crates");
+		if (hold != null)
+		{
+			said.add("hold fits " + hold + " crates");
+		}
 		String line = String.join(" · ", said);
-		return Character.toUpperCase(line.charAt(0)) + line.substring(1) + ".";
+		line = line.isEmpty() ? "" : Character.toUpperCase(line.charAt(0)) + line.substring(1) + ".";
+		return hold != null ? line : (line.isEmpty() ? "" : line + " ") + BOARD_ONCE;
 	}
 
 	private static String crates(int n)

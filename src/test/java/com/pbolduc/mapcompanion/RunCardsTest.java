@@ -41,6 +41,8 @@ import javax.swing.AbstractButton;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.ListCellRenderer;
 import javax.swing.SwingUtilities;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.ui.ColorScheme;
@@ -780,7 +782,123 @@ public class RunCardsTest
 	/** Pick a kind of run in the farm card's picker, as the player does. */
 	private void choose(String kind) throws Exception
 	{
-		SwingUtilities.invokeAndWait(() -> combo(farm).setSelectedItem(kind));
+		choose(farm, kind);
+	}
+
+	private static void choose(Component card, String kind) throws Exception
+	{
+		SwingUtilities.invokeAndWait(() -> combo(card).setSelectedItem(kind));
+	}
+
+	/**
+	 * A birdhouse said "Done · seeded sighting", and before that, in 10px, "Tracked by Time Tracking
+	 * sightings"; every checklist teleport said "· 1 leg". Time Tracking is still named as the
+	 * evidence, in the words a player uses, and a teleport says its legs only when it serves several.
+	 */
+	@Test
+	public void aRunSaysItsEvidenceInThePlayersWords() throws Exception
+	{
+		RelayResponse.FarmRun herbs = run("/contract/farm-run.json");
+		RelayResponse.FarmStop birdhouse = herbs.stops.get(2);
+		assertEquals("Done · seen by Time Tracking", RunView.status(new FarmRunState.View(herbs, Collections.singleton(3),
+			Collections.emptySet(), Collections.emptySet(), true, 0, 1, null), birdhouse));
+
+		birdhouse.done = false;
+		herbs.bring.get(0).uses = 2;
+		state.acceptFor(identity.id(), EPOCH, herbs, 1, System.currentTimeMillis());
+		refresh();
+		SwingUtilities.invokeAndWait(() -> opener(farm).doClick());
+		refresh();
+		List<String> words = shown(farm);
+		assertTrue(words.toString(), words.contains(RunView.BIRDHOUSE_PENDING));
+		assertTrue(words.toString(), words.contains("Explorer's ring 2 · 2 legs"));
+		assertTrue(words.toString(), words.contains("Catherby tablet"));
+		float[] size = new float[1];
+		SwingUtilities.invokeAndWait(() -> size[0] = label(farm, RunView.BIRDHOUSE_PENDING).getFont().getSize2D());
+		assertEquals("as large as the lines around it", 11f, size[0], 0f);
+	}
+
+	/**
+	 * While a run was planned the card was one full-width End run over "Planning run…", and the run
+	 * chosen was gone. It names the run, and the button that calls the plan off says so.
+	 */
+	@Test
+	public void aRunBeingPlannedIsNamedAndOffersCancel() throws Exception
+	{
+		FarmRunClient waiting = new FarmRunClient(neverAnswering(), gson, game.client(), thread, pairing, identity,
+			state, destinations, route);
+		FarmRunPanel[] card = new FarmRunPanel[1];
+		SwingUtilities.invokeAndWait(() ->
+		{
+			card[0] = new FarmRunPanel(state, waiting, follower, route, shortest, sprites, config);
+			card[0].refresh(true);
+		});
+		choose(card[0], "Herb run");
+		press(card[0], "Start run");
+		SwingUtilities.invokeAndWait(() -> card[0].refresh(true));
+		List<String> planning = shown(card[0]);
+		assertTrue(planning.toString(), planning.contains("Planning Herb run…"));
+		assertTrue(planning.toString(), planning.contains("Cancel"));
+		assertFalse(planning.toString(), planning.contains("End run"));
+		assertTrue(enabled(card[0], "Cancel"));
+	}
+
+	/** "Ready now ▾" alone read as a status. Closed, the picker names what it picks; its list stays plain. */
+	@Test
+	public void theClosedPickerNamesWhatItPicks() throws Exception
+	{
+		String[] drawn = new String[2];
+		SwingUtilities.invokeAndWait(() ->
+		{
+			@SuppressWarnings("unchecked")
+			ListCellRenderer<Object> rows = (ListCellRenderer<Object>) combo(farm).getRenderer();
+			drawn[0] = ((JLabel) rows.getListCellRendererComponent(new JList<>(), "Ready now", -1, false, false)).getText();
+			drawn[1] = ((JLabel) rows.getListCellRendererComponent(new JList<>(), "Ready now", 0, false, false)).getText();
+		});
+		assertEquals("Run: Ready now", drawn[0]);
+		assertEquals("Ready now", drawn[1]);
+	}
+
+	/** Calls queued on a dispatcher that never runs them: a press stays in flight for the whole test. */
+	private static OkHttpClient neverAnswering()
+	{
+		AbstractExecutorService never = new AbstractExecutorService()
+		{
+			@Override
+			public void execute(Runnable command)
+			{
+			}
+
+			@Override
+			public void shutdown()
+			{
+			}
+
+			@Override
+			public List<Runnable> shutdownNow()
+			{
+				return Collections.emptyList();
+			}
+
+			@Override
+			public boolean isShutdown()
+			{
+				return false;
+			}
+
+			@Override
+			public boolean isTerminated()
+			{
+				return false;
+			}
+
+			@Override
+			public boolean awaitTermination(long timeout, TimeUnit unit)
+			{
+				return true;
+			}
+		};
+		return new OkHttpClient.Builder().dispatcher(new Dispatcher(never)).build();
 	}
 
 	private static JComboBox<?> combo(Component component)

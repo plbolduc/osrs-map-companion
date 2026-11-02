@@ -175,17 +175,23 @@ final class FarmRunClient
 
 	void start(String kind)
 	{
-		clientThread.invokeLater(() -> press(kind, false, false));
+		start(kind, null);
+	}
+
+	/** @param name the run as the picker names it, said while it is planned: "Planning Herb run…" */
+	void start(String kind, @Nullable String name)
+	{
+		clientThread.invokeLater(() -> press(kind, name, false, false));
 	}
 
 	void reroute()
 	{
-		clientThread.invokeLater(() -> press(null, true, false));
+		clientThread.invokeLater(() -> press(null, null, true, false));
 	}
 
 	void end()
 	{
-		clientThread.invokeLater(() -> press(null, false, true));
+		clientThread.invokeLater(() -> press(null, null, false, true));
 	}
 
 	synchronized boolean ready()
@@ -207,7 +213,7 @@ final class FarmRunClient
 	}
 
 	/** Client thread, including the local stop; nothing reads a game tile in a network callback. */
-	private void press(@Nullable String start, boolean reroute, boolean end)
+	private void press(@Nullable String start, @Nullable String name, boolean reroute, boolean end)
 	{
 		synchronized (this)
 		{
@@ -290,7 +296,7 @@ final class FarmRunClient
 			}
 			ticket = new Ticket(lifetime, end, held, member, port);
 			active = ticket;
-			said = new Said(true, end ? "Ending run…" : "Planning run…", lifetime, -1, port);
+			said = new Said(true, end ? "Ending run…" : name != null ? "Planning " + name + "…" : "Planning run…", lifetime, -1, port);
 			call = http.newCall(request(server, code, member, secret, question, end, id));
 			call.enqueue(new Callback()
 			{

@@ -36,6 +36,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.ListCellRenderer;
 import net.runelite.client.ui.ColorScheme;
 
 /**
@@ -55,6 +56,7 @@ final class FarmRunPanel extends JPanel
 	static final String AFTER_PORT_RUN = "Start a farm run after the port run ends.";
 	static final String NEEDS_PATCHES = "Ready now reads your patches. Turn on Farming patches in Settings.";
 	static final String NEEDS_CONTRACT = "Turn on Farming contracts in Settings to plan your contract.";
+	static final String PICKED = "Run: ";
 	private static final String[][] STARTS =
 	{
 		{"ready-now", "Ready now"}, {"preset:herb", "Herb run"}, {"preset:tree", "Tree run"},
@@ -108,6 +110,10 @@ final class FarmRunPanel extends JPanel
 		}
 		kind.setFont(kind.getFont().deriveFont(11f));
 		kind.setToolTipText("Choose a run the map can build from your character's shared readings");
+		/* Closed, the picker names what it picks: "Ready now" alone reads as a status. The list stays plain. */
+		ListCellRenderer<? super String> rows = kind.getRenderer();
+		kind.setRenderer((list, value, index, selected, focused) ->
+			rows.getListCellRendererComponent(list, index < 0 && value != null ? PICKED + value : value, index, selected, focused));
 		picker.add(kind, BorderLayout.CENTER);
 		picker.add(start, BorderLayout.SOUTH);
 		picker.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
@@ -125,10 +131,10 @@ final class FarmRunPanel extends JPanel
 
 		start.addActionListener(e ->
 		{
-			String chosen = STARTS[kind.getSelectedIndex()][0];
-			if (needs(chosen, config) == null)
+			String[] chosen = STARTS[kind.getSelectedIndex()];
+			if (needs(chosen[0], config) == null)
 			{
-				client.start(chosen);
+				client.start(chosen[0], chosen[1]);
 			}
 		});
 		/* At once, not at the next refresh: a pick that needs a choice off must not leave Start pressable. */
