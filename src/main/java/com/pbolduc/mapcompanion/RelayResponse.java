@@ -286,7 +286,7 @@ public class RelayResponse
 		 *
 		 * This is the field that closes the loop the map was built around: a shooting star is at a
 		 * place <i>and</i> on a world, and half that answer is not an answer. It is <b>displayed</b>
-		 * — see {@link DestinationMarker} and {@link MapCompanionPanel} — and never acted on: the plugin does not hop, so the player uses the
+		 * — see {@link DestinationMarker} and {@link NowCards} — and never acted on: the plugin does not hop, so the player uses the
 		 * game's own world switcher.
 		 */
 		public Integer world;
