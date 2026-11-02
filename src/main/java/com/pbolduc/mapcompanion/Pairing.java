@@ -198,6 +198,23 @@ public class Pairing
 		return url.toString().replaceAll("/+$", "");
 	}
 
+	/**
+	 * An address as a person types it, with the scheme they leave off put back: https for a map
+	 * anywhere, and http for one on this machine, the only place {@link #normalizeServer} lets a map
+	 * be plain http. An address with a scheme of its own, or nothing at all, is left as it is for
+	 * normalizeServer to judge, so this widens nothing that rule refuses.
+	 */
+	static String withScheme(@Nullable String typed)
+	{
+		String value = typed == null ? "" : typed.trim();
+		if (value.isEmpty() || value.contains("://"))
+		{
+			return value;
+		}
+		HttpUrl local = HttpUrl.parse("http://" + value);
+		return (local != null && isLoopback(local.host()) ? "http://" : "https://") + value;
+	}
+
 	@Nullable
 	public String serverUrl()
 	{

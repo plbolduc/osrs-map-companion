@@ -60,6 +60,7 @@ import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
+import javax.swing.Timer;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.util.LinkBrowser;
@@ -166,11 +167,26 @@ final class ConnectCard extends JPanel
 	@Nullable
 	private String connectFailed;
 
-	/*
-	 * The group: its invite and its switch when there is one, the join field when there is not.
+	/**
+	 * The foot of the Group tab: Copy invite and Switch ▾, the line that answers them, and the join
+	 * field while the menu's Join another group… has it open. Each press is answered under itself,
+	 * where the player is looking, which a line above the tabs is not once the tab has scrolled.
 	 */
-	final JPanel groupActions = row(ColorScheme.DARK_GRAY_COLOR);
+	final JPanel groupActions = column(ColorScheme.DARK_GRAY_COLOR);
+	private final JPanel groupButtons = row(ColorScheme.DARK_GRAY_COLOR);
 	private List<JButton> shownGroupActions = new ArrayList<>();
+	/** What Copy invite and the menu's Rename group… said, under the row they are pressed in. */
+	private final JLabel groupMessage = new JLabel();
+	/** What the status card's own Rename group… said, in the card. */
+	private final JLabel cardMessage = new JLabel();
+	/** The group the two lines above were said about: a line about one group is not news in the next. */
+	private String saidFor = "";
+	/**
+	 * Copy invite says Copied for a moment when the clipboard has the invite, on the button itself,
+	 * which in a group of one sits in the card at the top of the tab, far from the line under the row.
+	 */
+	private final Timer copiedFlash = new Timer(2000, e -> showCopied(false));
+	static final String COPIED = "Copied";
 	/**
 	 * A size down, like every other button that is not <i>Open the map</i>. At the default size
 	 * these two were as large as the one filled button, so its colour was the only thing marking
@@ -194,6 +210,15 @@ final class ConnectCard extends JPanel
 	private final JPanel knownGroupsRow;
 	boolean joinOpen = false;
 	private final JPanel joinBlock;
+	/**
+	 * The field and its line, as one piece that sits in one of two places: under the orange button
+	 * before a group, after a new map address and while the map refuses the group, where nothing else
+	 * offers a way in; and in the Group tab under Copy invite and Switch ▾ while the menu that opened
+	 * it is what the player pressed.
+	 */
+	private final JPanel field = column(ColorScheme.DARK_GRAY_COLOR);
+	private final JPanel fieldAbove = column(ColorScheme.DARK_GRAY_COLOR);
+	private final JPanel fieldBelow = column(ColorScheme.DARK_GRAY_COLOR);
 
 	/**
 	 * The join field, and what it says back.
@@ -285,9 +310,14 @@ final class ConnectCard extends JPanel
 		nameLink.setName("companion.rename");
 		nameLink.setForeground(ColorScheme.BRAND_ORANGE);
 		nameLink.setToolTipText("Change the name everybody in the group sees");
-		nameLink.addActionListener(e -> renameGroup());
+		nameLink.addActionListener(e -> renameGroup(true));
 		nameLink.setVisible(false);
 		status.add(nameLink);
+		cardMessage.setName("companion.cardMessage");
+		cardMessage.setFont(cardMessage.getFont().deriveFont(11f));
+		cardMessage.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+		cardMessage.setVisible(false);
+		status.add(left(cardMessage));
 		add(status);
 		add(gap(6, ColorScheme.DARK_GRAY_COLOR));
 
@@ -303,8 +333,10 @@ final class ConnectCard extends JPanel
 
 		/* The connection is reachable from every tab, including after changing the server. */
 		joinBlock = buildJoinBlock();
-		add(joinBlock);
-		add(left(joinMessage));
+		field.add(joinBlock);
+		field.add(left(joinMessage));
+		fieldAbove.add(field);
+		add(fieldAbove);
 		/* Between the field and the tabs, which follow it only while the map refuses the group. */
 		refusedGap.setVisible(false);
 		add(refusedGap);
@@ -313,6 +345,17 @@ final class ConnectCard extends JPanel
 		knownGroupsRow.setBorder(new EmptyBorder(4, 0, 0, 0));
 		knownGroupsRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, knownGroupsButton.getPreferredSize().height + 4));
 		add(left(knownGroupsRow));
+
+		groupActions.add(left(groupButtons));
+		groupMessage.setName("group.message");
+		groupMessage.setFont(groupMessage.getFont().deriveFont(11f));
+		groupMessage.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+		groupMessage.setVisible(false);
+		groupActions.add(left(groupMessage));
+		fieldBelow.setBorder(new EmptyBorder(6, 0, 0, 0));
+		fieldBelow.setVisible(false);
+		groupActions.add(fieldBelow);
+		copiedFlash.setRepeats(false);
 
 		openMapButton.setName("companion.orange");
 		openMapButton.addActionListener(e -> pressOrange());
@@ -509,7 +552,9 @@ final class ConnectCard extends JPanel
 		String server = pairing.serverUrl();
 		if (!pairing.approvedMap(server) && !confirmMap())
 		{
-			say("Connection cancelled.");
+			/* Connect's answer, on the card beside it as its refusals are, rather than under the field. */
+			refused("Connection cancelled.", true);
+			refresh.run();
 			return;
 		}
 		ask();
@@ -737,6 +782,39 @@ final class ConnectCard extends JPanel
 		joinMessage.setVisible(false);
 	}
 
+	/** One line under Copy invite and Switch ▾, for what was pressed there. */
+	private void sayUnderGroup(String message)
+	{
+		saidFor = pairingCode();
+		setWrapped(groupMessage, message);
+		groupMessage.setVisible(true);
+	}
+
+	/** One line in the status card, under the Rename group… link that was pressed. */
+	private void sayOnCard(String message)
+	{
+		saidFor = pairingCode();
+		setWrapped(cardMessage, message, CARD_TEXT_WIDTH);
+		cardMessage.setVisible(true);
+	}
+
+	/**
+	 * Copy invite's own words for a moment, while the clipboard has the invite, or its name back.
+	 * Only its own Copied is put back: a press since has the button saying something else.
+	 */
+	private void showCopied(boolean copied)
+	{
+		if (copied)
+		{
+			copyInviteButton.setText(COPIED);
+			copiedFlash.restart();
+		}
+		else if (COPIED.equals(copyInviteButton.getText()))
+		{
+			copyInviteButton.setText("Copy invite");
+		}
+	}
+
 	/**
 	 * The remembered groups, as a menu under the button that opened it.
 	 *
@@ -791,7 +869,7 @@ final class ConnectCard extends JPanel
 			{
 				JMenuItem rename = groupMenuItem(RENAME);
 				rename.setToolTipText("Change the name everybody in the group sees");
-				rename.addActionListener(e -> renameGroup());
+				rename.addActionListener(e -> renameGroup(false));
 				menu.add(rename);
 			}
 		}
@@ -830,16 +908,20 @@ final class ConnectCard extends JPanel
 	 * ({@link #nameField}): a limit kept while typing has nothing to explain afterwards, where a
 	 * refusal would close the dialog on what was typed and say why somewhere else. An empty name
 	 * sends nothing, as Cancel does.
+	 *
+	 * <p>What it says is said where it was pressed: in the status card for the card's own link, and
+	 * under Copy invite and Switch ▾ for the menu's row.
 	 */
-	private void renameGroup()
+	void renameGroup(boolean fromCard)
 	{
+		Consumer<String> answer = fromCard ? this::sayOnCard : this::sayUnderGroup;
 		String server = pairing.serverUrl();
 		String code = pairingCode();
 		String member = pairing.memberWithSecret(server, code, identity.id());
 		String secret = member == null ? null : pairing.secret(server, code, member);
 		if (server == null || member == null || secret == null)
 		{
-			say("Log in once while connected, then rename the group.");
+			answer.accept("Log in once while connected, then rename the group.");
 			return;
 		}
 		JTextField typed = nameField(pairing.name(code));
@@ -868,17 +950,17 @@ final class ConnectCard extends JPanel
 		{
 			return;
 		}
-		say("Renaming…");
+		answer.accept("Renaming…");
 		connectClient.rename(server, code, member, secret, name, outcome -> SwingUtilities.invokeLater(() ->
 		{
 			if (outcome.name != null && server.equals(pairing.serverUrl()) && code.equalsIgnoreCase(pairingCode()))
 			{
 				pairing.rememberName(code, outcome.name);
-				say("Renamed to " + outcome.name + ".");
+				answer.accept("Renamed to " + outcome.name + ".");
 			}
 			else
 			{
-				say(outcome.message != null ? outcome.message : ConnectClient.FAILED);
+				answer.accept(outcome.message != null ? outcome.message : ConnectClient.FAILED);
 			}
 			refresh.run();
 		}));
@@ -919,8 +1001,8 @@ final class ConnectCard extends JPanel
 	}
 
 	/**
-	 * The groups menu's join row: it opens the code field above the tabs, and while that is open it
-	 * closes it again, as the fold it replaced did.
+	 * The groups menu's join row: it opens the code field under Copy invite and Switch ▾, where the
+	 * menu was opened, and while that is open it closes it again, as the fold it replaced did.
 	 */
 	static String joinMenuWords(boolean open)
 	{
@@ -1163,8 +1245,15 @@ final class ConnectCard extends JPanel
 			/* Always, now that it also holds Join another group. */
 			groupRow.add(switchButton);
 		}
-		shownGroupActions = syncRow(groupActions, groupRow, shownGroupActions);
-		groupActions.setVisible(!groupRow.isEmpty());
+		shownGroupActions = syncRow(groupButtons, groupRow, shownGroupActions);
+		groupButtons.setVisible(!groupRow.isEmpty());
+		groupActions.setVisible(paired);
+		/* A line about one group is not news in the next, nor after leaving it. */
+		if (!paired || !saidFor.equalsIgnoreCase(pairingCode()))
+		{
+			groupMessage.setVisible(false);
+			cardMessage.setVisible(false);
+		}
 		/*
 		 * A refusal the field can answer opens it under the card that says so, as before a group: the
 		 * field Join another group… opens, with its heading, because it is the way back in.
@@ -1179,6 +1268,12 @@ final class ConnectCard extends JPanel
 		{
 			setWrapped(nextStep, step);
 		}
+		/* A line about a field that has folded away has nothing to point at. */
+		if (!joinBlock.isVisible())
+		{
+			joinMessage.setVisible(false);
+		}
+		placeField(ready && joinOpen && step == null);
 		joinButton.setEnabled(!asking);
 		openMapButton.setText(asking ? (ready ? "Opening…" : "Connecting…") : ready ? OPEN_MAP : CONNECT);
 		openMapButton.setEnabled(!asking);
@@ -1188,6 +1283,26 @@ final class ConnectCard extends JPanel
 			: pasted != null ? "Join the group this " + (pasted.invite != null ? "invite" : "code") + " is for"
 			: paired ? "Connect to this group again"
 			: "Make a group for you on " + pairing.serverLabel() + ". Play alone, or invite friends to it.");
+	}
+
+	/**
+	 * The field where it is wanted: in the Group tab under the group's buttons while the menu there
+	 * has it open, and under the orange button otherwise. It is one piece moved between two places,
+	 * so what was typed in it and what it said go with it.
+	 */
+	private void placeField(boolean below)
+	{
+		JPanel slot = below ? fieldBelow : fieldAbove;
+		fieldBelow.setVisible(below);
+		if (field.getParent() == slot)
+		{
+			return;
+		}
+		slot.add(field);
+		fieldAbove.revalidate();
+		fieldAbove.repaint();
+		fieldBelow.revalidate();
+		fieldBelow.repaint();
 	}
 
 	/**
@@ -1338,10 +1453,11 @@ final class ConnectCard extends JPanel
 		String memberId = identity.id();
 		if (memberId == null)
 		{
-			say("Log in to a character to copy an invite.");
+			sayUnderGroup("Log in to a character to copy an invite.");
 			return;
 		}
 		copyingInvite = true;
+		copiedFlash.stop();
 		copyInviteButton.setEnabled(false);
 		copyInviteButton.setText("Asking the map…");
 		String secret = pairing.secret(server, code, memberId);
@@ -1401,7 +1517,7 @@ final class ConnectCard extends JPanel
 		String message = inviteText(invite, status, heldSecret, mapUrl.get(), code);
 		if (message == null)
 		{
-			say(INVITE_FAILED);
+			sayUnderGroup(INVITE_FAILED);
 			return;
 		}
 		boolean linked = invite != null && invite.url != null && !invite.url.isEmpty();
@@ -1414,10 +1530,11 @@ final class ConnectCard extends JPanel
 		catch (RuntimeException e)
 		{
 			log.debug("could not copy invite", e);
-			say("Couldn't put the invite on the clipboard.");
+			sayUnderGroup("Couldn't put the invite on the clipboard.");
 			return;
 		}
-		say("Invite copied."
+		showCopied(true);
+		sayUnderGroup("Invite copied."
 			+ (linked ? describeExpiry(invite.expiresAt, System.currentTimeMillis()) : ""));
 	}
 
