@@ -29,11 +29,9 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.function.IntConsumer;
 import javax.annotation.Nullable;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -46,8 +44,11 @@ import net.runelite.client.ui.ColorScheme;
  * The way to a destination, step by step, inside the destination's card.
  *
  * <p>The website's own words, numbered as the website numbers them, so a player reading the card
- * on the map and this list in the game reads one route. The current step is marked and drawn
- * bright; the steps behind it go grey; the ones ahead stay as they are. The way being followed is
+ * on the map and this list in the game reads one route. The numbers stand in a column of their own,
+ * as the website's journey row puts them, and the words of every step start at one x, wrapped lines
+ * and details under the title's first letter. The step you are on has its number in amber, the
+ * colour its pin has on the world map, and its title bright; a step behind it is its title alone, in
+ * grey; the ones ahead stay as they are. A ▸ or ▾ is only ever a fold. The way being followed is
  * named above its steps, and the others the map offered fold behind one line, as the card's closed
  * row folds them — a press on one shows its steps instead.
  *
@@ -81,13 +82,11 @@ final class RouteStepsView extends JPanel
 {
 	private static final long serialVersionUID = 1L;
 	private static final int WIDTH = MapCompanionPanel.CARD_TEXT_WIDTH;
-	/** Where a step's detail starts: under its words, past its number. */
-	private static final int INDENT = 14;
+	/** The step numbers' column: two digits, right-aligned, so 9 and 10 end at one x. */
+	private static final int NUMBER = 14;
 	/** A step's picture: the size the website's chips draw a sprite, and the friends list's news. */
 	static final int PICTURE = 16;
 	private static final int PICTURE_GAP = 5;
-	/** The picture's place while the client's cache answers. */
-	private static final ImageIcon NO_PICTURE_YET = new ImageIcon(new BufferedImage(PICTURE, PICTURE, BufferedImage.TYPE_INT_ARGB));
 	private static final Color DONE = ColorScheme.MEDIUM_GRAY_COLOR;
 	private static final Color AHEAD = ColorScheme.LIGHT_GRAY_COLOR;
 	/** An unmet gate, in the Slayer list's colour for one. */
@@ -199,25 +198,16 @@ final class RouteStepsView extends JPanel
 		steps.removeAll();
 		List<RelayResponse.RouteStep> list = view.steps();
 		int sails = sailingRow(current);
+		/* The picture's place is kept on every step once one has a picture, so the words start at one x. */
+		boolean slot = false;
+		for (RelayResponse.RouteStep step : list)
+		{
+			slot |= sprites != null && (step.itemId != null || step.spriteId != null);
+		}
 		for (int i = 0; i < list.size(); i++)
 		{
 			int place = i < view.step ? -1 : i == view.step ? 0 : 1;
-			JComponent row = step(i, list.get(i), place, sprites);
-			if (i == sails && current.voyage.gates != null)
-			{
-				for (RelayResponse.Gate gate : current.voyage.gates)
-				{
-					RelayResponse.RouteStep sailed = list.get(i);
-					boolean pictured = sprites != null && (sailed.itemId != null || sailed.spriteId != null);
-					JLabel said = under(gateLine(gate), place, pictured ? PICTURE + PICTURE_GAP : 0);
-					if ("unmet".equals(gate.tier) && place >= 0)
-					{
-						said.setForeground(UNMET);
-					}
-					row.add(said);
-				}
-			}
-			steps.add(row);
+			steps.add(step(i, list.get(i), place, slot, sprites, i == sails ? current.voyage.gates : null));
 		}
 
 		boat.setVisible(view.boatAway != null);
@@ -266,61 +256,91 @@ final class RouteStepsView extends JPanel
 	}
 
 	/**
-	 * One step: its picture, number and words, then what the card prints under it.
+	 * One step, as one row: its number in the numbers' column, the picture's place when the way keeps
+	 * one, then its words, so a wrapped title and the lines under it start under the title's first
+	 * letter. A step behind the current one is its title alone: what is done stops pushing the step
+	 * being walked down the card.
 	 *
 	 * @param place negative behind the current step, zero for it, positive ahead of it
+	 * @param slot whether every step of the way keeps a picture's place
+	 * @param gates a voyage's docking gates, under the row that sails, or null
 	 */
-	private static JComponent step(int index, RelayResponse.RouteStep step, int place, @Nullable GameSprites sprites)
+	private static JComponent step(int index, RelayResponse.RouteStep step, int place, boolean slot,
+		@Nullable GameSprites sprites, @Nullable List<RelayResponse.Gate> gates)
 	{
-		JPanel row = MapCompanionPanel.column(ColorScheme.DARKER_GRAY_COLOR);
-		row.setBorder(new EmptyBorder(3, 0, 0, 0));
+		/* The digit alone, in the amber of the current step's pin on the world map. */
+		JLabel number = label(12f, place == 0 ? MapPin.AMBER : place < 0 ? DONE : AHEAD);
+		number.setText(String.valueOf(index + 1));
+		number.setHorizontalAlignment(SwingConstants.RIGHT);
+		number.setVerticalAlignment(SwingConstants.TOP);
 		JLabel title = label(12f, place == 0 ? Color.WHITE : place < 0 ? DONE : AHEAD);
 		if (place == 0)
 		{
+			number.setFont(number.getFont().deriveFont(Font.BOLD));
 			title.setFont(title.getFont().deriveFont(Font.BOLD));
 			title.setToolTipText("The step you are on");
 		}
-		/*
-		 * The words are laid out at once beside an empty slot of the picture's width, and the picture
-		 * fills it when the client's cache answers, so the row never reflows under the pointer.
-		 */
-		boolean pictured = sprites != null && (step.itemId != null || step.spriteId != null);
-		int beside = pictured ? PICTURE + PICTURE_GAP : 0;
-		if (pictured)
+		Dimension column = new Dimension(NUMBER, number.getPreferredSize().height);
+		number.setPreferredSize(column);
+		number.setMinimumSize(column);
+		JComponent lead = number;
+		if (slot)
 		{
-			title.setIconTextGap(PICTURE_GAP);
-			title.setIcon(NO_PICTURE_YET);
-			if (step.itemId != null)
+			JLabel picture = pictureSlot();
+			picture.setName("route.step.picture");
+			picture.setVerticalAlignment(SwingConstants.TOP);
+			if (sprites != null && (step.itemId != null || step.spriteId != null))
 			{
-				sprites.item(title, step.itemId, PICTURE);
+				draw(picture, step, sprites);
 			}
-			else
-			{
-				sprites.sprite(title, step.spriteId, PICTURE);
-			}
+			/* Faded behind the current step, as the world map fades the pins of steps done. */
+			picture.setEnabled(place >= 0);
+			JPanel both = new JPanel(new BorderLayout(PICTURE_GAP, 0));
+			both.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+			both.add(number, BorderLayout.WEST);
+			both.add(picture, BorderLayout.CENTER);
+			lead = both;
 		}
-		MapCompanionPanel.setWrapped(title, stepLine(index, step, place == 0), WIDTH - beside);
-		row.add(MapCompanionPanel.left(title));
-		if (step.detail != null)
+		int width = WIDTH - NUMBER - PICTURE_GAP - (slot ? PICTURE + PICTURE_GAP : 0);
+		JPanel words = MapCompanionPanel.column(ColorScheme.DARKER_GRAY_COLOR);
+		MapCompanionPanel.setWrapped(title, step.title, width);
+		words.add(MapCompanionPanel.left(title));
+		if (place >= 0 && step.detail != null)
 		{
-			row.add(under(step.detail, place, beside));
+			words.add(under(step.detail, width));
 		}
-		if (step.notes != null)
+		if (place >= 0 && step.notes != null)
 		{
 			for (String note : step.notes)
 			{
-				row.add(under(note, place, beside));
+				words.add(under(note, width));
 			}
 		}
-		return row;
+		if (place >= 0 && gates != null)
+		{
+			for (RelayResponse.Gate gate : gates)
+			{
+				JLabel said = under(gateLine(gate), width);
+				if ("unmet".equals(gate.tier))
+				{
+					said.setForeground(UNMET);
+				}
+				words.add(said);
+			}
+		}
+		JPanel row = new JPanel(new BorderLayout(PICTURE_GAP, 0));
+		row.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		row.setBorder(new EmptyBorder(3, 0, 0, 0));
+		row.add(lead, BorderLayout.WEST);
+		row.add(words, BorderLayout.CENTER);
+		return MapCompanionPanel.left(row);
 	}
 
-	/** A line under a step, past its number and, on a step with a picture, past the picture too. */
-	private static JLabel under(String text, int place, int beside)
+	/** A line under a step's title, in its column: its detail, a note, a docking gate. */
+	private static JLabel under(String text, int width)
 	{
-		JLabel label = label(11f, place < 0 ? DONE : AHEAD);
-		label.setBorder(new EmptyBorder(0, INDENT + beside, 0, 0));
-		MapCompanionPanel.setWrapped(label, text, WIDTH - INDENT - beside);
+		JLabel label = label(11f, AHEAD);
+		MapCompanionPanel.setWrapped(label, text, width);
 		return MapCompanionPanel.left(label);
 	}
 
@@ -427,10 +447,13 @@ final class RouteStepsView extends JPanel
 		return "Your boat is no longer at " + port + ". Reroute plans from where it is.";
 	}
 
-	/** "▸ 2. Walk 12 tiles to the bank": the website's number, and a mark on the step you are on. */
-	static String stepLine(int index, RelayResponse.RouteStep step, boolean current)
+	/**
+	 * "2. Walk 12 tiles to the bank": the website's number and the step, on one line, where the step
+	 * is said outside this view's own number column — the box over the game.
+	 */
+	static String stepLine(int index, RelayResponse.RouteStep step)
 	{
-		return (current ? "▸ " : "") + (index + 1) + ". " + step.title;
+		return (index + 1) + ". " + step.title;
 	}
 
 	/** The way being followed, with its length where the map priced one. */

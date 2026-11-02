@@ -39,10 +39,12 @@ import java.util.List;
 import java.util.Map;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.SwingConstants;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.ui.ColorScheme;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
@@ -81,14 +83,30 @@ public class RouteStepsViewTest
 		view.show(route.view());
 	}
 
+	/**
+	 * The numbers stand in a column of their own, the digit alone, and the step you are on has its
+	 * number in bold amber, its pin's colour on the world map, with its title bold and white. This
+	 * pinned "▸ 1. Lumbridge Home Teleport" as one line: the mark the folds also use, before a
+	 * number that started at a different x on every kind of row.
+	 */
 	@Test
 	public void numbersTheStepsMarksTheCurrentOneAndFoldsTheOtherWays() throws IOException
 	{
 		receive();
 		assertEquals(
-			"Lumbridge Home Teleport · 52 tiles | ▸ 1. Lumbridge Home Teleport | Standard spellbook"
-			+ " | Ten seconds to cast, and a combat hit stops it | 2. Walk 12 tiles to the bank | ▸ 3 other ways",
+			"Lumbridge Home Teleport · 52 tiles | 1 | Lumbridge Home Teleport | Standard spellbook"
+			+ " | Ten seconds to cast, and a combat hit stops it | 2 | Walk 12 tiles to the bank | ▸ 3 other ways",
 			shown());
+		/* Colours, not weights: the test's look and feel draws every label bold already. */
+		JLabel one = label("1");
+		assertEquals(MapPin.AMBER, one.getForeground());
+		assertEquals("right-aligned, so 9 and 10 end at one x", SwingConstants.RIGHT, one.getHorizontalAlignment());
+		JLabel title = label("Lumbridge Home Teleport");
+		assertEquals(Color.WHITE, title.getForeground());
+		assertEquals("The step you are on", title.getToolTipText());
+		assertEquals(ColorScheme.LIGHT_GRAY_COLOR, label("2").getForeground());
+		assertSame("a step's detail and notes start under its title's first letter",
+			title.getParent(), label("Standard spellbook").getParent());
 	}
 
 	/**
@@ -102,7 +120,14 @@ public class RouteStepsViewTest
 		receive();
 		route.advance(new WorldPoint(3222, 3218, 0));
 		view.show(route.view());
-		assertTrue(shown(), shown().contains("▸ 2. Walk 12 tiles to the bank"));
+		/* A step behind is its title alone, so the step being walked is the first bright line. */
+		assertEquals("Lumbridge Home Teleport · 52 tiles | 1 | Lumbridge Home Teleport | 2 | Walk 12 tiles to the bank"
+			+ " | ▸ 3 other ways", shown());
+		assertEquals(ColorScheme.MEDIUM_GRAY_COLOR, label("1").getForeground());
+		assertEquals(MapPin.AMBER, label("2").getForeground());
+		List<JLabel> places = named("route.step.picture");
+		assertFalse("the passed teleport's picture fades, as its pin does", places.get(0).isEnabled());
+		assertTrue(places.get(1).isEnabled());
 		route.advance(new WorldPoint(3208, 3220, 2));
 		view.show(route.view());
 		assertEquals("the way, its steps and the other ways go", "Arrived", shown());
@@ -130,19 +155,22 @@ public class RouteStepsViewTest
 		assertTrue(shown(), shown().endsWith("▾ 3 other ways | Walk | Lumbridge tablet · 58 tiles | Docking point · 1340 tiles"));
 		assertTrue(SidebarWords.press(view, "Walk"));
 		view.show(route.view());
-		assertTrue(shown(), shown().startsWith("Walk | ▸ 1. Walk 140 tiles"));
+		assertTrue(shown(), shown().startsWith("Walk | 1 | Walk 140 tiles"));
 		assertTrue("the best way is now the other one", shown().contains("Lumbridge Home Teleport · 52 tiles · best"));
 	}
 
-	/** The spell's icon on its step, the tablet's sprite on its own, and a walk's row left as words. */
+	/**
+	 * The spell's icon on its step, the tablet's sprite on its own, and a walk's row left as words.
+	 * Every step keeps the picture's place once one has a picture, so the words start at one x; the
+	 * place was the teleport row's alone, and its words began 21 pixels right of the walk's.
+	 */
 	@Test
 	public void drawsTheGamesPictureOfWhatToClick() throws IOException
 	{
 		receive();
 		assertEquals(java.util.Collections.singletonList("sprite 356 at " + RouteStepsView.PICTURE), asked);
-		List<JLabel> titles = stepTitles();
-		assertTrue("the teleport's row holds a place for its picture", titles.get(0).getIcon() != null);
-		assertEquals("the walk's row has none", null, titles.get(1).getIcon());
+		List<JLabel> places = named("route.step.picture");
+		assertEquals("a place for the picture on the teleport's row and on the walk's", 2, places.size());
 
 		assertTrue(SidebarWords.press(view, "▸ 3 other ways"));
 		asked.clear();
@@ -254,8 +282,28 @@ public class RouteStepsViewTest
 		assertTrue(SidebarWords.press(view, "▸ 3 other ways"));
 		assertTrue(SidebarWords.press(view, "Docking point · 1340 tiles"));
 		view.show(route.view());
-		assertTrue(shown(), shown().contains("2. Board your boat at Port Sarim | 3. Sail to Catherby | About 650 tiles"
-			+ " | ✓ 20 Sailing | 4. Dock at Catherby | Your boat stays there"));
+		assertTrue(shown(), shown().contains("2 | Board your boat at Port Sarim | 3 | Sail to Catherby | About 650 tiles"
+			+ " | ✓ 20 Sailing | 4 | Dock at Catherby | Your boat stays there"));
+	}
+
+	/**
+	 * A sail the player has passed keeps only its title, and so drops its gates with its detail:
+	 * they are a question about a mooring already reached.
+	 */
+	@Test
+	public void aPassedSailKeepsOnlyItsTitle() throws IOException
+	{
+		receive();
+		assertTrue(SidebarWords.press(view, "▸ 3 other ways"));
+		assertTrue(SidebarWords.press(view, "Docking point · 1340 tiles"));
+		/* At the pier, then on the deck, then alongside Catherby's mooring. */
+		route.advance(new WorldPoint(3051, 3192, 0), new DestinationRoute.Sailing(false, null));
+		route.advance(new WorldPoint(3051, 3192, 0), new DestinationRoute.Sailing(true, null));
+		route.advance(new WorldPoint(2800, 3410, 0), new DestinationRoute.Sailing(true, null));
+		view.show(route.view());
+		assertEquals("the sail is behind, the dock is the step being walked", 3, route.view().step);
+		assertTrue(shown(), shown().contains("3 | Sail to Catherby | 4 | Dock at Catherby | Your boat stays there"));
+		assertFalse(shown(), shown().contains("20 Sailing"));
 	}
 
 	/**
@@ -304,20 +352,20 @@ public class RouteStepsViewTest
 		throw new AssertionError("no label says " + words + ": " + shown());
 	}
 
-	/** Each step's numbered line, in order. */
-	private List<JLabel> stepTitles()
+	/** Every shown label with this name, in order. */
+	private List<JLabel> named(String name)
 	{
 		List<JLabel> labels = new ArrayList<>();
 		collectLabels(view, labels);
-		List<JLabel> titles = new ArrayList<>();
+		List<JLabel> found = new ArrayList<>();
 		for (JLabel label : labels)
 		{
-			if (label.getText().replaceAll("<[^>]+>", "").matches("(▸ )?[0-9]+[.] .*"))
+			if (name.equals(label.getName()))
 			{
-				titles.add(label);
+				found.add(label);
 			}
 		}
-		return titles;
+		return found;
 	}
 
 	private static void collectLabels(Component component, List<JLabel> out)

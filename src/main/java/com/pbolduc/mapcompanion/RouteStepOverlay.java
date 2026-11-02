@@ -247,7 +247,7 @@ class RouteStepOverlay extends OverlayPanel
 		String named = DestinationSceneOverlay.name(name, NAME_MAX);
 		String title = named == null ? "Route" : named;
 		String detail = step.detail == null || Text.removeTags(step.detail).trim().isEmpty() ? null : Text.removeTags(step.detail).trim();
-		String line = leg ? step.title : RouteStepsView.stepLine(view.step, step, false);
+		String line = leg ? step.title : RouteStepsView.stepLine(view.step, step);
 		return new Box(title, Text.removeTags(line), detail, step.itemId, step.spriteId);
 	}
 

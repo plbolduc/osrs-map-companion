@@ -393,16 +393,21 @@ of `docs/plan-where-to-go-for-a-task.md` in `osrs-stars-map`.
 - **Under the destination's name**, when the map sent a route: the way being followed and its
   length in run tiles, *Lumbridge Home Teleport · 52 tiles*, then its steps in the card's own words,
   numbered as the website numbers them, each with the detail and notes the card prints under it.
-- **A teleport step's picture** sits before its number: the item's sprite or the spell's icon, at
-  16px, as the card's sprite for that row. The map sends the game's id for it and the client's own
-  cache draws it; a walk, a ride, or a teleport the map has no id for stays words alone.
+  The numbers stand in a column of their own, 14px and right-aligned, as the website's journey row
+  puts them, and a wrapped title and the lines under it start under the title's first letter.
+- **A teleport step's picture** sits between its number and its words: the item's sprite or the
+  spell's icon, at 16px, as the card's sprite for that row. The map sends the game's id for it and
+  the client's own cache draws it; a walk, a ride, or a teleport the map has no id for stays words
+  alone, and keeps the picture's place once any step of the way has one, so the words start at one x.
 - **Beside the destination's name**, when a Route pressed here made it, is the picture the row that
   asked drew: the clue's scroll, a search row's sprite or world-map icon, a friend's disc as the
   world map draws them, at 16px. It stays with that press's answer, so a destination the map sends
   has none, and it is never sent: the request is built from the id, the clue and the tile alone.
-- **The current step** is marked with ▸ and drawn bold and white; the steps behind it go grey. It
-  moves on when you stand within four tiles of where it ends, on its floor. Inside a raid's rooms
-  nothing moves, because the tile there is not a place.
+- **The current step** has its number in bold amber, the colour its pin has on the world map, and
+  its title bold and white. A step behind it goes grey and keeps only its title, its picture faded as
+  its pin is, so what is done stops pushing the step being walked down the card. ▸ and ▾ open folds
+  and mark nothing else. The step moves on when you stand within four tiles of where it ends, on its
+  floor. Inside a raid's rooms nothing moves, because the tile there is not a place.
 - **On arrival** the card changes shape rather than greying a route still drawn: the way, its steps
   and the other ways go, and one amber line, *Arrived*, takes the way line's place. Reroute and
   Dismiss stay, Reroute because an arrival read wrongly still needs its way out. A run's leg goes
