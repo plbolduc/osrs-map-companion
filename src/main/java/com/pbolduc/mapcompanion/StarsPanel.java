@@ -328,8 +328,16 @@ final class StarsPanel extends JPanel
 		}
 		/* An hour with no stars at all is not the player's filters, and says so. */
 		if (stars == 0) rows.add(label(empty ? "No stars reported right now." : "No stars match these filters."));
+		/*
+		 * The pick heads the tab only while the player's own filters show it: what sits there is what
+		 * a press acts on, so it never offers a star the list has just hidden. It is kept, though, and
+		 * comes back when the filter lets it.
+		 */
 		StarsModel.Star chosen = model.find(model.selected);
-		if (chosen != null) selection(chosen, elapsed, destination);
+		if (chosen != null && model.passes(chosen, elapsed))
+		{
+			selection(chosen, elapsed, destination);
+		}
 		revalidate();
 		repaint();
 	}

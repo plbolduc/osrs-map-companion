@@ -165,7 +165,14 @@ final class StarsModel
 		incoming.rows = valid;
 		feed = incoming;
 		receivedNanos = System.nanoTime();
-		if (find(selected) == null) selected = valid.isEmpty() ? null : valid.get(0).id;
+		/*
+		 * Only the player picks. A pick whose star has left the feed is dropped rather than moved to
+		 * another star, so "Selected world" always names one the player chose.
+		 */
+		if (find(selected) == null)
+		{
+			selected = null;
+		}
 	}
 
 	long elapsed()
