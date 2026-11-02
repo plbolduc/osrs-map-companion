@@ -41,10 +41,11 @@ import okhttp3.OkHttpClient;
  * the last polish pass changed: a fresh install with and without a kill log, the step after a first
  * Connect, a busy Home, the Group tab, Settings with Advanced open, Stars with a world picked, the
  * search answering "bank" and "whip", the death and clue cards, a meetup, and Drop luck alone.
- * The README also uses route (with Shortest Path present), settings-closed, search-whip-card
- * and dropluck-card (the real sections without the panel's surrounding controls).
+ * The README's pictures are route, search-whip-card, farm-count, group, stars-route, dropluck-card,
+ * slayer-card, settings-closed and port-run, with VoyageShot's voyage-sail; the card scenes paint the
+ * real sections without the panel's surrounding controls.
  * Synthetic local state and made-up names; no game account and no network — the map address is a
- * port nothing listens on.
+ * port nothing listens on. A paired scene shares what the one press at Connect turns on.
  *
  * <p>Written to run against the commit before the pass as well as after it, so one renderer takes
  * both photographs: everything it presses is found by component name or by its words, and a name
@@ -66,8 +67,8 @@ import okhttp3.OkHttpClient;
 public class SidebarPolishShot
 {
 	static final List<String> STATES = Arrays.asList("fresh", "fresh-log", "connect", "home", "route", "group", "settings", "settings-closed",
-		"stars", "stars-filters", "search", "search-whip", "search-whip-card", "death", "meetup", "dropluck", "dropluck-card", "status",
-		"farm", "farm-card", "farm-bring", "slayer", "slayer-card", "slayer-open", "slayer-expanded", "slayer-blocked",
+		"stars", "stars-filters", "stars-route", "search", "search-whip", "search-whip-card", "death", "meetup", "dropluck", "dropluck-card", "status",
+		"farm", "farm-card", "farm-bring", "farm-count", "slayer", "slayer-card", "slayer-open", "slayer-expanded", "slayer-blocked",
 		"port-tasks", "port-tasks-card", "port-tasks-unread", "port-run", "port-run-changed");
 
 	static HarnessGame game;
@@ -86,7 +87,7 @@ public class SidebarPolishShot
 			SwingUtilities.invokeAndWait(() -> { });
 			SwingUtilities.invokeAndWait(() -> call(() -> shoot(state.equals("dropluck-card")
 				? (JComponent) get(panel[0], "drySection") : state.equals("search-whip-card")
-				? (JComponent) get(panel[0], "searchPanel") : state.equals("farm-card") || state.equals("farm-bring")
+				? (JComponent) get(panel[0], "searchPanel") : state.equals("farm-card") || state.equals("farm-bring") || state.equals("farm-count")
 				? (JComponent) get(panel[0], "farmRunPanel") : state.equals("slayer-card") || state.equals("slayer-open")
 				? (JComponent) get(panel[0], "slayerPanel") : state.equals("slayer-blocked")
 				? (JComponent) get(panel[0], "slayerPanel") : state.equals("port-tasks-card") || state.equals("port-tasks-unread") || state.startsWith("port-run")
@@ -210,9 +211,15 @@ public class SidebarPolishShot
 		{
 			set(plugin, "status", "Connected to 127.0.0.1:9");
 			set(plugin, "health", Health.LIVE);
-			config.set("sharePosition", true);
-			config.set("shareSkills", true);
-			config.set("showDestination", true);
+			/*
+			 * What the one press at Connect turns on: every field it names, so Where you died stays off.
+			 * Of its two drawing choices the destinations are on and the whole group's dots are not, so a
+			 * friend's row still offers World map.
+			 */
+			for (String key : RecommendedSharing.KEYS)
+			{
+				config.set(key, !key.equals("showGroupOnWorldMap"));
+			}
 		}
 		Scenes.fill(state, injector, config, lootLog);
 		MapCompanionPanel panel = injector.getInstance(MapCompanionPanel.class);
@@ -227,6 +234,8 @@ public class SidebarPolishShot
 		static void fill(String state, Injector injector, HarnessConfig config, LootLog log) throws Exception
 		{
 			DestinationState destinations = injector.getInstance(DestinationState.class);
+			/* A session long settled, with no Slayer task unless a Slayer scene gives one below. */
+			injector.getInstance(SlayerState.class).local(injector.getInstance(MemberIdentity.class).id(), null, "best", false);
 			if (state.startsWith("slayer"))
 			{
 				config.set("shareSlayer", true);
@@ -313,6 +322,19 @@ public class SidebarPolishShot
 			{
 				String json = Files.readString(Paths.get("src/test/resources/contract/farm-run.json"), StandardCharsets.UTF_8);
 				RelayResponse.FarmRun run = new Gson().fromJson(json, RelayResponse.FarmRun.class);
+				boolean count = state.equals("farm-count");
+				if (count)
+				{
+					/*
+					 * Neither of the fixture's teleports, Explorer's ring 2 and the Catherby tablet, is one the
+					 * client can see in a bag, so its checklist never counts. The count scene adds the teleport
+					 * a birdhouse run takes to Fossil Island, and carries nothing.
+					 */
+					RelayResponse.FarmBring pendant = new RelayResponse.FarmBring();
+					pendant.kind = "teleport";
+					pendant.name = "Digsite pendant";
+					run.bring.add(pendant);
+				}
 				long now = System.currentTimeMillis();
 				FarmRunState farm = injector.getInstance(FarmRunState.class);
 				farm.bind(injector.getInstance(MemberIdentity.class).id());
@@ -323,26 +345,29 @@ public class SidebarPolishShot
 				replanted.observedMsAgo = 0;
 				replanted.completionId = "synthetic-replant";
 				replanted.completedMsAgo = 100L;
-				farm.observe(Collections.singletonList(replanted), null, new WorldPoint(2811, 3462, 0), now);
-				farm.carried(Collections.singletonList("explorersRing"));
+				/* The count scene stands at the patch just replanted, so the leg to Catherby is still ahead. */
+				farm.observe(Collections.singletonList(replanted), null, count ? new WorldPoint(3053, 3309, 0) : new WorldPoint(2811, 3462, 0), now);
+				farm.carried(count ? Collections.emptyList() : Collections.singletonList("explorersRing"));
 				injector.getInstance(FarmRunRoute.class).sync();
 				set(injector.getInstance(ShortestPath.class), "installed", true);
 			}
 			if (state.equals("home"))
 			{
-				route(injector, destinations);
+				route(injector, destinations, new WorldPoint(3221, 3219, 0));
 				death(injector, config);
-				social(destinations, false);
+				social(destinations, false, false);
 			}
 			if (state.equals("route"))
 			{
-				route(injector, destinations);
-				/* The README shows Follow as it appears with the optional Shortest Path plugin installed. */
-				set(injector.getInstance(ShortestPath.class), "installed", true);
+				/*
+				 * Standing at Draynor's bank, before the cast, so the step on now is the one with the spell's
+				 * icon. No Shortest Path: Follow is offered on every route.
+				 */
+				route(injector, destinations, new WorldPoint(3092, 3243, 0));
 			}
 			if (state.equals("group") || state.equals("meetup"))
 			{
-				social(destinations, state.equals("meetup"));
+				social(destinations, state.equals("meetup"), true);
 			}
 			if (state.equals("death"))
 			{
@@ -354,7 +379,7 @@ public class SidebarPolishShot
 			}
 		}
 
-		static void route(Injector injector, DestinationState destinations) throws Exception
+		static void route(Injector injector, DestinationState destinations, WorldPoint standing) throws Exception
 		{
 			DestinationRoute route = injector.getInstance(DestinationRoute.class);
 			RelayResponse.Directive directive = new RelayResponse.Directive();
@@ -367,7 +392,7 @@ public class SidebarPolishShot
 			directive.destination.route = SidebarPolishShot.route();
 			destinations.accept(directive);
 			route.sync(destinations.getDestination());
-			route.advance(new WorldPoint(3221, 3219, 0));
+			route.advance(standing);
 		}
 
 		static void death(Injector injector, HarnessConfig config) throws Exception
@@ -384,23 +409,28 @@ public class SidebarPolishShot
 			set(injector.getInstance(ClueReader.class), "current", clue);
 		}
 
-		/** The map's own description of a group of four (lib/contract/social.json), times moved to now. */
-		static void social(DestinationState destinations, boolean twoMeetups) throws Exception
+		/**
+		 * The map's own description of a group of four (lib/contract/social.json), times moved to now,
+		 * with its news as sent: a level, a drop and a quest.
+		 *
+		 * @param unanswered the next meetup without this member's answer
+		 * @param twoMeetups a second meetup tomorrow, which the Group tab folds to one line
+		 */
+		static void social(DestinationState destinations, boolean unanswered, boolean twoMeetups) throws Exception
 		{
 			String social = new String(Files.readAllBytes(Paths.get("src/test/resources/contract/stream.json")), StandardCharsets.UTF_8);
 			RelayResponse.StreamDirective directive = new Gson().fromJson(social, RelayResponse.StreamDirective.class);
 			long now = System.currentTimeMillis();
-			/* The released client produces levels and drops; quest announcements await their reader. */
-			directive.roster.get(2).news.kind = "level";
-			directive.roster.get(2).news.title = "Mining 72";
-			directive.roster.get(2).news.skill = "Mining";
 			directive.roster.get(0).news.atMs = now - 5 * 60_000L;
 			directive.roster.get(1).news.atMs = now - 9 * 60_000L;
 			directive.roster.get(2).news.atMs = now - 41 * 60_000L;
 			directive.events.get(0).startsAtMs = now + 80 * 60_000L;
-			if (twoMeetups)
+			if (unanswered)
 			{
 				directive.events.get(0).mine = null;
+			}
+			if (twoMeetups)
+			{
 				RelayResponse.Meetup later = new Gson().fromJson(new Gson().toJson(directive.events.get(0)), RelayResponse.Meetup.class);
 				later.id = "raids";
 				later.title = "Chambers of Xeric";
@@ -467,6 +497,29 @@ public class SidebarPolishShot
 		return route;
 	}
 
+	/**
+	 * A way to the Rimmington mine star, in the shape of the map's answer to Route: the tablet's landing
+	 * from the map's transport table, then the walk to the site's tile from the star fixture, priced as
+	 * the map prices a tablet, the walk plus its four ticks at a run. Written for the picture; no map
+	 * planned it.
+	 */
+	static RelayResponse.Route starRoute()
+	{
+		RelayResponse.RouteOption tablet = new RelayResponse.RouteOption();
+		tablet.id = "teleport_item:2953,3224,0";
+		tablet.label = "Rimmington tablet";
+		tablet.best = true;
+		tablet.tiles = 29;
+		tablet.steps = new ArrayList<>(Arrays.asList(
+			Steps.picture(step("method", "Use Rimmington tablet", null, false, 2953, 3224, null),
+				"itemId", net.runelite.api.gameval.ItemID.NZONE_TELETAB_RIMMINGTON),
+			step("arrival-walk", "Walk 21t north-east", "To Rimmington mine", true, 2974, 3241, 0)));
+		RelayResponse.Route route = new RelayResponse.Route();
+		route.origin = "shared";
+		route.options = new ArrayList<>(Collections.singletonList(tablet));
+		return route;
+	}
+
 	/** A step's icon where this build reads one; nothing where it does not. */
 	static final class Steps
 	{
@@ -491,6 +544,11 @@ public class SidebarPolishShot
 
 	static void after(String state, MapCompanionPanel panel) throws Exception
 	{
+		if (state.equals("route"))
+		{
+			/* Each other way opens with its teleport's picture. */
+			expand(panel, "1 other way");
+		}
 		if (state.equals("slayer-open") || state.equals("slayer-expanded"))
 		{
 			expand(panel, "All 3 places & options");
@@ -562,12 +620,31 @@ public class SidebarPolishShot
 			{
 				press(panel, "stars.filters");
 			}
+			if (state.equals("stars-route"))
+			{
+				starRouted(panel, client);
+				refresh(panel);
+				stars.refresh();
+			}
 		}
 		if (state.startsWith("search"))
 		{
 			search(panel, state.equals("search") ? "bank" : "whip");
 		}
 		refresh(panel);
+	}
+
+	/**
+	 * The picked star's Route, answered, by RoutePress's own steps for an answer: the star pinned as this
+	 * client's destination with its way, followed from the press, as a pressed Route always is.
+	 */
+	static void starRouted(MapCompanionPanel panel, StarsClient client) throws Exception
+	{
+		StarsModel.Star star = client.model.find(client.model.selected);
+		RelayResponse.Destination answer = RoutePress.destination(RoutePress.Target.tile(StarsPanel.SOURCE,
+			new WorldPoint(star.x, star.y, star.plane), star.name, star.world, null), null, starRoute());
+		((DestinationState) get(panel, "destinationState")).selectLocal(answer);
+		((DestinationRoute) get(get(panel, "nowCards"), "destinationRoute")).adoptPressed(answer);
 	}
 
 	static void search(MapCompanionPanel panel, String query) throws Exception

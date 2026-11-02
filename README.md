@@ -10,7 +10,7 @@ and see your character and friends on the website.
 ## Routes in RuneLite
 
 <p>
-  <img src="docs/mockups/sidebar-route.png" width="300" alt="A route to Lumbridge Castle bank in the real plugin sidebar: numbered steps, the home teleport's spell icon on its step, the current walk highlighted, and Follow, Reroute and Dismiss">
+  <img src="docs/mockups/sidebar-route.png" width="300" alt="Home in the plugin sidebar with a route to Lumbridge Castle bank: numbered steps, the current one, casting Lumbridge Home Teleport, with its number in amber beside the spell's icon, a ring of dueling as the other way, and Follow, Reroute and Dismiss; under Tasks, the Farm run and Slayer cards">
 </p>
 
 Send a place from the website or pick a search result, and the sidebar lists the way there.
@@ -29,7 +29,7 @@ and to the step of the clue you carry: a coordinate, a map, or a step in words, 
 map places for you. Or right-click any spot on the game's world map and choose **Route here**.
 
 <p>
-  <img src="docs/mockups/sidebar-voyage.png" width="300" alt="A voyage in the plugin sidebar: the walk to Port Sarim done, Board your boat at Port Sarim, Sail to Catherby current with its Sailing level marked unmet, then Dock at Catherby">
+  <img src="docs/mockups/sidebar-voyage.png" width="300" alt="A voyage in the plugin sidebar: the walk to Port Sarim and boarding your boat done, Sail to Catherby current with its number in amber and its Sailing level marked unmet, then Dock at Catherby">
 </p>
 
 A voyage in your own boat is its own steps: board your boat, sail, and dock, where the boat then
@@ -41,7 +41,7 @@ and moorings, voyages start where your boats are.
 ## Search for a place or item
 
 <p>
-  <img src="docs/mockups/sidebar-search.png" width="300" alt="Searching for whip: Abyssal demon and Abyssal Sire under Dropped by, and the Abyssal whip under Items">
+  <img src="docs/mockups/sidebar-search.png" width="300" alt="Searching for whip: Abyssal demon and Abyssal Sire under Dropped by, and under Items the Abyssal whip, dropped by 3 monsters">
 </p>
 
 Search for banks, shops, NPCs, monsters and items from **Home**. An item can show the monsters
@@ -51,7 +51,7 @@ Results use the game's map icons and item sprites.
 ## Farm runs in RuneLite
 
 <p>
-  <img src="docs/mockups/sidebar-farm-run.png" width="300" alt="A farm run in the real sidebar: a bank checklist, numbered stops with Done and Visited kept separate, the current leg's steps under This leg, and Pause, Reroute and End run buttons">
+  <img src="docs/mockups/sidebar-farm-run.png" width="300" alt="A farm run's card in the sidebar: Before you leave counting one teleport not on you, Falador done and folded to one line, Catherby next with its number in amber and This leg's steps under it, the birdhouse done and the bank visited, and Pause, Reroute and End run">
 </p>
 
 Build a run on the website and press **Send run to RuneLite**, or choose a preset, **Ready now**,
@@ -73,7 +73,7 @@ can make a new one in the same client session.
 ## Friends and meetups
 
 <p>
-  <img src="docs/mockups/sidebar-group.png" width="300" alt="The Group tab: friends' locations, a Woodcutting level and an Abyssal whip drop, then a star-hunt meetup with Route and four answers">
+  <img src="docs/mockups/sidebar-group.png" width="300" alt="The Group tab: three friends with their initials on their discs and a dot in each corner for online, idle or offline, Route beside a name, a Woodcutting level, an Abyssal whip drop and a quest finished, then a star-hunt meetup with each answer and who gave it, and tomorrow's raid folded to one line">
 </p>
 
 **Group** shows your friends' locations and latest levels and drops. Friends who share
@@ -86,7 +86,7 @@ or **On my way**. You can turn on a reminder before it starts.
 ## Shooting stars
 
 <p>
-  <img src="docs/mockups/stars-tab-list.png" width="300" alt="The Stars tab: Rimmington mine selected, tier and world filters, stars grouped by site, and Pin destination and Route buttons">
+  <img src="docs/mockups/stars-tab-list.png" width="300" alt="The Stars tab: a star at Rimmington mine pinned with its route under it, a Rimmington tablet and a walk, with Pause, Reroute and Unpin; then the tier and world filters, and the stars grouped by site, each tier in its own colour, with Data from Star Miners at the foot">
 </p>
 
 **Stars** lists active stars by site, world, tier and estimated time left. Filter by tier and
@@ -154,7 +154,7 @@ expected hunting. A bounty's pin opens the creature on the map.
 ## Port tasks in RuneLite
 
 <p>
-  <img src="docs/mockups/sidebar-port-tasks.png" width="225" alt="A port-task run in the RuneLite Port tasks card: Port Khazard done, Ardougne next with its crates to deliver, then the osprey hunt and Brimhaven's task board, and under This leg the steps from boarding the boat to the ledger table">
+  <img src="docs/mockups/sidebar-port-tasks.png" width="225" alt="A port-task run in the RuneLite Port tasks card: Port Khazard done and folded to one line, Ardougne next with its crates to deliver and This leg's steps under it, from the walk to the boat to the ledger table, then the osprey hunt and Brimhaven's task board">
 </p>
 
 Share your port tasks to list the ones you hold in Home: the crates still to collect and where
@@ -192,7 +192,7 @@ sharing choice off.
 <summary>Full sharing details and settings</summary>
 
 <p>
-  <img src="docs/mockups/sidebar-settings.png" width="300" alt="Settings with its four sharing categories, Name and death location, In the client and Advanced; Advanced is closed">
+  <img src="docs/mockups/sidebar-settings.png" width="300" alt="Settings: six sharing switches, all on but Where you died, as one press at Connect leaves them, then What each one sends, In RuneLite and Advanced, closed">
 </p>
 
 Sharing is six switches, and every one starts off. After your first Connect, one press of

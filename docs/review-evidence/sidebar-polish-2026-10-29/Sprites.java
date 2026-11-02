@@ -29,6 +29,8 @@ final class Sprites
 	 * cache holds the spellbook's icons, which a renderer without a running game cannot open.
 	 */
 	static final Map<Integer, String> SPELLS = new HashMap<>();
+	/** Items the website keeps only as a travel chip, the same wiki sprite already cut to a step's 16px. */
+	static final Map<Integer, String> CHIPS = new HashMap<>();
 
 	static
 	{
@@ -41,6 +43,7 @@ final class Sprites
 		ITEMS.put(net.runelite.api.gameval.ItemID.MYSTIC_ROBE_BOTTOM_DARK, "mystic-robe-bottom-dark");
 		SPELLS.put(net.runelite.api.gameval.SpriteID.Magicon2.LUMBRIDGE_HOME_TELEPORT, "home-teleport");
 		SPELLS.put(net.runelite.api.gameval.SpriteID.MagicNecroOn.DRAYNOR_MANOR_TELEPORT, "draynor-manor-teleport");
+		CHIPS.put(net.runelite.api.gameval.ItemID.NZONE_TELETAB_RIMMINGTON, "teleport-tab-rimmington");
 	}
 
 	/** The same item sprite that the live client's ItemManager supplies to Drop luck. */
@@ -62,6 +65,10 @@ final class Sprites
 				if (name != null)
 				{
 					show(label, read(root, "osrs-items/1x/" + name + ".png"), box);
+				}
+				else if (CHIPS.containsKey(itemId))
+				{
+					show(label, read(root, "osrs-icons/1x/" + CHIPS.get(itemId) + ".png"), box);
 				}
 			}
 
