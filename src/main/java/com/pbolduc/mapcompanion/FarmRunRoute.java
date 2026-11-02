@@ -50,6 +50,9 @@ final class FarmRunRoute
 	private volatile long selectedLifetime = -1;
 	private String selectedRun;
 	private long selectedRevision;
+	/** The destination whose arrival paused the run, so the card can name it; see {@link #pausedFor}. */
+	@Nullable
+	private volatile RelayResponse.Destination detour;
 
 	@Inject
 	FarmRunRoute(FarmRunState state, DestinationState destinations, DestinationRoute route, ClientThread clientThread)
@@ -69,6 +72,7 @@ final class FarmRunRoute
 				if (on)
 				{
 					selectedKey = null;    // A deliberate Follow may replace another local route.
+					detour = null;
 				}
 				state.follow(on);
 				if (!on && owns(destinations.getDestination()))
@@ -114,6 +118,7 @@ final class FarmRunRoute
 			}
 			selectedKey = null;
 			selectedRun = null;
+			detour = null;
 			return;
 		}
 		if (!view.following)
@@ -130,6 +135,7 @@ final class FarmRunRoute
 		}
 		if (selectedKey != null && !owns(destinations.getDestination()))
 		{
+			detour = destinations.getDestination();
 			state.follow(false);
 			selectedKey = null;
 			return;
@@ -168,6 +174,25 @@ final class FarmRunRoute
 	boolean ownsDestinationRoute(@Nullable DestinationRoute.View route)
 	{
 		return route != null && selectedKey != null && selectedLifetime == destinations.generation() && selectedKey.equals(route.key);
+	}
+
+	/**
+	 * The name of the destination that paused the run by taking its place — a search pick, Route here,
+	 * a friend's — while the run is still paused and that destination is still the one shown. Null
+	 * once it is dismissed or replaced, or the run is followed again: the card then says only that the
+	 * run is paused. Any thread.
+	 */
+	@Nullable
+	String pausedFor()
+	{
+		RelayResponse.Destination other = detour;
+		FarmRunState.View view = state.view();
+		if (other == null || view == null || view.following)
+		{
+			return null;
+		}
+		String shown = DestinationRoute.keyOf(destinations.getDestination());
+		return shown != null && shown.equals(DestinationRoute.keyOf(other)) ? other.name : null;
 	}
 
 	@Nullable

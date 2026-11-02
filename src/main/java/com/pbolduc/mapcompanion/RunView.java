@@ -96,6 +96,12 @@ final class RunView extends JPanel
 	 */
 	private final JLabel legHead = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
 	private final RouteStepsView steps;
+	/*
+	 * Where the leg was, while another destination has paused the run: what it waits for and the way
+	 * back. Without it a detour reads as the run's opposite, the destination above being followed while
+	 * this card offers Follow.
+	 */
+	private final JLabel paused = label(11f, MapPin.AMBER);
 	private final JLabel message = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
 	private boolean bringOpen;
 	private String shown;
@@ -123,6 +129,9 @@ final class RunView extends JPanel
 		add(before);
 		add(bring);
 		add(stops);
+		paused.setBorder(BorderFactory.createEmptyBorder(6, 0, 0, 0));
+		paused.setVisible(false);
+		add(MapCompanionPanel.left(paused));
 		legHead.setText("This leg");
 		legHead.setFont(legHead.getFont().deriveFont(Font.BOLD));
 		legHead.setBorder(BorderFactory.createCompoundBorder(
@@ -199,10 +208,12 @@ final class RunView extends JPanel
 		// An End whose run id never arrived has no run to say whose it was; the farm card keeps it, as before.
 		boolean ending = state.ending() && (said == null ? !port : said.port == port);
 		boolean ready = connected && client.ready();
-		reroute.setEnabled(ready && active && view.next() != null);
+		/* A run with every stop behind it has nothing to follow or reorder: End run is its one press. */
+		boolean left = active && view.next() != null;
+		reroute.setEnabled(ready && left);
 		end.setEnabled(!client.endingRequest() && (active || planning || (ending && ready)));
 		List<JButton> wanted = new ArrayList<>();
-		if (active)
+		if (left)
 		{
 			wanted.add(follow);
 			wanted.add(reroute);
@@ -230,10 +241,11 @@ final class RunView extends JPanel
 			shownRun = view.run.id;
 			MapCompanionPanel.setWrapped(title, view.run.name, WIDTH);
 			MapCompanionPanel.setWrapped(progress, progressLine(view), WIDTH);
+			progress.setForeground(left ? ColorScheme.LIGHT_GRAY_COLOR : Color.WHITE);
 			MapCompanionPanel.setWrapped(changed, CHANGED, WIDTH);
 			follow.setText(view.following ? "Pause" : "Follow");
 			follow.setToolTipText(view.following ? "Keep this run and stop following it until you press Follow" : null);
-			follow.setEnabled(view.next() != null);
+			follow.setEnabled(left);
 			String key = view.run.id + "|" + view.revision + "|" + view.done + "|" + view.visited + "|" + view.here + "|" + view.carried;
 			if (!key.equals(shown))
 			{
@@ -255,25 +267,60 @@ final class RunView extends JPanel
 		boolean drawable = following && config.drawWithShortestPath() && shortest.installed() && !route.arrived();
 		steps.showRunLeg(following ? route : null, following ? RouteStepsView.shortestPathLine(route, drawable, shortest.drawing()) : null);
 		legHead.setVisible(steps.isVisible());
+		String detour = left && !view.following ? follower.pausedFor() : null;
+		paused.setVisible(detour != null);
+		MapCompanionPanel.setWrapped(paused, detour == null ? "" : pausedLine(detour), WIDTH);
 		boolean speaks = mine && said.message != null;
 		message.setVisible(speaks);
 		MapCompanionPanel.setWrapped(message, speaks ? said.message : "", WIDTH);
 		return active || speaks || planning || ending;
 	}
 
-	/** A farm run counts the patches it can witness; a port-task run counts its stops, all ticked by counters. */
+	/**
+	 * The run's state, then what its count counts: a farm run the patches it can witness, a port-task
+	 * run its stops, all ticked by counters. A run not followed says so first, since Pause or another
+	 * route changes nothing else on the card; a finished one says what it came to, done and visited
+	 * kept apart as the stops keep them.
+	 */
 	static String progressLine(FarmRunState.View view)
 	{
 		if (view.next() == null)
 		{
-			return "Route finished.";
+			int done = 0;
+			int visited = 0;
+			for (RelayResponse.FarmStop stop : view.run.stops)
+			{
+				done += view.done.contains(stop.n) ? 1 : 0;
+				visited += view.visited.contains(stop.n) ? 1 : 0;
+			}
+			List<String> came = new ArrayList<>();
+			if (done > 0)
+			{
+				came.add(done + " done");
+			}
+			if (visited > 0)
+			{
+				came.add(visited + " visited");
+			}
+			return "Run finished" + (came.isEmpty() ? "" : " · " + String.join(", ", came));
 		}
+		String count;
 		if (FarmRunWire.PORT_TASKS.equals(view.run.kind))
 		{
-			return view.trackedDone() + " of " + view.tracked() + " stops done";
+			count = view.trackedDone() + " of " + view.tracked() + " stops done";
 		}
-		return view.tracked() > 0 ? view.trackedDone() + " of " + view.tracked() + " tracked done"
-			: view.visited.size() + " of " + view.run.stops.size() + " visited";
+		else
+		{
+			count = view.tracked() > 0 ? view.trackedDone() + " of " + view.tracked() + " tracked done"
+				: view.visited.size() + " of " + view.run.stops.size() + " visited";
+		}
+		return view.following ? count : "Paused · " + count;
+	}
+
+	/** Where the leg was, while a destination shown since has paused the run. */
+	static String pausedLine(String destination)
+	{
+		return "Paused for " + destination + ". Follow takes the run back.";
 	}
 
 	/** What a stop says it is at: done, visited, under the player, or next. */

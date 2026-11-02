@@ -106,12 +106,34 @@ public class FarmRunRouteTest
 		follower.sync();
 		assertFalse(state.view().following);
 		assertSame(other, destinations.getDestination());
+		assertEquals("the card can say what the run waits for", "My own route", follower.pausedFor());
 		replant();
 		follower.sync();
 		assertSame(other, destinations.getDestination());
 		follower.follow(true);
 		assertTrue(state.view().following);
 		assertEquals("2. Catherby", destinations.getDestination().name);
+		assertNull(follower.pausedFor());
+	}
+
+	@Test
+	public void aDetourOffTheScreenIsNoLongerWhatThePausedRunWaitsFor() throws Exception
+	{
+		state.accept(run(), 1, 1_000);
+		follower.sync();
+		RelayResponse.Destination other = new RelayResponse.Destination();
+		other.name = "My own route";
+		other.x = 3222;
+		other.y = 3218;
+		destinations.selectLocal(other);
+		follower.sync();
+		destinations.dismiss();
+		follower.sync();
+		assertFalse("dismissing the detour leaves the run paused", state.view().following);
+		assertNull(follower.pausedFor());
+		follower.follow(true);
+		follower.follow(false);
+		assertNull("paused by the player, for nothing else", follower.pausedFor());
 	}
 
 	@Test
