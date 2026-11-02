@@ -282,7 +282,8 @@ The website plan's second session, once the routes in the game are built: a memb
       destination without cutting a word; an approximate one shows Open website. Press Route: the
       steps show under the star, Stars stays the tab, and Follow and Reroute there act as Home's do
       while you walk and hop; Unpin clears the star and Home's card together. A meetup's Route
-      prints its world in the destination's line and nobody in the group is told.
+      prints its world and its day and clock in the destination's line, with no countdown, and
+      nobody in the group is told.
 - [ ] **Friends.** With two characters in one group and the group layer off, the other appears
       under Group with their disc, presence dot, *near* and news. World map draws only them; Route
       asks for their position, then fills the destination's card once and does not follow them.

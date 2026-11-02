@@ -129,6 +129,12 @@ final class SearchClient
 		final String name;
 		/** The grey line under the name, in the website's words. */
 		final String line;
+		/**
+		 * What a pick writes under the destination's name: the line without the effort. That was
+		 * measured from where the search was typed and stops being true as the player walks, while
+		 * the route's own way line under it gives the length from where they stood at the press.
+		 */
+		final String note;
 		/** "Sold at", "Dropped by" or {@link #ITEMS}; null for the ordinary rows. */
 		@Nullable
 		final String section;
@@ -150,9 +156,16 @@ final class SearchClient
 		Hit(String id, String name, String line, @Nullable String section, @Nullable int[] tile,
 			@Nullable String kind, @Nullable Integer itemId)
 		{
+			this(id, name, line, line, section, tile, kind, itemId);
+		}
+
+		Hit(String id, String name, String line, String note, @Nullable String section, @Nullable int[] tile,
+			@Nullable String kind, @Nullable Integer itemId)
+		{
 			this.id = id;
 			this.name = name;
 			this.line = line;
+			this.note = note;
 			this.section = section;
 			this.tile = tile;
 			this.kind = kind;
@@ -505,7 +518,7 @@ final class SearchClient
 				boolean onMap = row.x > 0 && row.y > 0 && row.x <= 16_383 && row.y <= 16_383 && plane >= 0 && plane <= 3;
 				String section = "Places".equals(row.section) ? null : RouteWire.text(row.section, 20);
 				String kind = RouteWire.text(row.kind, 20);
-				hits.add(new Hit(id, name, rowLine(row), section, onMap ? new int[]{row.x, row.y, plane} : null, kind, null));
+				hits.add(new Hit(id, name, rowLine(row), placeLine(row), section, onMap ? new int[]{row.x, row.y, plane} : null, kind, null));
 			}
 		}
 		if (answer.items != null)
@@ -527,11 +540,17 @@ final class SearchClient
 		return hits;
 	}
 
+	/** "Character · Shilo Village": the website's own subtitle, without the effort; see {@link Hit#note}. */
+	static String placeLine(Row row)
+	{
+		String line = RouteWire.text(row.line, 120);
+		return line == null ? "" : line;
+	}
+
 	/** "Character · Shilo Village · ~15 tiles": the website's own subtitle, then the effort it measured. */
 	static String rowLine(Row row)
 	{
-		String line = RouteWire.text(row.line, 120);
-		StringBuilder sb = new StringBuilder(line == null ? "" : line);
+		StringBuilder sb = new StringBuilder(placeLine(row));
 		if (row.effortTiles != null && row.effortTiles >= 0)
 		{
 			if (sb.length() > 0)

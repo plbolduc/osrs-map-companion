@@ -439,7 +439,11 @@ In Stars, Route sits beside *Pin destination* for a precise site; an approximate
 map** there instead. While the map answers the button reads *Planning…*, and a refusal is one line
 under it, in the map's own words when it gives them, as it does for a clue step it cannot place.
 The answer fills the destination's card, as a pick from Search does, and a star's is drawn under the
-star on Stars too (see *Stars* under 29 October). While it is there, the death's,
+star on Stars too (see *Stars* under 29 October). The line a press writes under the destination's
+name is written once, so it holds nothing that ages: a meetup's day and clock, *Today 7:52 PM*, with
+no countdown; a search row's words without the distance it measured from where the search was
+typed, since the way line gives the route's own; and for a star only its world, since a tier and a
+time left go stale by the minute and Stars keeps the star's line live. While it is there, the death's,
 the clue's and the meetup's button reads **Reroute**, as a friend's does, so the card above is not
 offered again as new; Dismiss gives back their own word. Route back's answer has no line under its
 name: the death card keeps the age counting, and an age written at the press sat above it, older.

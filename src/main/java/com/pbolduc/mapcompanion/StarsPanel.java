@@ -573,7 +573,11 @@ final class StarsPanel extends JPanel
 					next.plane = star.plane;
 					next.name = star.name;
 					next.world = star.world;
-					next.note = "T" + star.tier(service.model.elapsed()) + " · " + StarsModel.timeLeft(star.left(service.model.elapsed()));
+					/*
+					 * No note. The destination's card writes it once and never again, and a tier and a time
+					 * left age by the minute; the world is printed from its own field, and this tab keeps the
+					 * star's line live.
+					 */
 					destinations.selectLocal(next);
 					clientThread.invokeLater(marker::sync);
 					rendered = null;
@@ -599,9 +603,9 @@ final class StarsPanel extends JPanel
 					+ "hopping is left to the game's world switcher.");
 				route.addActionListener(e ->
 				{
-					long now = service.model.elapsed();
+					/* No note, as Pin destination writes none: nothing on the card may age. */
 					press.press(RoutePress.Target.tile(SOURCE, new net.runelite.api.coords.WorldPoint(star.x, star.y, star.plane),
-						star.name, star.world, "T" + star.tier(now) + " · " + StarsModel.timeLeft(star.left(now))));
+						star.name, star.world, null));
 					rendered = null;
 					refresh();
 				});
