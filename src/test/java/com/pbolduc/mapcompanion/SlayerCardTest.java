@@ -32,6 +32,7 @@ import java.awt.Component;
 import java.awt.Container;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import javax.swing.AbstractButton;
 import javax.swing.JComboBox;
@@ -255,6 +256,46 @@ public class SlayerCardTest
 		assertTrue(destinations.hasLocalDestination());
 		assertEquals("Home's card is the place", "Slayer Tower (basement)", destinations.getDestination().name);
 		assertEquals("and the world map has its pin", 1, drawn.size());
+	}
+
+	/**
+	 * A task with nothing left to kill folds to its row and the step that changes it, until the next
+	 * task is read: a place and its Route are no use to it. A new count opens the card again.
+	 */
+	@Test
+	public void aFinishedTaskFoldsToItsRowWithTheNextStep() throws Exception
+	{
+		CompanionSnapshot.Slayer finished = gargoyles();
+		finished.remaining = 0;
+		state.local(identity.id(), finished, "best", true);
+		received(places("best"), 1);
+		refresh();
+		assertEquals(Arrays.asList("Slayer", "Gargoyles · Complete", SlayerPanel.NEXT_TASK), shown(panel));
+
+		state.local(identity.id(), gargoyles(), "best", true);
+		refresh();
+		List<String> next = shown(panel);
+		assertTrue(next.toString(), next.contains("Gargoyles · 143 left"));
+		assertTrue(next.toString(), next.contains("1. Slayer Tower (basement)"));
+	}
+
+	/**
+	 * The closed card names its source and ends there. The licence is with the open list, after its
+	 * options, where the website's Slayer block has it.
+	 */
+	@Test
+	public void theClosedCardEndsOnItsSourceAndTheLicenceIsInTheFold() throws Exception
+	{
+		state.local(identity.id(), gargoyles(), "best", true);
+		received(places("best"), 1);
+		refresh();
+		List<String> closed = shown(panel);
+		assertEquals(closed.toString(), "OSRS Wiki ↗", closed.get(closed.size() - 1));
+		assertFalse(closed.toString(), closed.contains("CC BY-NC-SA 3.0 ↗"));
+
+		press("▸ All 3 places & options");
+		List<String> open = shown(panel);
+		assertTrue(open.toString(), open.indexOf("CC BY-NC-SA 3.0 ↗") > open.indexOf("Hide Wilderness"));
 	}
 
 	private CompanionSnapshot.Slayer gargoyles()
