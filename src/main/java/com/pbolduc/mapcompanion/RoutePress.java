@@ -196,6 +196,12 @@ final class RoutePress
 			this.message = message;
 			this.key = key;
 		}
+
+		/** A press that did not happen. A route that came back says nothing: the card it filled is the answer. */
+		boolean refused()
+		{
+			return !planning && message != null;
+		}
 	}
 
 	/** The map's answer: the ways, and where it planned to. */

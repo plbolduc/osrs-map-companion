@@ -298,6 +298,46 @@ public class SlayerCardTest
 		assertTrue(open.toString(), open.indexOf("CC BY-NC-SA 3.0 ↗") > open.indexOf("Hide Wilderness"));
 	}
 
+	/**
+	 * "The map could not be reached." ran on into "Only Slayer Tower counts for this task." as one
+	 * grey paragraph. A Route that did not happen is said in the refusal pink, apart from the notes.
+	 */
+	@Test
+	public void aRefusedRouteIsPinkApartFromTheCardsNotes() throws Exception
+	{
+		state.local(identity.id(), gargoyles(), "best", true);
+		received(places("best"), 1);
+		refresh();
+		AbstractButton route = button(panel, "Route");
+		String source = route.getName();
+		SwingUtilities.invokeAndWait(route::doClick);
+		refresh();
+		JLabel said = line(panel, source);
+		assertTrue(said.isVisible());
+		assertEquals(MapCompanionPanel.REFUSED, said.getForeground());
+	}
+
+	/** The label a Route's answer is said in, named for the place as its button is. */
+	private static JLabel line(Component component, String name)
+	{
+		if (component instanceof JLabel && name.equals(component.getName()))
+		{
+			return (JLabel) component;
+		}
+		if (component instanceof Container)
+		{
+			for (Component child : ((Container) component).getComponents())
+			{
+				JLabel found = line(child, name);
+				if (found != null)
+				{
+					return found;
+				}
+			}
+		}
+		return null;
+	}
+
 	private CompanionSnapshot.Slayer gargoyles()
 	{
 		CompanionSnapshot.Slayer task = new CompanionSnapshot.Slayer();

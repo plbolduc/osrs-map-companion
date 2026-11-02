@@ -123,6 +123,12 @@ final class FarmRunClient
 		{
 			return message != null && (!confirms || now - atMs < CONFIRMATION_MS);
 		}
+
+		/** A press that did not do what it asked: everything said but a plan or an end on its way, and "Run ended.". */
+		boolean refused()
+		{
+			return !planning && message != null && !confirms;
+		}
 	}
 
 	private static final class Ticket

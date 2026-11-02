@@ -40,6 +40,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.callback.ClientThread;
+import net.runelite.client.ui.ColorScheme;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Protocol;
@@ -220,6 +221,30 @@ public class SearchPanelTest
 		String after = status(panel);
 		assertTrue("a refusal does not head a list it was not picked from: " + after,
 			after == null || !after.contains("Al Kharid bank"));
+	}
+
+	/**
+	 * A refused pick was the grey of "Searching…", so whether a press had worked was read from its
+	 * words alone. A pick that did not happen is in the refusal pink; one on its way stays grey.
+	 */
+	@Test
+	public void aRefusedPickIsPinkAndOneOnItsWayIsGrey() throws Exception
+	{
+		RoutePress press = press(404, "{\"reason\":\"not_found\"}");
+		SearchPanel panel = listed(press, BANKS);
+		JLabel line = (JLabel) named(panel, "search.status").get(0);
+		gate = new CountDownLatch(1);
+		panel.pick(hit("bank:al-kharid", "Al Kharid bank"));
+		until(() -> routed.size() == 1);
+		panel.refresh();
+		assertTrue(status(panel), status(panel).contains("Planning the way there…"));
+		assertEquals(ColorScheme.LIGHT_GRAY_COLOR, line.getForeground());
+
+		gate.countDown();
+		until(() -> !press.said(SearchPanel.SOURCE).planning);
+		panel.refresh();
+		assertTrue(status(panel), status(panel).contains(RouteClient.NOT_FOUND));
+		assertEquals(MapCompanionPanel.REFUSED, line.getForeground());
 	}
 
 	/** The list folds when the card has the answer, not at the press: while it plans, the rows stay. */

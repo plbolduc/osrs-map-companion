@@ -330,6 +330,8 @@ final class RunView extends JPanel
 		boolean speaks = mine && said.shown(now);
 		message.setVisible(speaks);
 		MapCompanionPanel.setWrapped(message, speaks ? said.message : "", WIDTH);
+		/* A refusal in pink; Planning…, Ending run… and Run ended. in the line's grey. */
+		MapCompanionPanel.tone(message, speaks && said.refused());
 		return active || speaks || planning || ending;
 	}
 

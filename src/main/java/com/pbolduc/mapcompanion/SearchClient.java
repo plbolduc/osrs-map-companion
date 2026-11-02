@@ -185,14 +185,26 @@ final class SearchClient
 		@Nullable
 		final String message;
 		final boolean searching;
+		/**
+		 * The message says the search did not happen: the map refused it, failed or could not be asked.
+		 * Not a wait being kept, which goes by itself, nor an answer with nothing in it.
+		 */
+		final boolean refused;
 
 		Result(String query, List<Hit> hits, @Nullable String suggestion, @Nullable String message, boolean searching)
+		{
+			this(query, hits, suggestion, message, searching, false);
+		}
+
+		Result(String query, List<Hit> hits, @Nullable String suggestion, @Nullable String message, boolean searching,
+			boolean refused)
 		{
 			this.query = query;
 			this.hits = hits;
 			this.suggestion = suggestion;
 			this.message = message;
 			this.searching = searching;
+			this.refused = refused;
 		}
 	}
 
@@ -381,7 +393,7 @@ final class SearchClient
 		HttpUrl base = held == null ? null : HttpUrl.parse(held[0] + PATH);
 		if (base == null)
 		{
-			show(new Result(query, Collections.<Hit>emptyList(), null, NEEDS_CONNECTION, false));
+			show(new Result(query, Collections.<Hit>emptyList(), null, NEEDS_CONNECTION, false, true));
 			return;
 		}
 		Request request = new Request.Builder()
@@ -473,7 +485,7 @@ final class SearchClient
 		}
 		if (answer == null)
 		{
-			show(new Result(query, result.hits, null, why, false));
+			show(new Result(query, result.hits, null, why, false, true));
 			return;
 		}
 		List<Hit> hits = normalize(answer);

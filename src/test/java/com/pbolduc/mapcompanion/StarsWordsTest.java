@@ -47,6 +47,7 @@ import javax.swing.SwingUtilities;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.client.callback.ClientThread;
+import net.runelite.client.ui.ColorScheme;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Protocol;
@@ -124,6 +125,30 @@ public class StarsWordsTest
 			panel.refresh();
 			assertEquals("Updated 14m ago · couldn't refresh, retrying", text(status));
 			assertEquals("and why, on a hover", "Stars unavailable. Retrying shortly.", status.getToolTipText());
+		});
+	}
+
+	/**
+	 * Why there is no list is said in the refusal pink, since the tab has nothing else to show. A held
+	 * list and how old it is stay grey, even when its last refresh failed: the list is still there.
+	 */
+	@Test
+	public void noListIsSaidInPinkAndAHeldListsAgeIsNot() throws Exception
+	{
+		scene(fixture(), true);
+		open();
+		SwingUtilities.invokeAndWait(() ->
+		{
+			service.message = "The map is unreachable.";
+			panel.refresh();
+			JLabel status = (JLabel) named(panel, "stars.status");
+			assertEquals("The map is unreachable.", text(status));
+			assertEquals(MapCompanionPanel.REFUSED, status.getForeground());
+
+			service.model.accept(new Gson().fromJson(fixture(), StarsModel.Feed.class));
+			panel.refresh();
+			assertEquals("Updated just now · couldn't refresh, retrying", text(status));
+			assertEquals(ColorScheme.LIGHT_GRAY_COLOR, status.getForeground());
 		});
 	}
 

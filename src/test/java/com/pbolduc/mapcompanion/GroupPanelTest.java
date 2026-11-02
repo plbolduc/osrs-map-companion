@@ -680,6 +680,62 @@ public class GroupPanelTest
 		});
 	}
 
+	/**
+	 * Every line under a Group press was one grey, so "Cara is not sharing a position just now." read
+	 * like her row's "near Lumbridge Castle". A press that did not happen is said in the refusal pink;
+	 * "Meetup made. Its link is copied." keeps the line's grey, since that press did what it asked.
+	 */
+	@Test
+	public void aRefusedPressIsPinkAndAMeetupMadeIsNot() throws Exception
+	{
+		AtomicReference<GroupPanel> panel = new AtomicReference<>();
+		SwingUtilities.invokeAndWait(() -> panel.set(panel(http("{\"path\":\"/map?event=abc123&task=companion\"}"))));
+		social();
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.get().refresh(true);
+			named(panel.get(), "group.route.cara").doClick();
+		});
+		/* A frame with positions came, and Cara was not in it. */
+		group.arrived(Collections.emptyList(), System.currentTimeMillis());
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.get().refresh(true);
+			assertEquals(MapCompanionPanel.REFUSED, saying(panel.get(), "Cara is not sharing a position just now.").getForeground());
+			named(panel.get(), "group.meetHere").doClick();
+			panel.get().title().setText("Barrows run");
+			named(panel.get(), "group.meetMake").doClick();
+		});
+		until(() -> meetups.said("meet") != null && !meetups.said("meet").sending);
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.get().refresh(true);
+			assertEquals(ColorScheme.LIGHT_GRAY_COLOR, namedComponent(panel.get(), "group.meetSaid").getForeground());
+		});
+	}
+
+	/** The shown label whose words, markup taken out, are these. */
+	private static javax.swing.JLabel saying(Container parent, String words)
+	{
+		for (Component child : parent.getComponents())
+		{
+			if (child instanceof javax.swing.JLabel && child.isVisible() && ((javax.swing.JLabel) child).getText() != null
+				&& words.equals(((javax.swing.JLabel) child).getText().replaceAll("<[^>]+>", "")))
+			{
+				return (javax.swing.JLabel) child;
+			}
+			if (child instanceof Container)
+			{
+				javax.swing.JLabel found = saying((Container) child, words);
+				if (found != null)
+				{
+					return found;
+				}
+			}
+		}
+		return null;
+	}
+
 	/** Whether nothing between a component and the panel is hidden. */
 	private static boolean shownIn(Container panel, Component component)
 	{

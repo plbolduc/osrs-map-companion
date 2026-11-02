@@ -336,12 +336,12 @@ final class GroupPanel extends JPanel
 		long start = chosenStart(ZoneId.systemDefault());
 		if (name.isEmpty())
 		{
-			say(formSaid, "Give the meetup a title.");
+			refuse(formSaid, "Give the meetup a title.");
 			return;
 		}
 		if (start <= System.currentTimeMillis())
 		{
-			say(formSaid, "Pick a time still to come.");
+			refuse(formSaid, "Pick a time still to come.");
 			return;
 		}
 		meetups.create(name, start);
@@ -379,13 +379,14 @@ final class GroupPanel extends JPanel
 		}
 		if (formOpen && fresh != null && fresh.message != null)
 		{
-			say(formSaid, fresh.message);
+			refuse(formSaid, fresh.message);
 		}
 		boolean showMeet = !formOpen && fresh != null && fresh.shown(now);
 		meetSaid.setVisible(showMeet);
 		if (showMeet)
 		{
 			MapCompanionPanel.setWrapped(meetSaid, fresh.message, WIDTH + 16);
+			MapCompanionPanel.tone(meetSaid, fresh.refused());
 		}
 		make.setEnabled(ready && meetups.ready() && (meet == null || !meet.sending));
 		meetHere.setEnabled(ready);
@@ -624,9 +625,11 @@ final class GroupPanel extends JPanel
 			: group.lost(row.id) ? row.name + " is not sharing a position just now." : null;
 		if (message != null)
 		{
+			/* Each says why a Route did not happen. */
 			JLabel line = line(new JLabel());
 			line.setVisible(true);
 			MapCompanionPanel.setWrapped(line, message, WIDTH);
+			MapCompanionPanel.tone(line, true);
 			card.add(MapCompanionPanel.left(line));
 		}
 		return slot(card);
@@ -730,9 +733,11 @@ final class GroupPanel extends JPanel
 		String message = said != null && said.message != null ? said.message : answer != null ? answer.message : null;
 		if (message != null)
 		{
+			/* A Route or an answer that did not happen: an answer that lands says nothing, its fill does. */
 			JLabel line = line(new JLabel());
 			line.setVisible(true);
 			MapCompanionPanel.setWrapped(line, message, WIDTH);
+			MapCompanionPanel.tone(line, true);
 			card.add(MapCompanionPanel.left(line));
 		}
 		return slot(card);
@@ -1010,10 +1015,19 @@ final class GroupPanel extends JPanel
 		return MapPin.colour(hex, FALLBACK);
 	}
 
+	/** A line under a press, for a press on its way. */
 	private void say(JLabel line, String message)
 	{
 		line.setVisible(true);
 		MapCompanionPanel.setWrapped(line, message, WIDTH);
+		MapCompanionPanel.tone(line, false);
+	}
+
+	/** The same line, for a press that did not happen. */
+	private void refuse(JLabel line, String message)
+	{
+		say(line, message);
+		MapCompanionPanel.tone(line, true);
 	}
 
 	private static JPanel card()

@@ -220,6 +220,23 @@ public class SourceCardsTest
 	}
 
 	/**
+	 * A refusal under a card's Route was the grey of the card's own lines, so "The map found no way
+	 * there from here." read as one more fact about the death. It is the sidebar's refusal pink.
+	 */
+	@Test
+	public void aRefusedRouteIsSaidInTheRefusalPink() throws Exception
+	{
+		cards(died(), "{\"options\":[]}");
+		SwingUtilities.invokeAndWait(button(cards, "now.death.route")::doClick);
+		settle("death");
+		refresh();
+		javax.swing.JLabel said = label(cards, "now.death.said");
+		assertTrue(said.isVisible());
+		assertTrue(said.getText(), said.getText().contains(RouteClient.NO_WAY));
+		assertEquals(MapCompanionPanel.REFUSED, said.getForeground());
+	}
+
+	/**
 	 * Under the death, the gravestone's time left by the game's own timer, with a bar full at the
 	 * first reading; with no stone standing the card says only how long ago, as it did.
 	 */

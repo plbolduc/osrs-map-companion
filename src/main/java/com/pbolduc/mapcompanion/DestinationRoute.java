@@ -139,6 +139,8 @@ public class DestinationRoute
 	private boolean pressing;
 	@Nullable
 	private String message;
+	/** Whether {@link #message} says a Reroute did not happen, rather than a notice such as Shortest Path's. */
+	private boolean refused;
 	private long nextRerouteMs;
 	/**
 	 * The player asked to follow this route: pressed Follow, or Reroute. Only then is Shortest Path
@@ -170,6 +172,8 @@ public class DestinationRoute
 		final boolean rerouting;
 		@Nullable
 		final String message;
+		/** The message says a Reroute did not happen, and is drawn in the refusal pink. */
+		final boolean refused;
 		final long nextRerouteMs;
 		final boolean following;
 		final long revision;
@@ -183,13 +187,14 @@ public class DestinationRoute
 		View(String key, WorldPoint target, List<RelayResponse.RouteOption> ways, int chosen, int step, @Nullable String origin,
 			boolean rerouted, boolean rerouting, @Nullable String message, long nextRerouteMs, boolean following, long revision)
 		{
-			this(key, target, ways, chosen, step, origin, rerouted, rerouting, message, nextRerouteMs, following, revision, null);
+			this(key, target, ways, chosen, step, origin, rerouted, rerouting, message, false, nextRerouteMs, following, revision, null);
 		}
 
 		View(String key, WorldPoint target, List<RelayResponse.RouteOption> ways, int chosen, int step, @Nullable String origin,
-			boolean rerouted, boolean rerouting, @Nullable String message, long nextRerouteMs, boolean following, long revision,
-			@Nullable String boatAway)
+			boolean rerouted, boolean rerouting, @Nullable String message, boolean refused, long nextRerouteMs, boolean following,
+			long revision, @Nullable String boatAway)
 		{
+			this.refused = refused;
 			this.boatAway = boatAway;
 			this.revision = revision;
 			this.following = following;
@@ -291,6 +296,7 @@ public class DestinationRoute
 			rerouting = false;
 			following = false;
 			message = null;
+			refused = false;
 			adopt(destination == null ? null : destination.route);
 			return;
 		}
@@ -388,6 +394,7 @@ public class DestinationRoute
 			revision++;
 		}
 		message = null;
+		refused = false;
 	}
 
 	/** Stop following because something else took Shortest Path over, and say so. */
@@ -397,6 +404,7 @@ public class DestinationRoute
 		{
 			following = false;
 			message = why;
+			refused = false;
 		}
 	}
 
@@ -426,10 +434,12 @@ public class DestinationRoute
 		if (now < nextRerouteMs)
 		{
 			message = "The map asked to wait. Try again in " + ((nextRerouteMs - now + 999) / 1000) + "s.";
+			refused = true;
 			return null;
 		}
 		rerouting = true;
 		message = null;
+		refused = false;
 		return new Ticket(generation, target);
 	}
 
@@ -437,6 +447,7 @@ public class DestinationRoute
 	synchronized void refuse(String why)
 	{
 		message = why;
+		refused = true;
 	}
 
 	/**
@@ -452,6 +463,7 @@ public class DestinationRoute
 		}
 		rerouting = false;
 		message = why;
+		refused = why != null;
 		if (answer != null)
 		{
 			revision++;
@@ -516,6 +528,7 @@ public class DestinationRoute
 		rerouted = false;
 		rerouting = false;
 		message = null;
+		refused = false;
 		adopt(destination.route);
 		following = route != null;
 	}
@@ -531,6 +544,7 @@ public class DestinationRoute
 		rerouting = false;
 		following = false;
 		message = null;
+		refused = false;
 		chosen = 0;
 		step = 0;
 		ashore = null;
@@ -555,7 +569,7 @@ public class DestinationRoute
 			? Collections.<RelayResponse.RouteOption>emptyList()
 			: Collections.unmodifiableList(route.options);
 		return new View(key, target, ways, chosen, step, route == null ? null : route.origin, rerouted, rerouting,
-			message, nextRerouteMs, following, revision, boatAway);
+			message, refused, nextRerouteMs, following, revision, boatAway);
 	}
 
 	/**

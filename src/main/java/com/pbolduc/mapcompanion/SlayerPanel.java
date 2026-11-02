@@ -184,6 +184,8 @@ final class SlayerPanel extends JPanel
 			String text = said == null || said.planning ? null : said.message;
 			MapCompanionPanel.setWrapped(label, text, WIDTH);
 			label.setVisible(text != null);
+			/* Pink, so a Route that did not happen does not read as the card's next note. */
+			MapCompanionPanel.tone(label, text != null);
 		}
 	}
 
@@ -328,7 +330,7 @@ final class SlayerPanel extends JPanel
 		{
 			String words = ("unmet".equals(ask.tier) ? "Needs " : "unknown".equals(ask.tier) ? "Unconfirmed: " : "✓ ") + ask.text;
 			JLabel requirement = line(words,
-									  "unmet".equals(ask.tier) ? new Color(239, 150, 150) : MUTED);
+									  "unmet".equals(ask.tier) ? MapCompanionPanel.REFUSED : MUTED);
 			if (ask.skill != null)
 			{
 				MapCompanionPanel.setWrapped(requirement, words, WIDTH - 16);

@@ -180,7 +180,8 @@ final class SettingsPage extends JPanel
 		apply.addActionListener(e -> applyMapAddress(true));
 		contents.add(hug(apply, ColorScheme.DARK_GRAY_COLOR));
 		addressSaid.setFont(addressSaid.getFont().deriveFont(11f));
-		addressSaid.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+		/* It only ever says why Apply refused an address. */
+		addressSaid.setForeground(MapCompanionPanel.REFUSED);
 		addressSaid.setVisible(false);
 		contents.add(left(addressSaid));
 		contents.add(gap(8, ColorScheme.DARK_GRAY_COLOR));
@@ -215,7 +216,7 @@ final class SettingsPage extends JPanel
 			}
 			else
 			{
-				connectCard.say(why);
+				connectCard.refuse(why);
 			}
 			return false;
 		}

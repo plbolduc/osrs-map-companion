@@ -89,8 +89,8 @@ final class RouteStepsView extends JPanel
 	private static final int PICTURE_GAP = 5;
 	private static final Color DONE = ColorScheme.MEDIUM_GRAY_COLOR;
 	private static final Color AHEAD = ColorScheme.LIGHT_GRAY_COLOR;
-	/** An unmet gate, in the Slayer list's colour for one. */
-	private static final Color UNMET = new Color(239, 150, 150);
+	/** An unmet gate, in the Slayer list's colour for one: the sidebar's refusal pink. */
+	private static final Color UNMET = MapCompanionPanel.REFUSED;
 
 	private final transient IntConsumer choose;
 	@Nullable
@@ -263,6 +263,8 @@ final class RouteStepsView extends JPanel
 		String status = view.rerouting ? "Planning from where you stand…" : view.message;
 		message.setVisible(status != null);
 		MapCompanionPanel.setWrapped(message, status == null ? "" : status, WIDTH);
+		/* A Reroute refused in pink; its Planning… and Shortest Path's notices in the line's grey. */
+		MapCompanionPanel.tone(message, !view.rerouting && view.refused);
 
 		revalidate();
 		repaint();
@@ -508,7 +510,8 @@ final class RouteStepsView extends JPanel
 	{
 		StringBuilder sb = new StringBuilder(view.key).append('|').append(view.chosen).append('|').append(view.step)
 			.append('|').append(view.origin).append('|').append(view.rerouted).append('|').append(view.rerouting)
-			.append('|').append(view.message).append('|').append(open).append('|').append(view.boatAway).append('|');
+			.append('|').append(view.message).append('|').append(view.refused).append('|').append(open).append('|').append(view.boatAway)
+			.append('|');
 		for (RelayResponse.RouteOption option : view.ways)
 		{
 			sb.append(option.id).append(';').append(option.label).append(';').append(option.steps.size()).append(';');
