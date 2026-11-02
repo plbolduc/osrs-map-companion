@@ -250,8 +250,8 @@ Say these in the description of the next Hub update, as changes from what was ap
   asked about by name before anything is sent to it.
 - **Route here** on the world map: a `MenuAction.RUNELITE` entry, handled by the client and sending
   the game nothing, added below Cancel so a left-click never takes it, and only over the map with a
-  group set. A press is the Route request above with the clicked tile; it can be turned off under
-  *In the client*.
+  group set. A press is the Route request above with the clicked tile, which a faded pin marks on
+  the world map until the answer; it can be turned off under *In the client*.
 - **The step on screen**: an `OverlayPanel` naming the followed route's destination and the step the
   sidebar marks, drawn only while the player follows a route, gone on arrival and inside instances.
   It draws what the sidebar already holds and sends nothing; it can be turned off under *In the client*.

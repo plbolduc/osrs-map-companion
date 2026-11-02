@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import net.runelite.api.coords.WorldPoint;
@@ -58,6 +59,11 @@ import net.runelite.client.ui.overlay.worldmap.WorldMapPointManager;
  * edge: a row of discs round the border would say nothing about which way to go. The steps behind
  * it fade, and the last step's pin is left out where it would sit on the destination's own.
  *
+ * <p>While Route here plans, the spot it was pressed on has the destination's pin, faded, so the
+ * press shows it took on the map it was made on. It does not hold the edge, being where the player
+ * is looking, and it goes with the answer: a refusal leaves nothing, and a route draws its own pins.
+ * It belongs to the destinations it was pressed among, so a group left meanwhile takes it too.
+ *
  * <p>At most one of each is live. Sync and remove run on the client thread because the manager
  * mutates the world map's overlay list, which is game state.
  */
@@ -79,6 +85,10 @@ public class DestinationMarker
 	private String meetupKey;
 	private final List<MapPin> steps = new ArrayList<>();
 	private String stepsKey;
+	/** Route here's spot while its press plans, and the destinations' generation it was pressed in. */
+	private WorldPoint planningSpot;
+	private long planningGeneration;
+	private MapPin planning;
 
 	/** A step's disc ahead of the player: the map's light ink, so amber stays the place you are going to. */
 	static final Color STEP = new Color(228, 228, 231);
@@ -112,12 +122,41 @@ public class DestinationMarker
 		clientThread.invoke(this::removeNow);
 	}
 
+	/** Mark the spot Route here was pressed on while its press plans, or take the mark away with null. */
+	void planning(@Nullable WorldPoint spot)
+	{
+		clientThread.invoke(() ->
+		{
+			planningSpot = spot;
+			planningGeneration = state.generation();
+			syncPlanning();
+		});
+	}
+
 	private void syncNow()
 	{
 		syncDestination();
 		syncMeetup();
 		syncSteps();
 		syncFarmStops();
+		syncPlanning();
+	}
+
+	private void syncPlanning()
+	{
+		WorldPoint spot = planningGeneration == state.generation() ? planningSpot : null;
+		if (planning != null && planning.getWorldPoint().equals(spot))
+		{
+			return;
+		}
+		removePlanning();
+		if (spot == null)
+		{
+			return;
+		}
+		planning = new MapPin(spot, MapPin.AMBER, "", true, WorldMapRouteHere.OPTION, () -> "Planning the way here…");
+		planning.setSnapToEdge(false);
+		points.add(planning);
 	}
 
 	private void syncDestination()
@@ -367,6 +406,17 @@ public class DestinationMarker
 		removeMeetup();
 		removeSteps();
 		removeFarmStops();
+		planningSpot = null;
+		removePlanning();
+	}
+
+	private void removePlanning()
+	{
+		if (planning != null)
+		{
+			points.remove(planning);
+			planning = null;
+		}
 	}
 
 	private void removeSteps()
