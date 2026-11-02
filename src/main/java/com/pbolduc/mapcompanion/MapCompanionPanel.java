@@ -369,10 +369,14 @@ public class MapCompanionPanel extends PluginPanel
 	}
 
 	/** Buttons side by side, sharing the width equally — however many of them are showing. */
-	static JPanel row(Color background)
+	static JPanel row(Color background, JComponent... items)
 	{
 		JPanel row = new JPanel(new GridLayout(1, 0, 4, 0));
 		row.setBackground(background);
+		for (JComponent item : items)
+		{
+			row.add(item);
+		}
 		return row;
 	}
 
