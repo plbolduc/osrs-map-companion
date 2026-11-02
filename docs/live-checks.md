@@ -263,15 +263,16 @@ The website plan's second session, once the routes in the game are built: a memb
       and *Notify before a meetup* stay off. Restart RuneLite and reconnect: no step. In RuneLite's
       own config panel, ticking a sharing setting asks no "Are you sure?".
 - [ ] **Connect, Join and Open the map without the website.** With no group, Connect makes *Our
-      group*; the sidebar's Group tab says *Just you so far*. Copy invite, paste the whole message
-      into a second RuneLite's *Have an invite?* field and press Join: both see each other. Paste it
-      into a third and press the orange Connect rather than Join: it joins the same group, and no
-      second *Our group* is made. The maker's Switch ▾ shows *Rename group…* and the friend's does
-      not, and so does the maker's status card, under *Our group*; rename the group, and both
-      status cards show the new name and the maker's link is gone. Open the map from each: the
-      browser opens in the group as that player, the maker's as owner, with no `#link` left in the
-      address. Log out and press Open the map on the login screen: the same. Press Connect on the
-      login screen of a fresh profile and log in a few days later: the group is still there.
+      group*; the sidebar's Group tab says *Just you so far* at once, with Copy invite in that card.
+      Copy invite, paste the whole message into a second RuneLite's *Have an invite?* field and press
+      Join: both see each other, and the maker's Copy invite is back beside Switch ▾. Paste it into a
+      third and press the orange Connect rather than Join: it joins the same group, and no second
+      *Our group* is made. The maker's Switch ▾ shows *Rename group…* and the friend's does not, and
+      so does the maker's status card, under *Our group*; rename the group, and both status cards
+      show the new name and the maker's link is gone. Open the map from each: the browser opens in
+      the group as that player, the maker's as owner, with no `#link` left in the address. Log out
+      and press Open the map on the login screen: the same. Press Connect on the login screen of a
+      fresh profile and log in a few days later: the group is still there.
 - [ ] **Copy invite.** In a group Connect made, Copy invite says the invite expires in 7 days. With
       the map stopped it says nothing was copied, and pasting gives what the clipboard held before.
 - [ ] **The reminder.** With *Notify before a meetup* on and the minutes set to 2, a meetup two

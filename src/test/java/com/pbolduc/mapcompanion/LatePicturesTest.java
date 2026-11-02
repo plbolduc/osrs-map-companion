@@ -279,7 +279,8 @@ public class LatePicturesTest
 			destinations, new TestDestinationMarker());
 		MeetupClient meetups = new MeetupClient(new OkHttpClient(), new Gson(), game, now, pairing, identity, destinations, state,
 			link -> { });
-		GroupPanel group = new GroupPanel(destinations, state, press, meetups, config, later);
+		GroupPanel group = new GroupPanel(destinations, state, press, meetups, config, later,
+			MapCompanionPanel.smallButton("Copy invite"));
 		try
 		{
 			String stream = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "contract", "stream.json")),

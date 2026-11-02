@@ -534,7 +534,9 @@ on.
 They were three loose rows under the meetups: *Meet here…*, *Copy invite*, and *▸ Join another
 group*. *Meet here…* is now a link on the *Meetups* heading, which is drawn with or without a meetup
 under it; *Copy invite* sits beside *Switch ▾*, which is always there; and *Join another group…* is
-the menu's last row, under a rule, reading *Hide the code field* while the field is open.
+the menu's last row, under a rule, reading *Hide the code field* while the field is open. In a group
+of one, which is how Connect starts every group, *Copy invite* sits instead in the card that says
+*Just you so far*, under the sentence about it, and goes back beside *Switch ▾* once a friend is in.
 
 ### A meetup's Route
 

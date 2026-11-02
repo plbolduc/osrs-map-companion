@@ -419,7 +419,7 @@ public class MapCompanionPanel extends PluginPanel
 		this.clueReader = clueReader;
 		this.sprites = sprites;
 		this.searchPanel = new SearchPanel(searchClient, routePress, sprites);
-		this.groupPanel = new GroupPanel(destinationState, groupState, routePress, meetupClient, config, sprites);
+		this.groupPanel = new GroupPanel(destinationState, groupState, routePress, meetupClient, config, sprites, copyInviteButton);
 		this.routeSteps = new RouteStepsView(way ->
 		{
 			destinationRoute.choose(way);
@@ -1858,8 +1858,9 @@ public class MapCompanionPanel extends PluginPanel
 			drySection.setVisible(paused || dropLuck.hasContent());
 
 			/*
-			 * The group. In one: its invite beside the groups menu, which also joins another. In
-			 * none: the join field outright, and the remembered groups under it.
+			 * The group. In one: its invite beside the groups menu, which also joins another, or in the
+			 * Group tab's card while nobody else is in it. In none: the join field outright, and the
+			 * remembered groups under it.
 			 */
 			List<String> known = pairing.knownCodes();
 			/*
@@ -1878,7 +1879,8 @@ public class MapCompanionPanel extends PluginPanel
 			copyInviteButton.setEnabled(paired && pairing.hasServerConsent() && !copyingInvite);
 			knownGroupsRow.setVisible(!paired && !known.isEmpty());
 			List<JButton> groupRow = new ArrayList<>();
-			if (paired)
+			/* A group of one has Copy invite in the card that says so, from the refresh just above. */
+			if (paired && !(ready && groupPanel.holdsInvite()))
 			{
 				groupRow.add(copyInviteButton);
 			}
