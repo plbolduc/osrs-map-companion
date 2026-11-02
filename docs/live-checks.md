@@ -63,6 +63,9 @@ often. A clean run is now 443 tests with no failures or skips.
 - [ ] With friends whose news carries a picture, keep Group open past a minute: no card stretches or
       loses a line, and Copy invite and Switch stay at the foot. On Stars, with More filters closed,
       *Data from Star Miners* shows under the list.
+- [ ] A friend's news of a finished quest leads with the world map's quest-start star, and of a
+      diary with the diary tab's icon, no larger than a skill icon; its words start in the same
+      column as a level's or a drop's.
 - [ ] Receive a destination, preserve an existing quest hint arrow, and test clearing it.
 - [ ] Use two characters in one group: see only the other member on the game world map, including
       an edge pin when panned away. Turn sharing off and log out; pins must disappear.

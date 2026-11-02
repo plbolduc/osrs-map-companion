@@ -138,11 +138,18 @@ public class GroupPanelTest
 		{
 			drawn.add(label.getName() + " skill " + name);
 		}
+
+		@Override
+		void sprite(javax.swing.JLabel label, int spriteId, int box)
+		{
+			drawn.add(label.getName() + " sprite " + spriteId);
+		}
 	};
 
 	/**
 	 * A friend's news carries its own picture, as the website's friend rows do: the item a drop
-	 * names, the skill a level names, and nothing for a quest, which has neither.
+	 * names, the skill a level names, and for a quest or a diary, which name neither, the game's own
+	 * mark for one — so a quest's line starts in the same column as the rest rather than at the edge.
 	 */
 	@Test
 	public void aFriendsNewsAsksForTheItemOrTheSkillItNames() throws Exception
@@ -153,7 +160,13 @@ public class GroupPanelTest
 		SwingUtilities.invokeAndWait(() -> panel.get().refresh(true));
 		assertTrue(drawn.toString(), drawn.contains("group.news.cara skill Woodcutting"));
 		assertTrue(drawn.toString(), drawn.contains("group.news.dax item 4151"));
-		assertFalse(drawn.toString(), drawn.stream().anyMatch(d -> d.startsWith("group.news.rob")));
+		assertTrue("Rob's quest has the world map's quest-start mark: " + drawn,
+			drawn.contains("group.news.rob sprite " + net.runelite.api.gameval.SpriteID.Mapfunction.QUEST_START));
+		assertNotNull("and holds its place before it lands, as a pictured line does",
+			((javax.swing.JLabel) namedComponent(panel.get(), "group.news.rob")).getIcon());
+		assertEquals("a diary has the diary tab's icon", net.runelite.api.gameval.SpriteID.SideIcons.ACHIEVEMENT_DIARIES,
+			GroupPanel.progressSprite("diary"));
+		assertEquals("a level or a drop names its own picture", 0, GroupPanel.progressSprite("level"));
 	}
 
 	/**
