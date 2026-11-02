@@ -35,6 +35,10 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Consumer;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.callback.ClientThread;
 import static org.junit.Assert.assertEquals;
@@ -135,7 +139,7 @@ public class RouteStepOverlayTest
 		DestinationState destinations = new DestinationState(new Gson());
 		FarmRunState farm = new FarmRunState();
 		FarmRunRoute run = new FarmRunRoute(farm, destinations, route, new ClientThread());
-		RouteStepOverlay overlay = new RouteStepOverlay(null, null, destinations, route, run);
+		RouteStepOverlay overlay = new RouteStepOverlay(null, null, destinations, route, run, null);
 		String json = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "contract", "farm-run.json")), StandardCharsets.UTF_8);
 		farm.accept(new Gson().fromJson(json, RelayResponse.FarmRun.class), 1, 1_000);
 		run.sync();
@@ -163,19 +167,77 @@ public class RouteStepOverlayTest
 			RouteStepOverlay.box(route.view(), "a".repeat(500)).title.length());
 	}
 
+	/**
+	 * A teleport step has the game's picture of what to click before its words, as the sidebar's row
+	 * does, from the client's own cache. It is asked for once however often the box is drawn, nothing
+	 * stands in its place until it arrives, and the box is wider by it from the first frame, so it
+	 * keeps its size when the picture comes; a walk is words alone in a box of the old width.
+	 */
+	@Test
+	public void aTeleportStepHasItsPictureBeforeItsWords() throws IOException
+	{
+		RelayResponse.Destination destination = received();
+		route.follow(true);
+		List<String> asked = new ArrayList<>();
+		List<Consumer<BufferedImage>> answers = new ArrayList<>();
+		RouteStepOverlay overlay = overlay(destination, new GameSprites(null, null, null)
+		{
+			@Override
+			void sprite(int spriteId, int box, Consumer<BufferedImage> use)
+			{
+				asked.add("sprite " + spriteId + " at " + box);
+				answers.add(use);
+			}
+		});
+		Dimension waiting = drawn(overlay);
+		assertEquals("asked once, at the sidebar's size", Collections.singletonList("sprite 356 at 16"), asked);
+		assertEquals("nothing stands in its place yet", 0, picturePixels);
+
+		BufferedImage icon = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D paint = icon.createGraphics();
+		paint.setColor(Color.MAGENTA);
+		paint.fillRect(0, 0, 16, 16);
+		paint.dispose();
+		answers.get(0).accept(icon);
+		Dimension shown = drawn(overlay);
+		assertEquals("the whole picture, bare", 256, picturePixels);
+		assertTrue("before the words", pictureRight < wordsLeft);
+		assertEquals("the box keeps its size when the picture comes", waiting, shown);
+
+		route.advance(new WorldPoint(3222, 3218, 0));
+		Dimension walk = drawn(overlay);
+		assertEquals("a walk is words alone", 0, picturePixels);
+		assertEquals("in a box narrower by the picture and its gap", shown.width - 20, walk.width);
+		assertEquals(1, asked.size());
+	}
+
 	/** White pixels drawn outside the box by the last {@link #drawn}. */
 	private int lettersOutside;
+	/** The picture's pixels in the last {@link #drawn}, the right-most of them, and the left-most letter on their rows. */
+	private int picturePixels;
+	private int pictureRight;
+	private int wordsLeft;
 
 	/** The box as the game draws it, twice, because a panel sizes its background from the frame before. */
 	private Dimension drawn(RelayResponse.Destination destination)
+	{
+		return drawn(overlay(destination, new GameSprites(null, null, null)));
+	}
+
+	/** The box as the plugin wires it, on a route followed to this destination. */
+	private RouteStepOverlay overlay(RelayResponse.Destination destination, GameSprites sprites)
 	{
 		DestinationState destinations = new DestinationState(new Gson());
 		destinations.selectLocal(destination);
 		HarnessGame game = new HarnessGame();
 		game.login("Example", 444, 3222, 3218, 0);
-		RouteStepOverlay overlay = new RouteStepOverlay(game.client(),
+		return new RouteStepOverlay(game.client(),
 			new HarnessConfig(new HarnessStore(), MapCompanionConfig.DEFAULT_MAP_URL), destinations, route,
-			new FarmRunRoute(new FarmRunState(), destinations, route, new ClientThread()));
+			new FarmRunRoute(new FarmRunState(), destinations, route, new ClientThread()), sprites);
+	}
+
+	private Dimension drawn(RouteStepOverlay overlay)
+	{
 		int left = 200;
 		BufferedImage image = new BufferedImage(600, 240, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D graphics = image.createGraphics();
@@ -185,14 +247,34 @@ public class RouteStepOverlayTest
 		Dimension size = overlay.render(graphics);
 		graphics.dispose();
 		lettersOutside = 0;
+		picturePixels = 0;
+		pictureRight = -1;
+		wordsLeft = Integer.MAX_VALUE;
 		for (int y = 0; y < image.getHeight(); y++)
 		{
+			boolean pictureRow = false;
+			int firstLetter = Integer.MAX_VALUE;
 			for (int x = 0; x < image.getWidth(); x++)
 			{
-				if (image.getRGB(x, y) == Color.WHITE.getRGB() && (x < left || x >= left + size.width))
+				int pixel = image.getRGB(x, y);
+				if (pixel == Color.WHITE.getRGB())
 				{
-					lettersOutside++;
+					firstLetter = Math.min(firstLetter, x);
+					if (x < left || x >= left + size.width)
+					{
+						lettersOutside++;
+					}
 				}
+				if (pixel == Color.MAGENTA.getRGB())
+				{
+					picturePixels++;
+					pictureRight = Math.max(pictureRight, x);
+					pictureRow = true;
+				}
+			}
+			if (pictureRow)
+			{
+				wordsLeft = Math.min(wordsLeft, firstLetter);
 			}
 		}
 		return size;

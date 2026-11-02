@@ -45,8 +45,8 @@ import net.runelite.client.util.ImageUtil;
 import net.runelite.http.api.item.ItemPrice;
 
 /**
- * The game's own pictures for the sidebar: an item's sprite from {@link ItemManager}, and an
- * interface sprite — a world-map icon, a spell — from {@link SpriteManager}.
+ * The game's own pictures for the sidebar and the box over the game: an item's sprite from
+ * {@link ItemManager}, and an interface sprite — a world-map icon, a spell — from {@link SpriteManager}.
  *
  * <p>Only from the client's own cache, never from the map. A picture per search row or route step
  * fetched from a server would be a request to a third party on every search, which the README
@@ -54,7 +54,8 @@ import net.runelite.http.api.item.ItemPrice;
  *
  * <p>Both managers answer later: an item sprite loads on the client thread, and an interface sprite
  * is read there once the cache is up. Each picture is set on its label on the event thread when it
- * arrives, so a row is laid out at once with an empty slot of the right size and fills in.
+ * arrives, so a row is laid out at once with an empty slot of the right size and fills in. A box
+ * drawn over the game is handed its picture on the client thread instead, where it is drawn.
  */
 @Singleton
 class GameSprites
@@ -191,6 +192,37 @@ class GameSprites
 			return;
 		}
 		sprites.getSpriteAsync(spriteId, 0, (Consumer<BufferedImage>) image -> show(button, image, box));
+	}
+
+	/**
+	 * An item's sprite for a box drawn over the game, fitted to {@code box} and handed to {@code use}
+	 * on the client thread once the client has drawn it. Never the blank image the item cache hands
+	 * out first: a box drawn every frame draws nothing in its place until this answers.
+	 */
+	void item(int itemId, int box, Consumer<BufferedImage> use)
+	{
+		if (items == null || itemId <= 0)
+		{
+			return;
+		}
+		AsyncBufferedImage image = items.getImage(itemId);
+		if (image != null)
+		{
+			image.onLoaded(() -> use.accept(fit(image, box)));
+		}
+	}
+
+	/**
+	 * An interface sprite for a box drawn over the game, fitted and handed to {@code use} once read:
+	 * at once when the client holds it already, and otherwise on the client thread.
+	 */
+	void sprite(int spriteId, int box, Consumer<BufferedImage> use)
+	{
+		if (sprites == null || spriteId <= 0)
+		{
+			return;
+		}
+		sprites.getSpriteAsync(spriteId, 0, (Consumer<BufferedImage>) image -> use.accept(fit(image, box)));
 	}
 
 	/** Set on the event thread, at the sprite's own size when it fits, so pixel art stays crisp. */
