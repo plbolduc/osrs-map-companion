@@ -236,7 +236,7 @@ final class NowCards extends JPanel
 		eventActions.add(eventRouteButton);
 		eventSlot = nowCard(eventActions, eventSaid, eventWhen, eventTitle);
 		graveLabel.setName("now.death.grave");
-		grave.add(left(graveLabel));
+		grave.add(graveLabel);
 		grave.add(gap(3, ColorScheme.DARKER_GRAY_COLOR));
 		graveBar.setForeground(ColorScheme.PROGRESS_INPROGRESS_COLOR);
 		grave.add(left(graveBar));
@@ -385,7 +385,7 @@ final class NowCards extends JPanel
 		}
 		card.add(gap(5, ColorScheme.DARKER_GRAY_COLOR));
 		card.add(left(actions));
-		card.add(left(said(said)));
+		card.add(said(said));
 		JComponent slot = slot(card);
 		add(slot);
 		return slot;

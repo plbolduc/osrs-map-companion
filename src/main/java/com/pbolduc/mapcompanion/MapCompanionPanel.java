@@ -460,7 +460,7 @@ public class MapCompanionPanel extends PluginPanel
 		JLabel heading = new JLabel(text);
 		heading.setFont(heading.getFont().deriveFont(Font.BOLD, 11f));
 		heading.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
-		return left(heading);
+		return heading;
 	}
 
 	/** A button a size down, for the actions that sit inside a card or beside a field. */
@@ -483,7 +483,7 @@ public class MapCompanionPanel extends PluginPanel
 		button.setHorizontalAlignment(SwingConstants.LEFT);
 		button.setBorder(BorderFactory.createEmptyBorder(3, 0, 3, 0));
 		button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		return left(button);
+		return button;
 	}
 
 	/**

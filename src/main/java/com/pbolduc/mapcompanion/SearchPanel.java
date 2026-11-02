@@ -160,7 +160,7 @@ final class SearchPanel extends JPanel
 		});
 		add(box);
 		/* The one line under the box, above the rows, where the player is looking: under a full list it is out of sight. */
-		add(MapCompanionPanel.left(status));
+		add(status);
 		add(rows);
 		status.setName("search.status");
 		status.setBorder(new EmptyBorder(3, 0, 1, 0));

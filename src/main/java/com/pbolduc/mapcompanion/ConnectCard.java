@@ -299,7 +299,7 @@ final class ConnectCard extends JPanel
 		gearButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		status.add(left(MapCompanionPanel.bar(6, ColorScheme.DARKER_GRAY_COLOR, dot, statusLabel, gearButton)));
 		groupLabel.setFont(groupLabel.getFont().deriveFont(12f));
-		status.add(left(groupLabel));
+		status.add(groupLabel);
 		status.add(sharingLabel);
 		nameLink.setName("companion.rename");
 		nameLink.setForeground(ColorScheme.BRAND_ORANGE);
@@ -311,7 +311,7 @@ final class ConnectCard extends JPanel
 		cardMessage.setFont(cardMessage.getFont().deriveFont(11f));
 		cardMessage.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
 		cardMessage.setVisible(false);
-		status.add(left(cardMessage));
+		status.add(cardMessage);
 		add(status);
 		add(gap(6, ColorScheme.DARK_GRAY_COLOR));
 
@@ -328,7 +328,7 @@ final class ConnectCard extends JPanel
 		/* The connection is reachable from every tab, including after changing the server. */
 		joinBlock = buildJoinBlock();
 		field.add(joinBlock);
-		field.add(left(joinMessage));
+		field.add(joinMessage);
 		fieldAbove.add(field);
 		add(fieldAbove);
 		/* Between the field and the tabs, which follow it only while the map refuses the group. */
@@ -345,7 +345,7 @@ final class ConnectCard extends JPanel
 		groupMessage.setFont(groupMessage.getFont().deriveFont(11f));
 		groupMessage.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
 		groupMessage.setVisible(false);
-		groupActions.add(left(groupMessage));
+		groupActions.add(groupMessage);
 		fieldBelow.setBorder(new EmptyBorder(6, 0, 0, 0));
 		fieldBelow.setVisible(false);
 		groupActions.add(fieldBelow);

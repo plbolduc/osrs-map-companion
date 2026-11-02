@@ -347,16 +347,16 @@ final class DropLuckPanel extends JPanel
 		 * Wrapped and not bold: RuneLite's font has no bold face, so a derived bold is drawn wider
 		 * than it is measured and "Abyssal demon" lost its last letter.
 		 */
-		card.add(left(wrapped(monster.npc, TEXT_WIDTH, 15f, Color.WHITE)));
+		card.add(wrapped(monster.npc, TEXT_WIDTH, 15f, Color.WHITE));
 		Integer taskLeft = isNow ? log.taskRemaining(monster.npc) : null;
-		card.add(left(wrapped(DropLuckView.context(monster, isNow, taskLeft, now), TEXT_WIDTH, 11f,
-			taskLeft != null ? ColorScheme.BRAND_ORANGE : ColorScheme.LIGHT_GRAY_COLOR)));
+		card.add(wrapped(DropLuckView.context(monster, isNow, taskLeft, now), TEXT_WIDTH, 11f,
+			taskLeft != null ? ColorScheme.BRAND_ORANGE : ColorScheme.LIGHT_GRAY_COLOR));
 		card.add(gap(6, ColorScheme.DARKER_GRAY_COLOR));
 
 		if (monster.drops.isEmpty())
 		{
-			card.add(left(wrapped("No notable drops yet. Kills are counted; a drop gets odds where its rate is on file.",
-				TEXT_WIDTH, 11f, ColorScheme.LIGHT_GRAY_COLOR)));
+			card.add(wrapped("No notable drops yet. Kills are counted; a drop gets odds where its rate is on file.",
+				TEXT_WIDTH, 11f, ColorScheme.LIGHT_GRAY_COLOR));
 			add(card);
 			return;
 		}
@@ -381,9 +381,9 @@ final class DropLuckPanel extends JPanel
 		Color background = selected ? ColorScheme.DARKER_GRAY_HOVER_COLOR : ColorScheme.DARKER_GRAY_COLOR;
 		JPanel words = column(background);
 		/* The pinned drop's name is orange, the sidebar's own accent: an emoji pin is not in RuneLite's font. */
-		words.add(left(wrapped(drop.item, ROW_TEXT_WIDTH, 12f, pinned ? ColorScheme.BRAND_ORANGE : Color.WHITE)));
-		words.add(left(wrapped(DropLuckView.rowDetail(monster, drop, log.boostedNow(monster.npc, drop.boostWhen)),
-			ROW_TEXT_WIDTH, 11f, ColorScheme.LIGHT_GRAY_COLOR)));
+		words.add(wrapped(drop.item, ROW_TEXT_WIDTH, 12f, pinned ? ColorScheme.BRAND_ORANGE : Color.WHITE));
+		words.add(wrapped(DropLuckView.rowDetail(monster, drop, log.boostedNow(monster.npc, drop.boostWhen)),
+			ROW_TEXT_WIDTH, 11f, ColorScheme.LIGHT_GRAY_COLOR));
 
 		JPanel count = column(background);
 		JLabel n = new JLabel(DropOdds.count(drop.obtained), SwingConstants.RIGHT);
@@ -440,14 +440,14 @@ final class DropLuckPanel extends JPanel
 		card.add(fillIn(MapCompanionPanel.bar(0, ColorScheme.DARKER_GRAY_COLOR, label(drop.item, 12f, Color.WHITE), null, pin),
 			ColorScheme.DARKER_GRAY_COLOR));
 		card.add(gap(3, ColorScheme.DARKER_GRAY_COLOR));
-		card.add(left(wrapped(detail.verdict, TEXT_WIDTH, 13f, Color.WHITE)));
+		card.add(wrapped(detail.verdict, TEXT_WIDTH, 13f, Color.WHITE));
 		card.add(gap(5, ColorScheme.DARKER_GRAY_COLOR));
-		card.add(left(wrapped(detail.sinceLabel, TEXT_WIDTH, 11f, ColorScheme.LIGHT_GRAY_COLOR)));
+		card.add(wrapped(detail.sinceLabel, TEXT_WIDTH, 11f, ColorScheme.LIGHT_GRAY_COLOR));
 		/* Two labels, not one with a <font size>: a size change in markup leaves RuneLite's font and its "·". */
-		card.add(left(wrapped(detail.sinceValue, TEXT_WIDTH, 13f, Color.WHITE)));
+		card.add(wrapped(detail.sinceValue, TEXT_WIDTH, 13f, Color.WHITE));
 		if (detail.sinceComparison != null)
 		{
-			card.add(left(wrapped(detail.sinceComparison, TEXT_WIDTH, 11f, ColorScheme.LIGHT_GRAY_COLOR)));
+			card.add(wrapped(detail.sinceComparison, TEXT_WIDTH, 11f, ColorScheme.LIGHT_GRAY_COLOR));
 		}
 		if (detail.drierThan >= 0)
 		{
@@ -467,13 +467,13 @@ final class DropLuckPanel extends JPanel
 		if (detail.aheadLabel != null)
 		{
 			card.add(gap(5, ColorScheme.DARKER_GRAY_COLOR));
-			card.add(left(wrapped(detail.aheadLabel, TEXT_WIDTH, 11f, ColorScheme.LIGHT_GRAY_COLOR)));
-			card.add(left(wrapped(detail.aheadValue, TEXT_WIDTH, 13f, Color.WHITE)));
+			card.add(wrapped(detail.aheadLabel, TEXT_WIDTH, 11f, ColorScheme.LIGHT_GRAY_COLOR));
+			card.add(wrapped(detail.aheadValue, TEXT_WIDTH, 13f, Color.WHITE));
 		}
 		if (detail.median != null)
 		{
 			card.add(gap(4, ColorScheme.DARKER_GRAY_COLOR));
-			card.add(left(wrapped(detail.median, TEXT_WIDTH, 11f, ColorScheme.LIGHT_GRAY_COLOR)));
+			card.add(wrapped(detail.median, TEXT_WIDTH, 11f, ColorScheme.LIGHT_GRAY_COLOR));
 		}
 	}
 
@@ -549,7 +549,7 @@ final class DropLuckPanel extends JPanel
 			: monsters.size() + (monsters.size() == 1 ? " monster tracked" : " monsters tracked")));
 		if (shown.isEmpty())
 		{
-			results.add(left(wrapped("Nothing tracked matches “" + query.trim() + "”.", WIDTH, 11f, ColorScheme.LIGHT_GRAY_COLOR)));
+			results.add(wrapped("Nothing tracked matches “" + query.trim() + "”.", WIDTH, 11f, ColorScheme.LIGHT_GRAY_COLOR));
 		}
 		for (LootLog.Monster monster : shown)
 		{
@@ -565,9 +565,9 @@ final class DropLuckPanel extends JPanel
 			new MatteBorder(0, 2, 0, 0, ColorScheme.BRAND_ORANGE), new EmptyBorder(3, 4, 3, 4)));
 		row.add(new Picture(drop.itemId, 26, true, -1), BorderLayout.WEST);
 		JPanel words = column(ColorScheme.DARKER_GRAY_HOVER_COLOR);
-		words.add(left(wrapped(drop.item, ROW_TEXT_WIDTH, 12f, ColorScheme.BRAND_ORANGE)));
-		words.add(left(wrapped(monster.npc + " · " + DropOdds.count(drop.sinceLast) + " kills since last",
-			ROW_TEXT_WIDTH, 11f, ColorScheme.LIGHT_GRAY_COLOR)));
+		words.add(wrapped(drop.item, ROW_TEXT_WIDTH, 12f, ColorScheme.BRAND_ORANGE));
+		words.add(wrapped(monster.npc + " · " + DropOdds.count(drop.sinceLast) + " kills since last",
+			ROW_TEXT_WIDTH, 11f, ColorScheme.LIGHT_GRAY_COLOR));
 		row.add(words, BorderLayout.CENTER);
 		if (drop.oneIn != null)
 		{
@@ -802,7 +802,7 @@ final class DropLuckPanel extends JPanel
 	{
 		JLabel label = small(text, ColorScheme.LIGHT_GRAY_COLOR);
 		label.setBorder(new EmptyBorder(4, 0, 2, 0));
-		return left(label);
+		return label;
 	}
 
 	private static JLabel small(String text, Color color)

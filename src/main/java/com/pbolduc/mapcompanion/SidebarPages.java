@@ -70,7 +70,7 @@ final class SidebarPages extends JPanel
 		back.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		MapCompanionPanel.capped(back);
 		back.addActionListener(e -> open(false));
-		settings.add(MapCompanionPanel.left(back));
+		settings.add(back);
 		settings.add(settingsContent);
 		add(daily);
 		add(settings);

@@ -149,7 +149,7 @@ final class SettingsPage extends JPanel
 		whatsNew.setForeground(ColorScheme.BRAND_ORANGE);
 		whatsNew.setToolTipText("osrs-map.com's What's new page, where every update is written down");
 		whatsNew.addActionListener(e -> LinkBrowser.browse(mapUrl.get() + "/whats-new"));
-		add(left(whatsNew));
+		add(whatsNew);
 		add(gap(4, ColorScheme.DARK_GRAY_COLOR));
 		add(sectionHead("What you share"));
 		add(sharingControls);
