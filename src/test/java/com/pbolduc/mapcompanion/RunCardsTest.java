@@ -172,7 +172,8 @@ public class RunCardsTest
 		state.observePorts(Arrays.asList(empty(0), courier(1, 84, 3, 3), courier(2, 121, 3, 3), bounty(3, 466, 0), empty(4)));
 		state.observePorts(Arrays.asList(empty(0), empty(1), empty(2), empty(3), empty(4)));
 		refresh();
-		assertTrue(shown(ports).contains("Route finished."));
+		// "Route finished." until the card said what the run came to.
+		assertTrue(shown(ports).toString(), shown(ports).contains("Run finished · 4 done"));
 		List<String> free = shown(farm);
 		assertTrue(free.toString(), free.contains("Start run"));
 		assertFalse(free.toString(), free.contains(FarmRunPanel.AFTER_PORT_RUN));
@@ -248,6 +249,82 @@ public class RunCardsTest
 		assertTrue(enabled(farm, "Start run"));
 		assertFalse(shown(farm).contains(FarmRunPanel.NEEDS_PATCHES));
 		assertEquals(0, asked);
+	}
+
+	/**
+	 * Pausing changed one word, on the button, and a search pick or a friend's destination paused the
+	 * run with no word on its card at all. The count says the run is paused now, and while the
+	 * destination that paused it is shown, the card names it and the way back.
+	 */
+	@Test
+	public void aPausedRunSaysSoAndNamesTheRouteThatPausedIt() throws Exception
+	{
+		state.acceptFor(identity.id(), EPOCH, run("/contract/farm-run.json"), 1, System.currentTimeMillis());
+		follower.sync();
+		refresh();
+		assertTrue(shown(farm).toString(), shown(farm).contains("1 of 3 tracked done"));
+
+		press(farm, "Pause");
+		refresh();
+		List<String> paused = shown(farm);
+		assertTrue(paused.toString(), paused.contains("Paused · 1 of 3 tracked done"));
+		assertFalse("the player paused it: nothing else to name", paused.contains(RunView.pausedLine("1. Falador farm")));
+
+		press(farm, "Follow");
+		follower.sync();
+		destinations.selectLocal(bank());
+		follower.sync();
+		refresh();
+		List<String> detour = shown(farm);
+		assertTrue(detour.toString(), detour.contains("Paused · 1 of 3 tracked done"));
+		assertTrue(detour.toString(), detour.contains(RunView.pausedLine("Lumbridge Castle bank")));
+
+		destinations.dismiss();
+		refresh();
+		List<String> dismissed = shown(farm);
+		assertTrue("still paused, as the README says", dismissed.contains("Paused · 1 of 3 tracked done"));
+		assertFalse("but no longer for a destination gone from the screen",
+			dismissed.contains(RunView.pausedLine("Lumbridge Castle bank")));
+	}
+
+	/**
+	 * A finished run said only "Route finished." in grey, and kept Pause and Reroute greyed beside End
+	 * run. It says what it came to, done and visited apart, and leaves End run its one press.
+	 */
+	@Test
+	public void aFinishedRunSaysWhatItCameToAndOffersOnlyEndRun() throws Exception
+	{
+		state.acceptFor(identity.id(), EPOCH, run("/contract/farm-run.json"), 1, System.currentTimeMillis());
+		replant("falador-herb");
+		replant("catherby-herb");
+		refresh();
+		List<String> finished = shown(farm);
+		assertTrue(finished.toString(), finished.contains("Run finished · 3 done, 1 visited"));
+		assertTrue(finished.toString(), finished.contains("End run"));
+		assertFalse(finished.toString(), finished.contains("Pause") || finished.contains("Follow") || finished.contains("Reroute"));
+		assertTrue(enabled(farm, "End run"));
+	}
+
+	/** Lumbridge Castle bank, picked from the search: a destination of the player's own. */
+	private static RelayResponse.Destination bank()
+	{
+		RelayResponse.Destination bank = new RelayResponse.Destination();
+		bank.name = "Lumbridge Castle bank";
+		bank.x = 3208;
+		bank.y = 3220;
+		bank.plane = 2;
+		return bank;
+	}
+
+	/** A replant this client watched, as the farming reader reports one. */
+	private void replant(String patch)
+	{
+		CompanionSnapshot.Patch replanted = new CompanionSnapshot.Patch();
+		replanted.id = patch;
+		replanted.state = "growing";
+		replanted.completionId = "replanted-" + patch;
+		replanted.completedMsAgo = 0L;
+		state.observe(Collections.singletonList(replanted), null, null, System.currentTimeMillis());
 	}
 
 	/** Pick a kind of run in the farm card's picker, as the player does. */

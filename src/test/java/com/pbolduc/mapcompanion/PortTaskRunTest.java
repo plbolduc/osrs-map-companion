@@ -171,7 +171,8 @@ public class PortTaskRunTest
 		state.observePorts(Arrays.asList(empty(0), empty(1), empty(2), empty(3), empty(4)));
 		assertFalse(state.view().changed);
 		assertNull(state.view().next());
-		assertEquals("Route finished.", RunView.progressLine(state.view()));
+		// The card says the run is over and what it came to, where it said "Route finished." alone.
+		assertEquals("Run finished · 4 done", RunView.progressLine(state.view()));
 	}
 
 	@Test
