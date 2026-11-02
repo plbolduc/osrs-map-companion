@@ -1305,89 +1305,16 @@ final class ConnectCard extends JPanel
 		fieldBelow.repaint();
 	}
 
-	/**
-	 * Every kind of data a snapshot can carry, each with whether it is going out — from the same
-	 * settings that gate the fields, in the order the README lists them.
-	 *
-	 * <p>Pets and collection additions ride on drops and levels, so they are off whenever it is,
-	 * whatever their own toggle says — which is what the snapshot does.
-	 */
-	private List<SharedKind> sharedKinds()
-	{
-		List<SharedKind> kinds = new ArrayList<>();
-		/** First, because it is the only one of these that names the account rather than describing it. */
-		kinds.add(new SharedKind("name", config.shareName()));
-		kinds.add(new SharedKind("position", config.sharePosition()));
-		kinds.add(new SharedKind("levels", config.shareSkills()));
-		kinds.add(new SharedKind("activity", config.shareActivity()));
-		kinds.add(new SharedKind("account type", config.shareAccountType()));
-		kinds.add(new SharedKind("quests", config.shareQuests()));
-		kinds.add(new SharedKind("diaries", config.shareDiaries()));
-		kinds.add(new SharedKind("carried items", config.shareCapabilities()));
-		kinds.add(new SharedKind("permanent travel", config.sharePermanentTravel()));
-		kinds.add(new SharedKind("slayer", config.shareSlayer()));
-		kinds.add(new SharedKind("clue", config.shareClue()));
-		kinds.add(new SharedKind("STASH construction", config.shareStash()));
-		kinds.add(new SharedKind("boats", config.shareBoats()));
-		kinds.add(new SharedKind("patches", config.shareFarming()));
-		kinds.add(new SharedKind("birdhouses", config.shareBirdhouses()));
-		kinds.add(new SharedKind("hunter rumours", config.shareHunterRumours()));
-		kinds.add(new SharedKind("Mahogany Homes", config.shareMahoganyHomes()));
-		kinds.add(new SharedKind("farming contracts", config.shareFarmingContracts()));
-		kinds.add(new SharedKind("port tasks", config.sharePortTasks()));
-		kinds.add(new SharedKind("full quest progress", config.shareQuestLog()));
-		kinds.add(new SharedKind("observed loot kills", config.shareLoot()));
-		kinds.add(new SharedKind("drops & levels", config.shareMilestones()));
-		kinds.add(new SharedKind("pets", config.shareMilestones() && config.sharePets()));
-		kinds.add(new SharedKind("collection additions", config.shareMilestones() && config.shareCollectionLog()));
-		kinds.add(new SharedKind("death spot", config.shareDeath()));
-		return kinds;
-	}
-
-	/** A short summary of opt-in character fields, never a claim that membership sends nothing. */
+	/** A short summary of character sharing in Settings' switches, never a claim that membership sends nothing. */
 	private String sharingLine()
 	{
-		List<SharedKind> kinds = sharedKinds();
-		List<String> on = new ArrayList<>();
-		for (SharedKind kind : kinds)
-		{
-			if (kind.on)
-			{
-				on.add(kind.label);
-			}
-		}
-		if (on.isEmpty())
-		{
-			return "Character sharing off";
-		}
-		return on.size() <= 2 ? "Sharing " + String.join(", ", on) : "Sharing " + on.size() + " character fields";
+		return SharingSummary.line(config);
 	}
 
-	/** The whole list, for the line's tooltip: "Sharing: name, position, …". */
+	/** Every switch for the line's tooltip, one a line, wrapped to fit the screen. */
 	private String sharingList()
 	{
-		List<String> on = new ArrayList<>();
-		for (SharedKind kind : sharedKinds())
-		{
-			if (kind.on)
-			{
-				on.add(kind.label);
-			}
-		}
-		return on.isEmpty() ? "Sharing nothing" : "Sharing: " + String.join(", ", on);
-	}
-
-	/** One kind of data, and whether it is going out. */
-	private static final class SharedKind
-	{
-		final String label;
-		final boolean on;
-
-		SharedKind(String label, boolean on)
-		{
-			this.label = label;
-			this.on = on;
-		}
+		return SharingSummary.list(config);
 	}
 
 	/**
