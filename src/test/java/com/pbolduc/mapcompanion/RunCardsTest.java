@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.concurrent.AbstractExecutorService;
 import java.util.concurrent.TimeUnit;
 import javax.swing.AbstractButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 import net.runelite.client.callback.ClientThread;
@@ -45,6 +46,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Protocol;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
@@ -84,6 +86,8 @@ public class RunCardsTest
 	/** The map's answer to the next press. */
 	private int status = 200;
 	private String body = "{}";
+	/** Every press that reached the map. */
+	private int asked;
 	private final FarmRunClient client = new FarmRunClient(answering(), gson, game.client(), thread, pairing, identity,
 		state, destinations, route);
 	private final FarmRunRoute follower = new FarmRunRoute(state, destinations, route, thread);
@@ -211,6 +215,83 @@ public class RunCardsTest
 		assertTrue(refused.toString(), refused.contains(NO_BOAT));
 		assertTrue(refused.toString(), refused.contains(HONEY));
 		assertTrue(refused.toString(), refused.contains("Start run"));
+	}
+
+	/**
+	 * Ready now plans from the patches this client shares, and a contract from the contract. With that
+	 * choice off the map could only refuse, so the card says which choice to turn on, Start run waits,
+	 * and nothing is sent. A preset is planned from the map's own tables and needs neither.
+	 */
+	@Test
+	public void aRunPlannedFromASharingChoiceThatIsOffIsNotSent() throws Exception
+	{
+		refresh();
+		List<String> readyNow = shown(farm);
+		assertTrue(readyNow.toString(), readyNow.contains(FarmRunPanel.NEEDS_PATCHES));
+		assertFalse("Start run waits for the choice", enabled(farm, "Start run"));
+		click(farm, "Start run");
+		assertEquals("nothing reaches the map", 0, asked);
+
+		choose("Herb run");
+		assertFalse(shown(farm).contains(FarmRunPanel.NEEDS_PATCHES));
+		assertTrue("a preset needs no reading", enabled(farm, "Start run"));
+
+		choose("Farming contract");
+		assertTrue(shown(farm).contains(FarmRunPanel.NEEDS_CONTRACT));
+		assertFalse("a new pick is checked at once, not at the next refresh", enabled(farm, "Start run"));
+		config.set("shareFarmingContracts", true);
+		refresh();
+		assertTrue(enabled(farm, "Start run"));
+
+		config.set("shareFarming", true);
+		choose("Ready now");
+		assertTrue(enabled(farm, "Start run"));
+		assertFalse(shown(farm).contains(FarmRunPanel.NEEDS_PATCHES));
+		assertEquals(0, asked);
+	}
+
+	/** Pick a kind of run in the farm card's picker, as the player does. */
+	private void choose(String kind) throws Exception
+	{
+		SwingUtilities.invokeAndWait(() -> combo(farm).setSelectedItem(kind));
+	}
+
+	private static JComboBox<?> combo(Component component)
+	{
+		if (component instanceof JComboBox)
+		{
+			return (JComboBox<?>) component;
+		}
+		if (component instanceof Container)
+		{
+			for (Component child : ((Container) component).getComponents())
+			{
+				JComboBox<?> found = combo(child);
+				if (found != null)
+				{
+					return found;
+				}
+			}
+		}
+		return null;
+	}
+
+	/** Whether a shown button with these words can be pressed. */
+	private static boolean enabled(Component root, String words) throws Exception
+	{
+		boolean[] enabled = new boolean[1];
+		SwingUtilities.invokeAndWait(() ->
+		{
+			AbstractButton button = button(root, words);
+			enabled[0] = button != null && button.isEnabled();
+		});
+		return enabled[0];
+	}
+
+	/** A click that does what a click does, enabled or not: a disabled button takes no press. */
+	private static void click(Component root, String words) throws Exception
+	{
+		SwingUtilities.invokeAndWait(() -> button(root, words).doClick());
 	}
 
 	private RelayResponse.FarmRun portRun() throws Exception
@@ -357,8 +438,11 @@ public class RunCardsTest
 			}
 		};
 		return new OkHttpClient.Builder().dispatcher(new Dispatcher(inline)).addInterceptor(chain ->
-			new Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1).code(status).message("")
+		{
+			asked++;
+			return new Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1).code(status).message("")
 				.header("X-Companion-Relay-Epoch", EPOCH)
-				.body(ResponseBody.create(MediaType.get("application/json"), body)).build()).build();
+				.body(ResponseBody.create(MediaType.get("application/json"), body)).build();
+		}).build();
 	}
 }
