@@ -147,9 +147,10 @@ final class NowCards extends JPanel
 	/** Ask the map for the way again from where the player stands. See {@link RouteClient}. */
 	private final JButton rerouteButton = smallButton("Reroute");
 	/**
-	 * Follow this route, or stop: the step in the box over the game, and Shortest Path's walks where
-	 * it is running. The only door to Shortest Path besides Reroute, so a destination that merely
-	 * arrives never draws on the player's own path.
+	 * Follow this route, or pause it: the step in the box over the game, and Shortest Path's walks
+	 * where it is running. It says Pause while following, as a run's card and the key's name call the
+	 * same act. The only door to Shortest Path besides Reroute, so a destination that merely arrives
+	 * never draws on the player's own path.
 	 */
 	private final JButton followButton = smallButton("Follow");
 	private final ShortestPath shortestPath;
@@ -295,8 +296,9 @@ final class NowCards extends JPanel
 	}
 
 	/**
-	 * What Follow does here, or Stop while following: the step in the box over the game, Shortest
-	 * Path's walks, or both, as far as each is on.
+	 * What Follow does here, or Pause while following: the step in the box over the game, Shortest
+	 * Path's walks, or both, as far as each is on. Pause's words are a run's own, and still say that
+	 * the path Shortest Path drew goes with it.
 	 *
 	 * @param drawable Shortest Path is running and the setting lets it draw
 	 * @param box the step on screen is on
@@ -305,9 +307,8 @@ final class NowCards extends JPanel
 	{
 		if (following)
 		{
-			return !drawable ? "Stop showing the step you're on over the game"
-				: box ? "Stop showing the step you're on over the game, and clear the path Shortest Path drew"
-				: "Stop drawing this route with Shortest Path, and clear the path it drew";
+			return "Keep this route and stop following it until you press Follow"
+				+ (drawable ? ", and clear the path Shortest Path drew" : "");
 		}
 		return !drawable ? "Show the step you're on in a box over the game"
 			: box ? "Show the step you're on in a box over the game, and have Shortest Path draw each walking step. "
@@ -520,7 +521,7 @@ final class NowCards extends JPanel
 		List<JButton> destinationRow = new ArrayList<>();
 		if (followable)
 		{
-			followButton.setText(route.following ? "Stop" : "Follow");
+			followButton.setText(route.following ? "Pause" : "Follow");
 			followButton.setToolTipText(followTip(route.following, drawable, box));
 			destinationRow.add(followButton);
 		}
