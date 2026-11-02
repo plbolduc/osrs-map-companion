@@ -879,16 +879,14 @@ final class GroupPanel extends JPanel
 		return countdown == null ? at : at + " · " + countdown;
 	}
 
-	/** "Today 7:42 PM", "Wednesday 8:59 PM", "4 Nov 18:00": the day and the clock alone, as a folded meetup's line says them. */
+	/**
+	 * "Today 7:42 PM", "Wednesday 8:59 PM", "4 Nov 18:00": the day and the clock alone, as a folded
+	 * meetup's line says them. They are the words a meetup's Route writes under the destination's
+	 * name, so they are {@link MapCompanionPanel#meetupStarts}'s, and the two can never disagree.
+	 */
 	static String dayAndClock(long startsAtMs, long nowMs, ZoneId zone, Locale locale)
 	{
-		ZonedDateTime at = Instant.ofEpochMilli(startsAtMs).atZone(zone);
-		long days = ChronoUnit.DAYS.between(Instant.ofEpochMilli(nowMs).atZone(zone).toLocalDate(), at.toLocalDate());
-		String day = days == 0 ? "Today"
-			: days == 1 ? "Tomorrow"
-			: days > 1 && days < 7 ? at.format(DateTimeFormatter.ofPattern("EEEE", Locale.ENGLISH))
-			: at.format(DateTimeFormatter.ofPattern("d MMM", Locale.ENGLISH));
-		return day + " " + at.format(DateTimeFormatter.ofPattern(MapCompanionPanel.clockPattern(locale), Locale.ENGLISH));
+		return MapCompanionPanel.meetupStarts(startsAtMs, nowMs, zone, locale);
 	}
 
 	/** The countdown a when line ends with: "in 25m", "in 3h 20m", "now", "started", or null past twelve hours. */

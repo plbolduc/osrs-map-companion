@@ -475,6 +475,8 @@ public class MapCompanionPanel extends PluginPanel
 
 	/**
 	 * "Today 7:52 PM": a meetup's day and clock in the player's zone, as the Group tab's line begins.
+	 * That line and a later meetup's folded one take these very words, through
+	 * {@link GroupPanel#dayAndClock}.
 	 *
 	 * <p>The note a Route press writes under the destination's name is written once and never
 	 * redrawn, so it carries no countdown: a day and a clock stay true however long the card is up.
