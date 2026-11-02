@@ -38,6 +38,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import net.runelite.api.coords.WorldPoint;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
@@ -86,6 +87,11 @@ public class RouteStepsViewTest
 			shown());
 	}
 
+	/**
+	 * Arriving changes the card's shape. It used to keep the way and every step, greyed, with "You're
+	 * there." squeezed between the last step and the other ways' fold, so a route done looked like a
+	 * route still being walked; now one amber line takes the way's place and the rest goes.
+	 */
 	@Test
 	public void movesTheMarkOnAndSaysWhenYouAreThere() throws IOException
 	{
@@ -95,8 +101,21 @@ public class RouteStepsViewTest
 		assertTrue(shown(), shown().contains("▸ 2. Walk 12 tiles to the bank"));
 		route.advance(new WorldPoint(3208, 3220, 2));
 		view.show(route.view());
-		assertTrue(shown(), shown().contains("You're there."));
-		assertTrue("no step is marked once arrived", !shown().contains("▸ 2."));
+		assertEquals("the way, its steps and the other ways go", "Arrived", shown());
+		assertEquals("in the colour a run gives a stop's own status", MapPin.AMBER, label("Arrived").getForeground());
+	}
+
+	/** On a run's leg the stop it led to already says You're here, so the leg goes on arrival. */
+	@Test
+	public void aRunLegSaysNothingOnceThere() throws IOException
+	{
+		receive();
+		view.showRunLeg(route.view(), null);
+		assertTrue(view.isVisible());
+		route.advance(new WorldPoint(3222, 3218, 0));
+		route.advance(new WorldPoint(3208, 3220, 2));
+		view.showRunLeg(route.view(), null);
+		assertFalse("and This leg's heading, which follows it, with it", view.isVisible());
 	}
 
 	@Test
@@ -163,6 +182,21 @@ public class RouteStepsViewTest
 		route.sync(DestinationRouteTest.destination("Al Kharid bank", nowhere));
 		view.show(route.view());
 		assertTrue(shown(), shown().contains("Planned without your position. Reroute plans from where you stand."));
+	}
+
+	/** The label shown with exactly these words. */
+	private JLabel label(String words)
+	{
+		List<JLabel> labels = new ArrayList<>();
+		collectLabels(view, labels);
+		for (JLabel label : labels)
+		{
+			if (label.getText().replaceAll("<[^>]+>", "").equals(words))
+			{
+				return label;
+			}
+		}
+		throw new AssertionError("no label says " + words + ": " + shown());
 	}
 
 	/** Each step's numbered line, in order. */

@@ -399,6 +399,10 @@ of `docs/plan-where-to-go-for-a-task.md` in `osrs-stars-map`.
 - **The current step** is marked with ▸ and drawn bold and white; the steps behind it go grey. It
   moves on when you stand within four tiles of where it ends, on its floor. Inside a raid's rooms
   nothing moves, because the tile there is not a place.
+- **On arrival** the card changes shape rather than greying a route still drawn: the way, its steps
+  and the other ways go, and one amber line, *Arrived*, takes the way line's place. Reroute and
+  Dismiss stay, Reroute because an arrival read wrongly still needs its way out. A run's leg goes
+  whole, since the stop it led to already says *You're here*.
 - **The other ways** fold behind one line, *▸ 2 other ways*, as the card's closed row folds them.
   Pressing one shows its steps instead; the best one says so.
 - **Reroute** sits beside **Dismiss**, and plans again from where you stand. While the answer is

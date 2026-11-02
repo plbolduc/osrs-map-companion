@@ -48,6 +48,11 @@ import net.runelite.client.ui.ColorScheme;
  * named above its steps, and the others the map offered fold behind one line, as the card's closed
  * row folds them — a press on one shows its steps instead.
  *
+ * <p>Arriving changes the shape rather than greying a route still drawn: the way, its steps and the
+ * other ways go, and one amber line, <i>Arrived</i>, takes the way line's place, in the colour a run
+ * gives a stop's own status. On a run's leg the whole view goes, because the stop it led to already
+ * says <i>You're here</i>.
+ *
  * <p>A teleport step carries the game's own picture of what to click, as the website's card hangs its
  * sprite on the same row: the item's sprite from {@link GameSprites#item}, the spell's icon from
  * {@link GameSprites#sprite}, by the id the map sent. Both come from this client's cache, never from
@@ -88,7 +93,7 @@ final class RouteStepsView extends JPanel
 	private final JLabel way = label(11f, AHEAD);
 	private final JLabel origin = label(11f, AHEAD);
 	private final JPanel steps = MapCompanionPanel.column(ColorScheme.DARKER_GRAY_COLOR);
-	private final JLabel arrived = label(12f, Color.WHITE);
+	private final JLabel arrived = label(11f, MapPin.AMBER);
 	private final JButton others = MapCompanionPanel.linkButton("");
 	private final JPanel otherWays = MapCompanionPanel.column(ColorScheme.DARKER_GRAY_COLOR);
 	private final JLabel message = label(11f, AHEAD);
@@ -150,6 +155,11 @@ final class RouteStepsView extends JPanel
 	{
 		show(view, shortestPath);
 		origin.setVisible(false);
+		/* Arrived, the stop the leg led to says You're here, and the leg has nothing left to say. */
+		if (view != null && view.arrived())
+		{
+			setVisible(false);
+		}
 	}
 
 	/** @param shortestPath what Shortest Path is drawing for it, in words, or null */
@@ -169,12 +179,16 @@ final class RouteStepsView extends JPanel
 			return;
 		}
 		RelayResponse.RouteOption current = view.way();
+		/* Arrived: the route has done its work, and one line in the way's place says so. */
+		boolean there = view.arrived();
+		way.setVisible(!there);
 		MapCompanionPanel.setWrapped(way, wayLine(current), WIDTH);
 
 		boolean nowhere = view.origin == null && !view.rerouted;
-		origin.setVisible(nowhere);
+		origin.setVisible(nowhere && !there);
 		MapCompanionPanel.setWrapped(origin, "Planned without your position. Reroute plans from where you stand.", WIDTH);
 
+		steps.setVisible(!there);
 		steps.removeAll();
 		List<RelayResponse.RouteStep> list = view.steps();
 		int sails = sailingRow(current);
@@ -202,14 +216,14 @@ final class RouteStepsView extends JPanel
 		boat.setVisible(view.boatAway != null);
 		MapCompanionPanel.setWrapped(boat, view.boatAway == null ? "" : boatAwayLine(view.boatAway), WIDTH);
 
-		arrived.setVisible(view.arrived());
-		MapCompanionPanel.setWrapped(arrived, "You're there.", WIDTH);
+		arrived.setVisible(there);
+		MapCompanionPanel.setWrapped(arrived, "Arrived", WIDTH);
 
 		int more = view.ways.size() - 1;
-		others.setVisible(more > 0);
+		others.setVisible(more > 0 && !there);
 		others.setText((open ? "▾ " : "▸ ") + more + (more == 1 ? " other way" : " other ways"));
 		otherWays.removeAll();
-		otherWays.setVisible(open && more > 0);
+		otherWays.setVisible(open && more > 0 && !there);
 		for (int i = 0; i < view.ways.size(); i++)
 		{
 			if (i == view.chosen)
