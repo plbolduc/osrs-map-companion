@@ -64,17 +64,25 @@ final class SharingFields
 		}
 	}
 
-	/** A group of fields with one shortcut, as Settings draws it. */
+	/**
+	 * A group of fields, and the switch RuneLite's list shows for it: {@link #key} is that switch's
+	 * own stored setting, which {@link SharingGroups} keeps in step with the fields. The fields are
+	 * what is sent; the switch is only what the list draws.
+	 */
 	static final class Section
 	{
 		final String id;
 		final String title;
+		final String key;
+		final Predicate<MapCompanionConfig> read;
 		final List<Field> fields;
 
-		private Section(String id, String title, Field... fields)
+		private Section(String id, String title, String key, Predicate<MapCompanionConfig> read, Field... fields)
 		{
 			this.id = id;
 			this.title = title;
+			this.key = key;
+			this.read = read;
 			this.fields = Collections.unmodifiableList(Arrays.asList(fields));
 		}
 	}
@@ -84,7 +92,8 @@ final class SharingFields
 		return new Field(key, label, read, detail, false);
 	}
 
-	static final Section PRESENCE = new Section("presence", "Map presence",
+	static final Section PRESENCE = new Section("presence", "Map presence", MapCompanionConfig.KEY_SHARE_MAP_PRESENCE,
+		MapCompanionConfig::shareMapPresence,
 		field("sharePosition", "Position and world", MapCompanionConfig::sharePosition,
 			"Your tile, world and instance type. Shows your dot where its location is known."),
 		field("shareActivity", "Training and idle time", MapCompanionConfig::shareActivity,
@@ -92,7 +101,8 @@ final class SharingFields
 		field("shareAccountType", "Account type", MapCompanionConfig::shareAccountType,
 			"Your ironman or other account badge."));
 
-	static final Section PROGRESS = new Section("progress", "Progress and travel",
+	static final Section PROGRESS = new Section("progress", "Progress and travel", MapCompanionConfig.KEY_SHARE_PROGRESS,
+		MapCompanionConfig::shareProgressAndTravel,
 		field("shareSkills", "Skill levels", MapCompanionConfig::shareSkills, "Your levels, for usable routes."),
 		field("shareQuests", "Travel quest completion", MapCompanionConfig::shareQuests,
 			"Progress in the quests that unlock travel; no individual steps."),
@@ -109,7 +119,8 @@ final class SharingFields
 		field("shareBoats", "Boats and moorings", MapCompanionConfig::shareBoats,
 			"Where each boat is moored and its teleport focus, so voyages start at your boat; boat names are never sent."));
 
-	static final Section TASKS = new Section("tasks", "Tasks and timers",
+	static final Section TASKS = new Section("tasks", "Tasks and timers", MapCompanionConfig.KEY_SHARE_TASKS,
+		MapCompanionConfig::shareTasksAndTimers,
 		field("shareSlayer", "Slayer task", MapCompanionConfig::shareSlayer, "Your current assignment and remaining count."),
 		field("shareClue", "Clue step", MapCompanionConfig::shareClue, "Your current clue scroll step."),
 		field("shareFarming", "Farming patches", MapCompanionConfig::shareFarming,
@@ -125,7 +136,8 @@ final class SharingFields
 		field("sharePortTasks", "Port tasks", MapCompanionConfig::sharePortTasks,
 			"Your Sailing port task slots and their counters; cargo is never read."));
 
-	static final Section LOOT = new Section("loot", "Loot and milestones",
+	static final Section LOOT = new Section("loot", "Loot and milestones", MapCompanionConfig.KEY_SHARE_LOOT_GROUP,
+		MapCompanionConfig::shareLootAndMilestones,
 		field("shareLoot", "Observed kills and drops", MapCompanionConfig::shareLoot,
 			"Locally observed tracked monster kills and rated drop totals on normal members worlds; not lifetime kill counts."),
 		field(MapCompanionConfig.KEY_SHARE_MILESTONES, "Notable drops and levels", MapCompanionConfig::shareMilestones,
@@ -133,7 +145,7 @@ final class SharingFields
 			+ "if those are shared. Activity rewards require Loot Tracker. " + MapCompanionConfig.FEED_KEPT),
 		field(MapCompanionConfig.KEY_SHARE_PETS, "Include pet rewards", MapCompanionConfig::sharePets,
 			"Observed pet rewards while Notable drops and levels is enabled; unknown pets stay unnamed."),
-		field(MapCompanionConfig.KEY_SHARE_COLLECTION, "Include collection additions", MapCompanionConfig::shareCollectionLog,
+		field(MapCompanionConfig.KEY_SHARE_COLLECTION, "Include collection log additions", MapCompanionConfig::shareCollectionLog,
 			"New collection notifications while Notable drops and levels is enabled; existing slots are never read."));
 
 	/** The four groups, in the order both Settings and the Connect step draw them. */

@@ -314,6 +314,15 @@ The website plan's second session, once the routes in the game are built: a memb
       what's ticked: Settings shows the four groups full, the receive stream opens, *Where you died*
       and *Notify before a meetup* stay off. Restart RuneLite and reconnect: no step. In RuneLite's
       own config panel, ticking a sharing setting asks no "Are you sure?".
+- [ ] **Sharing as six switches after an update.** On a RuneLite profile that ran 1.3.0 with all of
+      Map presence and two fields of Tasks and timers ticked, start this version. RuneLite's list
+      shows *What you share* with Map presence on and Tasks and timers off, Show what's sent carries
+      the same fields as before, and the profile's settings file holds `mapcompanion.sharingGroups=1`.
+      Tick Tasks and timers in RuneLite's list: Show what's sent then carries all eight of its fields.
+      Turn the plugin off, untick Map presence in RuneLite's list and turn the plugin on: no position
+      is sent. Switch to another RuneLite profile and back: each keeps its own switches. RuneLite
+      redraws its list on a profile change rather than on every write, so note whether a switch moved
+      by the sidebar shows there before the list is reopened.
 - [ ] **Connect, Join and Open the map without the website.** With no group, Connect makes *Our
       group*; the sidebar's Group tab says *Just you so far* at once, with Copy invite in that card.
       Copy invite, paste the whole message into a second RuneLite's *Have an invite?* field and press

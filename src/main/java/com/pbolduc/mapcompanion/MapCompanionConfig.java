@@ -52,6 +52,13 @@ import net.runelite.client.config.Units;
  * <p>A nickname can label the member without naming an account. Saved choices keep their existing
  * keys so an update does not reset them.
  *
+ * <p><b>Six switches, and the fields under them.</b> RuneLite's list shows sharing as the sidebar
+ * does: the character name and where you died, and a switch for each of the four groups in
+ * {@link SharingFields}. The 23 fields under those groups are still settings of their own, hidden
+ * from the list, and still what {@link SnapshotBuilder} and the readers read; a group's switch is
+ * stored only because RuneLite draws a box from a stored value. {@link SharingGroups} keeps each
+ * switch in step with its fields, and says which wins when they disagree.
+ *
  * <p>Receiving destinations opens the relay stream and is also opt-in. The client section
  * keeps that choice beside the local notification controls.
  */
@@ -89,29 +96,22 @@ public interface MapCompanionConfig extends Config
 	String KEY_SHARE_COLLECTION = "shareCollectionLog";
 	String KEY_SHORTEST_PATH = "drawWithShortestPath";
 
-	@ConfigSection(
-		name = "Map presence",
-		description = "Your dot, name and current activity",
-		position = 0,
-		closedByDefault = true
-	)
-	String presenceSection = "presence";
+	/**
+	 * Each sharing group's switch, as RuneLite's list stores it. Written into profiles, so a wire
+	 * format of their own: never renamed. {@link SharingFields} pairs each with its group.
+	 */
+	String KEY_SHARE_MAP_PRESENCE = "shareMapPresence";
+	String KEY_SHARE_PROGRESS = "shareProgressAndTravel";
+	String KEY_SHARE_TASKS = "shareTasksAndTimers";
+	String KEY_SHARE_LOOT_GROUP = "shareLootAndMilestones";
 
 	@ConfigSection(
-		name = "Progress & travel",
-		description = "Levels, completed quests and available travel",
-		position = 1,
-		closedByDefault = true
+		name = "What you share",
+		description = "What your group sees. Each switch shares everything named in it. A group an earlier version left "
+			+ "partly on shows off here, and the sidebar's Settings names what is on.",
+		position = 0
 	)
-	String progressSection = "progress";
-
-	@ConfigSection(name = "Tasks & timers", description = "Assignments and observed patch states",
-		position = 2, closedByDefault = true)
-	String tasksSection = "tasks";
-
-	@ConfigSection(name = "Loot & milestones", description = "Observed kills, drops and levels",
-		position = 3, closedByDefault = true)
-	String lootSection = "loot";
+	String sharingSection = "sharing";
 
 	@ConfigSection(name = "Advanced", description = "The map server to connect to",
 		position = 5, closedByDefault = true)
@@ -155,12 +155,10 @@ public interface MapCompanionConfig extends Config
 
 	@ConfigItem(
 		keyName = "nickname",
-		name = "Name to show",
-		description =
-			"What your group sees beside your dot while Show my character name to the group is "
-			+ "off. Leave it empty to show as Member.",
-		position = 2,
-		section = presenceSection
+		name = "Name to show instead",
+		description = "What your group sees beside your dot while Character name is off. Leave it empty to show as Member.",
+		position = 1,
+		section = sharingSection
 	)
 	default String nickname()
 	{
@@ -181,16 +179,72 @@ public interface MapCompanionConfig extends Config
 
 	@ConfigItem(
 		keyName = KEY_SHARE_NAME,
-		name = "Show my character name to the group",
+		name = "Character name",
 		description =
-			"Send the display name of the character you are logged in as, so friends holding your "
-			+ "code see who each dot is. Only ever the name — nothing is looked up by it, and "
-			+ "nothing is sent while you are logged out. Leave it off and they see your Name to "
-			+ "show, or Member.",
-		position = 9,
-		section = presenceSection
+			"Send the display name of the character you are logged in as, so your group sees who each "
+			+ "dot is. Only ever the name — nothing is looked up by it, and nothing is sent while you "
+			+ "are logged out. Leave it off and they see your Name to show instead, or Member.",
+		position = 0,
+		section = sharingSection
 	)
 	default boolean shareName()
+	{
+		return false;
+	}
+
+	/*
+	 * The four groups' switches. Each names its fields in the sidebar's words, which
+	 * SharingGroupsTest holds to SharingFields, and none is read to decide what is sent.
+	 */
+	@ConfigItem(
+		keyName = KEY_SHARE_MAP_PRESENCE,
+		name = "Map presence",
+		description = "Your dot on the map: Position and world, Training and idle time, and Account type. "
+			+ "On shares all three; off stops all three.",
+		position = 2,
+		section = sharingSection
+	)
+	default boolean shareMapPresence()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = KEY_SHARE_PROGRESS,
+		name = "Progress and travel",
+		description = "What the map ranks your routes by: Skill levels, Travel quest completion, Full quest progress, "
+			+ "Achievement diaries, Permanent travel and house, Carried travel items, STASH construction, and "
+			+ "Boats and moorings. On shares all eight; off stops all eight.",
+		position = 3,
+		section = sharingSection
+	)
+	default boolean shareProgressAndTravel()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = KEY_SHARE_TASKS,
+		name = "Tasks and timers",
+		description = "Slayer task, Clue step, Farming patches, Birdhouses, Hunter rumours, Mahogany Homes, "
+			+ "Farming contracts, and Port tasks. On shares all eight; off stops all eight.",
+		position = 4,
+		section = sharingSection
+	)
+	default boolean shareTasksAndTimers()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = KEY_SHARE_LOOT_GROUP,
+		name = "Loot and milestones",
+		description = "Observed kills and drops, Notable drops and levels, Include pet rewards, and Include "
+			+ "collection log additions. On shares all four; off stops all four. " + FEED_KEPT,
+		position = 5,
+		section = sharingSection
+	)
+	default boolean shareLootAndMilestones()
 	{
 		return false;
 	}
@@ -205,7 +259,7 @@ public interface MapCompanionConfig extends Config
 			+ "on a shared map, so the map says so instead of drawing your dot in a room nobody "
 			+ "else is in.",
 		position = 10,
-		section = presenceSection
+		hidden = true
 	)
 	default boolean sharePosition()
 	{
@@ -219,7 +273,7 @@ public interface MapCompanionConfig extends Config
 			"Your levels, so the map can rank routes you can actually use. These are already public "
 			+ "on the hiscores.",
 		position = 11,
-		section = progressSection
+		hidden = true
 	)
 	default boolean shareSkills()
 	{
@@ -228,13 +282,13 @@ public interface MapCompanionConfig extends Config
 
 	@ConfigItem(
 		keyName = "shareActivity",
-		name = "What you're training",
+		name = "Training and idle time",
 		description =
 			"The skill you last gained experience in, how much in the last five minutes, and how long "
 			+ "since you last moved — so the map can show the rocks or trees for it, and tell your "
 			+ "friends you are idle rather than ignoring them.",
 		position = 12,
-		section = presenceSection
+		hidden = true
 	)
 	default boolean shareActivity()
 	{
@@ -249,7 +303,7 @@ public interface MapCompanionConfig extends Config
 			+ "differ — an ironman cannot buy the teleport a main would. This is the badge the game "
 			+ "already prints beside your name in every line of chat.",
 		position = 13,
-		section = presenceSection
+		hidden = true
 	)
 	default boolean shareAccountType()
 	{
@@ -258,13 +312,13 @@ public interface MapCompanionConfig extends Config
 
 	@ConfigItem(
 		keyName = "shareQuests",
-		name = "Quest completion",
+		name = "Travel quest completion",
 		description =
 			"Whether you have started or finished the handful of quests that unlock travel (fairy "
 			+ "rings, spirit trees and the like). Nothing else about your quest log is read, and "
 			+ "no individual step of one is.",
 		position = 14,
-		section = progressSection
+		hidden = true
 	)
 	default boolean shareQuests()
 	{
@@ -279,7 +333,7 @@ public interface MapCompanionConfig extends Config
 			+ "their rewards you have collected — so the map can rank the teleports those unlock "
 			+ "instead of asking you to tick them by hand. No individual task is read.",
 		position = 15,
-		section = progressSection
+		hidden = true
 	)
 	default boolean shareDiaries()
 	{
@@ -288,11 +342,11 @@ public interface MapCompanionConfig extends Config
 
 	@ConfigItem(
 		keyName = "sharePermanentTravel",
-		name = "Permanent travel unlocks and house",
+		name = "Permanent travel and house",
 		description = "Built landing sites, activated statues and other permanent transport unlocks, "
 			+ "plus the town your house is in. Unverified flags are not sent.",
 		position = 25,
-		section = progressSection
+		hidden = true
 	)
 	default boolean sharePermanentTravel()
 	{
@@ -304,7 +358,7 @@ public interface MapCompanionConfig extends Config
 		name = "STASH construction",
 		description = "Which STASH units you have built. Does not read or share stored equipment.",
 		position = 26,
-		section = progressSection
+		hidden = true
 	)
 	default boolean shareStash()
 	{
@@ -317,7 +371,7 @@ public interface MapCompanionConfig extends Config
 		description = "Where each of your boats is moored and whether it carries a teleport focus, so the map's "
 			+ "voyages start at your boat. Boat names are not sent.",
 		position = 26,
-		section = progressSection
+		hidden = true
 	)
 	default boolean shareBoats()
 	{
@@ -326,10 +380,10 @@ public interface MapCompanionConfig extends Config
 
 	@ConfigItem(
 		keyName = "shareBirdhouses",
-		name = "Birdhouse observations",
+		name = "Birdhouses",
 		description = "Birdhouse states observed by RuneLite Time Tracking for this character, with their age. Enable Time Tracking to collect observations.",
 		position = 27,
-		section = tasksSection
+		hidden = true
 	)
 	default boolean shareBirdhouses()
 	{
@@ -341,7 +395,7 @@ public interface MapCompanionConfig extends Config
 		name = "Hunter rumours",
 		description = "Your current rumour, after using the Rumour option on a quetzal whistle. Recheck after logging in or hopping.",
 		position = 28,
-		section = tasksSection
+		hidden = true
 	)
 	default boolean shareHunterRumours()
 	{
@@ -353,7 +407,7 @@ public interface MapCompanionConfig extends Config
 		name = "Mahogany Homes",
 		description = "Your customer and contract tier, when observed in game messages or NPC dialogue.",
 		position = 29,
-		section = tasksSection
+		hidden = true
 	)
 	default boolean shareMahoganyHomes()
 	{
@@ -365,7 +419,7 @@ public interface MapCompanionConfig extends Config
 		name = "Farming contracts",
 		description = "The crop requested by your current Farming Guild contract.",
 		position = 30,
-		section = tasksSection
+		hidden = true
 	)
 	default boolean shareFarmingContracts()
 	{
@@ -378,7 +432,7 @@ public interface MapCompanionConfig extends Config
 		description = "Your five Sailing port task slots: which task each holds, crates collected and delivered, "
 			+ "and bounty parts still owed. Cargo itself is never read.",
 		position = 37,
-		section = tasksSection
+		hidden = true
 	)
 	default boolean sharePortTasks()
 	{
@@ -390,7 +444,7 @@ public interface MapCompanionConfig extends Config
 		name = "Full quest progress",
 		description = "Started, finished or not started for the full quest and miniquest log, including subquests. Separate from travel-quest sharing; refreshed at most every thirty seconds.",
 		position = 31,
-		section = progressSection
+		hidden = true
 	)
 	default boolean shareQuestLog()
 	{
@@ -399,12 +453,12 @@ public interface MapCompanionConfig extends Config
 
 	@ConfigItem(
 		keyName = "shareCapabilities",
-		name = "Travel unlocks",
+		name = "Carried travel items",
 		description =
 			"Whether you are carrying the items that unlock a route — a dramen staff, a slayer ring. "
 			+ "Evaluated here as yes/no answers; your inventory itself never leaves the client.",
 		position = 16,
-		section = progressSection
+		hidden = true
 	)
 	default boolean shareCapabilities()
 	{
@@ -416,7 +470,7 @@ public interface MapCompanionConfig extends Config
 		name = "Slayer task",
 		description = "Your current assignment and how many are left.",
 		position = 17,
-		section = tasksSection
+		hidden = true
 	)
 	default boolean shareSlayer()
 	{
@@ -428,7 +482,7 @@ public interface MapCompanionConfig extends Config
 		name = "Clue step",
 		description = "The clue scroll step you are on, so the map can route you to it.",
 		position = 18,
-		section = tasksSection
+		hidden = true
 	)
 	default boolean shareClue()
 	{
@@ -442,7 +496,7 @@ public interface MapCompanionConfig extends Config
 			"The state of patches you have walked past, so the map can build a run. Only patches you "
 			+ "have actually seen are known.",
 		position = 19,
-		section = tasksSection
+		hidden = true
 	)
 	default boolean shareFarming()
 	{
@@ -451,14 +505,14 @@ public interface MapCompanionConfig extends Config
 
 	@ConfigItem(
 		keyName = "shareLoot",
-		name = "Observed loot kills",
+		name = "Observed kills and drops",
 		description =
 			"Send observed loot kills, how long ago each monster was last killed, which notable drops "
 			+ "you have seen, the monster you are killing now and the drop you pinned, so the map can "
 			+ "show your drop luck. The log itself always stays on this computer; this only controls "
 			+ "whether it is shared. Normal members worlds only; these are not your lifetime game kill counts.",
 		position = 20,
-		section = lootSection
+		hidden = true
 	)
 	default boolean shareLoot()
 	{
@@ -467,16 +521,16 @@ public interface MapCompanionConfig extends Config
 
 	@ConfigItem(
 		keyName = KEY_SHARE_MILESTONES,
-		name = "Drops and levels as they happen",
+		name = "Notable drops and levels",
 		description =
 			"Announce notable NPC and supported activity rewards, and real levels. Collection items "
 			+ "and a small curated exception list qualify; repeated supplies do not. Activity and chest "
-			+ "rewards require RuneLite's Loot Tracker. Pets and collection additions also have their "
-			+ "own switches below. A quest or diary tier you finish while logged in is announced too when "
+			+ "rewards require RuneLite's Loot Tracker. Pets and collection additions are fields of their "
+			+ "own beside it. A quest or diary tier you finish while logged in is announced too when "
 			+ "its own quest or diary choice is on; nothing done before is. Nothing is queued while "
 			+ "unpaired or logged out. " + FEED_KEPT,
 		position = 21,
-		section = lootSection
+		hidden = true
 	)
 	default boolean shareMilestones()
 	{
@@ -486,10 +540,10 @@ public interface MapCompanionConfig extends Config
 	@ConfigItem(
 		keyName = KEY_SHARE_PETS,
 		name = "Include pet rewards",
-		description = "Include observed local pet rewards while Drops and levels is on. A pet message "
+		description = "Include observed local pet rewards while Notable drops and levels is on. A pet message "
 					  + "without a confirmed item stays unnamed; no boss or pet is guessed.",
 		position = 23,
-		section = lootSection
+		hidden = true
 	)
 	default boolean sharePets()
 	{
@@ -499,11 +553,11 @@ public interface MapCompanionConfig extends Config
 	@ConfigItem(
 		keyName = KEY_SHARE_COLLECTION,
 		name = "Include collection log additions",
-		description = "Include new collection log notifications while Drops and levels is on. Enable "
+		description = "Include new collection log notifications while Notable drops and levels is on. Enable "
 					  + "collection log chat or popup notifications in the game's settings so additions can be "
 					  + "observed. Your collection log contents and previously filled slots are never read.",
 		position = 24,
-		section = lootSection
+		hidden = true
 	)
 	default boolean shareCollectionLog()
 	{
@@ -516,8 +570,8 @@ public interface MapCompanionConfig extends Config
 		description =
 			"Send the tile of your most recent death so the map can offer a route back to it. Forgotten "
 			+ "after an hour.",
-		position = 22,
-		section = presenceSection
+		position = 6,
+		section = sharingSection
 	)
 	default boolean shareDeath()
 	{

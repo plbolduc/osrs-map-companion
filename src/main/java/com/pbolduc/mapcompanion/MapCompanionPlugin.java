@@ -72,6 +72,7 @@ import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ClientShutdown;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.events.PluginMessage;
+import net.runelite.client.events.ProfileChanged;
 import net.runelite.client.events.RuneScapeProfileChanged;
 import net.runelite.client.events.ServerNpcLoot;
 import net.runelite.client.input.KeyManager;
@@ -478,6 +479,8 @@ public class MapCompanionPlugin extends Plugin
 	@Override
 	protected void startUp()
 	{
+		/* First, so no snapshot is built from a group whose switch was pressed while this was off. */
+		SharingGroups.settle(config, settings());
 		lifetime++;
 		panel = injector.getInstance(MapCompanionPanel.class);
 		BufferedImage icon = ImageUtil.loadImageResource(getClass(), "/icon.png");
@@ -877,6 +880,14 @@ public class MapCompanionPlugin extends Plugin
 			return;
 		}
 		String key = event.getKey();
+		/*
+		 * A sharing switch and its fields, kept in step before anything below reads a field. A switch's
+		 * fan-out raises each field's own event, so what follows still runs once per field that moved.
+		 */
+		if (event.getProfile() == null)
+		{
+			SharingGroups.changed(key, event.getNewValue(), config, settings());
+		}
 		if (key.equals("shareSlayer") && !config.shareSlayer())
 		{
 			slayerState.clear();
@@ -919,6 +930,23 @@ public class MapCompanionPlugin extends Plugin
 			clientThread.invoke(() -> applySettingChange(key));
 		}
 		dirty = true;
+	}
+
+	/**
+	 * Another RuneLite profile is in use, with its own sharing choices: read its switches as a start
+	 * reads them. RuneLite raises this without restarting a plugin that is on in both profiles.
+	 */
+	@Subscribe
+	public void onProfileChanged(ProfileChanged event)
+	{
+		SharingGroups.settle(config, settings());
+		dirty = true;
+	}
+
+	/** RuneLite's settings, as {@link SharingGroups} reads and writes them; a test gives its own. */
+	ConfigStore settings()
+	{
+		return ConfigStore.of(configManager);
 	}
 
 	/** The part of a setting change that touches what a game tick owns. Client thread only. */

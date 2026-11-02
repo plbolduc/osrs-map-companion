@@ -253,7 +253,10 @@ sent** previews the current snapshot; credentials are named without displaying s
 
 The plugin keeps pairing settings, credentials, preferences, patch observations and a bounded kill
 log in its own RuneLite config group. Kill logs, pins and observations are character-scoped.
-**Forget kill log** clears the current character's counts and pin.
+**Forget kill log** clears the current character's counts and pin. Each sharing group's switch in
+RuneLite's list is kept there too, beside the per-field choices it stands for, which stay what is sent;
+the plugin keeps the two in step and never sends a switch. A marker, `sharingGroups`, records that a
+profile's choices have been read as groups, so an update keeps every choice as it was.
 
 On the default map server, live positions and progress stay in temporary memory; there is no stored
 movement history. Group membership, last shared names, invites, meetups and group pins persist.
