@@ -448,6 +448,9 @@ who is coming as discs (solid for coming or here, a ring for maybe, faint for ca
 filled. *On my way* is one of the four, and Route beside them tells nobody. A map that sends no `events` leaves the one meetup under *Now*,
 as before. **Meet here…** opens a form under them: a title, a day of the coming week, an hour and a
 minute in fives, defaulting to half an hour from now, and **Make meetup**, which copies the link.
+Like the single meetup under *Now*, the week's meetups are taken only while *Show map destinations*
+is on; while it is off, one grey line under the heading says why the section is empty and where the
+setting is.
 
 `docs/review-evidence/where-to-go-2026-10-29/WhereToGoShot.java` paints the real panel in each of
 these states (steps 5a, 6, 8 and 9) at 225px with made-up names; how to run it is in its docblock.
