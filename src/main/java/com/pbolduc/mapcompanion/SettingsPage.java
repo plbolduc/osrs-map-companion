@@ -147,7 +147,7 @@ final class SettingsPage extends JPanel
 		JButton whatsNew = linkButton("What's new in " + CompanionVersion.VERSION + " ›");
 		whatsNew.setName("settings.whatsNew");
 		whatsNew.setForeground(ColorScheme.BRAND_ORANGE);
-		whatsNew.setToolTipText("osrs-map.com's What's new page, where every update is written down");
+		whatsNew.setToolTipText(Words.of("settings.whatsNewTip"));
 		whatsNew.addActionListener(e -> LinkBrowser.browse(mapUrl.get() + "/whats-new"));
 		add(whatsNew);
 		add(gap(4, ColorScheme.DARK_GRAY_COLOR));
@@ -156,7 +156,7 @@ final class SettingsPage extends JPanel
 		add(gap(4, ColorScheme.DARK_GRAY_COLOR));
 		add(buildAdvanced());
 
-		previewButton.setToolTipText("Print the exact snapshot this plugin would send right now");
+		previewButton.setToolTipText(Words.of("settings.previewTip"));
 		previewButton.addActionListener(e -> showSnapshotPreview());
 		leaveButton.addActionListener(e -> leaveGroup());
 		forgetLootButton.addActionListener(e ->
@@ -203,7 +203,7 @@ final class SettingsPage extends JPanel
 		String server = Pairing.normalizeServer(Pairing.withScheme(mapAddress.getText()));
 		if (server == null)
 		{
-			String why = "Enter an https:// map address without a login, query or fragment.";
+			String why = Words.of("settings.badAddress");
 			if (here)
 			{
 				setWrapped(addressSaid, why);
@@ -326,43 +326,36 @@ final class SettingsPage extends JPanel
 	{
 		if (json == null)
 		{
-			return "Nothing goes out while you're logged out. Log in to see what would.";
+			return Words.of("settings.loggedOut");
 		}
 		StringBuilder text = new StringBuilder();
 		if (!grouped)
 		{
-			text.append("You're not in a group, so nothing goes out. Connect would start sending this to ")
-				.append(server).append(":\n\n");
+			text.append(Words.of("settings.notGrouped") + " ").append(server).append(":\n\n");
 		}
 		else if (!approved)
 		{
-			text.append("You're not connected to ").append(server)
-				.append(", so nothing goes out. Connect would start sending this:\n\n");
+			text.append("You're not connected to ").append(server).append(Words.of("settings.notConnected"));
 		}
 		else
 		{
-			text.append("This goes to ").append(server)
-				.append(" every couple of seconds while you're logged in. Your group sees it.\n\n");
+			text.append("This goes to ").append(server).append(Words.of("settings.sendsEvery"));
 		}
 		text.append(memberKey
-			? "Two keys go with it and are never shown here: your member key (X-Companion-Member-Secret), which "
-			+ "proves you're this member of the group, and this RuneLite's own key (X-Companion-Installation), which "
-			+ "lets your other characters join the same group. Leave group deletes the first and replaces the second."
-			: "A key goes with it and is never shown here: this RuneLite's own key (X-Companion-Installation), which "
-			+ "lets your other characters join the same group." + (grouped ? " Leave group replaces it." : ""));
+			? Words.of("settings.twoKeys")
+			: Words.of("settings.oneKey") + (grouped ? " Leave group replaces it." : ""));
 		text.append("\n\n");
 		/* It stops being sent the moment the map says it has connected this RuneLite to a browser. */
 		if (runeLiteCode != null)
 		{
-			text.append("Your RuneLite code goes with it too (X-Companion-Suffix), ").append(runeLiteCode)
-				.append(", until the map says it has connected your dot to your browser; then it is deleted.\n\n");
+			text.append(Words.of("settings.codeGoes") + " ").append(runeLiteCode)
+				.append(Words.of("settings.codeDeleted"));
 		}
 		text.append(json);
 		String nick = nick(json, gson);
 		if (SnapshotBuilder.NO_NICKNAME.equals(nick))
 		{
-			text.append("\n\n\"Me\" means you set no name of your own: your group sees ")
-				.append(nameShared ? "your character name." : "Member.");
+			text.append(Words.of("settings.meMeans") + " ").append(nameShared ? "your character name." : "Member.");
 		}
 		return text.toString();
 	}
@@ -439,10 +432,9 @@ final class SettingsPage extends JPanel
 	 */
 	static String leaveMessage(int others)
 	{
-		return "Your group stops seeing you, and you stop seeing them. Coming back needs a new invite, "
-			+ "and you'll join as a new member."
-			+ (others == 1 ? " Your other group will need a new invite too, so it leaves your list."
-			: others > 1 ? " Your " + others + " other groups will need a new invite too, so they leave your list."
+		return Words.of("settings.leaving")
+			+ (others == 1 ? Words.of("settings.leaveOther")
+			: others > 1 ? " Your " + others + Words.of("settings.leaveOthers")
 			: "")
 			+ " Your kill log stays.";
 	}
@@ -457,9 +449,7 @@ final class SettingsPage extends JPanel
 	private boolean confirmForgetKillLog()
 	{
 		return MapCompanionPanel.confirm(SwingUtilities.getWindowAncestor(this),
-			"Forget every kill and drop counted for this character?\n\n"
-			+ "Drop luck starts again from zero, and your pinned drop goes with it.\n"
-			+ "This cannot be undone.", "Forget kill log", "Forget kill log");
+			Words.of("settings.forgetLoot"), "Forget kill log", "Forget kill log");
 	}
 
 	/** Clear the kill log once the player has said yes, and only then. True when it was cleared. */

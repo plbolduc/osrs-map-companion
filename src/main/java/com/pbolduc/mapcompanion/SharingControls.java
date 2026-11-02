@@ -73,8 +73,7 @@ final class SharingControls extends JPanel
 	private static final int TEXT = PluginPanel.PANEL_WIDTH - 30;
 	/** What this client draws and does, named as RuneLite's list and the step after Connect name it. */
 	static final String CLIENT_TITLE = "In RuneLite";
-	static final String KEYS_ELSEWHERE = "Keys for Reroute and Follow, and the reminder's minutes, are in RuneLite's own "
-		+ "settings for this plugin.";
+	static final String KEYS_ELSEWHERE = Words.of("settings.keysElsewhere");
 	private final MapCompanionConfig config;
 	private final ConfigStore store;
 	private final List<Choice> choices = new ArrayList<>();
@@ -104,7 +103,7 @@ final class SharingControls extends JPanel
 		nickname.setName("nickname");
 		MapCompanionPanel.capped(nickname);
 		nickname.setAlignmentX(Component.LEFT_ALIGNMENT);
-		nickname.setToolTipText("What your group sees beside your dot. Saves on Enter or when you leave the field.");
+		nickname.setToolTipText(Words.of("settings.nicknameTip"));
 		nickname.addActionListener(e -> saveNickname());
 		nickname.addFocusListener(new FocusAdapter()
 		{

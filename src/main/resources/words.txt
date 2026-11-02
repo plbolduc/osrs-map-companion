@@ -61,3 +61,26 @@ share.destinationsDetail=Places your group sends you, and your group's meetups, 
 share.groupDetail=Your group's dots on the game's world map, from what they already share.
 share.shareTip=Turn on the ticked settings, as the switches in Settings do. Nothing else changes.
 share.skipTip=Share nothing yet. Every choice stays off until you turn it on in Settings.
+
+# SettingsPage: Settings, Show what's sent, Leave group and Forget kill log. Where a line runs on
+# into a server, a code or a count, the Java puts that after it.
+settings.whatsNewTip=osrs-map.com's What's new page, where every update is written down
+settings.previewTip=Print the exact snapshot this plugin would send right now
+settings.badAddress=Enter an https:// map address without a login, query or fragment.
+settings.loggedOut=Nothing goes out while you're logged out. Log in to see what would.
+settings.notGrouped=You're not in a group, so nothing goes out. Connect would start sending this to
+settings.notConnected=, so nothing goes out. Connect would start sending this:\n\n
+settings.sendsEvery= every couple of seconds while you're logged in. Your group sees it.\n\n
+settings.twoKeys=Two keys go with it and are never shown here: your member key (X-Companion-Member-Secret), which proves you're this member of the group, and this RuneLite's own key (X-Companion-Installation), which lets your other characters join the same group. Leave group deletes the first and replaces the second.
+settings.oneKey=A key goes with it and is never shown here: this RuneLite's own key (X-Companion-Installation), which lets your other characters join the same group.
+settings.codeGoes=Your RuneLite code goes with it too (X-Companion-Suffix),
+settings.codeDeleted=, until the map says it has connected your dot to your browser; then it is deleted.\n\n
+settings.meMeans=\n\n"Me" means you set no name of your own: your group sees
+settings.leaving=Your group stops seeing you, and you stop seeing them. Coming back needs a new invite, and you'll join as a new member.
+settings.leaveOther= Your other group will need a new invite too, so it leaves your list.
+settings.leaveOthers= other groups will need a new invite too, so they leave your list.
+settings.forgetLoot=Forget every kill and drop counted for this character?\n\nDrop luck starts again from zero, and your pinned drop goes with it.\nThis cannot be undone.
+
+# SharingControls: What you share in Settings.
+settings.keysElsewhere=Keys for Reroute and Follow, and the reminder's minutes, are in RuneLite's own settings for this plugin.
+settings.nicknameTip=What your group sees beside your dot. Saves on Enter or when you leave the field.

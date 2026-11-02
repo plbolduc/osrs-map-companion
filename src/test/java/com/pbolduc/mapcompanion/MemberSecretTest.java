@@ -39,6 +39,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import okhttp3.Interceptor;
@@ -347,12 +348,19 @@ public class MemberSecretTest
 		 * when somebody is asking for help. So it is named and never spelled out.
 		 */
 		/* The whole sidebar: the frame and the three parts it builds. The preview is Settings'. */
-		String panel = read("src/main/java/com/pbolduc/mapcompanion/MapCompanionPanel.java")
+		String sources = read("src/main/java/com/pbolduc/mapcompanion/MapCompanionPanel.java")
 			+ read("src/main/java/com/pbolduc/mapcompanion/ConnectCard.java")
 			+ read("src/main/java/com/pbolduc/mapcompanion/NowCards.java")
 			+ read("src/main/java/com/pbolduc/mapcompanion/SettingsPage.java");
+		/* Their longer sentences are lines of words.txt, read here as Words reads them for the window. */
+		StringBuilder panel = new StringBuilder(sources);
+		Matcher words = Pattern.compile("Words\\.of\\(\"([^\"]+)\"\\)").matcher(sources);
+		while (words.find())
+		{
+			panel.append('\n').append(Words.of(words.group(1)));
+		}
 
-		assertTrue("the preview should say which header a snapshot carries", panel.contains(HEADER));
+		assertTrue("the preview should say which header a snapshot carries", panel.toString().contains(HEADER));
 		assertFalse("the preview must not print the secret itself",
 					java.util.regex.Pattern.compile("[+][ ]*pairing[.]secret[(]|pairing[.]secret[(][^)]*[)][ ]*[+]").matcher(panel).find());
 	}
