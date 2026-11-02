@@ -871,6 +871,8 @@ final class DropLuckPanel extends JPanel
 		rule.setBackground(ColorScheme.DARK_GRAY_COLOR);
 		rule.setPreferredSize(new Dimension(1, 1));
 		rule.setMaximumSize(new Dimension(Integer.MAX_VALUE, 1));
+		/* A one-pixel gap in the page's colour: it needs a gap's minimum too, or a squeeze thickens it. */
+		rule.setMinimumSize(new Dimension(0, 1));
 		return left(rule);
 	}
 
@@ -885,6 +887,8 @@ final class DropLuckPanel extends JPanel
 		spacer.setBackground(background);
 		spacer.setPreferredSize(new Dimension(1, height));
 		spacer.setMaximumSize(new Dimension(Integer.MAX_VALUE, height));
+		/* A plain panel's FlowLayout asks for 10px at least, and a squeezed column grows a gap to that. */
+		spacer.setMinimumSize(new Dimension(0, height));
 		return left(spacer);
 	}
 
