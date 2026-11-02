@@ -447,25 +447,35 @@ public class RunCardsTest
 	@Test
 	public void eachStopShowsTheTeleportThisLegDrawsInOneColumn() throws Exception
 	{
+		/* The stops' pictures only: the bank checklist's lines ask for theirs too, and have their own test. */
 		List<String> asked = new ArrayList<>();
 		GameSprites recording = new GameSprites(null, null, null)
 		{
 			@Override
 			void item(JLabel label, int itemId, int box)
 			{
-				asked.add("item " + itemId);
+				if (!(label instanceof RunView.Picture))
+				{
+					asked.add("item " + itemId);
+				}
 			}
 
 			@Override
 			void sprite(JLabel label, int spriteId, int box)
 			{
-				asked.add("sprite " + spriteId);
+				if (!(label instanceof RunView.Picture))
+				{
+					asked.add("sprite " + spriteId);
+				}
 			}
 
 			@Override
 			void farmTravelItem(JLabel label, String name, int box)
 			{
-				asked.add("named " + name);
+				if (!(label instanceof RunView.Picture))
+				{
+					asked.add("named " + name);
+				}
 			}
 		};
 		RelayResponse.FarmRun herbs = run("/contract/farm-run.json");
@@ -487,6 +497,141 @@ public class RunCardsTest
 		state.acceptFor(identity.id(), EPOCH, portRun(), 2, System.currentTimeMillis());
 		refresh();
 		assertEquals("a run with no picture keeps no place for one", 0, slots(ports));
+	}
+
+	/**
+	 * Before you leave was closed with no count, and open it was grey words alone, "not on you" at
+	 * the end of one line in the same ink as the seeds. Closed, it now says how many teleports are not
+	 * on you; open, each line has its picture, and a teleport not on you is amber beside its greyed
+	 * picture. A line nothing here can check makes no claim either way.
+	 */
+	@Test
+	public void beforeYouLeaveCountsWhatIsNotOnYouAndPicturesEachLine() throws Exception
+	{
+		List<String> asked = new ArrayList<>();
+		GameSprites recording = new GameSprites(null, null, null)
+		{
+			@Override
+			void item(JLabel label, int itemId, int box)
+			{
+				if (label instanceof RunView.Picture)
+				{
+					asked.add("item " + itemId);
+				}
+			}
+
+			@Override
+			void farmTravelItem(JLabel label, String name, int box)
+			{
+				if (label instanceof RunView.Picture)
+				{
+					asked.add("named " + name);
+				}
+			}
+
+			@Override
+			void itemNamed(JLabel label, String name, int box)
+			{
+				asked.add("supply " + name);
+			}
+		};
+		RelayResponse.FarmRun herbs = run("/contract/farm-run.json");
+		herbs.bring.add(teleport("Stony basalt"));
+		herbs.bring.add(teleport("Skills necklace"));
+		state.acceptFor(identity.id(), EPOCH, herbs, 1, System.currentTimeMillis());
+		state.carried(Collections.singletonList("skillsNecklace"));
+		FarmRunPanel[] card = new FarmRunPanel[1];
+		SwingUtilities.invokeAndWait(() ->
+		{
+			card[0] = new FarmRunPanel(state, client, follower, route, shortest, recording, config);
+			card[0].refresh(true);
+		});
+		List<String> closed = shown(card[0]);
+		assertTrue(closed.toString(), closed.contains("▸ Before you leave · 1 not on you"));
+		assertEquals("amber while it counts", MapPin.AMBER, opener(card[0]).getForeground());
+
+		SwingUtilities.invokeAndWait(() -> opener(card[0]).doClick());
+		SwingUtilities.invokeAndWait(() -> card[0].refresh(true));
+		List<String> open = shown(card[0]);
+		assertTrue("open, the lines say it: " + open, open.contains("▾ Before you leave"));
+		assertEquals(Arrays.asList("item 13126", "item 24961", "supply 2 herb seeds", "supply Rake",
+			"named Stony basalt", "named Skills necklace"), asked);
+		Object[] drawn = new Object[4];
+		SwingUtilities.invokeAndWait(() ->
+		{
+			JLabel absent = label(card[0], "Stony basalt · not on you");
+			JLabel carried = label(card[0], "Skills necklace");
+			drawn[0] = absent.getForeground();
+			drawn[1] = picture(absent).faded;
+			drawn[2] = carried.getForeground();
+			drawn[3] = picture(carried).faded;
+		});
+		assertEquals(MapPin.AMBER, drawn[0]);
+		assertEquals(true, drawn[1]);
+		assertEquals(ColorScheme.LIGHT_GRAY_COLOR, drawn[2]);
+		assertEquals(false, drawn[3]);
+
+		SwingUtilities.invokeAndWait(() -> opener(card[0]).doClick());
+		state.carried(Arrays.asList("skillsNecklace", "stonyBasalt"));
+		SwingUtilities.invokeAndWait(() -> card[0].refresh(true));
+		assertTrue("nothing missing, nothing added", shown(card[0]).contains("▸ Before you leave"));
+		assertEquals(ColorScheme.LIGHT_GRAY_COLOR, opener(card[0]).getForeground());
+	}
+
+	private static RelayResponse.FarmBring teleport(String name)
+	{
+		RelayResponse.FarmBring line = new RelayResponse.FarmBring();
+		line.kind = "teleport";
+		line.name = name;
+		return line;
+	}
+
+	/** The checklist's opener, whatever its count says. */
+	private static AbstractButton opener(Component component)
+	{
+		if (component instanceof AbstractButton && plain(((AbstractButton) component).getText()).contains("Before you leave"))
+		{
+			return (AbstractButton) component;
+		}
+		if (component instanceof Container)
+		{
+			for (Component child : ((Container) component).getComponents())
+			{
+				AbstractButton found = opener(child);
+				if (found != null)
+				{
+					return found;
+				}
+			}
+		}
+		return null;
+	}
+
+	/** The picture on a checklist line's own row. */
+	private static RunView.Picture picture(JLabel line)
+	{
+		List<Component> row = new ArrayList<>();
+		gather(line.getParent(), row);
+		for (Component part : row)
+		{
+			if (part instanceof RunView.Picture)
+			{
+				return (RunView.Picture) part;
+			}
+		}
+		return null;
+	}
+
+	private static void gather(Component component, List<Component> out)
+	{
+		out.add(component);
+		if (component instanceof Container)
+		{
+			for (Component child : ((Container) component).getComponents())
+			{
+				gather(child, out);
+			}
+		}
 	}
 
 	/** A courier with every crate delivered is finished, and greyed as a finished stop is. */
