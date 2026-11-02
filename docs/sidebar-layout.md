@@ -655,6 +655,11 @@ depleted star's *Depleted* is grey. The picked world's row is darker than it was
 tier's colour still reads on it, and the soon-ending red is deeper than the pink a refusal and the
 Wilderness are written in.
 
+*Pin destination* was bold on the brown Group gives the meetup answer already chosen, beside a plain
+Route; it is now as plain as Route, so *Open the map* stays the one loud button and brown keeps its
+one meaning. A filter chip that is on carries the orange outline of Drop luck's chosen sort, where
+only a fill a few shades lighter told P2P on from F2P off.
+
 ### Drop luck's heading
 
 The section's heading took a row of its own over a row that was empty on the left: the card's

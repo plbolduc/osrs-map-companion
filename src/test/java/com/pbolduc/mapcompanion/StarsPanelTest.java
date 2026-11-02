@@ -139,6 +139,47 @@ public class StarsPanelTest
 	}
 
 	/**
+	 * One loud button a page: Pin destination is as plain as Route beside it, not the brown Group gives
+	 * an answer already chosen. A filter chip that is on says so with an orange outline, not by a fill a
+	 * few shades lighter alone, and it is the same size on as off.
+	 */
+	@Test
+	public void pinIsAsPlainAsRouteAndAChipThatIsOnIsOutlined() throws Exception
+	{
+		SwingUtilities.invokeAndWait(() ->
+		{
+			Tab tab = new Tab();
+			tab.pick();
+			AbstractButton pin = (AbstractButton) named(tab.stars, "stars.pin");
+			AbstractButton route = (AbstractButton) named(tab.stars, "stars.route");
+			assertEquals(route.getFont(), pin.getFont());
+			assertEquals(route.getBackground(), pin.getBackground());
+			assertEquals(route.getForeground(), pin.getForeground());
+			assertEquals(route.getMargin(), pin.getMargin());
+
+			JToggleButton members = (JToggleButton) named(tab.stars, "stars.members");
+			JToggleButton free = (JToggleButton) named(tab.stars, "stars.free");
+			assertTrue("P2P starts on", members.isSelected());
+			assertTrue("on: outlined in orange", outlined(members));
+			assertFalse("off: the look and feel's own border", outlined(free));
+			java.awt.Dimension off = free.getPreferredSize();
+			free.doClick();
+			assertTrue(outlined(free));
+			assertEquals("the same size on as off", off, free.getPreferredSize());
+			members.doClick();
+			assertFalse(outlined(members));
+		});
+	}
+
+	private static boolean outlined(JToggleButton chip)
+	{
+		return chip.getBorder() instanceof javax.swing.border.CompoundBorder
+			&& ((javax.swing.border.CompoundBorder) chip.getBorder()).getOutsideBorder() instanceof javax.swing.border.LineBorder
+			&& ColorScheme.BRAND_ORANGE.equals(((javax.swing.border.LineBorder) ((javax.swing.border.CompoundBorder) chip.getBorder())
+				.getOutsideBorder()).getLineColor());
+	}
+
+	/**
 	 * A star hunter stays on Stars while they hop, so the way to the picked star is drawn under it
 	 * once the map answers: the steps Home's card draws, and Home's own Follow and Reroute as Home
 	 * offers them, pressed through rather than copied, so Stars never offers a press Home would not.

@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import javax.annotation.Nullable;
+import javax.swing.border.Border;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -129,7 +130,7 @@ final class StarsPanel extends JPanel
 	private final RouteStepsView steps;
 	private final JCheckBox sync = check("Sync filters with website");
 	private final JComboBox<String> tier = new JComboBox<>(new String[]{"T1+", "T2+", "T3+", "T4+", "T5+", "T6+", "T7+", "T8+", "T9+"});
-	private final JToggleButton members = toggle("P2P"), free = toggle("F2P"), safe = toggle("Safe");
+	private final JToggleButton members = chip("P2P"), free = chip("F2P"), safe = chip("Safe");
 	private final JToggleButton filters = toggle("⋯");
 	private final JPanel more = column(), rows = column(), selection = column();
 	private final JLabel levels = label(""), order = label("Most time left first"), count = label(""), status = label("");
@@ -312,6 +313,9 @@ final class StarsPanel extends JPanel
 		members.setSelected(f.showMembers);
 		free.setSelected(f.showFreeToPlay);
 		safe.setSelected(f.safe());
+		outline(members);
+		outline(free);
+		outline(safe);
 		wilderness.setSelected(f.hideWilderness);
 		pvp.setSelected(f.hidePvpWorlds);
 		deadman.setSelected(f.hideDeadmanWorlds);
@@ -584,7 +588,11 @@ final class StarsPanel extends JPanel
 			actions.setBackground(getBackground());
 			if (!pinned)
 			{
-				JButton pin = new JButton("Pin destination");
+				/*
+				 * As plain as Route beside it. The orange Open the map is the one button on the page that
+				 * says press me, and a filled brown here is the colour Group gives an answer already chosen.
+				 */
+				JButton pin = button("Pin destination");
 				pin.setName("stars.pin");
 				pin.setEnabled(star.precise && star.left(elapsed) > 0);
 				pin.addActionListener(e -> {
@@ -603,7 +611,7 @@ final class StarsPanel extends JPanel
 					clientThread.invokeLater(marker::sync);
 					rendered = null;
 					refresh();
-				}); primary(pin);
+				});
 				actions.add(pin);
 			}
 			/*
@@ -701,14 +709,6 @@ final class StarsPanel extends JPanel
 
 	/** Which Route button a press came from, so its answer is said beside it. */
 	static final String SOURCE = "star";
-
-	private static void primary(JButton button)
-	{
-		button.setFont(button.getFont().deriveFont(Font.BOLD, 11f));
-		button.setMargin(new Insets(4, 4, 4, 4));
-		button.setBackground(new Color(117, 94, 52));
-		button.setForeground(new Color(255, 240, 209));
-	}
 
 	/** What the sync box does now, for the map this sidebar is actually paired with. */
 	private String syncTip()
@@ -909,6 +909,36 @@ final class StarsPanel extends JPanel
 		free.setIconTextGap(3);
 		sprites.sprite(members, SpriteID.WorldswitcherStars.MEMBERS, WORLD_STAR);
 		sprites.sprite(free, SpriteID.WorldswitcherStars.FREE, WORLD_STAR);
+	}
+
+	/** Where a filter chip keeps its two borders; see {@link #chip} and {@link #outline}. */
+	private static final String CHIP_OFF = "stars.chipOff", CHIP_ON = "stars.chipOn";
+
+	/**
+	 * A filter chip. On, it carries the orange outline Drop luck's chosen sort has, beside the look and
+	 * feel's lighter fill, which alone told P2P on from F2P off by a few shades. The outline takes the
+	 * place of the border's own line and keeps its insets, so a chip is the same size on as off.
+	 */
+	private static JToggleButton chip(String text)
+	{
+		JToggleButton chip = toggle(text);
+		Border off = chip.getBorder();
+		Insets inside = off.getBorderInsets(chip);
+		chip.putClientProperty(CHIP_OFF, off);
+		chip.putClientProperty(CHIP_ON, BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(ColorScheme.BRAND_ORANGE),
+			BorderFactory.createEmptyBorder(Math.max(0, inside.top - 1), Math.max(0, inside.left - 1),
+				Math.max(0, inside.bottom - 1), Math.max(0, inside.right - 1))));
+		return chip;
+	}
+
+	/** A chip's border for whether it is on, set only when that changes: the tab refreshes every second. */
+	private static void outline(JToggleButton chip)
+	{
+		Object wanted = chip.getClientProperty(chip.isSelected() ? CHIP_ON : CHIP_OFF);
+		if (chip.getBorder() != wanted)
+		{
+			chip.setBorder((Border) wanted);
+		}
 	}
 
 	private static JToggleButton toggle(String text)
