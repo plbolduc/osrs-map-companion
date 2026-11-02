@@ -235,8 +235,15 @@ final class StarsModel
 		return favorites;
 	}
 
+	/** "~46m", or "Depleted": the last column of a world's row, a column too narrow for more. */
 	static String minutes(long remaining)
 	{
 		return remaining <= 0 ? "Depleted" : "~" + Math.max(1, (remaining + 59_999) / 60_000) + "m";
+	}
+
+	/** "~46m left", or "Depleted": the time left in a sentence, the one way every line says it. */
+	static String timeLeft(long remaining)
+	{
+		return remaining <= 0 ? "Depleted" : minutes(remaining) + " left";
 	}
 }

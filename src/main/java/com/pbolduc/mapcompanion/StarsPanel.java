@@ -93,7 +93,8 @@ final class StarsPanel extends JPanel
 	private final JPanel more = column(), rows = column(), selection = column();
 	private final JLabel levels = label(""), order = label("Most time left first"), count = label(""), status = label("");
 	private final JCheckBox wilderness = check("Wilderness"), pvp = check("PvP and high-risk worlds"), deadman = check("Deadman worlds"), depleted = check("Depleted stars");
-	private final JComboBox<String> league = new JComboBox<>(new String[]{"Main worlds", "League worlds"});
+	/* Under the Hide boxes, each choice says it shows, so the box needs no label of its own. */
+	private final JComboBox<String> league = new JComboBox<>(new String[]{"Show main game worlds", "Show League worlds"});
 	private final Set<String> expanded = new HashSet<>();
 	private boolean selected, active, updating;
 	private String rendered;
@@ -117,6 +118,10 @@ final class StarsPanel extends JPanel
 		 */
 		add(selection);
 		sync.setName("stars.sync");
+		levels.setName("stars.levels");
+		count.setName("stars.count");
+		status.setName("stars.status");
+		league.setName("stars.league");
 
 		/* The tier picker keeps the width its longest value needs; the three chips share the rest. */
 		JPanel controls = new JPanel(new GridBagLayout());
@@ -254,12 +259,14 @@ final class StarsPanel extends JPanel
 		league.setSelectedIndex("only".equals(f.leagueWorlds) ? 1 : 0);
 		league.setVisible(model.feed != null && model.feed.leagueSeason);
 		updating = false;
-		sync.setToolTipText(service.syncReady ? "Personal filters and favourites follow your paired browser" : "Paste your personal RuneLite code from the map to sync. Independent filters stay on this character.");
-		levels.setText("Mining " + (model.miningLevel == null ? "—" : model.miningLevel) + " · Skill total " + (model.skillTotal == null ? "—" : model.skillTotal));
+		sync.setToolTipText(syncTip());
+		wrap(levels, levelsLine(model.miningLevel, model.skillTotal), TEXT);
 		List<StarsModel.Site> sites = model.sites();
 		long elapsed = model.elapsed();
 		int stars = 0, locations = 0;
-		StringBuilder signature = new StringBuilder().append(model.feed != null).append(service.eligible()).append(service.message);
+		boolean loggedOut = !service.eligible() && active;
+		boolean empty = model.feed != null && model.feed.rows.isEmpty();
+		StringBuilder signature = new StringBuilder().append(model.feed != null).append(loggedOut).append(empty).append(service.message);
 		for (StarsModel.Site site : sites)
 		{
 			stars += site.worlds.size();
@@ -267,11 +274,21 @@ final class StarsPanel extends JPanel
 			signature.append(site.key).append(site.name).append(site.favorite).append(site.hiddenByFilters).append(expanded.contains(site.key));
 			for (StarsModel.Star star : site.worlds) signature.append(star.id).append(star.tier(elapsed)).append(StarsModel.minutes(star.left(elapsed))).append((star.ageMs + elapsed) / 60_000);
 		}
-		count.setText(locations + (locations == 1 ? " site · " : " sites · ") + stars + (stars == 1 ? " star" : " stars"));
-		String notice = service.message;
-		if (model.feed != null && f.safe() && !model.feed.worldsAvailable) notice = "World list unavailable: PvP and Deadman filters cannot be checked.";
-		if (!service.eligible() && active) notice = "Log in and connect to your map to see stars.";
-		wrap(status, notice == null ? "Updated " + (model.feed == null ? "—" : age(model.feed.snapshotAgeSeconds * 1000 + elapsed)) + " · estimates" : notice, TEXT);
+		/* Nothing is counted, and no age given, until the map has answered once: there is no list yet. */
+		count.setText(model.feed == null ? "" : locations + (locations == 1 ? " site · " : " sites · ") + stars + (stars == 1 ? " star" : " stars"));
+		/* A list it holds says how old it is, the same when Star Miners or the last refresh failed. */
+		String notice = loggedOut ? "Log in and connect to your map to see stars."
+			: model.feed == null ? service.message
+			: f.safe() && !model.feed.worldsAvailable ? "World list unavailable: PvP and Deadman filters cannot be checked."
+			: "Updated " + age(model.feed.snapshotAgeSeconds * 1000 + elapsed) + " · "
+				+ (service.message != null ? "couldn't refresh, retrying" : model.feed.stale ? "Star Miners not answering" : "estimates");
+		status.setVisible(notice != null);
+		if (notice != null)
+		{
+			wrap(status, notice, TEXT);
+		}
+		/* Why the refresh failed is a hover away, so the line over the list stays short. */
+		status.setToolTipText(model.feed != null && service.message != null ? service.message : null);
 		RelayResponse.Destination destination = destinations.getDestination();
 		signature.append(model.selected).append(destination == null ? "" : destination.name + destination.world + destination.x + destination.y);
 		RoutePress.Said said = press.said(SOURCE);
@@ -283,7 +300,7 @@ final class StarsPanel extends JPanel
 		selection.setBorder(null);
 		if (model.feed == null)
 		{
-			if (service.message == null) rows.add(label("Loading stars…"));
+			if (notice == null) rows.add(label("Loading stars…"));
 			revalidate();
 			repaint();
 			return;
@@ -309,7 +326,8 @@ final class StarsPanel extends JPanel
 			rows.add(site(site, elapsed));
 			rows.add(gap(4));
 		}
-		if (stars == 0) rows.add(label("No stars match these filters."));
+		/* An hour with no stars at all is not the player's filters, and says so. */
+		if (stars == 0) rows.add(label(empty ? "No stars reported right now." : "No stars match these filters."));
 		StarsModel.Star chosen = model.find(model.selected);
 		if (chosen != null) selection(chosen, elapsed, destination);
 		revalidate();
@@ -330,7 +348,7 @@ final class StarsPanel extends JPanel
 		String name = "<font color='" + (primary == null ? "#a0a0a0" : primary.wilderness ? "#ef9696" : "#ffffff") + "'>" + escape(site.name) + "</font>";
 		String detail = primary == null ? "<font color='#a0a0a0'>" + (site.hiddenByFilters ? "Hidden by filters" : "No star right now") + "</font>"
 			: "<font color='#edbd64'>T" + primary.tier(elapsed) + "</font><font color='#b8b8b8'> · W" + primary.world + " · "
-				+ StarsModel.minutes(primary.left(elapsed)) + " left" + (primary.wilderness ? " · Wilderness" : "") + "</font>";
+				+ StarsModel.timeLeft(primary.left(elapsed)) + (primary.wilderness ? " · Wilderness" : "") + "</font>";
 		String text = "<html><body width='" + CARD_TEXT + "'>" + name + "<br>" + detail + "</body></html>";
 		if (primary == null)
 		{
@@ -463,7 +481,7 @@ final class StarsPanel extends JPanel
 		name.setForeground(GOLD);
 		name.setFont(name.getFont().deriveFont(12f));
 		selection.add(name);
-		selection.add(label("W" + star.world + " · T" + star.tier(elapsed) + " · " + StarsModel.minutes(star.left(elapsed)) + " left"));
+		selection.add(label("W" + star.world + " · T" + star.tier(elapsed) + " · " + StarsModel.timeLeft(star.left(elapsed))));
 		selection.add(gap(5));
 		if (!pinned)
 		{
@@ -477,7 +495,7 @@ final class StarsPanel extends JPanel
 				next.plane = star.plane;
 				next.name = star.name;
 				next.world = star.world;
-				next.note = "T" + star.tier(service.model.elapsed()) + " · " + StarsModel.minutes(star.left(service.model.elapsed())) + " left";
+				next.note = "T" + star.tier(service.model.elapsed()) + " · " + StarsModel.timeLeft(star.left(service.model.elapsed()));
 				destinations.selectLocal(next);
 				clientThread.invokeLater(marker::sync);
 				rendered = null;
@@ -505,7 +523,7 @@ final class StarsPanel extends JPanel
 				{
 					long now = service.model.elapsed();
 					press.press(RoutePress.Target.tile(SOURCE, new net.runelite.api.coords.WorldPoint(star.x, star.y, star.plane),
-						star.name, star.world, "T" + star.tier(now) + " · " + StarsModel.minutes(star.left(now)) + " left"));
+						star.name, star.world, "T" + star.tier(now) + " · " + StarsModel.timeLeft(star.left(now))));
 					rendered = null;
 					refresh();
 				});
@@ -548,6 +566,33 @@ final class StarsPanel extends JPanel
 		button.setMargin(new Insets(4, 4, 4, 4));
 		button.setBackground(new Color(117, 94, 52));
 		button.setForeground(new Color(255, 240, 209));
+	}
+
+	/** What the sync box does now, for the map this sidebar is actually paired with. */
+	private String syncTip()
+	{
+		String map = mapUrl.get().replaceFirst("^https?://", "");
+		if (!service.sync)
+		{
+			return "These filters are kept for this character. Tick to keep them the same here and on " + map + ".";
+		}
+		return service.syncReady ? "Your filters and favourites are the same here and on " + map + "."
+			: "Not synced yet; these filters are kept for this character.";
+	}
+
+	/**
+	 * The levels said as what they hide, since that is why they are shown: a star needs ten Mining a
+	 * tier, and a total world its total. A level not read yet hides nothing.
+	 */
+	static String levelsLine(Integer mining, Integer total)
+	{
+		String tiers = mining == null ? null
+			: "For Mining " + mining + ": " + (mining >= 90 ? "every tier" : mining < 10 ? "T1 needs 10" : "up to T" + mining / 10);
+		if (total == null)
+		{
+			return tiers == null ? "Levels not read yet: every tier and world shows" : tiers;
+		}
+		return tiers == null ? "Worlds up to " + total + " total" : tiers + " · worlds up to " + total + " total";
 	}
 
 	private static String age(long ms)

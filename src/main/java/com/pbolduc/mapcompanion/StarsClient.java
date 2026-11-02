@@ -81,7 +81,12 @@ final class StarsClient
 	final StarsModel model = new StarsModel();
 	boolean sync = true;
 	boolean syncReady;
-	String message = "Open Stars while logged in and connected to your map.";
+	/**
+	 * Why the last ask for the list failed, or null. Nothing else: the tab says "Loading stars…" and
+	 * "log in" from {@link #eligible()} and the feed, and how old a held list is from the feed, so a
+	 * sentence set here can never outlive what it described.
+	 */
+	String message;
 	private boolean active, eligible, dirty;
 
 	/**
@@ -185,7 +190,7 @@ final class StarsClient
 			cancel();
 			model.feed = null;
 			syncReady = false;
-			message = "Log in and connect to your map to see stars.";
+			message = null;
 			return;
 		}
 		String incoming = server + "\n" + code + "\n" + member + "\n" + profile;
@@ -197,6 +202,7 @@ final class StarsClient
 			storageKey = "starPreferences:" + Base64.getUrlEncoder().withoutPadding().encodeToString(server.getBytes(StandardCharsets.UTF_8));
 			model.feed = null;
 			model.selected = null;
+			message = null;
 			revision = 0;
 			syncReady = false;
 			dirty = false;
@@ -286,7 +292,7 @@ final class StarsClient
 			StarsModel.Feed incoming = gson.fromJson(response, StarsModel.Feed.class);
 			model.accept(incoming);
 			nextFeed = System.currentTimeMillis() + Math.max(60_000, Math.min(300_000, incoming.pollIntervalMs));
-			message = incoming.stale ? "Saved feed · upstream unavailable" : null;
+			message = null;
 		});
 	}
 
