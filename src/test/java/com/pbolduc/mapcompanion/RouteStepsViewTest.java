@@ -26,6 +26,7 @@
 package com.pbolduc.mapcompanion;
 
 import com.google.gson.Gson;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.io.IOException;
@@ -39,6 +40,7 @@ import java.util.Map;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import net.runelite.api.coords.WorldPoint;
+import net.runelite.client.ui.ColorScheme;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -146,7 +148,87 @@ public class RouteStepsViewTest
 		asked.clear();
 		assertTrue(SidebarWords.press(view, "Lumbridge tablet · 58 tiles"));
 		view.show(route.view());
-		assertEquals(java.util.Collections.singletonList("item 8008 at " + RouteStepsView.PICTURE), asked);
+		/* The tablet's own step, then the home teleport's icon leading its way in the open fold. */
+		assertEquals(java.util.Arrays.asList("item 8008 at " + RouteStepsView.PICTURE, "sprite 356 at " + RouteStepsView.PICTURE),
+			asked);
+	}
+
+	/**
+	 * Each other way starts with the picture of what it makes you use, the first of its steps that has
+	 * one, as the website's chip leads with its teleport; a way with none keeps the picture's place, so
+	 * the words start at one x. A way not open yet is grey with its picture faded, where it was as
+	 * white as the rest, and pressing it still shows its steps.
+	 */
+	@Test
+	public void eachOtherWayStartsWithWhatItMakesYouUse() throws IOException
+	{
+		String reply = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "contract", "reply.json")), StandardCharsets.UTF_8);
+		RelayResponse.Destination fixture = new Gson().fromJson(reply, RelayResponse.class).directive.destination;
+		fixture.route.options.get(2).blocked = true;
+		route.sync(fixture);
+		view.show(route.view());
+		asked.clear();
+		assertTrue(SidebarWords.press(view, "▸ 3 other ways"));
+		assertTrue(asked.toString(), asked.contains("item 8008 at " + RouteStepsView.PICTURE));
+
+		JButton tablet = button("Lumbridge tablet · 58 tiles · not yet");
+		assertEquals("a way not open yet is grey", ColorScheme.MEDIUM_GRAY_COLOR, tablet.getForeground());
+		assertFalse("and its picture faded", wayPicture(tablet).isEnabled());
+		JButton walk = button("Walk");
+		assertEquals(Color.WHITE, walk.getForeground());
+		assertTrue("a way with no picture keeps its place", wayPicture(walk).isEnabled());
+		assertEquals(null, wayPicture(walk).getIcon());
+
+		assertTrue(SidebarWords.press(view, "Lumbridge tablet · 58 tiles · not yet"));
+		view.show(route.view());
+		assertTrue(shown(), shown().startsWith("Lumbridge tablet · 58 tiles"));
+	}
+
+	/** The visible button with exactly these words. */
+	private JButton button(String words)
+	{
+		List<JButton> buttons = new ArrayList<>();
+		collectButtons(view, buttons);
+		for (JButton button : buttons)
+		{
+			if (words.equals(button.getText()))
+			{
+				return button;
+			}
+		}
+		throw new AssertionError("no button says " + words + ": " + shown());
+	}
+
+	private static void collectButtons(Component component, List<JButton> out)
+	{
+		if (!component.isVisible())
+		{
+			return;
+		}
+		if (component instanceof JButton)
+		{
+			out.add((JButton) component);
+		}
+		if (component instanceof Container)
+		{
+			for (Component child : ((Container) component).getComponents())
+			{
+				collectButtons(child, out);
+			}
+		}
+	}
+
+	/** The picture leading another way's words, in the row beside its button. */
+	private static JLabel wayPicture(JButton way)
+	{
+		for (Component beside : way.getParent().getComponents())
+		{
+			if (beside instanceof JLabel && "route.way.picture".equals(beside.getName()))
+			{
+				return (JLabel) beside;
+			}
+		}
+		throw new AssertionError("no picture beside " + way.getText());
 	}
 
 	@Test

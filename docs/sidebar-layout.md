@@ -408,7 +408,9 @@ of `docs/plan-where-to-go-for-a-task.md` in `osrs-stars-map`.
   Dismiss stay, Reroute because an arrival read wrongly still needs its way out. A run's leg goes
   whole, since the stop it led to already says *You're here*.
 - **The other ways** fold behind one line, *▸ 2 other ways*, as the card's closed row folds them.
-  Pressing one shows its steps instead; the best one says so.
+  Pressing one shows its steps instead; the best one says so. Each starts with the picture of the
+  first of its steps that has one, the ring or the tablet, as the website's route chip leads with
+  its teleport; a way not open yet is grey, its picture faded, and still shows its steps.
 - **Reroute** sits beside **Dismiss**, and plans again from where you stand. While the answer is
   on its way the card says *Planning from where you stand…*, and a refusal is one plain sentence
   under the steps. A route ranked from no position says so above the steps. A destination with no

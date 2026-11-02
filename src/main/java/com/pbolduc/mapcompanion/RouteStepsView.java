@@ -25,7 +25,9 @@
  */
 package com.pbolduc.mapcompanion;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.image.BufferedImage;
 import java.util.List;
@@ -36,6 +38,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import net.runelite.client.ui.ColorScheme;
 
@@ -56,7 +59,10 @@ import net.runelite.client.ui.ColorScheme;
  * <p>A teleport step carries the game's own picture of what to click, as the website's card hangs its
  * sprite on the same row: the item's sprite from {@link GameSprites#item}, the spell's icon from
  * {@link GameSprites#sprite}, by the id the map sent. Both come from this client's cache, never from
- * the map; a step the map names no id for is words alone, as it always was.
+ * the map; a step the map names no id for is words alone, as it always was. Each of the other ways
+ * starts with the picture of its first step that has one, as the website's route chip leads with its
+ * teleport, so ways are told apart by what they make you use; a way not open yet is greyed, its
+ * picture faded, and still shows its steps when pressed.
  *
  * <p>When Shortest Path is drawing a step's walk for this route, a line under the steps says so, so
  * the line on the ground is never taken for this plugin's own drawing.
@@ -224,19 +230,28 @@ final class RouteStepsView extends JPanel
 		others.setVisible(more > 0 && !there);
 		others.setText((open ? "▾ " : "▸ ") + more + (more == 1 ? " other way" : " other ways"));
 		otherWays.removeAll();
-		otherWays.setVisible(open && more > 0 && !there);
-		for (int i = 0; i < view.ways.size(); i++)
+		/* Built only while open, so a folded list asks the client's cache for no pictures. */
+		boolean listed = open && more > 0 && !there;
+		otherWays.setVisible(listed);
+		/* The picture's place is kept on every way once one has a picture, so the words start at one x. */
+		boolean pictured = false;
+		for (int i = 0; listed && i < view.ways.size(); i++)
+		{
+			pictured |= i != view.chosen && sprites != null && firstPictured(view.ways.get(i)) != null;
+		}
+		for (int i = 0; listed && i < view.ways.size(); i++)
 		{
 			if (i == view.chosen)
 			{
 				continue;
 			}
 			int index = i;
-			JButton pick = MapCompanionPanel.linkButton(otherLine(view.ways.get(i)));
-			pick.setForeground(Color.WHITE);
+			RelayResponse.RouteOption option = view.ways.get(i);
+			JButton pick = MapCompanionPanel.linkButton(otherLine(option));
+			pick.setForeground(option.blocked ? DONE : Color.WHITE);
 			pick.setToolTipText("Show this way's steps instead");
 			pick.addActionListener(e -> choose.accept(index));
-			otherWays.add(pick);
+			otherWays.add(pictured ? led(option, pick, sprites) : pick);
 		}
 
 		drawn.setVisible(shortestPath != null);
@@ -307,6 +322,71 @@ final class RouteStepsView extends JPanel
 		label.setBorder(new EmptyBorder(0, INDENT + beside, 0, 0));
 		MapCompanionPanel.setWrapped(label, text, WIDTH - INDENT - beside);
 		return MapCompanionPanel.left(label);
+	}
+
+	/**
+	 * Another way, led by the picture of the first of its steps that has one, in a place kept for it
+	 * whether or not it does. A way not open yet has its picture drawn disabled, which the look and
+	 * feel greys and dims as it does any control that cannot be used; its words are already grey.
+	 */
+	private static JComponent led(RelayResponse.RouteOption option, JButton pick, GameSprites sprites)
+	{
+		JLabel picture = pictureSlot();
+		picture.setName("route.way.picture");
+		RelayResponse.RouteStep shows = firstPictured(option);
+		if (shows != null)
+		{
+			draw(picture, shows, sprites);
+		}
+		picture.setEnabled(!option.blocked);
+		JPanel row = new JPanel(new BorderLayout(PICTURE_GAP, 0));
+		row.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		row.add(picture, BorderLayout.WEST);
+		row.add(pick, BorderLayout.CENTER);
+		return MapCompanionPanel.left(row);
+	}
+
+	/** The first step of a way with the game's picture of what to click, or null when none has one. */
+	@Nullable
+	private static RelayResponse.RouteStep firstPictured(RelayResponse.RouteOption option)
+	{
+		for (RelayResponse.RouteStep step : option.steps)
+		{
+			if (step.itemId != null || step.spriteId != null)
+			{
+				return step;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * A picture's place, its size fixed, so a row is laid out once at its final width and the picture
+	 * fills it when the client's cache answers. Its picture is centred, as a sprite smaller than the
+	 * square is drawn at its own size.
+	 */
+	private static JLabel pictureSlot()
+	{
+		JLabel slot = new JLabel();
+		slot.setHorizontalAlignment(SwingConstants.CENTER);
+		Dimension square = new Dimension(PICTURE, PICTURE);
+		slot.setPreferredSize(square);
+		slot.setMinimumSize(square);
+		slot.setMaximumSize(square);
+		return slot;
+	}
+
+	/** A step's own picture: its item's sprite, or its spell's icon. */
+	private static void draw(JLabel slot, RelayResponse.RouteStep step, GameSprites sprites)
+	{
+		if (step.itemId != null)
+		{
+			sprites.item(slot, step.itemId, PICTURE);
+		}
+		else
+		{
+			sprites.sprite(slot, step.spriteId, PICTURE);
+		}
 	}
 
 	/**
