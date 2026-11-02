@@ -45,6 +45,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.UIManager;
 import net.runelite.client.ui.ColorScheme;
 
 /**
@@ -184,6 +185,7 @@ final class RecommendedSharing extends JPanel
 		JButton share = new JButton("Share what's ticked");
 		share.setName("recommended.share");
 		share.setFont(share.getFont().deriveFont(12f));
+		orange(share, true);
 		share.setToolTipText("Turn on the ticked settings, as the switches in Settings do. Nothing else changes.");
 		share.addActionListener(e -> share());
 		JPanel shareRow = new JPanel(new GridLayout(1, 1));
@@ -281,6 +283,20 @@ final class RecommendedSharing extends JPanel
 		refreshGroups();
 		setVisible(true);
 		revalidate();
+	}
+
+	/**
+	 * The page's one filled button, or a plain one. While this step is up its own press is the filled
+	 * one, and Open the map waits above it under its own name, drawn plain rather than hidden; Share or
+	 * Not now closes the step and gives the orange back. So each moment has one answer to "what do I
+	 * press", and a new player shares or chooses before opening a map that would show them sharing
+	 * nothing. Plain is the look and feel's own button colours, as resources, so the look and feel
+	 * paints it as any other button rather than in the panel's grey.
+	 */
+	static void orange(JButton button, boolean filled)
+	{
+		button.setBackground(filled ? ColorScheme.BRAND_ORANGE : UIManager.getColor("Button.background"));
+		button.setForeground(filled ? Color.WHITE : UIManager.getColor("Button.foreground"));
 	}
 
 	/** Hide the step without a word, as when the group it was offered for is left. */
