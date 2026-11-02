@@ -62,6 +62,7 @@ final class SlayerPanel extends JPanel
 	private static final Color GOLD = new Color(237, 189, 100);
 	static final String NO_TASK = "No Slayer task";
 	static final String GET_ONE = "Get one from a Slayer master and it shows here.";
+	static final String NEXT_TASK = "Get your next task from a Slayer master.";
 	static final String NONE_OPEN = "No place for this task is open to you yet.";
 	private final transient SlayerState state;
 	private final transient MapCompanionConfig config;
@@ -141,7 +142,13 @@ final class SlayerPanel extends JPanel
 					   : reading.task + (reading.remaining == null ? "" : reading.remaining == 0 ? " · Complete" : " · " + reading.remaining + " left");
 		MapCompanionPanel.setWrapped(task, title, WIDTH);
 		task.setVisible(title != null);
+		/*
+		 * Nothing left to kill: the card folds to its row and the step that changes it until the next
+		 * task is read, since a place and its Route are no use to a finished task.
+		 */
+		boolean finished = reading.task != null && reading.remaining != null && reading.remaining == 0;
 		String message = reading.task == null ? reading.settled ? GET_ONE : "The current assignment appears here once the game has settled."
+						 : finished ? NEXT_TASK
 						 : waiting ? rankingAgain(view.previous, view.order, view.hideWilderness)
 						 : view.options == null ? "Waiting for places from the map…" : view.stale ? "Waiting for the map to reconnect. These are the last places received." : reading.area;
 		MapCompanionPanel.setWrapped(status, message, WIDTH);
@@ -160,6 +167,7 @@ final class SlayerPanel extends JPanel
 			shownHide = view.hideWilderness;
 			render();
 		}
+		body.setVisible(!finished);
 		for (JButton button : routeButtons)
 		{
 			RoutePress.Said said = routes.said(button.getName());
@@ -280,11 +288,18 @@ final class SlayerPanel extends JPanel
 			wiki.setToolTipText("Open this task's source page in your browser");
 			wiki.addActionListener(e -> LinkBrowser.browse(wikiUrl(shown.page)));
 			body.add(wiki);
-			JButton license = MapCompanionPanel.linkButton("CC BY-NC-SA 3.0 ↗");
-			license.setFont(license.getFont().deriveFont(10f));
-			license.setToolTipText("The licence for the Wiki's locations and rates");
-			license.addActionListener(e -> LinkBrowser.browse("https://creativecommons.org/licenses/by-nc-sa/3.0/"));
-			body.add(license);
+			/*
+			 * The source on every card, the licence with the open list, where the website's Slayer block
+			 * has it too: the closed card ends on its last useful row, and the terms are one press away.
+			 */
+			if (expanded)
+			{
+				JButton license = MapCompanionPanel.linkButton("CC BY-NC-SA 3.0 ↗");
+				license.setFont(license.getFont().deriveFont(10f));
+				license.setToolTipText("The licence for the Wiki's locations and rates");
+				license.addActionListener(e -> LinkBrowser.browse("https://creativecommons.org/licenses/by-nc-sa/3.0/"));
+				body.add(license);
+			}
 		}
 		body.revalidate();
 		body.repaint();

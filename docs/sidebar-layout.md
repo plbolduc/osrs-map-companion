@@ -603,6 +603,11 @@ each", and the owner took that pick. They were built above Now, so an idle farm 
 between the search and the route being walked. Home is now the search, *Now*, *Tasks* and Drop luck.
 The *Tasks* heading hides with the last visible card, as *Now*'s does.
 
+A Slayer task with nothing left to kill folds to its row, *Gargoyles · Complete*, and the step that
+changes it, *Get your next task from a Slayer master.*, until the next task is read: a place and its
+Route are no use to it. The closed card ends on *OSRS Wiki ↗*, its source, and *CC BY-NC-SA 3.0 ↗*
+is in the fold after the options, where the website's Slayer block keeps its licence.
+
 ### Actions are buttons
 
 *Start run*, a run's *Pause route · Reroute · End run* and Slayer's *Route · World map* were drawn as

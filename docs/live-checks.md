@@ -99,7 +99,9 @@ steps wait on these readings (`osrs-stars-map/docs/plan-where-to-go-for-a-task.m
       the task, and its places greyed, until the new world settles, and never says there is no
       task meanwhile; log out and in, and it waits for the new session's reading instead. With no
       assignment, `SLAYER_TARGET` (395) should read 0 once settled, and the card then says *No
-      Slayer task* and to get one from a master; note what it reads after a task is finished.
+      Slayer task* and to get one from a master; note what it reads after a task is finished. If
+      the task stays with 0 left, the card folds to *Gargoyles · Complete* (or whichever task) and
+      *Get your next task from a Slayer master.* until the next task is read.
 - [ ] **Port task slots.** `PortTaskReader` is written from the Hub's Sailing and Port Tasks
       plugins and the game's script, not from a session; these settle it. With *Port tasks*
       sharing on:
