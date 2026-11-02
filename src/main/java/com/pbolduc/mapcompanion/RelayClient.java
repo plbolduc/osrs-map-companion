@@ -206,10 +206,33 @@ public class RelayClient
 
 	/**
 	 * One short sentence about the last transient failure, never the pairing code or the URL.
-	 * Cleared on success. The sidebar prints this while {@link Health#DEGRADED}.
+	 * Cleared on success. The sidebar prints this once a post has failed, whether or not one landed
+	 * before it.
 	 */
 	@Getter
 	private volatile String lastTransientError = null;
+
+	/**
+	 * The status the last transient failure came with, or 0 when it came with none: unreachable, or
+	 * a reply nobody could read. Cleared with the sentence.
+	 *
+	 * <p>Kept beside the sentence rather than in it. A number means nothing to a player and reads as
+	 * a crash, so the status card says what is happening and the dot's tooltip carries the number,
+	 * for whoever is writing a bug report.
+	 */
+	@Getter
+	private volatile int lastTransientStatus = 0;
+
+	/*
+	 * What the status card says while a post fails and the plugin waits to try again. Each fits the
+	 * one line beside the dot, 141px, so "retrying" is never left on a line of its own.
+	 */
+	/** A post that cannot reach the map. */
+	static final String UNREACHABLE = "Can't reach the map · retrying";
+	/** An answer that cannot be read. */
+	static final String UNREADABLE = "Unreadable reply · retrying";
+	/** A failure that is not a refusal: a 5xx, or a 4xx a proxy sent. */
+	static final String HAVING_TROUBLE = "Map having trouble · retrying";
 
 	/**
 	 * Package-private rather than private, so a test can drive {@link #handle} with responses it
@@ -266,6 +289,7 @@ public class RelayClient
 		lastSuccessMs = 0L;
 		consecutiveFailures = 0;
 		lastTransientError = null;
+		lastTransientStatus = 0;
 	}
 
 	/**
@@ -394,7 +418,7 @@ public class RelayClient
 						return;
 					}
 					log.debug("companion relay unreachable", e);
-					recordTransient("Couldn't reach the map", System.currentTimeMillis());
+					recordTransient(UNREACHABLE, System.currentTimeMillis());
 					activePost = null;
 				}
 			}
@@ -414,7 +438,7 @@ public class RelayClient
 						if (requestGeneration == generation && activePost == call)
 						{
 							log.debug("companion relay response unreadable", e);
-							recordTransient("The map's reply was unreadable", System.currentTimeMillis());
+							recordTransient(UNREADABLE, System.currentTimeMillis());
 						}
 					}
 				}
@@ -453,6 +477,7 @@ public class RelayClient
 		nextAllowedPostMs = now + ERROR_BACKOFF_MS;
 		consecutiveFailures++;
 		lastTransientError = message;
+		lastTransientStatus = 0;
 		inFlight.set(false);
 	}
 
@@ -554,9 +579,8 @@ public class RelayClient
 			 * editing the settings.
 			 */
 			consecutiveFailures++;
-			lastTransientError = code >= 400 && code < 500
-								 ? "The map refused this request (" + code + ")"
-								 : "The map answered " + code;
+			lastTransientError = HAVING_TROUBLE;
+			lastTransientStatus = code;
 			nextAllowedPostMs = now + ERROR_BACKOFF_MS;
 			return;
 		}
@@ -564,6 +588,7 @@ public class RelayClient
 		everSucceeded = true;
 		consecutiveFailures = 0;
 		lastTransientError = null;
+		lastTransientStatus = 0;
 		lastSuccessMs = now;
 
 		long interval = parsed != null && parsed.pollIntervalMs > 0
@@ -659,8 +684,10 @@ public class RelayClient
 	 * <p>The map says {@code group_full} when this group has no room for another member and
 	 * {@code capacity} when the relay itself has none, and the answers differ: the first needs
 	 * somebody in the group to leave or be removed, and the second clears by itself as other groups
-	 * go quiet, so the five-minute retry is all there is to do. A 507 with no word comes from a map
-	 * older than the words and gets the sentence every 507 used to get.
+	 * go quiet, so the five-minute retry is all there is to do, and the words say only that. They
+	 * are the status card's first line beside the dot, where a sentence about five minutes took
+	 * three lines. A 507 with no word comes from a map older than the words and gets the sentence
+	 * every 507 used to get.
 	 *
 	 * <p>Package-private so both words can be pinned without standing up OkHttp.
 	 */
@@ -669,7 +696,7 @@ public class RelayClient
 		String tidy = reason == null ? "" : reason.trim().toLowerCase(Locale.ROOT);
 		if ("capacity".equals(tidy))
 		{
-			return "The map has no room for anyone new right now. This will try again in five minutes.";
+			return "Map is full · retrying";
 		}
 		return "That group is full.";
 	}

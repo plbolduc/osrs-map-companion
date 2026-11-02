@@ -497,6 +497,7 @@ public class MapCompanionPlugin extends Plugin
 		relay.reset();
 		lootLog.reload();
 		clientThread.invokeLater(() -> { collectionItems.initialize(); });
+		clientThread.invokeLater(this::restStatus);
 		dirty = true;
 	}
 
@@ -601,7 +602,36 @@ public class MapCompanionPlugin extends Plugin
 		issuedSecret = null;
 		toldName = null;
 		runsGroup = null;
-		setStatus(Health.IDLE, "Not paired");
+		restStatus();
+	}
+
+	/**
+	 * The status before a tick has said anything: at the start of a lifetime, and at its end.
+	 *
+	 * <p>No tick comes at the login screen. RuneLite starts its plugins before the client first
+	 * reaches it, so a client start hears {@code Logged out} from that state change; a plugin turned
+	 * on, or back on, while RuneLite already sits there hears nothing, and would print whatever this
+	 * last said beside the name of the group it is in until the player logged in. Client thread.
+	 */
+	private void restStatus()
+	{
+		String code = config.pairingCode() == null ? "" : config.pairingCode().trim();
+		setStatus(code.isEmpty() ? Health.IDLE : Health.WAITING,
+			restingStatus(!code.isEmpty(), client.getGameState() == GameState.LOGGED_IN));
+	}
+
+	/**
+	 * {@link #restStatus}'s words: the tick's own for no code, {@code Logged out} as the login
+	 * screen's state change says it, and {@code Connecting…} for a relay that has just been reset.
+	 * Package-private so they can be pinned without a client.
+	 */
+	static String restingStatus(boolean hasCode, boolean loggedIn)
+	{
+		if (!hasCode)
+		{
+			return "Not paired";
+		}
+		return loggedIn ? "Connecting…" : "Logged out";
 	}
 
 	/**
@@ -1765,24 +1795,30 @@ public class MapCompanionPlugin extends Plugin
 	{
 		int failures = relay.getConsecutiveFailures();
 		boolean live = relay.isEverSucceeded();
-		String transientError = relay.getLastTransientError();
-		Health health = healthFor(live, failures, null);
-		String sentence;
-		if (failures > 0 && live)
+		setStatus(healthFor(live, failures, null),
+			healthSentence(live, failures, relay.getLastTransientError(), "Connected to " + pairing.serverLabel()));
+	}
+
+	/**
+	 * The sentence beside {@link #healthFor}'s colour, from the same outcome.
+	 *
+	 * <p>Once a post has failed it says why, whether or not one ever landed: a map that is down, or
+	 * that this network cannot reach, failed the first post as plainly as it fails a later one, and
+	 * {@code Connecting…} there would never change while it looked exactly like a connection about
+	 * to work. The colour still waits until a post has landed. Package-private for its test, and for
+	 * the harness, which prints what the sidebar would.
+	 */
+	static String healthSentence(boolean everSucceeded, int consecutiveFailures, @Nullable String transientError, String connected)
+	{
+		if (consecutiveFailures > 0 && transientError != null && !transientError.isEmpty())
 		{
-			sentence = transientError != null && !transientError.isEmpty()
-					   ? transientError
-					   : "Reconnecting…";
+			return transientError;
 		}
-		else if (live)
+		if (consecutiveFailures > 0)
 		{
-			sentence = "Connected to " + pairing.serverLabel();
+			return everSucceeded ? "Reconnecting…" : "Connecting…";
 		}
-		else
-		{
-			sentence = "Connecting…";
-		}
-		setStatus(health, sentence);
+		return everSucceeded ? connected : "Connecting…";
 	}
 
 	/**

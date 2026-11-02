@@ -506,6 +506,13 @@ plugin-first plan has it, and its tooltip says *Join the group this invite is fo
 does not count, because its alphabet spells ordinary words; Join takes that. After Paste the field
 shows the start of the message rather than the tail of the link's token.
 
+While Connect or Join waits on the map, the status card says *Connecting…* beside an amber dot and
+the line under the field is quiet; it said *Not connected* over a button reading *Connecting…*, and
+the line said it again. A Connect that made no group says why on the card until the next press:
+under the field it read as being about the invite. Join's refusals stay under the field, because
+they are. Otherwise the dot is grey before a group, where the connection's own state coloured the
+same *Not connected* amber at the login screen and grey in game.
+
 ### The step after Connect
 
 It said *Waiting for the map* twice, once beside the dot and once under the field, and the tabs and
@@ -541,6 +548,16 @@ its tooltip with the last post and the stream, so the first line is the group's 
 what is shared, *Sharing position, levels*, with the gear at the end of the first. While it is not,
 the first line says what is happening — *Connecting…*, *Logged out*, a refusal — and the second is
 the group's name. The connect step is 532px.
+
+*Connecting…* lasts only until a post has failed. A map that is down, or that this network cannot
+reach, then says *Can't reach the map · retrying*, where it said *Connecting…* for good and looked
+exactly like a connection about to work; the dot stays amber until a post lands. No first line
+prints an HTTP status: *The map answered 503* became *Map having trouble · retrying*, with the number
+kept in the dot's tooltip for a bug report, and a full relay is *Map is full · retrying* on one line
+rather than three. Each of these fits the 141px beside the dot, where *The map is having trouble ·
+retrying* would leave *retrying* on a line of its own. A plugin turned on while RuneLite sits at
+the login screen says *Logged out*, as a client start does, rather than *Not paired* beside the
+group's name.
 
 ### Stars
 

@@ -174,6 +174,12 @@ public class MapCompanionPanel extends PluginPanel
 	private final ConnectClient connectClient;
 	/** True while Connect, Join or Open the map waits on the map, so a second press sends nothing. */
 	private boolean asking = false;
+	/**
+	 * Why the last Connect made no group, until the next Connect or Join. The status card's first
+	 * line says it: printed under the invite field, it read as being about the invite.
+	 */
+	@Nullable
+	private String connectFailed;
 
 	/*
 	 * What is happening now: what the map asked for, and where you died. Each is a card that is
@@ -1003,15 +1009,16 @@ public class MapCompanionPanel extends PluginPanel
 		{
 			return;
 		}
+		connectFailed = null;
 		String server = pairing.serverUrl();
 		if (!pairing.approvedMap(server) && !confirmMap())
 		{
 			say("Connection cancelled.");
 			return;
 		}
-		ask(server);
+		ask();
 		connectClient.start(server, identity.installationKey(),
-			outcome -> SwingUtilities.invokeLater(() -> finishConnect(server, outcome)));
+			outcome -> SwingUtilities.invokeLater(() -> finishConnect(server, outcome, true)));
 	}
 
 	/** Join with a friend's invite: the one question for another map, then the map spends the invite. */
@@ -1027,16 +1034,19 @@ public class MapCompanionPanel extends PluginPanel
 			say("Connection cancelled.");
 			return;
 		}
-		ask(server);
+		ask();
 		connectClient.join(server, identity.installationKey(), invited.code, invited.invite,
-			outcome -> SwingUtilities.invokeLater(() -> finishConnect(server, outcome)));
+			outcome -> SwingUtilities.invokeLater(() -> finishConnect(server, outcome, false)));
 	}
 
-	/** The button and the line under the field while the map is asked. */
-	private void ask(String server)
+	/**
+	 * While the map is asked: the button says so, the status card says Connecting…, and the line
+	 * under the field is quiet rather than saying it a second time.
+	 */
+	private void ask()
 	{
 		asking = true;
-		say("Connecting to " + server.replaceFirst("^https?://", "") + "…");
+		quiet();
 		refresh();
 	}
 
@@ -1049,7 +1059,7 @@ public class MapCompanionPanel extends PluginPanel
 	 * player meeting this map for the first time. An answer that arrives after the map address has
 	 * changed is for a map the player has left, and is dropped.
 	 */
-	private void finishConnect(String server, ConnectClient.Outcome outcome)
+	private void finishConnect(String server, ConnectClient.Outcome outcome, boolean making)
 	{
 		asking = false;
 		if (!server.equals(pairing.serverUrl()))
@@ -1060,14 +1070,14 @@ public class MapCompanionPanel extends PluginPanel
 		}
 		if (outcome.joined == null)
 		{
-			say(outcome.message != null ? outcome.message : ConnectClient.FAILED);
+			refused(outcome.message != null ? outcome.message : ConnectClient.FAILED, making);
 			refresh();
 			return;
 		}
 		if (!RecommendedSharing.connect(pairing, outcome.joined, () -> true, config,
 			() -> recommendedSharing.offer(pairing.serverLabel())))
 		{
-			say(ConnectClient.FAILED);
+			refused(ConnectClient.FAILED, making);
 			refresh();
 			return;
 		}
@@ -1077,6 +1087,24 @@ public class MapCompanionPanel extends PluginPanel
 		quiet();
 		pages.open(false);
 		refresh();
+	}
+
+	/**
+	 * Why a press made no group or joined none. Connect's goes on the status card, until the next
+	 * press, because it is about the connection; under the invite field it read as being about the
+	 * invite. Join's stays under the field, because an expired or used-up invite is news about it.
+	 */
+	private void refused(String message, boolean making)
+	{
+		if (making)
+		{
+			connectFailed = message;
+			quiet();
+		}
+		else
+		{
+			say(message);
+		}
 	}
 
 	/**
@@ -1162,6 +1190,7 @@ public class MapCompanionPanel extends PluginPanel
 		{
 			return;
 		}
+		connectFailed = null;
 		String entered = joinField.getText().trim();
 		JoinCode joined = JoinCode.parse(entered.isEmpty() ? pairingCode() : entered);
 		if (joined == null)
@@ -1406,18 +1435,41 @@ public class MapCompanionPanel extends PluginPanel
 	 * and otherwise what the connection is doing. "Not connected" before a group, where the plugin's
 	 * own word was "Not paired": pairing is this code's word for it, and nobody joins a map to be
 	 * paired. "Connected" is the dot's colour and tooltip rather than a line of its own.
+	 *
+	 * <p>Before a group it is also where Connect and Join are answered: "Connecting…" while the map
+	 * is asked, rather than "Not connected" beside a button that says otherwise, and why the last
+	 * Connect made no group ({@code failed}) until the next press.
 	 */
-	static String statusWords(boolean paired, boolean ready, Health health, String status, @Nullable String group)
+	static String statusWords(boolean paired, boolean ready, boolean asking, @Nullable String failed, Health health,
+		String status, @Nullable String group)
 	{
+		if (asking && !ready)
+		{
+			return "Connecting…";
+		}
 		if (!paired)
 		{
-			return "Not connected";
+			return failed != null ? failed : "Not connected";
 		}
 		if (!ready)
 		{
 			return "Press Connect";
 		}
 		return health == Health.LIVE && group != null ? group : status;
+	}
+
+	/**
+	 * The dot's colour. Before a group it is grey, whatever the connection's own state, which is
+	 * amber at the login screen and grey in game and would colour the same "Not connected" two ways;
+	 * and amber while Connect or Join is asked, as every "Connecting…" is.
+	 */
+	static Health dotHealth(boolean paired, boolean asking, Health health)
+	{
+		if (paired)
+		{
+			return health;
+		}
+		return asking ? Health.WAITING : Health.IDLE;
 	}
 
 	/**
@@ -1632,8 +1684,16 @@ public class MapCompanionPanel extends PluginPanel
 			boolean paired = !code.isEmpty();
 			boolean ready = paired && pairing.hasServerConsent();
 
-			dot.setForeground(health.getColor());
+			if (paired)
+			{
+				/* A failed Connect is news until a group is had, by that press or any other. */
+				connectFailed = null;
+			}
+			dot.setForeground(dotHealth(paired, asking, health).getColor());
+			/* The status a transient failure came with, which the first line leaves out, for a bug report. */
+			int answered = relay.getFatalError() == null ? relay.getLastTransientStatus() : 0;
 			dot.setToolTipText(plugin.getStatus()
+							   + (answered > 0 ? " · HTTP " + answered : "")
 							   + " · last post " + ageOf(relay.getLastSuccessMs())
 							   + (directiveStream.isConnected() ? " · stream open" : " · stream closed"));
 			/*
@@ -1644,7 +1704,7 @@ public class MapCompanionPanel extends PluginPanel
 			 */
 			boolean live = ready && health == Health.LIVE;
 			String group = paired ? statusGroup(code, pairing.name(code)) : null;
-			setWrapped(statusLabel, statusWords(paired, ready, health, plugin.getStatus(), group),
+			setWrapped(statusLabel, statusWords(paired, ready, asking, connectFailed, health, plugin.getStatus(), group),
 				CARD_TEXT_WIDTH - 18 - SidebarIcons.SIZE - 4);
 			statusLabel.setToolTipText(live ? "Group code " + JoinCode.forDisplay(code) + " · " + dot.getToolTipText()
 				: dot.getToolTipText());

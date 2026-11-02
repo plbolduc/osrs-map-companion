@@ -116,9 +116,12 @@ public class RelayClientRefusalsTest
 	@Test
 	public void a507NamesWhichCeilingItHit()
 	{
-		/** The relay's ceiling clears by itself; the group's needs somebody to leave. */
-		assertEquals("The map has no room for anyone new right now. This will try again in five minutes.",
-					 RelayClient.describeFull("capacity"));
+		/**
+		 * The relay's ceiling clears by itself; the group's needs somebody to leave. The words are the
+		 * status card's first line, so the relay's are as short as the other retries' and say only
+		 * that it will try again: the sentence about five minutes they replaced took three lines.
+		 */
+		assertEquals("Map is full · retrying", RelayClient.describeFull("capacity"));
 		assertEquals(RelayClient.describeFull("capacity"), RelayClient.describeFull(" CAPACITY "));
 		assertEquals("That group is full.", RelayClient.describeFull("group_full"));
 		/** A map older than the words, or a word this plugin does not know yet. */

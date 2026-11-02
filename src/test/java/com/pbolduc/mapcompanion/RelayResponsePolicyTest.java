@@ -167,14 +167,14 @@ public class RelayResponsePolicyTest
 	 * A full relay is not a full group, and the sentence has to say which: somebody refused by the
 	 * first cannot fix it by asking an owner to remove anybody, and waiting is the whole answer.
 	 * Both still latch — a full relay asked again every two seconds by every plugin turned away is
-	 * load on exactly the machine that has none to spare.
+	 * load on exactly the machine that has none to spare. The relay's words are the status card's
+	 * first line, as short as the other retries': the sentence about five minutes took three lines.
 	 */
 	@Test
 	public void a507SaysWhetherTheGroupOrTheRelayIsFull() throws IOException
 	{
 		relay.handle(reply(507, "{\"reason\":\"capacity\",\"error\":\"There is no room for that right now.\"}"), null);
-		assertEquals("The map has no room for anyone new right now. This will try again in five minutes.",
-					 relay.getFatalError());
+		assertEquals("Map is full · retrying", relay.getFatalError());
 		assertTrue(!relay.isReady(System.currentTimeMillis()));
 
 		RelayClient other = new RelayClient(new OkHttpClient(), new Gson());
@@ -209,6 +209,28 @@ public class RelayResponsePolicyTest
 		});
 		assertTrue(relay.isEverSucceeded());
 		assertEquals(0, relay.getConsecutiveFailures());
+	}
+
+	/**
+	 * A failure the plugin will retry says what is happening, and not its number: "The map answered
+	 * 503" means nothing to a player and reads as a crash. The number is kept beside the words for
+	 * the dot's tooltip, and goes with them on the next success.
+	 */
+	@Test
+	public void aFailureSaysWhatIsHappeningAndKeepsItsNumberAside() throws IOException
+	{
+		relay.handle(reply(503, "<html>Service Unavailable</html>"), null);
+		assertEquals("Map having trouble · retrying", relay.getLastTransientError());
+		assertEquals(503, relay.getLastTransientStatus());
+
+		/** A proxy's 404 during a deploy is retried too, and says the same. */
+		relay.handle(reply(404, ""), null);
+		assertEquals(RelayClient.HAVING_TROUBLE, relay.getLastTransientError());
+		assertEquals(404, relay.getLastTransientStatus());
+
+		relay.handle(reply(200, "{}"), null);
+		assertNull(relay.getLastTransientError());
+		assertEquals(0, relay.getLastTransientStatus());
 	}
 
 	private static Response reply(int code, String body)
