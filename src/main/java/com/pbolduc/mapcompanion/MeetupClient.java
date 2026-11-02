@@ -38,13 +38,9 @@ import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.callback.ClientThread;
-import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.HttpUrl;
-import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
@@ -69,7 +65,6 @@ import okhttp3.Response;
 @Singleton
 final class MeetupClient
 {
-	private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 	static final String EVENT = "/api/companion/event";
 	static final String ANSWER = "/api/companion/event/answer";
 	/** The map's own cap on a title. */
@@ -295,31 +290,14 @@ final class MeetupClient
 			busy = true;
 		}
 		said = new Said(source, true, null, asked);
-		http.newCall(request(server, code, member, secret, path, body)).enqueue(new Callback()
-		{
-			@Override
-			public void onFailure(Call failed, IOException error)
-			{
-				finish(source, asked, UNREACHABLE, System.currentTimeMillis() + FAILURE_GAP_MS);
-			}
-
-			@Override
-			public void onResponse(Call completed, Response response)
-			{
-				handle(source, asked, making, onAnswered, server, response);
-			}
-		});
+		CompanionHttp.enqueue(http.newCall(request(server, code, member, secret, path, body)),
+			(failed, error) -> finish(source, asked, UNREACHABLE, System.currentTimeMillis() + FAILURE_GAP_MS),
+			(completed, response) -> handle(source, asked, making, onAnswered, server, response));
 	}
 
 	Request request(String server, String code, String member, String secret, String path, Object body)
 	{
-		return new Request.Builder()
-			.url(server + path)
-			.header("User-Agent", CompanionVersion.USER_AGENT)
-			.header("X-Companion-Code", code)
-			.header("X-Companion-Member", member)
-			.header("X-Companion-Member-Secret", secret)
-			.put(RequestBody.create(JSON, gson.toJson(body)))
+		return CompanionHttp.member(server + path, code, member, secret).put(CompanionHttp.json(gson, body))
 			.build();
 	}
 

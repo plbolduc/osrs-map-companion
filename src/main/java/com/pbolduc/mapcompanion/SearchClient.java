@@ -396,13 +396,7 @@ final class SearchClient
 				character.getAsBoolean() ? RouteClient.NOT_CONNECTED : LOG_IN, false, true));
 			return;
 		}
-		Request request = new Request.Builder()
-			.url(base.newBuilder().addQueryParameter("q", query).build())
-			.header("User-Agent", CompanionVersion.USER_AGENT)
-			.header("X-Companion-Code", held[1])
-			.header("X-Companion-Member", held[2])
-			.header("X-Companion-Member-Secret", held[3])
-			.get()
+		Request request = CompanionHttp.member(base.newBuilder().addQueryParameter("q", query).build(), held[1], held[2], held[3]).get()
 			.build();
 		long asked = generation;
 		scope = scopeOf(held);

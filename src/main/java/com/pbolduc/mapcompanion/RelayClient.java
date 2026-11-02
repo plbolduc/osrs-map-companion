@@ -38,12 +38,9 @@ import javax.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
 import lombok.Getter;
 import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.HttpUrl;
-import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
@@ -91,7 +88,6 @@ import okhttp3.ResponseBody;
 @Singleton
 public class RelayClient
 {
-	private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 	private static final String CODE_HEADER = "X-Companion-Code";
 
 	/**
@@ -435,11 +431,9 @@ public class RelayClient
 			return false;
 		}
 
-		Request.Builder builder = new Request.Builder()
-		.url(url)
+		Request.Builder builder = CompanionHttp.request(url)
 		.header(CODE_HEADER, code)
-		.header("User-Agent", CompanionVersion.USER_AGENT)
-		.post(RequestBody.create(JSON, gson.toJson(snapshot)));
+		.post(CompanionHttp.json(gson, snapshot));
 		if (JoinCode.isWellFormedSuffix(suffix))
 		{
 			/** Checked rather than trusted: this comes out of a settings field a player can type in. */
@@ -457,10 +451,7 @@ public class RelayClient
 		long requestGeneration = generation;
 		activePost = httpClient.newCall(request);
 
-		activePost.enqueue(new Callback()
-		{
-			@Override
-			public void onFailure(Call call, IOException e)
+		CompanionHttp.enqueue(activePost, (call, e) ->
 			{
 				synchronized (RelayClient.this)
 				{
@@ -472,10 +463,7 @@ public class RelayClient
 					recordTransient(UNREACHABLE, System.currentTimeMillis());
 					activePost = null;
 				}
-			}
-
-			@Override
-			public void onResponse(Call call, Response response)
+			}, (call, response) ->
 			{
 				try
 					(Response r = response)
@@ -504,8 +492,7 @@ public class RelayClient
 						}
 					}
 				}
-			}
-		});
+			});
 		return true;
 	}
 
@@ -877,32 +864,23 @@ public class RelayClient
 		InviteRequest payload = new InviteRequest();
 		payload.memberId = memberId;
 
-		Request.Builder builder = new Request.Builder()
-		.url(url)
+		Request.Builder builder = CompanionHttp.request(url)
 		.header(CODE_HEADER, code)
-		.header("User-Agent", CompanionVersion.USER_AGENT)
-		.post(RequestBody.create(JSON, gson.toJson(payload)));
+		.post(CompanionHttp.json(gson, payload));
 		if (JoinCode.isWellFormedSecret(memberSecret))
 		{
 			builder.header(MEMBER_SECRET_HEADER, memberSecret);
 		}
 		Request request = builder.build();
 
-		httpClient.newBuilder()
+		CompanionHttp.enqueue(httpClient.newBuilder()
 		.callTimeout(INVITE_TIMEOUT_MS, TimeUnit.MILLISECONDS)
 		.build()
-		.newCall(request)
-		.enqueue(new Callback()
-		{
-			@Override
-			public void onFailure(Call call, IOException e)
+		.newCall(request), (call, e) ->
 			{
 				log.debug("companion invite request failed", e);
 				onResult.accept(null, NO_ANSWER);
-			}
-
-			@Override
-			public void onResponse(Call call, Response response)
+			}, (call, response) ->
 			{
 				Invite invite = null;
 				int status = response.code();
@@ -924,8 +902,7 @@ public class RelayClient
 					log.debug("companion invite reply unreadable", e);
 				}
 				onResult.accept(invite, status);
-			}
-		});
+			});
 	}
 
 	/**

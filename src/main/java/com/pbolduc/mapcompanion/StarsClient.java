@@ -43,8 +43,6 @@ import okhttp3.Callback;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.MediaType;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
@@ -280,7 +278,7 @@ final class StarsClient
 	{
 		HttpUrl url = HttpUrl.parse(server + path);
 		if (url == null) throw new IllegalArgumentException("Invalid map address");
-		return new Request.Builder().url(url).header("User-Agent", CompanionVersion.USER_AGENT);
+		return CompanionHttp.request(url);
 	}
 
 	private void fetchFeed(String server)
@@ -309,7 +307,7 @@ final class StarsClient
 			StarsModel.PreferenceReply body = new StarsModel.PreferenceReply();
 			body.revision = revision;
 			body.preferences = model.preferences;
-			builder.put(RequestBody.create(MediaType.get("application/json; charset=utf-8"), gson.toJson(body)));
+			builder.put(CompanionHttp.json(gson, body));
 		}
 		else builder.get();
 		preferenceCall = http.newCall(builder.build());

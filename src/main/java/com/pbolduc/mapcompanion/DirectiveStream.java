@@ -39,7 +39,6 @@ import javax.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
 import lombok.Getter;
 import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -270,10 +269,8 @@ public class DirectiveStream
 		{
 			return;
 		}
-		Request.Builder builder = new Request.Builder()
-		.url(url)
-		.header("Accept", "text/event-stream")
-		.header("User-Agent", CompanionVersion.USER_AGENT);
+		Request.Builder builder = CompanionHttp.request(url)
+		.header("Accept", "text/event-stream");
 		if (secret != null)
 		{
 			/** Already checked in {@link #start}; a stream is not the place to re-decide it. */
@@ -290,10 +287,7 @@ public class DirectiveStream
 		Call started = streaming.newCall(request);
 		call = started;
 
-		started.enqueue(new Callback()
-		{
-			@Override
-			public void onFailure(Call c, IOException e)
+		CompanionHttp.enqueue(started, (c, e) ->
 			{
 				synchronized (DirectiveStream.this)
 				{
@@ -305,16 +299,14 @@ public class DirectiveStream
 					log.debug("companion stream unreachable", e);
 					scheduleReconnect(url, streamGeneration, secret, onDirective);
 				}
-			}
-
-			/**
+			},
+			/*
 			 * One exit, one reconnect.
 			 *
 			 * <p>A refused stream leaves posting available. Every exit schedules through the finally
 			 * block so a refusal cannot queue a second reconnect alongside the ordinary close path.
 			 */
-			@Override
-			public void onResponse(Call c, Response response)
+			(c, response) ->
 			{
 				try
 					(Response r = response)
@@ -359,8 +351,7 @@ public class DirectiveStream
 						}
 					}
 				}
-			}
-		});
+			});
 	}
 
 	/**

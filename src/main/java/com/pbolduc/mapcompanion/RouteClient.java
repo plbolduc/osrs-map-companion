@@ -33,13 +33,9 @@ import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.callback.ClientThread;
-import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.HttpUrl;
-import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
@@ -62,7 +58,6 @@ import okhttp3.Response;
 @Singleton
 final class RouteClient
 {
-	private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 	static final String PATH = "/api/companion/route";
 	/** The least time between two presses that reached the map, whatever it answered. */
 	static final long MIN_GAP_MS = 5_000L;
@@ -145,20 +140,9 @@ final class RouteClient
 		{
 			return;
 		}
-		http.newCall(request(server, code, member, secret, ticket.target, from)).enqueue(new Callback()
-		{
-			@Override
-			public void onFailure(Call failed, IOException error)
-			{
-				route.finishReroute(ticket, null, UNREACHABLE, System.currentTimeMillis() + FAILURE_GAP_MS);
-			}
-
-			@Override
-			public void onResponse(Call completed, Response response)
-			{
-				handle(ticket, response);
-			}
-		});
+		CompanionHttp.enqueue(http.newCall(request(server, code, member, secret, ticket.target, from)),
+			(failed, error) -> route.finishReroute(ticket, null, UNREACHABLE, System.currentTimeMillis() + FAILURE_GAP_MS),
+			(completed, response) -> handle(ticket, response));
 	}
 
 	/** One question, as the map's {@code POST /api/companion/route} reads it. */
@@ -167,13 +151,7 @@ final class RouteClient
 		Question question = new Question();
 		question.target = new Tile(target);
 		question.from = new Tile(from);
-		return new Request.Builder()
-			.url(server + PATH)
-			.header("User-Agent", CompanionVersion.USER_AGENT)
-			.header("X-Companion-Code", code)
-			.header("X-Companion-Member", member)
-			.header("X-Companion-Member-Secret", secret)
-			.post(RequestBody.create(JSON, gson.toJson(question)))
+		return CompanionHttp.member(server + PATH, code, member, secret).post(CompanionHttp.json(gson, question))
 			.build();
 	}
 
