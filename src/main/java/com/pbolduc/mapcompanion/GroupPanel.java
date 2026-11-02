@@ -764,7 +764,9 @@ final class GroupPanel extends JPanel
 
 	/**
 	 * "Today 7:42 PM · in 1h 20m": the day and the clock in the player's zone, as they would say it
-	 * to the group, and how long until, as the map's own meetup card counts down.
+	 * to the group, and how long until, as the map's own meetup card counts down. Past twelve hours
+	 * the day and the clock say it alone, as the meetup line under Now does: a count of days beside
+	 * the day's own name would say the day twice.
 	 */
 	static String when(long startsAtMs, long nowMs, ZoneId zone, Locale locale)
 	{
@@ -785,14 +787,14 @@ final class GroupPanel extends JPanel
 		{
 			countdown = "in " + minutes + "m";
 		}
-		else if (minutes < 24 * 60)
+		else if (minutes < 12 * 60)
 		{
 			long rest = minutes % 60;
 			countdown = "in " + (minutes / 60) + "h" + (rest == 0 ? "" : " " + rest + "m");
 		}
 		else
 		{
-			countdown = "in " + (minutes / (24 * 60)) + "d";
+			return day + " " + clock;
 		}
 		return day + " " + clock + " · " + countdown;
 	}
