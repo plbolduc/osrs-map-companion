@@ -132,7 +132,7 @@ final class GroupPanel extends JPanel
 	private final GameSprites sprites;
 
 	private final JPanel friends = MapCompanionPanel.column(ColorScheme.DARK_GRAY_COLOR);
-	private final JLabel meetupsHead = MapCompanionPanel.left(new JLabel("Meetups"));
+	private final JLabel meetupsHead = MapCompanionPanel.sectionHead("Meetups");
 	/**
 	 * Under the Meetups heading while Destinations and meetups is off. The map's meetups are taken only
 	 * with it on ({@link DestinationState#acceptSocial}), so the section is empty, and a meetup made
@@ -199,8 +199,6 @@ final class GroupPanel extends JPanel
 		setBackground(ColorScheme.DARK_GRAY_COLOR);
 		MapCompanionPanel.left(this);
 		setName("companionGroup");
-		meetupsHead.setFont(meetupsHead.getFont().deriveFont(java.awt.Font.BOLD, 11f));
-		meetupsHead.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
 		add(friends);
 		meetHere.setName("group.meetHere");
 		meetHere.setForeground(ColorScheme.BRAND_ORANGE);
@@ -249,14 +247,12 @@ final class GroupPanel extends JPanel
 		minute.setFont(minute.getFont().deriveFont(11f));
 		form.add(fill(day));
 		form.add(gap(4));
-		JPanel time = new JPanel(new GridLayout(1, 0, 4, 0));
-		time.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		JPanel time = actions();
 		time.add(hour);
 		time.add(minute);
 		form.add(fill(time));
 		form.add(gap(6));
-		JPanel buttons = new JPanel(new GridLayout(1, 0, 4, 0));
-		buttons.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		JPanel buttons = actions();
 		make.setName("group.meetMake");
 		make.setToolTipText("Make the meetup at the tile and world you are on, and copy its link");
 		make.addActionListener(e -> makeMeetup());
@@ -663,9 +659,7 @@ final class GroupPanel extends JPanel
 		{
 			/* Each says why a Route did not happen. */
 			JLabel line = line(new JLabel());
-			line.setVisible(true);
-			MapCompanionPanel.setWrapped(line, message, WIDTH);
-			MapCompanionPanel.tone(line, true);
+			refuse(line, message);
 			card.add(line);
 			if (pressed)
 			{
@@ -789,9 +783,7 @@ final class GroupPanel extends JPanel
 		{
 			/* A Route or an answer that did not happen: an answer that lands says nothing, its fill does. */
 			JLabel line = line(new JLabel());
-			line.setVisible(true);
-			MapCompanionPanel.setWrapped(line, message, WIDTH);
-			MapCompanionPanel.tone(line, true);
+			refuse(line, message);
 			card.add(line);
 			/* Each wait from its own gate: a Route's is the routes' wait, an answer's the meetups'. */
 			ticking.add(at -> MapCompanionPanel.setWrapped(line, routed ? press.words(said, at) : meetups.words(answer, at), WIDTH));
