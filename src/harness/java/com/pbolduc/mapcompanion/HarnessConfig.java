@@ -115,6 +115,31 @@ final class HarnessConfig implements MapCompanionConfig
 		return on(MapCompanionConfig.KEY_SHARE_NAME, MapCompanionConfig.super.shareName());
 	}
 
+	/* The switches RuneLite's list shows, which SharingGroups keeps in step with the fields below. */
+	@Override
+	public boolean shareMapPresence()
+	{
+		return on(MapCompanionConfig.KEY_SHARE_MAP_PRESENCE, MapCompanionConfig.super.shareMapPresence());
+	}
+
+	@Override
+	public boolean shareProgressAndTravel()
+	{
+		return on(MapCompanionConfig.KEY_SHARE_PROGRESS, MapCompanionConfig.super.shareProgressAndTravel());
+	}
+
+	@Override
+	public boolean shareTasksAndTimers()
+	{
+		return on(MapCompanionConfig.KEY_SHARE_TASKS, MapCompanionConfig.super.shareTasksAndTimers());
+	}
+
+	@Override
+	public boolean shareLootAndMilestones()
+	{
+		return on(MapCompanionConfig.KEY_SHARE_LOOT_GROUP, MapCompanionConfig.super.shareLootAndMilestones());
+	}
+
 	@Override
 	public boolean sharePosition()
 	{

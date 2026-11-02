@@ -116,6 +116,11 @@ public class SharingConsentTest
 	 * shows the Hub manifest's on Install, so a setting repeating it would ask again about a decision
 	 * already made. The warning that is kept is pinned here instead, where its removal from the
 	 * submission guide fails a build.
+	 *
+	 * <p>Chosen by key since sharing became six switches: the 23 fields under the four groups are
+	 * hidden settings with no section, still what is sent, and the four switches RuneLite's list shows
+	 * for them are settings of their own. Both kinds start off, so the count is the 28 it was and the
+	 * four switches.
 	 */
 	@Test
 	public void everyRemoteFeatureStartsOffAndTheWarningIsTheInstallsAlone() throws Exception
@@ -127,10 +132,7 @@ public class SharingConsentTest
 			ConfigItem item = method.getAnnotation(ConfigItem.class);
 			/* The meetup reminder is a RuneLite notification setting, off while its enabled flag is. */
 			if (item != null && (method.getReturnType() == boolean.class || method.getReturnType() == Notification.class)
-				&& ((item.section().equals(MapCompanionConfig.presenceSection)
-				|| item.section().equals(MapCompanionConfig.progressSection)
-				|| item.section().equals(MapCompanionConfig.tasksSection)
-				|| item.section().equals(MapCompanionConfig.lootSection))
+				&& (item.keyName().startsWith("share")
 				|| method.getName().equals("showDestination") || method.getName().equals("notifyMeetups")
 				|| method.getName().equals("showGroupOnWorldMap")))
 			{
@@ -140,7 +142,7 @@ public class SharingConsentTest
 				remoteFeatures++;
 			}
 		}
-		assertEquals(28, remoteFeatures);
+		assertEquals(32, remoteFeatures);
 
 		String guide = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get("docs", "plugin-hub-submission.md")),
 			java.nio.charset.StandardCharsets.UTF_8);

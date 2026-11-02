@@ -167,7 +167,7 @@ public class CompanionViewsTest
 			assertFalse(config.shareActivity());
 			assertFalse(config.shareName());
 			assertTrue(named(sharing, "sharingOptions.presence").isVisible());
-			assertEquals("indeterminate", ((JCheckBox) named(sharing, "shareGroup.presence")).getClientProperty("JButton.selectedState"));
+			assertEquals("indeterminate", ((JCheckBox) named(sharing, MapCompanionConfig.KEY_SHARE_MAP_PRESENCE)).getClientProperty("JButton.selectedState"));
 			assertNull(store.get(Pairing.KEY_SERVER_CONSENT));
 		});
 	}

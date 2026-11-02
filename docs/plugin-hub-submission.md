@@ -72,6 +72,15 @@ that approved its map and only while every choice it offers is still off, so an 
 existing player's settings and opens no stream for them. `RecommendedSharing` is the step;
 `RecommendedSharingTest` holds it to these sentences.
 
+**Sharing as six switches.** RuneLite's list shows sharing as the sidebar does: *Character name*,
+*Name to show instead*, a switch for each of the four groups, and *Where you died*. The 23 per-field
+settings under the groups keep their keys and stay what `SnapshotBuilder` reads; they are `hidden`
+from the list. `SharingGroups` writes a group's fields when its switch is pressed and moves the switch
+when they are written, so a switch shows on only while every field in it is. Every switch starts off.
+The first start after the update writes each switch from the fields already chosen and never a field,
+so no existing player's sharing changes, a group they chose part of included; `SharingGroupsTest`
+holds that with the snapshot itself.
+
 Server approval and credentials are scoped to the chosen address; changing it pauses requests
 until Connect. No pairing code or no approved server means no network requests. Joining with
 sharing off still sends a random member id, alias, timestamp and connection credentials.
@@ -245,6 +254,9 @@ Say these in the description of the next Hub update, as changes from what was ap
 - **One press at Connect** (above): the recommended set is offered after the first Connect and
   shared only on the player's press, which names every field and the receive stream it opens. No
   config default changed.
+- **Sharing as six switches** (above): RuneLite's list shows a switch per sharing group over the
+  same per-field settings, now hidden. A switch writes its fields and nothing else, an update keeps
+  every choice, and nothing sent changes.
 - The routes, Search, Route buttons, friends and meetups listed under *Network requests*, each a
   press of the player's own.
 - **Connect without the website**: Connect makes a group, Join takes a friend's pasted invite, Open

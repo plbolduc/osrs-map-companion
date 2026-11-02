@@ -295,6 +295,12 @@ public class RewardDeliveryRaceTest
 						return true;
 					case "sharePets":
 						return pets.get();
+					/*
+					 * The loot group's switch in RuneLite's list, which the plugin reads to keep it in step
+					 * with a field written (SharingGroups). This group is not whole, so it reads off.
+					 */
+					case "shareLootAndMilestones":
+						return false;
 					default:
 						throw new AssertionError("Unexpected setting access: " + method);
 				}

@@ -59,8 +59,12 @@ public class SharingControlsTest
 			for (Method method : MapCompanionConfig.class.getDeclaredMethods())
 			{
 				ConfigItem item = method.getAnnotation(ConfigItem.class);
-				/* The meetup reminder is a RuneLite notification setting with a box of its own here. */
-				if (item != null && !item.hidden() && (method.getReturnType() == boolean.class || method.getReturnType() == Notification.class))
+				/*
+				 * Every box RuneLite's list shows, the meetup reminder's notification setting among them,
+				 * and the fields under the four groups, which the list hides and Settings still draws.
+				 */
+				if (item != null && (!item.hidden() || item.keyName().startsWith("share"))
+					&& (method.getReturnType() == boolean.class || method.getReturnType() == Notification.class))
 				{
 					expected.add(item.keyName());
 				}
@@ -68,12 +72,14 @@ public class SharingControlsTest
 			assertEquals(expected, actual);
 			/*
 			 * 28 data and client choices; Route here on the world map, which asks the map only on a press
-			 * of its own, as every Route does; and the five that only draw on this client: Drop luck's
+			 * of its own, as every Route does; the five that only draw on this client: Drop luck's
 			 * chat line, the destination's hint arrow, the followed step's box over the game, a farm
 			 * run's teleports outlined in the bank, and a followed route's walks handed to Shortest
-			 * Path, which is a plugin message inside the client rather than anything sent.
+			 * Path, which is a plugin message inside the client rather than anything sent; and the four
+			 * groups' boxes, named after the switches RuneLite's list stores for them, so the sidebar is
+			 * held to those too.
 			 */
-			assertEquals(34, actual.size());
+			assertEquals(38, actual.size());
 			for (String key : actual)
 			{
 				if (key.startsWith("share")) assertFalse("every data choice starts off: " + key, defaultOf(key));
@@ -112,7 +118,7 @@ public class SharingControlsTest
 			followStoredSettings(store, config);
 			Pairing pairing = new Pairing(store, new Gson());
 			SharingControls controls = new SharingControls(config, store);
-			JCheckBox master = find(controls, "shareGroup.presence");
+			JCheckBox master = find(controls, MapCompanionConfig.KEY_SHARE_MAP_PRESENCE);
 			master.doClick();
 			assertTrue(config.sharePosition());
 			assertTrue(config.shareActivity());
@@ -136,18 +142,24 @@ public class SharingControlsTest
 			assertFalse(config.sharePosition());
 			assertFalse(config.shareActivity());
 			assertFalse(config.shareAccountType());
-			assertNull(store.get("shareGroup.presence"));
+			assertNull("the box writes fields; the switch RuneLite's list shows follows them in the plugin",
+				store.get(MapCompanionConfig.KEY_SHARE_MAP_PRESENCE));
 			assertNull(store.get(Pairing.KEY_SERVER_CONSENT));
 		});
 	}
 
+	/**
+	 * Each group's box writes exactly its own fields. Every setting is checked, the hidden fields
+	 * included, since the fields are what is sent; the group's own switch is the plugin's to write from
+	 * those fields, never the box's.
+	 */
 	@Test
 	public void everyOtherGroupWritesOnlyItsKnownIndividualOptIns() throws Exception
 	{
 		String[][] groupKeys = {
-			{"progress", "shareSkills", "shareQuests", "shareQuestLog", "shareDiaries", "sharePermanentTravel", "shareCapabilities", "shareStash", "shareBoats"},
-			{"tasks", "shareSlayer", "shareClue", "shareFarming", "shareBirdhouses", "shareHunterRumours", "shareMahoganyHomes", "shareFarmingContracts", "sharePortTasks"},
-			{"loot", "shareLoot", "shareMilestones", "sharePets", "shareCollectionLog"}
+			{MapCompanionConfig.KEY_SHARE_PROGRESS, "shareSkills", "shareQuests", "shareQuestLog", "shareDiaries", "sharePermanentTravel", "shareCapabilities", "shareStash", "shareBoats"},
+			{MapCompanionConfig.KEY_SHARE_TASKS, "shareSlayer", "shareClue", "shareFarming", "shareBirdhouses", "shareHunterRumours", "shareMahoganyHomes", "shareFarmingContracts", "sharePortTasks"},
+			{MapCompanionConfig.KEY_SHARE_LOOT_GROUP, "shareLoot", "shareMilestones", "sharePets", "shareCollectionLog"}
 		};
 		for (String[] group : groupKeys)
 		{
@@ -157,18 +169,22 @@ public class SharingControlsTest
 				HarnessConfig config = new HarnessConfig(store, MapCompanionConfig.DEFAULT_MAP_URL);
 				followStoredSettings(store, config);
 				SharingControls controls = new SharingControls(config, store);
-				find(controls, "shareGroup." + group[0]).doClick();
-				Set<String> selected = new HashSet<>(java.util.Arrays.asList(group));
+				find(controls, group[0]).doClick();
+				Set<String> selected = new HashSet<>(java.util.Arrays.asList(group).subList(1, group.length));
 				for (Method method : MapCompanionConfig.class.getDeclaredMethods())
 				{
 					ConfigItem item = method.getAnnotation(ConfigItem.class);
-					// Hidden Slayer list preferences are owned by the task card, not sharing controls; the meetup
-					// reminder is a notification setting with a box like any other.
-					if (item == null || item.hidden() || (method.getReturnType() != boolean.class && method.getReturnType() != Notification.class)) continue;
-					assertEquals(item.keyName(), selected.contains(item.keyName()) || defaultOf(item.keyName()), find(controls, item.keyName()).isSelected());
+					// The meetup reminder is a notification setting with a box like any other.
+					if (item == null || (method.getReturnType() != boolean.class && method.getReturnType() != Notification.class)) continue;
 					assertEquals(item.keyName(), selected.contains(item.keyName()) ? "true" : null, store.get(item.keyName()));
+					/* Hidden Slayer list preferences are owned by the task card and have no box here. */
+					JCheckBox shown = find(controls, item.keyName());
+					if (shown != null)
+					{
+						assertEquals(item.keyName(), selected.contains(item.keyName()) || item.keyName().equals(group[0])
+							|| defaultOf(item.keyName()), shown.isSelected());
+					}
 				}
-				assertNull(store.get("shareGroup." + group[0]));
 				assertNull(store.get(Pairing.KEY_SERVER_CONSENT));
 			});
 		}
@@ -185,12 +201,12 @@ public class SharingControlsTest
 			config.set("sharePosition", true);
 			controls.refresh();
 			assertTrue(find(controls, "sharePosition").isSelected());
-			assertEquals("indeterminate", find(controls, "shareGroup.presence").getClientProperty("JButton.selectedState"));
+			assertEquals("indeterminate", find(controls, MapCompanionConfig.KEY_SHARE_MAP_PRESENCE).getClientProperty("JButton.selectedState"));
 			assertFalse(find(controls, "shareName").isSelected());
 			config.set("sharePosition", false);
 			controls.refresh();
 			assertFalse(find(controls, "sharePosition").isSelected());
-			assertNull(find(controls, "shareGroup.presence").getClientProperty("JButton.selectedState"));
+			assertNull(find(controls, MapCompanionConfig.KEY_SHARE_MAP_PRESENCE).getClientProperty("JButton.selectedState"));
 			assertNull(store.get("sharePosition"));
 		});
 	}
@@ -222,7 +238,13 @@ public class SharingControlsTest
 		});
 	}
 
-	/** Replaces per-checkbox modal assertions: a choice must never bypass the Connect disclosure. */
+	/**
+	 * Replaces per-checkbox modal assertions: a choice must never bypass the Connect disclosure.
+	 *
+	 * <p>Every box the sidebar draws, by the setting it is named after: a group's box writes its
+	 * fields, which are what it stands for, and any other box its own setting. Each box flips from
+	 * whatever it shows when pressed, since a group's press moves the boxes of its fields too.
+	 */
 	@Test
 	public void everySidebarChoiceSavesWithoutADialogButCannotApproveTheServer() throws Exception
 	{
@@ -234,21 +256,40 @@ public class SharingControlsTest
 			Pairing pairing = new Pairing(store, new Gson());
 			pairing.join(JoinCode.parse("ABC234-K7PQ2M3X"));
 			SharingControls controls = new SharingControls(config, store);
+			int pressed = 0;
 			for (Method method : MapCompanionConfig.class.getDeclaredMethods())
 			{
 				ConfigItem item = method.getAnnotation(ConfigItem.class);
-				// Hidden Slayer list preferences are owned by the task card, not sharing controls; the meetup
-				// reminder is a notification setting with a box like any other.
-				if (item == null || item.hidden() || (method.getReturnType() != boolean.class && method.getReturnType() != Notification.class)) continue;
+				// The meetup reminder is a notification setting with a box like any other.
+				if (item == null || (method.getReturnType() != boolean.class && method.getReturnType() != Notification.class)) continue;
 				JCheckBox box = find(controls, item.keyName());
-				assertNotNull(box);
-				boolean flipped = !defaultOf(item.keyName());
+				/* Hidden Slayer list preferences are owned by the task card, not sharing controls. */
+				assertEquals(item.keyName(), !item.hidden() || item.keyName().startsWith("share"), box != null);
+				if (box == null) continue;
+				boolean flipped = !box.isSelected();
 				box.doClick();
 				controls.refresh();
+				pressed++;
 				assertEquals(item.keyName(), flipped, box.isSelected());
-				assertEquals(Boolean.toString(flipped), store.get(item.keyName()));
+				SharingFields.Section group = null;
+				for (SharingFields.Section section : SharingFields.GROUPS)
+				{
+					if (section.key.equals(item.keyName())) group = section;
+				}
+				if (group == null)
+				{
+					assertEquals(Boolean.toString(flipped), store.get(item.keyName()));
+				}
+				else
+				{
+					for (SharingFields.Field field : group.fields)
+					{
+						assertEquals(field.key, flipped, field.read.test(config));
+					}
+				}
 				assertFalse("choosing data is not permission to connect", pairing.hasServerConsent());
 			}
+			assertEquals(38, pressed);
 			assertNull(store.get(Pairing.KEY_SERVER_CONSENT));
 		});
 	}
@@ -373,7 +414,7 @@ public class SharingControlsTest
 			if (child instanceof JCheckBox)
 			{
 				String key = child.getName();
-				if (!key.startsWith("shareGroup.")) assertTrue("one checkbox per setting", keys.add(key));
+				assertTrue("one checkbox per setting", keys.add(key));
 				assertEquals(key, isConfigKey(key) && defaultOf(key), ((JCheckBox) child).isSelected());
 			}
 			else if (child instanceof Container) collect((Container) child, keys);

@@ -113,7 +113,7 @@ final class SharingControls extends JPanel
 				dependencies.setAlignmentX(Component.LEFT_ALIGNMENT);
 				contents.add(dependencies);
 			}
-			addGroup(section.id, section.title, contents);
+			addGroup(section, contents);
 		}
 		add(fold("Name and death location", privacy));
 
@@ -172,14 +172,14 @@ final class SharingControls extends JPanel
 	}
 
 	/** A group is a shortcut over today's known fields, never a persisted permission of its own. */
-	private void addGroup(String id, String title, JPanel contents)
+	private void addGroup(SharingFields.Section section, JPanel contents)
 	{
 		List<Choice> members = new ArrayList<>();
 		for (Choice choice : choices)
 		{
 			if (choice.box.getParent() == contents) members.add(choice);
 		}
-		Group group = new Group(id, title, contents, members);
+		Group group = new Group(section, contents, members);
 		groups.add(group);
 		add(group.panel);
 	}
@@ -251,13 +251,15 @@ final class SharingControls extends JPanel
 		final JLabel count = new JLabel();
 		final List<Choice> members;
 
-		Group(String id, String title, JPanel contents, List<Choice> members)
+		Group(SharingFields.Section section, JPanel contents, List<Choice> members)
 		{
+			String id = section.id;
+			String title = section.title;
 			this.members = members;
 			panel.setName("sharingGroup." + id);
 			panel.setBorder(BorderFactory.createEmptyBorder(5, 0, 7, 0));
 			master = new JCheckBox(title);
-			master.setName("shareGroup." + id);
+			master.setName(section.key);
 			master.setBackground(ColorScheme.DARK_GRAY_COLOR);
 			master.setFont(master.getFont().deriveFont(Font.BOLD, 12f));
 			master.setAlignmentX(Component.LEFT_ALIGNMENT);
