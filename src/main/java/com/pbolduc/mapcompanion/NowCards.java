@@ -87,7 +87,7 @@ final class NowCards extends JPanel
 	private final Runnable refresh;
 	private final Supplier<String> mapUrl;
 
-	private final JLabel destinationName = new JLabel();
+	private final JLabel destinationName = sized(12f);
 	/**
 	 * What the destination leads to, drawn by the row that asked for it: the clue's scroll, the
 	 * search row's sprite or icon, the friend's disc. A slot of fixed size beside the name, so the
@@ -96,18 +96,23 @@ final class NowCards extends JPanel
 	private final JLabel destinationPicture = new JLabel();
 	@Nullable
 	private RoutePress.Picture shownPicture;
-	private final JLabel destinationDetail = new JLabel();
+	private final JLabel destinationDetail = detail();
 	private final JPanel destinationActions = row(ColorScheme.DARKER_GRAY_COLOR);
 	private List<JButton> shownDestinationActions = new ArrayList<>();
-	private final JLabel eventWhen = new JLabel();
-	private final JLabel eventTitle = new JLabel();
-	private final JLabel deathLabel = new JLabel();
+	private final JLabel eventWhen = sized(12f);
+	private final JLabel eventTitle = detail();
+	/*
+	 * The death in the same ink and size as the destination and the meetup above it, with its own
+	 * action, rather than a line of 11px red. Red here says "error", and nothing has gone wrong
+	 * with the plugin; the map's panel keeps red for refusals and prints this line plainly too.
+	 */
+	private final JLabel deathLabel = sized(12f);
 	/**
 	 * The gravestone's time left, by the game's own timer ({@link DeathWatcher#gravestone}), with a
 	 * bar full at the first reading and draining, as RuneLite's Time Tracking draws one. In the card's
 	 * own ink and the bar's in-progress orange, never red: nothing has gone wrong with the plugin.
 	 */
-	private final JLabel graveLabel = new JLabel();
+	private final JLabel graveLabel = detail();
 	private final ThinProgressBar graveBar = new ThinProgressBar();
 	private final JPanel grave = MapCompanionPanel.column(ColorScheme.DARKER_GRAY_COLOR);
 	/**
@@ -132,8 +137,8 @@ final class NowCards extends JPanel
 	 * step — a coordinate's dig spot, a map's picture, or words. RuneLite's clue plugin draws the tile
 	 * and the arrow already; what this adds is which teleport.
 	 */
-	private final JLabel clueTitle = new JLabel();
-	private final JLabel clueDetail = new JLabel();
+	private final JLabel clueTitle = sized(12f);
+	private final JLabel clueDetail = detail();
 	private final JButton clueRouteButton = smallButton("Route");
 	private final JLabel clueSaid = new JLabel();
 	private final JComponent clueSlot;
@@ -218,8 +223,6 @@ final class NowCards extends JPanel
 		 */
 		add(sectionHead("Now"));
 		add(gap(3, ColorScheme.DARK_GRAY_COLOR));
-		JPanel destination = card();
-		destinationName.setFont(destinationName.getFont().deriveFont(12f));
 		destinationPicture.setName("now.destination.picture");
 		destinationPicture.setHorizontalAlignment(SwingConstants.CENTER);
 		destinationPicture.setVerticalAlignment(SwingConstants.TOP);
@@ -227,66 +230,22 @@ final class NowCards extends JPanel
 		destinationPicture.setPreferredSize(square);
 		destinationPicture.setMinimumSize(square);
 		destinationPicture.setVisible(false);
-		destination.add(left(MapCompanionPanel.bar(DESTINATION_PICTURE_GAP, ColorScheme.DARKER_GRAY_COLOR, destinationPicture,
-			destinationName, null)));
-		destinationDetail.setFont(destinationDetail.getFont().deriveFont(11f));
-		destinationDetail.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
-		destination.add(left(destinationDetail));
-		destination.add(routeSteps);
-		destination.add(gap(5, ColorScheme.DARKER_GRAY_COLOR));
-		destination.add(left(destinationActions));
-		destination.add(left(said(destinationSaid)));
-		destinationSlot = slot(destination);
-		add(destinationSlot);
-		JPanel meetup = card();
-		eventWhen.setFont(eventWhen.getFont().deriveFont(12f));
-		meetup.add(left(eventWhen));
-		eventTitle.setFont(eventTitle.getFont().deriveFont(11f));
-		eventTitle.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
-		meetup.add(left(eventTitle));
-		meetup.add(gap(5, ColorScheme.DARKER_GRAY_COLOR));
+		destinationSlot = nowCard(destinationActions, destinationSaid, MapCompanionPanel.bar(DESTINATION_PICTURE_GAP,
+			ColorScheme.DARKER_GRAY_COLOR, destinationPicture, destinationName, null), destinationDetail, routeSteps);
 		JPanel eventActions = row(ColorScheme.DARKER_GRAY_COLOR);
 		eventActions.add(eventRouteButton);
-		meetup.add(left(eventActions));
-		meetup.add(left(said(eventSaid)));
-		eventSlot = slot(meetup);
-		add(eventSlot);
-		/*
-		 * The death in the same ink and size as the destination and the meetup above it, with its own
-		 * action, rather than a line of 11px red. Red here says "error", and nothing has gone wrong
-		 * with the plugin; the map's panel keeps red for refusals and prints this line plainly too.
-		 */
-		JPanel death = card();
-		deathLabel.setFont(deathLabel.getFont().deriveFont(12f));
-		death.add(left(deathLabel));
+		eventSlot = nowCard(eventActions, eventSaid, eventWhen, eventTitle);
 		graveLabel.setName("now.death.grave");
-		graveLabel.setFont(graveLabel.getFont().deriveFont(11f));
-		graveLabel.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
 		grave.add(left(graveLabel));
 		grave.add(gap(3, ColorScheme.DARKER_GRAY_COLOR));
 		graveBar.setForeground(ColorScheme.PROGRESS_INPROGRESS_COLOR);
 		grave.add(left(graveBar));
 		grave.setVisible(false);
-		death.add(left(grave));
-		death.add(gap(5, ColorScheme.DARKER_GRAY_COLOR));
 		/* The card's width, as Dismiss is in the card above: the same shape for "act on this card". */
 		deathActions.add(deathMapButton);
-		death.add(left(deathActions));
-		death.add(left(said(deathSaid)));
-		deathSlot = slot(death);
-		add(deathSlot);
-		JPanel clue = card();
-		clueTitle.setFont(clueTitle.getFont().deriveFont(12f));
-		clue.add(left(clueTitle));
-		clueDetail.setFont(clueDetail.getFont().deriveFont(11f));
-		clueDetail.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
-		clue.add(left(clueDetail));
-		clue.add(gap(5, ColorScheme.DARKER_GRAY_COLOR));
+		deathSlot = nowCard(deathActions, deathSaid, deathLabel, grave);
 		clueActions.add(clueRouteButton);
-		clue.add(left(clueActions));
-		clue.add(left(said(clueSaid)));
-		clueSlot = slot(clue);
-		add(clueSlot);
+		clueSlot = nowCard(clueActions, clueSaid, clueTitle, clueDetail);
 		add(gap(7, ColorScheme.DARK_GRAY_COLOR));
 
 		deathMapButton.addActionListener(e -> showDeathOnMap());
@@ -411,6 +370,41 @@ final class NowCards extends JPanel
 			setWrapped(line, routePress.words(said, now), CARD_TEXT_WIDTH);
 			MapCompanionPanel.tone(line, said.refused());
 		}
+	}
+
+	/**
+	 * One card of Now, in its slot at the foot of the column: what it is about, a gap, its buttons and the
+	 * line a press is answered in. Each part is pinned to the card's left edge, as every row here is.
+	 */
+	private JComponent nowCard(JPanel actions, JLabel said, JComponent... above)
+	{
+		JPanel card = card();
+		for (JComponent part : above)
+		{
+			card.add(left(part));
+		}
+		card.add(gap(5, ColorScheme.DARKER_GRAY_COLOR));
+		card.add(left(actions));
+		card.add(left(said(said)));
+		JComponent slot = slot(card);
+		add(slot);
+		return slot;
+	}
+
+	/** A label in one size and the look and feel's own ink: a card's first line. */
+	private static JLabel sized(float size)
+	{
+		JLabel label = new JLabel();
+		label.setFont(label.getFont().deriveFont(size));
+		return label;
+	}
+
+	/** The line under a card's first, small and grey. */
+	private static JLabel detail()
+	{
+		JLabel label = sized(11f);
+		label.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+		return label;
 	}
 
 	/** The line a press's refusal is said in, under the buttons it came from, in the refusal pink. */
