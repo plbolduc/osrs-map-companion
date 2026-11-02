@@ -216,6 +216,9 @@ public class MeetupClientTest
 		client.create("Vorkath", System.currentTimeMillis() + 3_600_000L);
 		assertTrue(sent.isEmpty());
 		assertEquals(MeetupClient.NEEDS_TILE, client.said("meet").message);
+		/* The cause and the one step that fixes it, where the line used to give the cause alone. */
+		assertEquals("You can't make a meetup inside an instance. Step outside, then press Make meetup.",
+			client.said("meet").message);
 	}
 
 	/** Logged in at Lumbridge on W302, in or out of an instance. */

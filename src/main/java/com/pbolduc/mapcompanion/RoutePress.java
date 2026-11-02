@@ -26,6 +26,8 @@
 package com.pbolduc.mapcompanion;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
@@ -78,6 +80,8 @@ final class RoutePress
 	private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 	static final String ONE_AT_A_TIME = "The map is still planning the last route.";
 	private static final int MAX_NAME = 120;
+	/** The longest refusal the map's words may make, as a farm run's are cut. */
+	private static final int MAX_REFUSAL = 240;
 	/** The game's tile space, as {@link RouteWire} bounds a step's tile. */
 	private static final int MAX_COORDINATE = 16_383;
 
@@ -332,7 +336,7 @@ final class RoutePress
 			}
 			if (!close.isSuccessful())
 			{
-				String why = status == 404 ? RouteClient.NOT_FOUND
+				String why = status == 404 ? notFound(close)
 					: status == 403 || status == 410 ? RouteClient.NEEDS_CONNECTION : RouteClient.FAILED;
 				finish(asked, target, why,
 					now + Math.max(status == 404 ? RouteClient.MIN_GAP_MS : RouteClient.FAILURE_GAP_MS, waitMs));
@@ -368,6 +372,34 @@ final class RoutePress
 		{
 			finish(asked, target, RouteClient.UNREADABLE, System.currentTimeMillis() + RouteClient.FAILURE_GAP_MS);
 		}
+	}
+
+	/**
+	 * Why the map has no way there, in its own words when its 404 gives them: a clue step whose words
+	 * it does not know and one that names no single place are different answers, and the map says
+	 * which. Its sentence is cleaned as anything the map sends is, and a 404 without one, from an
+	 * older map, keeps the plugin's own.
+	 */
+	private String notFound(Response response)
+	{
+		try
+		{
+			JsonObject refusal = gson.fromJson(CompanionHttp.readBounded(response.body(), CompanionHttp.MAX_REPLY_BYTES), JsonObject.class);
+			JsonElement error = refusal == null ? null : refusal.get("error");
+			if (error != null && error.isJsonPrimitive() && error.getAsJsonPrimitive().isString())
+			{
+				String words = RouteWire.text(MapPin.plain(error.getAsString()), MAX_REFUSAL);
+				if (words != null)
+				{
+					return words;
+				}
+			}
+		}
+		catch (IOException | RuntimeException unreadable)
+		{
+			/* The status alone still says what happened. */
+		}
+		return RouteClient.NOT_FOUND;
 	}
 
 	private void finish(long asked, Target target, String why, long nextAllowedMs)

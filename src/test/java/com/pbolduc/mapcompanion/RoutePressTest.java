@@ -312,7 +312,15 @@ public class RoutePressTest
 	{
 		connect();
 		Object[][] cases = {
+			/* An older map's 404 says no more than its status, so the plugin's own sentence stands. */
 			{404, "{\"reason\":\"not_found\"}", RouteClient.NOT_FOUND},
+			{404, "not json at all", RouteClient.NOT_FOUND},
+			/* A map that says why is quoted: a clue whose words it does not know is not one with no place. */
+			{404, "{\"reason\":\"no_tile\",\"error\":\"The map does not know this step's words, so it has no place to plan a "
+				+ "route to.\"}", "The map does not know this step's words, so it has no place to plan a route to."},
+			/* Its words were typed by somebody, so they are cleaned as everything else it sends is. */
+			{404, "{\"reason\":\"no_tile\",\"error\":\"<col=ff0000>No single\\u0007 place</col>\"}", "No single place"},
+			{404, "{\"reason\":\"no_tile\",\"error\":\"   \"}", RouteClient.NOT_FOUND},
 			{403, "{\"reason\":\"needs_code\"}", RouteClient.NEEDS_CONNECTION},
 			{500, "oops", RouteClient.FAILED},
 			{200, "{\"options\":[]}", RouteClient.NO_WAY},

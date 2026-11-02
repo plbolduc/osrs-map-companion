@@ -78,7 +78,8 @@ final class MeetupClient
 	private static final Pattern PATH = Pattern.compile("/[A-Za-z0-9/?=&%._~+\\-]{0,2000}");
 
 	static final String NEEDS_CONNECTION = "Connect to your map to answer or make a meetup.";
-	static final String NEEDS_TILE = "Meet here needs a place on the map, and inside an instance the game does not give one.";
+	/** The cause and the one step that fixes it: a meetup is made on the tile you stand on, which an instance does not give. */
+	static final String NEEDS_TILE = "You can't make a meetup inside an instance. Step outside, then press Make meetup.";
 	static final String BUSY = "The map asked to wait. Try again in a few seconds.";
 	static final String ONE_AT_A_TIME = "The last answer is still on its way.";
 	static final String GONE = "That meetup isn't in this group any more.";
