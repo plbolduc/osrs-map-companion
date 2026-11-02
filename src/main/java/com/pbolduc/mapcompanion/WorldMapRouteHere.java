@@ -67,6 +67,7 @@ class WorldMapRouteHere
 	static final String OPTION = "Route here";
 	/** The press's source, which {@link RoutePress#said} answers by. */
 	static final String SOURCE = "worldmap";
+	/** The route's name when the map's answer names no landmark near the spot. */
 	static final String NAME = "Picked on the world map";
 
 	private final Client client;

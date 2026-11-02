@@ -376,8 +376,9 @@ final class RoutePress
 
 	/**
 	 * The destination the answer makes: where the map planned to, under the name the press knew it
-	 * by — or the map's, for a place it resolved, since an item's route goes to whatever drops it.
-	 * Null when neither the answer nor the press names a tile on the map.
+	 * by — or the map's, for a place it resolved, since an item's route goes to whatever drops it,
+	 * and for a spot picked on the world map, which the press had no name for. Null when neither the
+	 * answer nor the press names a tile on the map.
 	 */
 	@Nullable
 	static RelayResponse.Destination destination(Target target, @Nullable AnswerTarget planned, RelayResponse.Route ways)
@@ -403,6 +404,15 @@ final class RoutePress
 		String resolved = planned == null ? null : RouteWire.text(planned.name, MAX_NAME);
 		/* The map names what it resolved: an item's drop, or the place a clue's words lead to. */
 		destination.name = (target.id != null || target.clue != null) && resolved != null ? resolved : RouteWire.text(target.name, MAX_NAME);
+		if (resolved != null && WorldMapRouteHere.SOURCE.equals(target.source))
+		{
+			/*
+			 * A spot picked on the world map takes the landmark words the map's roster gives a friend's
+			 * spot, "near Lumbridge Castle", capitalised to head the card. A map that names none leaves
+			 * the press's own words.
+			 */
+			destination.name = Character.toUpperCase(resolved.charAt(0)) + resolved.substring(1);
+		}
 		destination.world = target.world;
 		destination.note = RouteWire.text(target.note, MAX_NAME);
 		destination.route = ways;

@@ -184,6 +184,33 @@ public class RoutePressTest
 	}
 
 	/**
+	 * A spot picked on the world map has no name of its own, so the card takes the landmark the map
+	 * names near it, capitalised to head the card, and keeps the press's own words from a map that
+	 * names none. Any other tile keeps the name it was pressed under.
+	 */
+	@Test
+	public void aSpotPickedOnTheWorldMapIsNamedByTheLandmarkNearIt() throws Exception
+	{
+		connect();
+		RoutePress press = press(200, ANSWER.replace("\"name\":\"Abyssal demon\"", "\"name\":\"near Lumbridge Castle\""), null);
+		RoutePress.Target spot = RoutePress.Target.tile(WorldMapRouteHere.SOURCE, new WorldPoint(3408, 3573, 2),
+			WorldMapRouteHere.NAME, null, null);
+		press.press(spot);
+		settle(press, WorldMapRouteHere.SOURCE);
+		assertEquals("{\"x\":3408,\"y\":3573,\"plane\":2}", body(sent.get(0)).get("target").toString());
+		assertEquals("Near Lumbridge Castle", destinations.getDestination().name);
+
+		RoutePress.AnswerTarget planned = new RoutePress.AnswerTarget();
+		planned.x = 3408;
+		planned.y = 3573;
+		assertEquals("a map that names no landmark", WorldMapRouteHere.NAME,
+			RoutePress.destination(spot, planned, new RelayResponse.Route()).name);
+		planned.name = "near Rimmington";
+		assertEquals("Rimmington mine", RoutePress.destination(RoutePress.Target.tile("star", new WorldPoint(3408, 3573, 2),
+			"Rimmington mine", 302, null), planned, new RelayResponse.Route()).name);
+	}
+
+	/**
 	 * A clue step that is words goes as the clue, read by the map's own clue table, and the card
 	 * takes the place the map names rather than the scroll's tier.
 	 */
