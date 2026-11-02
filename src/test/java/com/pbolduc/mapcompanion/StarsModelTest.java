@@ -94,6 +94,18 @@ public class StarsModelTest
 		model.feed.rows.get(0).calledTier = 4; model.accept(model.feed); assertEquals(chosen, model.selected);
 		model.feed.rows.remove(0); model.accept(model.feed); assertNotEquals(chosen, model.selected);
 	}
+	/** "Selected world" names a star the player chose: none until a press, and none once it has gone. */
+	@Test
+	public void nothingIsPickedForThePlayerAndALostPickIsNotMovedToAnotherStar()
+	{
+		StarsModel model = fixture();
+		assertNull("a feed arriving picks nothing", model.selected);
+		String chosen = "330|rimmington mine";
+		model.selected = chosen;
+		model.feed.rows.removeIf(star -> star.id.equals(chosen));
+		model.accept(model.feed);
+		assertNull("the star gone, the pick goes with it", model.selected);
+	}
 	@Test public void nativeLabelsCannotInterpretNamesAsRemoteImages()
 	{
 		assertEquals("&lt;html&gt;&lt;img src=&quot;http://example&quot;&gt;&amp;", StarsPanel.escape("<html><img src=\"http://example\">&"));

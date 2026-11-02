@@ -28,6 +28,10 @@ package com.pbolduc.mapcompanion;
 import com.google.gson.Gson;
 import java.awt.Component;
 import java.awt.Container;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import javax.swing.AbstractButton;
+import javax.swing.JComboBox;
 import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
 import net.runelite.client.callback.ClientThread;
@@ -35,6 +39,7 @@ import okhttp3.OkHttpClient;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
@@ -85,6 +90,48 @@ public class StarsPanelTest
 		});
 		assertEquals(Integer.valueOf(net.runelite.api.gameval.SpriteID.WorldswitcherStars.MEMBERS), asked.get("P2P"));
 		assertEquals(Integer.valueOf(net.runelite.api.gameval.SpriteID.WorldswitcherStars.FREE), asked.get("F2P"));
+	}
+
+	/**
+	 * What heads the tab is what Pin destination and Route act on, so it is a world the player picked,
+	 * never one picked for them, and never one their own filters have just hidden from the list.
+	 */
+	@Test
+	public void theTopIsAWorldThePlayerPickedAndTheirFiltersShow() throws Exception
+	{
+		SwingUtilities.invokeAndWait(() ->
+		{
+			HarnessStore store = new HarnessStore();
+			Pairing pairing = new Pairing(store, new Gson());
+			MemberIdentity identity = new MemberIdentity(store);
+			StarsClient service = new StarsClient(new OkHttpClient(), new Gson(), null, new ClientThread(),
+				new HarnessConfig(store, MapCompanionConfig.DEFAULT_MAP_URL), pairing, identity, store);
+			DestinationState destinations = new DestinationState(new Gson());
+			RoutePress press = new RoutePress(new OkHttpClient(), new Gson(), null, new ClientThread(), pairing, identity,
+				new DestinationRoute(), destinations, new TestDestinationMarker());
+			StarsPanel stars = new StarsPanel(service, destinations, new ClientThread(), new TestDestinationMarker(), press,
+				() -> MapCompanionConfig.DEFAULT_MAP_URL);
+			service.model.accept(feed());
+			service.model.miningLevel = 72;
+			stars.refresh();
+			assertNull("a list arriving picks nothing", named(stars, "stars.pin"));
+
+			((AbstractButton) named(stars, "stars.site.tile:2974,3241")).doClick();
+			assertNotNull("a press picks", named(stars, "stars.pin"));
+
+			JComboBox<?> tier = (JComboBox<?>) named(stars, "stars.tier");
+			tier.setSelectedIndex(8);
+			assertNull("T9+ hides the T7 picked, so it is not offered", named(stars, "stars.pin"));
+			assertEquals("but it is still the pick", "302|rimmington mine", service.model.selected);
+			tier.setSelectedIndex(0);
+			assertNotNull("and shows again when the filter lets it", named(stars, "stars.pin"));
+		});
+	}
+
+	private static StarsModel.Feed feed()
+	{
+		return new Gson().fromJson(new InputStreamReader(StarsPanelTest.class.getResourceAsStream("/companion-stars.sample.json"),
+			StandardCharsets.UTF_8), StarsModel.Feed.class);
 	}
 
 	/** Visible, and every ancestor up to the panel visible too. */
