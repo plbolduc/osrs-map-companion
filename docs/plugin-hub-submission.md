@@ -269,6 +269,13 @@ Say these in the description of the next Hub update, as changes from what was ap
 ## Before submission
 
 - [ ] Review and commit the final source; match `build.gradle` and `CompanionVersion.VERSION`.
+- [ ] Write `UpdateNotice.LINE`, the one chat line a player hears on the first login after updating,
+      for what this release changed, and move `CompanionVersion.LINE_VERSION` with `VERSION`;
+      `UpdateNoticeTest` fails until they match.
+- [ ] Read the plugin's description and tags as a player searching the Hub would: `description=` and
+      `tags=` in `runelite-plugin.properties`, and the same two on `MapCompanionPlugin`'s
+      `@PluginDescriptor`, which RuneLite's plugin list shows. They must agree and still say what the
+      plugin does.
 - [ ] Run `./gradlew clean build -PruneLiteVersion=1.13.4` from a clean checkout.
       Recheck the Hub's [current client version](https://github.com/runelite/plugin-hub/blob/master/runelite.version).
 - [ ] Verify production sources against the Hub's
