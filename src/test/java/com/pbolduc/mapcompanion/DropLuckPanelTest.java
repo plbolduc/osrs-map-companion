@@ -26,13 +26,19 @@
 package com.pbolduc.mapcompanion;
 
 import com.google.gson.Gson;
+import java.awt.Component;
+import java.awt.Container;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import net.runelite.client.events.ServerNpcLoot;
 import net.runelite.client.game.ItemStack;
+import net.runelite.client.ui.PluginPanel;
 import org.junit.Test;
 
 /**
@@ -162,5 +168,93 @@ public class DropLuckPanelTest
 		java.awt.Component first = panel.getComponent(0);
 		panel.refresh();
 		assertEquals("the same component, so a click in progress is not lost", first, panel.getComponent(0));
+	}
+
+	/**
+	 * Squeezed, a column takes each row down to its minimum, and a plain panel's minimum is 10px: the
+	 * card's 3 to 6px gaps and the hairline over a drop's detail grew while the rows beside them were
+	 * cut, as the Group and Stars tabs' gaps did. Every stack of the card, the list and a monster under
+	 * the Now killing bar is squeezed in turn, and each spacer in it holds its height.
+	 */
+	@Test
+	public void aSqueezedColumnNeverGrowsItsGaps() throws Exception
+	{
+		now -= 3 * 60 * 60_000L;
+		kill("Gargoyle", 995);
+		now += 3 * 60 * 60_000L;
+		kill("Abyssal demon", 4151);
+		kill("Abyssal demon", 995);
+		panel.refresh();
+		int checked = squeezed();
+		assertTrue(words(), SidebarWords.press(panel, "All monsters ›"));
+		checked += squeezed();
+		assertTrue(words(), SidebarWords.press(panel, "Gargoyle"));
+		checked += squeezed();
+		assertTrue("the card's, the list's and the Now killing bar's spacers: " + checked, checked >= 10);
+	}
+
+	/** Each stack holding a spacer, squeezed 4px under its height and laid out; how many spacers held. */
+	private int squeezed() throws Exception
+	{
+		int[] checked = {0};
+		SwingUtilities.invokeAndWait(() ->
+		{
+			for (Container column : columns(panel, new ArrayList<>()))
+			{
+				column.setSize(PluginPanel.PANEL_WIDTH - 20, column.getPreferredSize().height - 4);
+				layout(column);
+				for (Component child : column.getComponents())
+				{
+					if (spacer(child))
+					{
+						checked[0]++;
+						assertTrue("a " + child.getPreferredSize().height + "px gap drawn " + child.getHeight() + "px tall",
+							child.getHeight() <= child.getPreferredSize().height);
+					}
+				}
+			}
+		});
+		return checked[0];
+	}
+
+	/** Every stack in the panel that holds a spacer of its own, the panel included. */
+	private static List<Container> columns(Container parent, List<Container> found)
+	{
+		boolean holds = false;
+		for (Component child : parent.getComponents())
+		{
+			if (spacer(child))
+			{
+				holds = true;
+			}
+			else if (child instanceof Container)
+			{
+				columns((Container) child, found);
+			}
+		}
+		if (holds)
+		{
+			found.add(parent);
+		}
+		return found;
+	}
+
+	/** The spacers: empty panels one pixel wide, which is how a gap and the hairline are made. */
+	private static boolean spacer(Component component)
+	{
+		return component instanceof JPanel && ((JPanel) component).getComponentCount() == 0
+			&& component.getPreferredSize().width == 1;
+	}
+
+	private static void layout(Container parent)
+	{
+		parent.doLayout();
+		for (Component child : parent.getComponents())
+		{
+			if (child instanceof Container)
+			{
+				layout((Container) child);
+			}
+		}
 	}
 }
