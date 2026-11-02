@@ -279,12 +279,36 @@ public class RecommendedSharingTest
 				assertTrue("the card has a row for " + field.key, closed.contains(field.label));
 			}
 			assertTrue(closed.contains(RecommendedSharing.LOOT_ROW));
-			assertTrue("the stream is said on the card", closed.contains(RecommendedSharing.STREAM_SHORT));
-			assertTrue("the map it goes to", closed.contains("Sent to osrs-map.com while you're logged in; your group sees it."));
+			assertTrue("the connection is said on the card", closed.contains(RecommendedSharing.streamShort("osrs-map.com")));
 			assertTrue("What each one sends is on the card", closed.contains("What each one sends"));
 			assertTrue("and where to change it later", closed.contains(RecommendedSharing.INTRO));
-			assertTrue(RecommendedSharing.INTRO.endsWith("later in Settings."));
-			assertFalse("the field lists wait in the fold", closed.contains(RecommendedSharing.STREAM));
+			/*
+			 * Rewritten when the step was reworded: who sees what is ticked is the intro's first sentence,
+			 * the fact a player weighs before sharing, so the line over the press says only where it goes.
+			 */
+			assertTrue(RecommendedSharing.INTRO.startsWith("Your group sees what's ticked."));
+			assertTrue(RecommendedSharing.INTRO.endsWith("in Settings."));
+			assertTrue("the map it goes to", closed.contains("Sent to osrs-map.com while you're logged in."));
+			assertFalse("said once, in the intro", closed.contains("your group sees it"));
+			assertFalse("the connection in full waits in the fold", closed.contains(RecommendedSharing.stream("osrs-map.com")));
+		});
+	}
+
+	/** Another map's step names that map wherever the connection is said, as the line over the press does. */
+	@Test
+	public void theConnectionNamesTheMapItIsTo() throws Exception
+	{
+		SwingUtilities.invokeAndWait(() ->
+		{
+			Fixture fixture = new Fixture();
+			fixture.step.offer("maps.example.org");
+			click(fixture.step, "recommended.detailsToggle");
+			String open = visibleText(fixture.step);
+			assertTrue(open.contains(RecommendedSharing.streamShort("maps.example.org")));
+			assertTrue(open.contains("The connection to maps.example.org"));
+			assertTrue(open.contains(RecommendedSharing.stream("maps.example.org")));
+			assertTrue(open.contains("Sent to maps.example.org while you're logged in."));
+			assertFalse(open.contains("osrs-map.com"));
 		});
 	}
 
@@ -301,9 +325,12 @@ public class RecommendedSharingTest
 			{
 				assertTrue("the fold names " + field.key + " as \"" + field.label + "\"", open.contains(field.label));
 			}
-			assertTrue(open.contains(RecommendedSharing.STREAM));
-			assertTrue(open.contains("receive stream"));
-			assertTrue("beside Drops and levels", open.contains(MapCompanionConfig.FEED_KEPT));
+			assertTrue(open.contains("The connection to osrs-map.com"));
+			assertTrue(open.contains(RecommendedSharing.stream("osrs-map.com")));
+			/* In a player's words, and all of what it carries: the member key rides it too. */
+			assertTrue(open.contains("your group's code, your member id and its key, and nothing about your character"));
+			assertFalse(open.contains("receive stream"));
+			assertTrue("beside Notable drops and levels", open.contains(MapCompanionConfig.FEED_KEPT));
 			assertTrue(open.contains(RecommendedSharing.DEATH_DETAIL));
 			assertTrue(open.contains(RecommendedSharing.DESTINATIONS_DETAIL));
 			assertTrue(open.contains(RecommendedSharing.GROUP_DETAIL));

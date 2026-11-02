@@ -716,6 +716,15 @@ orange, and *Open the map* waits above it under its own name, drawn plain rather
 loudest thing on the page had invited a new player to the browser before choosing, where they would
 appear sharing nothing. *Share what's ticked* or *Not now* closes the step and gives the orange back.
 
+Its words were reworked the same day for a player reading them first on the Hub. The intro leads with
+the fact a player weighs before sharing, *Your group sees what's ticked. Change it any time in
+Settings.*, so the line over the press says only where it goes, *Sent to osrs-map.com while you're
+logged in.* The drawing choices' line and the fold's last entry, *The connection to osrs-map.com*,
+say what the connection brings and all it carries, the group's code, the member id and its key, in
+place of *receive stream* and *member id* alone, and name the map it goes to. The card is 544px
+closed and 1,078px with its fold open, from 532 and 1,054: naming the map takes the drawing choices'
+line to a third line.
+
 ### Which map a button opens
 
 *Show on map* opened the website on the death card and drew on the game's world map on a friend's.
