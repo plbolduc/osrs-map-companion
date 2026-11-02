@@ -74,7 +74,7 @@ import okhttp3.Response;
 @Singleton
 final class RoutePress
 {
-	static final String ONE_AT_A_TIME = "The map is still planning the last route.";
+	static final String ONE_AT_A_TIME = Words.of("route.oneAtATime");
 	private static final int MAX_NAME = 120;
 	/** The longest refusal the map's words may make, as a farm run's are cut. */
 	private static final int MAX_REFUSAL = 240;

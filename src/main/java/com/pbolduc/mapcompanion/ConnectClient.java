@@ -85,9 +85,9 @@ final class ConnectClient
 	static final String GROUP = "/api/companion/group";
 	private static final String INSTALLATION_HEADER = "X-Companion-Installation";
 
-	static final String UNREACHABLE = "The map could not be reached. Try again in a moment.";
-	static final String BUSY = "The map is busy. Try again in a minute.";
-	static final String FAILED = "The map could not make that just now. Try again in a moment.";
+	static final String UNREACHABLE = Words.of("connect.unreachable");
+	static final String BUSY = Words.of("connect.busy");
+	static final String FAILED = Words.of("connect.failed");
 	static final String ONE_AT_A_TIME = "Still waiting for the map.";
 	/** The longest sentence the map is trusted to have written; anything longer is not one of its own. */
 	static final int MAX_SENTENCE = 200;

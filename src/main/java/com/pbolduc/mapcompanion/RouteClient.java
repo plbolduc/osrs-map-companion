@@ -70,14 +70,14 @@ final class RouteClient
 	 * Logged in, but not yet a member the map takes: no group, no member secret issued yet, or the map
 	 * refusing this member. The status card is where the cause is said, so this points there.
 	 */
-	static final String NOT_CONNECTED = "Not connected to the group yet. The top of the sidebar says why.";
+	static final String NOT_CONNECTED = Words.of("route.notConnected");
 	/** The cause and the one step that fixes it: the game gives no tile inside a raid's rooms, and does outside. */
-	static final String NEEDS_TILE = "Reroute can't see where you are inside an instance. Press it again once you're out.";
-	static final String NO_WAY = "The map found no way there from here.";
-	static final String NOT_FOUND = "The map has no way to plan to this place.";
+	static final String NEEDS_TILE = Words.of("route.needsTile");
+	static final String NO_WAY = Words.of("route.noWay");
+	static final String NOT_FOUND = Words.of("route.notFound");
 	static final String UNREACHABLE = "The map could not be reached.";
-	static final String FAILED = "The map could not plan a route just now.";
-	static final String REDIRECTS = "This map address redirects. Check Settings → Advanced → Map address.";
+	static final String FAILED = Words.of("route.failed");
+	static final String REDIRECTS = Words.of("map.redirects");
 	static final String UNREADABLE = "The map returned unreadable data.";
 
 	private final OkHttpClient http;
