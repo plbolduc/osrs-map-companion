@@ -93,7 +93,6 @@ import net.runelite.client.ui.ColorScheme;
  */
 final class GroupPanel extends JPanel
 {
-	private static final long serialVersionUID = 1L;
 	private static final int WIDTH = MapCompanionPanel.CARD_TEXT_WIDTH;
 	private static final Color FALLBACK = new Color(161, 161, 170);
 	/*
@@ -124,12 +123,12 @@ final class GroupPanel extends JPanel
 	private static final javax.swing.ImageIcon NO_PICTURE_YET = new javax.swing.ImageIcon(
 		new java.awt.image.BufferedImage(NEWS_PICTURE, NEWS_PICTURE, java.awt.image.BufferedImage.TYPE_INT_ARGB));
 
-	private final transient DestinationState destinations;
-	private final transient GroupState group;
-	private final transient RoutePress press;
-	private final transient MeetupClient meetups;
-	private final transient MapCompanionConfig config;
-	private final transient GameSprites sprites;
+	private final DestinationState destinations;
+	private final GroupState group;
+	private final RoutePress press;
+	private final MeetupClient meetups;
+	private final MapCompanionConfig config;
+	private final GameSprites sprites;
 
 	private final JPanel friends = MapCompanionPanel.column(ColorScheme.DARK_GRAY_COLOR);
 	private final JLabel meetupsHead = MapCompanionPanel.left(new JLabel("Meetups"));
@@ -157,7 +156,7 @@ final class GroupPanel extends JPanel
 	 * the next one, and a meetup made closes the form once rather than each time it is opened.
 	 */
 	@Nullable
-	private transient MeetupClient.Said quietMeet;
+	private MeetupClient.Said quietMeet;
 	/** The days the form offers, from today, in the player's zone. */
 	private final List<LocalDate> days = new ArrayList<>();
 	@Nullable
@@ -176,7 +175,7 @@ final class GroupPanel extends JPanel
 	 * the map's wait greys it, and a line counting a wait down. A rebuild each second would eat a
 	 * press under the pointer, so the rows hand these over when they are built and they are run.
 	 */
-	private final transient List<LongConsumer> ticking = new ArrayList<>();
+	private final List<LongConsumer> ticking = new ArrayList<>();
 	/**
 	 * Copy invite, which {@link ConnectCard} owns, presses and words. The card of a group of one
 	 * holds it, under the sentence that is about it; otherwise it sits beside Switch ▾ under the tab.
@@ -1117,8 +1116,6 @@ final class GroupPanel extends JPanel
 	 */
 	private static final class Slot extends JPanel
 	{
-		private static final long serialVersionUID = 1L;
-
 		Slot()
 		{
 			super(new java.awt.BorderLayout());
@@ -1256,7 +1253,6 @@ final class GroupPanel extends JPanel
 	 */
 	static final class RollUp extends JPanel
 	{
-		private static final long serialVersionUID = 1L;
 		/** A disc's picture, which leaves three pixels between two discs' edges. */
 		private static final int STEP = 20;
 		private static final int AFTER_WORD = 4;

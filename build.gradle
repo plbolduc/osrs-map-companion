@@ -69,8 +69,11 @@ tasks.withType(JavaCompile).configureEach {
      * the plugin classpath, and javac reports sixty 'cannot find annotation method' lines that no
      * change here could ever fix. Leaving it on would bury the deprecation warnings that do matter,
      * which are the early notice that a client update is going to break this build.
+     *
+     * Minus 'serial' too: it asks every Swing panel for a serialVersionUID, and no panel here is
+     * ever serialized. The Plugin Hub counts every character of source, so those fields went.
      */
-    options.compilerArgs << '-Xlint:all' << '-Xlint:-classfile'
+    options.compilerArgs << '-Xlint:all' << '-Xlint:-classfile' << '-Xlint:-serial'
 }
 
 /*

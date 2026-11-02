@@ -75,7 +75,6 @@ import net.runelite.client.ui.PluginPanel;
  */
 final class StarsPanel extends JPanel
 {
-	private static final long serialVersionUID = 1L;
 	private static final Color GOLD = new Color(237, 189, 100);
 	/** The world switcher's stars, at their own size. */
 	private static final int WORLD_STAR = 14;
@@ -851,8 +850,6 @@ final class StarsPanel extends JPanel
 	 */
 	private static final class Row extends JPanel
 	{
-		private static final long serialVersionUID = 1L;
-
 		Row()
 		{
 			super(new BorderLayout());

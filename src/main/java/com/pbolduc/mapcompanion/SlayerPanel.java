@@ -56,7 +56,6 @@ import net.runelite.client.util.LinkBrowser;
  */
 final class SlayerPanel extends JPanel
 {
-	private static final long serialVersionUID = 1L;
 	private static final int WIDTH = MapCompanionPanel.CARD_TEXT_WIDTH;
 	private static final Color MUTED = ColorScheme.LIGHT_GRAY_COLOR;
 	private static final Color GOLD = new Color(237, 189, 100);
@@ -64,14 +63,14 @@ final class SlayerPanel extends JPanel
 	static final String GET_ONE = "Get one from a Slayer master and it shows here.";
 	static final String NEXT_TASK = "Get your next task from a Slayer master.";
 	static final String NONE_OPEN = "No place for this task is open to you yet.";
-	private final transient SlayerState state;
-	private final transient MapCompanionConfig config;
-	private final transient ConfigManager configManager;
-	private final transient RoutePress routes;
-	private final transient DestinationState destinations;
-	private final transient DestinationMarker marker;
-	private final transient ClientThread clientThread;
-	private final transient GameSprites sprites;
+	private final SlayerState state;
+	private final MapCompanionConfig config;
+	private final ConfigManager configManager;
+	private final RoutePress routes;
+	private final DestinationState destinations;
+	private final DestinationMarker marker;
+	private final ClientThread clientThread;
+	private final GameSprites sprites;
 	private final JLabel task = line("", Color.WHITE);
 	private final JLabel status = line("", MUTED);
 	private final JPanel body = column();

@@ -74,7 +74,6 @@ import static com.pbolduc.mapcompanion.MapCompanionPanel.syncRow;
  */
 final class NowCards extends JPanel
 {
-	private static final long serialVersionUID = 1L;
 	/** The clue scroll's sprite beside the card's title, at the size the inventory draws it. */
 	private static final int CLUE_PICTURE = 32;
 	/** The picture beside a destination's name, at the size a route step's is drawn, and its gap. */

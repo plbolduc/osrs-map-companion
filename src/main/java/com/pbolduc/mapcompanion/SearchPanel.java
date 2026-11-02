@@ -81,7 +81,6 @@ import net.runelite.client.ui.ColorScheme;
  */
 final class SearchPanel extends JPanel
 {
-	private static final long serialVersionUID = 1L;
 	private static final int WIDTH = MapCompanionPanel.CARD_TEXT_WIDTH;
 	static final String SOURCE = "search";
 
@@ -89,28 +88,28 @@ final class SearchPanel extends JPanel
 	static final int PICTURE = 24;
 	static final String PLACEHOLDER = "Search places, people, items";
 
-	private final transient SearchClient search;
-	private final transient RoutePress press;
+	private final SearchClient search;
+	private final RoutePress press;
 	@Nullable
-	private final transient GameSprites sprites;
+	private final GameSprites sprites;
 	private final JTextField box = new JTextField();
 	private final JPanel rows = MapCompanionPanel.column(ColorScheme.DARK_GRAY_COLOR);
 	private final JLabel status = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
 	/** The list is folded once a pick's answer has filled the destination's card; typing or Enter opens it again. */
 	private boolean folded;
 	/** The rows drawn while a pick would not go, whose tooltip says how long the map's wait has left. */
-	private final transient List<JPanel> heldRows = new ArrayList<>();
+	private final List<JPanel> heldRows = new ArrayList<>();
 	/** Such a row's tooltip while a route plans, with no wait to count. */
 	private static final String HELD = "The map plans one route at a time, a few seconds apart. Pick again in a moment.";
 	/** The row whose pick is out or was refused, so a refusal can name it; null once answered or typed past. */
 	@Nullable
-	private transient SearchClient.Hit picked;
+	private SearchClient.Hit picked;
 	/** The press's last word this list has acted on, so each answer folds or opens it once. */
 	@Nullable
-	private transient RoutePress.Said heard;
+	private RoutePress.Said heard;
 	/** A word from a pick the player has typed past, which the line under the box no longer says. */
 	@Nullable
-	private transient RoutePress.Said quiet;
+	private RoutePress.Said quiet;
 	/** The player typed while a pick was planning, so its answer, when it lands, is typed past too. */
 	private boolean typedPast;
 	@Nullable

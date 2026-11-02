@@ -76,8 +76,6 @@ import net.runelite.client.ui.ColorScheme;
  */
 final class RecommendedSharing extends JPanel
 {
-	private static final long serialVersionUID = 1L;
-
 	/** What one press shares: the four groups' fields, the character name, and the client's drawing. */
 	static final List<String> KEYS = Collections.unmodifiableList(Arrays.asList(
 		"sharePosition", "shareActivity", "shareAccountType",

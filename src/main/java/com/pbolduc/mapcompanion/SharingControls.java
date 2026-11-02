@@ -66,7 +66,6 @@ import net.runelite.client.ui.PluginPanel;
  */
 final class SharingControls extends JPanel
 {
-	private static final long serialVersionUID = 1L;
 	/** Where a checkbox's words start, from its left edge: a line under one starts under its words. */
 	static final int TEXT_INSET = 28;
 	/** The column's width for a wrapped line, as the rest of the sidebar takes it. */

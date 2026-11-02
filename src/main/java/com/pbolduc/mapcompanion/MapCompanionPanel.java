@@ -85,7 +85,6 @@ import net.runelite.client.ui.PluginPanel;
 public class MapCompanionPanel extends PluginPanel
 {
 	/** Swing's, not ours: this panel is never serialised, and the constant only quiets the warning. */
-	private static final long serialVersionUID = 1L;
 
 	/**
 	 * The sidebar is 225 wide and this panel insets ten either side. Labels are told that width
