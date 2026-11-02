@@ -26,7 +26,6 @@
 package com.pbolduc.mapcompanion;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
@@ -41,12 +40,9 @@ import net.runelite.api.GameState;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.callback.ClientThread;
 import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.HttpUrl;
-import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
@@ -61,7 +57,6 @@ import okhttp3.Response;
 final class FarmRunClient
 {
 	static final String PATH = "/api/companion/run";
-	private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 	private final OkHttpClient http;
 	private final Gson gson;
 	private final Client client;
@@ -308,20 +303,9 @@ final class FarmRunClient
 			active = ticket;
 			said = new Said(true, end ? "Ending run…" : name != null ? "Planning " + name + "…" : "Planning run…", lifetime, -1, port);
 			call = http.newCall(request(server, code, member, secret, question, end, id));
-			call.enqueue(new Callback()
-			{
-				@Override
-				public void onFailure(Call failed, IOException error)
-				{
-					finish(ticket, null, 0, RouteClient.UNREACHABLE, System.currentTimeMillis() + RouteClient.FAILURE_GAP_MS);
-				}
-
-				@Override
-				public void onResponse(Call completed, Response response)
-				{
-					handle(ticket, response);
-				}
-			});
+			CompanionHttp.enqueue(call,
+				(failed, error) -> finish(ticket, null, 0, RouteClient.UNREACHABLE, System.currentTimeMillis() + RouteClient.FAILURE_GAP_MS),
+				(completed, response) -> handle(ticket, response));
 		}
 	}
 
@@ -350,12 +334,8 @@ final class FarmRunClient
 		{
 			url.addQueryParameter("run", id);
 		}
-		Request.Builder request = new Request.Builder().url(url.build())
-		.header("User-Agent", CompanionVersion.USER_AGENT)
-		.header("X-Companion-Code", code)
-		.header("X-Companion-Member", member)
-		.header("X-Companion-Member-Secret", secret);
-		return (end ? request.delete() : request.post(RequestBody.create(JSON, gson.toJson(question)))).build();
+		Request.Builder request = CompanionHttp.member(url.build(), code, member, secret);
+		return (end ? request.delete() : request.post(CompanionHttp.json(gson, question))).build();
 	}
 
 	private void handle(Ticket ticket, Response response)
@@ -376,23 +356,9 @@ final class FarmRunClient
 				int code = close.code();
 				String why = code == 429 || code == 503 ? MapWait.BUSY
 							 : code == 403 || code == 410 ? RouteClient.NOT_CONNECTED : "The map could not prepare that run.";
-				boolean worded = false;
-				String body = CompanionHttp.readBounded(close.body(), CompanionHttp.MAX_REPLY_BYTES);
-				try
-				{
-					JsonObject error = gson.fromJson(body, JsonObject.class);
-					if (error != null && error.has("error") && error.get("error").isJsonPrimitive()
-						&& error.get("error").getAsJsonPrimitive().isString())
-					{
-						String words = RouteWire.text(MapPin.plain(error.get("error").getAsString()), 240);
-						if (words != null)
-						{
-							why = words;
-							worded = true;
-						}
-					}
-				}
-				catch (RuntimeException ignored) { /* The status still has a useful sentence. */ }
+				String words = CompanionHttp.said(gson, CompanionHttp.readBounded(close.body(), CompanionHttp.MAX_REPLY_BYTES), 240);
+				boolean worded = words != null;
+				why = worded ? words : why;
 				/*
 				 * A refusal the map words (409, 404, 400) is an answer, not a failure: the map is up, read
 				 * the press and said why it will not plan it — nothing is due yet, no patch seen, no such

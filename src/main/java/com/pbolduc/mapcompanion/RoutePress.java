@@ -26,8 +26,6 @@
 package com.pbolduc.mapcompanion;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
@@ -39,13 +37,9 @@ import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.callback.ClientThread;
-import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.HttpUrl;
-import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
@@ -80,7 +74,6 @@ import okhttp3.Response;
 @Singleton
 final class RoutePress
 {
-	private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 	static final String ONE_AT_A_TIME = "The map is still planning the last route.";
 	private static final int MAX_NAME = 120;
 	/** The longest refusal the map's words may make, as a farm run's are cut. */
@@ -357,20 +350,9 @@ final class RoutePress
 			return;
 		}
 		said = new Said(target.source, true, null, null, asked);
-		http.newCall(request(server, code, member, secret, target, from)).enqueue(new Callback()
-		{
-			@Override
-			public void onFailure(Call failed, IOException error)
-			{
-				finish(asked, target, RouteClient.UNREACHABLE, System.currentTimeMillis() + RouteClient.FAILURE_GAP_MS);
-			}
-
-			@Override
-			public void onResponse(Call completed, Response response)
-			{
-				handle(asked, target, response);
-			}
-		});
+		CompanionHttp.enqueue(http.newCall(request(server, code, member, secret, target, from)),
+			(failed, error) -> finish(asked, target, RouteClient.UNREACHABLE, System.currentTimeMillis() + RouteClient.FAILURE_GAP_MS),
+			(completed, response) -> handle(asked, target, response));
 	}
 
 	/** One question, as the map's {@code POST /api/companion/route} reads it. */
@@ -381,13 +363,7 @@ final class RoutePress
 			: target.clue != null ? new ClueTarget(target.clue)
 			: new RouteClient.Tile(target.tile);
 		question.from = from == null ? null : new RouteClient.Tile(from);
-		return new Request.Builder()
-			.url(server + RouteClient.PATH)
-			.header("User-Agent", CompanionVersion.USER_AGENT)
-			.header("X-Companion-Code", code)
-			.header("X-Companion-Member", member)
-			.header("X-Companion-Member-Secret", secret)
-			.post(RequestBody.create(JSON, gson.toJson(question)))
+		return CompanionHttp.member(server + RouteClient.PATH, code, member, secret).post(CompanionHttp.json(gson, question))
 			.build();
 	}
 
@@ -461,22 +437,13 @@ final class RoutePress
 	{
 		try
 		{
-			JsonObject refusal = gson.fromJson(CompanionHttp.readBounded(response.body(), CompanionHttp.MAX_REPLY_BYTES), JsonObject.class);
-			JsonElement error = refusal == null ? null : refusal.get("error");
-			if (error != null && error.isJsonPrimitive() && error.getAsJsonPrimitive().isString())
-			{
-				String words = RouteWire.text(MapPin.plain(error.getAsString()), MAX_REFUSAL);
-				if (words != null)
-				{
-					return words;
-				}
-			}
+			String said = CompanionHttp.said(gson, CompanionHttp.readBounded(response.body(), CompanionHttp.MAX_REPLY_BYTES), MAX_REFUSAL);
+			return said != null ? said : RouteClient.NOT_FOUND;
 		}
 		catch (IOException | RuntimeException unreadable)
 		{
-			/* The status alone still says what happened. */
+			return RouteClient.NOT_FOUND;
 		}
-		return RouteClient.NOT_FOUND;
 	}
 
 	private void finish(long asked, Target target, String why, long nextAllowedMs)

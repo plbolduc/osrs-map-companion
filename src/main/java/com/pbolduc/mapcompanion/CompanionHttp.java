@@ -25,12 +25,23 @@
  */
 package com.pbolduc.mapcompanion;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.function.BiConsumer;
 import javax.annotation.Nullable;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.HttpUrl;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import okhttp3.ResponseBody;
 
 /**
@@ -57,6 +68,8 @@ final class CompanionHttp
 	 */
 	static final int MAX_REPLY_BYTES = 1_048_576;
 
+	private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
+
 	private CompanionHttp()
 	{
 	}
@@ -72,6 +85,89 @@ final class CompanionHttp
 			.followRedirects(false)
 			.followSslRedirects(false)
 			.build();
+	}
+
+	/**
+	 * A request to the map with the plugin's User-Agent. Every client builds from here, so what
+	 * identifies the plugin is written once.
+	 */
+	static Request.Builder request(String url)
+	{
+		return new Request.Builder().header("User-Agent", CompanionVersion.USER_AGENT).url(url);
+	}
+
+	static Request.Builder request(HttpUrl url)
+	{
+		return new Request.Builder().header("User-Agent", CompanionVersion.USER_AGENT).url(url);
+	}
+
+	/** The same, signed as a member of the group: its code, the member id and its secret. */
+	static Request.Builder member(String url, String code, String member, String secret)
+	{
+		return signed(request(url), code, member, secret);
+	}
+
+	static Request.Builder member(HttpUrl url, String code, String member, String secret)
+	{
+		return signed(request(url), code, member, secret);
+	}
+
+	private static Request.Builder signed(Request.Builder request, String code, String member, String secret)
+	{
+		return request
+			.header("X-Companion-Code", code)
+			.header("X-Companion-Member", member)
+			.header("X-Companion-Member-Secret", secret);
+	}
+
+	/** A JSON body, as every client sends one. */
+	static RequestBody json(Gson gson, Object body)
+	{
+		return RequestBody.create(JSON, gson.toJson(body));
+	}
+
+	/**
+	 * Sends a call and hands its failure or its response to the two given, on OkHttp's thread as
+	 * an anonymous Callback would. Each client's own code is what it was; only the class around it
+	 * is gone.
+	 */
+	static void enqueue(Call call, BiConsumer<Call, IOException> failed, BiConsumer<Call, Response> answered)
+	{
+		call.enqueue(new Callback()
+		{
+			@Override
+			public void onFailure(Call call, IOException error)
+			{
+				failed.accept(call, error);
+			}
+
+			@Override
+			public void onResponse(Call call, Response response)
+			{
+				answered.accept(call, response);
+			}
+		});
+	}
+
+	/**
+	 * The sentence a refusal's body carries as {"error": "..."}, tidied and capped at {@code max}, or
+	 * null when it carries none or is not JSON. The map wrote it, so it is plain text and nothing
+	 * more. The caller reads the body, so a body too large to read fails where it always failed.
+	 */
+	@Nullable
+	static String said(Gson gson, String body, int max)
+	{
+		try
+		{
+			JsonObject refusal = gson.fromJson(body, JsonObject.class);
+			JsonElement error = refusal == null ? null : refusal.get("error");
+			return error != null && error.isJsonPrimitive() && error.getAsJsonPrimitive().isString()
+				? RouteWire.text(MapPin.plain(error.getAsString()), max) : null;
+		}
+		catch (RuntimeException unreadable)
+		{
+			return null;
+		}
 	}
 
 	/** The body as text, refusing one longer than {@code limit} bytes before it is all in memory. */

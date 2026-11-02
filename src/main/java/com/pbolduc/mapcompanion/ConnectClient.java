@@ -26,6 +26,7 @@
 package com.pbolduc.mapcompanion;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
@@ -33,13 +34,9 @@ import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.HttpUrl;
-import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
@@ -83,7 +80,6 @@ import okhttp3.Response;
 @Singleton
 final class ConnectClient
 {
-	private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 	static final String CONNECT = "/api/companion/connect";
 	static final String LINK = "/api/companion/link";
 	static final String GROUP = "/api/companion/group";
@@ -202,26 +198,13 @@ final class ConnectClient
 			}
 			busy = true;
 		}
-		Request request = new Request.Builder()
-			.url(url)
-			.header("User-Agent", CompanionVersion.USER_AGENT)
+		Request request = CompanionHttp.request(url)
 			.header(INSTALLATION_HEADER, installationKey)
-			.post(RequestBody.create(JSON, gson.toJson(ask)))
+			.post(CompanionHttp.json(gson, ask))
 			.build();
-		http.newCall(request).enqueue(new Callback()
-		{
-			@Override
-			public void onFailure(Call call, IOException error)
-			{
-				finish(done, Outcome.refused(UNREACHABLE));
-			}
-
-			@Override
-			public void onResponse(Call call, Response response)
-			{
-				finish(done, read(response, expectedCode));
-			}
-		});
+		CompanionHttp.enqueue(http.newCall(request),
+			(call, error) -> finish(done, Outcome.refused(UNREACHABLE)),
+			(call, response) -> finish(done, read(response, expectedCode)));
 	}
 
 	private void finish(Consumer<Outcome> done, Outcome outcome)
@@ -302,28 +285,11 @@ final class ConnectClient
 		}
 		Rename body = new Rename();
 		body.name = name;
-		Request request = new Request.Builder()
-			.url(url)
-			.header("User-Agent", CompanionVersion.USER_AGENT)
-			.header("X-Companion-Code", code)
-			.header("X-Companion-Member", memberId)
-			.header("X-Companion-Member-Secret", secret)
-			.patch(RequestBody.create(JSON, gson.toJson(body)))
+		Request request = CompanionHttp.member(url, code, memberId, secret).patch(CompanionHttp.json(gson, body))
 			.build();
-		http.newCall(request).enqueue(new Callback()
-		{
-			@Override
-			public void onFailure(Call call, IOException error)
-			{
-				finish(done, Outcome.refused(UNREACHABLE));
-			}
-
-			@Override
-			public void onResponse(Call call, Response response)
-			{
-				finish(done, readRename(response));
-			}
-		});
+		CompanionHttp.enqueue(http.newCall(request),
+			(call, error) -> finish(done, Outcome.refused(UNREACHABLE)),
+			(call, response) -> finish(done, readRename(response)));
 	}
 
 	/** One answer to a rename: the name the map now has, or why not. Package-private for its test. */
@@ -368,28 +334,11 @@ final class ConnectClient
 			done.accept(null);
 			return;
 		}
-		Request request = new Request.Builder()
-			.url(url)
-			.header("User-Agent", CompanionVersion.USER_AGENT)
-			.header("X-Companion-Code", code)
-			.header("X-Companion-Member", memberId)
-			.header("X-Companion-Member-Secret", secret)
-			.post(RequestBody.create(JSON, "{}"))
+		Request request = CompanionHttp.member(url, code, memberId, secret).post(CompanionHttp.json(gson, new JsonObject()))
 			.build();
-		http.newCall(request).enqueue(new Callback()
-		{
-			@Override
-			public void onFailure(Call call, IOException error)
-			{
-				done.accept(null);
-			}
-
-			@Override
-			public void onResponse(Call call, Response response)
-			{
-				done.accept(readLink(response, url));
-			}
-		});
+		CompanionHttp.enqueue(http.newCall(request),
+			(call, error) -> done.accept(null),
+			(call, response) -> done.accept(readLink(response, url)));
 	}
 
 	/** The link out of an answer, if it is one this plugin will open. Package-private for its test. */
