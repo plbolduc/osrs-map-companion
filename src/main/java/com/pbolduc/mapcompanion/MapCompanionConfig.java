@@ -59,6 +59,11 @@ import net.runelite.client.config.Units;
  * stored only because RuneLite draws a box from a stored value. {@link SharingGroups} keeps each
  * switch in step with its fields, and says which wins when they disagree.
  *
+ * <p><b>Why a hidden setting's description is empty.</b> RuneLite draws no hidden setting, so its
+ * description was text no player could see, and the Plugin Hub counts every character of source
+ * when it decides whether an update can be reviewed automatically. Each one's words are the comment
+ * above it instead, where they still explain the setting to whoever reads this file.
+ *
  * <p>Receiving destinations opens the relay stream and is also opt-in. The client section
  * keeps that choice beside the local notification controls.
  */
@@ -125,10 +130,11 @@ public interface MapCompanionConfig extends Config
 	)
 	String clientSection = "client";
 
+	/** Internal group code, filled by Connect in the sidebar. An empty code sends nothing. */
 	@ConfigItem(
 		keyName = KEY_PAIRING_CODE,
 		name = "Pairing code",
-		description = "Internal group code, filled by Connect in the sidebar. An empty code sends nothing.",
+		description = "",
 		position = 0,
 		hidden = true
 	)
@@ -137,14 +143,16 @@ public interface MapCompanionConfig extends Config
 		return "";
 	}
 
+	/**
+	 * The eight characters after the dash in the RuneLite code on the map's Companion panel. Filled in
+	 * by Connect and sent as a header until the map says it has connected your dot to your browser,
+	 * after which it is deleted. Nothing to type here by hand; clearing it only means the map has to
+	 * ask who you are.
+	 */
 	@ConfigItem(
 		keyName = KEY_PAIRING_SUFFIX,
 		name = "Your RuneLite code's suffix",
-		description =
-			"The eight characters after the dash in the RuneLite code on the map's Companion panel. "
-			+ "Filled in by Connect and sent as a header until the map says it has connected your "
-			+ "dot to your browser, after which it is deleted. Nothing to type here by hand; "
-			+ "clearing it only means the map has to ask who you are.",
+		description = "",
 		position = 1,
 		hidden = true
 	)
@@ -249,15 +257,16 @@ public interface MapCompanionConfig extends Config
 		return false;
 	}
 
+	/**
+	 * Where you are standing, which world you are on and what kind of world it is (members, PvP,
+	 * league and so on), and whether you are inside an instance and whether it is one place or rooms
+	 * put together — in a raid or a house your position means nothing on a shared map, so the map says
+	 * so instead of drawing your dot in a room nobody else is in.
+	 */
 	@ConfigItem(
 		keyName = "sharePosition",
 		name = "Position and world",
-		description =
-			"Where you are standing, which world you are on and what kind of world it is (members, "
-			+ "PvP, league and so on), and whether you are inside an instance and whether it is "
-			+ "one place or rooms put together — in a raid or a house your position means nothing "
-			+ "on a shared map, so the map says so instead of drawing your dot in a room nobody "
-			+ "else is in.",
+		description = "",
 		position = 10,
 		hidden = true
 	)
@@ -266,12 +275,14 @@ public interface MapCompanionConfig extends Config
 		return false;
 	}
 
+	/**
+	 * Your levels, so the map can rank routes you can actually use. These are already public on the
+	 * hiscores.
+	 */
 	@ConfigItem(
 		keyName = "shareSkills",
 		name = "Skill levels",
-		description =
-			"Your levels, so the map can rank routes you can actually use. These are already public "
-			+ "on the hiscores.",
+		description = "",
 		position = 11,
 		hidden = true
 	)
@@ -280,13 +291,15 @@ public interface MapCompanionConfig extends Config
 		return false;
 	}
 
+	/**
+	 * The skill you last gained experience in, how much in the last five minutes, and how long since
+	 * you last moved — so the map can show the rocks or trees for it, and tell your friends you are
+	 * idle rather than ignoring them.
+	 */
 	@ConfigItem(
 		keyName = "shareActivity",
 		name = "Training and idle time",
-		description =
-			"The skill you last gained experience in, how much in the last five minutes, and how long "
-			+ "since you last moved — so the map can show the rocks or trees for it, and tell your "
-			+ "friends you are idle rather than ignoring them.",
+		description = "",
 		position = 12,
 		hidden = true
 	)
@@ -295,13 +308,15 @@ public interface MapCompanionConfig extends Config
 		return false;
 	}
 
+	/**
+	 * Whether this account is an ironman, a group ironman, and so on. The map's answers genuinely
+	 * differ — an ironman cannot buy the teleport a main would. This is the badge the game already
+	 * prints beside your name in every line of chat.
+	 */
 	@ConfigItem(
 		keyName = "shareAccountType",
 		name = "Account type",
-		description =
-			"Whether this account is an ironman, a group ironman, and so on. The map's answers genuinely "
-			+ "differ — an ironman cannot buy the teleport a main would. This is the badge the game "
-			+ "already prints beside your name in every line of chat.",
+		description = "",
 		position = 13,
 		hidden = true
 	)
@@ -310,13 +325,15 @@ public interface MapCompanionConfig extends Config
 		return false;
 	}
 
+	/**
+	 * Whether you have started or finished the handful of quests that unlock travel (fairy rings,
+	 * spirit trees and the like). Nothing else about your quest log is read, and no individual step of
+	 * one is.
+	 */
 	@ConfigItem(
 		keyName = "shareQuests",
 		name = "Travel quest completion",
-		description =
-			"Whether you have started or finished the handful of quests that unlock travel (fairy "
-			+ "rings, spirit trees and the like). Nothing else about your quest log is read, and "
-			+ "no individual step of one is.",
+		description = "",
 		position = 14,
 		hidden = true
 	)
@@ -325,13 +342,15 @@ public interface MapCompanionConfig extends Config
 		return false;
 	}
 
+	/**
+	 * Which achievement diary tier you have finished in each of the 12 regions, and which of their
+	 * rewards you have collected — so the map can rank the teleports those unlock instead of asking
+	 * you to tick them by hand. No individual task is read.
+	 */
 	@ConfigItem(
 		keyName = "shareDiaries",
 		name = "Achievement diaries",
-		description =
-			"Which achievement diary tier you have finished in each of the 12 regions, and which of "
-			+ "their rewards you have collected — so the map can rank the teleports those unlock "
-			+ "instead of asking you to tick them by hand. No individual task is read.",
+		description = "",
 		position = 15,
 		hidden = true
 	)
@@ -340,11 +359,14 @@ public interface MapCompanionConfig extends Config
 		return false;
 	}
 
+	/**
+	 * Built landing sites, activated statues and other permanent transport unlocks, plus the town your
+	 * house is in. Unverified flags are not sent.
+	 */
 	@ConfigItem(
 		keyName = "sharePermanentTravel",
 		name = "Permanent travel and house",
-		description = "Built landing sites, activated statues and other permanent transport unlocks, "
-			+ "plus the town your house is in. Unverified flags are not sent.",
+		description = "",
 		position = 25,
 		hidden = true
 	)
@@ -353,10 +375,11 @@ public interface MapCompanionConfig extends Config
 		return false;
 	}
 
+	/** Which STASH units you have built. Does not read or share stored equipment. */
 	@ConfigItem(
 		keyName = "shareStash",
 		name = "STASH construction",
-		description = "Which STASH units you have built. Does not read or share stored equipment.",
+		description = "",
 		position = 26,
 		hidden = true
 	)
@@ -365,11 +388,14 @@ public interface MapCompanionConfig extends Config
 		return false;
 	}
 
+	/**
+	 * Where each of your boats is moored and whether it carries a teleport focus, so the map's voyages
+	 * start at your boat. Boat names are not sent.
+	 */
 	@ConfigItem(
 		keyName = "shareBoats",
 		name = "Boats and moorings",
-		description = "Where each of your boats is moored and whether it carries a teleport focus, so the map's "
-			+ "voyages start at your boat. Boat names are not sent.",
+		description = "",
 		position = 26,
 		hidden = true
 	)
@@ -378,10 +404,14 @@ public interface MapCompanionConfig extends Config
 		return false;
 	}
 
+	/**
+	 * Birdhouse states observed by RuneLite Time Tracking for this character, with their age. Enable
+	 * Time Tracking to collect observations.
+	 */
 	@ConfigItem(
 		keyName = "shareBirdhouses",
 		name = "Birdhouses",
-		description = "Birdhouse states observed by RuneLite Time Tracking for this character, with their age. Enable Time Tracking to collect observations.",
+		description = "",
 		position = 27,
 		hidden = true
 	)
@@ -390,10 +420,14 @@ public interface MapCompanionConfig extends Config
 		return false;
 	}
 
+	/**
+	 * Your current rumour, after using the Rumour option on a quetzal whistle. Recheck after logging
+	 * in or hopping.
+	 */
 	@ConfigItem(
 		keyName = "shareHunterRumours",
 		name = "Hunter rumours",
-		description = "Your current rumour, after using the Rumour option on a quetzal whistle. Recheck after logging in or hopping.",
+		description = "",
 		position = 28,
 		hidden = true
 	)
@@ -402,10 +436,11 @@ public interface MapCompanionConfig extends Config
 		return false;
 	}
 
+	/** Your customer and contract tier, when observed in game messages or NPC dialogue. */
 	@ConfigItem(
 		keyName = "shareMahoganyHomes",
 		name = "Mahogany Homes",
-		description = "Your customer and contract tier, when observed in game messages or NPC dialogue.",
+		description = "",
 		position = 29,
 		hidden = true
 	)
@@ -414,10 +449,11 @@ public interface MapCompanionConfig extends Config
 		return false;
 	}
 
+	/** The crop requested by your current Farming Guild contract. */
 	@ConfigItem(
 		keyName = "shareFarmingContracts",
 		name = "Farming contracts",
-		description = "The crop requested by your current Farming Guild contract.",
+		description = "",
 		position = 30,
 		hidden = true
 	)
@@ -426,11 +462,14 @@ public interface MapCompanionConfig extends Config
 		return false;
 	}
 
+	/**
+	 * Your five Sailing port task slots: which task each holds, crates collected and delivered, and
+	 * bounty parts still owed. Cargo itself is never read.
+	 */
 	@ConfigItem(
 		keyName = "sharePortTasks",
 		name = "Port tasks",
-		description = "Your five Sailing port task slots: which task each holds, crates collected and delivered, "
-			+ "and bounty parts still owed. Cargo itself is never read.",
+		description = "",
 		position = 37,
 		hidden = true
 	)
@@ -439,10 +478,14 @@ public interface MapCompanionConfig extends Config
 		return false;
 	}
 
+	/**
+	 * Started, finished or not started for the full quest and miniquest log, including subquests.
+	 * Separate from travel-quest sharing; refreshed at most every thirty seconds.
+	 */
 	@ConfigItem(
 		keyName = "shareQuestLog",
 		name = "Full quest progress",
-		description = "Started, finished or not started for the full quest and miniquest log, including subquests. Separate from travel-quest sharing; refreshed at most every thirty seconds.",
+		description = "",
 		position = 31,
 		hidden = true
 	)
@@ -451,12 +494,14 @@ public interface MapCompanionConfig extends Config
 		return false;
 	}
 
+	/**
+	 * Whether you are carrying the items that unlock a route — a dramen staff, a slayer ring.
+	 * Evaluated here as yes/no answers; your inventory itself never leaves the client.
+	 */
 	@ConfigItem(
 		keyName = "shareCapabilities",
 		name = "Carried travel items",
-		description =
-			"Whether you are carrying the items that unlock a route — a dramen staff, a slayer ring. "
-			+ "Evaluated here as yes/no answers; your inventory itself never leaves the client.",
+		description = "",
 		position = 16,
 		hidden = true
 	)
@@ -465,10 +510,11 @@ public interface MapCompanionConfig extends Config
 		return false;
 	}
 
+	/** Your current assignment and how many are left. */
 	@ConfigItem(
 		keyName = "shareSlayer",
 		name = "Slayer task",
-		description = "Your current assignment and how many are left.",
+		description = "",
 		position = 17,
 		hidden = true
 	)
@@ -477,10 +523,11 @@ public interface MapCompanionConfig extends Config
 		return false;
 	}
 
+	/** The clue scroll step you are on, so the map can route you to it. */
 	@ConfigItem(
 		keyName = "shareClue",
 		name = "Clue step",
-		description = "The clue scroll step you are on, so the map can route you to it.",
+		description = "",
 		position = 18,
 		hidden = true
 	)
@@ -489,12 +536,14 @@ public interface MapCompanionConfig extends Config
 		return false;
 	}
 
+	/**
+	 * The state of patches you have walked past, so the map can build a run. Only patches you have
+	 * actually seen are known.
+	 */
 	@ConfigItem(
 		keyName = "shareFarming",
 		name = "Farming patches",
-		description =
-			"The state of patches you have walked past, so the map can build a run. Only patches you "
-			+ "have actually seen are known.",
+		description = "",
 		position = 19,
 		hidden = true
 	)
@@ -503,14 +552,16 @@ public interface MapCompanionConfig extends Config
 		return false;
 	}
 
+	/**
+	 * Send observed loot kills, how long ago each monster was last killed, which notable drops you
+	 * have seen, the monster you are killing now and the drop you pinned, so the map can show your
+	 * drop luck. The log itself always stays on this computer; this only controls whether it is
+	 * shared. Normal members worlds only; these are not your lifetime game kill counts.
+	 */
 	@ConfigItem(
 		keyName = "shareLoot",
 		name = "Observed kills and drops",
-		description =
-			"Send observed loot kills, how long ago each monster was last killed, which notable drops "
-			+ "you have seen, the monster you are killing now and the drop you pinned, so the map can "
-			+ "show your drop luck. The log itself always stays on this computer; this only controls "
-			+ "whether it is shared. Normal members worlds only; these are not your lifetime game kill counts.",
+		description = "",
 		position = 20,
 		hidden = true
 	)
@@ -519,16 +570,18 @@ public interface MapCompanionConfig extends Config
 		return false;
 	}
 
+	/**
+	 * Announce notable NPC and supported activity rewards, and real levels. Collection items and a
+	 * small curated exception list qualify; repeated supplies do not. Activity and chest rewards
+	 * require RuneLite's Loot Tracker. Pets and collection additions are fields of their own beside
+	 * it. A quest or diary tier you finish while logged in is announced too when its own quest or
+	 * diary choice is on; nothing done before is. Nothing is queued while unpaired or logged out. Your
+	 * group keeps the last two weeks.
+	 */
 	@ConfigItem(
 		keyName = KEY_SHARE_MILESTONES,
 		name = "Notable drops and levels",
-		description =
-			"Announce notable NPC and supported activity rewards, and real levels. Collection items "
-			+ "and a small curated exception list qualify; repeated supplies do not. Activity and chest "
-			+ "rewards require RuneLite's Loot Tracker. Pets and collection additions are fields of their "
-			+ "own beside it. A quest or diary tier you finish while logged in is announced too when "
-			+ "its own quest or diary choice is on; nothing done before is. Nothing is queued while "
-			+ "unpaired or logged out. " + FEED_KEPT,
+		description = "",
 		position = 21,
 		hidden = true
 	)
@@ -537,11 +590,14 @@ public interface MapCompanionConfig extends Config
 		return false;
 	}
 
+	/**
+	 * Include observed local pet rewards while Notable drops and levels is on. A pet message without a
+	 * confirmed item stays unnamed; no boss or pet is guessed.
+	 */
 	@ConfigItem(
 		keyName = KEY_SHARE_PETS,
 		name = "Include pet rewards",
-		description = "Include observed local pet rewards while Notable drops and levels is on. A pet message "
-					  + "without a confirmed item stays unnamed; no boss or pet is guessed.",
+		description = "",
 		position = 23,
 		hidden = true
 	)
@@ -550,12 +606,15 @@ public interface MapCompanionConfig extends Config
 		return false;
 	}
 
+	/**
+	 * Include new collection log notifications while Notable drops and levels is on. Enable collection
+	 * log chat or popup notifications in the game's settings so additions can be observed. Your
+	 * collection log contents and previously filled slots are never read.
+	 */
 	@ConfigItem(
 		keyName = KEY_SHARE_COLLECTION,
 		name = "Include collection log additions",
-		description = "Include new collection log notifications while Notable drops and levels is on. Enable "
-					  + "collection log chat or popup notifications in the game's settings so additions can be "
-					  + "observed. Your collection log contents and previously filled slots are never read.",
+		description = "",
 		position = 24,
 		hidden = true
 	)
@@ -747,10 +806,11 @@ public interface MapCompanionConfig extends Config
 		return 5;
 	}
 
+	/** The sidebar's kept ranking choice */
 	@ConfigItem(
 		keyName = "slayerOrder",
 		name = "Slayer order",
-		description = "The sidebar's kept ranking choice",
+		description = "",
 		hidden = true
 	)
 	default String slayerOrder()
@@ -758,10 +818,11 @@ public interface MapCompanionConfig extends Config
 		return "best";
 	}
 
+	/** The sidebar's kept filter */
 	@ConfigItem(
 		keyName = "slayerHideWilderness",
 		name = "Hide Wilderness Slayer places",
-		description = "The sidebar's kept filter",
+		description = "",
 		hidden = true
 	)
 	default boolean slayerHideWilderness()
