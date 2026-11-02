@@ -407,6 +407,9 @@ of `docs/plan-where-to-go-for-a-task.md` in `osrs-stars-map`.
 - **On the world map** each step's end has a pin with the step's number. The current one is amber
   and holds the map's edge, the ones behind it fade, and the last step leaves the destination's
   own pin uncovered. The game's arrow points at the current step's end once it is loaded.
+  While the current step's pin holds the edge, the destination's own pin lets go of it: two amber
+  discs side by side there, one numbered, said nothing about which way to go. It is drawn as
+  before while its place is in view, and holds the edge again on the last step.
 - **Follow**, beside Reroute while the Shortest Path plugin is running, has it draw each walking
   step as you reach it; it reads **Stop** while following. A line under the steps says when
   Shortest Path is drawing one, *Shortest Path is drawing the walk for step 2.*, so its line on the

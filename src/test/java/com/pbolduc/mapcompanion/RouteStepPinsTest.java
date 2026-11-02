@@ -122,6 +122,46 @@ public class RouteStepPinsTest
 		assertTrue(drawn.isEmpty());
 	}
 
+	/**
+	 * The edge shows one amber disc, the way to go now: while the current step's pin holds it, the
+	 * destination's own pin lets go. On the last step, whose pin is the destination's, and with no
+	 * route at all, the destination holds the edge itself.
+	 */
+	@Test
+	public void theDestinationLeavesTheEdgeToTheCurrentStep()
+	{
+		routed();
+		markers.sync();
+		assertEquals("[1. Ring of dueling]", edge());
+		route.advance(new WorldPoint(3293, 3184, 0));
+		route.advance(new WorldPoint(3300, 3190, 0));
+		markers.sync();
+		assertEquals("[3. Climb the staircase]", edge());
+
+		route.advance(new WorldPoint(3300, 3191, 1));
+		markers.sync();
+		assertEquals("the last step's pin is the destination's", "[Al Kharid bank]", edge());
+
+		state.selectLocal(DestinationRouteTest.destination("Al Kharid counter", null));
+		route.sync(state.getDestination());
+		markers.sync();
+		assertEquals("a destination with no route", "[Al Kharid counter]", edge());
+	}
+
+	/** What holds the map's edge, by tooltip. */
+	private String edge()
+	{
+		List<String> held = new ArrayList<>();
+		for (WorldMapPoint point : drawn)
+		{
+			if (point.isSnapToEdge())
+			{
+				held.add(point.getTooltip());
+			}
+		}
+		return held.toString();
+	}
+
 	@Test
 	public void aFarmRunDrawsItsStopNumbersWithoutADuplicateDestinationOrJourneyNumbers() throws Exception
 	{
