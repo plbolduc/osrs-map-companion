@@ -149,6 +149,13 @@ final class GroupPanel extends JPanel
 	private final JLabel formSaid = new JLabel();
 	private final JButton make = MapCompanionPanel.smallButton("Make meetup");
 	private boolean formOpen;
+	/**
+	 * Meet here's last word as it stood when the player last opened the form or put it away, which
+	 * neither the form nor the heading says again. A refusal is news to the form it answered, not to
+	 * the next one, and a meetup made closes the form once rather than each time it is opened.
+	 */
+	@Nullable
+	private transient MeetupClient.Said quietMeet;
 	/** The days the form offers, from today, in the player's zone. */
 	private final List<LocalDate> days = new ArrayList<>();
 	@Nullable
@@ -255,8 +262,15 @@ final class GroupPanel extends JPanel
 		form.add(MapCompanionPanel.left(line(formSaid)));
 	}
 
-	/** Open the form at the next five minutes past half an hour from now, or close it. */
+	/** Open the form, or put it away: the player's own press, after which the form's last word is not news. */
 	void openForm(boolean open)
+	{
+		quietMeet = meetups.said("meet");
+		showForm(open);
+	}
+
+	/** Open the form at the next five minutes past half an hour from now, or close it. */
+	private void showForm(boolean open)
 	{
 		formOpen = open;
 		formSaid.setVisible(false);
@@ -343,27 +357,35 @@ final class GroupPanel extends JPanel
 	/** Redraw from what the map last said and what the presses since have said. Swing. */
 	void refresh(boolean ready)
 	{
+		refresh(ready, System.currentTimeMillis());
+	}
+
+	/** The same, as of {@code now}: a confirmation is drawn only while it is news. */
+	void refresh(boolean ready, long now)
+	{
 		this.ready = ready;
 		here = group.world();
-		long now = System.currentTimeMillis();
 		List<RelayResponse.RosterRow> roster = destinations.getRoster();
 		List<RelayResponse.Meetup> events = destinations.getEvents();
 		String destinationKey = DestinationRoute.keyOf(destinations.getDestination());
 
 		MeetupClient.Said meet = meetups.said("meet");
-		if (formOpen && meet != null && !meet.sending && MeetupClient.MADE.equals(meet.message))
+		/* Meet here's answer to a press made since the form was last opened or put away. */
+		MeetupClient.Said fresh = meet == null || meet == quietMeet || meet.sending ? null : meet;
+		if (formOpen && fresh != null && fresh.confirms())
 		{
-			openForm(false);
+			/* Made: the form has done its work, and the heading says so for a moment. */
+			showForm(false);
 		}
-		if (formOpen && meet != null && !meet.sending && meet.message != null)
+		if (formOpen && fresh != null && fresh.message != null)
 		{
-			say(formSaid, meet.message);
+			say(formSaid, fresh.message);
 		}
-		boolean showMeet = !formOpen && meet != null && meet.message != null && !meet.sending;
+		boolean showMeet = !formOpen && fresh != null && fresh.shown(now);
 		meetSaid.setVisible(showMeet);
 		if (showMeet)
 		{
-			MapCompanionPanel.setWrapped(meetSaid, meet.message, WIDTH + 16);
+			MapCompanionPanel.setWrapped(meetSaid, fresh.message, WIDTH + 16);
 		}
 		make.setEnabled(ready && meetups.ready() && (meet == null || !meet.sending));
 		meetHere.setEnabled(ready);

@@ -438,7 +438,7 @@ final class SettingsPage extends JPanel
 		farmRunClient.clear();
 		farmRunState.clear();
 		destinationState.clear();
-		connectCard.say("Left the group.");
+		connectCard.confirm("Left the group.");
 		settingsOpen.accept(false);
 		refresh.run();
 	}

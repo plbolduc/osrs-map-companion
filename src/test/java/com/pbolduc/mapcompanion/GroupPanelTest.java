@@ -609,6 +609,90 @@ public class GroupPanelTest
 		});
 	}
 
+	/**
+	 * "Meetup made. Its link is copied." closed the form and then stayed under the heading for good,
+	 * and kept closing the form: opened again for a second meetup, it shut on the next refresh. The
+	 * confirmation is news for ten seconds, as a run's "Run ended." is, and closes the form once.
+	 */
+	@Test
+	public void aMeetupMadeIsSaidForAMomentAndTheFormOpensAgain() throws Exception
+	{
+		AtomicReference<GroupPanel> panel = new AtomicReference<>();
+		SwingUtilities.invokeAndWait(() -> panel.set(panel(http("{\"path\":\"/map?event=abc123&task=companion\"}"))));
+		twoMeetups();
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.get().refresh(true);
+			named(panel.get(), "group.meetHere").doClick();
+			panel.get().title().setText("Barrows run");
+			named(panel.get(), "group.meetMake").doClick();
+		});
+		until(() -> meetups.said("meet") != null && !meetups.said("meet").sending);
+		long made = meetups.said("meet").atMs;
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.get().refresh(true, made);
+			assertFalse("made, the form puts itself away", shownIn(panel.get(), panel.get().title()));
+			Component said = namedComponent(panel.get(), "group.meetSaid");
+			assertTrue(shownIn(panel.get(), said));
+			assertEquals(Collections.singletonList(MeetupClient.MADE), SidebarWords.words(said));
+			panel.get().refresh(true, made + FarmRunClient.Said.CONFIRMATION_MS);
+			assertFalse("ten seconds on it has given its line back", shownIn(panel.get(), said));
+
+			named(panel.get(), "group.meetHere").doClick();
+			panel.get().refresh(true, made + FarmRunClient.Said.CONFIRMATION_MS);
+			assertTrue("the form opens for the next meetup and stays open", shownIn(panel.get(), panel.get().title()));
+		});
+	}
+
+	/**
+	 * A refusal the form said stayed under the heading once Cancel had put the form away, about a
+	 * form no longer there. It stays in the form until the next press, and goes with Cancel.
+	 */
+	@Test
+	public void aRefusalTheFormSaidGoesWithCancel() throws Exception
+	{
+		OkHttpClient refusing = new OkHttpClient.Builder().addInterceptor(chain ->
+		{
+			sent.add(chain.request());
+			return new Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1)
+				.code(400).message("").body(ResponseBody.create(JSON, "{\"reason\":\"invalid\"}")).build();
+		}).build();
+		AtomicReference<GroupPanel> panel = new AtomicReference<>();
+		SwingUtilities.invokeAndWait(() -> panel.set(panel(refusing)));
+		twoMeetups();
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.get().refresh(true);
+			named(panel.get(), "group.meetHere").doClick();
+			panel.get().title().setText("Barrows run");
+			named(panel.get(), "group.meetMake").doClick();
+		});
+		until(() -> meetups.said("meet") != null && !meetups.said("meet").sending);
+		SwingUtilities.invokeAndWait(() ->
+		{
+			long minuteOn = System.currentTimeMillis() + 60_000L;
+			panel.get().refresh(true, minuteOn);
+			assertTrue("a refusal is still the form's a minute on", SidebarWords.words(panel.get()).contains(MeetupClient.REFUSED));
+			assertTrue(SidebarWords.press(panel.get(), "Cancel"));
+			panel.get().refresh(true, minuteOn);
+			assertFalse(shownIn(panel.get(), namedComponent(panel.get(), "group.meetSaid")));
+		});
+	}
+
+	/** Whether nothing between a component and the panel is hidden. */
+	private static boolean shownIn(Container panel, Component component)
+	{
+		for (Component at = component; at != null && at != panel; at = at.getParent())
+		{
+			if (!at.isVisible())
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
 	/** Which of the panel's own rows holds a component. */
 	private static int row(Container panel, Component component)
 	{

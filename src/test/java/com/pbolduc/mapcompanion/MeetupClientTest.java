@@ -163,6 +163,28 @@ public class MeetupClientTest
 		assertEquals(MeetupClient.NEEDS_CONNECTION, forged.said("answer:x").message);
 	}
 
+	/** "Meetup made." is news for a moment, as a run's "Run ended." is; a refusal stays until the next press. */
+	@Test
+	public void aMeetupMadeIsNewsForTenSecondsAndARefusalStays() throws Exception
+	{
+		connect();
+		MeetupClient client = client(200, "{\"path\":\"/map?event=abc123&task=companion\"}", null, false);
+		client.create("Barrows run", System.currentTimeMillis() + 3_600_000L);
+		settle(client, "meet");
+		MeetupClient.Said made = client.said("meet");
+		assertTrue(made.confirms());
+		assertTrue(made.shown(made.atMs + 9_000L));
+		assertFalse(made.shown(made.atMs + FarmRunClient.Said.CONFIRMATION_MS));
+
+		MeetupClient refused = client(400, "{\"reason\":\"invalid\"}", null, false);
+		refused.create("Barrows run", System.currentTimeMillis() + 3_600_000L);
+		settle(refused, "meet");
+		MeetupClient.Said said = refused.said("meet");
+		assertEquals(MeetupClient.REFUSED, said.message);
+		assertFalse(said.confirms());
+		assertTrue("a refusal is still said a minute on", said.shown(said.atMs + 60_000L));
+	}
+
 	@Test
 	public void sendsNothingBeforeConnect()
 	{
