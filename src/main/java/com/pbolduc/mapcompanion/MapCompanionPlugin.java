@@ -67,6 +67,7 @@ import net.runelite.client.chat.ChatMessageBuilder;
 import net.runelite.client.chat.ChatMessageManager;
 import net.runelite.client.chat.QueuedMessage;
 import net.runelite.client.config.ConfigManager;
+import net.runelite.client.config.Notification;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ClientShutdown;
 import net.runelite.client.events.ConfigChanged;
@@ -1822,17 +1823,19 @@ public class MapCompanionPlugin extends Plugin
 	}
 
 	/**
-	 * Say once when a meetup is about to start, through RuneLite's own notifier, and only with
-	 * <i>Notify before a meetup</i> on. {@link MeetupReminder} holds the rule.
+	 * Say once when a meetup is about to start, through RuneLite's own notifier with the setting's own
+	 * notification settings, and only with <i>Notify before a meetup</i> on. {@link MeetupReminder}
+	 * holds the rule, and {@link NotificationChoice} how it reaches a player who is playing.
 	 */
 	private void maybeNotifyMeetup(long now)
 	{
+		Notification notification = config.notifyMeetups();
 		List<String> due = meetupReminder.due(
 			MeetupReminder.of(destinationState.getEvents(), destinationState.getEvent()), now,
-			config.notifyMeetups(), config.meetupReminderMinutes());
+			notification.isEnabled(), config.meetupReminderMinutes());
 		for (String line : due)
 		{
-			notifier.notify(line);
+			notifier.notify(notification, line);
 		}
 	}
 

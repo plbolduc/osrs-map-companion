@@ -38,6 +38,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import net.runelite.client.config.ConfigItem;
+import net.runelite.client.config.Notification;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -58,7 +59,8 @@ public class SharingControlsTest
 			for (Method method : MapCompanionConfig.class.getDeclaredMethods())
 			{
 				ConfigItem item = method.getAnnotation(ConfigItem.class);
-				if (item != null && !item.hidden() && method.getReturnType() == boolean.class)
+				/* The meetup reminder is a RuneLite notification setting with a box of its own here. */
+				if (item != null && !item.hidden() && (method.getReturnType() == boolean.class || method.getReturnType() == Notification.class))
 				{
 					expected.add(item.keyName());
 				}
@@ -119,7 +121,7 @@ public class SharingControlsTest
 			assertFalse(config.shareDeath());
 			assertFalse(config.shareSkills());
 			assertFalse(config.showDestination());
-			assertFalse(config.notifyMeetups());
+			assertFalse(config.notifyMeetups().isEnabled());
 			assertFalse(pairing.hasServerConsent());
 			assertEquals("All 3 selected", ((javax.swing.JLabel) named(controls, "shareCount.presence")).getText());
 			find(controls, "sharePosition").doClick();
@@ -160,8 +162,9 @@ public class SharingControlsTest
 				for (Method method : MapCompanionConfig.class.getDeclaredMethods())
 				{
 					ConfigItem item = method.getAnnotation(ConfigItem.class);
-					// Hidden Slayer list preferences are owned by the task card, not sharing controls.
-					if (item == null || item.hidden() || method.getReturnType() != boolean.class) continue;
+					// Hidden Slayer list preferences are owned by the task card, not sharing controls; the meetup
+					// reminder is a notification setting with a box like any other.
+					if (item == null || item.hidden() || (method.getReturnType() != boolean.class && method.getReturnType() != Notification.class)) continue;
 					assertEquals(item.keyName(), selected.contains(item.keyName()) || defaultOf(item.keyName()), find(controls, item.keyName()).isSelected());
 					assertEquals(item.keyName(), selected.contains(item.keyName()) ? "true" : null, store.get(item.keyName()));
 				}
@@ -234,8 +237,9 @@ public class SharingControlsTest
 			for (Method method : MapCompanionConfig.class.getDeclaredMethods())
 			{
 				ConfigItem item = method.getAnnotation(ConfigItem.class);
-				// Hidden Slayer list preferences are owned by the task card, not sharing controls.
-				if (item == null || item.hidden() || method.getReturnType() != boolean.class) continue;
+				// Hidden Slayer list preferences are owned by the task card, not sharing controls; the meetup
+				// reminder is a notification setting with a box like any other.
+				if (item == null || item.hidden() || (method.getReturnType() != boolean.class && method.getReturnType() != Notification.class)) continue;
 				JCheckBox box = find(controls, item.keyName());
 				assertNotNull(box);
 				boolean flipped = !defaultOf(item.keyName());
@@ -294,6 +298,61 @@ public class SharingControlsTest
 			assertEquals("", pairing.code());
 			assertFalse(pairing.hasServerConsent());
 			assertNull(store.get(Pairing.KEY_SERVER_CONSENT));
+		});
+	}
+
+	/**
+	 * The meetup box writes a RuneLite notification setting as one, through the store that knows how
+	 * (see {@link NotificationChoice}), and never as the word a plain box writes, which RuneLite reads
+	 * as on with its own defaults: held while the game is focused, and so heard by nobody playing.
+	 */
+	@Test
+	public void theMeetupBoxIsWrittenAsANotification() throws Exception
+	{
+		SwingUtilities.invokeAndWait(() ->
+		{
+			HarnessStore held = new HarnessStore();
+			HarnessConfig config = new HarnessConfig(held, MapCompanionConfig.DEFAULT_MAP_URL);
+			java.util.List<String> chosen = new java.util.ArrayList<>();
+			ConfigStore store = new ConfigStore()
+			{
+				@Override
+				public String get(String key)
+				{
+					return held.get(key);
+				}
+
+				@Override
+				public void set(String key, String value)
+				{
+					held.set(key, value);
+				}
+
+				@Override
+				public void unset(String key)
+				{
+					held.unset(key);
+				}
+
+				@Override
+				public void chooseNotification(String key, boolean on)
+				{
+					chosen.add(key + "=" + on);
+					config.set(key, on);
+				}
+			};
+			SharingControls controls = new SharingControls(config, store);
+			JCheckBox box = find(controls, "notifyMeetups");
+			assertFalse(box.isSelected());
+			box.doClick();
+			assertNull("never the word a plain box writes", held.get("notifyMeetups"));
+			assertEquals(java.util.Collections.singletonList("notifyMeetups=true"), chosen);
+			assertTrue(box.isSelected());
+			assertTrue(config.notifyMeetups().isEnabled());
+			box.doClick();
+			assertFalse(box.isSelected());
+			assertEquals(java.util.Arrays.asList("notifyMeetups=true", "notifyMeetups=false"), chosen);
+			assertNull(held.get("notifyMeetups"));
 		});
 	}
 
@@ -373,7 +432,7 @@ public class SharingControlsTest
 		return false;
 	}
 
-	/** What an untouched install reads for a boolean choice. */
+	/** What an untouched install reads for a boolean choice, or for a notification's enabled flag. */
 	private static boolean defaultOf(String key)
 	{
 		HarnessConfig fresh = new HarnessConfig(new HarnessStore(), MapCompanionConfig.DEFAULT_MAP_URL);
@@ -383,7 +442,8 @@ public class SharingControlsTest
 			if (item == null || !item.keyName().equals(key)) continue;
 			try
 			{
-				return (Boolean) method.invoke(fresh);
+				Object value = method.invoke(fresh);
+				return value instanceof Notification ? ((Notification) value).isEnabled() : (Boolean) value;
 			}
 			catch (ReflectiveOperationException e)
 			{

@@ -34,6 +34,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import net.runelite.api.Client;
 import net.runelite.client.config.ConfigItem;
+import net.runelite.client.config.Notification;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -58,7 +59,7 @@ public class SharingConsentTest
 		assertEquals(new HashSet<>(Arrays.asList("id", "nick")), sent.getAsJsonObject("member").keySet());
 		assertEquals("Me", sent.getAsJsonObject("member").get("nick").getAsString());
 		assertFalse(fixture.config.showDestination());
-		assertFalse(fixture.config.notifyMeetups());
+		assertFalse(fixture.config.notifyMeetups().isEnabled());
 		assertFalse(fixture.config.showGroupOnWorldMap());
 	}
 
@@ -124,7 +125,8 @@ public class SharingConsentTest
 		for (Method method : MapCompanionConfig.class.getDeclaredMethods())
 		{
 			ConfigItem item = method.getAnnotation(ConfigItem.class);
-			if (item != null && method.getReturnType() == boolean.class
+			/* The meetup reminder is a RuneLite notification setting, off while its enabled flag is. */
+			if (item != null && (method.getReturnType() == boolean.class || method.getReturnType() == Notification.class)
 				&& ((item.section().equals(MapCompanionConfig.presenceSection)
 				|| item.section().equals(MapCompanionConfig.progressSection)
 				|| item.section().equals(MapCompanionConfig.tasksSection)
@@ -132,7 +134,8 @@ public class SharingConsentTest
 				|| method.getName().equals("showDestination") || method.getName().equals("notifyMeetups")
 				|| method.getName().equals("showGroupOnWorldMap")))
 			{
-				assertEquals(method.getName(), false, method.invoke(config));
+				Object value = method.invoke(config);
+				assertEquals(method.getName(), false, value instanceof Notification ? ((Notification) value).isEnabled() : value);
 				assertEquals(method.getName(), "", item.warning());
 				remoteFeatures++;
 			}

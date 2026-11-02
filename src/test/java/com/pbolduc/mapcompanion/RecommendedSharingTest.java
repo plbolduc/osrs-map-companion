@@ -42,6 +42,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 import net.runelite.client.config.ConfigItem;
+import net.runelite.client.config.Notification;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -64,7 +65,7 @@ public class RecommendedSharingTest
 		{
 			assertFalse("a sharing default stays off; the press is the opt-in: " + field.key, field.read.test(fresh));
 		}
-		assertFalse(fresh.notifyMeetups());
+		assertFalse(fresh.notifyMeetups().isEnabled());
 		assertTrue("a fresh install is offered the step", RecommendedSharing.offered(fresh));
 	}
 
@@ -95,7 +96,7 @@ public class RecommendedSharingTest
 			assertFalse("offered, and left unticked", box(fixture.step, "recommended.shareDeath").isSelected());
 			click(fixture.step, "recommended.share");
 			assertFalse(fixture.config.shareDeath());
-			assertFalse(fixture.config.notifyMeetups());
+			assertFalse(fixture.config.notifyMeetups().isEnabled());
 			assertNull(fixture.store.get("shareDeath"));
 			assertNull(fixture.store.get("notifyMeetups"));
 			assertNull("the press approves no server", fixture.store.get(Pairing.KEY_SERVER_CONSENT));
@@ -350,14 +351,20 @@ public class RecommendedSharingTest
 			step = new RecommendedSharing(config, store, closed::incrementAndGet);
 		}
 
-		/* Every choice, as stored. The pairing's own keys move on a reconnect and are not the step's to keep. */
+		/*
+		 * Every choice, as stored, the meetup reminder's notification setting among them. The pairing's
+		 * own keys move on a reconnect and are not the step's to keep.
+		 */
 		Map<String, String> values()
 		{
 			Map<String, String> values = new HashMap<>();
 			for (Method method : MapCompanionConfig.class.getDeclaredMethods())
 			{
 				ConfigItem item = method.getAnnotation(ConfigItem.class);
-				if (item != null && method.getReturnType() == boolean.class) values.put(item.keyName(), store.get(item.keyName()));
+				if (item != null && (method.getReturnType() == boolean.class || method.getReturnType() == Notification.class))
+				{
+					values.put(item.keyName(), store.get(item.keyName()));
+				}
 			}
 			return values;
 		}

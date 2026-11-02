@@ -57,6 +57,18 @@ interface ConfigStore
 
 	void unset(String key);
 
+	/**
+	 * Turn a RuneLite notification setting on or off, as a box in the sidebar does.
+	 *
+	 * <p>RuneLite reads a stored "true" or "false" there as on or off with its own notification
+	 * settings, which is all a store without them can keep. RuneLite's store keeps the rest; see
+	 * {@link NotificationChoice}.
+	 */
+	default void chooseNotification(String key, boolean on)
+	{
+		set(key, Boolean.toString(on));
+	}
+
 	/** Null means no character is selected; the empty string is the ordinary settings store. */
 	@Nullable
 	default String scopeKey()
@@ -162,6 +174,12 @@ interface ConfigStore
 			public void unset(String key)
 			{
 				configManager.unsetConfiguration(MapCompanionConfig.GROUP, key);
+			}
+
+			@Override
+			public void chooseNotification(String key, boolean on)
+			{
+				NotificationChoice.choose(configManager, key, on);
 			}
 		};
 	}

@@ -177,7 +177,9 @@ installation key are per installation, not per server or group, and [Network and
 reads (Paste) and writes (Copy invite, Copy connection code) happen only on a button press; an
 invite link is copied only if it is on the approved map. Meetup notifications use RuneLite's
 `Notifier`, with the title stripped of control characters, cut to 60 characters, and at most one a
-minute.
+minute. *Notify before a meetup* is a RuneLite `Notification` setting, so its cog in RuneLite's panel
+says how it arrives; the sidebar's box turns it on with RuneLite's own notification settings copied
+and *Send notifications when focused* on, and leaves one the player customised as they set it.
 
 `BoatReader` reads the five `SAILING_BOAT_n_*` varbits and looks a stored port up in the game's
 `SailingDock` table by value, as the game's own dock lookup does; it is read-only.
@@ -265,6 +267,11 @@ Say these in the description of the next Hub update, as changes from what was ap
   now sends the clue itself, its tier, words and scroll item id, in that one request, whether or not
   *Share clue* is on; the map places the step with its own clue table. Before, only a coordinate's
   or a beginner map's tile was sent, and a worded step offered no Route.
+- **The meetup reminder while playing**: *Notify before a meetup* is now a RuneLite `Notification`
+  setting, still off by default, and a stored `true` or `false` still reads as on or off. Ticked in
+  the sidebar, it is written as RuneLite's panel initialises a customised notification, from
+  RuneLite's own settings, with *Send notifications when focused* on, so it reaches a player whose
+  RuneLite window is focused. It still goes only through `Notifier`, and nothing leaves the machine.
 
 ## Before submission
 
