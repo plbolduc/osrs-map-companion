@@ -249,6 +249,27 @@ public class GroupPanelTest
 		assertTrue(sent.isEmpty());
 	}
 
+	/**
+	 * A friend's Route is on their name's line, as a meetup's is beside its title, so Finding…,
+	 * Planning… and Reroute read beside the name they are about. World map keeps the row under the card.
+	 */
+	@Test
+	public void aFriendsRouteSitsBesideTheirName() throws Exception
+	{
+		AtomicReference<GroupPanel> panel = new AtomicReference<>();
+		SwingUtilities.invokeAndWait(() -> panel.set(panel()));
+		social();
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.get().refresh(true);
+			Container card = (Container) namedComponent(panel.get(), "group.friend.cara");
+			assertTrue("Route is on the name's line, the card's first row",
+				SwingUtilities.isDescendingFrom(named(panel.get(), "group.route.cara"), card.getComponent(0)));
+			assertFalse("World map keeps the row under the card",
+				SwingUtilities.isDescendingFrom(named(panel.get(), "group.show.cara"), card.getComponent(0)));
+		});
+	}
+
 	@Test
 	public void routeToAFriendWaitsForTheirDotThenGoesOnceToWhereTheyStand() throws Exception
 	{
