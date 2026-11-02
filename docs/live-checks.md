@@ -260,6 +260,16 @@ The website plan's second session, once the routes in the game are built: a memb
 - [ ] **Route back.** Die somewhere ordinary with *Share death* off, respawn and press Route back.
       Then, if convenient, die at a boss fought in an instance (Vorkath, Zulrah): note where the
       route goes. The map's half decides whether it is the boss's way in.
+- [ ] **The gravestone's time left.** Die somewhere ordinary. Once you respawn, the death card says
+      *Gravestone · 15m left* under *You died …*, over a full orange bar. For a few minutes, compare
+      it with the game's own gravestone timer: the card's minutes are the game's, rounded up, which
+      is the unit the game's HUD script gives the varbit (game ticks of 0.6s). If no line appears
+      while the game's timer runs, `GRAVESTONE_VISIBLE` does not mean that a stone stands, and the
+      card must stop asking it. Log out for two minutes and back in: note whether the game's timer
+      paused, and check the line comes back about fifteen seconds after login, agreeing with it. If
+      convenient, have the stone blessed and note what the game's timer shows; past fifteen minutes
+      the card shows no time, as the game prints none. Pick the stone up: the line and the bar go,
+      and *You died …* stays.
 - [ ] **Route here.** Right-click empty ground on the world map: *Route here* sits below Cancel,
       and a left-click still drags the map and plans nothing. Choose it on a spot a few tiles from a
       landmark: the route under Now ends on that tile, not the one beside it. Logged out of the

@@ -185,6 +185,10 @@ and *Send notifications when focused* on, and leaves one the player customised a
 `BoatReader` reads the five `SAILING_BOAT_n_*` varbits and looks a stored port up in the game's
 `SailingDock` table by value, as the game's own dock lookup does; it is read-only.
 
+`DeathWatcher` reads `GRAVESTONE_VISIBLE` and `GRAVESTONE_DURATION` on the game tick, once the
+session has settled, to show the gravestone's own time left under the death card. It is read-only
+and local: nothing about it joins a snapshot or any request.
+
 The plugin takes no gameplay action. `StashReader` uses
 the read-only `WATSON_STASH_UNIT_CHECK` script used by RuneLite's clue plugin, only with STASH
 sharing enabled, at most once a minute. `DestinationArrow` sets the hint arrow on a loaded

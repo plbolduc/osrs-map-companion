@@ -39,6 +39,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.ui.ColorScheme;
+import net.runelite.client.ui.components.ThinProgressBar;
 import net.runelite.client.util.LinkBrowser;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.card;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.CARD_TEXT_WIDTH;
@@ -89,6 +90,14 @@ final class NowCards extends JPanel
 	private final JLabel eventWhen = new JLabel();
 	private final JLabel eventTitle = new JLabel();
 	private final JLabel deathLabel = new JLabel();
+	/**
+	 * The gravestone's time left, by the game's own timer ({@link DeathWatcher#gravestone}), with a
+	 * bar full at the first reading and draining, as RuneLite's Time Tracking draws one. In the card's
+	 * own ink and the bar's in-progress orange, never red: nothing has gone wrong with the plugin.
+	 */
+	private final JLabel graveLabel = new JLabel();
+	private final ThinProgressBar graveBar = new ThinProgressBar();
+	private final JPanel grave = MapCompanionPanel.column(ColorScheme.DARKER_GRAY_COLOR);
 	/**
 	 * The map at the tile where you died, which is the question the line above it raises.
 	 *
@@ -209,6 +218,15 @@ final class NowCards extends JPanel
 		JPanel death = card();
 		deathLabel.setFont(deathLabel.getFont().deriveFont(12f));
 		death.add(left(deathLabel));
+		graveLabel.setName("now.death.grave");
+		graveLabel.setFont(graveLabel.getFont().deriveFont(11f));
+		graveLabel.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+		grave.add(left(graveLabel));
+		grave.add(gap(3, ColorScheme.DARKER_GRAY_COLOR));
+		graveBar.setForeground(ColorScheme.PROGRESS_INPROGRESS_COLOR);
+		grave.add(left(graveBar));
+		grave.setVisible(false);
+		death.add(left(grave));
 		death.add(gap(5, ColorScheme.DARKER_GRAY_COLOR));
 		/* The card's width, as Dismiss is in the card above: the same shape for "act on this card". */
 		deathActions.add(deathMapButton);
@@ -284,6 +302,12 @@ final class NowCards extends JPanel
 		long minutes = msAgo / 60_000L;
 		return "You died " + (minutes < 1 ? "just now" : minutes + "m ago")
 			   + (plane > 0 ? " on floor " + plane : "");
+	}
+
+	/** "Gravestone · 8m left": the line under the death, while the game says a stone stands. */
+	static String graveLine(DeathWatcher.Stone stone)
+	{
+		return "Gravestone · " + stone.left();
 	}
 
 	/** The tile for the tooltip: "3222, 3218", with "(floor 1)" after it when it is upstairs. */
@@ -507,6 +531,14 @@ final class NowCards extends JPanel
 			 * under it does the one thing anybody wanted it for.
 			 */
 			deathLabel.setToolTipText(deathTile(death.tile.x, death.tile.y, death.tile.plane));
+			DeathWatcher.Stone stone = deathWatcher.gravestone(now);
+			grave.setVisible(stone != null);
+			if (stone != null)
+			{
+				setWrapped(graveLabel, graveLine(stone), CARD_TEXT_WIDTH);
+				graveBar.setMaximumValue(stone.ticksFull);
+				graveBar.setValue(stone.ticksLeft);
+			}
 			deathMapButton.setToolTipText(config.shareDeath()
 										  ? "Open the map at the tile where you died"
 										  : "Open the map at the tile where you died. Sharing it is off, so it leaves this "
