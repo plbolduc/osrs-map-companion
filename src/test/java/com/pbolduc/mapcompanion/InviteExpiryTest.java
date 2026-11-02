@@ -43,9 +43,9 @@ public class InviteExpiryTest
 	@Test
 	public void countsWholeDays()
 	{
-		assertEquals(" It expires in 7 days.", MapCompanionPanel.describeExpiry(
+		assertEquals(" It expires in 7 days.", ConnectCard.describeExpiry(
 						 Long.toString(NOW + 7 * 86_400_000L), NOW));
-		assertEquals(" It expires in 1 day.", MapCompanionPanel.describeExpiry(
+		assertEquals(" It expires in 1 day.", ConnectCard.describeExpiry(
 						 Long.toString(NOW + 86_400_000L + 60_000L), NOW));
 	}
 
@@ -57,33 +57,33 @@ public class InviteExpiryTest
 	@Test
 	public void aNewInviteIsTheSevenDaysTheMapGaveIt()
 	{
-		assertEquals(" It expires in 7 days.", MapCompanionPanel.describeExpiry(
+		assertEquals(" It expires in 7 days.", ConnectCard.describeExpiry(
 						 Long.toString(NOW + 7 * 86_400_000L - 1_500L), NOW));
-		assertEquals(" It expires in 23 hours.", MapCompanionPanel.describeExpiry(
+		assertEquals(" It expires in 23 hours.", ConnectCard.describeExpiry(
 						 Long.toString(NOW + 86_400_000L - 60_000L), NOW));
 	}
 
 	@Test
 	public void fallsBackToHoursAndThenToSoon()
 	{
-		assertEquals(" It expires in 5 hours.", MapCompanionPanel.describeExpiry(
+		assertEquals(" It expires in 5 hours.", ConnectCard.describeExpiry(
 						 Long.toString(NOW + 5 * 3_600_000L), NOW));
-		assertEquals(" It expires in 1 hour.", MapCompanionPanel.describeExpiry(
+		assertEquals(" It expires in 1 hour.", ConnectCard.describeExpiry(
 						 Long.toString(NOW + 3_600_000L), NOW));
-		assertEquals(" It expires within the hour.", MapCompanionPanel.describeExpiry(
+		assertEquals(" It expires within the hour.", ConnectCard.describeExpiry(
 						 Long.toString(NOW + 60_000L), NOW));
 	}
 
 	@Test
 	public void saysNothingWhenTheMapSaidNothingUsable()
 	{
-		assertEquals("", MapCompanionPanel.describeExpiry(null, NOW));
-		assertEquals("", MapCompanionPanel.describeExpiry("", NOW));
+		assertEquals("", ConnectCard.describeExpiry(null, NOW));
+		assertEquals("", ConnectCard.describeExpiry("", NOW));
 		/** An instant as text: readable by a person, not by this, and not worth guessing at. */
-		assertEquals("", MapCompanionPanel.describeExpiry("2026-09-14T00:00:00Z", NOW));
+		assertEquals("", ConnectCard.describeExpiry("2026-09-14T00:00:00Z", NOW));
 		/** Seconds rather than milliseconds reads as long past, which is silence rather than a lie. */
-		assertEquals("", MapCompanionPanel.describeExpiry(Long.toString(NOW / 1000L + 604_800L), NOW));
+		assertEquals("", ConnectCard.describeExpiry(Long.toString(NOW / 1000L + 604_800L), NOW));
 		/** And an invite that has already expired is not news to put beside a fresh one. */
-		assertEquals("", MapCompanionPanel.describeExpiry(Long.toString(NOW - 1L), NOW));
+		assertEquals("", ConnectCard.describeExpiry(Long.toString(NOW - 1L), NOW));
 	}
 }

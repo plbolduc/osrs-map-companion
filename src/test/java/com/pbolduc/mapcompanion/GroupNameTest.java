@@ -101,10 +101,10 @@ public class GroupNameTest
 	@Test
 	public void theMenuSaysTheNameBesideTheCodeOrTheCodeAlone()
 	{
-		assertEquals("Sunday raids · KQX 482", MapCompanionPanel.groupLabel("KQX482", "Sunday raids"));
-		assertEquals("KQX 482", MapCompanionPanel.groupLabel("KQX482", null));
+		assertEquals("Sunday raids · KQX 482", ConnectCard.groupLabel("KQX482", "Sunday raids"));
+		assertEquals("KQX 482", ConnectCard.groupLabel("KQX482", null));
 		/** An adopted legacy group is named after its own code until its owner names it: once is enough. */
-		assertEquals("KQX 482", MapCompanionPanel.groupLabel("KQX482", "KQX 482"));
+		assertEquals("KQX 482", ConnectCard.groupLabel("KQX482", "KQX 482"));
 	}
 
 	@Test
@@ -116,7 +116,7 @@ public class GroupNameTest
 		 * anything laid out inside this client, images fetched from anywhere included.
 		 */
 		String name = "<html><b>Sunday</b>";
-		JMenuItem item = MapCompanionPanel.groupMenuItem(MapCompanionPanel.groupLabel("KQX482", name));
+		JMenuItem item = ConnectCard.groupMenuItem(ConnectCard.groupLabel("KQX482", name));
 
 		assertEquals(name + " · KQX 482", item.getText());
 		assertNull("no markup view was built for it", item.getClientProperty(BasicHTML.propertyKey));

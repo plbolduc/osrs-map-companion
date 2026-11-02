@@ -136,7 +136,7 @@ final class GroupPanel extends JPanel
 	private String drawn;
 	private boolean ready;
 	/**
-	 * Copy invite, which {@link MapCompanionPanel} owns, presses and words. The card of a group of one
+	 * Copy invite, which {@link ConnectCard} owns, presses and words. The card of a group of one
 	 * holds it, under the sentence that is about it; otherwise it sits beside Switch ▾ under the tab.
 	 */
 	private final JButton invite;

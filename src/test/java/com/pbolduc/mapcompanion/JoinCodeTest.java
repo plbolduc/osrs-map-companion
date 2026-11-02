@@ -149,7 +149,7 @@ public class JoinCodeTest
 	public void takesTheWholeInviteMessageThisPluginWrites()
 	{
 		/**
-		 * Verbatim from {@code MapCompanionPanel.finishInvite}. The message names the code twice,
+		 * Verbatim from {@code ConnectCard.finishInvite}. The message names the code twice,
 		 * in a link and in words, and both name the same group — so whichever the parser reaches
 		 * first, the answer is the same one.
 		 */
@@ -195,7 +195,7 @@ public class JoinCodeTest
 	@Test
 	public void takesTheInviteOutOfTheMessageCopyInviteWrites()
 	{
-		String message = MapCompanionPanel.inviteMessage("https://osrs-map.com/map?join=ABC234&i=K7PQ2M3XABCDEFGH&task=companion");
+		String message = ConnectCard.inviteMessage("https://osrs-map.com/map?join=ABC234&i=K7PQ2M3XABCDEFGH&task=companion");
 		JoinCode parsed = JoinCode.parse(message);
 		assertNotNull(parsed);
 		assertEquals("ABC234", parsed.code);
