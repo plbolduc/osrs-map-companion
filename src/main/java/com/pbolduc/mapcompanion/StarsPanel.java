@@ -637,11 +637,31 @@ final class StarsPanel extends JPanel
 	/** One component the full width of the column, at its own height. */
 	private static JComponent fill(JComponent component)
 	{
-		JPanel holder = new JPanel(new BorderLayout());
+		JPanel holder = new Row();
 		holder.setOpaque(false);
 		holder.add(component, BorderLayout.CENTER);
-		holder.setMaximumSize(new Dimension(Integer.MAX_VALUE, component.getPreferredSize().height));
 		return left(holder);
+	}
+
+	/**
+	 * A holder whose height is its component's as laid out, not as built. The P2P and F2P stars land
+	 * after the filter row is built and make it taller; under a maximum fixed before that, BoxLayout
+	 * would cut the row and squeeze the rest of the tab, Data from Star Miners off the bottom first.
+	 */
+	private static final class Row extends JPanel
+	{
+		private static final long serialVersionUID = 1L;
+
+		Row()
+		{
+			super(new BorderLayout());
+		}
+
+		@Override
+		public Dimension getMaximumSize()
+		{
+			return new Dimension(Integer.MAX_VALUE, getPreferredSize().height);
+		}
 	}
 
 	private static JComponent gap(int height)
@@ -655,6 +675,8 @@ final class StarsPanel extends JPanel
 		gap.setBackground(background);
 		gap.setPreferredSize(new Dimension(1, height));
 		gap.setMaximumSize(new Dimension(Integer.MAX_VALUE, height));
+		/* A plain panel's FlowLayout asks for 10px at least, and a squeezed column grows a gap to that. */
+		gap.setMinimumSize(new Dimension(0, height));
 		return left(gap);
 	}
 

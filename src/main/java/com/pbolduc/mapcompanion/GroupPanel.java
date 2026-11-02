@@ -94,6 +94,9 @@ final class GroupPanel extends JPanel
 	static final String WORLD_MAP = "World map";
 	/** A news line's picture: the game's 16px skill icons, and an item's sprite shrunk to match. */
 	private static final int NEWS_PICTURE = 16;
+	/** The picture's place while the client's cache answers, as a route step keeps it. */
+	private static final javax.swing.ImageIcon NO_PICTURE_YET = new javax.swing.ImageIcon(
+		new java.awt.image.BufferedImage(NEWS_PICTURE, NEWS_PICTURE, java.awt.image.BufferedImage.TYPE_INT_ARGB));
 
 	private final transient DestinationState destinations;
 	private final transient GroupState group;
@@ -431,6 +434,14 @@ final class GroupPanel extends JPanel
 			MapCompanionPanel.setWrapped(news, row.news.title + " · " + ago(now - row.news.atMs),
 				pictured ? WIDTH - NEWS_PICTURE - 5 : WIDTH);
 			news.setIconTextGap(5);
+			/*
+			 * The picture arrives later, and the card is measured now: a blank of its size keeps the
+			 * line as tall as it will be, so the card never grows under its own slot when it lands.
+			 */
+			if (pictured)
+			{
+				news.setIcon(NO_PICTURE_YET);
+			}
 			if (row.news.itemId != null)
 			{
 				sprites.item(news, row.news.itemId, NEWS_PICTURE);
@@ -781,12 +792,32 @@ final class GroupPanel extends JPanel
 
 	private static JPanel slot(JPanel card)
 	{
-		JPanel slot = new JPanel(new java.awt.BorderLayout());
+		JPanel slot = new Slot();
 		slot.setBackground(ColorScheme.DARK_GRAY_COLOR);
 		slot.setBorder(new EmptyBorder(0, 0, 3, 0));
 		slot.add(card);
-		slot.setMaximumSize(new java.awt.Dimension(Integer.MAX_VALUE, slot.getPreferredSize().height));
 		return MapCompanionPanel.left(slot);
+	}
+
+	/**
+	 * A card's place in the column: the column's width, and the card's height as it is when laid
+	 * out. A height fixed when the card was built falls short once anything in it grows, and
+	 * BoxLayout cuts a row to its maximum and squeezes the column under it.
+	 */
+	private static final class Slot extends JPanel
+	{
+		private static final long serialVersionUID = 1L;
+
+		Slot()
+		{
+			super(new java.awt.BorderLayout());
+		}
+
+		@Override
+		public java.awt.Dimension getMaximumSize()
+		{
+			return new java.awt.Dimension(Integer.MAX_VALUE, getPreferredSize().height);
+		}
 	}
 
 	private static JPanel actions()
@@ -811,6 +842,8 @@ final class GroupPanel extends JPanel
 		spacer.setOpaque(false);
 		spacer.setPreferredSize(new java.awt.Dimension(1, height));
 		spacer.setMaximumSize(new java.awt.Dimension(Integer.MAX_VALUE, height));
+		/* A plain panel's FlowLayout asks for 10px at least, and a squeezed column grows a gap to that. */
+		spacer.setMinimumSize(new java.awt.Dimension(0, height));
 		return MapCompanionPanel.left(spacer);
 	}
 
