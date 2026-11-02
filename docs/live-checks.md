@@ -210,7 +210,10 @@ The website plan's second session, once the routes in the game are built: a memb
       quest's arrow set first is left alone.
 - [ ] **The step on screen.** Follow a route with the sidebar closed: a small box in the top left
       names the destination and the step the sidebar marks, moves on with it, and goes on arrival.
-      It can be dragged like any RuneLite box, and it is not drawn inside an instance.
+      It can be dragged like any RuneLite box, and it is not drawn inside an instance. Search for
+      *Civitas illa Fortis east bank deposit box* and follow it: the whole name wraps inside the box.
+      Route to a star on another world: the box and the tile's label both end in its world, *(W302)*;
+      hop to that world and both drop it.
 - [ ] **Route keys.** Set *Reroute key* to Ctrl+R and *Follow and pause key* to Ctrl+F. On a farm run,
       Ctrl+F pauses and follows it and Ctrl+R reroutes it; twice within five seconds asks once. With
       no run, they act on the destination's own buttons, and do nothing with neither shown.

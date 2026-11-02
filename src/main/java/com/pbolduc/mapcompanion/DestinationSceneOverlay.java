@@ -88,7 +88,7 @@ public class DestinationSceneOverlay extends Overlay
 		}
 		try
 		{
-			String label = label(destination);
+			String label = label(destination) + elsewhere(destination, client.getWorld());
 			for (LocalPoint local : localPoints(client, destination))
 			{
 				Polygon poly = Perspective.getCanvasTilePoly(client, local);
@@ -123,23 +123,39 @@ public class DestinationSceneOverlay extends Overlay
 	}
 
 	/**
-	 * The name as drawn in the game scene, where RuneLite reads {@code <col=…>} tags. Any member of the
-	 * group can set the destination, so its name is stripped of tags and control characters and cut
-	 * to a label's length before it can colour or crowd a friend's screen.
+	 * The name as drawn in the game scene, cut to a label's length: one line over the scene, where a
+	 * long one would crowd a friend's screen.
 	 */
 	static String label(RelayResponse.Destination destination)
 	{
-		String name = destination.name == null ? "" : Text.removeTags(destination.name)
-			.replaceAll("\\p{Cntrl}", " ").replaceAll("\\s+", " ").trim();
+		String name = name(destination.name, 40);
+		return name == null ? "Destination" : name;
+	}
+
+	/**
+	 * A destination's name made safe to draw, here and in the step box. RuneLite reads
+	 * {@code <col=…>} tags in both, and any member of the group can set the destination, so tags and
+	 * control characters come out, runs of spaces close up, and the name is cut to {@code max}
+	 * characters. Null when nothing is left.
+	 */
+	@Nullable
+	static String name(@Nullable String typed, int max)
+	{
+		String name = typed == null ? "" : Text.removeTags(typed).replaceAll("\\p{Cntrl}", " ").replaceAll("\\s+", " ").trim();
 		if (name.isEmpty())
 		{
-			name = "Destination";
+			return null;
 		}
-		else if (name.length() > 40)
-		{
-			name = name.substring(0, 39) + "…";
-		}
-		return destination.world == null ? name : name + " (W" + destination.world + ")";
+		return name.length() > max ? name.substring(0, max - 1) + "…" : name;
+	}
+
+	/**
+	 * The destination's world, as the label and the step box add it: only while the player is on
+	 * another world, where it says which to hop to. On that world it is one more thing to read.
+	 */
+	static String elsewhere(RelayResponse.Destination destination, int currentWorld)
+	{
+		return destination.world == null || destination.world == currentWorld ? "" : " (W" + destination.world + ")";
 	}
 
 	/**

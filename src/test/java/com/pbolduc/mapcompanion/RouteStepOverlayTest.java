@@ -26,6 +26,11 @@
 package com.pbolduc.mapcompanion;
 
 import com.google.gson.Gson;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -33,6 +38,7 @@ import java.nio.file.Paths;
 import net.runelite.api.coords.WorldPoint;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 /** The box over the game says the step the sidebar marks, and only while the route is followed. */
@@ -79,5 +85,88 @@ public class RouteStepOverlayTest
 		assertEquals("Bank", RouteStepOverlay.box(route.view(), "<col=ff0000>Bank</col>").title);
 		assertEquals("Route", RouteStepOverlay.box(route.view(), "<col=ff0000></col>").title);
 		assertEquals("Route", RouteStepOverlay.box(route.view(), null).title);
+	}
+
+	/**
+	 * A long name wraps inside the box, as the step line does, rather than running past both of its
+	 * sides as one centred line, cut off where the box sits at the screen's edge.
+	 */
+	@Test
+	public void aLongNameWrapsInsideTheBox() throws IOException
+	{
+		RelayResponse.Destination destination = received();
+		route.follow(true);
+		Dimension one = drawn(destination);
+		destination.name = "Civitas illa Fortis east bank deposit box";
+		Dimension wrapped = drawn(destination);
+		assertEquals("no letter is drawn outside the box", 0, lettersOutside);
+		assertTrue("the name took another line rather than being dropped", wrapped.height > one.height);
+	}
+
+	/**
+	 * The box names the destination in the tile label's words, and adds its world as the label does:
+	 * only while the player is on another, where it says which world to hop to.
+	 */
+	@Test
+	public void namesTheWorldOnlyWhileThePlayerIsOnAnother() throws IOException
+	{
+		RelayResponse.Destination destination = received();
+		route.follow(true);
+		RouteStepOverlay.Box box = RouteStepOverlay.box(route.view(), destination.name);
+		assertEquals("Lumbridge (W302)", RouteStepOverlay.title(box, destination, 444));
+		assertEquals("Lumbridge", RouteStepOverlay.title(box, destination, 302));
+		assertEquals("the tile's label says the same", RouteStepOverlay.title(box, destination, 444),
+			DestinationSceneOverlay.label(destination) + DestinationSceneOverlay.elsewhere(destination, 444));
+		assertEquals(RouteStepOverlay.title(box, destination, 302),
+			DestinationSceneOverlay.label(destination) + DestinationSceneOverlay.elsewhere(destination, 302));
+		destination.world = null;
+		assertEquals("a destination on any world names none", "Lumbridge", RouteStepOverlay.title(box, destination, 444));
+	}
+
+	/** The tile's one line cuts a long name short; the box, which wraps, keeps it whole, up to a bound. */
+	@Test
+	public void keepsTheWholeNameTheTileCutsShort() throws IOException
+	{
+		RelayResponse.Destination destination = received();
+		route.follow(true);
+		destination.name = "Civitas illa Fortis east bank deposit box";
+		assertEquals(destination.name, RouteStepOverlay.box(route.view(), destination.name).title);
+		assertEquals("Civitas illa Fortis east bank deposit b…", DestinationSceneOverlay.label(destination));
+		assertEquals("a name somebody typed is still bounded", 120,
+			RouteStepOverlay.box(route.view(), "a".repeat(500)).title.length());
+	}
+
+	/** White pixels drawn outside the box by the last {@link #drawn}. */
+	private int lettersOutside;
+
+	/** The box as the game draws it, twice, because a panel sizes its background from the frame before. */
+	private Dimension drawn(RelayResponse.Destination destination)
+	{
+		DestinationState destinations = new DestinationState(new Gson());
+		destinations.selectLocal(destination);
+		HarnessGame game = new HarnessGame();
+		game.login("Example", 444, 3222, 3218, 0);
+		RouteStepOverlay overlay = new RouteStepOverlay(game.client(),
+			new HarnessConfig(new HarnessStore(), MapCompanionConfig.DEFAULT_MAP_URL), destinations, route);
+		int left = 200;
+		BufferedImage image = new BufferedImage(600, 240, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D graphics = image.createGraphics();
+		graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+		graphics.translate(left, 20);
+		overlay.render(graphics);
+		Dimension size = overlay.render(graphics);
+		graphics.dispose();
+		lettersOutside = 0;
+		for (int y = 0; y < image.getHeight(); y++)
+		{
+			for (int x = 0; x < image.getWidth(); x++)
+			{
+				if (image.getRGB(x, y) == Color.WHITE.getRGB() && (x < left || x >= left + size.width))
+				{
+					lettersOutside++;
+				}
+			}
+		}
+		return size;
 	}
 }
