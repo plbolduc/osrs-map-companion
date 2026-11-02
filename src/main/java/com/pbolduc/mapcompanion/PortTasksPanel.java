@@ -56,7 +56,8 @@ import net.runelite.client.ui.ColorScheme;
  * and its voyage on the world map, ticked by the slots' own counters. While a run is held the
  * per-task lines step aside, since every stop says its tasks in the order they are done. It is
  * offered only with Boats and moorings shared too: a run sails the player's own boat, and the map
- * plans no voyage from a boat it was never told about.
+ * plans no voyage from a boat it was never told about. Nor beside a farm run still being walked:
+ * the map keeps one run a member, so a Start here would replace it.
  *
  * <p>EDT only. The reading is immutable and replaced whole, so an unchanged one rebuilds nothing.
  */
@@ -66,6 +67,7 @@ final class PortTasksPanel extends JPanel
 	private static final int WIDTH = MapCompanionPanel.CARD_TEXT_WIDTH;
 	private static final Color MUTED = ColorScheme.LIGHT_GRAY_COLOR;
 	static final String NEEDS_BOATS = "Turn on Boats and moorings to plan these as one run.";
+	static final String AFTER_FARM_RUN = "Start run after the farm run ends.";
 	private final transient PortTaskReader reader;
 	private final transient MapCompanionConfig config;
 	private final transient FarmRunClient client;
@@ -136,10 +138,12 @@ final class PortTasksPanel extends JPanel
 		 */
 		boolean running = run.busy();
 		boolean offer = startable(slots) && !running;
-		starter.setVisible(offer && config.shareBoats());
+		/* The farm card's run being walked holds Start back too, and the line where it was says so. */
+		boolean after = offer && config.shareBoats() && run.otherBusy();
+		starter.setVisible(offer && config.shareBoats() && !after);
 		start.setEnabled(connected && client.ready());
-		hint.setVisible(offer && !config.shareBoats());
-		MapCompanionPanel.setWrapped(hint, NEEDS_BOATS, WIDTH);
+		hint.setVisible(offer && (!config.shareBoats() || after));
+		MapCompanionPanel.setWrapped(hint, after ? AFTER_FARM_RUN : NEEDS_BOATS, WIDTH);
 		if (!worth)
 		{
 			shown = null;
