@@ -56,8 +56,10 @@ import net.runelite.client.ui.overlay.worldmap.WorldMapPointManager;
  *
  * <p>When the destination came with its route, each step's end has a numbered pin too, with the
  * number the sidebar and the website give that step. Only the current step's pin holds the map's
- * edge: a row of discs round the border would say nothing about which way to go. The steps behind
- * it fade, and the last step's pin is left out where it would sit on the destination's own.
+ * edge: a row of discs round the border would say nothing about which way to go. The destination's
+ * own pin leaves the edge to it, and holds it again when no step's pin is current, as on the last
+ * step. The steps behind it fade, and the last step's pin is left out where it would sit on the
+ * destination's own.
  *
  * <p>While Route here plans, the spot it was pressed on has the destination's pin, faded, so the
  * press shows it took on the map it was made on. It does not hold the edge, being where the player
@@ -135,9 +137,10 @@ public class DestinationMarker
 
 	private void syncNow()
 	{
-		syncDestination();
+		List<StepPin> shown = shownSteps();
+		syncDestination(shown.stream().anyMatch(pin -> pin.place == 0));
 		syncMeetup();
-		syncSteps();
+		syncSteps(shown);
 		syncFarmStops();
 		syncPlanning();
 	}
@@ -159,7 +162,8 @@ public class DestinationMarker
 		points.add(planning);
 	}
 
-	private void syncDestination()
+	/** @param stepLeads whether the current step's pin is drawn, holding the map's edge */
+	private void syncDestination(boolean stepLeads)
 	{
 		RelayResponse.Destination destination =
 			config.showDestination() || state.hasLocalDestination() ? state.getDestination() : null;
@@ -173,7 +177,7 @@ public class DestinationMarker
 		String tooltip = destination.world == null
 						 ? destination.name
 						 : destination.name + " (W" + destination.world + ")";
-		String key = where + "|" + tooltip;
+		String key = where + "|" + tooltip + "|" + stepLeads;
 		if (current != null && key.equals(currentKey))
 		{
 			return;
@@ -181,6 +185,11 @@ public class DestinationMarker
 
 		removeDestination();
 		current = new MapPin(where, MapPin.AMBER, "", false, "Destination", () -> tooltip);
+		/*
+		 * Rebuilt rather than switched when this changes: a point let go of while held at the edge
+		 * keeps the edge's disc for a picture, because RuneLite only swaps it back while it snaps.
+		 */
+		current.setSnapToEdge(!stepLeads);
 		currentKey = key;
 		points.add(current);
 	}
@@ -218,20 +227,23 @@ public class DestinationMarker
 	 * The route's step pins, while the destination they lead to is drawn and its route is the one
 	 * {@link DestinationRoute} holds for it.
 	 */
-	private void syncSteps()
+	private List<StepPin> shownSteps()
 	{
 		// Run ordinals label its stops; a second set of step ordinals would make each number ambiguous.
 		if (farming != null && farming.owns(state.getDestination()))
 		{
-			removeSteps();
-			return;
+			return new ArrayList<>();
 		}
 		RelayResponse.Destination destination =
 			config.showDestination() || state.hasLocalDestination() ? state.getDestination() : null;
 		DestinationRoute.View view = destination == null ? null : route.view();
-		List<StepPin> wanted = view == null || !view.key.equals(DestinationRoute.keyOf(destination))
+		return view == null || !view.key.equals(DestinationRoute.keyOf(destination))
 			? new ArrayList<>()
 			: stepPins(view);
+	}
+
+	private void syncSteps(List<StepPin> wanted)
+	{
 		String key = wanted.toString();
 		if (key.equals(stepsKey))
 		{
