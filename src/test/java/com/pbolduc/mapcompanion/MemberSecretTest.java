@@ -288,7 +288,7 @@ public class MemberSecretTest
 		plugin.storeIssuedSecret();
 
 		assertNull("nothing of ABC234's is presented to DEF567", plugin.pairing.secret(MEMBER));
-		plugin.pairing.switchTo("ABC234");
+		plugin.pairing.join(JoinCode.parse("ABC234"));
 		assertEquals("and it is still there for the group that issued it", SECRET, plugin.pairing.secret(MEMBER));
 	}
 
@@ -307,7 +307,7 @@ public class MemberSecretTest
 		plugin.pairing.leave();
 
 		assertNull(plugin.pairing.secret(MEMBER));
-		plugin.pairing.switchTo("ABC234");
+		plugin.pairing.join(JoinCode.parse("ABC234"));
 		assertNull("Leave is not a switch: it forgets what every group issued", plugin.pairing.secret(MEMBER));
 	}
 

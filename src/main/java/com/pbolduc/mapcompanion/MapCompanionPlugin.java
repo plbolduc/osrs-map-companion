@@ -1579,13 +1579,6 @@ public class MapCompanionPlugin extends Plugin
 		}
 	}
 
-	/** A local event cannot be replayed to a group joined after it happened. */
-	boolean sharingMilestones()
-	{
-		return config.shareMilestones() && client.getGameState() == GameState.LOGGED_IN
-			   && config.pairingCode() != null && !config.pairingCode().trim().isEmpty();
-	}
-
 	/** Settle first, then assign retry identity. No extra posts or independent timers are added. */
 	void flushRewards(long now)
 	{

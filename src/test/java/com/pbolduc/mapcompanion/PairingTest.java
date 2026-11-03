@@ -116,7 +116,7 @@ public class PairingTest
 		pairing.join(JoinCode.parse("ABC234"));
 		pairing.join(JoinCode.parse("DEF567-K7PQ2M3X"));
 
-		pairing.switchTo("ABC234");
+		pairing.join(JoinCode.parse("ABC234"));
 
 		assertEquals("ABC234", pairing.code());
 		assertNull(pairing.suffix());
@@ -157,7 +157,7 @@ public class PairingTest
 		assertNull(pairing.secret(MEMBER));
 
 		/** And coming back finds it, which is the whole reason it is filed rather than replaced. */
-		pairing.switchTo("ABC234");
+		pairing.join(JoinCode.parse("ABC234"));
 		assertEquals(SECRET, pairing.secret(MEMBER));
 	}
 
@@ -239,7 +239,7 @@ public class PairingTest
 		}
 
 		assertFalse(pairing.knownCodes().contains("AAA222"));
-		pairing.switchTo("AAA222");
+		pairing.join(JoinCode.parse("AAA222"));
 		assertNull("a group nobody can press a button to reach keeps no credential", pairing.secret(MEMBER));
 	}
 
@@ -260,7 +260,7 @@ public class PairingTest
 
 		pairing.leave();
 
-		pairing.switchTo("ABC234");
+		pairing.join(JoinCode.parse("ABC234"));
 		assertNull(pairing.secret(MEMBER));
 	}
 
