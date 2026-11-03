@@ -226,7 +226,6 @@ public class WhereToGoShot
 					directive.events.add(later);
 				}
 				directive.destination = null;
-				directive.event = null;
 				destinations.acceptSocial(directive, true);
 			}
 			if (state.equals("death"))

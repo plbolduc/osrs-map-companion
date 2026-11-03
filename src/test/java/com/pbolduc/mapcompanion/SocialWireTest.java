@@ -45,20 +45,28 @@ public class SocialWireTest
 		return gson.fromJson("{\"memberSecret\":\"kept\",\"directive\":" + directive + "}", RelayResponse.class);
 	}
 
+	/*
+	 * Rewritten when the map's older single meetup stopped being read: the map still sends it beside
+	 * the week's meetups for plugins released before, and this one ignores it, so a reply with only
+	 * that is a sidebar with no meetups rather than a reply that fails, and the destination beside it
+	 * stands.
+	 */
 	@Test
 	public void aMapThatSendsNeitherIsTodaysSidebar()
 	{
-		RelayResponse reply = read("{\"event\":{\"title\":\"Star hunt\",\"x\":3222,\"y\":3218,\"startsAtMs\":1800000000000}}");
+		RelayResponse reply = read("{\"destination\":{\"name\":\"Rimmington mine\",\"x\":2974,\"y\":3241},"
+			+ "\"event\":{\"title\":\"Star hunt\",\"x\":3222,\"y\":3218,\"startsAtMs\":1800000000000}}");
 		assertNull(reply.directive.roster);
 		assertNull(reply.directive.events);
-		assertEquals("the single meetup is still read", "Star hunt", reply.directive.event.title);
+		assertEquals("kept", reply.memberSecret);
 
 		DestinationState state = new DestinationState(gson);
 		state.accept(reply.directive);
 		state.acceptSocial(reply.directive, true);
 		assertNull(state.getRoster());
 		assertNull(state.getEvents());
-		assertNotNull(state.getEvent());
+		assertNotNull(state.getDestination());
+		assertTrue("nothing reminds of a meetup the map sent only the old way", MeetupReminder.of(state.getEvents()).isEmpty());
 	}
 
 	@Test

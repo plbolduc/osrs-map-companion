@@ -26,11 +26,9 @@
 package com.pbolduc.mapcompanion;
 
 import java.awt.Dimension;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.function.Supplier;
 import java.util.List;
-import java.util.Locale;
 import javax.annotation.Nullable;
 import javax.swing.border.EmptyBorder;
 import javax.swing.BoxLayout;
@@ -47,7 +45,6 @@ import static com.pbolduc.mapcompanion.MapCompanionPanel.card;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.CARD_TEXT_WIDTH;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.gap;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.left;
-import static com.pbolduc.mapcompanion.MapCompanionPanel.meetupWhen;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.OPEN_WEBSITE;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.row;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.sectionHead;
@@ -58,8 +55,8 @@ import static com.pbolduc.mapcompanion.MapCompanionPanel.syncRow;
 
 /**
  * Now, on Home: the destination the map sent, with its route steps and Follow, Reroute and
- * Dismiss, or Route while it has no way yet; the next meetup, from a map that sends only the one;
- * where you died; and the clue being carried, each with its Route.
+ * Dismiss, or Route while it has no way yet; where you died; and the clue being carried, each with
+ * its Route. Meetups are the Group tab's, every one of the week with its answers.
  *
  * <p>What is happening now: what the map asked for, and where you died. Each is a card that is
  * hidden while there is nothing in it, and the heading goes with the last of them — see
@@ -99,10 +96,8 @@ final class NowCards extends JPanel
 	private final JLabel destinationDetail = detail();
 	private final JPanel destinationActions = row(ColorScheme.DARKER_GRAY_COLOR);
 	private List<JButton> shownDestinationActions = new ArrayList<>();
-	private final JLabel eventWhen = sized(12f);
-	private final JLabel eventTitle = detail();
 	/*
-	 * The death in the same ink and size as the destination and the meetup above it, with its own
+	 * The death in the same ink and size as the destination above it, with its own
 	 * action, rather than a line of 11px red. Red here says "error", and nothing has gone wrong
 	 * with the plugin; the map's panel keeps red for refusals and prints this line plainly too.
 	 */
@@ -143,10 +138,7 @@ final class NowCards extends JPanel
 	private final JButton clueRouteButton = smallButton("Route");
 	private final JLabel clueSaid = new JLabel();
 	private final JComponent clueSlot;
-	private final JButton eventRouteButton = smallButton("Route");
-	private final JLabel eventSaid = new JLabel();
 	private final JComponent destinationSlot;
-	private final JComponent eventSlot;
 	private final JComponent deathSlot;
 	/** Route, pressed beside anything in the sidebar; see {@link RoutePress}. */
 	private final RoutePress routePress;
@@ -183,7 +175,6 @@ final class NowCards extends JPanel
 	static final String DESTINATION = "destination";
 	/* Each Route's own tooltip, which the map's wait stands in for while it greys the button; see MapWait#tip. */
 	private static final String CLUE_ROUTE_TIP = Words.of("now.clueRouteTip");
-	private static final String MEETUP_ROUTE_TIP = Words.of("meetup.routeTip");
 	private static final String REROUTE_TIP = Words.of("now.rerouteTip");
 	private static final String ROUTE_TIP = Words.of("now.routeTip");
 
@@ -214,8 +205,8 @@ final class NowCards extends JPanel
 		left(this);
 
 		/*
-		 * Now: a destination with its dismiss, a meetup, a death. "From the map" named two of
-		 * the three — the death is this client's own observation — so the heading says when rather
+		 * Now: a destination with its dismiss, a death, a clue. "From the map" named only the first —
+		 * the death and the clue are this client's own observations — so the heading says when rather
 		 * than where from, which is true of all of them.
 		 */
 		add(sectionHead("Now"));
@@ -229,7 +220,6 @@ final class NowCards extends JPanel
 		destinationPicture.setVisible(false);
 		destinationSlot = nowCard(destinationActions, destinationSaid, MapCompanionPanel.bar(DESTINATION_PICTURE_GAP,
 			ColorScheme.DARKER_GRAY_COLOR, destinationPicture, destinationName, null), destinationDetail, routeSteps);
-		eventSlot = nowCard(row(ColorScheme.DARKER_GRAY_COLOR, eventRouteButton), eventSaid, eventWhen, eventTitle);
 		graveLabel.setName("now.death.grave");
 		grave.add(graveLabel);
 		grave.add(gap(3, ColorScheme.DARKER_GRAY_COLOR));
@@ -244,13 +234,10 @@ final class NowCards extends JPanel
 		deathMapButton.addActionListener(e -> showDeathOnMap());
 		deathRouteButton.addActionListener(e -> routeToDeath());
 		clueRouteButton.addActionListener(e -> routeToClue());
-		eventRouteButton.addActionListener(e -> routeToMeetup());
 		deathRouteButton.setName("now.death.route");
 		deathSaid.setName("now.death.said");
 		clueRouteButton.setName("now.clue.route");
-		eventRouteButton.setName("now.meetup.route");
 		clueRouteButton.setToolTipText(CLUE_ROUTE_TIP);
-		eventRouteButton.setToolTipText(MEETUP_ROUTE_TIP);
 		rerouteButton.setToolTipText(REROUTE_TIP);
 		rerouteButton.addActionListener(e ->
 		{
@@ -490,20 +477,6 @@ final class NowCards extends JPanel
 		refresh.run();
 	}
 
-	/** The way to the meetup, with its world and its day and clock in the card's words. Nobody is told. */
-	private void routeToMeetup()
-	{
-		RelayResponse.Event event = destinationState.getEvent();
-		if (event != null)
-		{
-			routePress.press(RoutePress.Target.tile("meetup", new WorldPoint(event.x, event.y, event.plane),
-				event.title == null ? "Meetup" : event.title, event.world,
-				MapCompanionPanel.meetupStarts(event.startsAtMs, System.currentTimeMillis(), ZoneId.systemDefault(),
-					Locale.getDefault(Locale.Category.FORMAT))));
-		}
-		refresh.run();
-	}
-
 	/**
 	 * The way to the destination on the card, read again at the press: by its tile, under its own
 	 * name, world and note, so the answer is the same place with its way, as a star's Route makes one.
@@ -622,21 +595,6 @@ final class NowCards extends JPanel
 		destinationRow.add(dismissButton);
 		shownDestinationActions = syncRow(destinationActions, destinationRow, shownDestinationActions);
 
-		/*
-		 * The one meetup under Now is the map's older word for the next meetup. A map that sends the
-		 * week's meetups shows them all under Group instead, with their answers, so Now leaves it out.
-		 */
-		RelayResponse.Event event = destinationState.getEvents() == null ? destinationState.getEvent() : null;
-		eventSlot.setVisible(event != null);
-		if (event != null)
-		{
-			/* Its countdown amber while it is imminent, as the Group tab's meetups have it. */
-			GroupPanel.setWhen(eventWhen, meetupWhen(event.startsAtMs, now, ZoneId.systemDefault(),
-											 Locale.getDefault(Locale.Category.FORMAT), event.world), event.startsAtMs, now, CARD_TEXT_WIDTH);
-			setWrapped(eventTitle, event.title, CARD_TEXT_WIDTH);
-			routeState(eventRouteButton, eventSaid, "meetup", "Route", asks, loggedIn ? MEETUP_ROUTE_TIP : RouteClient.LOG_IN, now);
-		}
-
 		CompanionSnapshot.Death death = deathWatcher.snapshot(now);
 		deathSlot.setVisible(death != null);
 		if (death != null)
@@ -691,7 +649,7 @@ final class NowCards extends JPanel
 			routeState(clueRouteButton, clueSaid, "clue", "Route", asks && routable, loggedIn ? CLUE_ROUTE_TIP : RouteClient.LOG_IN, now);
 		}
 		/** The heading goes with the last card under it, rather than naming nothing. */
-		setVisible((destination != null && !farmDestination) || event != null || death != null || (clue != null && paired));
+		setVisible((destination != null && !farmDestination) || death != null || (clue != null && paired));
 	}
 
 	/**

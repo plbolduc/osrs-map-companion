@@ -442,7 +442,6 @@ public class SidebarPolishShot
 				directive.events.add(later);
 			}
 			directive.destination = null;
-			directive.event = null;
 			destinations.acceptSocial(directive, true);
 		}
 
