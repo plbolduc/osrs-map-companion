@@ -343,11 +343,11 @@ public class DestinationCardTest
 		SwingUtilities.invokeAndWait(() ->
 		{
 			SearchPanel search = new SearchPanel(new SearchClient(new OkHttpClient(), gson, pairing, identity), press, sprites);
-			search.pick(new SearchClient.Hit("bank:lumbridge", "Lumbridge Castle bank", "Bank · 2nd floor", "Bank · 2nd floor",
-				new int[]{3208, 3220, 2}, "bank"));
+			search.pick(new SearchClient.Hit("bank:lumbridge", "Lumbridge Castle bank", "Bank · 2nd floor", null,
+				new int[]{3208, 3220, 2}, "bank", null));
 		});
 		refresh();
-		assertEquals(Arrays.asList("sprite " + SearchPanel.spriteFor("bank") + " at " + RouteStepsView.PICTURE), asked);
+		assertEquals(Arrays.asList("sprite " + SearchPanel.spriteFor("bank", null) + " at " + RouteStepsView.PICTURE), asked);
 		assertNotNull(picture().getIcon());
 	}
 

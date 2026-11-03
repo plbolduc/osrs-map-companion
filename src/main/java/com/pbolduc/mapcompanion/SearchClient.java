@@ -54,11 +54,6 @@ import okhttp3.Response;
  * the map resolves a monster standing in five places to the nearest and a boss to its way in. This
  * class decides when to ask and reads what comes back; it ranks nothing.
  *
- * <p><b>Places, not items.</b> For a query that names an item the map also answers with the item
- * itself and the shops and monsters it files under <i>Sold at</i> and <i>Dropped by</i>. The sidebar
- * leaves all of that out, which the map's other plugin releases still read: it searches places,
- * characters and monsters, and the website is where an item is looked up.
- *
  * <p><b>When it asks.</b> {@link #DEBOUNCE_MS} after the last key, or at once on Enter; a query of
  * fewer than two characters asks nothing. One search is in flight at a time, because the map
  * answers a second with "busy": a query typed while one is on its way waits for it and then goes,
@@ -82,6 +77,7 @@ final class SearchClient
 	static final int MAX_QUERY = 64;
 	/** The map's own number: eight rows is the most a narrow panel shows. */
 	static final int MAX_ROWS = 8;
+	static final int MAX_ITEMS = 3;
 	/** After a failure that named no wait of its own. */
 	static final long FAILURE_GAP_MS = 10_000L;
 
@@ -98,6 +94,7 @@ final class SearchClient
 	static final class Answer
 	{
 		List<Row> rows;
+		List<Item> items;
 		String suggestion;
 		String origin;
 	}
@@ -115,7 +112,20 @@ final class SearchClient
 		Integer effortTiles;
 	}
 
-	/** One place the list shows. */
+	static final class Item
+	{
+		String id;
+		/** The game's id for the item, where the map's tables name one; it picks the sprite and nothing else. */
+		Integer itemId;
+		String name;
+		int droppedBy;
+		int soldAt;
+	}
+
+	/** The heading item rows sit under, so they are never read as one more shop or monster above them. */
+	static final String ITEMS = "Items";
+
+	/** One thing the list shows: a place, or an item routed to its nearest source. */
 	@AllArgsConstructor(access = AccessLevel.PACKAGE)
 	static final class Hit
 	{
@@ -129,16 +139,28 @@ final class SearchClient
 		 * the route's own way line under it gives the length from where they stood at the press.
 		 */
 		final String note;
-		/** Where the row stood, kept for a destination the map names no tile for. */
+		/** "Sold at", "Dropped by" or {@link #ITEMS}; null for the ordinary rows. */
+		@Nullable
+		final String section;
+		/** Where the row stood, kept for a destination the map names no tile for. Null for an item. */
 		@Nullable
 		final int[] tile;
-		/** The map's kind for a place — {@code bank}, {@code monster} — which picks its icon. */
+		/** The map's kind for a place — {@code bank}, {@code monster} — which picks its icon; null for an item. */
 		@Nullable
 		final String kind;
+		/** An item's game id, for its sprite; null for a place, or an item the map names no id for. */
+		@Nullable
+		final Integer itemId;
 
-		Hit(String id, String name, String line, @Nullable int[] tile)
+		Hit(String id, String name, String line, @Nullable String section, @Nullable int[] tile)
 		{
-			this(id, name, line, line, tile, null);
+			this(id, name, line, section, tile, null, null);
+		}
+
+		Hit(String id, String name, String line, @Nullable String section, @Nullable int[] tile,
+			@Nullable String kind, @Nullable Integer itemId)
+		{
+			this(id, name, line, line, section, tile, kind, itemId);
 		}
 	}
 
@@ -466,10 +488,10 @@ final class SearchClient
 	}
 
 	/**
-	 * The places made safe to draw: every string folded and cut, an id with no characters the map
-	 * would refuse, at most {@link #MAX_ROWS}, and none filed under an item's <i>Sold at</i> or
-	 * <i>Dropped by</i>. Every one was typed by somebody at some point — a place's name is the
-	 * wiki's — and is drawn by this client, so it is bounded here whatever the map did.
+	 * The rows and items made safe to draw: every string folded and cut, an id with no characters
+	 * the map would refuse, at most {@link #MAX_ROWS} places and {@link #MAX_ITEMS} items. Every one
+	 * was typed by somebody at some point — a place's name is the wiki's — and is drawn by this
+	 * client, so it is bounded here whatever the map did.
 	 */
 	static List<Hit> normalize(Answer answer)
 	{
@@ -484,14 +506,31 @@ final class SearchClient
 				}
 				String id = id(row == null ? null : row.id);
 				String name = row == null ? null : RouteWire.text(row.name, 120);
-				if (id == null || name == null || (row.section != null && !"Places".equals(row.section)))
+				if (id == null || name == null)
 				{
 					continue;
 				}
 				int plane = row.plane == null ? 0 : row.plane;
 				boolean onMap = row.x > 0 && row.y > 0 && row.x <= 16_383 && row.y <= 16_383 && plane >= 0 && plane <= 3;
-				hits.add(new Hit(id, name, rowLine(row), placeLine(row), onMap ? new int[]{row.x, row.y, plane} : null,
-					RouteWire.text(row.kind, 20)));
+				String section = "Places".equals(row.section) ? null : RouteWire.text(row.section, 20);
+				String kind = RouteWire.text(row.kind, 20);
+				hits.add(new Hit(id, name, rowLine(row), placeLine(row), section, onMap ? new int[]{row.x, row.y, plane} : null, kind, null));
+			}
+		}
+		if (answer.items != null)
+		{
+			int items = 0;
+			for (Item item : answer.items)
+			{
+				String id = id(item == null ? null : item.id);
+				String name = item == null ? null : RouteWire.text(item.name, 120);
+				if (id == null || name == null || items >= MAX_ITEMS)
+				{
+					continue;
+				}
+				items++;
+				Integer itemId = item.itemId != null && item.itemId > 0 ? item.itemId : null;
+				hits.add(new Hit(id, name, itemLine(item), ITEMS, null, null, itemId));
 			}
 		}
 		return hits;
@@ -517,6 +556,26 @@ final class SearchClient
 			sb.append('~').append(row.effortTiles).append(" tiles");
 		}
 		return sb.toString();
+	}
+
+	/**
+	 * "Dropped by 3 monsters · sold in 1 shop": what picking a name a partial query could mean would
+	 * answer. It does not start "Item ·", because the row sits under the Items heading that says so.
+	 * Each count names what it counts: the row can follow a Dropped by heading that lists fewer
+	 * sources than its count, and a bare number there reads as a count of something on the screen.
+	 */
+	static String itemLine(Item item)
+	{
+		StringBuilder sb = new StringBuilder();
+		if (item.droppedBy > 0)
+		{
+			sb.append("dropped by ").append(item.droppedBy).append(item.droppedBy == 1 ? " monster" : " monsters");
+		}
+		if (item.soldAt > 0)
+		{
+			sb.append(sb.length() > 0 ? " · " : "").append("sold in ").append(item.soldAt).append(item.soldAt == 1 ? " shop" : " shops");
+		}
+		return sb.length() == 0 ? "" : Character.toUpperCase(sb.charAt(0)) + sb.substring(1);
 	}
 
 	/** An id the route endpoint would accept: non-empty, short, and no control bytes. */

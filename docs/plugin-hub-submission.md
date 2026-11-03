@@ -163,8 +163,7 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RoutePress`, `SearchClien
 - **GET /api/companion/search** — the sidebar's search box, while connected: about 350ms after the
   last key or on Enter, two to sixty-four characters, one in flight, and nothing before a
   `Retry-After` has passed. Same three headers; the query is the `q` parameter and is never logged.
-  The rows drawn are places, characters and monsters; the items in the answer are ignored. Their
-  icons are the client's own sprites (`SpriteManager`); no image is downloaded.
+  The rows' icons are the client's own sprites (`SpriteManager`, `ItemManager`); no image is downloaded.
 - **POST /api/companion/run** — one **Start run** or **Reroute** press, from the farm run or Port
   tasks card, with the same three credential headers as Route. Start carries a run kind (a farm
   run's, or `port-tasks`); Reroute carries its id, done ordinals and
@@ -246,9 +245,6 @@ answering a reviewer:
 
 - **Stars no longer syncs its filters with the website**: the `star-preferences` reads and writes
   are gone, and the filters and favourite sites stay in this RuneLite's settings.
-- **Search finds places, not items**: the sidebar draws places, characters and monsters, and no
-  longer the items a query names or the shops and monsters under an item's *Sold at* and
-  *Dropped by*. `GET /api/companion/search` is asked as before; the item half of its answer is ignored.
 - **The sharing fields are read by key**: 22 of the 23 fields under the groups are no longer declared
   as hidden settings. Their keys, defaults and what they send are unchanged, and Reset still turns
   them off, through `resetConfiguration`.

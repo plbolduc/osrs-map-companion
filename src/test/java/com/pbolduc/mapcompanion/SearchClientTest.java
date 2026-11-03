@@ -148,15 +148,19 @@ public class SearchClientTest
 		assertEquals(SECRET, request.header("X-Companion-Member-Secret"));
 		assertEquals(CompanionVersion.USER_AGENT, request.header("User-Agent"));
 
-		/*
-		 * Rewritten when items left the sidebar's search: the answer still carries a row filed under
-		 * an item's Dropped by and the item itself, as the map sends them to older plugins, and only
-		 * the place is read.
-		 */
 		List<SearchClient.Hit> hits = search.result().hits;
-		assertEquals(1, hits.size());
+		assertEquals(3, hits.size());
 		assertEquals("Lumbridge Castle bank", hits.get(0).name);
 		assertEquals("Bank · 2nd floor · ~40 tiles", hits.get(0).line);
+		assertNull("Places carries no heading of its own", hits.get(0).section);
+		assertEquals("Dropped by", hits.get(1).section);
+		assertEquals("item:Abyssal whip", hits.get(2).id);
+		/*
+		 * The row sits under the Items heading now, so its line no longer starts by saying it is one;
+		 * and the count says what it counts, where "Dropped by 3" left the reader to guess.
+		 */
+		assertEquals("Dropped by 3 monsters", hits.get(2).line);
+		assertNull("an item stands nowhere until the map picks its source", hits.get(2).tile);
 	}
 
 	@Test
@@ -278,9 +282,9 @@ public class SearchClientTest
 		SearchClient search = client(200, BANKS, null, null);
 		search.enter("bank");
 		until(() -> !search.result().searching);
-		assertEquals(1, search.result().hits.size());
+		assertEquals(3, search.result().hits.size());
 		search.checkScope();
-		assertEquals("the same member keeps the list", 1, search.result().hits.size());
+		assertEquals("the same member keeps the list", 3, search.result().hits.size());
 		held = new Pairing.Signed("https://osrs-map.com", "DEF567", "member-1", SECRET);
 		search.checkScope();
 		assertTrue("another group's list is not offered", search.result().hits.isEmpty());
@@ -317,53 +321,72 @@ public class SearchClientTest
 		assertNotNull(hits.get(0).tile);
 	}
 
-	/*
-	 * Rewritten when items left the sidebar's search, which had drawn an item under a heading of its
-	 * own beside its sources: an item and the rows filed under its Dropped by are left out, and a
-	 * place keeps its kind.
+	/**
+	 * An item follows the item's sources, and without a heading of its own it was drawn under
+	 * theirs: "Bank filler" read as one more counter under Sold at. Items have their own heading.
 	 */
 	@Test
-	public void anItemAndItsSourcesAreLeftOutAndAPlaceKeepsItsKind()
+	public void itemsSitUnderTheirOwnHeadingNotTheLastSourcesOne()
 	{
 		SearchClient.Answer answer = new com.google.gson.Gson().fromJson(BANKS, SearchClient.Answer.class);
 		List<SearchClient.Hit> hits = SearchClient.normalize(answer);
-		assertEquals(1, hits.size());
-		assertEquals("bank:lumbridge", hits.get(0).id);
+		assertEquals("Dropped by", hits.get(1).section);
+		assertEquals(SearchClient.ITEMS, hits.get(2).section);
 		assertEquals("bank", hits.get(0).kind);
+		assertNull("an item is no kind of place", hits.get(2).kind);
+		assertNull("the map named no id for a whip, so none is made up", hits.get(2).itemId);
+		/* Each count names what it counts, one or many: "Sold at 1" left the reader to guess one what. */
+		assertEquals("Sold in 1 shop", SearchClient.itemLine(item(0, 1)));
+		assertEquals("Dropped by 3 monsters · sold in 1 shop", SearchClient.itemLine(item(3, 1)));
+		assertEquals("Dropped by 1 monster · sold in 2 shops", SearchClient.itemLine(item(1, 2)));
 	}
 
-	/* Rewritten with items gone: a pick's card line is the row's own words, or none. */
-	@Test
-	public void aPicksCardLineIsTheRowsOwnWords()
-	{
-		List<SearchClient.Hit> hits = SearchClient.normalize(new com.google.gson.Gson().fromJson(BANKS, SearchClient.Answer.class));
-		assertTrue("a place keeps its own words", SearchPanel.note(hits.get(0)).startsWith("Bank · 2nd floor"));
-		assertNull("a row with no line gives the card none", SearchPanel.note(new SearchClient.Hit("bank:x", "X", "", null)));
-	}
-
-	/*
-	 * The map's own description of an answer (lib/contract/search.json), read whole. Rewritten when
-	 * items left the sidebar: the map still sends this item with its game id, and a row under its
-	 * Dropped by, to the plugins released before; this one reads neither, and the answer still parses.
+	/**
+	 * An item's route goes to one of its sources, whose name heads the card, so the card's line says
+	 * which item it was for; a place's pick keeps the row's own line.
 	 */
 	@Test
-	public void theContractFixtureIsReadAndItsItemLeftOut() throws Exception
+	public void anItemsPickSaysWhichItemTheCardIsFor()
+	{
+		List<SearchClient.Hit> hits = SearchClient.normalize(new com.google.gson.Gson().fromJson(BANKS, SearchClient.Answer.class));
+		assertEquals("For Abyssal whip", SearchPanel.note(hits.get(2)));
+		assertTrue("a place keeps its own words", SearchPanel.note(hits.get(0)).startsWith("Bank · 2nd floor"));
+		assertNull("a row with no line gives the card none", SearchPanel.note(new SearchClient.Hit("bank:x", "X", "", null, null)));
+	}
+
+	/** The map's own description of an answer (lib/contract/search.json), read whole: the item's id picks its sprite. */
+	@Test
+	public void theContractFixtureIsReadWithTheItemsGameId() throws Exception
 	{
 		String fixture = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get("src/test/resources/contract/search.json")),
 			java.nio.charset.StandardCharsets.UTF_8);
-		SearchClient.Answer answer = new com.google.gson.Gson().fromJson(fixture, SearchClient.Answer.class);
-		assertEquals("abyssal whip", answer.suggestion);
-		assertTrue(SearchClient.normalize(answer).isEmpty());
+		List<SearchClient.Hit> hits = SearchClient.normalize(new com.google.gson.Gson().fromJson(fixture, SearchClient.Answer.class));
+		assertEquals(2, hits.size());
+		assertEquals("monster", hits.get(0).kind);
+		assertEquals("Dropped by", hits.get(0).section);
+		assertEquals("item:Feather", hits.get(1).id);
+		assertEquals(Integer.valueOf(314), hits.get(1).itemId);
+		assertEquals(SearchClient.ITEMS, hits.get(1).section);
 	}
 
 	/** Each kind's icon is the world map's own, and a kind with none draws none rather than another's. */
 	@Test
 	public void aRowsIconIsTheWorldMapsForItsKind()
 	{
-		assertEquals(net.runelite.api.gameval.SpriteID.Mapfunction.BANK, SearchPanel.spriteFor("bank"));
-		assertEquals(net.runelite.api.gameval.SpriteID.SideIcons.COMBAT, SearchPanel.spriteFor("monster"));
-		assertEquals(0, SearchPanel.spriteFor("place"));
-		assertEquals(0, SearchPanel.spriteFor(null));
+		assertEquals(net.runelite.api.gameval.SpriteID.Mapfunction.BANK, SearchPanel.spriteFor("bank", null));
+		assertEquals(net.runelite.api.gameval.SpriteID.SideIcons.COMBAT, SearchPanel.spriteFor("monster", "Dropped by"));
+		assertEquals("a shop's sign, whichever shop it is", net.runelite.api.gameval.SpriteID.Mapfunction.GENERAL_STORE,
+			SearchPanel.spriteFor("poi", "Sold at"));
+		assertEquals(0, SearchPanel.spriteFor("place", null));
+		assertEquals(0, SearchPanel.spriteFor(null, null));
+	}
+
+	private static SearchClient.Item item(int droppedBy, int soldAt)
+	{
+		SearchClient.Item item = new SearchClient.Item();
+		item.droppedBy = droppedBy;
+		item.soldAt = soldAt;
+		return item;
 	}
 
 	/** What a person types is theirs: nothing in this class can write it to a log. */

@@ -3,7 +3,7 @@
 Bring [osrs-map.com](https://osrs-map.com)'s routes, search and shooting stars into RuneLite,
 and see your character and friends on the website.
 
-[Getting started](#getting-started) · [Search](#search-for-a-place) ·
+[Getting started](#getting-started) · [Search](#search-for-a-place-or-item) ·
 [Farm runs](#farm-runs-in-runelite) · [Slayer](#slayer-in-runelite) · [Sailing](#sailing-on-the-website) ·
 [What's new](https://osrs-map.com/whats-new)
 
@@ -40,14 +40,15 @@ as a line on the world map, and the docking mooring's Sailing level and quests s
 Shortest Path draws only the walks. With **Progress and travel** shared, which includes your boats
 and moorings, voyages start where your boats are.
 
-## Search for a place
+## Search for a place or item
 
 <p>
-  <img src="docs/mockups/sidebar-search.png" width="300" alt="Searching for bank: Lumbridge Castle bank, Draynor Village bank and Al Kharid bank beside the world map's bank icon, then a Banker beside the minimap's yellow dot, each with how many tiles away it is">
+  <img src="docs/mockups/sidebar-search.png" width="300" alt="Searching for whip: Abyssal demon and Abyssal Sire under Dropped by, and under Items the Abyssal whip, dropped by 3 monsters">
 </p>
 
-Search for banks, shops, NPCs and monsters from **Home**, and pick one to plan the way there.
-Results use the game's map icons.
+Search for banks, shops, NPCs, monsters and items from **Home**. An item can show the monsters
+that drop it and the shops that sell it. Pick a place, monster or shop to plan the way there.
+Results use the game's map icons and item sprites.
 
 ## Farm runs in RuneLite
 
