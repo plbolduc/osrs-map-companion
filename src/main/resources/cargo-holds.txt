@@ -1,0 +1,15 @@
+# The boat parts CargoHolds reads, one row a line. A holds row is one tier of cargo hold, regular,
+# oak, teak, mahogany, camphor, ironwood then rosewood, each in its raft, skiff and sloop forms:
+# plain, with cargo drawn and with none. A hulls row is one size, raft, skiff then sloop, in the
+# seven woods. A row's place is its tier or size, so rows are never reordered, only corrected.
+# Object ids from RuneLite 1.13.5's gameval ObjectID; GameIdsTest holds every one to its name.
+holds|60245,60581,60577,60259,60604,60603,60273,60630,60629
+holds|60247,60583,60582,60261,60606,60605,60275,60632,60631
+holds|60249,60586,60584,60263,60620,60607,60277,60634,60633
+holds|60251,60590,60588,60265,60622,60621,60279,60636,60635
+holds|60253,60594,60592,60267,60624,60623,60281,60638,60637
+holds|60255,60598,60596,60269,60626,60625,60283,60640,60639
+holds|60257,60602,60601,60271,60628,60627,60285,60642,60641
+hulls|59494,59495,59496,59497,59498,59499,59500
+hulls|59501,59502,59503,59504,59505,59506,59507
+hulls|59508,59509,59510,59511,59512,59513,59514
