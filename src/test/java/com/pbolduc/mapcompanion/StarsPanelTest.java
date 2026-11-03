@@ -52,13 +52,14 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 /**
- * The top of the Stars tab is the picked world and the filters a player changes daily. Sync with
- * the website and the levels the list is measured by are set once, so they wait in More filters.
+ * The top of the Stars tab is the picked world and the filters a player changes daily. The levels
+ * the list is measured by are read once, so they wait in More filters; the filters stay on this
+ * machine, with no switch that sends them anywhere.
  */
 public class StarsPanelTest
 {
 	@Test
-	public void syncAndTheLevelsLineWaitInMoreFilters() throws Exception
+	public void theLevelsLineWaitsInMoreFiltersAndNothingSyncs() throws Exception
 	{
 		SwingUtilities.invokeAndWait(() ->
 		{
@@ -68,11 +69,12 @@ public class StarsPanelTest
 				new MemberIdentity(store), store);
 			StarsPanel stars = new StarsPanel(service, null, null, null, null, () -> MapCompanionConfig.DEFAULT_MAP_URL,
 				new DestinationRoute(), null, null, null, rerouting -> null, () -> { });
-			Component sync = named(stars, "stars.sync");
-			assertNotNull(sync);
-			assertFalse("hidden until More filters is opened", showing(sync, stars));
+			Component levels = named(stars, "stars.levels");
+			assertNotNull(levels);
+			assertFalse("hidden until More filters is opened", showing(levels, stars));
 			((JToggleButton) named(stars, "stars.filters")).doClick();
-			assertTrue(showing(sync, stars));
+			assertTrue(showing(levels, stars));
+			assertNull("no Sync filters with website", named(stars, "stars.sync"));
 		});
 	}
 

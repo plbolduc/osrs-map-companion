@@ -90,10 +90,9 @@ is not in it.
 Enabling either drawing choice opens a receive stream; group positions are requested only with
 the latter. **Copy invite**
 makes one request for an expiring invite. While **Stars** is open, logged in and connected,
-the star list is fetched about once a minute without character or group credentials. **Sync
-filters with website** starts on for that tab: it reads and writes filters and favourite sites
-every thirty seconds and after changes, using the group code, member id and member secret. Mining
-level and skill total filter stars locally. Turn sync off to keep those preferences local.
+the star list is fetched about once a minute without character or group credentials. Its filters,
+favourite sites, Mining level and skill total filter stars locally and are kept in this RuneLite's
+settings for the character; none of them is sent.
 
 A destination can carry the map's way there, step by step; reading it sends nothing, and the
 sidebar moves its steps on from your position in the game without telling the map. A voyage's
@@ -243,7 +242,7 @@ a group code it admits your characters to your groups, so connect only to a map 
 member id and installation key are the same for every map and group this RuneLite connects to until
 **Leave group**, and the receive stream carries the group code and member id in its URL.
 `X-Companion-Member-Secret` is a random credential for one server, group and character, used on
-snapshots, invites, the receive stream, star-preference sync and **Open the map**. It is never displayed
+snapshots, invites, the receive stream and **Open the map**. It is never displayed
 or logged. **Leave group** deletes every one of these member secrets and replaces the installation
 identity; your local kill log remains. A remembered group that issued one keeps its members and
 admits the new identity only by invite, so it leaves **Switch ▾** with the group left; a group that

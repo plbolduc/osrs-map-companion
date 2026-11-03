@@ -24,9 +24,6 @@ meetup.gone=That meetup isn't in this group any more.
 meetup.refused=The map would not take that meetup. A title and a time within the month are needed.
 meetup.failed=The map could not save that just now.
 
-# StarsClient: the Stars list and its synced filters.
-stars.pairToSync=Pair with your personal RuneLite code to sync filters.
-
 # FarmRunClient: End pressed when the map cannot be told.
 farm.endedNotConnected=Run ended here. Not connected to the group yet, so the map still has it.
 farm.endedLogIn=Run ended here. Log in to end it on the map too.
@@ -120,9 +117,6 @@ stars.safeTip=Hide Wilderness, PvP, high-risk and Deadman
 stars.noWorldList=World list unavailable: PvP and Deadman filters cannot be checked.
 stars.openTip=Show the possible spots on osrs-map.com in your browser
 stars.approximate=This spot is approximate. Open website shows where it might be.
-stars.keptHere=These filters are kept for this character. Tick to keep them the same here and on
-stars.synced=Your filters and favourites are the same here and on
-stars.notSynced=Not synced yet; these filters are kept for this character.
 stars.noLevels=Levels not read yet: every tier and world shows
 
 # SlayerPanel: the Slayer card and its places.

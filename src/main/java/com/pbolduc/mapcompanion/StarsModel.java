@@ -84,12 +84,6 @@ final class StarsModel
 		List<Favorite> favorites = new ArrayList<>();
 	}
 
-	static final class PreferenceReply
-	{
-		Long revision;
-		Preferences preferences;
-	}
-
 	static final class Feed
 	{
 		int version;

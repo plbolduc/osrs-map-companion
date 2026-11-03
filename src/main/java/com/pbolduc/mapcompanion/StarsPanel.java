@@ -128,7 +128,6 @@ final class StarsPanel extends JPanel
 	private final Runnable sidebar;
 	/** The way to the picked star, kept across rebuilds of the block it sits in; see {@link #selection}. */
 	private final RouteStepsView steps;
-	private final JCheckBox sync = check("Sync filters with website");
 	private final JComboBox<String> tier = new JComboBox<>(new String[]{"T1+", "T2+", "T3+", "T4+", "T5+", "T6+", "T7+", "T8+", "T9+"});
 	private final JToggleButton members = chip("P2P"), free = chip("F2P"), safe = chip("Safe");
 	private final JToggleButton filters = toggle("⋯");
@@ -187,7 +186,6 @@ final class StarsPanel extends JPanel
 		 * for, and under a list of a dozen sites they were a scroll away from every row but the last.
 		 */
 		add(selection);
-		sync.setName("stars.sync");
 		levels.setName("stars.levels");
 		count.setName("stars.count");
 		status.setName("stars.status");
@@ -223,11 +221,10 @@ final class StarsPanel extends JPanel
 		filters.setName("stars.filters");
 
 		/*
-		 * Sync and the levels the list is filtered by are set once, so they sit with the other
-		 * filters set once rather than above the list as daily controls.
+		 * The levels the list is filtered by are read once, so they sit with the filters set once
+		 * rather than above the list as daily controls.
 		 */
 		more.setBorder(BorderFactory.createEmptyBorder(6, 0, 0, 0));
-		more.add(fill(sync));
 		more.add(levels);
 		more.add(gap(6));
 		more.add(heading("Hide"));
@@ -252,15 +249,6 @@ final class StarsPanel extends JPanel
 		source.setHorizontalAlignment(SwingConstants.CENTER);
 		add(fill(source));
 
-		sync.addActionListener(e ->
-		{
-			if (!updating)
-			{
-				service.sync(sync.isSelected());
-				rendered = null;
-				refresh();
-			}
-		});
 		tier.addActionListener(e -> change(() -> service.model.preferences.filters.minTier = tier.getSelectedIndex() + 1));
 		members.addActionListener(e -> change(() -> {
 			StarsModel.Filters f = service.model.preferences.filters;
@@ -313,7 +301,6 @@ final class StarsPanel extends JPanel
 		StarsModel model = service.model;
 		StarsModel.Filters f = model.preferences.filters;
 		updating = true;
-		sync.setSelected(service.sync);
 		tier.setSelectedIndex(Math.max(0, Math.min(8, f.minTier - 1)));
 		members.setSelected(f.showMembers);
 		free.setSelected(f.showFreeToPlay);
@@ -328,7 +315,6 @@ final class StarsPanel extends JPanel
 		league.setSelectedIndex("only".equals(f.leagueWorlds) ? 1 : 0);
 		league.setVisible(model.feed != null && model.feed.leagueSeason);
 		updating = false;
-		sync.setToolTipText(syncTip());
 		wrap(levels, levelsLine(model.miningLevel, model.skillTotal), TEXT);
 		List<StarsModel.Site> sites = model.sites();
 		long elapsed = model.elapsed();
@@ -736,17 +722,6 @@ final class StarsPanel extends JPanel
 	static final String SOURCE = "star";
 	/** The tab while no character is logged in, since the list is asked for as one. */
 	static final String LOG_IN = "Log in to see stars.";
-
-	/** What the sync box does now, for the map this sidebar is actually paired with. */
-	private String syncTip()
-	{
-		String map = mapUrl.get().replaceFirst("^https?://", "");
-		if (!service.sync)
-		{
-			return Words.of("stars.keptHere") + " " + map + ".";
-		}
-		return service.syncReady ? Words.of("stars.synced") + " " + map + "." : Words.of("stars.notSynced");
-	}
 
 	/**
 	 * The levels said as what they hide, since that is why they are shown: a star needs ten Mining a

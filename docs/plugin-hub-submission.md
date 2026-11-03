@@ -137,12 +137,8 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RouteClient`, `RoutePress
   map** or **Route** beside. Receives destinations, meetups, the group's roster and the requested
   members; never initiates gameplay.
 - **GET /api/companion/stars** — while Stars is open, logged in and connected; normally once a
-  minute, respecting a longer feed interval. No character/group credentials.
-- **GET /api/companion/star-preferences** and **PUT** to the same path — only with Stars open and
-  filter sync enabled (on by default for that tab), a logged-in character and an issued secret.
-  Reads every thirty seconds; changes can trigger a write sooner. Headers:
-  `X-Companion-Code`, `X-Companion-Member`, `X-Companion-Member-Secret`.
-  JSON contains filters, favourite sites and a revision. Mining level and total remain local.
+  minute, respecting a longer feed interval. No character/group credentials. The tab's filters,
+  favourite sites, Mining level and total stay on this machine.
 - **POST /api/companion/route** — one **Reroute** press, under the steps of a destination the
   map sent. One in flight, and none before the wait the map last asked for (Retry-After, at least
   five seconds). Headers: `X-Companion-Code`, `X-Companion-Member`, `X-Companion-Member-Secret`.
@@ -245,7 +241,8 @@ screenshot tools are outside `src/main`. Bundled third-party notices accompany t
 What the next Hub update brings. Its description names each in a few words; the detail here is for
 answering a reviewer:
 
-Nothing yet: 1.4.0 carried everything listed here before it.
+- **Stars no longer syncs its filters with the website**: the `star-preferences` reads and writes
+  are gone, and the filters and favourite sites stay in this RuneLite's settings.
 
 ## Before submission
 

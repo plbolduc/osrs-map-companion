@@ -93,7 +93,7 @@ or **On my way**. You can turn on a reminder before it starts.
 </p>
 
 **Stars** lists active stars by site, world, tier and estimated time left. Filter by tier and
-world type, save favourite sites, and optionally sync your filters and favourites with the website.
+world type, and save favourite sites; your filters and favourites stay on your computer.
 Pick a precise site to pin it on the world map or plan a route there. The route's steps show under
 the star as they do on Home, so you can stay on Stars while you hop.
 
