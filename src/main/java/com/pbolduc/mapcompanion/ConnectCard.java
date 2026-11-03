@@ -99,6 +99,8 @@ import static com.pbolduc.mapcompanion.MapCompanionPanel.syncRow;
 final class ConnectCard extends JPanel
 {
 	private final MapCompanionConfig config;
+	/** RuneLite's settings, where the sharing fields are read; see {@link SharingFields}. */
+	private final ConfigStore settings;
 	private final MapCompanionPlugin plugin;
 	private final MemberIdentity identity;
 	private final Pairing pairing;
@@ -241,13 +243,14 @@ final class ConnectCard extends JPanel
 	 */
 	private boolean copyingInvite = false;
 
-	ConnectCard(Component sidebar, MapCompanionConfig config, MapCompanionPlugin plugin, MemberIdentity identity,
+	ConnectCard(Component sidebar, MapCompanionConfig config, ConfigStore settings, MapCompanionPlugin plugin, MemberIdentity identity,
 		Pairing pairing, RelayClient relay, DirectiveStream directiveStream, ConnectClient connectClient,
 		RecommendedSharing recommendedSharing, Runnable refresh, Consumer<Boolean> settingsOpen,
 		BooleanSupplier applyMapAddress, Supplier<String> mapUrl)
 	{
 		this.sidebar = sidebar;
 		this.config = config;
+		this.settings = settings;
 		this.connectClient = connectClient;
 		this.plugin = plugin;
 		this.identity = identity;
@@ -560,7 +563,7 @@ final class ConnectCard extends JPanel
 			refresh.run();
 			return;
 		}
-		if (!RecommendedSharing.connect(pairing, outcome.joined, () -> true, config,
+		if (!RecommendedSharing.connect(pairing, outcome.joined, () -> true, config, settings,
 			() -> recommendedSharing.offer(pairing.serverLabel())))
 		{
 			refused(ConnectClient.FAILED, making);
@@ -708,7 +711,7 @@ final class ConnectCard extends JPanel
 	/** Connect, then offer the recommended set if this was a first Connect to the map. */
 	private boolean connect(JoinCode joined)
 	{
-		return RecommendedSharing.connect(pairing, joined, this::confirmMap, config,
+		return RecommendedSharing.connect(pairing, joined, this::confirmMap, config, settings,
 			() -> recommendedSharing.offer(pairing.serverLabel()));
 	}
 
@@ -1321,13 +1324,13 @@ final class ConnectCard extends JPanel
 	/** A short summary of character sharing in Settings' switches, never a claim that membership sends nothing. */
 	private String sharingLine()
 	{
-		return SharingSummary.line(config);
+		return SharingSummary.line(config, settings);
 	}
 
 	/** Every switch for the line's tooltip, one a line, wrapped to fit the screen. */
 	private String sharingList()
 	{
-		return SharingSummary.list(config);
+		return SharingSummary.list(config, settings);
 	}
 
 	/**

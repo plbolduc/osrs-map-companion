@@ -195,6 +195,9 @@ public class MapCompanionPlugin extends Plugin
 	private ConfigManager configManager;
 
 	@Inject
+	private ConfigStore settings;
+
+	@Inject
 	private RelayClient relay;
 
 	@Inject
@@ -496,6 +499,29 @@ public class MapCompanionPlugin extends Plugin
 	MapCompanionConfig provideConfig(ConfigManager configManager)
 	{
 		return configManager.getConfig(MapCompanionConfig.class);
+	}
+
+	/** RuneLite's ordinary settings, which is where the sharing fields RuneLite does not declare are read. */
+	@Provides
+	ConfigStore provideSettings(ConfigManager configManager)
+	{
+		return ConfigStore.of(configManager);
+	}
+
+	/**
+	 * Reset, under RuneLite's list: RuneLite puts back what the config declares, and the sharing fields
+	 * under the four groups are not declared, so they are turned off here, as Reset always turned them.
+	 */
+	@Override
+	public void resetConfiguration()
+	{
+		for (SharingFields.Section section : SharingFields.GROUPS)
+		{
+			for (SharingFields.Field field : section.fields)
+			{
+				settings().unset(field.key);
+			}
+		}
 	}
 
 	@Provides
@@ -918,7 +944,7 @@ public class MapCompanionPlugin extends Plugin
 		{
 			SharingGroups.changed(key, event.getNewValue(), config, settings());
 		}
-		if (key.equals("shareSlayer") && !config.shareSlayer())
+		if (key.equals("shareSlayer") && !settings().on("shareSlayer"))
 		{
 			slayerState.clear();
 		}
@@ -973,10 +999,10 @@ public class MapCompanionPlugin extends Plugin
 		dirty = true;
 	}
 
-	/** RuneLite's settings, as {@link SharingGroups} reads and writes them; a test gives its own. */
+	/** RuneLite's settings, as {@link SharingGroups} and the sharing fields read them; a test gives its own. */
 	ConfigStore settings()
 	{
-		return ConfigStore.of(configManager);
+		return settings;
 	}
 
 	/** The part of a setting change that touches what a game tick owns. Client thread only. */
@@ -1214,7 +1240,7 @@ public class MapCompanionPlugin extends Plugin
 			{
 				clueReader.onMapWidget(event.getGroupId());
 			}
-			if (config.shareClue())
+			if (settings().on("shareClue"))
 			{
 				dirty = true;
 			}
@@ -1247,7 +1273,7 @@ public class MapCompanionPlugin extends Plugin
 			farmRunState.carried(capabilityEvaluator.evaluate());
 			farmRunState.observe(farmingObserver.observations(now), birdhouseReader.read(now), DestinationRoute.standing(client), now);
 			/* A port-task run's stops tick by the slots read this tick, and by nothing else. */
-			farmRunState.observePorts(config.sharePortTasks() ? portTaskReader.latest() : null);
+			farmRunState.observePorts(settings().on("sharePortTasks") ? portTaskReader.latest() : null);
 		}
 		farmRunRoute.sync();
 		/**
@@ -1354,7 +1380,7 @@ public class MapCompanionPlugin extends Plugin
 			{
 				/** Each half only while its own setting is on; the stream may be open for the other. */
 				destinationState.acceptSocial(directive, config.showDestination());
-				if (config.shareSlayer())
+				if (settings().on("shareSlayer"))
 				{
 					slayerState.accept(memberId, directive, System.currentTimeMillis());
 				}
@@ -1457,7 +1483,7 @@ public class MapCompanionPlugin extends Plugin
 			noteGroupName(server, code, response.groupName);
 			noteGroupOwner(server, code, response.groupOwner);
 			destinationState.acceptSocial(response.directive, config.showDestination());
-			if (config.shareSlayer())
+			if (settings().on("shareSlayer"))
 			{
 				slayerState.accept(postedAs, response.directive, System.currentTimeMillis());
 			}
@@ -1537,7 +1563,7 @@ public class MapCompanionPlugin extends Plugin
 	/** Caller holds the observer monitor. Config writes become visible before ConfigChanged runs. */
 	private RewardContext activeRewardContext()
 	{
-		RewardContext current = new RewardContext(config);
+		RewardContext current = new RewardContext(config, settings());
 		if (rewardContext != null && !rewardContext.sameAs(current))
 		{
 			rewardObserver.reset();
@@ -1561,14 +1587,14 @@ public class MapCompanionPlugin extends Plugin
 		final boolean pets;
 		final boolean collections;
 
-		RewardContext(MapCompanionConfig config)
+		RewardContext(MapCompanionConfig config, ConfigStore settings)
 		{
 			server = Pairing.normalizeServer(config.relayUrl());
 			String configuredCode = config.pairingCode();
 			code = configuredCode == null ? "" : configuredCode.trim();
-			enabled = config.shareMilestones();
-			pets = config.sharePets();
-			collections = config.shareCollectionLog();
+			enabled = settings.on(MapCompanionConfig.KEY_SHARE_MILESTONES);
+			pets = settings.on(MapCompanionConfig.KEY_SHARE_PETS);
+			collections = settings.on(MapCompanionConfig.KEY_SHARE_COLLECTION);
 		}
 
 		boolean sameAs(RewardContext other)
@@ -1590,7 +1616,7 @@ public class MapCompanionPlugin extends Plugin
 				return;
 			}
 			List<RewardObservation> settled = rewardObserver.onGameTick(now, client.getTickCount());
-			if (!context.sameAs(new RewardContext(config)))
+			if (!context.sameAs(new RewardContext(config, settings())))
 			{
 				activeRewardContext();
 				return;
@@ -1619,7 +1645,7 @@ public class MapCompanionPlugin extends Plugin
 			}
 			// A settings write can happen during enqueue while its event waits for this monitor.
 			// Recheck before releasing it, so that write cannot leave an old-context batch queued.
-			if (!context.sameAs(new RewardContext(config)))
+			if (!context.sameAs(new RewardContext(config, settings())))
 			{
 				activeRewardContext();
 			}
@@ -1653,9 +1679,9 @@ public class MapCompanionPlugin extends Plugin
 				completions.reset();
 				return;
 			}
-			if (config.shareQuestLog() || config.shareQuests())
+			if (settings().on("shareQuestLog") || settings().on("shareQuests"))
 			{
-				Map<String, String> quests = config.shareQuestLog() ? questReader.readLog(now)
+				Map<String, String> quests = settings().on("shareQuestLog") ? questReader.readLog(now)
 					: questReader.settled(now) ? questReader.readStates(now) : null;
 				for (String quest : completions.quests(quests))
 				{
@@ -1667,7 +1693,7 @@ public class MapCompanionPlugin extends Plugin
 			{
 				completions.forgetQuests();
 			}
-			if (config.shareDiaries())
+			if (settings().on("shareDiaries"))
 			{
 				for (String[] tier : completions.diaries(diaryReader.readTiers(now)))
 				{
@@ -2009,7 +2035,7 @@ public class MapCompanionPlugin extends Plugin
 		 * Read every tick while the choice is on, for the sidebar as much as the snapshot: the slots
 		 * are five varbits and a cached row each. Off, nothing is read or shown.
 		 */
-		if (config.sharePortTasks())
+		if (settings().on("sharePortTasks"))
 		{
 			portTaskReader.read(now);
 		}
@@ -2021,7 +2047,7 @@ public class MapCompanionPlugin extends Plugin
 		clueReader.read();
 		/* The death card's gravestone line, from the game's own timer; local, and never sent. */
 		deathWatcher.readGravestone(now);
-		if (config.shareFarming() || farmRunState.active())
+		if (settings().on("shareFarming") || farmRunState.active())
 		{
 			farmingObserver.observe(now, currentRegionId());
 		}

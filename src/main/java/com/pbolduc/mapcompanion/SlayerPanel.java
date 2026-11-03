@@ -44,7 +44,6 @@ import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.callback.ClientThread;
-import net.runelite.client.config.ConfigManager;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.util.LinkBrowser;
 
@@ -64,7 +63,7 @@ final class SlayerPanel extends JPanel
 	static final String NONE_OPEN = Words.of("slayer.noneOpen");
 	private final SlayerState state;
 	private final MapCompanionConfig config;
-	private final ConfigManager configManager;
+	private final ConfigStore settings;
 	private final RoutePress routes;
 	private final DestinationState destinations;
 	private final DestinationMarker marker;
@@ -90,12 +89,12 @@ final class SlayerPanel extends JPanel
 	private boolean loggedIn = true;
 
 	@Inject
-	SlayerPanel(SlayerState state, MapCompanionConfig config, ConfigManager configManager, RoutePress routes,
+	SlayerPanel(SlayerState state, MapCompanionConfig config, ConfigStore settings, RoutePress routes,
 				DestinationState destinations, DestinationMarker marker, ClientThread clientThread, GameSprites sprites)
 	{
 		this.state = state;
 		this.config = config;
-		this.configManager = configManager;
+		this.settings = settings;
 		this.routes = routes;
 		this.destinations = destinations;
 		this.marker = marker;
@@ -117,7 +116,7 @@ final class SlayerPanel extends JPanel
 	{
 		connected = ready;
 		this.loggedIn = loggedIn;
-		setVisible(ready && config.shareSlayer());
+		setVisible(ready && settings.on("shareSlayer"));
 		if (!isVisible())
 		{
 			return;
@@ -376,8 +375,8 @@ final class SlayerPanel extends JPanel
 	private void choose(String order, boolean hide)
 	{
 		state.choices(order, hide);
-		configManager.setConfiguration(MapCompanionConfig.GROUP, "slayerOrder", order);
-		configManager.setConfiguration(MapCompanionConfig.GROUP, "slayerHideWilderness", hide);
+		settings.set("slayerOrder", order);
+		settings.set("slayerHideWilderness", Boolean.toString(hide));
 		refresh(connected);
 	}
 

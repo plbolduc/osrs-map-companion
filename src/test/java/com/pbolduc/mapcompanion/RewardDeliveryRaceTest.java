@@ -290,11 +290,6 @@ public class RewardDeliveryRaceTest
 						return server.get();
 					case "pairingCode":
 						return code.get();
-					case "shareMilestones":
-					case "shareCollectionLog":
-						return true;
-					case "sharePets":
-						return pets.get();
 					/*
 					 * The loot group's switch in RuneLite's list, which the plugin reads to keep it in step
 					 * with a field written (SharingGroups). This group is not whole, so it reads off.
@@ -305,6 +300,36 @@ public class RewardDeliveryRaceTest
 						throw new AssertionError("Unexpected setting access: " + method);
 				}
 			});
+			/* The fields RuneLite does not declare are read by key from its settings, as strictly. */
+			ConfigStore settings = new ConfigStore()
+			{
+				@Override
+				public String get(String key)
+				{
+					switch (key)
+					{
+						case MapCompanionConfig.KEY_SHARE_MILESTONES:
+						case MapCompanionConfig.KEY_SHARE_COLLECTION:
+							return "true";
+						case MapCompanionConfig.KEY_SHARE_PETS:
+							return String.valueOf(pets.get());
+						default:
+							throw new AssertionError("Unexpected setting access: " + key);
+					}
+				}
+
+				@Override
+				public void set(String key, String value)
+				{
+					throw new AssertionError("Unexpected setting write: " + key);
+				}
+
+				@Override
+				public void unset(String key)
+				{
+					throw new AssertionError("Unexpected setting write: " + key);
+				}
+			};
 			plugin.milestones = outbox;
 			plugin.destinationState = new DestinationState(new Gson());
 			plugin.destinationMarker = new TestDestinationMarker();
@@ -314,7 +339,8 @@ public class RewardDeliveryRaceTest
 			TestFarmRuns.attach(plugin);
 			set("client", client);
 			set("config", config);
-			set("assignmentReader", new AssignmentReader(client, config));
+			set("settings", settings);
+			set("assignmentReader", new AssignmentReader(client, settings));
 			set("collectionItems", catalog);
 		}
 

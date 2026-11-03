@@ -83,6 +83,7 @@ public class CompletionAnnouncementTest
 		TestFarmRuns.attach(plugin);
 		set("client", game.client());
 		set("config", config);
+		set("settings", store);
 		set("questReader", quests);
 		set("diaryReader", diaries);
 		set("xpTracker", new XpTracker());
@@ -95,7 +96,7 @@ public class CompletionAnnouncementTest
 		set("cargoHolds", holds);
 		set("portTaskReader", new PortTaskReader(game.client(), holds));
 		set("birdhouseReader", new BirdhouseReader(key -> null));
-		set("assignmentReader", new AssignmentReader(game.client(), config));
+		set("assignmentReader", new AssignmentReader(game.client(), store));
 		set("deathWatcher", construct(DeathWatcher.class, game.client()));
 		set("lootLog", new LootLog(game.client(), store, new Gson()));
 		set("directiveStream", new DirectiveStream(new okhttp3.OkHttpClient(), new Gson(), (action, delay) -> null));

@@ -213,13 +213,13 @@ final class RecommendedSharing extends JPanel
 	 * <p>Every choice the step could turn on, and meetup notifications beside them, must still be
 	 * off: anything else is a player who has chosen already, and their choice stands.
 	 */
-	static boolean offered(MapCompanionConfig config)
+	static boolean offered(MapCompanionConfig config, ConfigStore store)
 	{
 		List<SharingFields.Field> asked = new ArrayList<>(all());
 		asked.add(SharingFields.NOTIFY_MEETUPS);
 		for (SharingFields.Field field : asked)
 		{
-			if (field.read.test(config))
+			if (field.on(config, store))
 			{
 				return false;
 			}
@@ -236,7 +236,8 @@ final class RecommendedSharing extends JPanel
 	 * the approval asks nothing, because the install warning was the question; the step is what the
 	 * player is shown instead.
 	 */
-	static boolean connect(Pairing pairing, JoinCode joined, BooleanSupplier notice, MapCompanionConfig config, Runnable offer)
+	static boolean connect(Pairing pairing, JoinCode joined, BooleanSupplier notice, MapCompanionConfig config, ConfigStore store,
+		Runnable offer)
 	{
 		boolean[] shown = {false};
 		boolean connected = pairing.connect(joined, () ->
@@ -244,7 +245,7 @@ final class RecommendedSharing extends JPanel
 			shown[0] = true;
 			return notice.getAsBoolean();
 		});
-		if (connected && shown[0] && offered(config))
+		if (connected && shown[0] && offered(config, store))
 		{
 			offer.run();
 		}
@@ -337,7 +338,7 @@ final class RecommendedSharing extends JPanel
 	{
 		for (SharingFields.Field field : tickedFields())
 		{
-			if (!field.read.test(config))
+			if (!field.on(config, store))
 			{
 				store.set(field.key, "true");
 			}

@@ -63,7 +63,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.text.Document;
 import javax.swing.Timer;
 import net.runelite.client.callback.ClientThread;
-import net.runelite.client.config.ConfigManager;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
@@ -176,7 +175,7 @@ public class MapCompanionPanel extends PluginPanel
 		DeathWatcher deathWatcher,
 		SnapshotBuilder snapshotBuilder,
 		ClientThread clientThread,
-		ConfigManager configManager,
+		ConfigStore settings,
 		MemberIdentity identity,
 		Pairing pairing,
 		Gson gson,
@@ -212,8 +211,8 @@ public class MapCompanionPanel extends PluginPanel
 		this.routePress = routePress;
 		this.searchPanel = new SearchPanel(searchClient, routePress, sprites);
 		/* Before the connect card, which offers it after a first Connect. */
-		this.recommendedSharing = new RecommendedSharing(config, ConfigStore.of(configManager), this::refresh);
-		this.connectCard = new ConnectCard(this, config, plugin, identity, pairing, relay, directiveStream, connectClient,
+		this.recommendedSharing = new RecommendedSharing(config, settings, this::refresh);
+		this.connectCard = new ConnectCard(this, config, settings, plugin, identity, pairing, relay, directiveStream, connectClient,
 			recommendedSharing, this::refresh, this::openSettings, this::applyMapAddress, this::mapUrl);
 		this.groupPanel = new GroupPanel(destinationState, groupState, routePress, meetupClient, config, sprites, connectCard.copyInviteButton);
 		this.nowCards = new NowCards(config, destinationState, deathWatcher, destinationMarker, destinationRoute,
@@ -273,7 +272,7 @@ public class MapCompanionPanel extends PluginPanel
 		views = new CompanionViews(overview, group, starsPanel, starsPanel::selected);
 		body.add(views);
 
-		settingsPage = new SettingsPage(config, destinationState, lootLog, snapshotBuilder, clientThread, configManager,
+		settingsPage = new SettingsPage(config, destinationState, lootLog, snapshotBuilder, clientThread, settings,
 			identity, pairing, gson, farmRunState, farmRunClient, connectCard, this::refresh, this::openSettings, this::mapUrl);
 		pages = new SidebarPages(body, settingsPage);
 

@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
+import javax.annotation.Nullable;
 
 /**
  * Every sharing choice the sidebar offers, by its setting key and in the words the sidebar uses.
@@ -41,6 +42,7 @@ import java.util.function.Predicate;
  * cannot name a field differently from the switch that later turns it off, and a field cannot be
  * added to a group in one without the other. RuneLite's list names them the same way, which
  * {@code SharingGroupsTest} holds it to. The keys are the existing settings; nothing here is stored.
+ * The fields under the groups but the position are read by key, as {@link MapCompanionConfig} says why.
  */
 final class SharingFields
 {
@@ -54,17 +56,25 @@ final class SharingFields
 		final String key;
 		final String label;
 		final String detail;
-		final Predicate<MapCompanionConfig> read;
+		/** The config's own getter, or null for a field RuneLite does not declare, which is read by key. */
+		@Nullable
+		private final Predicate<MapCompanionConfig> read;
 		/** A RuneLite notification setting, which a press writes as one; see {@link NotificationChoice}. */
 		final boolean notification;
 
-		private Field(String key, Predicate<MapCompanionConfig> read, boolean notification)
+		private Field(String key, @Nullable Predicate<MapCompanionConfig> read, boolean notification)
 		{
 			this.key = key;
 			this.label = WORDS.get(key)[1];
 			this.detail = WORDS.get(key)[2];
 			this.read = read;
 			this.notification = notification;
+		}
+
+		/** Whether it is on now. A getter and a key read the same stored value; see {@link MapCompanionConfig}. */
+		boolean on(MapCompanionConfig config, ConfigStore store)
+		{
+			return read != null ? read.test(config) : store.on(key);
 		}
 	}
 
@@ -113,40 +123,30 @@ final class SharingFields
 		return new Field(key, read, false);
 	}
 
+	/** A field RuneLite does not declare, read by its key. */
+	private static Field field(String key)
+	{
+		return new Field(key, null, false);
+	}
+
 	static final Section PRESENCE = new Section("presence", MapCompanionConfig.KEY_SHARE_MAP_PRESENCE,
 		MapCompanionConfig::shareMapPresence,
-		field("sharePosition", MapCompanionConfig::sharePosition),
-		field("shareActivity", MapCompanionConfig::shareActivity),
-		field("shareAccountType", MapCompanionConfig::shareAccountType));
+		field("sharePosition", MapCompanionConfig::sharePosition), field("shareActivity"), field("shareAccountType"));
 
 	static final Section PROGRESS = new Section("progress", MapCompanionConfig.KEY_SHARE_PROGRESS,
 		MapCompanionConfig::shareProgressAndTravel,
-		field("shareSkills", MapCompanionConfig::shareSkills),
-		field("shareQuests", MapCompanionConfig::shareQuests),
-		field("shareQuestLog", MapCompanionConfig::shareQuestLog),
-		field("shareDiaries", MapCompanionConfig::shareDiaries),
-		field("sharePermanentTravel", MapCompanionConfig::sharePermanentTravel),
-		field("shareCapabilities", MapCompanionConfig::shareCapabilities),
-		field("shareStash", MapCompanionConfig::shareStash),
-		field("shareBoats", MapCompanionConfig::shareBoats));
+		field("shareSkills"), field("shareQuests"), field("shareQuestLog"), field("shareDiaries"), field("sharePermanentTravel"),
+		field("shareCapabilities"), field("shareStash"), field("shareBoats"));
 
 	static final Section TASKS = new Section("tasks", MapCompanionConfig.KEY_SHARE_TASKS,
 		MapCompanionConfig::shareTasksAndTimers,
-		field("shareSlayer", MapCompanionConfig::shareSlayer),
-		field("shareClue", MapCompanionConfig::shareClue),
-		field("shareFarming", MapCompanionConfig::shareFarming),
-		field("shareBirdhouses", MapCompanionConfig::shareBirdhouses),
-		field("shareHunterRumours", MapCompanionConfig::shareHunterRumours),
-		field("shareMahoganyHomes", MapCompanionConfig::shareMahoganyHomes),
-		field("shareFarmingContracts", MapCompanionConfig::shareFarmingContracts),
-		field("sharePortTasks", MapCompanionConfig::sharePortTasks));
+		field("shareSlayer"), field("shareClue"), field("shareFarming"), field("shareBirdhouses"), field("shareHunterRumours"),
+		field("shareMahoganyHomes"), field("shareFarmingContracts"), field("sharePortTasks"));
 
 	static final Section LOOT = new Section("loot", MapCompanionConfig.KEY_SHARE_LOOT_GROUP,
 		MapCompanionConfig::shareLootAndMilestones,
-		field("shareLoot", MapCompanionConfig::shareLoot),
-		field(MapCompanionConfig.KEY_SHARE_MILESTONES, MapCompanionConfig::shareMilestones),
-		field(MapCompanionConfig.KEY_SHARE_PETS, MapCompanionConfig::sharePets),
-		field(MapCompanionConfig.KEY_SHARE_COLLECTION, MapCompanionConfig::shareCollectionLog));
+		field("shareLoot"), field(MapCompanionConfig.KEY_SHARE_MILESTONES), field(MapCompanionConfig.KEY_SHARE_PETS),
+		field(MapCompanionConfig.KEY_SHARE_COLLECTION));
 
 	/** The four groups, in the order both Settings and the Connect step draw them. */
 	static final List<Section> GROUPS = Collections.unmodifiableList(Arrays.asList(PRESENCE, PROGRESS, TASKS, LOOT));

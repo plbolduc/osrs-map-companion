@@ -42,11 +42,26 @@ public class AssignmentReaderTest
 {
 	private final Map<String, Boolean> enabled = new HashMap<>();
 	private final Map<Integer, Integer> bits = new HashMap<>();
-	private final MapCompanionConfig config = new MapCompanionConfig()
+	/* The three sharing fields by key, as RuneLite's settings hold them, each from its kind's switch below. */
+	private final ConfigStore settings = new ConfigStore()
 	{
-		@Override public boolean shareHunterRumours() { return enabled.getOrDefault("rumour", false); }
-		@Override public boolean shareMahoganyHomes() { return enabled.getOrDefault("home", false); }
-		@Override public boolean shareFarmingContracts() { return enabled.getOrDefault("farm", false); }
+		@Override
+		public String get(String key)
+		{
+			String kind = key.equals("shareHunterRumours") ? "rumour" : key.equals("shareMahoganyHomes") ? "home"
+				: key.equals("shareFarmingContracts") ? "farm" : null;
+			return kind == null ? null : String.valueOf(enabled.getOrDefault(kind, false));
+		}
+
+		@Override
+		public void set(String key, String value)
+		{
+		}
+
+		@Override
+		public void unset(String key)
+		{
+		}
 	};
 	private final Client client = (Client) Proxy.newProxyInstance(Client.class.getClassLoader(), new Class<?>[] {Client.class},
 		(proxy, method, args) ->
@@ -56,7 +71,7 @@ public class AssignmentReaderTest
 			if (method.getName().equals("getVarbitValue")) return bits.getOrDefault((Integer) args[0], -1);
 			throw new UnsupportedOperationException(method.getName());
 		});
-	private final AssignmentReader reader = new AssignmentReader(client, config);
+	private final AssignmentReader reader = new AssignmentReader(client, settings);
 
 	private void message(ChatMessageType type, String text, long now)
 	{

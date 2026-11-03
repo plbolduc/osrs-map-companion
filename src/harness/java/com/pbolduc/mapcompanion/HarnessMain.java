@@ -222,6 +222,7 @@ public final class HarnessMain
 				bind(OkHttpClient.class).toInstance(http);
 				bind(ScheduledExecutorService.class).toInstance(reconnects);
 				bind(MapCompanionConfig.class).toInstance(config);
+				bind(ConfigStore.class).toInstance(store);
 				bind(MemberIdentity.class).toInstance(new MemberIdentity(store));
 				bind(Pairing.class).toInstance(new Pairing(store, gson, config::relayUrl));
 				bind(LootLog.class).toInstance(new LootLog(game.client(), store, gson));
@@ -648,8 +649,8 @@ public final class HarnessMain
 	{
 		long now = System.currentTimeMillis();
 		String type = text(command, "rewardType", "item");
-		if (sharingMilestones() && (!"pet".equals(type) || config.sharePets())
-			&& (!"collection_log".equals(type) || config.shareCollectionLog()))
+		if (sharingMilestones() && (!"pet".equals(type) || store.on(MapCompanionConfig.KEY_SHARE_PETS))
+			&& (!"collection_log".equals(type) || store.on(MapCompanionConfig.KEY_SHARE_COLLECTION)))
 		{
 			JsonObject source = command.has("source") && command.get("source").isJsonObject()
 								? command.getAsJsonObject("source") : new JsonObject();
@@ -657,7 +658,7 @@ public final class HarnessMain
 						 ? command.get("itemId").getAsInt() : null;
 			Integer quantity = command.has("quantity") && !command.get("quantity").isJsonNull()
 							   ? command.get("quantity").getAsInt() : null;
-			Boolean collection = config.shareCollectionLog() && command.has("collectionNew")
+			Boolean collection = store.on(MapCompanionConfig.KEY_SHARE_COLLECTION) && command.has("collectionNew")
 								 && command.get("collectionNew").getAsBoolean() ? true : null;
 			milestones.reward(new RewardObservation(type, text(command, "item", "Pet"), id, quantity,
 													text(source, "kind", null), text(source, "name", null), collection, now), now);
@@ -678,9 +679,9 @@ public final class HarnessMain
 			completions.reset();
 			return;
 		}
-		if (config.shareQuestLog() || config.shareQuests())
+		if (store.on("shareQuestLog") || store.on("shareQuests"))
 		{
-			Map<String, String> quests = config.shareQuestLog() ? questReader.readLog(now)
+			Map<String, String> quests = store.on("shareQuestLog") ? questReader.readLog(now)
 				: questReader.settled(now) ? questReader.readStates(now) : null;
 			for (String quest : completions.quests(quests))
 			{
@@ -692,7 +693,7 @@ public final class HarnessMain
 		{
 			completions.forgetQuests();
 		}
-		if (config.shareDiaries())
+		if (store.on("shareDiaries"))
 		{
 			for (String[] tier : completions.diaries(diaryReader.readTiers(now)))
 			{
@@ -708,7 +709,7 @@ public final class HarnessMain
 
 	private boolean sharingMilestones()
 	{
-		return config.shareMilestones() && game.gameState() == GameState.LOGGED_IN
+		return store.on(MapCompanionConfig.KEY_SHARE_MILESTONES) && game.gameState() == GameState.LOGGED_IN
 			   && !config.pairingCode().trim().isEmpty();
 	}
 
@@ -745,7 +746,7 @@ public final class HarnessMain
 	 */
 	private void onConfigChanged(String key)
 	{
-		if (key.equals("shareSlayer") && !config.shareSlayer())
+		if (key.equals("shareSlayer") && !store.on("shareSlayer"))
 		{
 			slayerState.clear();
 		}
@@ -860,7 +861,7 @@ public final class HarnessMain
 			String streamedMember = identity.id();
 			directiveStream.start(config.relayUrl(), code, streamedMember, pairing.secret(streamedMember), showGroup, directive ->
 			{
-				if (config.shareSlayer())
+				if (store.on("shareSlayer"))
 				{
 					slayerState.accept(streamedMember, directive, System.currentTimeMillis());
 				}
@@ -951,7 +952,7 @@ public final class HarnessMain
 				toldNameCode = code;
 				toldName = response.groupName;
 			}
-			if (config.shareSlayer())
+			if (store.on("shareSlayer"))
 			{
 				slayerState.accept(postedAs, response.directive, System.currentTimeMillis());
 			}
@@ -1038,7 +1039,7 @@ public final class HarnessMain
 		birdhouseReader.onSessionResumed(now);
 		diaryReader.onSessionResumed(now);
 		questReader.onSessionResumed(now);
-		if (config.shareFarming() || farmRunState.active())
+		if (store.on("shareFarming") || farmRunState.active())
 		{
 			farmingObserver.observe(now, game.where().getRegionID());
 		}

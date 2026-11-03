@@ -63,7 +63,7 @@ final class FarmRunPanel extends JPanel
 	};
 
 	private final FarmRunClient client;
-	private final MapCompanionConfig config;
+	private final ConfigStore settings;
 	private final JComboBox<String> kind = new JComboBox<>();
 	/* A button under the picker, the picker's width: it acts, and a link is a fold's own opener. */
 	private final JButton start = MapCompanionPanel.smallButton("Start run");
@@ -84,10 +84,10 @@ final class FarmRunPanel extends JPanel
 
 	@Inject
 	FarmRunPanel(FarmRunState state, FarmRunClient client, FarmRunRoute follower, DestinationRoute routes,
-				 ShortestPath shortest, GameSprites sprites, MapCompanionConfig config)
+				 ShortestPath shortest, GameSprites sprites, MapCompanionConfig config, ConfigStore settings)
 	{
 		this.client = client;
-		this.config = config;
+		this.settings = settings;
 		this.run = new RunView(false, state, client, follower, routes, shortest, sprites, config);
 		MapCompanionPanel.taskCard(this, "farmRun", "Farm run", sprites, "Farming");
 		picker.setBackground(getBackground());
@@ -114,7 +114,7 @@ final class FarmRunPanel extends JPanel
 		start.addActionListener(e ->
 		{
 			String[] chosen = STARTS[kind.getSelectedIndex()];
-			if (needs(chosen[0], config) == null)
+			if (needs(chosen[0], settings) == null)
 			{
 				client.start(chosen[0], chosen[1]);
 			}
@@ -134,13 +134,13 @@ final class FarmRunPanel extends JPanel
 	 * the contract it shared; the presets and Birdhouses are planned from the map's own tables.
 	 */
 	@Nullable
-	static String needs(String kind, MapCompanionConfig config)
+	static String needs(String kind, ConfigStore settings)
 	{
-		if ("ready-now".equals(kind) && !config.shareFarming())
+		if ("ready-now".equals(kind) && !settings.on("shareFarming"))
 		{
 			return NEEDS_PATCHES;
 		}
-		if ("contract".equals(kind) && !config.shareFarmingContracts())
+		if ("contract".equals(kind) && !settings.on("shareFarmingContracts"))
 		{
 			return NEEDS_CONTRACT;
 		}
@@ -150,7 +150,7 @@ final class FarmRunPanel extends JPanel
 	/** Start run, and the line under it, for the kind chosen now. EDT. */
 	private void offer()
 	{
-		String missing = needs(STARTS[kind.getSelectedIndex()][0], config);
+		String missing = needs(STARTS[kind.getSelectedIndex()][0], settings);
 		start.setEnabled(ready && missing == null);
 		needs.setVisible(picker.isVisible() && missing != null);
 		MapCompanionPanel.setWrapped(needs, missing == null ? "" : missing, MapCompanionPanel.CARD_TEXT_WIDTH);

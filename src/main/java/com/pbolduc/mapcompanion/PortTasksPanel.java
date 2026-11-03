@@ -68,7 +68,7 @@ final class PortTasksPanel extends JPanel
 	static final String AFTER_FARM_RUN = "Start run after the farm run ends.";
 	static final String BOARD_ONCE = Words.of("port.boardOnce");
 	private final PortTaskReader reader;
-	private final MapCompanionConfig config;
+	private final ConfigStore settings;
 	private final FarmRunClient client;
 	private final JPanel body = new JPanel();
 	/* The card's width, as the farm run's Start run is: it acts, so it is a button and not a link. */
@@ -81,11 +81,11 @@ final class PortTasksPanel extends JPanel
 	private boolean shownRunning;
 
 	@Inject
-	PortTasksPanel(PortTaskReader reader, MapCompanionConfig config, GameSprites sprites, FarmRunState state,
-		FarmRunClient client, FarmRunRoute follower, DestinationRoute routes, ShortestPath shortest)
+	PortTasksPanel(PortTaskReader reader, MapCompanionConfig config, ConfigStore settings, GameSprites sprites,
+		FarmRunState state, FarmRunClient client, FarmRunRoute follower, DestinationRoute routes, ShortestPath shortest)
 	{
 		this.reader = reader;
-		this.config = config;
+		this.settings = settings;
 		this.client = client;
 		this.run = new RunView(true, state, client, follower, routes, shortest, sprites, config);
 		/* The bold face's last "s" draws past its advance; two pixels keep it inside the label. */
@@ -122,7 +122,7 @@ final class PortTasksPanel extends JPanel
 	/** The same, knowing whether a character is logged in: with none, Start run waits for one. */
 	void refresh(boolean connected, boolean loggedIn)
 	{
-		List<PortTaskReader.Slot> slots = config.sharePortTasks() ? reader.shown() : null;
+		List<PortTaskReader.Slot> slots = settings.on("sharePortTasks") ? reader.shown() : null;
 		/* Through a hop's window these are the tasks from before it: shown, but not a reading to plan from. */
 		boolean kept = slots != null && reader.latest() == null;
 		boolean worth = slots != null && slots.stream().anyMatch(s -> s.held() || PortTaskReader.UNKNOWN.equals(s.state));
@@ -135,10 +135,10 @@ final class PortTasksPanel extends JPanel
 		boolean running = run.busy();
 		boolean offer = startable(slots) && !running;
 		/* The farm card's run being walked holds Start back too, and the line where it was says so. */
-		boolean after = offer && config.shareBoats() && run.otherBusy();
-		starter.setVisible(offer && config.shareBoats() && !after);
+		boolean after = offer && settings.on("shareBoats") && run.otherBusy();
+		starter.setVisible(offer && settings.on("shareBoats") && !after);
 		start.setEnabled(connected && loggedIn && client.ready() && !kept);
-		hint.setVisible(offer && (!config.shareBoats() || after));
+		hint.setVisible(offer && (!settings.on("shareBoats") || after));
 		MapCompanionPanel.setWrapped(hint, after ? AFTER_FARM_RUN : NEEDS_BOATS, WIDTH);
 		if (!worth)
 		{

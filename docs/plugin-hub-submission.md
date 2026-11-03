@@ -82,9 +82,11 @@ existing player's settings and opens no stream for them. `RecommendedSharing` is
 
 **Sharing as six switches.** RuneLite's list shows sharing as the sidebar does: *Character name*,
 *Name to show instead*, a switch for each of the four groups, and *Where you died*. The 23 per-field
-settings under the groups keep their keys and stay what `SnapshotBuilder` reads; they are `hidden`
-from the list, and Settings in the sidebar draws the same six switches, with *What each one sends*
-naming every field. `SharingGroups` writes a group's fields when its switch is pressed and moves the
+settings under the groups keep their keys and stay what `SnapshotBuilder` reads; none is in the list.
+*Position and world* is declared `hidden`, and the other 22 are not declared at all: they are read
+by key (`ConfigStore.on`), and **Reset** turns them off in `MapCompanionPlugin.resetConfiguration`,
+since RuneLite resets only what is declared. Settings in the sidebar draws the same six switches,
+with *What each one sends* naming every field. `SharingGroups` writes a group's fields when its switch is pressed and moves the
 switch when they are written, so a switch shows on only while every field in it is; a group a player
 chose part of before the update shows off, and Settings names the fields that are on. Every switch
 starts off.
@@ -247,6 +249,9 @@ answering a reviewer:
 - **Search finds places, not items**: the sidebar draws places, characters and monsters, and no
   longer the items a query names or the shops and monsters under an item's *Sold at* and
   *Dropped by*. `GET /api/companion/search` is asked as before; the item half of its answer is ignored.
+- **The sharing fields are read by key**: 22 of the 23 fields under the groups are no longer declared
+  as hidden settings. Their keys, defaults and what they send are unchanged, and Reset still turns
+  them off, through `resetConfiguration`.
 
 ## Before submission
 

@@ -75,6 +75,12 @@ final class HarnessStore implements ConfigStore
 		onChanged.accept(key);
 	}
 
+	/** Store a value without the event: {@link HarnessConfig#set} mirroring a choice it already holds. */
+	synchronized void put(String key, String value)
+	{
+		values.put(key, value);
+	}
+
 	@Override
 	public void unset(String key)
 	{

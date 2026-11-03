@@ -33,9 +33,20 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import net.runelite.api.Client;
 import net.runelite.client.config.ConfigItem;
 import net.runelite.client.events.ConfigChanged;
@@ -96,7 +107,7 @@ public class SharingGroupsTest
 		assertEquals("only the switch that disagreed, and the marker",
 			Arrays.asList(MapCompanionConfig.KEY_SHARE_MAP_PRESENCE + "=true", SharingGroups.KEY_SETTLED + "=1"), fixture.written);
 		assertEquals(Arrays.asList(SharingFields.PROGRESS.fields.get(0), SharingFields.PROGRESS.fields.get(7)),
-			SharingGroups.shared(SharingFields.PROGRESS, fixture.config));
+			SharingGroups.shared(SharingFields.PROGRESS, fixture.config, fixture.store));
 		assertEquals("Skill levels", SharingFields.PROGRESS.fields.get(0).label);
 		assertEquals("Boats and moorings", SharingFields.PROGRESS.fields.get(7).label);
 
@@ -140,13 +151,13 @@ public class SharingGroupsTest
 			on.add(field.key + "=true");
 		}
 		assertEquals("the press, then each field that was off", on, fixture.written);
-		assertTrue(SharingGroups.on(SharingFields.TASKS, fixture.config));
-		assertFalse("no other group moves", fixture.config.shareSkills() || fixture.config.sharePosition() || fixture.config.shareLoot());
+		assertTrue(SharingGroups.on(SharingFields.TASKS, fixture.config, fixture.store));
+		assertFalse("no other group moves", fixture.store.on("shareSkills") || fixture.config.sharePosition() || fixture.store.on("shareLoot"));
 
 		fixture.written.clear();
 		fixture.store.set(MapCompanionConfig.KEY_SHARE_TASKS, "false");
 		assertEquals(1 + SharingFields.TASKS.fields.size(), fixture.written.size());
-		assertTrue(SharingGroups.shared(SharingFields.TASKS, fixture.config).isEmpty());
+		assertTrue(SharingGroups.shared(SharingFields.TASKS, fixture.config, fixture.store).isEmpty());
 		assertEquals("false", fixture.store.get(MapCompanionConfig.KEY_SHARE_TASKS));
 	}
 
@@ -166,13 +177,13 @@ public class SharingGroupsTest
 		assertNull("a partly shared group shows off, and nothing is written for it", fixture.store.get(MapCompanionConfig.KEY_SHARE_MAP_PRESENCE));
 		fixture.store.set(presence.get(2).key, "true");
 		assertEquals("true", fixture.store.get(MapCompanionConfig.KEY_SHARE_MAP_PRESENCE));
-		assertTrue("every field kept", SharingGroups.on(SharingFields.PRESENCE, fixture.config));
+		assertTrue("every field kept", SharingGroups.on(SharingFields.PRESENCE, fixture.config, fixture.store));
 
 		fixture.written.clear();
 		fixture.store.set(presence.get(1).key, "false");
 		assertEquals(Arrays.asList(presence.get(1).key + "=false", MapCompanionConfig.KEY_SHARE_MAP_PRESENCE + "=false"), fixture.written);
 		assertTrue("the switch going off took no other field with it",
-			fixture.config.sharePosition() && fixture.config.shareAccountType());
+			fixture.config.sharePosition() && fixture.store.on("shareAccountType"));
 	}
 
 	/**
@@ -195,10 +206,10 @@ public class SharingGroupsTest
 
 		SharingGroups.settle(fixture.config, fixture.store);
 
-		assertTrue("switched off there, so no longer shared", SharingGroups.shared(SharingFields.LOOT, fixture.config).isEmpty());
-		assertTrue("switched on there, so all of it", SharingGroups.on(SharingFields.PROGRESS, fixture.config));
+		assertTrue("switched off there, so no longer shared", SharingGroups.shared(SharingFields.LOOT, fixture.config, fixture.store).isEmpty());
+		assertTrue("switched on there, so all of it", SharingGroups.on(SharingFields.PROGRESS, fixture.config, fixture.store));
 		assertEquals("off over a partly shared group agrees with it, and keeps it",
-			Arrays.asList(SharingFields.TASKS.fields.get(3)), SharingGroups.shared(SharingFields.TASKS, fixture.config));
+			Arrays.asList(SharingFields.TASKS.fields.get(3)), SharingGroups.shared(SharingFields.TASKS, fixture.config, fixture.store));
 	}
 
 	/**
@@ -216,7 +227,7 @@ public class SharingGroupsTest
 		}
 		fixture.store.set(MapCompanionConfig.KEY_SHARE_MAP_PRESENCE, "false");
 		SharingGroups.changed(MapCompanionConfig.KEY_SHARE_MAP_PRESENCE, "false", fixture.config, fixture.store);
-		assertTrue("a default written before the profile was read is not a press", SharingGroups.on(SharingFields.PRESENCE, fixture.config));
+		assertTrue("a default written before the profile was read is not a press", SharingGroups.on(SharingFields.PRESENCE, fixture.config, fixture.store));
 
 		SharingGroups.settle(fixture.config, fixture.store);
 		assertEquals("true", fixture.store.get(MapCompanionConfig.KEY_SHARE_MAP_PRESENCE));
@@ -224,7 +235,7 @@ public class SharingGroupsTest
 		fixture.store.unset(MapCompanionConfig.KEY_SHARE_MAP_PRESENCE);
 		fixture.config.set(MapCompanionConfig.KEY_SHARE_MAP_PRESENCE, false);
 		SharingGroups.changed(MapCompanionConfig.KEY_SHARE_MAP_PRESENCE, null, fixture.config, fixture.store);
-		assertTrue("unsetting is how Reset starts, not a press", SharingGroups.on(SharingFields.PRESENCE, fixture.config));
+		assertTrue("unsetting is how Reset starts, not a press", SharingGroups.on(SharingFields.PRESENCE, fixture.config, fixture.store));
 	}
 
 	/**
@@ -265,9 +276,9 @@ public class SharingGroupsTest
 
 		fixture.store.set(MapCompanionConfig.KEY_SHARE_MAP_PRESENCE, "false");
 		assertTrue("the press in RuneLite's list reached every field",
-			SharingGroups.shared(SharingFields.PRESENCE, fixture.config).isEmpty());
+			SharingGroups.shared(SharingFields.PRESENCE, fixture.config, fixture.store).isEmpty());
 		fixture.store.set(MapCompanionConfig.KEY_SHARE_MAP_PRESENCE, "true");
-		assertTrue(SharingGroups.on(SharingFields.PRESENCE, fixture.config));
+		assertTrue(SharingGroups.on(SharingFields.PRESENCE, fixture.config, fixture.store));
 		fixture.store.set("shareActivity", "false");
 		assertEquals("and a field the sidebar writes moves the switch", "false", fixture.store.get(MapCompanionConfig.KEY_SHARE_MAP_PRESENCE));
 	}
@@ -275,6 +286,7 @@ public class SharingGroupsTest
 	/**
 	 * One name for each setting: RuneLite's list names each switch as the sidebar does, and says every
 	 * field it shares in the sidebar's words, in order; a field it hides is named as the sidebar names it.
+	 * A field it does not declare at all is in no list of its own, and its one name is the sidebar's.
 	 */
 	@Test
 	public void runeLitesListNamesEachSwitchAndItsFieldsInTheSidebarsWords() throws Exception
@@ -302,8 +314,11 @@ public class SharingGroupsTest
 				assertTrue(section.key + " names " + field.label + " after the field before it", at >= from);
 				from = at + field.label.length();
 				ConfigItem hidden = items.get(field.key);
-				assertTrue(field.key + " is drawn by its switch alone", hidden.hidden());
-				assertEquals(field.key, field.label, hidden.name());
+				if (hidden != null)
+				{
+					assertTrue(field.key + " is drawn by its switch alone", hidden.hidden());
+					assertEquals(field.key, field.label, hidden.name());
+				}
 			}
 		}
 		for (SharingFields.Field field : Arrays.asList(SharingFields.NAME, SharingFields.DEATH))
@@ -312,9 +327,84 @@ public class SharingGroupsTest
 			assertEquals(MapCompanionConfig.sharingSection, items.get(field.key).section());
 		}
 		assertEquals("Name to show instead", items.get("nickname").name());
+		Set<String> declared = new LinkedHashSet<>(groupFieldKeys());
+		declared.retainAll(items.keySet());
+		assertEquals("the one field RuneLite declares, for the map's contract test", Arrays.asList("sharePosition"), new ArrayList<>(declared));
 	}
 
-	private static List<String> fieldKeys()
+	/**
+	 * A field RuneLite does not declare is read by its key, which no compiler checks as it checked a
+	 * getter: every key the plugin reads that way is a field of a group, so a misspelt key cannot read a
+	 * setting nobody writes, and every such field is read somewhere, so none is offered and never sent.
+	 */
+	@Test
+	public void everyKeyReadByKeyIsAFieldOfAGroupAndEveryFieldIsRead() throws Exception
+	{
+		Set<String> undeclared = new LinkedHashSet<>(groupFieldKeys());
+		for (Method method : MapCompanionConfig.class.getDeclaredMethods())
+		{
+			ConfigItem item = method.getAnnotation(ConfigItem.class);
+			if (item != null)
+			{
+				undeclared.remove(item.keyName());
+			}
+		}
+		Pattern literal = Pattern.compile("\\.on\\(\"(\\w+)\"\\)");
+		Pattern constant = Pattern.compile("\\.on\\(MapCompanionConfig\\.(KEY_\\w+)\\)");
+		Set<String> read = new HashSet<>();
+		try (Stream<Path> files = Files.walk(Paths.get("src/main/java")))
+		{
+			for (Path file : files.filter(path -> path.toString().endsWith(".java")).collect(Collectors.toList()))
+			{
+				String source = new String(Files.readAllBytes(file), StandardCharsets.UTF_8);
+				for (Matcher found = literal.matcher(source); found.find();)
+				{
+					read.add(found.group(1));
+				}
+				for (Matcher found = constant.matcher(source); found.find();)
+				{
+					read.add((String) MapCompanionConfig.class.getField(found.group(1)).get(null));
+				}
+			}
+		}
+		Set<String> stray = new HashSet<>(read);
+		stray.removeAll(undeclared);
+		assertTrue("read by key, and no field of a group RuneLite leaves undeclared: " + stray, stray.isEmpty());
+		assertEquals("every field RuneLite does not declare is read", undeclared, new LinkedHashSet<>(groupFieldKeys().stream()
+			.filter(read::contains).collect(Collectors.toList())));
+		assertEquals(22, undeclared.size());
+	}
+
+	/**
+	 * Reset under RuneLite's list puts back only what the config declares, so the plugin turns the fields
+	 * it reads by key off itself: a group partly on, whose switch Reset leaves as it was, is shared no more.
+	 */
+	@Test
+	public void resetTurnsOffTheFieldsRuneLiteDoesNotDeclare()
+	{
+		Fixture fixture = new Fixture();
+		for (String key : groupFieldKeys())
+		{
+			fixture.store.set(key, "true");
+		}
+		assertTrue("shared before the reset", fixture.sent().has("skills"));
+		new MapCompanionPlugin()
+		{
+			@Override
+			ConfigStore settings()
+			{
+				return fixture.store;
+			}
+		}.resetConfiguration();
+		for (String key : groupFieldKeys())
+		{
+			assertFalse(key, fixture.store.on(key));
+		}
+		assertFalse("so a field read by key goes out no more", fixture.sent().has("skills"));
+	}
+
+	/** The fields under the four groups, in their order. */
+	private static List<String> groupFieldKeys()
 	{
 		List<String> keys = new ArrayList<>();
 		for (SharingFields.Section section : SharingFields.GROUPS)
@@ -324,6 +414,12 @@ public class SharingGroupsTest
 				keys.add(field.key);
 			}
 		}
+		return keys;
+	}
+
+	private static List<String> fieldKeys()
+	{
+		List<String> keys = new ArrayList<>(groupFieldKeys());
 		keys.add(SharingFields.NAME.key);
 		keys.add(SharingFields.DEATH.key);
 		return keys;
@@ -355,6 +451,7 @@ public class SharingGroupsTest
 					bind(Client.class).toInstance(game.client());
 					bind(Gson.class).toInstance(gson);
 					bind(MapCompanionConfig.class).toInstance(config);
+					bind(ConfigStore.class).toInstance(store);
 					bind(MemberIdentity.class).toInstance(new MemberIdentity(store));
 					bind(LootLog.class).toInstance(new LootLog(game.client(), store, gson));
 					bind(FarmingObserver.class).toInstance(new FarmingObserver(game.client(), store, gson));

@@ -46,6 +46,10 @@ import net.runelite.client.config.ConfigManager;
  * <p>Every implementer stores under {@link MapCompanionConfig#GROUP}, so a key here is a key
  * there. Package-private on purpose: it is a seam, not an API, and nothing outside this plugin has
  * any business holding one.
+ *
+ * <p>The one the plugin's injector hands out is {@link #of}, RuneLite's ordinary settings: it is how
+ * the sharing fields under the four groups are read, which RuneLite does not declare; see
+ * {@link SharingFields}.
  */
 interface ConfigStore
 {
@@ -56,6 +60,12 @@ interface ConfigStore
 	void set(String key, String value);
 
 	void unset(String key);
+
+	/** A setting stored as "true" or "false"; one never written is off, as every sharing field starts. */
+	default boolean on(String key)
+	{
+		return Boolean.parseBoolean(get(key));
+	}
 
 	/**
 	 * Turn a RuneLite notification setting on or off, as a box in the sidebar does.

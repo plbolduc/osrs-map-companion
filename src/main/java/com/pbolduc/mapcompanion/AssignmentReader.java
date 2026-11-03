@@ -67,7 +67,7 @@ public class AssignmentReader
 	private static final Pattern HOME_REMINDER = Pattern.compile("You're currently on an? (\\w+) Contract\\. Go see (\\w+)[ ,][\\w\\s,-]*\\. You can get another job once you have furnished \\w* home\\.");
 	private static final Pattern HOME_FINISHED = Pattern.compile("You have completed [\\d,]+ contracts with a total of [\\d,]+ points?\\.");
 	private final Client client;
-	private final MapCompanionConfig config;
+	private final ConfigStore settings;
 	private final SessionSettle settle = new SessionSettle(15_000L);
 	private CompanionSnapshot.Assignment rumour;
 	private CompanionSnapshot.Assignment home;
@@ -76,10 +76,10 @@ public class AssignmentReader
 	private String lastHomeDialog;
 
 	@Inject
-	AssignmentReader(Client client, MapCompanionConfig config)
+	AssignmentReader(Client client, ConfigStore settings)
 	{
 		this.client = client;
-		this.config = config;
+		this.settings = settings;
 	}
 
 	void onSessionEnded()
@@ -92,11 +92,11 @@ public class AssignmentReader
 
 	void onSharingChanged()
 	{
-		if (!config.shareHunterRumours())
+		if (!settings.on("shareHunterRumours"))
 		{
 			rumour = null;
 		}
-		if (!config.shareMahoganyHomes())
+		if (!settings.on("shareMahoganyHomes"))
 		{
 			home = null;
 			lastHomeDialog = null;
@@ -111,7 +111,7 @@ public class AssignmentReader
 		}
 		settle.resumed(now);
 		onSharingChanged();
-		if (config.shareMahoganyHomes())
+		if (settings.on("shareMahoganyHomes"))
 		{
 			Widget dialog = client.getWidget(InterfaceID.ChatLeft.TEXT);
 			String text = dialog == null ? null : Text.sanitizeMultilineText(dialog.getText());
@@ -133,7 +133,7 @@ public class AssignmentReader
 		String lower = text.toLowerCase(Locale.ROOT);
 		if (event.getType() == ChatMessageType.GAMEMESSAGE)
 		{
-			if (config.shareHunterRumours())
+			if (settings.on("shareHunterRumours"))
 			{
 				if (text.startsWith("Your current rumour target is"))
 				{
@@ -153,7 +153,7 @@ public class AssignmentReader
 					rumourAt = now;
 				}
 			}
-			if (config.shareMahoganyHomes())
+			if (settings.on("shareMahoganyHomes"))
 			{
 				Matcher assigned = HOME_ASSIGNED.matcher(text);
 				if (assigned.matches())
@@ -166,7 +166,7 @@ public class AssignmentReader
 				}
 			}
 		}
-		else if (config.shareHunterRumours() && event.getType() == ChatMessageType.DIALOG && inBurrows())
+		else if (settings.on("shareHunterRumours") && event.getType() == ChatMessageType.DIALOG && inBurrows())
 		{
 			for (int id : HUNTER_IDS)
 			{
@@ -204,19 +204,19 @@ public class AssignmentReader
 	@Nullable
 	CompanionSnapshot.Assignment rumour(long now)
 	{
-		return config.shareHunterRumours() ? aged(rumour, rumourAt, now) : null;
+		return settings.on("shareHunterRumours") ? aged(rumour, rumourAt, now) : null;
 	}
 
 	@Nullable
 	CompanionSnapshot.Assignment home(long now)
 	{
-		return config.shareMahoganyHomes() ? aged(home, homeAt, now) : null;
+		return settings.on("shareMahoganyHomes") ? aged(home, homeAt, now) : null;
 	}
 
 	@Nullable
 	CompanionSnapshot.Assignment farming(long now)
 	{
-		if (!config.shareFarmingContracts() || !settle.settled(now))
+		if (!settings.on("shareFarmingContracts") || !settle.settled(now))
 		{
 			return null;
 		}

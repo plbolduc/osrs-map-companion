@@ -165,7 +165,7 @@ public class CompanionViewsTest
 
 			pages.open(true);
 			assertTrue(config.sharePosition());
-			assertTrue(config.shareActivity());
+			assertTrue(store.on("shareActivity"));
 			assertFalse(config.shareName());
 			assertTrue(named(sharing, "sharing.details").isVisible());
 			assertTrue(((JCheckBox) named(sharing, MapCompanionConfig.KEY_SHARE_MAP_PRESENCE)).isSelected());

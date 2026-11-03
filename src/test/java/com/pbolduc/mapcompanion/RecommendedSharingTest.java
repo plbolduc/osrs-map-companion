@@ -61,12 +61,14 @@ public class RecommendedSharingTest
 		MapCompanionConfig fresh = new MapCompanionConfig()
 		{
 		};
+		/* A fresh install's settings, where the fields RuneLite does not declare are read by key. */
+		HarnessStore none = new HarnessStore();
 		for (SharingFields.Field field : RecommendedSharing.all())
 		{
-			assertFalse("a sharing default stays off; the press is the opt-in: " + field.key, field.read.test(fresh));
+			assertFalse("a sharing default stays off; the press is the opt-in: " + field.key, field.on(fresh, none));
 		}
 		assertFalse(fresh.notifyMeetups().isEnabled());
-		assertTrue("a fresh install is offered the step", RecommendedSharing.offered(fresh));
+		assertTrue("a fresh install is offered the step", RecommendedSharing.offered(fresh, none));
 	}
 
 	/**
@@ -211,7 +213,7 @@ public class RecommendedSharingTest
 			AtomicInteger offers = new AtomicInteger();
 			AtomicInteger notices = new AtomicInteger();
 			assertTrue(RecommendedSharing.connect(pairing, JoinCode.parse("ABC234"), () -> notices.incrementAndGet() > 0,
-				fixture.config, offers::incrementAndGet));
+				fixture.config, fixture.store, offers::incrementAndGet));
 			assertEquals("an approved map shows no notice", 0, notices.get());
 			assertEquals("so nothing is offered", 0, offers.get());
 			assertTrue(fixture.written.isEmpty());
@@ -221,9 +223,9 @@ public class RecommendedSharingTest
 			Fixture quiet = new Fixture();
 			Pairing quietPairing = new Pairing(quiet.store, new Gson());
 			assertTrue(quietPairing.connect(JoinCode.parse("ABC234-K7PQ2M3X"), () -> true));
-			assertTrue(RecommendedSharing.offered(quiet.config));
+			assertTrue(RecommendedSharing.offered(quiet.config, quiet.store));
 			assertTrue(RecommendedSharing.connect(quietPairing, JoinCode.parse("ABC234"), () -> true,
-				quiet.config, offers::incrementAndGet));
+				quiet.config, quiet.store, offers::incrementAndGet));
 			assertEquals("only the Connect that approved its map offers it", 0, offers.get());
 		});
 	}
@@ -236,21 +238,21 @@ public class RecommendedSharingTest
 			Fixture fresh = new Fixture();
 			AtomicInteger offers = new AtomicInteger();
 			assertTrue(RecommendedSharing.connect(new Pairing(fresh.store, new Gson()), JoinCode.parse("ABC234-K7PQ2M3X"),
-				() -> true, fresh.config, offers::incrementAndGet));
+				() -> true, fresh.config, fresh.store, offers::incrementAndGet));
 			assertEquals(1, offers.get());
 
 			Fixture cancelled = new Fixture();
 			assertFalse(RecommendedSharing.connect(new Pairing(cancelled.store, new Gson()), JoinCode.parse("ABC234-K7PQ2M3X"),
-				() -> false, cancelled.config, offers::incrementAndGet));
+				() -> false, cancelled.config, cancelled.store, offers::incrementAndGet));
 			assertEquals("a cancelled notice offers nothing", 1, offers.get());
 
 			for (SharingFields.Field field : offeredOrAsked())
 			{
 				Fixture chosen = new Fixture();
 				chosen.config.set(field.key, true);
-				assertFalse(field.key, RecommendedSharing.offered(chosen.config));
+				assertFalse(field.key, RecommendedSharing.offered(chosen.config, chosen.store));
 				assertTrue(RecommendedSharing.connect(new Pairing(chosen.store, new Gson()), JoinCode.parse("ABC234-K7PQ2M3X"),
-					() -> true, chosen.config, offers::incrementAndGet));
+					() -> true, chosen.config, chosen.store, offers::incrementAndGet));
 				assertEquals("a player who chose " + field.key + " keeps their choice", 1, offers.get());
 			}
 		});
@@ -377,6 +379,8 @@ public class RecommendedSharingTest
 			ConfigItem item = method.getAnnotation(ConfigItem.class);
 			if (item != null) configKeys.add(item.keyName());
 		}
+		/* The fields under the groups are settings RuneLite does not declare, read by key; see SharingGroupsTest. */
+		for (SharingFields.Section section : SharingFields.GROUPS) configKeys.addAll(keys(section));
 		assertTrue("every key is an existing setting", configKeys.containsAll(RecommendedSharing.KEYS));
 		assertFalse(RecommendedSharing.KEYS.contains("shareDeath"));
 		assertFalse(RecommendedSharing.KEYS.contains("notifyMeetups"));
@@ -488,6 +492,11 @@ public class RecommendedSharingTest
 				{
 					values.put(item.keyName(), store.get(item.keyName()));
 				}
+			}
+			/* And the fields RuneLite does not declare, which are settings all the same. */
+			for (SharingFields.Section section : SharingFields.GROUPS)
+			{
+				for (SharingFields.Field field : section.fields) values.put(field.key, store.get(field.key));
 			}
 			return values;
 		}
