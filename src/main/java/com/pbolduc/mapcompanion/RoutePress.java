@@ -29,6 +29,7 @@ import com.google.gson.Gson;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
+import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import javax.swing.JLabel;
 import lombok.AccessLevel;
@@ -63,6 +64,13 @@ import okhttp3.Response;
  * cannot say where the player stands, so no {@code from} is sent and the map ranks from the
  * position the member shares, or from nowhere and says so.
  *
+ * <p><b>Reroute</b> is the same question about the destination already shown: its tile, and the
+ * tile the player stands on, which the map did not have if position sharing is off. A route from
+ * here is the whole of what Reroute asks, so with no tile it asks nothing. The map's routes are never
+ * recomputed on their own, which keeps the server's work to presses. The answer replaces the steps
+ * through {@link DestinationRoute#finishReroute}, which drops one for a destination since replaced,
+ * and what it says is the route's own line rather than a press's.
+ *
  * <p><b>How often.</b> One question at a time and none before the map's own wait, shared with
  * Reroute through {@link DestinationRoute#beginPress}, since the map counts both against one
  * member. A press is never repeated on its own.
@@ -74,6 +82,27 @@ import okhttp3.Response;
 @Singleton
 final class RoutePress
 {
+	static final String PATH = "/api/companion/route";
+	/** The least time between two presses that reached the map, whatever it answered. */
+	static final long MIN_GAP_MS = 5_000L;
+	/** After a reply that was not an answer and named no wait of its own. */
+	static final long FAILURE_GAP_MS = 30_000L;
+
+	/** A press with no character logged in, so nobody to ask the map as; the sidebar offers none then. */
+	static final String LOG_IN = "Log in to plan a route.";
+	/**
+	 * Logged in, but not yet a member the map takes: no group, no member secret issued yet, or the map
+	 * refusing this member. The status card is where the cause is said, so this points there.
+	 */
+	static final String NOT_CONNECTED = Words.of("route.notConnected");
+	/** The cause and the one step that fixes it: the game gives no tile inside a raid's rooms, and does outside. */
+	static final String NEEDS_TILE = Words.of("route.needsTile");
+	static final String NO_WAY = Words.of("route.noWay");
+	static final String NOT_FOUND = Words.of("route.notFound");
+	static final String UNREACHABLE = "The map could not be reached.";
+	static final String FAILED = Words.of("route.failed");
+	static final String REDIRECTS = Words.of("map.redirects");
+	static final String UNREADABLE = "The map returned unreadable data.";
 	static final String ONE_AT_A_TIME = Words.of("route.oneAtATime");
 	private static final int MAX_NAME = 120;
 	/** The longest refusal the map's words may make, as a farm run's are cut. */
@@ -191,7 +220,27 @@ final class RoutePress
 	static final class Question
 	{
 		Object target;
-		RouteClient.Tile from;
+		Tile from;
+	}
+
+	static final class Tile
+	{
+		final int x;
+		final int y;
+		final int plane;
+
+		Tile(WorldPoint point)
+		{
+			this.x = point.getX();
+			this.y = point.getY();
+			this.plane = point.getPlane();
+		}
+	}
+
+	/** What a reply came to: the map's answer, or why there is none, and when the next question may go. */
+	interface Landing
+	{
+		void land(@Nullable Answer answer, @Nullable String why, long nextAllowedMs);
 	}
 
 	/** A clue step by its words or its scroll, which the map turns into a place with its own clue table. */
@@ -254,6 +303,12 @@ final class RoutePress
 	void press(Target target)
 	{
 		clientThread.invokeLater(() -> start(target));
+	}
+
+	/** Reroute, pressed under the destination's steps. Any thread, as {@link #press} is. */
+	void reroute()
+	{
+		clientThread.invokeLater(this::startReroute);
 	}
 
 	/**
@@ -321,18 +376,8 @@ final class RoutePress
 	/** Client thread: the credentials, the tile, then the call. */
 	private void start(Target target)
 	{
-		Pairing.Signed signed = pairing.signed(identity.id());
-		if (client.getGameState() != GameState.LOGGED_IN)
-		{
-			refuse(target.source, RouteClient.LOG_IN);
-			return;
-		}
-		if (signed == null || HttpUrl.parse(signed.server + RouteClient.PATH) == null)
-		{
-			refuse(target.source, RouteClient.NOT_CONNECTED);
-			return;
-		}
-		if (target.id == null && target.tile == null && target.clue == null)
+		Pairing.Signed signed = signed(why -> refuse(target.source, why));
+		if (signed == null || (target.id == null && target.tile == null && target.clue == null))
 		{
 			return;
 		}
@@ -346,9 +391,53 @@ final class RoutePress
 			return;
 		}
 		said = new Said(target.source, true, null, null, asked);
+		send(signed, target, from, pressed(asked, target));
+	}
+
+	/** Client thread: as a press, but from the tile the player stands on or not at all, and about the destination shown. */
+	private void startReroute()
+	{
+		Pairing.Signed signed = signed(route::refuse);
+		if (signed == null)
+		{
+			return;
+		}
+		WorldPoint from = DestinationRoute.standing(client);
+		if (from == null)
+		{
+			route.refuse(NEEDS_TILE);
+			return;
+		}
+		DestinationRoute.Ticket ticket = route.beginReroute(System.currentTimeMillis());
+		if (ticket != null)
+		{
+			send(signed, Target.tile(NowCards.DESTINATION, ticket.target, "", null, null), from, rerouted(ticket));
+		}
+	}
+
+	/** The member's credentials to ask with, or null once {@code refuse} has said why there are none. Client thread. */
+	@Nullable
+	private Pairing.Signed signed(Consumer<String> refuse)
+	{
+		Pairing.Signed signed = pairing.signed(identity.id());
+		if (client.getGameState() != GameState.LOGGED_IN)
+		{
+			refuse.accept(LOG_IN);
+			return null;
+		}
+		if (signed == null || HttpUrl.parse(signed.server + PATH) == null)
+		{
+			refuse.accept(NOT_CONNECTED);
+			return null;
+		}
+		return signed;
+	}
+
+	private void send(Pairing.Signed signed, Target target, @Nullable WorldPoint from, Landing landing)
+	{
 		CompanionHttp.enqueue(http.newCall(request(signed.server, signed.code, signed.member, signed.secret, target, from)),
-			(failed, error) -> finish(asked, target, RouteClient.UNREACHABLE, System.currentTimeMillis() + RouteClient.FAILURE_GAP_MS),
-			(completed, response) -> handle(asked, target, response));
+			(failed, error) -> landing.land(null, UNREACHABLE, System.currentTimeMillis() + FAILURE_GAP_MS),
+			(completed, response) -> read(response, landing));
 	}
 
 	/** One question, as the map's {@code POST /api/companion/route} reads it. */
@@ -357,46 +446,64 @@ final class RoutePress
 		Question question = new Question();
 		question.target = target.id != null ? new PlaceId(target.id)
 			: target.clue != null ? new ClueTarget(target.clue)
-			: new RouteClient.Tile(target.tile);
-		question.from = from == null ? null : new RouteClient.Tile(from);
-		return CompanionHttp.member(server + RouteClient.PATH, code, member, secret).post(CompanionHttp.json(gson, question))
+			: new Tile(target.tile);
+		question.from = from == null ? null : new Tile(from);
+		return CompanionHttp.member(server + PATH, code, member, secret).post(CompanionHttp.json(gson, question))
 			.build();
 	}
 
-	/** Read one reply into a destination or a sentence. Package-private for its test; OkHttp's thread. */
-	void handle(long asked, Target target, Response response)
+	/**
+	 * Read one reply into the map's answer or a sentence, with the wait before the next question: a
+	 * press's and a Reroute's are read alike, and differ only in where they land. OkHttp's thread.
+	 */
+	void read(Response response, Landing landing)
 	{
 		try (Response close = response)
 		{
 			long now = System.currentTimeMillis();
 			String wait = close.header("Retry-After");
 			long waitMs = wait == null ? 0L : StarsClient.retryDelay(wait);
+			int status = close.code();
 			if (close.isRedirect())
 			{
-				finish(asked, target, RouteClient.REDIRECTS, now + 300_000L);
-				return;
+				landing.land(null, REDIRECTS, now + 300_000L);
 			}
-			int status = close.code();
-			if (status == 429 || status == 503)
+			else if (status == 429 || status == 503)
 			{
-				finish(asked, target, MapWait.BUSY, now + StarsClient.retryDelay(wait));
-				return;
+				landing.land(null, MapWait.BUSY, now + StarsClient.retryDelay(wait));
 			}
-			if (!close.isSuccessful())
+			else if (!close.isSuccessful())
 			{
-				String why = status == 404 ? notFound(close)
-					: status == 403 || status == 410 ? RouteClient.NOT_CONNECTED : RouteClient.FAILED;
-				finish(asked, target, why,
-					now + Math.max(status == 404 ? RouteClient.MIN_GAP_MS : RouteClient.FAILURE_GAP_MS, waitMs));
-				return;
+				landing.land(null, status == 404 ? notFound(close) : status == 403 || status == 410 ? NOT_CONNECTED : FAILED,
+					now + Math.max(status == 404 ? MIN_GAP_MS : FAILURE_GAP_MS, waitMs));
 			}
-			Answer answer = gson.fromJson(CompanionHttp.readBounded(close.body(), CompanionHttp.MAX_REPLY_BYTES), Answer.class);
+			else
+			{
+				landing.land(gson.fromJson(CompanionHttp.readBounded(close.body(), CompanionHttp.MAX_REPLY_BYTES), Answer.class),
+					null, now + Math.max(MIN_GAP_MS, waitMs));
+			}
+		}
+		catch (IOException | RuntimeException unreadable)
+		{
+			landing.land(null, UNREADABLE, System.currentTimeMillis() + FAILURE_GAP_MS);
+		}
+	}
+
+	/** Read a press's reply into a destination or a sentence. Package-private for its test; OkHttp's thread. */
+	void handle(long asked, Target target, Response response)
+	{
+		read(response, pressed(asked, target));
+	}
+
+	private Landing pressed(long asked, Target target)
+	{
+		return (answer, why, next) ->
+		{
 			RelayResponse.Route ways = RouteWire.normalize(answer);
-			long next = now + Math.max(RouteClient.MIN_GAP_MS, waitMs);
 			RelayResponse.Destination destination = ways == null ? null : destination(target, answer.target, ways);
 			if (destination == null)
 			{
-				finish(asked, target, RouteClient.NO_WAY, next);
+				finish(asked, target, why != null ? why : NO_WAY, next);
 				return;
 			}
 			route.finishPress(next);
@@ -416,11 +523,17 @@ final class RoutePress
 			}
 			said = new Said(target.source, false, null, DestinationRoute.keyOf(destination), asked);
 			marker.sync();
-		}
-		catch (IOException | RuntimeException unreadable)
+		};
+	}
+
+	/** A Reroute's reply lands on the route: the new ways, or the sentence its line says. Package-private for its test. */
+	Landing rerouted(DestinationRoute.Ticket ticket)
+	{
+		return (answer, why, next) ->
 		{
-			finish(asked, target, RouteClient.UNREADABLE, System.currentTimeMillis() + RouteClient.FAILURE_GAP_MS);
-		}
+			RelayResponse.Route ways = RouteWire.normalize(answer);
+			route.finishReroute(ticket, ways, ways == null && why == null ? NO_WAY : why, next);
+		};
 	}
 
 	/**
@@ -434,11 +547,11 @@ final class RoutePress
 		try
 		{
 			String said = CompanionHttp.said(gson, CompanionHttp.readBounded(response.body(), CompanionHttp.MAX_REPLY_BYTES), MAX_REFUSAL);
-			return said != null ? said : RouteClient.NOT_FOUND;
+			return said != null ? said : NOT_FOUND;
 		}
 		catch (IOException | RuntimeException unreadable)
 		{
-			return RouteClient.NOT_FOUND;
+			return NOT_FOUND;
 		}
 	}
 

@@ -152,7 +152,6 @@ public class DestinationCardTest
 		assertTrue(pairing.connect(JoinCode.parse("ABC234"), () -> true));
 		pairing.rememberSecret(pairing.code(), identity.id(), SECRET);
 		DeathWatcher deaths = construct(DeathWatcher.class);
-		RouteClient rerouter = new RouteClient(new OkHttpClient(), gson, game.client(), thread, pairing, identity, route);
 		press = new RoutePress(answering(), gson, game.client(), thread, pairing, identity, route, destinations, marker);
 		FarmRunRoute runs = new FarmRunRoute(new FarmRunState(), destinations, route, thread);
 		ClueReader clues = new ClueReader(game.client())
@@ -163,7 +162,7 @@ public class DestinationCardTest
 				return carried;
 			}
 		};
-		SwingUtilities.invokeAndWait(() -> cards = new NowCards(config, destinations, deaths, marker, route, rerouter,
+		SwingUtilities.invokeAndWait(() -> cards = new NowCards(config, destinations, deaths, marker, route,
 			shortestPath, press, clues, runs, sprites, this::refreshNow, () -> MapCompanionConfig.DEFAULT_MAP_URL));
 	}
 
@@ -284,7 +283,7 @@ public class DestinationCardTest
 		press("Route");
 		refresh();
 		assertEquals(Arrays.asList("Route", "Dismiss"), actions());
-		assertTrue(words().toString(), words().contains(RouteClient.NOT_FOUND));
+		assertTrue(words().toString(), words().contains(RoutePress.NOT_FOUND));
 		assertEquals("no way came, so nothing is followed", null, route.view().way());
 	}
 

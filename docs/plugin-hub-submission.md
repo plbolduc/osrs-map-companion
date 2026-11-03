@@ -99,7 +99,7 @@ sharing off still sends a random member id, alias, timestamp and connection cred
 ### Network requests
 
 All paths use **Map address** (`https://osrs-map.com` by default); clipboard contents cannot change it.
-Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RouteClient`, `RoutePress`, `SearchClient`,
+Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RoutePress`, `SearchClient`,
 `MeetupClient`, `FarmRunClient` and `ConnectClient` construct HTTP requests:
 
 - **POST /api/companion/connect** — one **Connect** press with no group, or one **Join** press with a

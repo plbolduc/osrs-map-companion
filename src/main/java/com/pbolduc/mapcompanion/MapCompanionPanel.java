@@ -186,7 +186,6 @@ public class MapCompanionPanel extends PluginPanel
 		ItemManager itemManager,
 		StarsClient starsClient,
 		DestinationRoute destinationRoute,
-		RouteClient routeClient,
 		ShortestPath shortestPath,
 		SearchClient searchClient,
 		RoutePress routePress,
@@ -217,7 +216,7 @@ public class MapCompanionPanel extends PluginPanel
 		this.connectCard = new ConnectCard(this, config, plugin, identity, pairing, relay, directiveStream, connectClient,
 			recommendedSharing, this::refresh, this::openSettings, this::applyMapAddress, this::mapUrl);
 		this.groupPanel = new GroupPanel(destinationState, groupState, routePress, meetupClient, config, sprites, connectCard.copyInviteButton);
-		this.nowCards = new NowCards(config, destinationState, deathWatcher, destinationMarker, destinationRoute, routeClient,
+		this.nowCards = new NowCards(config, destinationState, deathWatcher, destinationMarker, destinationRoute,
 			shortestPath, routePress, clueReader, farmRunRoute, sprites, this::refresh, this::mapUrl);
 		this.dropLuck = new DropLuckPanel(lootLog, DropLuckPanel.Pictures.of(itemManager));
 		this.starsPanel = new StarsPanel(starsClient, destinationState, clientThread, destinationMarker, routePress, this::mapUrl,

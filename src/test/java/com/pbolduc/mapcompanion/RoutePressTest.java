@@ -270,7 +270,7 @@ public class RoutePressTest
 		press.press(RoutePress.Target.place("search", "bank:lumbridge", "Lumbridge bank", null, null));
 		assertTrue(sent.isEmpty());
 		/* Logged in with no group: not connected, said apart from a logout, which asks to log in instead. */
-		assertEquals(RouteClient.NOT_CONNECTED, press.said("search").message);
+		assertEquals(RoutePress.NOT_CONNECTED, press.said("search").message);
 		assertNull("another button's line is its own", press.said("death"));
 		assertNull(destinations.getDestination());
 	}
@@ -369,19 +369,19 @@ public class RoutePressTest
 		connect();
 		Object[][] cases = {
 			/* An older map's 404 says no more than its status, so the plugin's own sentence stands. */
-			{404, "{\"reason\":\"not_found\"}", RouteClient.NOT_FOUND},
-			{404, "not json at all", RouteClient.NOT_FOUND},
+			{404, "{\"reason\":\"not_found\"}", RoutePress.NOT_FOUND},
+			{404, "not json at all", RoutePress.NOT_FOUND},
 			/* A map that says why is quoted: a clue whose words it does not know is not one with no place. */
 			{404, "{\"reason\":\"no_tile\",\"error\":\"The map does not know this step's words, so it has no place to plan a "
 				+ "route to.\"}", "The map does not know this step's words, so it has no place to plan a route to."},
 			/* Its words were typed by somebody, so they are cleaned as everything else it sends is. */
 			{404, "{\"reason\":\"no_tile\",\"error\":\"<col=ff0000>No single\\u0007 place</col>\"}", "No single place"},
-			{404, "{\"reason\":\"no_tile\",\"error\":\"   \"}", RouteClient.NOT_FOUND},
+			{404, "{\"reason\":\"no_tile\",\"error\":\"   \"}", RoutePress.NOT_FOUND},
 			/* The map refusing this member: one sentence for it, pointing at the card that says why. */
-			{403, "{\"reason\":\"needs_code\"}", RouteClient.NOT_CONNECTED},
-			{500, "oops", RouteClient.FAILED},
-			{200, "{\"options\":[]}", RouteClient.NO_WAY},
-			{200, "not json at all", RouteClient.UNREADABLE},
+			{403, "{\"reason\":\"needs_code\"}", RoutePress.NOT_CONNECTED},
+			{500, "oops", RoutePress.FAILED},
+			{200, "{\"options\":[]}", RoutePress.NO_WAY},
+			{200, "not json at all", RoutePress.UNREADABLE},
 		};
 		RoutePress press = press(200, ANSWER, null);
 		RoutePress.Target target = RoutePress.Target.place("search", "bank:lumbridge", "Lumbridge bank", null, null);

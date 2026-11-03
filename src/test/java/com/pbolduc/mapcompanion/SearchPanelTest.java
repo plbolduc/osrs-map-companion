@@ -214,7 +214,7 @@ public class SearchPanelTest
 		assertEquals("the rows are still there to try the next", 2, named(panel, "search.row").size());
 		String line = status(panel);
 		assertNotNull(line);
-		assertTrue(line, line.contains("Al Kharid bank: " + RouteClient.NOT_FOUND));
+		assertTrue(line, line.contains("Al Kharid bank: " + RoutePress.NOT_FOUND));
 
 		typeOnTheEnd(panel, " chest");
 		panel.refresh();
@@ -243,7 +243,7 @@ public class SearchPanelTest
 		gate.countDown();
 		until(() -> !press.said(SearchPanel.SOURCE).planning);
 		panel.refresh();
-		assertTrue(status(panel), status(panel).contains(RouteClient.NOT_FOUND));
+		assertTrue(status(panel), status(panel).contains(RoutePress.NOT_FOUND));
 		assertEquals(MapCompanionPanel.REFUSED, line.getForeground());
 	}
 

@@ -268,7 +268,7 @@ final class MeetupClient
 		}
 		if (signed == null || HttpUrl.parse(signed.server + path) == null)
 		{
-			said = new Said(source, false, RouteClient.NOT_CONNECTED, asked);
+			said = new Said(source, false, RoutePress.NOT_CONNECTED, asked);
 			return;
 		}
 		synchronized (this)
@@ -312,7 +312,7 @@ final class MeetupClient
 			}
 			if (!close.isSuccessful())
 			{
-				String why = status == 403 || status == 410 ? RouteClient.NOT_CONNECTED
+				String why = status == 403 || status == 410 ? RoutePress.NOT_CONNECTED
 					: status == 404 && !making ? GONE
 					: status == 400 && making ? REFUSED : FAILED;
 				finish(source, asked, why, now + Math.max(FAILURE_GAP_MS, wait == null ? 0L : StarsClient.retryDelay(wait)));

@@ -162,7 +162,7 @@ public class FarmRunClientTest
 		assertTrue(sent.isEmpty());
 		assertNull(state.view());
 		/* Logged in with no group: not connected, said apart from a logout, which asks to log in instead. */
-		assertEquals(RouteClient.NOT_CONNECTED, client.said().message);
+		assertEquals(RoutePress.NOT_CONNECTED, client.said().message);
 	}
 
 	/**
@@ -282,7 +282,7 @@ public class FarmRunClientTest
 			assertEquals("Nothing the client has seen needs a visit yet.", client.said().message);
 			assertFalse(code + " still holds the next press", held.pressReady(System.currentTimeMillis()));
 			assertTrue(code + " holds it five seconds, not thirty",
-				held.pressReady(System.currentTimeMillis() + RouteClient.MIN_GAP_MS + 1_000));
+				held.pressReady(System.currentTimeMillis() + RoutePress.MIN_GAP_MS + 1_000));
 		}
 	}
 
@@ -319,7 +319,7 @@ public class FarmRunClientTest
 			client.start("birdhouses");
 			settled(client);
 			assertFalse(reply[0] + " " + reply[1] + " backs off",
-				held.pressReady(System.currentTimeMillis() + RouteClient.FAILURE_GAP_MS - 5_000));
+				held.pressReady(System.currentTimeMillis() + RoutePress.FAILURE_GAP_MS - 5_000));
 		}
 	}
 
@@ -332,7 +332,7 @@ public class FarmRunClientTest
 		client.start("birdhouses");
 		settled(client);
 		assertEquals(1, sent.size());
-		assertEquals(RouteClient.REDIRECTS, client.said().message);
+		assertEquals(RoutePress.REDIRECTS, client.said().message);
 		assertNull(state.view());
 	}
 

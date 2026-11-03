@@ -269,7 +269,7 @@ public class SearchClientTest
 		search.enter("bank");
 		assertTrue(sent.isEmpty());
 		/* A character to search as, and no member the map takes: not connected, where a logout says to log in. */
-		assertEquals(RouteClient.NOT_CONNECTED, search.result().message);
+		assertEquals(RoutePress.NOT_CONNECTED, search.result().message);
 	}
 
 	@Test
