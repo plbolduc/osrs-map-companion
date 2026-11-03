@@ -3,8 +3,9 @@
 **On the Plugin Hub since 27 October 2026**, merged in
 [runelite/plugin-hub#19494](https://github.com/runelite/plugin-hub/pull/19494), and updated to 1.3.0
 (`fbf96fa`) in [runelite/plugin-hub#19712](https://github.com/runelite/plugin-hub/pull/19712) on
-30 October. 1.4.0 (`c0280e8`) is in review in
-[runelite/plugin-hub#19965](https://github.com/runelite/plugin-hub/pull/19965). The steps below are
+30 October. 1.4.0 is in review in
+[runelite/plugin-hub#19965](https://github.com/runelite/plugin-hub/pull/19965), which names the
+commit it pins. The steps below are
 how it was submitted; a release after that is a merged plugin
 commit, then `commit=` updated in the Hub's `plugins/osrs-map-companion`. Completed and outstanding game checks
 are recorded in [Live checks](live-checks.md). A successful build does not establish live-event
