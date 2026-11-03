@@ -50,24 +50,18 @@ import okhttp3.ResponseBody;
  * Reads only this installation's approved map server, while Stars is visible and logged in.
  * No Star Miners address or key exists in the plugin. Cancelling or changing a character,
  * group or server invalidates callbacks before they can touch the new reader's preferences.
- * RuneLite's character profile keeps the independent copy and sync choice on this machine.
+ * The filters and favourite sites are kept in RuneLite's character profile on this machine and
+ * are never sent: the list is fetched whole and filtered here.
  */
 @Singleton
 final class StarsClient
 {
+	/** What a character's filters are kept as. A save from a release that synced them reads the same. */
 	static final class Saved
 	{
-		boolean sync = true;
 		StarsModel.Preferences preferences = new StarsModel.Preferences();
 	}
 
-	/**
-	 * How often an open Stars tab asks whether the browser changed something. The map spends its
-	 * shared read bucket on this, the same one the group panel's reads draw from, so it is paced
-	 * for an idle tab rather than for immediacy; an edit made here is sent within a beat anyway,
-	 * see {@link #changed()}, and opening the tab asks at once.
-	 */
-	static final long PREFERENCE_POLL_MS = 30_000L;
 	private final OkHttpClient http;
 	private final Gson gson;
 	private final Client client;
@@ -77,26 +71,16 @@ final class StarsClient
 	private final MemberIdentity identity;
 	private final ConfigStore store;
 	final StarsModel model = new StarsModel();
-	boolean sync = true;
-	boolean syncReady;
 	/**
 	 * Why the last ask for the list failed, or null. Nothing else: the tab says "Loading stars…" and
 	 * "log in" from {@link #eligible()} and the feed, and how old a held list is from the feed, so a
 	 * sentence set here can never outlive what it described.
 	 */
 	String message;
-	private boolean active, eligible, dirty;
-
-	/**
-	 * Quick re-sends left for an edit the map has not yet confirmed. A conflict is answered at once,
-	 * with the map's revision; a map that keeps answering without the preferences it holds would
-	 * otherwise be asked again three times a second for as long as the tab is open.
-	 */
-	private static final int QUICK_RESENDS = 3;
-	private int quickResends = QUICK_RESENDS;
-	private long generation, editVersion, revision, nextFeed, nextPreferences;
+	private boolean active, eligible;
+	private long generation, nextFeed;
 	private String connection, scope, storageKey;
-	private Call feedCall, preferenceCall;
+	private Call feedCall;
 
 	@Inject
 	StarsClient(OkHttpClient http, Gson gson, Client client, ClientThread clientThread,
@@ -125,7 +109,6 @@ final class StarsClient
 		cancel();
 		if (on)
 		{
-			nextPreferences = 0;
 			tick();
 		}
 	}
@@ -144,9 +127,7 @@ final class StarsClient
 	{
 		generation++;
 		if (feedCall != null) feedCall.cancel();
-		if (preferenceCall != null) preferenceCall.cancel();
 		feedCall = null;
-		preferenceCall = null;
 	}
 
 	void tick()
@@ -180,14 +161,13 @@ final class StarsClient
 	private void update(String server, String code, String profile, boolean allowed, boolean between, Integer mining, Integer total)
 	{
 		if (!active) return;
-		/* The mailbox is this character's member's, so no character means no mailbox yet. */
+		/* The list is a character's: none until RuneLite names the one logged in. */
 		String member = allowed || between ? identity.id() : null;
 		if (member == null)
 		{
 			eligible = false;
 			cancel();
 			model.feed = null;
-			syncReady = false;
 			message = null;
 			return;
 		}
@@ -201,11 +181,7 @@ final class StarsClient
 			model.feed = null;
 			model.selected = null;
 			message = null;
-			revision = 0;
-			syncReady = false;
-			dirty = false;
 			nextFeed = 0;
-			nextPreferences = 0;
 			Saved saved = null;
 			try
 			{
@@ -215,7 +191,6 @@ final class StarsClient
 			{
 				/* An unreadable save starts from the defaults rather than from half of one. */
 			}
-			sync = saved == null || saved.sync;
 			model.preferences = saved == null ? new StarsModel.Preferences() : validPreferences(saved.preferences);
 		}
 		eligible = true;
@@ -227,36 +202,14 @@ final class StarsClient
 		if (between) return;
 		model.miningLevel = mining;
 		model.skillTotal = total;
-		long now = System.currentTimeMillis();
-		if (feedCall == null && now >= nextFeed) fetchFeed(server);
-		if (sync && preferenceCall == null && pairing.secret(server, code, member) != null && now >= nextPreferences) fetchPreferences(server, code, member);
+		if (feedCall == null && System.currentTimeMillis() >= nextFeed) fetchFeed(server);
 	}
 
-	void sync(boolean on)
-	{
-		sync = on;
-		dirty = false;
-		editVersion++;
-		nextPreferences = 0;
-		cancel();
-		save();
-		tick();
-	}
-
+	/** A filter or a favourite changed on the tab: kept for this character, on this machine. */
 	void changed()
-	{
-		editVersion++;
-		quickResends = QUICK_RESENDS;
-		dirty = sync;
-		nextPreferences = Math.min(nextPreferences, System.currentTimeMillis() + 300);
-		save();
-	}
-
-	private void save()
 	{
 		if (scope == null || storageKey == null) return;
 		Saved saved = new Saved();
-		saved.sync = sync;
 		saved.preferences = model.preferences;
 		store.setScoped(scope, storageKey, gson.toJson(saved));
 	}
@@ -286,7 +239,7 @@ final class StarsClient
 		long epoch = generation;
 		nextFeed = System.currentTimeMillis() + 60_000;
 		feedCall = http.newCall(request(server, "/api/companion/stars").get().build());
-		send(feedCall, false, epoch, response -> {
+		send(feedCall, epoch, response -> {
 			StarsModel.Feed incoming = gson.fromJson(response, StarsModel.Feed.class);
 			model.accept(incoming);
 			nextFeed = System.currentTimeMillis() + Math.max(60_000, Math.min(300_000, incoming.pollIntervalMs));
@@ -294,44 +247,7 @@ final class StarsClient
 		});
 	}
 
-	private void fetchPreferences(String server, String code, String member)
-	{
-		long epoch = generation, edits = editVersion;
-		nextPreferences = System.currentTimeMillis() + PREFERENCE_POLL_MS;
-		Request.Builder builder = request(server, "/api/companion/star-preferences")
-			.header("X-Companion-Code", code).header("X-Companion-Member", member)
-			.header("X-Companion-Member-Secret", pairing.secret(server, code, member));
-		boolean writing = dirty && syncReady;
-		if (writing)
-		{
-			StarsModel.PreferenceReply body = new StarsModel.PreferenceReply();
-			body.revision = revision;
-			body.preferences = model.preferences;
-			builder.put(CompanionHttp.json(gson, body));
-		}
-		else builder.get();
-		preferenceCall = http.newCall(builder.build());
-		send(preferenceCall, true, epoch, text -> {
-			StarsModel.PreferenceReply reply = gson.fromJson(text, StarsModel.PreferenceReply.class);
-			if (reply == null || reply.revision == null || reply.revision < 0) throw new IllegalArgumentException("Unreadable preferences");
-			revision = reply.revision;
-			syncReady = true;
-			if (reply.preferences != null && edits == editVersion && (!dirty || writing))
-			{
-				model.preferences = validPreferences(reply.preferences);
-				dirty = false;
-				save();
-			}
-			if (!dirty) quickResends = QUICK_RESENDS;
-			else if (quickResends > 0)
-			{
-				quickResends--;
-				nextPreferences = System.currentTimeMillis() + 300;
-			}
-		});
-	}
-
-	private void send(Call call, boolean preference, long epoch, Consumer<String> accept)
+	private void send(Call call, long epoch, Consumer<String> accept)
 	{
 		call.enqueue(new Callback()
 		{
@@ -351,9 +267,9 @@ final class StarsClient
 						finish(null, Words.of("map.redirects"), 300_000);
 						return;
 					}
-					if (!close.isSuccessful() && !(preference && close.code() == 409))
+					if (!close.isSuccessful())
 					{
-						finish(null, preference ? Words.of("stars.pairToSync") : "Stars unavailable. Retrying shortly.", delay);
+						finish(null, "Stars unavailable. Retrying shortly.", delay);
 						return;
 					}
 					finish(readBounded(close.body()), null, delay);
@@ -369,8 +285,7 @@ final class StarsClient
 				SwingUtilities.invokeLater(() -> {
 					if (epoch != generation) return;
 					/* Released before the checks below, so a reply that is then ignored cannot hold the slot. */
-					if (preference) preferenceCall = null;
-					else feedCall = null;
+					feedCall = null;
 					if (!active || !pairing.hasServerConsent() || scope == null || !scope.equals(store.scopeKey())) return;
 					if (error == null)
 					{
@@ -390,16 +305,8 @@ final class StarsClient
 
 			private void errorResult(String error, long delay)
 			{
-				if (preference)
-				{
-					syncReady = false;
-					nextPreferences = System.currentTimeMillis() + Math.max(5_000, delay);
-				}
-				else
-				{
-					message = error;
-					nextFeed = System.currentTimeMillis() + Math.max(60_000, delay);
-				}
+				message = error;
+				nextFeed = System.currentTimeMillis() + Math.max(60_000, delay);
 			}
 		});
 	}

@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.lang.reflect.Proxy;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
@@ -78,8 +79,9 @@ public class StarsHopTest
 	{
 		StarsClient stars = client(null);
 		SwingUtilities.invokeAndWait(() -> stars.active(true));
-		until(() -> stars.model.feed != null && stars.syncReady);
+		until(() -> stars.model.feed != null);
 		SwingUtilities.invokeAndWait(() -> stars.model.selected = PICK);
+		assertEquals("the list is the only thing the tab asks for", Collections.singletonList("/api/companion/stars"), sent);
 		int asked = sent.size();
 
 		/* A hop, then a lost connection the game gets back, each ending on a world again. */
@@ -147,14 +149,12 @@ public class StarsHopTest
 		{
 			String path = chain.request().url().encodedPath();
 			sent.add(path);
-			boolean preferences = path.endsWith("/star-preferences");
-			if (!preferences && answer != null)
+			if (answer != null)
 			{
 				hold(answer);
 			}
-			String body = preferences ? "{\"revision\":0,\"preferences\":{\"filters\":{},\"favorites\":[]}}" : feed;
 			return new Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1).code(200).message("")
-				.body(ResponseBody.create(JSON, body)).build();
+				.body(ResponseBody.create(JSON, feed)).build();
 		}).build();
 
 		Client client = (Client) Proxy.newProxyInstance(Client.class.getClassLoader(), new Class<?>[]{Client.class},

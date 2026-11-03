@@ -235,9 +235,6 @@ public class StarsWordsTest
 			((JToggleButton) named(panel, "stars.filters")).doClick();
 			assertEquals("the levels the game read", "For Mining 72: up to T7 · worlds up to 1620 total",
 				text(named(panel, "stars.levels")));
-			assertEquals("no browser has answered for this character yet",
-				"Not synced yet; these filters are kept for this character.",
-				((AbstractButton) named(panel, "stars.sync")).getToolTipText());
 			JComboBox<?> league = (JComboBox<?>) named(panel, "stars.league");
 			assertEquals("Show main game worlds", league.getItemAt(0));
 			assertEquals("Show League worlds", league.getItemAt(1));
