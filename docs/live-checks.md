@@ -264,10 +264,12 @@ The website plan's second session, once the routes in the game are built: a memb
 - [ ] **Three buttons fit.** Follow, Reroute and Dismiss sit on one row in the 225px sidebar
       without cutting a word.
 - [ ] **Search.** Connected, type *bank* in the box at the top of Home: the rows match the
-      website's dropdown for the same word, in its order, and nothing is asked until the typing
-      stops. Pick one: the destination's card fills with its steps, Shortest Path draws the first
-      walk, and the list folds. Type *abysal whip* and see *Did you mean*. Clear the box while a
-      search is out: nothing comes back. Check RuneLite's log holds nothing that was typed.
+      places in the website's dropdown for the same word, in its order, and nothing is asked until
+      the typing stops. Pick one: the destination's card fills with its steps, Shortest Path draws
+      the first walk, and the list folds. Type *abysal whip* and see *Did you mean*; press it, and
+      no row of the item, its *Sold at* or its *Dropped by* shows, only *Nothing on the map by that
+      name.* Clear the box while a search is out: nothing comes back. Check RuneLite's log holds
+      nothing that was typed.
 - [ ] **Route on a clue.** With *Tasks and timers* off, read a coordinate clue and a beginner map: the
       clue card appears under *Now* with Route, and Route fills the destination's card. A step that
       is words, an anagram or an emote, shows its words and Route: the card is named after the place

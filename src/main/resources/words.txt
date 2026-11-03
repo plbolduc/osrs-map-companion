@@ -157,7 +157,7 @@ steps.drawing=Shortest Path is drawing the walk for step
 steps.drawsEach=Shortest Path draws each walk when you reach it.
 path.takenOver=Shortest Path was given another path, so this route stopped drawing there. Follow draws it again.
 search.held=The map plans one route at a time, a few seconds apart. Pick again in a moment.
-search.boxTip=Search the map: a place, a character, a monster or an item. A pick plans the way there.
+search.boxTip=Search the map: a place, a character or a monster. A pick plans the way there.
 
 # UpdateNotice: the one chat line an update says, on the first login after it. Every release writes
 # it again for what that release changed, and moves CompanionVersion.LINE_VERSION with it.

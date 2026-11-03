@@ -68,11 +68,11 @@ import static com.pbolduc.mapcompanion.MapCompanionPanel.label;
  * rebuild under the pointer eats the click and the sidebar refreshes every second.
  *
  * <p><b>No type filter.</b> Eight rows already come sorted by kind — a bare kind word is ordered by
- * distance, an item splits into <i>Sold at</i> and <i>Dropped by</i> — and the website's six chips
- * need two rows at this width. What tells a row's kind at a glance is the game's own icon beside it
- * instead: the world map's for a bank, a ride, a patch, a mine or a shop, its combat icon for a
- * monster, the minimap's yellow dot for a character, and an item's own sprite. All of it is the
- * client's ({@link GameSprites}); nothing is fetched.
+ * distance — and the website's six chips need two rows at this width. What tells a row's kind at a
+ * glance is the game's own icon beside it instead: the world map's for a bank, a ride, a patch or a
+ * mine, its combat icon for a monster, and the minimap's yellow dot for a character. All of it is
+ * the client's ({@link GameSprites}); nothing is fetched. Items are not searched here; see
+ * {@link SearchClient}.
  *
  * <p>The box is a plain field rather than RuneLite's icon field because only a plain field takes the
  * look and feel's placeholder, and an empty box should say what it searches.
@@ -82,9 +82,9 @@ final class SearchPanel extends JPanel
 	private static final int WIDTH = MapCompanionPanel.CARD_TEXT_WIDTH;
 	static final String SOURCE = "search";
 
-	/** A row's picture column: the widest sprite it holds, an item's, fitted to this square. */
+	/** A row's picture column: the icon it holds, fitted to this square. */
 	static final int PICTURE = 24;
-	static final String PLACEHOLDER = "Search places, people, items";
+	static final String PLACEHOLDER = "Search places and people";
 
 	private final SearchClient search;
 	private final RoutePress press;
@@ -205,17 +205,8 @@ final class SearchPanel extends JPanel
 		heldRows.clear();
 		if (!folded)
 		{
-			String section = null;
 			for (SearchClient.Hit hit : result.hits)
 			{
-				if (hit.section != null && !hit.section.equals(section))
-				{
-					JLabel head = MapCompanionPanel.wrapped(hit.section, 11f, ColorScheme.LIGHT_GRAY_COLOR, WIDTH);
-					head.setFont(head.getFont().deriveFont(java.awt.Font.BOLD));
-					head.setBorder(new EmptyBorder(4, 0, 1, 0));
-					rows.add(head);
-				}
-				section = hit.section;
 				rows.add(row(hit, live));
 			}
 			if (result.suggestion != null)
@@ -390,8 +381,8 @@ final class SearchPanel extends JPanel
 	}
 
 	/**
-	 * The row's picture, from the game: an item's sprite, a world-map icon, or the character dot,
-	 * fitted to {@code box}. The destination's card draws the same one beside a pick's answer.
+	 * The row's picture, from the game: a world-map icon, or the character dot, fitted to
+	 * {@code box}. The destination's card draws the same one beside a pick's answer.
 	 */
 	private void picture(JLabel picture, SearchClient.Hit hit, int box)
 	{
@@ -400,39 +391,19 @@ final class SearchPanel extends JPanel
 			picture.setIcon(SidebarIcons.characterDot());
 			return;
 		}
-		if (sprites == null)
-		{
-			return;
-		}
-		if (hit.itemId != null)
-		{
-			sprites.item(picture, hit.itemId, box);
-			return;
-		}
-		if (SearchClient.ITEMS.equals(hit.section))
-		{
-			sprites.itemNamed(picture, hit.name, box);
-			return;
-		}
-		int sprite = spriteFor(hit.kind, hit.section);
-		if (sprite > 0)
+		int sprite = spriteFor(hit.kind);
+		if (sprites != null && sprite > 0)
 		{
 			sprites.sprite(picture, sprite, box);
 		}
 	}
 
 	/**
-	 * The world map's icon for a row, by the map's kind for it, or 0 for none. A row under
-	 * <i>Sold at</i> is a shop of some kind, and the map does not say which, so it is the general
-	 * store's sign rather than a guess at the axe shop's. A town or a point of interest has no one
-	 * icon, so it has none.
+	 * The world map's icon for a row, by the map's kind for it, or 0 for none. A town or a point of
+	 * interest has no one icon, so it has none.
 	 */
-	static int spriteFor(@Nullable String kind, @Nullable String section)
+	static int spriteFor(@Nullable String kind)
 	{
-		if ("Sold at".equals(section))
-		{
-			return SpriteID.Mapfunction.GENERAL_STORE;
-		}
 		if (kind == null)
 		{
 			return 0;
@@ -473,19 +444,13 @@ final class SearchPanel extends JPanel
 	}
 
 	/**
-	 * The destination card's second line for a pick. An item's route goes to whatever drops or sells
-	 * it, and the card takes that source's name, so its line says which item it is for: the row's own
-	 * count under a monster's name would read as a fact about the monster and never name the item.
-	 * Any other row keeps its own words, without the distance the row measured from where the search
-	 * was typed: the card's line is written once, and the way line under it gives the route's own.
+	 * The destination card's second line for a pick: the row's own words, without the distance the
+	 * row measured from where the search was typed. The card's line is written once, and the way line
+	 * under it gives the route's own.
 	 */
 	@Nullable
 	static String note(SearchClient.Hit hit)
 	{
-		if (SearchClient.ITEMS.equals(hit.section))
-		{
-			return "For " + hit.name;
-		}
 		return hit.note.isEmpty() ? null : hit.note;
 	}
 }
