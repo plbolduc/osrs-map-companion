@@ -140,35 +140,29 @@ public class RouteNotesTest
 		assertFalse("no countdown: " + note, note.contains(" in "));
 	}
 
+	/*
+	 * Rewritten when Now stopped drawing the map's older single meetup: every meetup is the Group
+	 * tab's, with its answers and the Route the test above presses, so Now carries no Route of its
+	 * own for one while the week's meetups arrive.
+	 */
 	@Test
-	public void theMeetupUnderNowIsRoutedWithItsDayAndClock() throws Exception
+	public void aMeetupIsRoutedFromGroupAndNotFromNow() throws Exception
 	{
 		connect();
 		RoutePress press = press();
-		long startsAt = System.currentTimeMillis() + 45 * 60_000L;
 		RelayResponse.Directive directive = new RelayResponse.Directive();
-		directive.event = new RelayResponse.Event();
-		directive.event.title = "Star hunt";
-		directive.event.x = 3222;
-		directive.event.y = 3218;
-		directive.event.world = 302;
-		directive.event.startsAtMs = startsAt;
+		directive.events = Collections.singletonList(meetup(System.currentTimeMillis() + 45 * 60_000L));
 		destinations.accept(directive);
+		destinations.acceptSocial(directive, true);
+		List<JButton> routes = new ArrayList<>();
 		SwingUtilities.invokeAndWait(() ->
 		{
-			/* Only the meetup card is pressed, so the cards it never reaches are left out. */
 			NowCards now = new NowCards(config, destinations, null, marker(), route, null, null, press, null, null, null,
 				() -> { }, () -> MapCompanionConfig.DEFAULT_MAP_URL);
-			List<JButton> routes = new ArrayList<>();
 			buttons(now, "Route", routes);
-			/* The meetup's card comes before the clue's. */
-			routes.get(0).doClick();
 		});
-		settle(press, "meetup");
-		String note = destinations.getDestination().note;
-		assertEquals(MapCompanionPanel.meetupStarts(startsAt, System.currentTimeMillis(), ZoneId.systemDefault(),
-			Locale.getDefault(Locale.Category.FORMAT)), note);
-		assertFalse("no countdown: " + note, note.contains(" in "));
+		assertEquals("the clue's Route is the only one Now holds", 1, routes.size());
+		assertEquals("now.clue.route", routes.get(0).getName());
 	}
 
 	/** The row keeps the distance it measured; the card under it carries the route's own length instead. */

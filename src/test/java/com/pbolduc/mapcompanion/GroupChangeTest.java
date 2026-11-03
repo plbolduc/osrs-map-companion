@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nullable;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
@@ -123,9 +124,11 @@ public class GroupChangeTest
 		MapCompanionPlugin plugin = pluginJoinedTo("ABC234");
 		RelayResponse.Directive directive = gson.fromJson(
 												"{\"destination\":{\"name\":\"Old star\",\"x\":3222,\"y\":3218},"
-												+ "\"event\":{\"id\":\"old-meetup\",\"title\":\"Old group\"}}",
+												+ "\"events\":[{\"id\":\"old-meetup\",\"title\":\"Old group\"}]}",
 												RelayResponse.Directive.class);
 		plugin.destinationState.accept(directive);
+		plugin.destinationState.acceptSocial(directive, true);
+		assertNotNull(plugin.destinationState.getEvents());
 		/*
 		 * The reminder now watches every meetup of the week rather than one, so what it has said is a
 		 * set held by MeetupReminder instead of a single key; the rule is unchanged: a group change
@@ -140,7 +143,7 @@ public class GroupChangeTest
 		plugin.onGroupChanged();
 
 		assertNull(plugin.destinationState.getDestination());
-		assertNull(plugin.destinationState.getEvent());
+		assertNull(plugin.destinationState.getEvents());
 		assertTrue(!plugin.meetupReminder.said("old-meetup", start, "Old group"));
 		assertTrue(((TestDestinationMarker) plugin.destinationMarker).removed);
 	}

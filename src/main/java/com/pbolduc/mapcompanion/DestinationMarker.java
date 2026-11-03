@@ -197,12 +197,13 @@ public class DestinationMarker
 	}
 
 	/**
-	 * The meetup the map says is next, while meetups are being received at all. A meetup with no
-	 * place — an old map, or a time with nowhere attached — has nothing to pin.
+	 * The week's soonest meetup, while meetups are being received at all. A meetup with no place —
+	 * a time with nowhere attached — has nothing to pin.
 	 */
 	private void syncMeetup()
 	{
-		RelayResponse.Event event = config.showDestination() ? state.getEvent() : null;
+		List<RelayResponse.Meetup> events = config.showDestination() ? state.getEvents() : null;
+		RelayResponse.Meetup event = events == null || events.isEmpty() ? null : events.get(0);
 		if (event == null || (event.x == 0 && event.y == 0))
 		{
 			removeMeetup();

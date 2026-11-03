@@ -97,7 +97,6 @@ public class RelayResponse
 		@JsonAdapter(DirectiveEpoch.Lenient.class)
 		public String relayEpoch;
 		public Destination destination;
-		public Event event;
 		/** The member's own ordered farm run; a malformed one cannot cost the rest of the reply. */
 		@JsonAdapter(FarmRunWire.Lenient.class)
 		public FarmRun run;
@@ -218,6 +217,7 @@ public class RelayResponse
 		public int y;
 		public int plane;
 		public Integer world;
+		/** The one absolute time in the protocol — a meetup is an instant people must agree on. */
 		public long startsAtMs;
 		public String near;
 		/** The card's roll-up: going, on my way, maybe, can't, then arrived. */
@@ -452,16 +452,5 @@ public class RelayResponse
 		public int x;
 		public int y;
 		public Integer plane;
-	}
-
-	public static class Event
-	{
-		public String title;
-		public int x;
-		public int y;
-		public int plane;
-		public Integer world;
-		/** The one absolute time in the protocol — a meetup is an instant people must agree on. */
-		public long startsAtMs;
 	}
 }

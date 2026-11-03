@@ -112,8 +112,8 @@ final class MeetupReminder
 		return said.contains(key + "|" + startsAtMs + "|" + title);
 	}
 
-	/** The week's meetups when the map sends them, else the one it always sent. */
-	static List<Upcoming> of(List<RelayResponse.Meetup> events, RelayResponse.Event event)
+	/** The week's meetups as the map sends them; none while it sends none. */
+	static List<Upcoming> of(List<RelayResponse.Meetup> events)
 	{
 		List<Upcoming> out = new ArrayList<>();
 		if (events != null)
@@ -122,10 +122,6 @@ final class MeetupReminder
 			{
 				out.add(new Upcoming(meetup.id, meetup.title, meetup.startsAtMs));
 			}
-		}
-		else if (event != null)
-		{
-			out.add(new Upcoming("event", event.title, event.startsAtMs));
 		}
 		return out;
 	}

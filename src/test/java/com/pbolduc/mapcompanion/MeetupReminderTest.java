@@ -92,14 +92,27 @@ public class MeetupReminderTest
 		assertTrue(reminder.due(past, NOW, true, 5).isEmpty());
 	}
 
+	/*
+	 * Rewritten when the map's older single meetup stopped being read: every map this plugin talks to
+	 * sends the week's meetups, so they are the only thing a reminder can come from, each under its
+	 * own id, and a map that sends none reminds of nothing.
+	 */
 	@Test
-	public void theWeeksMeetupsWhenSentElseTheOneAlwaysSent()
+	public void theWeeksMeetupsAreWhatIsWatched()
 	{
-		RelayResponse.Event event = new RelayResponse.Event();
-		event.title = "Star hunt";
-		event.startsAtMs = NOW;
-		assertEquals(1, MeetupReminder.of(null, event).size());
-		assertTrue(MeetupReminder.of(Collections.<RelayResponse.Meetup>emptyList(), event).isEmpty());
-		assertTrue(MeetupReminder.of(null, null).isEmpty());
+		RelayResponse.Meetup hunt = new RelayResponse.Meetup();
+		hunt.id = "hunt";
+		hunt.title = "Star hunt";
+		hunt.startsAtMs = NOW;
+		RelayResponse.Meetup raid = new RelayResponse.Meetup();
+		raid.id = "raid";
+		raid.title = "Raids";
+		raid.startsAtMs = NOW + 60_000L;
+		List<MeetupReminder.Upcoming> watched = MeetupReminder.of(Arrays.asList(hunt, raid));
+		assertEquals(2, watched.size());
+		assertEquals("hunt", watched.get(0).key);
+		assertEquals("raid", watched.get(1).key);
+		assertTrue(MeetupReminder.of(Collections.<RelayResponse.Meetup>emptyList()).isEmpty());
+		assertTrue(MeetupReminder.of(null).isEmpty());
 	}
 }

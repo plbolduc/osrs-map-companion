@@ -208,8 +208,9 @@ so the sidebar has it to offer; the snapshot still carries it only with that cho
 **The Group section** is read from what the map already sends: `roster`, one row per other member
 with their name, colour, presence, *near*, *Near you* and newest news, arrives on every snapshot
 reply and stream frame and is shown whatever the destination setting; `events`, the week's meetups
-with their answers, is shown only with **Destinations and meetups**, as the single `event`
-always was. A map that sends neither leaves the sidebar as it was. Neither carries a tile.
+with their answers, is shown only with **Destinations and meetups**, and the soonest of them is
+the meetup pinned on the world map. The single `event` the map still sends beside them for older
+plugins is not read. A map that sends neither leaves the sidebar as it was. Neither carries a tile.
 **World map** beside a friend, or **Route** to a friend whose position this client has not been
 sent, opens the receive stream with `members=1`, the same question *Group on the world map*
 asks, and draws only that friend; it sends nothing of yours. A Route to a friend goes once to the

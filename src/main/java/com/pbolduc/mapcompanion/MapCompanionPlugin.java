@@ -1902,7 +1902,7 @@ public class MapCompanionPlugin extends Plugin
 	{
 		Notification notification = config.notifyMeetups();
 		List<String> due = meetupReminder.due(
-			MeetupReminder.of(destinationState.getEvents(), destinationState.getEvent()), now,
+			MeetupReminder.of(destinationState.getEvents()), now,
 			notification.isEnabled(), config.meetupReminderMinutes());
 		for (String line : due)
 		{

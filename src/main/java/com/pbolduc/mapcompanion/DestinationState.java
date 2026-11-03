@@ -56,13 +56,9 @@ public class DestinationState
 	@Getter
 	private volatile RelayResponse.Destination destination;
 
-	@Getter
-	private volatile RelayResponse.Event event;
-
 	/**
-	 * The group's other members and its week of meetups, from the same directive. Null while the map
-	 * sends none, which is today's sidebar: no friends list, and the single {@link #event} as the
-	 * meetup. See {@link #acceptSocial}.
+	 * The group's other members and its week of meetups, from the same directive, soonest meetup
+	 * first. Null while the map sends none. See {@link #acceptSocial}.
 	 */
 	@Getter
 	private volatile java.util.List<RelayResponse.RosterRow> roster;
@@ -105,11 +101,9 @@ public class DestinationState
 		if (directive == null)
 		{
 			destination = localDestination;
-			event = null;
 			lastRemoteFingerprint = null;
 			return;
 		}
-		event = directive.event;
 		if (directive.destination == null)
 		{
 			destination = localDestination;
@@ -137,7 +131,7 @@ public class DestinationState
 	 * The friends and the meetups a directive carries, kept apart from {@link #accept} because they
 	 * are read on a different condition: the roster whenever the map sends one, since it is the group
 	 * the panel already shows and no setting receives it, and the meetups only while destinations and
-	 * meetups are shown, as the single meetup always was.
+	 * meetups are shown.
 	 *
 	 * <p>A directive without them leaves them as they were rather than clearing them. The held stream
 	 * and the snapshot reply both carry a directive, and a map that has the roster on one and not the
@@ -184,7 +178,6 @@ public class DestinationState
 	{
 		generation++;
 		destination = null;
-		event = null;
 		roster = null;
 		events = null;
 		dismissedFingerprint = null;

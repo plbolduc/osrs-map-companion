@@ -1096,8 +1096,9 @@ public final class HarnessMain
 		state.put("pendingMilestones", milestones.pendingCount());
 		RelayResponse.Destination destination = destinationState.getDestination();
 		state.put("destination", destination == null ? null : destination.name);
-		RelayResponse.Event event = destinationState.getEvent();
-		state.put("meetup", event == null ? null : event.title);
+		/* The soonest of the week's meetups, which is what the story calls the meetup. */
+		List<RelayResponse.Meetup> meetups = destinationState.getEvents();
+		state.put("meetup", meetups == null || meetups.isEmpty() ? null : meetups.get(0).title);
 		FarmRunState.View farm = farmRunState.view();
 		Map<String, Object> run = new LinkedHashMap<>();
 		if (farm != null)
@@ -1144,13 +1145,15 @@ public final class HarnessMain
 			destination.put("world", directive.destination.world);
 			described.put("destination", destination);
 		}
-		if (directive.event != null)
+		/* Under the name the story has always read: the soonest of the week's meetups. */
+		if (directive.events != null && !directive.events.isEmpty())
 		{
+			RelayResponse.Meetup soonest = directive.events.get(0);
 			Map<String, Object> event = new LinkedHashMap<>();
-			event.put("title", directive.event.title);
-			event.put("x", directive.event.x);
-			event.put("y", directive.event.y);
-			event.put("startsAtMs", directive.event.startsAtMs);
+			event.put("title", soonest.title);
+			event.put("x", soonest.x);
+			event.put("y", soonest.y);
+			event.put("startsAtMs", soonest.startsAtMs);
 			described.put("event", event);
 		}
 		return described;
