@@ -3,9 +3,9 @@
 **On the Plugin Hub since 27 October 2026**, merged in
 [runelite/plugin-hub#19494](https://github.com/runelite/plugin-hub/pull/19494), and updated to 1.3.0
 (`fbf96fa`) in [runelite/plugin-hub#19712](https://github.com/runelite/plugin-hub/pull/19712) on
-30 October. 1.4.0 is in review in
-[runelite/plugin-hub#19965](https://github.com/runelite/plugin-hub/pull/19965), which names the
-commit it pins. The steps below are
+30 October, then to 1.4.0 (`6df00cf`) in
+[runelite/plugin-hub#19965](https://github.com/runelite/plugin-hub/pull/19965) on 2 November, which
+RuneLite's review bot approved and merged itself. The steps below are
 how it was submitted; a release after that is a merged plugin
 commit, then `commit=` updated in the Hub's `plugins/osrs-map-companion`. Completed and outstanding game checks
 are recorded in [Live checks](live-checks.md). A successful build does not establish live-event
@@ -245,75 +245,7 @@ screenshot tools are outside `src/main`. Bundled third-party notices accompany t
 What the next Hub update brings. Its description names each in a few words; the detail here is for
 answering a reviewer:
 
-- Farm runs: a received ordered itinerary, local replant/seeded-house progress, numbered stop
-  pins, and Start, Reroute and End requests as disclosed above. No input or movement is automated.
-- Slayer places: the map's ranked list in Home, received through existing replies/stream until
-  acknowledged. Sharing the task also sends the order, Wilderness filter and receipt. Route
-  uses the existing endpoint with a public spot id; Pin sets only a local destination. The Wiki
-  and licence are linked. No ranking table, automatic route request or additional poll is added.
-- **Boats and moorings**, a new sharing choice that starts off and joins the one press at
-  Connect: each boat's slot, dock id and dock name from the game's `SailingDock` table, and its
-  teleport focus. Nothing for an unsettled login, while aboard, or for an unreadable slot; boat
-  names are read only as evidence a slot holds a boat and never sent.
-- Voyages: a route's board, sail and dock steps tick from the deck and the boats' ports, read
-  locally and never sent, and the sail's line is drawn on the world map by `VoyageMapOverlay`
-  after the world map interface. Shortest Path is never given a voyage; no input is automated.
-- Completed farming contracts remain visible under the existing sharing choice, with the same
-  assignment's `state: "return"`, so the website can point back to Guildmaster Jane.
-- Port tasks: a new sharing choice, off by default and in the one press at Connect, sending the
-  five Sailing task slots and their counters as disclosed above. Home lists the tasks held, from
-  the local reading. No request, poll or game action is added.
-- **One press at Connect** (above): the recommended set is offered after the first Connect and
-  shared only on the player's press, which names every field and the receive stream it opens. No
-  config default changed.
-- **Sharing as six switches** (above): RuneLite's list, Settings and the step after Connect show a
-  switch per sharing group over the same per-field settings, now hidden. A switch writes its fields
-  and nothing else, an update keeps every choice, and nothing sent changes.
-- The routes, Search, Route buttons, friends and meetups listed under *Network requests*, each a
-  press of the player's own.
-- **Connect without the website**: Connect makes a group, Join takes a friend's pasted invite, Open
-  the map opens the website already in the group, and the group's maker can rename it. Three
-  requests, `connect`, `link` and the group `PATCH` above, each a press. Nothing is sent before
-  Connect, as before.
-- **One warning, at install**: no setting carries a warning of its own any more, because the
-  manifest's install warning satisfies RuneLite's rule on its own. A changed map address is still
-  asked about by name before anything is sent to it.
-- **Route here** on the world map: a `MenuAction.RUNELITE` entry, handled by the client and sending
-  the game nothing, added below Cancel so a left-click never takes it, and only over the map with a
-  group set. A press is the Route request above with the clicked tile, which a faded pin marks on
-  the world map until the answer; it can be turned off under *In RuneLite*.
-- **The step on screen**: an `OverlayPanel` naming the followed route's destination and the step the
-  sidebar marks, drawn only while the player follows a route, gone on arrival and inside instances.
-  It draws what the sidebar already holds and sends nothing; it can be turned off under *In RuneLite*.
-  A teleport step's picture comes from the client's own `ItemManager` and `SpriteManager`, as the
-  sidebar's does, asked for once and drawn when it has loaded.
-- **Two route keys**: `Keybind` settings, unset until the player picks one, read by `HotkeyListener`s
-  registered through `KeyManager`. A key presses the sidebar's own Reroute or Follow button on the
-  EDT, and only while that button is shown and enabled, so it sends nothing a click would not and
-  takes no game action.
-- **A farm run's teleports in the bank**: a `WidgetItemOverlay` shown on the bank that draws an
-  outline around the travel items a running farm run's checklist names and the player is not
-  carrying, matched by the same local rule as the checklist. It moves, hides and resizes nothing,
-  reads no bank contents beyond the items it is asked to draw, and sends nothing.
-- **Clue steps by their words**: Route beside a clue whose step is words, an anagram or an emote,
-  now sends the clue itself, its tier, words and scroll item id, in that one request, whether or not
-  *Clue step* is shared; the map places the step with its own clue table. Before, only a coordinate's
-  or a beginner map's tile was sent, and a worded step offered no Route.
-- **Map clues above beginner**: Route beside an easy, medium, hard or elite map sends that same clue
-  with its tier and scroll item id alone, which RuneLite's own `MapClue` table and the map's both
-  key the picture by. No field is added; before, such a map offered no Route.
-- **The meetup reminder while playing**: *Meetup reminder* is now a RuneLite `Notification`
-  setting, still off by default, and a stored `true` or `false` still reads as on or off. Ticked in
-  the sidebar, it is written as RuneLite's panel initialises a customised notification, from
-  RuneLite's own settings, with *Send notifications when focused* on, so it reaches a player whose
-  RuneLite window is focused. It still goes only through `Notifier`, and nothing leaves the machine.
-- **A review of every sidebar state** (plugin #25 to #37): words, layout and fixes on every card, none
-  of which adds a request. A world hop keeps the Stars list and the task cards; a pasted invite joins
-  on Connect; a refused press is drawn in one colour and a Route held by the map's wait counts it
-  down; at the login screen the presses that need a character are greyed. A farm run whose sharing
-  field is off is refused in the sidebar and sends nothing; after a refusal the map gave in words, the
-  next press waits five seconds or the Retry-After, and a failure still backs off thirty seconds. The
-  death card reads the gravestone's own timer as above, and nothing about it is sent.
+Nothing yet: 1.4.0 carried everything listed here before it.
 
 ## Before submission
 
