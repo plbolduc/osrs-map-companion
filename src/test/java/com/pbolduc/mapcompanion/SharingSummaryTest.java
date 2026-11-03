@@ -40,17 +40,17 @@ public class SharingSummaryTest
 	public void theLineNamesWhatIsOffWhenThatIsShorter()
 	{
 		HarnessConfig config = config();
-		assertEquals("Character sharing off", SharingSummary.line(config));
+		assertEquals("Character sharing off", line(config));
 		for (String key : RecommendedSharing.KEYS)
 		{
 			config.set(key, true);
 		}
-		assertEquals("what the one press after Connect leaves", "Sharing all but where you died", SharingSummary.line(config));
+		assertEquals("what the one press after Connect leaves", "Sharing all but where you died", line(config));
 		config.set(MapCompanionConfig.KEY_SHARE_NAME, false);
-		assertEquals("Sharing all but character name, where you died", SharingSummary.line(config));
+		assertEquals("Sharing all but character name, where you died", line(config));
 		config.set(MapCompanionConfig.KEY_SHARE_NAME, true);
 		config.set("shareDeath", true);
-		assertEquals("Sharing everything", SharingSummary.line(config));
+		assertEquals("Sharing everything", line(config));
 	}
 
 	@Test
@@ -58,11 +58,11 @@ public class SharingSummaryTest
 	{
 		HarnessConfig config = config();
 		on(config, SharingFields.PRESENCE);
-		assertEquals("Sharing map presence", SharingSummary.line(config));
+		assertEquals("Sharing map presence", line(config));
 		on(config, SharingFields.LOOT);
-		assertEquals("Sharing map presence, loot and milestones", SharingSummary.line(config));
+		assertEquals("Sharing map presence, loot and milestones", line(config));
 		config.set("shareDeath", true);
-		assertEquals("three of six is neither few on nor few off", "Sharing 3 of 6 choices", SharingSummary.line(config));
+		assertEquals("three of six is neither few on nor few off", "Sharing 3 of 6 choices", line(config));
 	}
 
 	/** A group a player chose part of before the switches is said as part of it, on the line and in the tooltip. */
@@ -75,13 +75,13 @@ public class SharingSummaryTest
 			config.set(key, true);
 		}
 		config.set("shareFarming", false);
-		assertEquals("Sharing all but part of tasks and timers, where you died", SharingSummary.line(config));
+		assertEquals("Sharing all but part of tasks and timers, where you died", line(config));
 
 		HarnessConfig few = config();
 		few.set("shareSlayer", true);
 		few.set("shareClue", true);
-		assertEquals("Sharing part of tasks and timers", SharingSummary.line(few));
-		String list = SharingSummary.list(few);
+		assertEquals("Sharing part of tasks and timers", line(few));
+		String list = list(few);
 		assertTrue(list, list.contains("Tasks and timers: Slayer task, Clue step"));
 		assertTrue(list, list.contains("Map presence: off"));
 	}
@@ -93,9 +93,9 @@ public class SharingSummaryTest
 		HarnessConfig config = config();
 		config.set(MapCompanionConfig.KEY_SHARE_PETS, true);
 		config.set(MapCompanionConfig.KEY_SHARE_COLLECTION, true);
-		assertEquals("nothing goes out, so nothing is said", "Character sharing off", SharingSummary.line(config));
+		assertEquals("nothing goes out, so nothing is said", "Character sharing off", line(config));
 		on(config, SharingFields.LOOT);
-		assertEquals("Sharing loot and milestones", SharingSummary.line(config));
+		assertEquals("Sharing loot and milestones", line(config));
 	}
 
 	/**
@@ -107,7 +107,7 @@ public class SharingSummaryTest
 	{
 		HarnessConfig config = config();
 		on(config, SharingFields.PRESENCE);
-		String list = SharingSummary.list(config);
+		String list = list(config);
 		assertTrue(list, list.startsWith("<html><body width='"));
 		assertEquals(list, "Character name: off<br>Map presence: on<br>Progress and travel: off<br>Tasks and timers: off"
 			+ "<br>Loot and milestones: off<br>Where you died: off", list.replaceAll("^<html><body width='\\d+'>|</body></html>$", ""));
@@ -119,6 +119,17 @@ public class SharingSummaryTest
 		{
 			config.set(field.key, true);
 		}
+	}
+
+	/* The summary reads the fields RuneLite does not declare from the store the config writes them to. */
+	private static String line(HarnessConfig config)
+	{
+		return SharingSummary.line(config, config.store());
+	}
+
+	private static String list(HarnessConfig config)
+	{
+		return SharingSummary.list(config, config.store());
 	}
 
 	private static HarnessConfig config()

@@ -64,7 +64,8 @@ public class RewardDeliveryTest
 		TestFarmRuns.attach(plugin);
 		set("client", game.client);
 		set("config", config);
-		set("assignmentReader", new AssignmentReader(game.client, config));
+		set("settings", store);
+		set("assignmentReader", new AssignmentReader(game.client, store));
 		set("collectionItems", catalog);
 		set("lootLog", new LootLog(new HarnessGame().client(), store, new Gson()));
 	}

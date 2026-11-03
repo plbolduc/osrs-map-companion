@@ -53,10 +53,39 @@ final class HarnessConfig implements MapCompanionConfig
 		this.mapUrl = mapUrl;
 	}
 
-	/** Choose one category explicitly, the way a reader does in the settings panel. */
+	/**
+	 * Choose one category explicitly, the way a reader does in the settings panel. A sharing field
+	 * RuneLite does not declare has no getter here: the plugin reads it from the store by key, as it
+	 * reads RuneLite's settings, so it is written there, without the event a write there raises.
+	 */
 	void set(String key, boolean value)
 	{
 		toggles.put(key, value);
+		if (!DECLARED.contains(key))
+		{
+			store.put(key, Boolean.toString(value));
+		}
+	}
+
+	/** Every key {@link MapCompanionConfig} has a getter for. */
+	private static final java.util.Set<String> DECLARED = new java.util.HashSet<>();
+
+	static
+	{
+		for (java.lang.reflect.Method method : MapCompanionConfig.class.getDeclaredMethods())
+		{
+			net.runelite.client.config.ConfigItem item = method.getAnnotation(net.runelite.client.config.ConfigItem.class);
+			if (item != null)
+			{
+				DECLARED.add(item.keyName());
+			}
+		}
+	}
+
+	/** The store this config's fields are read from, for a test that reads them as the plugin does. */
+	HarnessStore store()
+	{
+		return store;
 	}
 
 	void nickname(String nickname)
@@ -146,137 +175,27 @@ final class HarnessConfig implements MapCompanionConfig
 		return on("sharePosition", MapCompanionConfig.super.sharePosition());
 	}
 
-	@Override
-	public boolean shareSkills()
-	{
-		return on("shareSkills", MapCompanionConfig.super.shareSkills());
-	}
 
-	@Override
-	public boolean shareActivity()
-	{
-		return on("shareActivity", MapCompanionConfig.super.shareActivity());
-	}
 
-	@Override
-	public boolean shareAccountType()
-	{
-		return on("shareAccountType", MapCompanionConfig.super.shareAccountType());
-	}
 
-	@Override
-	public boolean shareQuests()
-	{
-		return on("shareQuests", MapCompanionConfig.super.shareQuests());
-	}
 
-	@Override
-	public boolean shareDiaries()
-	{
-		return on("shareDiaries", MapCompanionConfig.super.shareDiaries());
-	}
 
-	@Override
-	public boolean sharePermanentTravel()
-	{
-		return on("sharePermanentTravel", MapCompanionConfig.super.sharePermanentTravel());
-	}
 
-	@Override
-	public boolean shareStash()
-	{
-		return on("shareStash", MapCompanionConfig.super.shareStash());
-	}
 
-	@Override
-	public boolean shareBoats()
-	{
-		return on("shareBoats", MapCompanionConfig.super.shareBoats());
-	}
 
-	@Override
-	public boolean shareBirdhouses()
-	{
-		return on("shareBirdhouses", MapCompanionConfig.super.shareBirdhouses());
-	}
 
-	@Override
-	public boolean shareHunterRumours()
-	{
-		return on("shareHunterRumours", MapCompanionConfig.super.shareHunterRumours());
-	}
 
-	@Override
-	public boolean shareMahoganyHomes()
-	{
-		return on("shareMahoganyHomes", MapCompanionConfig.super.shareMahoganyHomes());
-	}
 
-	@Override
-	public boolean shareFarmingContracts()
-	{
-		return on("shareFarmingContracts", MapCompanionConfig.super.shareFarmingContracts());
-	}
 
-	@Override
-	public boolean sharePortTasks()
-	{
-		return on("sharePortTasks", MapCompanionConfig.super.sharePortTasks());
-	}
 
-	@Override
-	public boolean shareQuestLog()
-	{
-		return on("shareQuestLog", MapCompanionConfig.super.shareQuestLog());
-	}
 
-	@Override
-	public boolean shareCapabilities()
-	{
-		return on("shareCapabilities", MapCompanionConfig.super.shareCapabilities());
-	}
 
-	@Override
-	public boolean shareSlayer()
-	{
-		return on("shareSlayer", MapCompanionConfig.super.shareSlayer());
-	}
 
-	@Override
-	public boolean shareClue()
-	{
-		return on("shareClue", MapCompanionConfig.super.shareClue());
-	}
 
-	@Override
-	public boolean shareFarming()
-	{
-		return on("shareFarming", MapCompanionConfig.super.shareFarming());
-	}
 
-	@Override
-	public boolean shareLoot()
-	{
-		return on("shareLoot", MapCompanionConfig.super.shareLoot());
-	}
 
-	@Override
-	public boolean shareMilestones()
-	{
-		return on("shareMilestones", MapCompanionConfig.super.shareMilestones());
-	}
 
-	@Override
-	public boolean sharePets()
-	{
-		return on("sharePets", MapCompanionConfig.super.sharePets());
-	}
 
-	@Override
-	public boolean shareCollectionLog()
-	{
-		return on("shareCollectionLog", MapCompanionConfig.super.shareCollectionLog());
-	}
 
 	@Override
 	public boolean shareDeath()

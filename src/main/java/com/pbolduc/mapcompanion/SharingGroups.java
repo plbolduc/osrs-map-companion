@@ -66,11 +66,11 @@ final class SharingGroups
 	}
 
 	/** Every field in the group on: the only state its switch shows as on. */
-	static boolean on(SharingFields.Section section, MapCompanionConfig config)
+	static boolean on(SharingFields.Section section, MapCompanionConfig config, ConfigStore store)
 	{
 		for (SharingFields.Field field : section.fields)
 		{
-			if (!field.read.test(config))
+			if (!field.on(config, store))
 			{
 				return false;
 			}
@@ -79,12 +79,12 @@ final class SharingGroups
 	}
 
 	/** The group's fields that are on, in its own order: what a partly shared group names. */
-	static List<SharingFields.Field> shared(SharingFields.Section section, MapCompanionConfig config)
+	static List<SharingFields.Field> shared(SharingFields.Section section, MapCompanionConfig config, ConfigStore store)
 	{
 		List<SharingFields.Field> on = new ArrayList<>();
 		for (SharingFields.Field field : section.fields)
 		{
-			if (field.read.test(config))
+			if (field.on(config, store))
 			{
 				on.add(field);
 			}
@@ -97,7 +97,7 @@ final class SharingGroups
 	{
 		for (SharingFields.Field field : section.fields)
 		{
-			if (field.read.test(config) != on)
+			if (field.on(config, store) != on)
 			{
 				store.set(field.key, Boolean.toString(on));
 			}
@@ -113,7 +113,7 @@ final class SharingGroups
 		boolean read = store.get(KEY_SETTLED) != null;
 		for (SharingFields.Section section : SharingFields.GROUPS)
 		{
-			boolean fields = on(section, config);
+			boolean fields = on(section, config, store);
 			boolean shown = section.read.test(config);
 			if (fields == shown)
 			{
@@ -147,7 +147,7 @@ final class SharingGroups
 		{
 			if (section.key.equals(key))
 			{
-				if (value != null && store.get(KEY_SETTLED) != null && Boolean.parseBoolean(value) != on(section, config))
+				if (value != null && store.get(KEY_SETTLED) != null && Boolean.parseBoolean(value) != on(section, config, store))
 				{
 					choose(section, Boolean.parseBoolean(value), config, store);
 				}
@@ -160,11 +160,11 @@ final class SharingGroups
 					continue;
 				}
 				boolean shown = section.read.test(config);
-				if (!field.read.test(config) && shown)
+				if (!field.on(config, store) && shown)
 				{
 					store.set(section.key, "false");
 				}
-				else if (field.read.test(config) && !shown && on(section, config))
+				else if (field.on(config, store) && !shown && on(section, config, store))
 				{
 					store.set(section.key, "true");
 				}

@@ -156,11 +156,11 @@ public class SharingControlsTest
 			assertFalse(partly.isVisible());
 			master.doClick();
 			assertTrue(config.sharePosition());
-			assertTrue(config.shareActivity());
-			assertTrue(config.shareAccountType());
+			assertTrue(store.on("shareActivity"));
+			assertTrue(store.on("shareAccountType"));
 			assertFalse(config.shareName());
 			assertFalse(config.shareDeath());
-			assertFalse(config.shareSkills());
+			assertFalse(store.on("shareSkills"));
 			assertFalse(config.showDestination());
 			assertFalse(config.notifyMeetups().isEnabled());
 			assertFalse(pairing.hasServerConsent());
@@ -173,13 +173,13 @@ public class SharingControlsTest
 			assertTrue(partly.isVisible());
 			assertEquals("Partly shared: Training and idle time, Account type", partly.getText().replaceAll("<[^>]+>", ""));
 			master.doClick();
-			assertTrue("a press turns all of it on", config.sharePosition() && config.shareActivity() && config.shareAccountType());
+			assertTrue("a press turns all of it on", config.sharePosition() && store.on("shareActivity") && store.on("shareAccountType"));
 			assertNull(master.getClientProperty("JButton.selectedState"));
 			assertFalse(partly.isVisible());
 			master.doClick();
 			assertFalse(config.sharePosition());
-			assertFalse(config.shareActivity());
-			assertFalse(config.shareAccountType());
+			assertFalse(store.on("shareActivity"));
+			assertFalse(store.on("shareAccountType"));
 			assertNull("the box writes fields; the switch RuneLite's list shows follows them in the plugin",
 				store.get(MapCompanionConfig.KEY_SHARE_MAP_PRESENCE));
 			assertNull(store.get(Pairing.KEY_SERVER_CONSENT));
@@ -417,7 +417,7 @@ public class SharingControlsTest
 				{
 					for (SharingFields.Field field : group.fields)
 					{
-						assertEquals(field.key, flipped, field.read.test(config));
+						assertEquals(field.key, flipped, field.on(config, store));
 					}
 				}
 				assertFalse("choosing data is not permission to connect", pairing.hasServerConsent());
@@ -443,7 +443,7 @@ public class SharingControlsTest
 			position.doClick();
 			assertTrue(config.sharePosition());
 			assertFalse(config.shareName());
-			assertFalse(config.shareSkills());
+			assertFalse(store.on("shareSkills"));
 			assertTrue(pairing.hasServerConsent());
 			position.doClick();
 			assertFalse(config.sharePosition());

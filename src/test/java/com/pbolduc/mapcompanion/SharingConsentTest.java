@@ -118,18 +118,24 @@ public class SharingConsentTest
 	 * submission guide fails a build.
 	 *
 	 * <p>Chosen by key since sharing became six switches: the 23 fields under the four groups are
-	 * hidden settings with no section, still what is sent, and the four switches RuneLite's list shows
-	 * for them are settings of their own. Both kinds start off, so the count is the 28 it was and the
-	 * four switches.
+	 * settings with no box, still what is sent, and the four switches RuneLite's list shows for them
+	 * are settings of their own. Both kinds start off, so the count is the 28 it was and the four
+	 * switches. All but one field are read by key and declared nowhere, so they are counted from
+	 * {@link SharingFields}, off in a store nothing has written.
 	 */
 	@Test
 	public void everyRemoteFeatureStartsOffAndTheWarningIsTheInstallsAlone() throws Exception
 	{
 		MapCompanionConfig config = new MapCompanionConfig() {};
 		int remoteFeatures = 0;
+		java.util.Set<String> declared = new java.util.HashSet<>();
 		for (Method method : MapCompanionConfig.class.getDeclaredMethods())
 		{
 			ConfigItem item = method.getAnnotation(ConfigItem.class);
+			if (item != null)
+			{
+				declared.add(item.keyName());
+			}
 			/* The meetup reminder is a RuneLite notification setting, off while its enabled flag is. */
 			if (item != null && (method.getReturnType() == boolean.class || method.getReturnType() == Notification.class)
 				&& (item.keyName().startsWith("share")
@@ -140,6 +146,19 @@ public class SharingConsentTest
 				assertEquals(method.getName(), false, value instanceof Notification ? ((Notification) value).isEnabled() : value);
 				assertEquals(method.getName(), "", item.warning());
 				remoteFeatures++;
+			}
+		}
+		/* A field under a group RuneLite does not declare is read by key: never written, it is off, and no setting carries a warning for it. */
+		HarnessStore fresh = new HarnessStore();
+		for (SharingFields.Section section : SharingFields.GROUPS)
+		{
+			for (SharingFields.Field field : section.fields)
+			{
+				if (!declared.contains(field.key))
+				{
+					assertFalse(field.key, field.on(config, fresh));
+					remoteFeatures++;
+				}
 			}
 		}
 		assertEquals(32, remoteFeatures);
@@ -171,6 +190,7 @@ public class SharingConsentTest
 					bind(Client.class).toInstance(game.client());
 					bind(Gson.class).toInstance(gson);
 					bind(MapCompanionConfig.class).toInstance(config);
+					bind(ConfigStore.class).toInstance(store);
 					bind(MemberIdentity.class).toInstance(new MemberIdentity(store));
 					bind(LootLog.class).toInstance(new LootLog(game.client(), store, gson));
 					bind(FarmingObserver.class).toInstance(new FarmingObserver(game.client(), store, gson));

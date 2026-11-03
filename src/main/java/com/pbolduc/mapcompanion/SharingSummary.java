@@ -78,9 +78,9 @@ final class SharingSummary
 	}
 
 	/** The line under the group's name: never more than two names, and never a count of fields. */
-	static String line(MapCompanionConfig config)
+	static String line(MapCompanionConfig config, ConfigStore store)
 	{
-		List<Switch> switches = switches(config);
+		List<Switch> switches = switches(config, store);
 		List<String> on = new ArrayList<>();
 		List<String> notOn = new ArrayList<>();
 		int whole = 0;
@@ -118,11 +118,11 @@ final class SharingSummary
 	}
 
 	/** The line's tooltip: each switch on a line of its own, in Settings' words, wrapped to fit. */
-	static String list(MapCompanionConfig config)
+	static String list(MapCompanionConfig config, ConfigStore store)
 	{
 		StringBuilder list = new StringBuilder("<html><body width='220'>");
 		boolean first = true;
-		for (Switch one : switches(config))
+		for (Switch one : switches(config, store))
 		{
 			list.append(first ? "" : "<br>").append(MapCompanionPanel.escape(one.title)).append(": ")
 				.append(one.whole() ? "on" : one.none() ? "off" : MapCompanionPanel.escape(SharingControls.labels(one.sent, ", ")));
@@ -131,36 +131,36 @@ final class SharingSummary
 		return list.append("</body></html>").toString();
 	}
 
-	private static List<Switch> switches(MapCompanionConfig config)
+	private static List<Switch> switches(MapCompanionConfig config, ConfigStore store)
 	{
 		List<Switch> switches = new ArrayList<>();
-		switches.add(single(SharingFields.NAME, config));
+		switches.add(single(SharingFields.NAME, config, store));
 		for (SharingFields.Section section : SharingFields.GROUPS)
 		{
 			List<SharingFields.Field> sent = new ArrayList<>();
-			for (SharingFields.Field field : SharingGroups.shared(section, config))
+			for (SharingFields.Field field : SharingGroups.shared(section, config, store))
 			{
-				if (goesOut(field, config))
+				if (goesOut(field, store))
 				{
 					sent.add(field);
 				}
 			}
 			switches.add(new Switch(section.title, section.fields, sent));
 		}
-		switches.add(single(SharingFields.DEATH, config));
+		switches.add(single(SharingFields.DEATH, config, store));
 		return switches;
 	}
 
-	private static Switch single(SharingFields.Field field, MapCompanionConfig config)
+	private static Switch single(SharingFields.Field field, MapCompanionConfig config, ConfigStore store)
 	{
-		List<SharingFields.Field> sent = field.read.test(config) ? Arrays.asList(field) : new ArrayList<>();
+		List<SharingFields.Field> sent = field.on(config, store) ? Arrays.asList(field) : new ArrayList<>();
 		return new Switch(field.label, Arrays.asList(field), sent);
 	}
 
 	/** Pets and collection additions ride on Notable drops and levels: with it off, neither is sent. */
-	private static boolean goesOut(SharingFields.Field field, MapCompanionConfig config)
+	private static boolean goesOut(SharingFields.Field field, ConfigStore store)
 	{
 		boolean riding = MapCompanionConfig.KEY_SHARE_PETS.equals(field.key) || MapCompanionConfig.KEY_SHARE_COLLECTION.equals(field.key);
-		return !riding || config.shareMilestones();
+		return !riding || store.on(MapCompanionConfig.KEY_SHARE_MILESTONES);
 	}
 }

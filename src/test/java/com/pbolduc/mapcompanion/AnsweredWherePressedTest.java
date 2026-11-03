@@ -57,7 +57,7 @@ public class AnsweredWherePressedTest
 	private final HarnessConfig config = new HarnessConfig(store, MapCompanionConfig.DEFAULT_MAP_URL);
 	private final Pairing pairing = new Pairing(store, new Gson());
 	private final MemberIdentity identity = new MemberIdentity(store);
-	private final ConnectCard card = new ConnectCard(new JPanel(), config, new MapCompanionPlugin(), identity, pairing,
+	private final ConnectCard card = new ConnectCard(new JPanel(), config, store, new MapCompanionPlugin(), identity, pairing,
 		new RelayClient(new OkHttpClient(), new Gson()), new DirectiveStream(new OkHttpClient(), new Gson(), (action, delay) -> null),
 		new ConnectClient(new OkHttpClient(), new Gson()), new RecommendedSharing(config, store, () -> { }),
 		() -> { }, open -> { }, () -> true, () -> MapCompanionConfig.DEFAULT_MAP_URL);

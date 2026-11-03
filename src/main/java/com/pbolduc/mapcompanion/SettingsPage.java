@@ -44,7 +44,6 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.callback.ClientThread;
-import net.runelite.client.config.ConfigManager;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.util.LinkBrowser;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.column;
@@ -85,7 +84,7 @@ final class SettingsPage extends JPanel
 	private final LootLog lootLog;
 	private final SnapshotBuilder snapshotBuilder;
 	private final ClientThread clientThread;
-	private final ConfigManager configManager;
+	private final ConfigStore settings;
 	private final MemberIdentity identity;
 	private final Pairing pairing;
 	private final Gson gson;
@@ -116,7 +115,7 @@ final class SettingsPage extends JPanel
 	private final JButton forgetLootButton = smallButton("Forget kill log");
 
 	SettingsPage(MapCompanionConfig config, DestinationState destinationState, LootLog lootLog,
-		SnapshotBuilder snapshotBuilder, ClientThread clientThread, ConfigManager configManager, MemberIdentity identity,
+		SnapshotBuilder snapshotBuilder, ClientThread clientThread, ConfigStore settings, MemberIdentity identity,
 		Pairing pairing, Gson gson, FarmRunState farmRunState, FarmRunClient farmRunClient, ConnectCard connectCard,
 		Runnable refresh, Consumer<Boolean> settingsOpen, Supplier<String> mapUrl)
 	{
@@ -125,7 +124,7 @@ final class SettingsPage extends JPanel
 		this.lootLog = lootLog;
 		this.snapshotBuilder = snapshotBuilder;
 		this.clientThread = clientThread;
-		this.configManager = configManager;
+		this.settings = settings;
 		this.identity = identity;
 		this.pairing = pairing;
 		this.gson = gson;
@@ -135,7 +134,7 @@ final class SettingsPage extends JPanel
 		this.refresh = refresh;
 		this.settingsOpen = settingsOpen;
 		this.mapUrl = mapUrl;
-		this.sharingControls = new SharingControls(config, ConfigStore.of(configManager));
+		this.sharingControls = new SharingControls(config, settings);
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		setBackground(ColorScheme.DARK_GRAY_COLOR);
 		left(this);
@@ -219,7 +218,7 @@ final class SettingsPage extends JPanel
 		mapAddress.setText(server);
 		if (!server.equals(pairing.serverUrl()))
 		{
-			configManager.setConfiguration(MapCompanionConfig.GROUP, MapCompanionConfig.KEY_RELAY_URL, server);
+			settings.set(MapCompanionConfig.KEY_RELAY_URL, server);
 			connectCard.joinOpen = true;
 			connectCard.say("Map address changed. Press Connect.");
 			/* The field and the line that asks for it are on the daily page. */

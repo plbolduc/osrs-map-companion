@@ -61,6 +61,8 @@ public class SnapshotBuilder
 
 	private final Client client;
 	private final MapCompanionConfig config;
+	/** RuneLite's settings, where the sharing fields but the position are read; see {@link SharingFields}. */
+	private final ConfigStore settings;
 	private final MemberIdentity identity;
 	private final SlayerTaskReader slayerReader;
 	private final SlayerState slayerState;
@@ -85,6 +87,7 @@ public class SnapshotBuilder
 	private SnapshotBuilder(
 		Client client,
 		MapCompanionConfig config,
+		ConfigStore settings,
 		MemberIdentity identity,
 		SlayerTaskReader slayerReader,
 		ClueReader clueReader,
@@ -107,6 +110,7 @@ public class SnapshotBuilder
 	{
 		this.client = client;
 		this.config = config;
+		this.settings = settings;
 		this.identity = identity;
 		this.slayerReader = slayerReader;
 		this.clueReader = clueReader;
@@ -168,13 +172,13 @@ public class SnapshotBuilder
 		 * now. The wire fields are boxed so that "not shared" is absent rather than a default: an
 		 * idleMs of 0 would have been a claim that the player just moved.
 		 */
-		if (config.shareAccountType())
+		if (settings.on("shareAccountType"))
 		{
 			/* Varbits read zero for a moment after a login, and zero is "normal": wait it out. */
 			snapshot.accountType = questReader.settled(nowMs) ? accountType() : null;
 		}
 
-		if (config.shareActivity())
+		if (settings.on("shareActivity"))
 		{
 			snapshot.idleMs = xpTracker.idleMs(nowMs);
 			snapshot.activeSkill = xpTracker.snapshot(nowMs);
@@ -189,7 +193,7 @@ public class SnapshotBuilder
 			snapshot.pos = position(local);
 		}
 
-		if (config.shareSkills())
+		if (settings.on("shareSkills"))
 		{
 			snapshot.skills = skills();
 		}
@@ -199,11 +203,11 @@ public class SnapshotBuilder
 		 * an empty list as "none finished" and marks quest-gated routes unusable, while null leaves
 		 * them merely uncertain. Leaving the field unset is how "don't assume" is expressed.
 		 */
-		if (config.shareQuestLog())
+		if (settings.on("shareQuestLog"))
 		{
 			snapshot.questLog = questReader.readLog(nowMs);
 		}
-		if (config.shareQuests() && questReader.settled(nowMs))
+		if (settings.on("shareQuests") && questReader.settled(nowMs))
 		{
 			snapshot.questsCompleted = questReader.readFinished(nowMs);
 			/*
@@ -220,19 +224,19 @@ public class SnapshotBuilder
 		 * about an account and somebody may reasonably want their friends to see one and not the
 		 * other, and the rule this plugin holds is that every category is separately refusable.
 		 */
-		if (config.shareDiaries())
+		if (settings.on("shareDiaries"))
 		{
 			snapshot.diaries = diaryReader.readCompleted(nowMs);
 			snapshot.diaryRewards = diaryReader.readRewards(nowMs);
 		}
 
-		if (config.sharePermanentTravel())
+		if (settings.on("sharePermanentTravel"))
 		{
 			snapshot.travelUnlocks = travelUnlockReader.read(nowMs);
 			snapshot.house = travelUnlockReader.house(nowMs);
 		}
 
-		if (config.shareStash())
+		if (settings.on("shareStash"))
 		{
 			snapshot.stashUnits = stashReader.read(nowMs);
 		}
@@ -241,17 +245,17 @@ public class SnapshotBuilder
 		 * Null whenever the reader cannot vouch for every slot — unsettled, aboard, unreadable, or no
 		 * boat seen — which the map reads as "not told" and keeps its docking network for.
 		 */
-		if (config.shareBoats())
+		if (settings.on("shareBoats"))
 		{
 			snapshot.boats = boatReader.read(nowMs);
 		}
 
-		if (config.shareCapabilities())
+		if (settings.on("shareCapabilities"))
 		{
 			snapshot.capabilities = capabilities.evaluate();
 		}
 
-		if (config.shareSlayer())
+		if (settings.on("shareSlayer"))
 		{
 			boolean settled = questReader.settled(nowMs);
 			snapshot.slayer = settled ? slayerReader.read() : null;
@@ -274,33 +278,33 @@ public class SnapshotBuilder
 			slayerState.clear();
 		}
 
-		if (config.shareClue())
+		if (settings.on("shareClue"))
 		{
 			snapshot.clue = clueReader.read();
 		}
 
-		if (config.shareHunterRumours())
+		if (settings.on("shareHunterRumours"))
 		{
 			snapshot.hunterRumour = assignmentReader.rumour(nowMs);
 		}
-		if (config.shareMahoganyHomes())
+		if (settings.on("shareMahoganyHomes"))
 		{
 			snapshot.mahoganyHome = assignmentReader.home(nowMs);
 		}
-		if (config.shareFarmingContracts())
+		if (settings.on("shareFarmingContracts"))
 		{
 			snapshot.farmingContract = assignmentReader.farming(nowMs);
 		}
-		if (config.shareBirdhouses())
+		if (settings.on("shareBirdhouses"))
 		{
 			snapshot.birdhouses = birdhouseReader.read(nowMs);
 		}
-		if (config.sharePortTasks())
+		if (settings.on("sharePortTasks"))
 		{
 			snapshot.portTasks = portTaskReader.wire(nowMs);
 		}
 
-		if (config.shareFarming())
+		if (settings.on("shareFarming"))
 		{
 			List<CompanionSnapshot.Patch> patches = farming.observations(nowMs);
 			if (!patches.isEmpty())
@@ -323,7 +327,7 @@ public class SnapshotBuilder
 		 * lives on their disk either way. This toggle decides only whether the totals leave the
 		 * machine, which is the distinction the setting text makes too.
 		 */
-		if (config.shareLoot())
+		if (settings.on("shareLoot"))
 		{
 			snapshot.loot = lootLog.snapshot();
 		}
@@ -332,7 +336,7 @@ public class SnapshotBuilder
 		 * Taken, not drained. An event stays in the outbox until the reply names its id, so a post
 		 * that never lands carries the same events again next time rather than losing them.
 		 */
-		if (config.shareMilestones())
+		if (settings.on(MapCompanionConfig.KEY_SHARE_MILESTONES))
 		{
 			List<CompanionSnapshot.Milestone> batch = milestones.take(nowMs);
 			if (!batch.isEmpty())

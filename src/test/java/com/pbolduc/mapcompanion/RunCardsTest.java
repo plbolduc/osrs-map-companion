@@ -133,8 +133,8 @@ public class RunCardsTest
 		state.bind(identity.id());
 		SwingUtilities.invokeAndWait(() ->
 		{
-			ports = new PortTasksPanel(tasks, config, sprites, state, client, follower, route, shortest);
-			farm = new FarmRunPanel(state, client, follower, route, shortest, sprites, config);
+			ports = new PortTasksPanel(tasks, config, store, sprites, state, client, follower, route, shortest);
+			farm = new FarmRunPanel(state, client, follower, route, shortest, sprites, config, store);
 		});
 	}
 
@@ -450,8 +450,8 @@ public class RunCardsTest
 		Insets[] insets = new Insets[2];
 		SwingUtilities.invokeAndWait(() ->
 		{
-			insets[0] = new FarmRunPanel(state, client, follower, route, shortest, recording, config).getInsets();
-			insets[1] = new PortTasksPanel(tasks, config, recording, state, client, follower, route, shortest).getInsets();
+			insets[0] = new FarmRunPanel(state, client, follower, route, shortest, recording, config, store).getInsets();
+			insets[1] = new PortTasksPanel(tasks, config, store, recording, state, client, follower, route, shortest).getInsets();
 		});
 		assertEquals(insets[1], insets[0]);
 		assertTrue(skills.toString(), skills.contains("Farming 16"));
@@ -570,7 +570,7 @@ public class RunCardsTest
 		FarmRunPanel[] card = new FarmRunPanel[1];
 		SwingUtilities.invokeAndWait(() ->
 		{
-			card[0] = new FarmRunPanel(state, client, follower, route, shortest, recording, config);
+			card[0] = new FarmRunPanel(state, client, follower, route, shortest, recording, config, store);
 			card[0].refresh(true);
 		});
 		assertEquals(Arrays.asList("item 13126", "item 24961", "sprite 1253"), asked);
@@ -625,7 +625,7 @@ public class RunCardsTest
 		FarmRunPanel[] card = new FarmRunPanel[1];
 		SwingUtilities.invokeAndWait(() ->
 		{
-			card[0] = new FarmRunPanel(state, client, follower, route, shortest, recording, config);
+			card[0] = new FarmRunPanel(state, client, follower, route, shortest, recording, config, store);
 			card[0].refresh(true);
 		});
 		List<String> closed = shown(card[0]);
@@ -739,7 +739,7 @@ public class RunCardsTest
 		Color[] colours = new Color[2];
 		SwingUtilities.invokeAndWait(() ->
 		{
-			PortTasksPanel card = new PortTasksPanel(delivered, config, sprites, state, client, follower, route, shortest);
+			PortTasksPanel card = new PortTasksPanel(delivered, config, store, sprites, state, client, follower, route, shortest);
 			card.refresh(true);
 			colours[0] = label(card, HONEY).getForeground();
 			colours[1] = label(card, "Port Sarim tern bounty").getForeground();
@@ -910,7 +910,7 @@ public class RunCardsTest
 		FarmRunPanel[] card = new FarmRunPanel[1];
 		SwingUtilities.invokeAndWait(() ->
 		{
-			card[0] = new FarmRunPanel(state, waiting, follower, route, shortest, sprites, config);
+			card[0] = new FarmRunPanel(state, waiting, follower, route, shortest, sprites, config, store);
 			card[0].refresh(true);
 		});
 		choose(card[0], "Herb run");

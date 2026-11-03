@@ -119,6 +119,7 @@ public class TasksThroughAHopTest
 				bind(Client.class).toInstance(game.client());
 				bind(Gson.class).toInstance(gson);
 				bind(MapCompanionConfig.class).toInstance(config);
+				bind(ConfigStore.class).toInstance(store);
 				bind(MemberIdentity.class).toInstance(identity);
 				bind(LootLog.class).toInstance(new LootLog(game.client(), store, gson));
 				bind(FarmingObserver.class).toInstance(new FarmingObserver(game.client(), store, gson));
@@ -143,6 +144,7 @@ public class TasksThroughAHopTest
 		set("slayerState", slayer);
 		set("client", game.client());
 		set("config", config);
+		set("settings", store);
 		set("questReader", quests);
 		set("diaryReader", construct(DiaryReader.class));
 		set("xpTracker", new XpTracker());
@@ -154,7 +156,7 @@ public class TasksThroughAHopTest
 		set("cargoHolds", holds);
 		set("portTaskReader", ports);
 		set("birdhouseReader", new BirdhouseReader(key -> null));
-		set("assignmentReader", new AssignmentReader(game.client(), config));
+		set("assignmentReader", new AssignmentReader(game.client(), store));
 		set("deathWatcher", construct(DeathWatcher.class));
 		set("lootLog", new LootLog(game.client(), store, gson));
 		set("directiveStream", new DirectiveStream(new OkHttpClient(), gson, (action, delay) -> null));
@@ -172,9 +174,9 @@ public class TasksThroughAHopTest
 		GameSprites sprites = new GameSprites(null, null, null);
 		SwingUtilities.invokeAndWait(() ->
 		{
-			/* No choice is pressed here, so the settings it would write have nowhere to go. */
-			slayerCard = new SlayerPanel(slayer, config, null, routes, destinations, marker, thread, sprites);
-			portCard = new PortTasksPanel(ports, config, sprites, runs, press, new FarmRunRoute(runs, destinations, route, thread),
+			/* No choice is pressed here; the store is where the Slayer field is read. */
+			slayerCard = new SlayerPanel(slayer, config, store, routes, destinations, marker, thread, sprites);
+			portCard = new PortTasksPanel(ports, config, store, sprites, runs, press, new FarmRunRoute(runs, destinations, route, thread),
 				route, new ShortestPath(message -> { }));
 		});
 	}

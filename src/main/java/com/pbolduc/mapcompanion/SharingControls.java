@@ -142,7 +142,7 @@ final class SharingControls extends JPanel
 	private JCheckBox choice(SharingFields.Field field, boolean sharing)
 	{
 		String key = field.key;
-		BooleanSupplier read = () -> field.read.test(config);
+		BooleanSupplier read = () -> field.on(config, store);
 		JCheckBox box = new JCheckBox(sharing ? field.label
 			: "<html><body width='150'>" + MapCompanionPanel.escape(field.label) + "</body></html>");
 		box.setName(key);
@@ -337,7 +337,7 @@ final class SharingControls extends JPanel
 
 		void refresh()
 		{
-			List<SharingFields.Field> on = SharingGroups.shared(section, config);
+			List<SharingFields.Field> on = SharingGroups.shared(section, config, store);
 			boolean whole = on.size() == section.fields.size();
 			boolean part = !on.isEmpty() && !whole;
 			box.setSelected(whole);

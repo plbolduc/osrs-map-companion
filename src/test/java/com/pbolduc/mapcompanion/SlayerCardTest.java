@@ -110,7 +110,7 @@ public class SlayerCardTest
 		RoutePress routes = new RoutePress(new OkHttpClient(), gson, game.client(), thread, new Pairing(store, gson),
 			identity, new DestinationRoute(), destinations, marker);
 		/* No choice is pressed here, so the settings it would write have nowhere to go. */
-		SwingUtilities.invokeAndWait(() -> panel = new SlayerPanel(state, config, null, routes, destinations, marker, thread,
+		SwingUtilities.invokeAndWait(() -> panel = new SlayerPanel(state, config, store, routes, destinations, marker, thread,
 			new GameSprites(null, null, null)));
 	}
 
@@ -167,6 +167,7 @@ public class SlayerCardTest
 				bind(Client.class).toInstance(game.client());
 				bind(Gson.class).toInstance(gson);
 				bind(MapCompanionConfig.class).toInstance(config);
+				bind(ConfigStore.class).toInstance(store);
 				bind(MemberIdentity.class).toInstance(identity);
 				bind(LootLog.class).toInstance(new LootLog(game.client(), store, gson));
 				bind(FarmingObserver.class).toInstance(new FarmingObserver(game.client(), store, gson));

@@ -145,6 +145,7 @@ public class WhereToGoShot
 				bind(Gson.class).toInstance(gson);
 				bind(OkHttpClient.class).toInstance(new OkHttpClient());
 				bind(MapCompanionConfig.class).toInstance(config);
+				bind(ConfigStore.class).toInstance(store);
 				bind(MemberIdentity.class).toInstance(new MemberIdentity(store));
 				bind(Pairing.class).toInstance(pairing);
 				bind(LootLog.class).toInstance(lootLog);

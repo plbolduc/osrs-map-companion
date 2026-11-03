@@ -66,7 +66,7 @@ public class RefusedGroupTest
 	private final Pairing pairing = new Pairing(store, new Gson());
 	private final MemberIdentity identity = new MemberIdentity(store);
 	private final RelayClient relay = new RelayClient(new OkHttpClient(), new Gson());
-	private final ConnectCard card = new ConnectCard(new JPanel(), config, new MapCompanionPlugin(), identity, pairing,
+	private final ConnectCard card = new ConnectCard(new JPanel(), config, store, new MapCompanionPlugin(), identity, pairing,
 		relay, new DirectiveStream(new OkHttpClient(), new Gson(), (action, delay) -> null),
 		new ConnectClient(new OkHttpClient(), new Gson()), new RecommendedSharing(config, store, () -> { }),
 		() -> { }, open -> { }, () -> true, () -> MapCompanionConfig.DEFAULT_MAP_URL);

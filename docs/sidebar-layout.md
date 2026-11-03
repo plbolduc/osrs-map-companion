@@ -425,7 +425,9 @@ send nothing, and that many is ordinary for a RuneLite plugin.
 The 23 fields under the four groups stay settings of their own, under the keys they always had, and
 stay what `SnapshotBuilder` and the readers read: a switch is never a permission of its own, only a
 way of writing fields. RuneLite's list hides them (`hidden = true`) and the sidebar no longer draws
-them one by one, so the wire, the map and every test of what is sent are untouched. The one press after Connect still writes exactly
+them one by one, so the wire, the map and every test of what is sent are untouched. All but
+*Position and world* have since stopped being declared at all: they are read by key, under the same
+keys, and Reset turns them off in the plugin. The one press after Connect still writes exactly
 the fields it names, and every one of them still starts off.
 
 ### A group shows as on only when all of it is
