@@ -192,7 +192,7 @@ public class SearchPanelTest
 
 	private static SearchClient.Hit hit(String id, String name)
 	{
-		return new SearchClient.Hit(id, name, "Bank", null);
+		return new SearchClient.Hit(id, name, "Bank", null, null);
 	}
 
 	/**

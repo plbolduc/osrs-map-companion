@@ -566,8 +566,7 @@ Step 6 of the same plan. A box at the top of Overview while connected, as the dr
 box is drawn, and under it up to eight places in the website's order, each with the website's
 grey line and the effort it measured, *Bank · 2nd floor · ~40 tiles*. An item's sources carry the
 website's *Sold at* or *Dropped by* heading, and a name a partial query could mean is a row of its
-own, *Item · dropped by 3*. Items and their sources have since been left out; see *Search* below.
-A misspelling is one button, *Did you mean abyssal whip?*, which searches
+own, *Item · dropped by 3*. A misspelling is one button, *Did you mean abyssal whip?*, which searches
 for it. A pick plans the way and fills the destination's card, so the list folds once that answer
 lands; typing or Enter opens it again. A refusal leaves the rows up, so the next one is a press
 away. While any card's route plans, or inside the map's wait between two, the rows take no pick and
@@ -679,11 +678,6 @@ counts, *Dropped by 3 monsters · sold in 1 shop*: a bare *Dropped by 3* sat und
 two monsters. A pick from them names the item on the destination's card, *For Abyssal whip*, since
 the card takes the name of the monster or shop the route goes to. One letter in the box says *Type
 one more letter.*, where it showed nothing.
-
-Items have since left the sidebar's search: their rows, the *Sold at* and *Dropped by* headings, the
-general store's sign, the item sprites and the card's *For* line are gone, and the box says *Search
-places and people*. The map still answers with them, for earlier releases; an item is looked up on
-the website.
 
 ### Before a group is joined
 

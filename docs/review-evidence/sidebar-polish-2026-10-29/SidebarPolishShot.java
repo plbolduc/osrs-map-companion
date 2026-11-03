@@ -41,11 +41,9 @@ import okhttp3.OkHttpClient;
  * the last polish pass changed: a fresh install with and without a kill log, the step after a first
  * Connect, a busy Home, the Group tab, Settings with Advanced open, Stars with a world picked, the
  * search answering "bank" and "whip", the death and clue cards, a meetup, and Drop luck alone.
- * The README's pictures are route, search-card, farm-count, group, stars-route, dropluck-card,
+ * The README's pictures are route, search-whip-card, farm-count, group, stars-route, dropluck-card,
  * slayer-card, settings-closed and port-run, with VoyageShot's voyage-sail; the card scenes paint the
- * real sections without the panel's surrounding controls. search-card is the bank search cropped as
- * search-whip-card is: the whip search answers only an item and its Dropped by, which the sidebar
- * no longer draws, so it shows the line a search that found nothing shows.
+ * real sections without the panel's surrounding controls.
  * Synthetic local state and made-up names; no game account and no network — the map address is a
  * port nothing listens on. A paired scene shares what the one press at Connect turns on.
  *
@@ -69,7 +67,7 @@ import okhttp3.OkHttpClient;
 public class SidebarPolishShot
 {
 	static final List<String> STATES = Arrays.asList("fresh", "fresh-log", "connect", "home", "route", "group", "settings", "settings-closed",
-		"stars", "stars-filters", "stars-route", "search", "search-card", "search-whip", "search-whip-card", "death", "meetup", "dropluck", "dropluck-card", "status",
+		"stars", "stars-filters", "stars-route", "search", "search-whip", "search-whip-card", "death", "meetup", "dropluck", "dropluck-card", "status",
 		"farm", "farm-card", "farm-bring", "farm-count", "slayer", "slayer-card", "slayer-open", "slayer-expanded", "slayer-blocked",
 		"port-tasks", "port-tasks-card", "port-tasks-unread", "port-run", "port-run-changed");
 
@@ -88,7 +86,7 @@ public class SidebarPolishShot
 			SwingUtilities.invokeAndWait(() -> call(() -> refresh(panel[0])));
 			SwingUtilities.invokeAndWait(() -> { });
 			SwingUtilities.invokeAndWait(() -> call(() -> shoot(state.equals("dropluck-card")
-				? (JComponent) get(panel[0], "drySection") : state.equals("search-whip-card") || state.equals("search-card")
+				? (JComponent) get(panel[0], "drySection") : state.equals("search-whip-card")
 				? (JComponent) get(panel[0], "searchPanel") : state.equals("farm-card") || state.equals("farm-bring") || state.equals("farm-count")
 				? (JComponent) get(panel[0], "farmRunPanel") : state.equals("slayer-card") || state.equals("slayer-open")
 				? (JComponent) get(panel[0], "slayerPanel") : state.equals("slayer-blocked")
@@ -631,7 +629,7 @@ public class SidebarPolishShot
 		}
 		if (state.startsWith("search"))
 		{
-			search(panel, state.equals("search") || state.equals("search-card") ? "bank" : "whip");
+			search(panel, state.equals("search") ? "bank" : "whip");
 		}
 		refresh(panel);
 	}
@@ -682,8 +680,7 @@ public class SidebarPolishShot
 			((Runnable) pending).run();
 		}
 		set(client, "pendingTimer", null);
-		/* As the client lands an answer: one with no row it draws says so under the box. */
-		set(client, "result", new SearchClient.Result(query, hits, null, hits.isEmpty() ? SearchClient.NOTHING : null, false));
+		set(client, "result", new SearchClient.Result(query, hits, null, null, false));
 		search.refresh();
 	}
 

@@ -183,10 +183,9 @@ Reroute's rules, and its answer becomes the destination, as a destination the ma
 **Route here**, on a right-click of the game's world map with a group set, is the same request with
 the clicked tile as the target, once per press; it is a RuneLite menu entry that the client handles
 itself and sends the game nothing. A refusal is said once in the chat box, locally.
-The rows drawn are places, characters and monsters. The map also answers with the items a query
-could name and the shops and monsters under an item's *Sold at* and *Dropped by*, which earlier
-releases drew; this one reads none of them. Each row's picture is the game's own, from the client's sprite cache: the map's
-kind for a row picks a world-map icon. No picture is ever fetched from the map or anywhere else.
+Each row's picture is the game's own, from the client's sprite cache: the map's kind for a row picks
+a world-map icon, and an item's `itemId`, where the map names one, picks its sprite. No picture is
+ever fetched from the map or anywhere else.
 
 **Route** beside the clue being carried, the last death, a star in the Stars tab or a meetup, or on
 the destination's card while it has no way yet, is the same request with a tile as its target: the
