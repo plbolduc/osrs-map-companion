@@ -68,15 +68,11 @@ public class FarmingPatchCatalogTest
 	public void neverGivesOneRegionAndSlotToTwoPatches()
 	{
 		Map<String, java.util.List<FarmingPatchCatalog.Patch>> claimed = new HashMap<>();
-		/** Every region id the game can produce: {@code (x >> 6) << 8 | (y >> 6)} tops out here. */
-		for (int region = 0; region <= 0xFFFF; region++)
+		/* Every region a patch transmits in, which is the list isLocal matches a tile's region against. */
+		for (FarmingPatchCatalog.Patch patch : FarmingPatchCatalog.PATCHES)
 		{
-			for (FarmingPatchCatalog.Patch patch : FarmingPatchCatalog.PATCHES)
+			for (int region : patch.regions)
 			{
-				if (!patch.transmitsIn(region))
-				{
-					continue;
-				}
 				String key = region + "/" + patch.varbit;
 				java.util.List<FarmingPatchCatalog.Patch> previous = claimed.computeIfAbsent(key, ignored -> new java.util.ArrayList<>());
 				// Catherby's fruit tree and north allotment reuse A in disjoint parts of 11317.
@@ -99,12 +95,16 @@ public class FarmingPatchCatalogTest
 	{
 		FarmingPatchCatalog.Patch falador = patch("falador-herb");
 		FarmingPatchCatalog.Patch catherby = patch("catherby-herb");
-		/** Both read the same number, and only the region tells them apart. */
+		/** Both read the same number, and only the region tells them apart: 12083 and 11062. */
 		assertEquals(falador.varbit, catherby.varbit);
-		assertTrue(falador.transmitsIn(12083));
-		assertFalse(falador.transmitsIn(11062));
-		assertTrue(catherby.transmitsIn(11062));
-		assertFalse(catherby.transmitsIn(12083));
+		WorldPoint inFalador = new WorldPoint(3058, 3311, 0);
+		WorldPoint inCatherby = new WorldPoint(2813, 3463, 0);
+		assertEquals(12083, inFalador.getRegionID());
+		assertEquals(11062, inCatherby.getRegionID());
+		assertTrue(falador.isLocal(inFalador));
+		assertFalse(falador.isLocal(inCatherby));
+		assertTrue(catherby.isLocal(inCatherby));
+		assertFalse(catherby.isLocal(inFalador));
 	}
 
 	@Test

@@ -739,13 +739,7 @@ final class ConnectCard extends JPanel
 		joinMessage.setVisible(false);
 	}
 
-	/** One line under Copy invite and Switch ▾, for what was pressed there: here, a press on its way. */
-	void sayUnderGroup(String message)
-	{
-		under(groupMessage, message, false, false);
-	}
-
-	/** The same line, for a press that did not happen. */
+	/** One line under Copy invite and Switch ▾, for what was pressed there: here, a press that did not happen. */
 	void refuseUnderGroup(String message)
 	{
 		under(groupMessage, message, true, false);

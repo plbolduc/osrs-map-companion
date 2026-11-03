@@ -107,17 +107,6 @@ final class FarmingPatchCatalog
 			}
 			return true;
 		}
-
-		/** Region membership alone is insufficient at the coordinate boundaries above. */
-		boolean transmitsIn(int regionId)
-		{
-			for (int region : regions)
-				if (region == regionId)
-				{
-					return true;
-				}
-			return false;
-		}
 	}
 
 	/**

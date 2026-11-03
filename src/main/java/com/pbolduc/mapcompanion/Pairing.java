@@ -682,18 +682,6 @@ public class Pairing
 		remember(joined.code);
 	}
 
-	/** Switch to a group already in the list. No suffix: the map knows this member there already. */
-	public synchronized void switchTo(String code)
-	{
-		if (!JoinCode.isWellFormedCode(code))
-		{
-			return;
-		}
-		store.set(MapCompanionConfig.KEY_PAIRING_CODE, code);
-		clearSuffix();
-		remember(code);
-	}
-
 	/**
 	 * Stop sending the suffix.
 	 *
