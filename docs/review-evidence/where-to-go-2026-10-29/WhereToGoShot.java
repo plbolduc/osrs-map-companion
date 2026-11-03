@@ -315,12 +315,10 @@ public class WhereToGoShot
 				SearchPanel search = (SearchPanel) get(panel, "searchPanel");
 				SearchClient client = (SearchClient) get(search, "search");
 				List<SearchClient.Hit> hits = new ArrayList<>();
-				hits.add(new SearchClient.Hit("bank:lumbridge", "Lumbridge Castle bank", "Bank · Lumbridge Castle · 2nd floor · ~40 tiles", null, new int[]{3208, 3220, 2}));
-				hits.add(new SearchClient.Hit("bank:draynor", "Draynor Village bank", "Bank · Draynor Village · ~95 tiles", null, new int[]{3092, 3243, 0}));
-				hits.add(new SearchClient.Hit("bank:al-kharid", "Al Kharid bank", "Bank · Al Kharid · ~108 tiles", null, new int[]{3269, 3167, 0}));
-				hits.add(new SearchClient.Hit("npc:banker", "Banker", "Character · nearest of 112 places · ~40 tiles", null, new int[]{3208, 3221, 2}));
-				hits.add(new SearchClient.Hit("shop:bobs-axes", "Bob's Brilliant Axes", "Shop · Lumbridge · ~22 tiles", "Sold at", new int[]{3230, 3203, 0}));
-				hits.add(new SearchClient.Hit("item:Bank filler", "Bank filler", "Item · sold at 1", null, null));
+				hits.add(new SearchClient.Hit("bank:lumbridge", "Lumbridge Castle bank", "Bank · Lumbridge Castle · 2nd floor · ~40 tiles", new int[]{3208, 3220, 2}));
+				hits.add(new SearchClient.Hit("bank:draynor", "Draynor Village bank", "Bank · Draynor Village · ~95 tiles", new int[]{3092, 3243, 0}));
+				hits.add(new SearchClient.Hit("bank:al-kharid", "Al Kharid bank", "Bank · Al Kharid · ~108 tiles", new int[]{3269, 3167, 0}));
+				hits.add(new SearchClient.Hit("npc:banker", "Banker", "Character · nearest of 112 places · ~40 tiles", new int[]{3208, 3221, 2}));
 				search.box().setText("bank");
 				/* Cancel the debounce the typing started, then stand the answer in for one. */
 				Object pending = get(client, "pendingTimer");
