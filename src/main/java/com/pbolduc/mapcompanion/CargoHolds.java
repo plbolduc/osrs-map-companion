@@ -26,10 +26,12 @@
 package com.pbolduc.mapcompanion;
 
 import com.google.inject.Singleton;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
-import static net.runelite.api.gameval.ObjectID.*;
 
 /**
  * How many crates the hold of the boat you are standing on carries.
@@ -40,6 +42,8 @@ import static net.runelite.api.gameval.ObjectID.*;
  * ({@code CargoHoldTier} and {@code SizeClass} at the commit pinned in the map's
  * {@code docs/review-evidence/sailing-reader-sources-2026-10-30.md}), and the capacities below are
  * that model's table. An Ultimate Ironman's hold carries the table's last column whatever its size.
+ * The objects' ids are a table in {@code cargo-holds.txt}, which {@code GameIdsTest} holds to the
+ * client's names for them; see {@link Resources} for why a table is not code.
  *
  * <p>Objects are kept per world view, because a boat is a world view of its own and every boat in
  * the scene spawns a hold. Only the one the local player stands in is believed: that is the boat
@@ -52,40 +56,11 @@ import static net.runelite.api.gameval.ObjectID.*;
 @Singleton
 public class CargoHolds
 {
-	/** Tier by tier, each hold in its raft, skiff and sloop forms with and without cargo drawn. */
-	static final int[][] HOLDS = {
-		{SAILING_BOAT_CARGO_HOLD_REGULAR_RAFT, SAILING_BOAT_CARGO_HOLD_REGULAR_RAFT_CARGO, SAILING_BOAT_CARGO_HOLD_REGULAR_RAFT_NO_CARGO,
-			SAILING_BOAT_CARGO_HOLD_REGULAR_2X5, SAILING_BOAT_CARGO_HOLD_REGULAR_2X5_CARGO, SAILING_BOAT_CARGO_HOLD_REGULAR_2X5_NO_CARGO,
-			SAILING_BOAT_CARGO_HOLD_REGULAR_LARGE, SAILING_BOAT_CARGO_HOLD_REGULAR_LARGE_CARGO, SAILING_BOAT_CARGO_HOLD_REGULAR_LARGE_NO_CARGO},
-		{SAILING_BOAT_CARGO_HOLD_OAK_RAFT, SAILING_BOAT_CARGO_HOLD_OAK_RAFT_CARGO, SAILING_BOAT_CARGO_HOLD_OAK_RAFT_NO_CARGO,
-			SAILING_BOAT_CARGO_HOLD_OAK_2X5, SAILING_BOAT_CARGO_HOLD_OAK_2X5_CARGO, SAILING_BOAT_CARGO_HOLD_OAK_2X5_NO_CARGO,
-			SAILING_BOAT_CARGO_HOLD_OAK_LARGE, SAILING_BOAT_CARGO_HOLD_OAK_LARGE_CARGO, SAILING_BOAT_CARGO_HOLD_OAK_LARGE_NO_CARGO},
-		{SAILING_BOAT_CARGO_HOLD_TEAK_RAFT, SAILING_BOAT_CARGO_HOLD_TEAK_RAFT_CARGO, SAILING_BOAT_CARGO_HOLD_TEAK_RAFT_NO_CARGO,
-			SAILING_BOAT_CARGO_HOLD_TEAK_2X5, SAILING_BOAT_CARGO_HOLD_TEAK_2X5_CARGO, SAILING_BOAT_CARGO_HOLD_TEAK_2X5_NO_CARGO,
-			SAILING_BOAT_CARGO_HOLD_TEAK_LARGE, SAILING_BOAT_CARGO_HOLD_TEAK_LARGE_CARGO, SAILING_BOAT_CARGO_HOLD_TEAK_LARGE_NO_CARGO},
-		{SAILING_BOAT_CARGO_HOLD_MAHOGANY_RAFT, SAILING_BOAT_CARGO_HOLD_MAHOGANY_RAFT_CARGO, SAILING_BOAT_CARGO_HOLD_MAHOGANY_RAFT_NO_CARGO,
-			SAILING_BOAT_CARGO_HOLD_MAHOGANY_2X5, SAILING_BOAT_CARGO_HOLD_MAHOGANY_2X5_CARGO, SAILING_BOAT_CARGO_HOLD_MAHOGANY_2X5_NO_CARGO,
-			SAILING_BOAT_CARGO_HOLD_MAHOGANY_LARGE, SAILING_BOAT_CARGO_HOLD_MAHOGANY_LARGE_CARGO, SAILING_BOAT_CARGO_HOLD_MAHOGANY_LARGE_NO_CARGO},
-		{SAILING_BOAT_CARGO_HOLD_CAMPHOR_RAFT, SAILING_BOAT_CARGO_HOLD_CAMPHOR_RAFT_CARGO, SAILING_BOAT_CARGO_HOLD_CAMPHOR_RAFT_NO_CARGO,
-			SAILING_BOAT_CARGO_HOLD_CAMPHOR_2X5, SAILING_BOAT_CARGO_HOLD_CAMPHOR_2X5_CARGO, SAILING_BOAT_CARGO_HOLD_CAMPHOR_2X5_NO_CARGO,
-			SAILING_BOAT_CARGO_HOLD_CAMPHOR_LARGE, SAILING_BOAT_CARGO_HOLD_CAMPHOR_LARGE_CARGO, SAILING_BOAT_CARGO_HOLD_CAMPHOR_LARGE_NO_CARGO},
-		{SAILING_BOAT_CARGO_HOLD_IRONWOOD_RAFT, SAILING_BOAT_CARGO_HOLD_IRONWOOD_RAFT_CARGO, SAILING_BOAT_CARGO_HOLD_IRONWOOD_RAFT_NO_CARGO,
-			SAILING_BOAT_CARGO_HOLD_IRONWOOD_2X5, SAILING_BOAT_CARGO_HOLD_IRONWOOD_2X5_CARGO, SAILING_BOAT_CARGO_HOLD_IRONWOOD_2X5_NO_CARGO,
-			SAILING_BOAT_CARGO_HOLD_IRONWOOD_LARGE, SAILING_BOAT_CARGO_HOLD_IRONWOOD_LARGE_CARGO, SAILING_BOAT_CARGO_HOLD_IRONWOOD_LARGE_NO_CARGO},
-		{SAILING_BOAT_CARGO_HOLD_ROSEWOOD_RAFT, SAILING_BOAT_CARGO_HOLD_ROSEWOOD_RAFT_CARGO, SAILING_BOAT_CARGO_HOLD_ROSEWOOD_RAFT_NO_CARGO,
-			SAILING_BOAT_CARGO_HOLD_ROSEWOOD_2X5, SAILING_BOAT_CARGO_HOLD_ROSEWOOD_2X5_CARGO, SAILING_BOAT_CARGO_HOLD_ROSEWOOD_2X5_NO_CARGO,
-			SAILING_BOAT_CARGO_HOLD_ROSEWOOD_LARGE, SAILING_BOAT_CARGO_HOLD_ROSEWOOD_LARGE_CARGO, SAILING_BOAT_CARGO_HOLD_ROSEWOOD_LARGE_NO_CARGO}
-	};
+	/** Tier by tier, each hold in its raft, skiff and sloop forms with and without cargo drawn: cargo-holds.txt's holds. */
+	static final int[][] HOLDS = table("holds");
 
-	/** Raft, skiff and sloop hulls, each in the seven woods. */
-	static final int[][] HULLS = {
-		{SAILING_BOAT_HULL_KANDARIN_1X3_WOOD, SAILING_BOAT_HULL_KANDARIN_1X3_OAK, SAILING_BOAT_HULL_KANDARIN_1X3_TEAK, SAILING_BOAT_HULL_KANDARIN_1X3_MAHOGANY,
-			SAILING_BOAT_HULL_KANDARIN_1X3_CAMPHOR, SAILING_BOAT_HULL_KANDARIN_1X3_IRONWOOD, SAILING_BOAT_HULL_KANDARIN_1X3_ROSEWOOD},
-		{SAILING_BOAT_HULL_KANDARIN_2X5_WOOD, SAILING_BOAT_HULL_KANDARIN_2X5_OAK, SAILING_BOAT_HULL_KANDARIN_2X5_TEAK, SAILING_BOAT_HULL_KANDARIN_2X5_MAHOGANY,
-			SAILING_BOAT_HULL_KANDARIN_2X5_CAMPHOR, SAILING_BOAT_HULL_KANDARIN_2X5_IRONWOOD, SAILING_BOAT_HULL_KANDARIN_2X5_ROSEWOOD},
-		{SAILING_BOAT_HULL_KANDARIN_3X8_WOOD, SAILING_BOAT_HULL_KANDARIN_3X8_OAK, SAILING_BOAT_HULL_KANDARIN_3X8_TEAK, SAILING_BOAT_HULL_KANDARIN_3X8_MAHOGANY,
-			SAILING_BOAT_HULL_KANDARIN_3X8_CAMPHOR, SAILING_BOAT_HULL_KANDARIN_3X8_IRONWOOD, SAILING_BOAT_HULL_KANDARIN_3X8_ROSEWOOD}
-	};
+	/** Raft, skiff and sloop hulls, each in the seven woods: cargo-holds.txt's hulls. */
+	static final int[][] HULLS = table("hulls");
 
 	/** Crates by tier: a raft's, a skiff's, a sloop's, then an Ultimate Ironman's at any size. */
 	static final int[][] CAPACITY = {
@@ -183,5 +158,20 @@ public class CargoHolds
 			}
 		}
 		return out;
+	}
+
+	/** One kind of row of cargo-holds.txt, in the file's order, which is its tier or size. */
+	private static int[][] table(String kind)
+	{
+		List<int[]> rows = new ArrayList<>();
+		for (String line : Resources.lines("/cargo-holds.txt"))
+		{
+			String[] cells = line.split("\\|");
+			if (cells[0].equals(kind))
+			{
+				rows.add(Arrays.stream(cells[1].split(",")).mapToInt(Integer::parseInt).toArray());
+			}
+		}
+		return rows.toArray(new int[0][]);
 	}
 }
