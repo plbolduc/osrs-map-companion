@@ -154,7 +154,7 @@ final class NowCards extends JPanel
 	/** The way there, step by step, when the map sent one. */
 	private final RouteStepsView routeSteps;
 	private final DestinationRoute destinationRoute;
-	/** Ask the map for the way again from where the player stands. See {@link RouteClient}. */
+	/** Ask the map for the way again from where the player stands. See {@link RoutePress#reroute}. */
 	private final JButton rerouteButton = smallButton("Reroute");
 	/**
 	 * Follow this route, or pause it: the step in the box over the game, and Shortest Path's walks
@@ -179,7 +179,7 @@ final class NowCards extends JPanel
 	private static final String ROUTE_TIP = Words.of("now.routeTip");
 
 	NowCards(MapCompanionConfig config, DestinationState destinationState, DeathWatcher deathWatcher,
-		DestinationMarker destinationMarker, DestinationRoute destinationRoute, RouteClient routeClient,
+		DestinationMarker destinationMarker, DestinationRoute destinationRoute,
 		ShortestPath shortestPath, RoutePress routePress, ClueReader clueReader, FarmRunRoute farmRunRoute,
 		GameSprites sprites, Runnable refresh, Supplier<String> mapUrl)
 	{
@@ -241,7 +241,7 @@ final class NowCards extends JPanel
 		rerouteButton.setToolTipText(REROUTE_TIP);
 		rerouteButton.addActionListener(e ->
 		{
-			routeClient.reroute();
+			routePress.reroute();
 			refresh.run();
 		});
 		routeButton.setToolTipText(ROUTE_TIP);
@@ -576,7 +576,7 @@ final class NowCards extends JPanel
 		{
 			destinationRow.add(rerouteButton);
 			rerouteButton.setEnabled(asks && !route.rerouting && now >= route.nextRerouteMs);
-			MapWait.tip(rerouteButton, loggedIn ? REROUTE_TIP : RouteClient.LOG_IN, route.nextRerouteMs - now);
+			MapWait.tip(rerouteButton, loggedIn ? REROUTE_TIP : RoutePress.LOG_IN, route.nextRerouteMs - now);
 		}
 		/*
 		 * No way yet, and none arriving with the destination itself for the tick before the route
@@ -586,7 +586,7 @@ final class NowCards extends JPanel
 		if (wayless)
 		{
 			destinationRow.add(routeButton);
-			routeState(routeButton, destinationSaid, DESTINATION, "Route", loggedIn, loggedIn ? ROUTE_TIP : RouteClient.LOG_IN, now);
+			routeState(routeButton, destinationSaid, DESTINATION, "Route", loggedIn, loggedIn ? ROUTE_TIP : RoutePress.LOG_IN, now);
 		}
 		else
 		{
@@ -623,7 +623,7 @@ final class NowCards extends JPanel
 				deathRow.add(deathRouteButton);
 			}
 			shownDeathActions = syncRow(deathActions, deathRow, shownDeathActions);
-			routeState(deathRouteButton, deathSaid, "death", "Route back", asks, loggedIn ? routeBackTip : RouteClient.LOG_IN, now);
+			routeState(deathRouteButton, deathSaid, "death", "Route back", asks, loggedIn ? routeBackTip : RoutePress.LOG_IN, now);
 		}
 
 		CompanionSnapshot.Clue clue = clueReader.current();
@@ -646,7 +646,7 @@ final class NowCards extends JPanel
 			setWrapped(clueDetail, clueDetail(clue), CARD_TEXT_WIDTH);
 			boolean routable = ClueReader.routeTile(clue) != null || ClueReader.routesByClue(clue);
 			clueActions.setVisible(routable);
-			routeState(clueRouteButton, clueSaid, "clue", "Route", asks && routable, loggedIn ? CLUE_ROUTE_TIP : RouteClient.LOG_IN, now);
+			routeState(clueRouteButton, clueSaid, "clue", "Route", asks && routable, loggedIn ? CLUE_ROUTE_TIP : RoutePress.LOG_IN, now);
 		}
 		/** The heading goes with the last card under it, rather than naming nothing. */
 		setVisible((destination != null && !farmDestination) || death != null || (clue != null && paired));

@@ -766,14 +766,14 @@ public class GroupPanelTest
 			panel.get().refresh(true, false, now);
 			AbstractButton route = named(panel.get(), "group.route.cara");
 			assertFalse(route.isEnabled());
-			assertEquals(RouteClient.LOG_IN, route.getToolTipText());
+			assertEquals(RoutePress.LOG_IN, route.getToolTipText());
 			assertFalse(named(panel.get(), "group.answer.star-hunt.going").isEnabled());
 			assertFalse(named(panel.get(), "group.meetHere").isEnabled());
 			assertTrue("World map draws here", named(panel.get(), "group.show.cara").isEnabled());
 
 			panel.get().routeToFriend("cara");
 			assertFalse("no position is waited for", group.finding("cara", now));
-			assertNotNull(words(panel.get()), saying(panel.get(), RouteClient.LOG_IN));
+			assertNotNull(words(panel.get()), saying(panel.get(), RoutePress.LOG_IN));
 		});
 	}
 
@@ -799,7 +799,7 @@ public class GroupPanelTest
 		{
 			panel.get().refresh(true, false, now);
 			assertEquals("Route", named(panel.get(), "group.route.cara").getText());
-			assertNotNull(words(panel.get()), saying(panel.get(), RouteClient.LOG_IN));
+			assertNotNull(words(panel.get()), saying(panel.get(), RoutePress.LOG_IN));
 		});
 		long later = now + GroupState.PENDING_MS + 1_000L;
 		SwingUtilities.invokeAndWait(() ->

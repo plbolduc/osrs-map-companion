@@ -157,7 +157,7 @@ public class RouteNotesTest
 		List<JButton> routes = new ArrayList<>();
 		SwingUtilities.invokeAndWait(() ->
 		{
-			NowCards now = new NowCards(config, destinations, null, marker(), route, null, null, press, null, null, null,
+			NowCards now = new NowCards(config, destinations, null, marker(), route, null, press, null, null, null,
 				() -> { }, () -> MapCompanionConfig.DEFAULT_MAP_URL);
 			buttons(now, "Route", routes);
 		});

@@ -360,7 +360,7 @@ final class SearchClient
 		if (base == null)
 		{
 			show(new Result(query, Collections.<Hit>emptyList(), null,
-				character.getAsBoolean() ? RouteClient.NOT_CONNECTED : LOG_IN, false, true));
+				character.getAsBoolean() ? RoutePress.NOT_CONNECTED : LOG_IN, false, true));
 			return;
 		}
 		Request request = CompanionHttp.member(base.newBuilder().addQueryParameter("q", query).build(), held.code, held.member, held.secret).get()
@@ -398,7 +398,7 @@ final class SearchClient
 					else if (!close.isSuccessful())
 					{
 						next = now + Math.max(FAILURE_GAP_MS, wait == null ? 0L : StarsClient.retryDelay(wait));
-						why = status == 403 || status == 410 ? RouteClient.NOT_CONNECTED : FAILED;
+						why = status == 403 || status == 410 ? RoutePress.NOT_CONNECTED : FAILED;
 					}
 					else
 					{

@@ -58,7 +58,7 @@ public class MapWaitTest
 		assertEquals("The map asked to wait. Searching in 3s.", MapWait.searching(3_000L));
 		assertTrue(MapWait.waits(MapWait.BUSY));
 		assertTrue(MapWait.waits(MapWait.ASKED));
-		assertFalse("any other sentence is said as it is", MapWait.waits(RouteClient.NO_WAY));
+		assertFalse("any other sentence is said as it is", MapWait.waits(RoutePress.NO_WAY));
 		assertFalse(MapWait.waits(null));
 	}
 

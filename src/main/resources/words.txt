@@ -9,7 +9,7 @@ connect.unreachable=The map could not be reached. Try again in a moment.
 connect.busy=The map is busy. Try again in a minute.
 connect.failed=The map could not make that just now. Try again in a moment.
 
-# RouteClient and RoutePress: Route, Reroute and Search's picks; StarsClient says map.redirects too.
+# RoutePress: Route, Reroute and Search's picks; StarsClient says map.redirects too.
 route.notConnected=Not connected to the group yet. The top of the sidebar says why.
 route.needsTile=Reroute can't see where you are inside an instance. Press it again once you're out.
 route.noWay=The map found no way there from here.

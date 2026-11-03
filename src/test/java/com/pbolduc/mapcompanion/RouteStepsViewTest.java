@@ -156,9 +156,9 @@ public class RouteStepsViewTest
 	public void aRefusedRerouteIsSaidInPinkAndANoticeInGrey() throws IOException
 	{
 		receive();
-		route.refuse(RouteClient.NEEDS_TILE);
+		route.refuse(RoutePress.NEEDS_TILE);
 		view.show(route.view());
-		assertEquals(MapCompanionPanel.REFUSED, label(RouteClient.NEEDS_TILE).getForeground());
+		assertEquals(MapCompanionPanel.REFUSED, label(RoutePress.NEEDS_TILE).getForeground());
 
 		route.follow(true);
 		route.stopFollowing(ShortestPath.TAKEN_OVER);

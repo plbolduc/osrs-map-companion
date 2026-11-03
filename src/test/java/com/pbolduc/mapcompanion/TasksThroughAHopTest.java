@@ -243,7 +243,7 @@ public class TasksThroughAHopTest
 		assertTrue(words(slayerCard).toString(), words(slayerCard).contains(TASK));
 		AbstractButton route = button(slayerCard, "Route");
 		assertFalse(route.isEnabled());
-		assertEquals(RouteClient.LOG_IN, route.getToolTipText());
+		assertEquals(RoutePress.LOG_IN, route.getToolTipText());
 		assertTrue(button(slayerCard, "Pin").isEnabled());
 		assertTrue("logging in, the character is not there until the game says so",
 			MapCompanionPlugin.loggedOutAfter(true, GameState.LOADING));

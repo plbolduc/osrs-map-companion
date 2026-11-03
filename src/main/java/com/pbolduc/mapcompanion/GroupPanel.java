@@ -377,7 +377,7 @@ final class GroupPanel extends JPanel
 		if (waited != null)
 		{
 			/* A Route pressed before the logout waits on a stream the logout closed: it says why it stopped. */
-			press.refuse(GroupState.source(waited), RouteClient.LOG_IN);
+			press.refuse(GroupState.source(waited), RoutePress.LOG_IN);
 		}
 		here = group.world();
 		List<RelayResponse.RosterRow> roster = destinations.getRoster();
@@ -560,7 +560,7 @@ final class GroupPanel extends JPanel
 				: routedHere ? "Reroute" : "Route");
 			route.setName("group.route." + row.id);
 			route.setEnabled(ready && loggedIn && !planning && !finding && press.ready());
-			String own = !loggedIn ? RouteClient.LOG_IN : "Plan the way to where " + row.name + Words.of("group.routeFriendTip");
+			String own = !loggedIn ? RoutePress.LOG_IN : "Plan the way to where " + row.name + Words.of("group.routeFriendTip");
 			route.setToolTipText(own);
 			JButton held = route;
 			ticking.add(at -> MapWait.tip(held, own, press.waitMs(at)));
@@ -666,7 +666,7 @@ final class GroupPanel extends JPanel
 	{
 		if (!loggedIn)
 		{
-			press.refuse(GroupState.source(id), RouteClient.LOG_IN);
+			press.refuse(GroupState.source(id), RoutePress.LOG_IN);
 			drawn = null;
 			refresh(ready, loggedIn, System.currentTimeMillis());
 			return;
@@ -694,7 +694,7 @@ final class GroupPanel extends JPanel
 		JButton route = MapCompanionPanel.smallButton(planning ? "Planning…" : "Route");
 		route.setName("group.meetupRoute." + meetup.id);
 		route.setEnabled(ready && loggedIn && !planning && press.ready());
-		String own = loggedIn ? MEETUP_ROUTE_TIP : RouteClient.LOG_IN;
+		String own = loggedIn ? MEETUP_ROUTE_TIP : RoutePress.LOG_IN;
 		route.setToolTipText(own);
 		ticking.add(at -> MapWait.tip(route, own, press.waitMs(at)));
 		route.addActionListener(e ->

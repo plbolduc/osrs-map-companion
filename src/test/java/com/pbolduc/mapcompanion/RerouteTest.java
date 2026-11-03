@@ -57,10 +57,11 @@ import org.junit.Test;
 /**
  * Reroute asks once, from where the player stands, and waits as long as the map says to.
  *
- * <p>The press is driven through the real client thread hand-off and a real OkHttp call, answered
- * by an interceptor rather than a server, so what is checked is what would leave the machine.
+ * <p>The press is driven through {@link RoutePress#reroute}, the real client thread hand-off and a
+ * real OkHttp call, answered by an interceptor rather than a server, so what is checked is what
+ * would leave the machine.
  */
-public class RouteClientTest
+public class RerouteTest
 {
 	private static final MediaType JSON = MediaType.get("application/json");
 	private static final String SECRET = "K7PQ2M3XABCDEFGHJKMNPQRSTVWXYZ23";
@@ -72,11 +73,12 @@ public class RouteClientTest
 	private final Pairing pairing = new Pairing(store, new Gson());
 	private final MemberIdentity identity = new MemberIdentity(store);
 	private final DestinationRoute route = new DestinationRoute();
+	private final DestinationState destinations = new DestinationState(new Gson());
 	private final List<Request> sent = new CopyOnWriteArrayList<>();
 
-	private RouteClient client(int status, String body, @Nullable String retryAfter)
+	private RoutePress client(int status, String body, @Nullable String retryAfter)
 	{
-		OkHttpClient http = new OkHttpClient.Builder().addInterceptor(chain ->
+		return press(new OkHttpClient.Builder().addInterceptor(chain ->
 		{
 			sent.add(chain.request());
 			Response.Builder reply = new Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1)
@@ -86,15 +88,31 @@ public class RouteClientTest
 				reply.header("Retry-After", retryAfter);
 			}
 			return reply.build();
-		}).build();
-		return new RouteClient(http, new Gson(), game(), new ClientThread()
+		}).build(), game());
+	}
+
+	private RoutePress press(OkHttpClient http, Client game)
+	{
+		return new RoutePress(http, new Gson(), game, new ClientThread()
 		{
 			@Override
 			public void invokeLater(Runnable r)
 			{
 				r.run();
 			}
-		}, pairing, identity, route);
+		}, pairing, identity, route, destinations, marker());
+	}
+
+	/** A pin that draws nothing: Reroute moves the route's steps, never the destination's pin. */
+	private static DestinationMarker marker()
+	{
+		return new DestinationMarker(null, null, null, null, null, null)
+		{
+			@Override
+			void sync()
+			{
+			}
+		};
 	}
 
 	private void connect()
@@ -155,7 +173,7 @@ public class RouteClientTest
 		client(200, ANSWER, null).reroute();
 		assertTrue(sent.isEmpty());
 		/* Logged in with no group: not connected, said apart from a logout, which asks to log in instead. */
-		assertEquals(RouteClient.NOT_CONNECTED, route.view().message);
+		assertEquals(RoutePress.NOT_CONNECTED, route.view().message);
 		assertEquals("item:ring-of-dueling", route.view().way().id);
 	}
 
@@ -167,18 +185,11 @@ public class RouteClientTest
 		destination();
 		Client loggedOut = (Client) Proxy.newProxyInstance(Client.class.getClassLoader(), new Class<?>[]{Client.class},
 			(proxy, method, args) -> "getGameState".equals(method.getName()) ? GameState.LOGIN_SCREEN : null);
-		new RouteClient(new OkHttpClient.Builder().addInterceptor(chain ->
+		press(new OkHttpClient.Builder().addInterceptor(chain ->
 		{
 			sent.add(chain.request());
 			throw new java.io.IOException("nothing should be sent");
-		}).build(), new Gson(), loggedOut, new ClientThread()
-		{
-			@Override
-			public void invokeLater(Runnable r)
-			{
-				r.run();
-			}
-		}, pairing, identity, route).reroute();
+		}).build(), loggedOut).reroute();
 		assertTrue(sent.isEmpty());
 		assertEquals("Log in to plan a route.", route.view().message);
 	}
@@ -189,7 +200,7 @@ public class RouteClientTest
 		connect();
 		destination();
 		long before = System.currentTimeMillis();
-		RouteClient busy = client(429, "{\"reason\":\"busy\"}", "20");
+		RoutePress busy = client(429, "{\"reason\":\"busy\"}", "20");
 		busy.reroute();
 		settle();
 		DestinationRoute.View view = route.view();
@@ -224,20 +235,13 @@ public class RouteClientTest
 		Client raid = DestinationRouteTest.client(true, rooms);
 		Client loggedIn = (Client) Proxy.newProxyInstance(Client.class.getClassLoader(), new Class<?>[]{Client.class},
 			(proxy, method, args) -> "getGameState".equals(method.getName()) ? GameState.LOGGED_IN : method.invoke(raid, args));
-		new RouteClient(new OkHttpClient.Builder().addInterceptor(chain ->
+		press(new OkHttpClient.Builder().addInterceptor(chain ->
 		{
 			sent.add(chain.request());
 			throw new java.io.IOException("nothing should be sent");
-		}).build(), new Gson(), loggedIn, new ClientThread()
-		{
-			@Override
-			public void invokeLater(Runnable r)
-			{
-				r.run();
-			}
-		}, pairing, identity, route).reroute();
+		}).build(), loggedIn).reroute();
 		assertTrue(sent.isEmpty());
-		assertEquals(RouteClient.NEEDS_TILE, route.view().message);
+		assertEquals(RoutePress.NEEDS_TILE, route.view().message);
 		assertEquals("Reroute can't see where you are inside an instance. Press it again once you're out.", route.view().message);
 	}
 
@@ -247,12 +251,14 @@ public class RouteClientTest
 		connect();
 		Object[][] cases = {
 			{503, "{\"reason\":\"busy\"}", MapWait.BUSY},
-			{404, "{\"reason\":\"not_found\"}", RouteClient.NOT_FOUND},
+			{404, "{\"reason\":\"not_found\"}", RoutePress.NOT_FOUND},
+			/* A map that says why is quoted, as it is for a press of Route: the reply is read the same way. */
+			{404, "{\"reason\":\"not_found\",\"error\":\"That place is not on the map.\"}", "That place is not on the map."},
 			/* The map refusing this member: one sentence for it, pointing at the card that says why. */
-			{403, "{\"reason\":\"needs_code\"}", RouteClient.NOT_CONNECTED},
-			{500, "oops", RouteClient.FAILED},
-			{200, "{\"options\":[]}", RouteClient.NO_WAY},
-			{200, "not json at all", RouteClient.UNREADABLE},
+			{403, "{\"reason\":\"needs_code\"}", RoutePress.NOT_CONNECTED},
+			{500, "oops", RoutePress.FAILED},
+			{200, "{\"options\":[]}", RoutePress.NO_WAY},
+			{200, "not json at all", RoutePress.UNREADABLE},
 		};
 		for (Object[] c : cases)
 		{
@@ -261,8 +267,9 @@ public class RouteClientTest
 				DestinationRouteTest.route("item:ring-of-dueling", DestinationRouteTest.alKharid())));
 			DestinationRoute.Ticket ticket = fresh.beginReroute(0L);
 			assertNotNull(ticket);
-			RouteClient reader = new RouteClient(new OkHttpClient(), new Gson(), game(), new ClientThread(), pairing, identity, fresh);
-			reader.handle(ticket, reply((int) c[0], (String) c[1]));
+			RoutePress reader = new RoutePress(new OkHttpClient(), new Gson(), game(), new ClientThread(), pairing, identity, fresh,
+				destinations, marker());
+			reader.read(reply((int) c[0], (String) c[1]), reader.rerouted(ticket));
 			assertEquals("HTTP " + c[0], c[2], fresh.view().message);
 			assertEquals("HTTP " + c[0], "item:ring-of-dueling", fresh.view().way().id);
 			assertFalse(fresh.view().rerouting);
@@ -278,7 +285,7 @@ public class RouteClientTest
 	public void theReadmeSaysWhatAReroutePressSends() throws Exception
 	{
 		Set<String> fields = new TreeSet<>();
-		for (Field field : RouteClient.Question.class.getDeclaredFields())
+		for (Field field : RoutePress.Question.class.getDeclaredFields())
 		{
 			if (!field.isSynthetic())
 			{

@@ -116,8 +116,7 @@ public class SourceCardsTest
 			}
 		};
 		press = new RoutePress(http, new Gson(), RoutePressTest.game(), thread, pairing, identity, route, destinations, marker);
-		RouteClient reroute = new RouteClient(http, new Gson(), RoutePressTest.game(), thread, pairing, identity, route);
-		SwingUtilities.invokeAndWait(() -> cards = new NowCards(config, destinations, deaths, marker, route, reroute,
+		SwingUtilities.invokeAndWait(() -> cards = new NowCards(config, destinations, deaths, marker, route,
 			new ShortestPath(message -> { }), press, clues, new FarmRunRoute(new FarmRunState(), destinations, route, thread),
 			new GameSprites(null, null, null), () -> { }, () -> MapCompanionConfig.DEFAULT_MAP_URL));
 		refresh();
@@ -243,7 +242,7 @@ public class SourceCardsTest
 		refresh();
 		javax.swing.JLabel said = label(cards, "now.death.said");
 		assertTrue(said.isVisible());
-		assertTrue(said.getText(), said.getText().contains(RouteClient.NO_WAY));
+		assertTrue(said.getText(), said.getText().contains(RoutePress.NO_WAY));
 		assertEquals(MapCompanionPanel.REFUSED, said.getForeground());
 	}
 
@@ -280,7 +279,7 @@ public class SourceCardsTest
 		SwingUtilities.invokeAndWait(() -> cards.refresh(true, true, false));
 		JButton back = button(cards, "now.death.route");
 		assertFalse(back.isEnabled());
-		assertEquals(RouteClient.LOG_IN, back.getToolTipText());
+		assertEquals(RoutePress.LOG_IN, back.getToolTipText());
 		SwingUtilities.invokeAndWait(() -> cards.refresh(true, true, true));
 		assertTrue("logged in again, it is a press again", back.isEnabled());
 	}

@@ -162,7 +162,7 @@ public class MeetupClientTest
 		forged.handle("answer:x", destinations.generation(), false, null, "https://osrs-map.com",
 			RoutePressTest.reply(403, "{\"reason\":\"needs_code\"}"));
 		/* The map refusing this member: one sentence for it, pointing at the card that says why. */
-		assertEquals(RouteClient.NOT_CONNECTED, forged.said("answer:x").message);
+		assertEquals(RoutePress.NOT_CONNECTED, forged.said("answer:x").message);
 	}
 
 	/** "Meetup made." is news for a moment, as a run's "Run ended." is; a refusal stays until the next press. */
@@ -223,7 +223,7 @@ public class MeetupClientTest
 		client.answer("star-hunt", "going");
 		assertTrue(sent.isEmpty());
 		/* Logged in with no group: not connected, said apart from a logout, which asks to log in instead. */
-		assertEquals(RouteClient.NOT_CONNECTED, client.said("answer:star-hunt").message);
+		assertEquals(RoutePress.NOT_CONNECTED, client.said("answer:star-hunt").message);
 	}
 
 	@Test

@@ -169,7 +169,7 @@ final class SlayerPanel extends JPanel
 			RoutePress.Said said = routes.said(button.getName());
 			button.setEnabled(ready && loggedIn && !view.stale && !waiting && routes.ready());
 			button.setText(said != null && said.planning ? "Planning…" : "Route");
-			MapWait.tip(button, loggedIn ? null : RouteClient.LOG_IN, routes.waitMs(now));
+			MapWait.tip(button, loggedIn ? null : RoutePress.LOG_IN, routes.waitMs(now));
 		}
 		for (JButton button : pinButtons)
 		{
