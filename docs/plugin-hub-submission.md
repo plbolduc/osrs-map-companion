@@ -255,6 +255,9 @@ answering a reviewer:
   run's leg) as `RUNELITE_OVERLAY` entries, which RuneLite shows on a Shift-right-click under the
   game's own first entry. Each presses the sidebar's own button on the EDT, as the route keys do;
   nothing new is sent, and nothing acts in the game.
+- **A destination from the map says so in chat**: one local game message per new place, through
+  `ChatMessageManager` with the name stripped of tags and escaped by `ChatMessageBuilder`. Only with
+  *Destinations and meetups* on, and never for a pin chosen in this client.
 
 ## Before submission
 
