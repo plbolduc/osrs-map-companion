@@ -188,8 +188,8 @@ The pictures use made-up characters and stars.
    **Group**.
 3. Press **Share what's ticked**, or untick what you would rather keep to yourself first, or
    **Not now** to share nothing yet. The gear opens **Settings** whenever you want to change your choices.
-4. To play with friends, press **Copy invite** under **Group** and send it. A friend pastes it into
-   their own sidebar, under **Have an invite?**, and presses **Join**.
+4. To play with friends, press **Copy invite** under **Group** and send it. A friend copies it and
+   presses **Paste** under **Have an invite?** in their own sidebar, which joins your group.
 
 **Open the map** opens osrs-map.com already in your group, as you, for the bigger map on another
 screen. A group made on the website joins the same way: paste its invite, or the connection code

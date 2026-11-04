@@ -350,6 +350,9 @@ The website plan's second session, once the routes in the game are built: a memb
       is sent. Switch to another RuneLite profile and back: each keeps its own switches. RuneLite
       redraws its list on a profile change rather than on every write, so note whether a switch moved
       by the sidebar shows there before the list is reopened.
+- [ ] **Paste joins before a group.** On a RuneLite with no group, copy a friend's whole invite
+      message and press Paste: the status card says *Connecting…* at once and the sharing step
+      follows, with no Join pressed. In a group, the same Paste fills the field and says *Press Join*.
 - [ ] **Connect, Join and Open the map without the website.** With no group, Connect makes *Our
       group*; the sidebar's Group tab says *Just you so far* at once, with Copy invite in that card.
       Copy invite, paste the whole message into a second RuneLite's *Have an invite?* field and press
