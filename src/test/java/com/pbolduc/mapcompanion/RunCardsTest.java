@@ -404,8 +404,9 @@ public class RunCardsTest
 
 	/**
 	 * Mid-detour the Reroute key rerouted the paused run and the Follow key took the run back, throwing
-	 * away the route being walked. While another route is followed the run's card leaves the keys to
-	 * the destination card; a destination merely shown, not followed, leaves them with the run.
+	 * away the route being walked. While another route is followed the run's card leaves the keys, and
+	 * the step box's menu, to the destination card; a destination merely shown, not followed, leaves
+	 * them with the run.
 	 */
 	@Test
 	public void duringAFollowedDetourTheKeysLeaveThePausedRunAlone() throws Exception
@@ -413,8 +414,9 @@ public class RunCardsTest
 		state.acceptFor(identity.id(), EPOCH, run("/contract/farm-run.json"), 1, System.currentTimeMillis());
 		follower.sync();
 		refresh();
-		assertEquals("Pause", hotkey(false).getText());
-		assertEquals("Reroute", hotkey(true).getText());
+		assertEquals("Pause", act(MapCompanionPanel.Act.FOLLOW).getText());
+		assertEquals("Reroute", act(MapCompanionPanel.Act.REROUTE).getText());
+		assertEquals("the box's menu ends the run, as the card does", "End run", act(MapCompanionPanel.Act.END).getText());
 
 		RelayResponse.Destination bank = DestinationRouteTest.destination("Lumbridge Castle bank",
 			DestinationRouteTest.route("Lumbridge Home Teleport", DestinationRouteTest.alKharid()));
@@ -423,12 +425,13 @@ public class RunCardsTest
 		follower.sync();
 		refresh();
 		assertTrue("a Route press follows what it planned", route.view().following);
-		assertNull(hotkey(false));
-		assertNull(hotkey(true));
+		assertNull(act(MapCompanionPanel.Act.FOLLOW));
+		assertNull(act(MapCompanionPanel.Act.REROUTE));
+		assertNull("ending the run is not the detour's to do", act(MapCompanionPanel.Act.END));
 
 		route.follow(false);
 		refresh();
-		assertEquals("Follow", hotkey(false).getText());
+		assertEquals("Follow", act(MapCompanionPanel.Act.FOLLOW).getText());
 	}
 
 	/**
@@ -810,10 +813,10 @@ public class RunCardsTest
 		return count;
 	}
 
-	private JButton hotkey(boolean rerouting) throws Exception
+	private JButton act(MapCompanionPanel.Act act) throws Exception
 	{
 		JButton[] button = new JButton[1];
-		SwingUtilities.invokeAndWait(() -> button[0] = farm.hotkey(rerouting));
+		SwingUtilities.invokeAndWait(() -> button[0] = farm.actButton(act));
 		return button[0];
 	}
 

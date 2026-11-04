@@ -39,6 +39,7 @@ import javax.inject.Inject;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import net.runelite.api.Client;
+import net.runelite.api.MenuAction;
 import net.runelite.api.WorldView;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.overlay.OverlayPanel;
@@ -74,6 +75,12 @@ import net.runelite.client.util.Text;
  * it, so each picture is asked for once and drawn from the frame it arrives; until then its place
  * is kept empty, so the words never move. A walk, a ride, or a step the map names no id for stays
  * words alone, in a box no wider than before.
+ *
+ * <p>Shift and a right-click on the box, as RuneLite gives every overlay its menu, offer the card's
+ * own buttons: Pause, Reroute, and Dismiss, or End run on a run's leg. Each entry presses that
+ * button, as a route key does ({@link MapCompanionPanel#act}), so the sidebar can stay shut from
+ * Follow to arriving. RuneLite puts the entries under the game's own first one, so a left-click on
+ * the box still walks.
  */
 class RouteStepOverlay extends OverlayPanel
 {
@@ -102,6 +109,10 @@ class RouteStepOverlay extends OverlayPanel
 	 * is drawn there, and both caches answer there.
 	 */
 	private final Map<String, BufferedImage> pictures = new HashMap<>();
+	/** Where a menu entry's press goes: the plugin's, once the sidebar exists. */
+	private Consumer<MapCompanionPanel.Act> press = act -> {};
+	/** What the menu's last entry says now, the card's own word for its button. Client thread. */
+	private String endWord;
 
 	@Inject
 	RouteStepOverlay(Client client, MapCompanionConfig config, DestinationState destinations, DestinationRoute route,
@@ -114,6 +125,32 @@ class RouteStepOverlay extends OverlayPanel
 		this.run = run;
 		this.sprites = sprites;
 		setPosition(OverlayPosition.TOP_LEFT);
+		menu(false);
+	}
+
+	void pressWith(Consumer<MapCompanionPanel.Act> press)
+	{
+		this.press = press;
+	}
+
+	/** The menu for a destination's route or a run's leg, which ends in Dismiss or End run as its card does. */
+	private void menu(boolean leg)
+	{
+		String end = leg ? "End run" : "Dismiss";
+		if (end.equals(endWord))
+		{
+			return;
+		}
+		getMenuEntries().clear();
+		entry("Pause", MapCompanionPanel.Act.FOLLOW);
+		entry("Reroute", MapCompanionPanel.Act.REROUTE);
+		entry(end, MapCompanionPanel.Act.END);
+		endWord = end;
+	}
+
+	private void entry(String option, MapCompanionPanel.Act act)
+	{
+		addMenuEntry(MenuAction.RUNELITE_OVERLAY, option, "", e -> press.accept(act));
 	}
 
 	@Override
@@ -129,11 +166,14 @@ class RouteStepOverlay extends OverlayPanel
 			return null;
 		}
 		RelayResponse.Destination destination = destinations.getDestination();
-		Box box = box(destination);
+		DestinationRoute.View steps = route.view();
+		boolean leg = run.ownsDestinationRoute(steps);
+		Box box = box(steps, destination == null ? null : destination.name, leg);
 		if (box == null)
 		{
 			return null;
 		}
+		menu(leg);
 		boolean pictured = box.itemId != null || box.spriteId != null;
 		/* Wider by the picture, so the words keep the width they have without one. */
 		panelComponent.setPreferredSize(new Dimension(WIDTH + (pictured ? PICTURE + PICTURE_GAP : 0), 0));

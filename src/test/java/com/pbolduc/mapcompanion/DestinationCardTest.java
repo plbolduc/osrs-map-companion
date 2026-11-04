@@ -178,12 +178,14 @@ public class DestinationCardTest
 		refresh();
 		assertEquals(Arrays.asList("Follow", "Reroute", "Dismiss"), actions());
 		assertEquals("Show the step you're on in a box over the game", button("Follow").getToolTipText());
-		assertSame("the Follow key presses it too", button("Follow"), cards.hotkey(false));
+		assertSame("the Follow key presses it too", button("Follow"), cards.actButton(MapCompanionPanel.Act.FOLLOW));
 		assertNull("a route that merely arrived is not followed", RouteStepOverlay.box(route.view(), NAME));
 
 		press("Follow");
 		assertNotNull("the box over the game shows the step", RouteStepOverlay.box(route.view(), NAME));
 		assertEquals(Arrays.asList("Pause", "Reroute", "Dismiss"), actions());
+		assertSame("the box's menu presses the card's Reroute", button("Reroute"), cards.actButton(MapCompanionPanel.Act.REROUTE));
+		assertSame("and its Dismiss", button("Dismiss"), cards.actButton(MapCompanionPanel.Act.END));
 		press("Pause");
 		assertNull(RouteStepOverlay.box(route.view(), NAME));
 	}
@@ -202,7 +204,7 @@ public class DestinationCardTest
 		assertEquals(Arrays.asList("Pause", "Reroute", "Dismiss"), actions());
 		assertEquals("Keep this route and stop following it until you press Follow, and clear the path Shortest Path drew",
 			button("Pause").getToolTipText());
-		assertSame("the key presses the same button", button("Pause"), cards.hotkey(false));
+		assertSame("the key presses the same button", button("Pause"), cards.actButton(MapCompanionPanel.Act.FOLLOW));
 
 		press("Pause");
 		assertFalse(route.view().following);

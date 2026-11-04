@@ -106,11 +106,11 @@ final class PortTasksPanel extends JPanel
 		setVisible(false);
 	}
 
-	/** The button a hotkey presses on this card's run, or null with none shown here. EDT. */
+	/** The button a press from the game presses on this card's run, or null with none shown here. EDT. */
 	@Nullable
-	JButton hotkey(boolean rerouting)
+	JButton actButton(MapCompanionPanel.Act act)
 	{
-		return isVisible() ? run.hotkey(rerouting) : null;
+		return isVisible() ? run.actButton(act) : null;
 	}
 
 	/** Called on the EDT by the sidebar refresh, beside the farm run card. */
