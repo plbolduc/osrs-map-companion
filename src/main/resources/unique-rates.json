@@ -1995,7 +1995,7 @@
     },
     {
       "npc": "Wyrm",
-      "item": "Dragon sword",
+      "item": "Dragon shortsword",
       "oneIn": 10000,
       "page": "Wyrm",
       "boost": {
