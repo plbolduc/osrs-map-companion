@@ -92,7 +92,13 @@ public class DropLuckPanelTest
 		assertTrue(words, words.contains("Abyssal demon"));
 		assertTrue(words, words.contains("Killing now · 2 recorded kills"));
 		assertTrue(words, words.contains("All monsters ›"));
-		assertTrue("the common drop is the one opened, not the 1 in 32,000", words.contains("Abyssal whip | Pin"));
+		/*
+		 * The opened drop is the whip, the common one, not the 1 in 32,000: only it has dropped, so
+		 * only its detail can count kills since the last one. The detail leads with its verdict and
+		 * Pin, and does not name the drop again under the row that already does.
+		 */
+		assertTrue(words, words.contains("Lucky overall, fine right now. | Pin | Since last drop | 1 kill"));
+		assertEquals(words, 1, words.split("Abyssal whip", -1).length - 1);
 		assertTrue(words, words.contains("Since last drop"));
 		assertTrue(words, words.contains("1 kill | >99% of players would still be waiting too"));
 		assertTrue(words, words.contains("Pin"));

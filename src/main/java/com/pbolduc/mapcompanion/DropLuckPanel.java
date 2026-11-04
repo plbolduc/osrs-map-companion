@@ -413,10 +413,16 @@ final class DropLuckPanel extends JPanel
 			}
 			invalidateAndRefresh();
 		});
-		card.add(MapCompanionPanel.fill(MapCompanionPanel.bar(0, ColorScheme.DARKER_GRAY_COLOR, label(drop.item, 12f, Color.WHITE),
-			null, pin), ColorScheme.DARKER_GRAY_COLOR));
-		card.add(gap(3, ColorScheme.DARKER_GRAY_COLOR));
-		card.add(wrapped(detail.verdict, TEXT_WIDTH, 13f, Color.WHITE));
+		/*
+		 * The verdict leads, with Pin beside it. The selected row above already names the drop and wears
+		 * the orange edge, so a heading naming it again under the rule was the same words twice.
+		 */
+		JPanel pinAtTop = new JPanel(new BorderLayout());
+		pinAtTop.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		pinAtTop.add(pin, BorderLayout.NORTH);
+		card.add(MapCompanionPanel.fill(MapCompanionPanel.bar(6, ColorScheme.DARKER_GRAY_COLOR, null,
+			wrapped(detail.verdict, TEXT_WIDTH - pin.getPreferredSize().width - 6, 13f, Color.WHITE), pinAtTop),
+			ColorScheme.DARKER_GRAY_COLOR));
 		card.add(gap(5, ColorScheme.DARKER_GRAY_COLOR));
 		card.add(wrapped(detail.sinceLabel, TEXT_WIDTH, 11f, ColorScheme.LIGHT_GRAY_COLOR));
 		/* Two labels, not one with a <font size>: a size change in markup leaves RuneLite's font and its "·". */
