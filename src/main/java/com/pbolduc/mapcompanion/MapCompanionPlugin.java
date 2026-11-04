@@ -310,20 +310,13 @@ public class MapCompanionPlugin extends Plugin
 	@Inject
 	private KeyManager keyManager;
 
-	/*
-	 * The two route keys press the sidebar's own buttons on the EDT (MapCompanionPanel#pressHotkey), so a
-	 * key can do nothing a click could not. Both are unset until the player chooses one.
-	 */
+	/* The two route keys, unset until the player chooses one; see act. */
 	private final HotkeyListener rerouteKey = new HotkeyListener(() -> config.rerouteHotkey())
 	{
 		@Override
 		public void hotkeyPressed()
 		{
-			MapCompanionPanel shown = panel;
-			if (shown != null)
-			{
-				SwingUtilities.invokeLater(() -> shown.pressHotkey(true));
-			}
+			act(MapCompanionPanel.Act.REROUTE);
 		}
 	};
 
@@ -332,13 +325,22 @@ public class MapCompanionPlugin extends Plugin
 		@Override
 		public void hotkeyPressed()
 		{
-			MapCompanionPanel shown = panel;
-			if (shown != null)
-			{
-				SwingUtilities.invokeLater(() -> shown.pressHotkey(false));
-			}
+			act(MapCompanionPanel.Act.FOLLOW);
 		}
 	};
+
+	/**
+	 * A press from the game, a route key's or the step box's menu's, handed to the sidebar's own button
+	 * on the EDT ({@link MapCompanionPanel#act}), so it can do nothing a click could not.
+	 */
+	private void act(MapCompanionPanel.Act act)
+	{
+		MapCompanionPanel shown = panel;
+		if (shown != null)
+		{
+			SwingUtilities.invokeLater(() -> shown.act(act));
+		}
+	}
 
 	@Inject
 	private DirectiveStream directiveStream;
@@ -549,6 +551,7 @@ public class MapCompanionPlugin extends Plugin
 		overlayManager.add(destinationSceneOverlay);
 		overlayManager.add(destinationMinimapOverlay);
 		overlayManager.add(voyageMapOverlay);
+		routeStepOverlay.pressWith(this::act);
 		overlayManager.add(routeStepOverlay);
 		overlayManager.add(farmBankOverlay);
 		keyManager.registerKeyListener(rerouteKey);

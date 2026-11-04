@@ -212,13 +212,14 @@ final class RunView extends JPanel
 	}
 
 	/**
-	 * The button a hotkey presses here: Reroute, or Follow and Pause, while this card shows a run and
-	 * no other route is being followed. During a detour — a search pick, Route here, a friend's
-	 * destination followed — the keys belong to the route being walked, so the destination card's own
-	 * buttons answer them and the paused run is left as it is; its Follow is still a click away. EDT.
+	 * The button a press from the game presses here: Reroute, Follow and Pause, or End run, while this
+	 * card shows a run and no other route is being followed. During a detour — a search pick, Route
+	 * here, a friend's destination followed — the keys and the box's menu belong to the route being
+	 * walked, so the destination card's own buttons answer them and the paused run is left as it is;
+	 * its Follow is still a click away. EDT.
 	 */
 	@Nullable
-	JButton hotkey(boolean rerouting)
+	JButton actButton(MapCompanionPanel.Act act)
 	{
 		if (!shownActions.contains(follow))
 		{
@@ -229,7 +230,7 @@ final class RunView extends JPanel
 		{
 			return null;
 		}
-		return rerouting ? reroute : follow;
+		return act == MapCompanionPanel.Act.REROUTE ? reroute : act == MapCompanionPanel.Act.FOLLOW ? follow : end;
 	}
 
 	/**

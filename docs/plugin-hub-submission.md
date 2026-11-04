@@ -248,6 +248,10 @@ answering a reviewer:
 - **The sharing fields are read by key**: 22 of the 23 fields under the groups are no longer declared
   as hidden settings. Their keys, defaults and what they send are unchanged, and Reset still turns
   them off, through `resetConfiguration`.
+- **The step box has a menu**: `RouteStepOverlay` adds Pause, Reroute and Dismiss (End run on a
+  run's leg) as `RUNELITE_OVERLAY` entries, which RuneLite shows on a Shift-right-click under the
+  game's own first entry. Each presses the sidebar's own button on the EDT, as the route keys do;
+  nothing new is sent, and nothing acts in the game.
 
 ## Before submission
 

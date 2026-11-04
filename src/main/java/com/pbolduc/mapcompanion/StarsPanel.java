@@ -120,7 +120,7 @@ final class StarsPanel extends JPanel
 	private final MapCompanionConfig config;
 	/**
 	 * Home's destination card's Follow (false) or Reroute (true) while that card offers it, else
-	 * null: {@link NowCards#hotkey}. The buttons under a routed star press these very buttons, as a
+	 * null: {@link NowCards#actButton}. The buttons under a routed star press these very buttons, as a
 	 * key does, so the rules for when each is offered and pressable are written once, on Home.
 	 */
 	private final Function<Boolean, JButton> homeButton;
