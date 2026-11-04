@@ -82,8 +82,8 @@ settings.forgetLoot=Forget every kill and drop counted for this character?\n\nDr
 settings.keysElsewhere=Keys for Reroute and Follow, and the reminder's minutes, are in RuneLite's own settings for this plugin.
 settings.nicknameTip=What your group sees beside your dot. Saves on Enter or when you leave the field.
 
-# NowCards: the cards under Now on Home, their Route buttons and the death card; meetup.routeTip is
-# the Group tab's meetup Route.
+# NowCards: the cards under Now on Home, their Route buttons, the death card and the chat box's line
+# when a place arrives from the map; meetup.routeTip is the Group tab's meetup Route.
 now.clueRouteTip=Plan the way to this step from where you stand. Its tile, or for a step that is words or a map the clue itself, go to the map in this request only, whether or not you share your clue; the map plans with them and does not keep them.
 meetup.routeTip=Plan the way to this meetup from where you stand. Nobody is told you are coming.
 now.rerouteTip=Plan the way again from where you stand. Sends your tile to the map once; the map plans with it and does not keep it.
@@ -98,6 +98,8 @@ now.deathMapTip=Open osrs-map.com at the tile where you died
 now.deathMapUnsharedTip=Open osrs-map.com at the tile where you died. Sharing it is off, so it leaves this client only in the address of the page this opens, and only when you press it.
 now.routeBackTip=Plan the way back from where you stand
 now.routeBackUnsharedTip=Plan the way back from where you stand. Sharing it is off, so the tile goes to the map in this request only, and the map plans with it and does not keep it.
+now.arrival=, from your group. Follow it from the sidebar
+now.arrivalKey= or with
 
 # GroupPanel: the Group tab, its friends and its meetups.
 group.meetupsOff=Meetups show here with Destinations and meetups on (Settings → In RuneLite).

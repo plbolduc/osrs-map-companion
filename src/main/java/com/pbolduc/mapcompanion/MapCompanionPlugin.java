@@ -759,17 +759,10 @@ public class MapCompanionPlugin extends Plugin
 	private void announceDropLuck(LootLog.Notable drop)
 	{
 		String line = DropLuckView.chatLine(drop);
-		if (line == null)
+		if (line != null)
 		{
-			return;
+			say("Drop luck: ", line);
 		}
-		chatMessageManager.queue(QueuedMessage.builder()
-			.type(ChatMessageType.GAMEMESSAGE)
-			.runeLiteFormattedMessage(new ChatMessageBuilder()
-				.append(ChatColorType.HIGHLIGHT).append("Drop luck: ")
-				.append(ChatColorType.NORMAL).append(line)
-				.build())
-			.build());
 	}
 
 	/** This version's one line, on the first login after an update; see {@link UpdateNotice}. */
@@ -777,15 +770,33 @@ public class MapCompanionPlugin extends Plugin
 	{
 		boolean usedBefore = config.pairingCode() != null && !config.pairingCode().trim().isEmpty();
 		String line = UpdateNotice.due(ConfigStore.of(configManager), usedBefore);
-		if (line == null)
+		if (line != null)
 		{
-			return;
+			say("OSRS Map Companion " + CompanionVersion.VERSION + ": ", line + " " + UpdateNotice.WHERE);
 		}
+	}
+
+	/**
+	 * One local chat line when a place arrives from the map. It shows in the sidebar and on the world
+	 * map, but nothing over the game said so, and a place the group sends waits for Follow.
+	 */
+	private void announceArrival()
+	{
+		RelayResponse.Destination arrived = destinationState.takeArrival();
+		if (arrived != null && config.showDestination())
+		{
+			say("Destination: ", NowCards.arrivalLine(arrived, client.getWorld(), config.followHotkey()));
+		}
+	}
+
+	/** A game message drawn by this client and sent nowhere: its head highlighted, then its words. */
+	private void say(String head, String line)
+	{
 		chatMessageManager.queue(QueuedMessage.builder()
 			.type(ChatMessageType.GAMEMESSAGE)
 			.runeLiteFormattedMessage(new ChatMessageBuilder()
-				.append(ChatColorType.HIGHLIGHT).append("OSRS Map Companion " + CompanionVersion.VERSION + ": ")
-				.append(ChatColorType.NORMAL).append(line + " " + UpdateNotice.WHERE)
+				.append(ChatColorType.HIGHLIGHT).append(head)
+				.append(ChatColorType.NORMAL).append(line)
 				.build())
 			.build());
 	}
@@ -1293,6 +1304,7 @@ public class MapCompanionPlugin extends Plugin
 		/* The step pins follow the step; unchanged, this compares one string and returns. */
 		destinationMarker.sync();
 		destinationArrow.sync();
+		announceArrival();
 		shortestPath.tick(client.getTickCount(), destinationRoute.view(), config.drawWithShortestPath(),
 			DestinationRoute.standing(client), farmRunRoute::takenOver);
 		/*

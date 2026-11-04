@@ -76,6 +76,9 @@ often. A clean run is now 443 tests with no failures or skips.
 - [ ] Follow a route and hold Shift while right-clicking the step box: Pause, Reroute and Dismiss
       sit under the game's first entry, End run in Dismiss's place on a farm run's leg, and each
       does what the sidebar's button does. A plain left-click on the box still walks.
+- [ ] Send a place from the website: one chat line names it, with its world while you are on
+      another, once. A hop or a relog does not say it again, and a pin from Stars or a search pick
+      says nothing.
 - [ ] Use two characters in one group: see only the other member on the game world map, including
       an edge pin when panned away. Turn sharing off and log out; pins must disappear.
 - [ ] Recover after an unavailable map; switch groups with a snapshot outstanding and confirm the

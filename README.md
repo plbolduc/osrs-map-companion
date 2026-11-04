@@ -13,7 +13,8 @@ and see your character and friends on the website.
   <img src="docs/mockups/sidebar-route.png" width="300" alt="Home in the plugin sidebar with a route to Lumbridge Castle bank: numbered steps, the current one, casting Lumbridge Home Teleport, with its number in amber beside the spell's icon, a ring of dueling as the other way, and Follow, Reroute and Dismiss; under Tasks, the Farm run and Slayer cards">
 </p>
 
-Send a place from the website or pick a search result, and the sidebar lists the way there.
+Send a place from the website or pick a search result, and the sidebar lists the way there; a
+place sent from the website says so in the chat box.
 A teleport step shows what to click: the item's sprite or the spell's icon, from the game.
 Each step gets a numbered pin on the game's world map, and the step you are on is numbered in amber
 in both; the game's arrow points at it when it is in the loaded area.
