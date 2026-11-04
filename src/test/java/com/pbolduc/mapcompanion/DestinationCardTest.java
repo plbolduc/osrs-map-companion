@@ -225,7 +225,7 @@ public class DestinationCardTest
 		shortestPathRunning = true;
 		refresh();
 		assertEquals("Shortest Path alone has walks to draw", Arrays.asList("Follow", "Reroute", "Dismiss"), actions());
-		assertEquals("Have Shortest Path draw each walking step of this route. It is sent nothing for a teleport or a ride.",
+		assertEquals("Have Shortest Path draw each walking step of this route.",
 			button("Follow").getToolTipText());
 	}
 

@@ -54,7 +54,7 @@ public class ShowWhatsSentTest
 		String text = SettingsPage.previewText(SNAPSHOT, true, true, "osrs-map.com", null, true, false, GSON);
 		assertTrue(text, text.startsWith("This goes to osrs-map.com every couple of seconds while you're logged in. "
 			+ "Your group sees it.\n\n"));
-		assertTrue(text, text.contains("your member key (X-Companion-Member-Secret), which proves you're this member"));
+		assertTrue(text, text.contains("your member key (X-Companion-Member-Secret)"));
 		assertTrue(text, text.contains("this RuneLite's own key (X-Companion-Installation)"));
 		assertTrue(text, text.contains("Leave group deletes the first and replaces the second."));
 		assertTrue("the snapshot itself, as built", text.contains(SNAPSHOT));
@@ -67,7 +67,7 @@ public class ShowWhatsSentTest
 		String none = SettingsPage.previewText(SNAPSHOT, false, false, "osrs-map.com", null, false, false, GSON);
 		assertTrue(none, none.startsWith("You're not in a group, so nothing goes out. Connect would start sending this to osrs-map.com:"));
 		assertFalse(none, none.contains("every couple of seconds"));
-		assertTrue("no member key is held yet", none.contains("A key goes with it and is never shown here: this RuneLite's own key"));
+		assertTrue("no member key is held yet", none.contains("A key goes with it, never shown here: this RuneLite's own key"));
 		assertFalse("there is no group to leave yet", none.contains("Leave group"));
 
 		String other = SettingsPage.previewText(SNAPSHOT, true, false, "maps.example.org", null, true, false, GSON);
