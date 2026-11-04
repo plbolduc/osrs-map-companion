@@ -71,6 +71,14 @@ public class DestinationState
 	private volatile RelayResponse.Destination localDestination;
 	private volatile String lastRemoteFingerprint;
 	/**
+	 * The last place from the map the chat box was told of, and one it is still to be told of. Unlike
+	 * {@link #lastRemoteFingerprint} the first outlives a reply that carries no destination, so a place
+	 * sent once is news once however its copies arrive; {@link #clear} forgets both.
+	 */
+	private String announced;
+	@Nullable
+	private RelayResponse.Destination arrival;
+	/**
 	 * Counts {@link #clear}s: a group left, a lifetime ended. A route asked for before one is the old
 	 * group's answer, and {@link RoutePress} drops it by this.
 	 */
@@ -125,6 +133,20 @@ public class DestinationState
 		}
 		dismissedFingerprint = null;
 		destination = directive.destination;
+		if (!incoming.equals(announced))
+		{
+			announced = incoming;
+			arrival = destination;
+		}
+	}
+
+	/** A place from the map not yet said in the chat box, once; null when there is none. */
+	@Nullable
+	synchronized RelayResponse.Destination takeArrival()
+	{
+		RelayResponse.Destination taken = arrival;
+		arrival = null;
+		return taken;
 	}
 
 	/**
@@ -183,6 +205,8 @@ public class DestinationState
 		dismissedFingerprint = null;
 		localDestination = null;
 		lastRemoteFingerprint = null;
+		announced = null;
+		arrival = null;
 	}
 
 	/**

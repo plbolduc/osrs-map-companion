@@ -26,6 +26,9 @@
 package com.pbolduc.mapcompanion;
 
 import com.google.gson.Gson;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import net.runelite.client.config.Keybind;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -87,6 +90,53 @@ public class DestinationStateTest
 		assertNotNull(state.getDestination());
 		assertEquals("Varrock", state.getDestination().name);
 		assertEquals(Integer.valueOf(444), state.getDestination().world);
+	}
+
+	/**
+	 * A place from the map is said in the chat box once, however many replies and frames carry it: a
+	 * reply with no destination between two of them makes it no newer, and a place shown or hidden here
+	 * is not news from anybody.
+	 */
+	@Test
+	public void aPlaceFromTheMapIsNewsOnce()
+	{
+		state.accept(directive(place("Lumbridge", 3222, 3218, 302)));
+		assertEquals("Lumbridge", state.takeArrival().name);
+		assertNull("taken once", state.takeArrival());
+		state.accept(directive(place("Lumbridge", 3222, 3218, 302)));
+		state.accept(new RelayResponse.Directive());
+		state.accept(directive(place("Lumbridge", 3222, 3218, 302)));
+		assertNull("its copies are not news", state.takeArrival());
+
+		state.selectLocal(place("Rimmington mine", 2975, 3237, 330));
+		assertNull("a pin chosen here comes from nobody", state.takeArrival());
+		state.dismiss();
+		state.accept(directive(place("Lumbridge", 3222, 3218, 302)));
+		assertNull("a dismissed place stays quiet", state.takeArrival());
+
+		state.accept(directive(place("Varrock", 3213, 3428, 444)));
+		assertEquals("Varrock", state.takeArrival().name);
+		state.clear();
+		state.accept(directive(place("Varrock", 3213, 3428, 444)));
+		assertEquals("the next group's place is news", "Varrock", state.takeArrival().name);
+	}
+
+	/**
+	 * The line names the place as its tile does, with its world while the player is on another, and
+	 * the Follow key once the player has chosen one. A name somebody typed cannot colour it.
+	 */
+	@Test
+	public void theArrivalLineSaysWhereAndHowToFollow()
+	{
+		RelayResponse.Destination bank = place("<col=ff0000>Lumbridge Castle bank</col>", 3208, 3220, 302);
+		assertEquals("Lumbridge Castle bank (W302), from your group. Follow it from the sidebar.",
+			NowCards.arrivalLine(bank, 444, Keybind.NOT_SET));
+		Keybind key = new Keybind(KeyEvent.VK_F, InputEvent.CTRL_DOWN_MASK);
+		assertEquals("Lumbridge Castle bank, from your group. Follow it from the sidebar or with " + key + ".",
+			NowCards.arrivalLine(bank, 302, key));
+		assertTrue(key.toString(), key.toString().contains("F"));
+		assertEquals("A place, from your group. Follow it from the sidebar.",
+			NowCards.arrivalLine(place(" ", 3208, 3220, null), 302, Keybind.NOT_SET));
 	}
 
 	private static RelayResponse.Directive directive(RelayResponse.Destination destination)

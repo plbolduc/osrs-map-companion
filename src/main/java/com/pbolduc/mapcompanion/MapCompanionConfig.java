@@ -297,8 +297,8 @@ public interface MapCompanionConfig extends Config
 		keyName = "showDestination",
 		name = "Destinations and meetups",
 		description =
-			"The places your group sends you and the group's meetups: a destination's card and pin, the meetups "
-			+ "in the sidebar, and their reminder. "
+			"The places your group sends you and the group's meetups: a destination's card, pin and line in "
+			+ "the chat box, the meetups in the sidebar, and their reminder. "
 			+ "Nothing is ever clicked or walked for you.",
 		position = 30,
 		section = clientSection

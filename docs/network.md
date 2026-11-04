@@ -94,6 +94,8 @@ the star list is fetched about once a minute without character or group credenti
 favourite sites, Mining level and skill total filter stars locally and are kept in this RuneLite's
 settings for the character; none of them is sent.
 
+A place that arrives from the map is said once in the chat box, by this client alone: a game
+message nobody else sees, which sends nothing.
 A destination can carry the map's way there, step by step; reading it sends nothing, and the
 sidebar moves its steps on from your position in the game without telling the map. A voyage's
 steps also carry its moorings, a simplified line of the sail and the docking mooring's gates; its
