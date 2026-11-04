@@ -68,8 +68,8 @@ settings.loggedOut=Nothing goes out while you're logged out. Log in to see what 
 settings.notGrouped=You're not in a group, so nothing goes out. Connect would start sending this to
 settings.notConnected=, so nothing goes out. Connect would start sending this:\n\n
 settings.sendsEvery= every couple of seconds while you're logged in. Your group sees it.\n\n
-settings.twoKeys=Two keys go with it and are never shown here: your member key (X-Companion-Member-Secret), which proves you're this member of the group, and this RuneLite's own key (X-Companion-Installation), which lets your other characters join the same group. Leave group deletes the first and replaces the second.
-settings.oneKey=A key goes with it and is never shown here: this RuneLite's own key (X-Companion-Installation), which lets your other characters join the same group.
+settings.twoKeys=Two keys go with it, never shown here: your member key (X-Companion-Member-Secret) and this RuneLite's own key (X-Companion-Installation). Leave group deletes the first and replaces the second.
+settings.oneKey=A key goes with it, never shown here: this RuneLite's own key (X-Companion-Installation).
 settings.codeGoes=Your RuneLite code goes with it too (X-Companion-Suffix),
 settings.codeDeleted=, until the map says it has connected your dot to your browser; then it is deleted.\n\n
 settings.meMeans=\n\n"Me" means you set no name of your own: your group sees
@@ -84,27 +84,27 @@ settings.nicknameTip=What your group sees beside your dot. Saves on Enter or whe
 
 # NowCards: the cards under Now on Home, their Route buttons and the death card; meetup.routeTip is
 # the Group tab's meetup Route.
-now.clueRouteTip=Plan the way to this step from where you stand. Its tile, or for a step that is words or a map the clue itself, go to the map in this request only, whether or not you share your clue; the map plans with them and does not keep them.
+now.clueRouteTip=Plan the way to this step from where you stand. The map doesn't keep the clue or your tile.
 meetup.routeTip=Plan the way to this meetup from where you stand. Nobody is told you are coming.
-now.rerouteTip=Plan the way again from where you stand. Sends your tile to the map once; the map plans with it and does not keep it.
-now.routeTip=Plan the way here from where you stand. Sends your tile and this one to the map once; the map plans with them and does not keep them.
+now.rerouteTip=Plan the way again from where you stand. The map doesn't keep your tile.
+now.routeTip=Plan the way here from where you stand. The map doesn't keep your tile.
 now.dismissTip=Hide this destination on this client. The map is not told.
 now.unfollowTip=Keep this route and stop following it until you press Follow
 now.clearPath=, and clear the path Shortest Path drew
 now.boxTip=Show the step you're on in a box over the game
-now.boxAndPathTip=Show the step you're on in a box over the game, and have Shortest Path draw each walking step. It is sent nothing for a teleport or a ride.
-now.pathTip=Have Shortest Path draw each walking step of this route. It is sent nothing for a teleport or a ride.
+now.boxAndPathTip=Show the step you're on in a box over the game, and have Shortest Path draw each walking step.
+now.pathTip=Have Shortest Path draw each walking step of this route.
 now.deathMapTip=Open osrs-map.com at the tile where you died
-now.deathMapUnsharedTip=Open osrs-map.com at the tile where you died. Sharing it is off, so it leaves this client only in the address of the page this opens, and only when you press it.
+now.deathMapUnsharedTip=Open osrs-map.com at the tile where you died. Sharing it is off; the tile leaves only when you press this.
 now.routeBackTip=Plan the way back from where you stand
-now.routeBackUnsharedTip=Plan the way back from where you stand. Sharing it is off, so the tile goes to the map in this request only, and the map plans with it and does not keep it.
+now.routeBackUnsharedTip=Plan the way back from where you stand. Sharing it is off; the map doesn't keep the tile.
 
 # GroupPanel: the Group tab, its friends and its meetups.
 group.meetupsOff=Meetups show here with Destinations and meetups on (Settings → In RuneLite).
 group.meetHereTip=Make a meetup where you stand, on this world, and copy its link for your clan chat or Discord
 group.titleTip=The meetup's title, up to sixty characters. Everybody in the group sees it.
 group.makeTip=Make the meetup at the tile and world you are on, and copy its link
-group.alone=Just you so far. Send a friend an invite; they paste it into their sidebar and appear here and on osrs-map.com.
+group.alone=Just you so far. Send a friend an invite.
 group.routeFriendTip= stands now. Nothing follows them; press again to ask again.
 group.allOnMapTip=Your whole group is on the world map already
 group.drawOneTip='s dot on the game's world map, without the rest of the group
@@ -112,7 +112,7 @@ group.inside= is inside an instance. Route works once they're out.
 group.openMeetupTip=Open this meetup: who is coming, Route and your answer
 
 # StarsPanel: the Stars tab.
-stars.routeTip=Plan the way to this star from where you stand. The world is printed in the steps; hopping is left to the game's world switcher.
+stars.routeTip=Plan the way to this star from where you stand. The world is in the steps.
 stars.safeTip=Hide Wilderness, PvP, high-risk and Deadman
 stars.noWorldList=World list unavailable: PvP and Deadman filters cannot be checked.
 stars.openTip=Show the possible spots on osrs-map.com in your browser

@@ -115,8 +115,8 @@ public interface MapCompanionConfig extends Config
 
 	@ConfigSection(
 		name = "What you share",
-		description = "What your group sees. Each switch shares everything named in it. A group an earlier version left "
-			+ "partly on shows off here, and the sidebar's Settings names what is on.",
+		description = "What your group sees. Each switch shares everything named in it; the sidebar's Settings "
+			+ "names what is on.",
 		position = 0
 	)
 	String sharingSection = "sharing";
@@ -342,8 +342,7 @@ public interface MapCompanionConfig extends Config
 		name = "Draw paths with Shortest Path",
 		description =
 			"When you follow a route the map sent, have the Shortest Path plugin, if you have it, draw each "
-			+ "walking step. It is sent nothing for a teleport or a ride, and a destination somebody sends "
-			+ "never changes its path until you press Follow or Reroute.",
+			+ "walking step. A destination somebody sends never changes its path until you press Follow or Reroute.",
 		position = 36,
 		section = clientSection
 	)
