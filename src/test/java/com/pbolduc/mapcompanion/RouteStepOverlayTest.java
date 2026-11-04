@@ -252,6 +252,32 @@ public class RouteStepOverlayTest
 		assertEquals(Arrays.asList("Pause", "Reroute", "End run"), options(leg));
 	}
 
+	/**
+	 * The lines the sidebar prints under a step are in the box too, where a player with the sidebar shut
+	 * reads them, and a step that lands in the Wilderness says so in the sidebar's pink for it, as the
+	 * map's card says it in red. A note was typed nowhere near this client, so its tags come out.
+	 */
+	@Test
+	public void aStepsNotesAreInTheBoxAndTheWildernessIsPink() throws IOException
+	{
+		RelayResponse.Destination destination = received();
+		route.follow(true);
+		assertEquals(Collections.singletonList("Ten seconds to cast, and a combat hit stops it"),
+			RouteStepOverlay.box(route.view(), destination.name).notes);
+		drawn(destination);
+		assertEquals("a cast in Lumbridge warns of nothing", 0, pinkPixels);
+
+		RelayResponse.RouteStep amulet = DestinationRouteTest.step("method", "Use Burning amulet: Lava Maze", false, 3028, 3842, 0);
+		amulet.notes = Arrays.asList("<col=00ff00>Lands in the Wilderness</col>", " ");
+		RelayResponse.Destination maze = DestinationRouteTest.destination("Lava Maze",
+			DestinationRouteTest.route("Burning amulet", Collections.singletonList(amulet)));
+		route.sync(maze);
+		route.follow(true);
+		assertEquals(Collections.singletonList("Lands in the Wilderness"), RouteStepOverlay.box(route.view(), maze.name).notes);
+		drawn(maze);
+		assertTrue("the warning is the Wilderness's pink", pinkPixels > 0);
+	}
+
 	private static List<String> options(RouteStepOverlay overlay)
 	{
 		return overlay.getMenuEntries().stream().map(OverlayMenuEntry::getOption).collect(Collectors.toList());
@@ -268,6 +294,8 @@ public class RouteStepOverlayTest
 
 	/** White pixels drawn outside the box by the last {@link #drawn}. */
 	private int lettersOutside;
+	/** Pixels in the Wilderness's pink in the last {@link #drawn}. */
+	private int pinkPixels;
 	/** The picture's pixels in the last {@link #drawn}, the right-most of them, and the left-most letter on their rows. */
 	private int picturePixels;
 	private int pictureRight;
@@ -302,6 +330,7 @@ public class RouteStepOverlayTest
 		Dimension size = overlay.render(graphics);
 		graphics.dispose();
 		lettersOutside = 0;
+		pinkPixels = 0;
 		picturePixels = 0;
 		pictureRight = -1;
 		wordsLeft = Integer.MAX_VALUE;
@@ -320,6 +349,7 @@ public class RouteStepOverlayTest
 						lettersOutside++;
 					}
 				}
+				pinkPixels += pixel == MapCompanionPanel.REFUSED.getRGB() ? 1 : 0;
 				if (pixel == Color.MAGENTA.getRGB())
 				{
 					picturePixels++;
