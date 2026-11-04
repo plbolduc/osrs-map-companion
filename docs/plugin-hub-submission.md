@@ -270,6 +270,9 @@ answering a reviewer:
   as it follows a place picked in the sidebar, and its chat line says so. The map lets a browser
   name only a RuneLite bound to it, so a friend's send is never followed unasked. Nothing new is
   sent.
+- **Paste joins a friend's invite before a group**: with no group, Paste joins the invite or RuneLite
+  code it reads, as Join would; in a group it still fills the field for Join. It sends what Join
+  sends, once per press.
 
 ## Before submission
 

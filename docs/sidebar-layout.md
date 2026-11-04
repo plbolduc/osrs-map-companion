@@ -701,6 +701,11 @@ plugin-first plan has it, and its tooltip says *Join the group this invite is fo
 does not count, because its alphabet spells ordinary words; Join takes that. After Paste the field
 shows the start of the message rather than the tail of the link's token.
 
+Before a group, Paste itself joins what Connect would join from the field, an invite or a RuneLite
+code: it filled the field and said *Found an invite to KQX 482. Press Join.*, and the press that
+followed only confirmed it. Paste waits for Join in a group, where a stray press could move a player
+out of it, and for a code alone, as Connect does.
+
 While Connect or Join waits on the map, the status card says *Connecting…* beside an amber dot and
 the line under the field is quiet; it said *Not connected* over a button reading *Connecting…*, and
 the line said it again. A Connect that made no group says why on the card until the next press:

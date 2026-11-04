@@ -628,12 +628,47 @@ final class ConnectCard extends JPanel
 		}));
 	}
 
+	/** What Paste does with the words it read; see {@link #pasteAnswer}. */
+	enum PasteAnswer
+	{
+		/** Nothing readable on the clipboard. */
+		NOTHING,
+		/** Words, but no group's invite or code among them. */
+		NO_INVITE,
+		/** Into the field, for Join to join. */
+		FILL,
+		/** Into the field, and joined at once. */
+		JOIN
+	}
+
 	/**
-	 * Read the clipboard, once, because somebody pressed the button.
+	 * What Paste does with what it read from the clipboard.
 	 *
-	 * <p>It fills the field rather than joining, so an accidental press cannot move somebody out of
-	 * the group they are in — and it says what it found, because a paste that silently did nothing
-	 * is indistinguishable from a paste that worked.
+	 * <p>In a group it fills the field rather than joining, so an accidental press cannot move
+	 * somebody out of the group they are in. With no group there is none to lose, so what the orange
+	 * button would join from the field — an invite, or a RuneLite code with its suffix — joins at
+	 * once: a friend's second press only confirmed what Paste had just found, under a line that named
+	 * a code rather than a group. A code alone still waits for Join, because its alphabet spells
+	 * ordinary words.
+	 */
+	static PasteAnswer pasteAnswer(String pairingCode, @Nullable String pasted)
+	{
+		if (pasted == null || pasted.trim().isEmpty())
+		{
+			return PasteAnswer.NOTHING;
+		}
+		if (JoinCode.parse(pasted) == null)
+		{
+			return PasteAnswer.NO_INVITE;
+		}
+		return pairingCode.isEmpty() && joinsInstead(pasted) != null ? PasteAnswer.JOIN : PasteAnswer.FILL;
+	}
+
+	/**
+	 * Read the clipboard, once, because somebody pressed the button, and do what {@link #pasteAnswer}
+	 * says: join a friend's invite before a group, fill the field for Join otherwise, and say what it
+	 * found either way, because a paste that silently did nothing is indistinguishable from a paste
+	 * that worked.
 	 */
 	private void pasteIntoJoinField()
 	{
@@ -652,7 +687,8 @@ final class ConnectCard extends JPanel
 			log.debug("could not read the clipboard", e);
 		}
 
-		if (pasted == null || pasted.trim().isEmpty())
+		PasteAnswer answer = pasteAnswer(pairingCode(), pasted);
+		if (answer == PasteAnswer.NOTHING)
 		{
 			refuse(Words.of("connect.nothingToPaste"));
 			return;
@@ -660,12 +696,17 @@ final class ConnectCard extends JPanel
 		joinField.setText(pasted.trim());
 		/* The start of the message, which says what it is, rather than the tail of a link's token. */
 		joinField.setCaretPosition(0);
-		JoinCode found = JoinCode.parse(pasted);
-		if (found == null)
+		if (answer == PasteAnswer.NO_INVITE)
 		{
 			refuse(Words.of("connect.noInvite"));
 			return;
 		}
+		if (answer == PasteAnswer.JOIN)
+		{
+			joinFromField();
+			return;
+		}
+		JoinCode found = JoinCode.parse(pasted);
 		say(found.invite != null ? "Found an invite to " + JoinCode.forDisplay(found.code) + ". Press Join."
 			: "Found " + JoinCode.forDisplay(found.code) + ". Press Join.");
 	}
