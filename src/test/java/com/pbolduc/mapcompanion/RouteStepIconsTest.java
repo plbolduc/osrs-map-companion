@@ -95,10 +95,9 @@ public class RouteStepIconsTest
 
 	/**
 	 * Every item the map pictures a teleport with, under a head that names a travel flag, is one that
-	 * flag's rule recognises by the name the client prints for it, which is what the vocabulary is
-	 * matched against and what this table holds. The ring of the elements is told by its id, because
-	 * its empty twin shares its name and this table pictures it with that twin, so its rule is
-	 * {@code CapabilityEvaluatorTest}'s to hold.
+	 * flag's rule recognises: by the name the client prints for it, which is what the vocabulary is
+	 * matched against and what this table holds, or by its id where a spent twin shares the name, as
+	 * the ring of the elements' does. A picture of the twin that cannot teleport fails here.
 	 */
 	@Test
 	public void everyItemPicturedForATravelFlagIsOneTheFlagRecognises() throws IOException
@@ -111,7 +110,7 @@ public class RouteStepIconsTest
 			{
 				String head = row.getKey().split(":")[0];
 				CapabilityEvaluator.ItemTest flag = CapabilityEvaluator.itemTest(head);
-				if (flag == null || head.equals("ring of the elements"))
+				if (flag == null)
 				{
 					continue;
 				}
