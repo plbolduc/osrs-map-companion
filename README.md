@@ -15,7 +15,9 @@ and see your character and friends on the website.
 
 Send a place from the website or pick a search result, and the sidebar lists the way there; a
 place sent from the website says so in the chat box.
-A teleport step shows what to click: the item's sprite or the spell's icon, from the game.
+A teleport step shows what to click: the item's sprite or the spell's icon, from the game. While
+you follow the route, that item is outlined in your inventory or worn items, and that spell in
+your spellbook.
 Each step gets a numbered pin on the game's world map, and the step you are on is numbered in amber
 in both; the game's arrow points at it when it is in the loaded area.
 
@@ -304,8 +306,8 @@ rename it there.
 
 Under **In RuneLite**, **Destinations and meetups**, **Group on the world map** and **Meetup reminder**
 start off; the step after Connect ticks the first two for you to confirm. **Drop luck in chat**,
-**Hint arrow to a destination**, **Step on screen**, **Draw paths with Shortest Path** and
-**Farm run teleports in the bank** start on; none of them sends anything.
+**Hint arrow to a destination**, **Step on screen**, **Step's teleport outlined**, **Draw paths with
+Shortest Path** and **Farm run teleports in the bank** start on; none of them sends anything.
 **Route here on the world map** starts on too, and sends only when you choose it. The keys for
 Reroute and Follow, and how many minutes before a meetup the reminder comes, are in RuneLite's own
 settings for the plugin.

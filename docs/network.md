@@ -110,6 +110,9 @@ The Reroute key and Reroute on the step box's Shift-right-click menu press that 
 the same rules, and send nothing of their own.
 A teleport step's picture is the game's own, from the client's sprite cache: the step names an
 item's `itemId` or a spell icon's `spriteId`, and no picture is fetched from the map or elsewhere.
+**Step's teleport outlined** (on) uses the same two ids to outline that item in your inventory or
+worn items and that spell in your spellbook while you follow the route; it reads what this client
+draws and sends nothing.
 
 **Quest and diary announcements.** With *Notable drops and levels* on, a quest or achievement diary tier
 finished while logged in rides the next snapshot as an announcement: the quest's name, or the
