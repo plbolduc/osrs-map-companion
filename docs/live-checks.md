@@ -87,6 +87,8 @@ often. A clean run is now 443 tests with no failures or skips.
       World map, Switch ▾ and Open the map still work, and Stars says *Log in to see stars.* Log in
       again: all of it comes back.
 - [ ] Replace a clue scroll and compare charged versus uncharged jewellery capabilities.
+- [ ] With Carried travel items shared, carry a construction cape, then wear a trimmed one:
+      Show what's sent lists `constructionCape` both times.
 - [ ] Verify an upstairs death's Open website opens the correct tile and floor.
 - [ ] Exercise farming, birdhouses, rumours and contracts on a members character.
 - [ ] On a members character with **Slayer task** sharing on, check the map names the task as the

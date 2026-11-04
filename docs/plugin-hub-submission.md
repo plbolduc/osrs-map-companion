@@ -243,6 +243,9 @@ screenshot tools are outside `src/main`. Bundled third-party notices accompany t
 What the next Hub update brings. Its description names each in a few words; the detail here is for
 answering a reviewer:
 
+- **A construction cape counts as carried**: the travel vocabulary looked for "Construction cape"
+  and the game names it "Construct. cape", so `constructionCape` was never sent and a farm run's
+  checklist called a carried cape not on you. The flag is not new; the map already knows it.
 - **Stars no longer syncs its filters with the website**: the `star-preferences` reads and writes
   are gone, and the filters and favourite sites stay in this RuneLite's settings.
 - **The sharing fields are read by key**: 22 of the 23 fields under the groups are no longer declared
