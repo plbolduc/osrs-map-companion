@@ -381,13 +381,28 @@ public interface MapCompanionConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "outlineStepTeleport",
+		name = "Step's teleport outlined",
+		description =
+			"While you follow a route, outline the item a teleport step uses in your inventory or worn items, "
+			+ "and its spell in your spellbook while you can cast it. Nothing is clicked, and nothing leaves "
+			+ "this computer.",
+		position = 39,
+		section = clientSection
+	)
+	default boolean outlineStepTeleport()
+	{
+		return true;
+	}
+
+	@ConfigItem(
 		keyName = "rerouteHotkey",
 		name = "Reroute key",
 		description =
 			"A key that presses Reroute on the run or route you follow, as the sidebar's button would, with "
 			+ "its same wait between presses. Unset until you choose one; pick one with Ctrl, Alt or Shift so "
 			+ "typing in chat does not press it.",
-		position = 39,
+		position = 40,
 		section = clientSection
 	)
 	default Keybind rerouteHotkey()
@@ -401,7 +416,7 @@ public interface MapCompanionConfig extends Config
 		description =
 			"A key that presses Follow, or Pause while you follow, on the run or route the sidebar shows, "
 			+ "where the card offers it. Unset until you choose one.",
-		position = 40,
+		position = 41,
 		section = clientSection
 	)
 	default Keybind followHotkey()
@@ -415,7 +430,7 @@ public interface MapCompanionConfig extends Config
 		description =
 			"While a farm run is going, outline in your bank the teleports its Before you leave list names "
 			+ "that you are not carrying. Nothing in the bank moves, and nothing leaves this computer.",
-		position = 41,
+		position = 42,
 		section = clientSection
 	)
 	default boolean markFarmRunInBank()

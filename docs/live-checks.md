@@ -100,6 +100,11 @@ often. A clean run is now 443 tests with no failures or skips.
       The names come from the client's database by value; until this is seen, no build has read
       one for real.
 - [ ] With a destination in the loaded scene, see its dot on the minimap as well as the tile.
+- [ ] Follow a route whose step uses a teleport item: it is outlined in the inventory, and in the
+      worn-equipment tab when worn. A glory(4) is outlined for a glory(6) step; an uncharged glory,
+      a noted one and a lower diary tier are not. On a step that casts a spell, with the spellbook
+      open, the spell is edged in amber while it can be cast, and not while it is greyed or filtered
+      out of the book. Pause, and the outlines go.
 - [ ] Carry two clue tiers, read the one in the later slot, and check the map shows that step.
 - [ ] Kill a few monsters and log out within thirty seconds; the kill log keeps them.
 - [ ] Kill a monster and close RuneLite within thirty seconds; after a restart the kill is there.

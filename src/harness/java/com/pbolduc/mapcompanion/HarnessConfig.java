@@ -258,4 +258,10 @@ final class HarnessConfig implements MapCompanionConfig
 	{
 		return on("markFarmRunInBank", MapCompanionConfig.super.markFarmRunInBank());
 	}
+
+	@Override
+	public boolean outlineStepTeleport()
+	{
+		return on("outlineStepTeleport", MapCompanionConfig.super.outlineStepTeleport());
+	}
 }

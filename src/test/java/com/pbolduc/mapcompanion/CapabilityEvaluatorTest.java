@@ -26,7 +26,9 @@
 package com.pbolduc.mapcompanion;
 
 import java.util.Arrays;
+import net.runelite.api.gameval.ItemID;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
@@ -127,5 +129,49 @@ public class CapabilityEvaluatorTest
 	{
 		game.unreadInventory();
 		org.junit.Assert.assertNull(evaluator.evaluate());
+	}
+
+	/**
+	 * The item a route step names stands for each of its family that can make the trip: another charge,
+	 * a trim, the eternal glory, a higher diary tier, a trimmed cape. Never a spent one, a lower tier,
+	 * or the ring of the elements' empty twin, which only its id tells apart.
+	 */
+	@Test
+	public void aStepsItemIsAnyOfItsFamilyThatCanMakeTheTrip()
+	{
+		CapabilityEvaluator.ItemTest glory = CapabilityEvaluator.stepItem(ItemID.AMULET_OF_GLORY_6, "Amulet of glory(6)");
+		assertTrue(glory.grants(ItemID.AMULET_OF_GLORY_6, "Amulet of glory(6)"));
+		assertTrue(glory.grants(ItemID.AMULET_OF_GLORY_4, "Amulet of glory(4)"));
+		assertTrue(glory.grants(ItemID.TRAIL_AMULET_OF_GLORY_3, "Amulet of glory(t3)"));
+		assertTrue("RuneLite's variations leave it out, the vocabulary does not",
+			glory.grants(ItemID.AMULET_OF_GLORY_INF, "Amulet of eternal glory"));
+		assertFalse("an emptied glory carries nothing", glory.grants(ItemID.AMULET_OF_GLORY, "Amulet of glory"));
+
+		CapabilityEvaluator.ItemTest cloak = CapabilityEvaluator.stepItem(ItemID.ARDY_CAPE_MEDIUM, "Ardougne cloak 2");
+		assertTrue("a higher tier makes the trip", cloak.grants(ItemID.ARDY_CAPE_ELITE, "Ardougne cloak 4"));
+		assertFalse("a lower one does not", cloak.grants(ItemID.ARDY_CAPE_EASY, "Ardougne cloak 1"));
+
+		CapabilityEvaluator.ItemTest ring = CapabilityEvaluator.stepItem(ItemID.LUMBRIDGE_RING_MEDIUM, "Explorer's ring 2");
+		assertTrue("outside the vocabulary, RuneLite's family", ring.grants(ItemID.LUMBRIDGE_RING_ELITE, "Explorer's ring 4"));
+		assertFalse(ring.grants(ItemID.LUMBRIDGE_RING_EASY, "Explorer's ring 1"));
+		assertTrue(CapabilityEvaluator.stepItem(ItemID.SKILLCAPE_CRAFTING, "Crafting cape")
+			.grants(ItemID.SKILLCAPE_CRAFTING_TRIMMED, "Crafting cape(t)"));
+
+		CapabilityEvaluator.ItemTest elements = CapabilityEvaluator.stepItem(ItemID.RING_OF_ELEMENTS_CHARGED, "Ring of the elements");
+		assertTrue(elements.grants(ItemID.RING_OF_ELEMENTS_CHARGED, "Ring of the elements"));
+		assertFalse("the empty ring has the same name", elements.grants(ItemID.RING_OF_ELEMENTS, "Ring of the elements"));
+		/* Whichever twin a step pictures, the charged ring is the one that teleports. */
+		CapabilityEvaluator.ItemTest pictured = CapabilityEvaluator.stepItem(ItemID.RING_OF_ELEMENTS, "Ring of the elements");
+		assertTrue(pictured.grants(ItemID.RING_OF_ELEMENTS_CHARGED, "Ring of the elements"));
+		assertFalse(pictured.grants(ItemID.RING_OF_ELEMENTS, "Ring of the elements"));
+		assertFalse(CapabilityEvaluator.stepItem(ItemID.XERIC_TALISMAN, "Xeric's talisman")
+			.grants(ItemID.XERIC_TALISMAN_EMPTY, "Xeric's talisman (inert)"));
+		CapabilityEvaluator.ItemTest spentPictured = CapabilityEvaluator.stepItem(ItemID.XERIC_TALISMAN_EMPTY, "Xeric's talisman (inert)");
+		assertTrue("a spent twin pictured still means the live one", spentPictured.grants(ItemID.XERIC_TALISMAN, "Xeric's talisman"));
+		assertFalse(spentPictured.grants(ItemID.XERIC_TALISMAN_EMPTY, "Xeric's talisman (inert)"));
+
+		CapabilityEvaluator.ItemTest tablet = CapabilityEvaluator.stepItem(ItemID.POH_TABLET_LUMBRIDGETELEPORT, "Lumbridge teleport");
+		assertTrue(tablet.grants(ItemID.POH_TABLET_LUMBRIDGETELEPORT, "Lumbridge teleport"));
+		assertFalse("a tablet is itself alone", tablet.grants(ItemID.POH_TABLET_VARROCKTELEPORT, "Varrock teleport"));
 	}
 }
