@@ -72,7 +72,7 @@ import static com.pbolduc.mapcompanion.MapCompanionPanel.label;
  * and never as words, because online and world are the game's to say; where they are, <i>near</i> a
  * landmark as the map words it, and <i>Near you</i>; their newest level or drop. <b>Route</b>,
  * beside their name, goes once to where they stand now — pressed again it reads <b>Reroute</b> and
- * asks again, and nothing follows them on its own — and <b>World map</b>, under the card, draws that
+ * asks again, and nothing follows them on its own — and <b>World map</b>, under Route, draws that
  * friend's dot on the game's world map while its group layer is off. A friend who shares no position
  * shows a name and presence and nothing else.
  *
@@ -543,7 +543,7 @@ final class GroupPanel extends JPanel
 		return holdsInvite;
 	}
 
-	/** One friend: their disc and name with Route beside it, where they are, their news, and World map. */
+	/** One friend: their disc and name, where they are, Route and World map beside both, then their news. */
 	private JPanel friend(RelayResponse.RosterRow row, @Nullable String destinationKey, long now)
 	{
 		JPanel card = card();
@@ -566,19 +566,28 @@ final class GroupPanel extends JPanel
 			ticking.add(at -> MapWait.tip(held, own, press.waitMs(at)));
 			route.addActionListener(e -> routeToFriend(row.id));
 		}
+		boolean positioned = row.routable || row.near != null;
+		JButton map = positioned ? worldMapButton(row) : null;
+		/*
+		 * Route and World map stacked at the right, beside the name and where they are. World map had a
+		 * full-width row of its own under the card, a row per friend for a button pressed now and then;
+		 * the cost is a narrower line for where, which may wrap where it fitted before.
+		 */
+		JButton[] buttons = present(route, map);
+		int room = WIDTH - (buttons.length == 0 ? 0 : widest(buttons) + 4);
 		JLabel name = label(12f, Color.WHITE);
 		name.setIcon(new Disc(colour(row.colour), MapPin.initials(row.name), presenceColour(row.presence)));
 		name.setIconTextGap(6);
-		MapCompanionPanel.setWrapped(name, row.name, WIDTH - name.getIcon().getIconWidth() - name.getIconTextGap()
-			- (route == null ? 0 : route.getPreferredSize().width + 4));
+		MapCompanionPanel.setWrapped(name, row.name, room - name.getIcon().getIconWidth() - name.getIconTextGap());
 		name.setToolTipText(presenceWord(row.presence));
-		/* Route on the name's line, as a meetup's sits beside its title; World map keeps the row under the card. */
-		card.add(MapCompanionPanel.left(route == null ? name : beside(name, route)));
+		JPanel top = MapCompanionPanel.column(ColorScheme.DARKER_GRAY_COLOR);
+		top.add(MapCompanionPanel.left(name));
 		String where = whereLine(row);
 		if (where != null)
 		{
-			card.add(MapCompanionPanel.wrapped(where, 11f, ColorScheme.LIGHT_GRAY_COLOR, WIDTH));
+			top.add(MapCompanionPanel.left(MapCompanionPanel.wrapped(where, 11f, ColorScheme.LIGHT_GRAY_COLOR, room)));
 		}
+		card.add(MapCompanionPanel.left(buttons.length == 0 ? top : beside(top, buttons)));
 		if (row.news != null)
 		{
 			JLabel news = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
@@ -615,29 +624,10 @@ final class GroupPanel extends JPanel
 			}
 			card.add(news);
 		}
-		boolean positioned = row.routable || row.near != null;
 		if (!positioned)
 		{
 			return slot(card);
 		}
-		boolean layer = config.showGroupOnWorldMap();
-		boolean shown = group.shown(row.id);
-		/*
-		 * Named for the map it draws on. "Show on map" meant the game's world map here and the website
-		 * on the death card; the website's buttons say Open website, and this one says which map.
-		 */
-		JButton map = MapCompanionPanel.smallButton(layer ? "On world map" : shown ? "Hide on map" : WORLD_MAP);
-		map.setName("group.show." + row.id);
-		map.setEnabled(!layer && ready);
-		map.setToolTipText(layer ? Words.of("group.allOnMapTip") : "Draw " + row.name + Words.of("group.drawOneTip"));
-		map.addActionListener(e ->
-		{
-			group.toggleShown(row.id);
-			drawn = null;
-			refresh(ready);
-		});
-		card.add(gap(5));
-		card.add(MapCompanionPanel.left(actions(map)));
 		/* Inside an instance nothing was asked, so this is newer than any answer the press last gave. */
 		boolean pressed = !group.inside(row.id) && said != null && said.message != null;
 		String message = group.inside(row.id) ? row.name + Words.of("group.inside")
@@ -655,6 +645,28 @@ final class GroupPanel extends JPanel
 			}
 		}
 		return slot(card);
+	}
+
+	/**
+	 * World map for one friend: draws their dot on the game's world map, or takes it off again. Named for
+	 * the map it draws on. "Show on map" meant the game's world map here and the website on the death
+	 * card; the website's buttons say Open website, and this one says which map.
+	 */
+	private JButton worldMapButton(RelayResponse.RosterRow row)
+	{
+		boolean layer = config.showGroupOnWorldMap();
+		boolean shown = group.shown(row.id);
+		JButton map = MapCompanionPanel.smallButton(layer ? "On world map" : shown ? "Hide on map" : WORLD_MAP);
+		map.setName("group.show." + row.id);
+		map.setEnabled(!layer && ready);
+		map.setToolTipText(layer ? Words.of("group.allOnMapTip") : "Draw " + row.name + Words.of("group.drawOneTip"));
+		map.addActionListener(e ->
+		{
+			group.toggleShown(row.id);
+			drawn = null;
+			refresh(ready);
+		});
+		return map;
 	}
 
 	/**
@@ -1107,15 +1119,37 @@ final class GroupPanel extends JPanel
 	}
 
 	/**
-	 * A card's first line with its one button: the words, wrapped to the room the button leaves, and
-	 * the button at the right, held to the top when the words take two lines.
+	 * A card's first lines with their buttons: the words, wrapped to the room the buttons leave, and the
+	 * buttons at the right, one under another at the width of the widest, held to the top.
 	 */
-	private static JPanel beside(JLabel words, JButton button)
+	private static JPanel beside(JComponent words, JButton... buttons)
 	{
+		JPanel stack = new JPanel(new java.awt.GridLayout(buttons.length, 1, 0, 4));
+		stack.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		for (JButton button : buttons)
+		{
+			stack.add(button);
+		}
 		JPanel hug = new JPanel(new java.awt.BorderLayout());
 		hug.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-		hug.add(button, java.awt.BorderLayout.NORTH);
+		hug.add(stack, java.awt.BorderLayout.NORTH);
 		return MapCompanionPanel.capped(MapCompanionPanel.bar(4, ColorScheme.DARKER_GRAY_COLOR, null, words, hug));
+	}
+
+	/** The buttons a card has, in order, leaving out the ones it does not. */
+	private static JButton[] present(@Nullable JButton... buttons)
+	{
+		return Arrays.stream(buttons).filter(Objects::nonNull).toArray(JButton[]::new);
+	}
+
+	private static int widest(JButton... buttons)
+	{
+		int widest = 0;
+		for (JButton button : buttons)
+		{
+			widest = Math.max(widest, button.getPreferredSize().width);
+		}
+		return widest;
 	}
 
 	private static JPanel fill(JComponent component)

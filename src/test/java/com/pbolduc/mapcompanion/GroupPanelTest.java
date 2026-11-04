@@ -296,10 +296,11 @@ public class GroupPanelTest
 
 	/**
 	 * A friend's Route is on their name's line, as a meetup's is beside its title, so Finding…,
-	 * Planning… and Reroute read beside the name they are about. World map keeps the row under the card.
+	 * Planning… and Reroute read beside the name they are about. World map sits under Route in the
+	 * same first row: it had a full-width row of its own under the card, a row per friend.
 	 */
 	@Test
-	public void aFriendsRouteSitsBesideTheirName() throws Exception
+	public void aFriendsButtonsSitBesideTheirName() throws Exception
 	{
 		AtomicReference<GroupPanel> panel = new AtomicReference<>();
 		SwingUtilities.invokeAndWait(() -> panel.set(panel()));
@@ -310,8 +311,10 @@ public class GroupPanelTest
 			Container card = (Container) namedComponent(panel.get(), "group.friend.cara");
 			assertTrue("Route is on the name's line, the card's first row",
 				SwingUtilities.isDescendingFrom(named(panel.get(), "group.route.cara"), card.getComponent(0)));
-			assertFalse("World map keeps the row under the card",
+			assertTrue("World map is in the same first row, under Route",
 				SwingUtilities.isDescendingFrom(named(panel.get(), "group.show.cara"), card.getComponent(0)));
+			assertSame("one stack with Route, under it",
+				named(panel.get(), "group.route.cara").getParent(), named(panel.get(), "group.show.cara").getParent());
 		});
 	}
 
