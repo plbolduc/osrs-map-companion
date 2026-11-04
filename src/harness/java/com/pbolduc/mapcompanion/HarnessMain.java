@@ -861,6 +861,8 @@ public final class HarnessMain
 			String streamedMember = identity.id();
 			directiveStream.start(config.relayUrl(), code, streamedMember, pairing.secret(streamedMember), showGroup, directive ->
 			{
+				/* As the plugin does: the week's meetups are read here, not by accept(). */
+				destinationState.acceptSocial(directive, config.showDestination());
 				if (store.on("shareSlayer"))
 				{
 					slayerState.accept(streamedMember, directive, System.currentTimeMillis());
@@ -952,6 +954,7 @@ public final class HarnessMain
 				toldNameCode = code;
 				toldName = response.groupName;
 			}
+			destinationState.acceptSocial(response.directive, config.showDestination());
 			if (store.on("shareSlayer"))
 			{
 				slayerState.accept(postedAs, response.directive, System.currentTimeMillis());
