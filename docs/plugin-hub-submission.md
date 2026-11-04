@@ -3,9 +3,10 @@
 **On the Plugin Hub since 27 October 2026**, merged in
 [runelite/plugin-hub#19494](https://github.com/runelite/plugin-hub/pull/19494), and updated to 1.3.0
 (`fbf96fa`) in [runelite/plugin-hub#19712](https://github.com/runelite/plugin-hub/pull/19712) on
-30 October, then to 1.4.0 (`6df00cf`) in
-[runelite/plugin-hub#19965](https://github.com/runelite/plugin-hub/pull/19965) on 2 November, which
-RuneLite's review bot approved and merged itself. The steps below are
+30 October, to 1.4.0 (`6df00cf`) in
+[runelite/plugin-hub#19965](https://github.com/runelite/plugin-hub/pull/19965) on 2 November, and
+to 1.5.0 (`eaa882b`) in [runelite/plugin-hub#20137](https://github.com/runelite/plugin-hub/pull/20137)
+on 4 November; RuneLite's review bot approved and merged both updates itself. The steps below are
 how it was submitted; a release after that is a merged plugin
 commit, then `commit=` updated in the Hub's `plugins/osrs-map-companion`. Completed and outstanding game checks
 are recorded in [Live checks](live-checks.md). A successful build does not establish live-event
@@ -27,7 +28,7 @@ coverage or guarantee RuneLite approval.
 4. Open a PR titled **osrs-map-companion: update to *version***. Its description is public, so keep
    it short: one line, a short list of what changed, and only what a reviewer needs besides, such
    as a new request or a changed warning, as in
-   [runelite/plugin-hub#19965](https://github.com/runelite/plugin-hub/pull/19965). Validation
+   [runelite/plugin-hub#20137](https://github.com/runelite/plugin-hub/pull/20137). Validation
    results and live checks stay in this repository.
 5. Address reviewer feedback in the plugin repository, then update `commit=` in the same Hub PR.
 
@@ -244,42 +245,7 @@ screenshot tools are outside `src/main`. Bundled third-party notices accompany t
 ## Changes since the approved submission
 
 What the next Hub update brings. Its description names each in a few words; the detail here is for
-answering a reviewer:
-
-- **A construction cape counts as carried**: the travel vocabulary looked for "Construction cape"
-  and the game names it "Construct. cape", so `constructionCape` was never sent and a farm run's
-  checklist called a carried cape not on you. The flag is not new; the map already knows it.
-- **Stars no longer syncs its filters with the website**: the `star-preferences` reads and writes
-  are gone, and the filters and favourite sites stay in this RuneLite's settings.
-- **The sharing fields are read by key**: 22 of the 23 fields under the groups are no longer declared
-  as hidden settings. Their keys, defaults and what they send are unchanged, and Reset still turns
-  them off, through `resetConfiguration`.
-- **The step box has a menu**: `RouteStepOverlay` adds Pause, Reroute and Dismiss (End run on a
-  run's leg) as `RUNELITE_OVERLAY` entries, which RuneLite shows on a Shift-right-click under the
-  game's own first entry. Each presses the sidebar's own button on the EDT, as the route keys do;
-  nothing new is sent, and nothing acts in the game.
-- **A destination from the map says so in chat**: one local game message per new place, through
-  `ChatMessageManager` with the name stripped of tags and escaped by `ChatMessageBuilder`. Only with
-  *Destinations and meetups* on, and never for a pin chosen in this client.
-- **The step box says a step's notes**, as the sidebar does, with a Wilderness warning in the
-  sidebar's pink; nothing new is read or sent.
-- **The step's teleport is outlined**: `TeleportOutlineOverlay`, a `WidgetItemOverlay` on the
-  inventory, worn items and spellbook, outlines the followed step's item with
-  `ItemManager.getItemOutline`, matched with `ItemVariationMapping` and the travel vocabulary's
-  charge rules, and the spellbook widget whose sprite is the step's spell icon. It is drawn only,
-  under a new **In RuneLite** setting, *Step's teleport outlined*, on by default; nothing is sent.
-- **Whoever runs a group can remove a friend from the sidebar**: a friend's right-click in the
-  Group tab offers *Remove from group…* where *Rename group…* is offered, and after a confirmation
-  sends one `DELETE /api/companion/member` naming the friend's member id, the one new request in this
-  update (see *Network requests*). The map refuses to remove anybody who runs the group.
-- **A place sent to your own RuneLite is followed from the start**: the plugin reads a destination's
-  `targetMemberId`, which the map has always sent, and follows one that names this client's member,
-  as it follows a place picked in the sidebar, and its chat line says so. The map lets a browser
-  name only a RuneLite bound to it, so a friend's send is never followed unasked. Nothing new is
-  sent.
-- **Paste joins a friend's invite before a group**: with no group, Paste joins the invite or RuneLite
-  code it reads, as Join would; in a group it still fills the field for Join. It sends what Join
-  sends, once per press.
+answering a reviewer. Nothing yet since 1.5.0.
 
 ## Before submission
 
