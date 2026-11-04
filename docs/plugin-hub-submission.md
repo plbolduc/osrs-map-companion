@@ -268,6 +268,10 @@ answering a reviewer:
   `ItemManager.getItemOutline`, matched with `ItemVariationMapping` and the travel vocabulary's
   charge rules, and the spellbook widget whose sprite is the step's spell icon. It is drawn only,
   under a new **In RuneLite** setting, *Step's teleport outlined*, on by default; nothing is sent.
+- **Whoever runs a group can remove a friend from the sidebar**: a friend's right-click in the
+  Group tab offers *Remove from group…* where *Rename group…* is offered, and after a confirmation
+  sends one `DELETE /api/companion/member` naming the friend's member id, the one new request in this
+  update (see *Network requests*). The map refuses to remove anybody who runs the group.
 - **A place sent to your own RuneLite is followed from the start**: the plugin reads a destination's
   `targetMemberId`, which the map has always sent, and follows one that names this client's member,
   as it follows a place picked in the sidebar, and its chat line says so. The map lets a browser
