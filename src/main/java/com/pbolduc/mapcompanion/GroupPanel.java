@@ -31,6 +31,8 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.RenderingHints;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -56,7 +58,9 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import net.runelite.api.coords.WorldPoint;
@@ -124,6 +128,22 @@ final class GroupPanel extends JPanel
 	/** The picture's place while the client's cache answers, as a route step keeps it. */
 	private static final javax.swing.ImageIcon NO_PICTURE_YET = new javax.swing.ImageIcon(
 		new java.awt.image.BufferedImage(NEWS_PICTURE, NEWS_PICTURE, java.awt.image.BufferedImage.TYPE_INT_ARGB));
+
+	/**
+	 * Remove from group… for a friend's card: whether this RuneLite may, and the press itself, which
+	 * are the status card's to answer because it knows who this RuneLite is in the group (ConnectCard).
+	 */
+	interface Remover
+	{
+		boolean offered();
+
+		void remove(String memberId, String name);
+	}
+
+	static final String REMOVE = "Remove from group…";
+
+	@Nullable
+	private Remover remover;
 
 	private final DestinationState destinations;
 	private final GroupState group;
@@ -543,8 +563,80 @@ final class GroupPanel extends JPanel
 		return holdsInvite;
 	}
 
+	/** Who answers a friend card's right-click; set once the status card exists. */
+	void remover(Remover remover)
+	{
+		this.remover = remover;
+	}
+
+	/**
+	 * Remove from group… on a right-click anywhere on a friend's card, for whoever runs the group.
+	 *
+	 * <p>A right-click rather than a third button beside Route and World map: it is pressed once in a
+	 * long while, and it cannot be undone, so it stays out of the row a player reads every minute. Asked
+	 * at the click rather than when the card was drawn, because the rows are rebuilt only when what they
+	 * say changes, and whether this RuneLite runs the group is not part of that.
+	 */
+	private void offerRemove(Component part, RelayResponse.RosterRow row)
+	{
+		part.addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mousePressed(MouseEvent event)
+			{
+				show(event);
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent event)
+			{
+				show(event);
+			}
+
+			private void show(MouseEvent event)
+			{
+				JPopupMenu menu = event.isPopupTrigger() ? friendMenu(row) : null;
+				if (menu != null && event.getComponent().isShowing())
+				{
+					menu.show(event.getComponent(), event.getX(), event.getY());
+				}
+			}
+		});
+		if (part instanceof java.awt.Container)
+		{
+			for (Component child : ((java.awt.Container) part).getComponents())
+			{
+				offerRemove(child, row);
+			}
+		}
+	}
+
+	/** A friend card's right-click menu, or null for a RuneLite the map has not said runs the group. */
+	@Nullable
+	JPopupMenu friendMenu(RelayResponse.RosterRow row)
+	{
+		Remover asked = remover;
+		if (asked == null || !asked.offered())
+		{
+			return null;
+		}
+		JPopupMenu menu = new JPopupMenu();
+		JMenuItem remove = new JMenuItem(REMOVE);
+		remove.setName("group.remove." + row.id);
+		remove.addActionListener(e -> asked.remove(row.id, row.name));
+		menu.add(remove);
+		return menu;
+	}
+
 	/** One friend: their disc and name, where they are, Route and World map beside both, then their news. */
 	private JPanel friend(RelayResponse.RosterRow row, @Nullable String destinationKey, long now)
+	{
+		JPanel card = friendCard(row, destinationKey, now);
+		offerRemove(card, row);
+		return card;
+	}
+
+	private JPanel friendCard(RelayResponse.RosterRow row, @Nullable String destinationKey, long now)
 	{
 		JPanel card = card();
 		card.setName("group.friend." + row.id);

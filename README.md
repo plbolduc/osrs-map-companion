@@ -88,6 +88,9 @@ can make a new one in the same client session.
 achievement diary. Friends who share their position appear on the website and, if you enable it,
 on RuneLite's world map in the same colours. **Route** plans the way to a friend's current position.
 
+If you made the group or own it, right-click a friend and choose **Remove from group…** to take them out;
+only a new invite lets them back. Co-owners are removed on the website.
+
 Create a meetup with **Meet here…**, see who is coming, and answer **Going**, **Maybe**, **Can't**
 or **On my way**. You can turn on a reminder before it starts.
 
@@ -251,7 +254,8 @@ key and the invite. Neither sends
 anything about your character. If you have changed **Settings → Advanced → Map address** to a server
 other than osrs-map.com, the first Connect to it asks you first, naming it.
 **Open the map** sends your group's credentials once per press, and opens a one-time link that
-adds that browser to your group as you. **Rename group…** sends the new name, once per press.
+adds that browser to your group as you. **Rename group…** sends the new name, once per press, and
+**Remove from group…** sends which friend to remove, once per press.
 
 **Reroute**, under the steps of a destination the map sent, sends the tile you are standing on,
 once per press and whatever you share, so the map can plan the way from there. The map plans with
@@ -302,7 +306,7 @@ Nothing is shared until you choose it, and joining a group does not turn anythin
 **Character name** ticked your group sees it; untick it and **Name to show instead** sets what they
 see, or Member if you leave it empty. **Copy invite** copies a message you can send a friend.
 **Switch** remembers up to eight groups, and joins another; the person who made the group can
-rename it there.
+rename it there, and remove a friend by right-clicking them under **Group**.
 
 Under **In RuneLite**, **Destinations and meetups**, **Group on the world map** and **Meetup reminder**
 start off; the step after Connect ticks the first two for you to confirm. **Drop luck in chat**,

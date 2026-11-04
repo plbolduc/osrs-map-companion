@@ -973,6 +973,76 @@ final class ConnectCard extends JPanel
 		}));
 	}
 
+	/**
+	 * Whether a friend's card offers Remove from group…: to whoever the map said runs the group, as
+	 * Rename group… is, so nobody is offered a press it would refuse.
+	 */
+	boolean offersRemove()
+	{
+		String code = pairingCode();
+		return !code.isEmpty() && plugin.runsGroup(pairing.serverUrl(), code);
+	}
+
+	/**
+	 * Remove a friend from the group: asked first, in a dialog that says what follows, then sent to the
+	 * map as one of this RuneLite's members of the group, as Rename is.
+	 *
+	 * <p>A group made by Connect may never have a browser, and its maker should not need one to take
+	 * somebody out of it. The map takes what the website's Remove takes, and the friend's dot goes when
+	 * the stream next says who is in the group; nothing here edits the roster ahead of it. The old
+	 * invite does not bring them back, so the dialog promises only what holds: a new one would.
+	 *
+	 * <p>What it says is said under Copy invite and Switch ▾, where Rename's menu row says its own.
+	 */
+	void removeMember(String friendId, String friendName)
+	{
+		String server = pairing.serverUrl();
+		String code = pairingCode();
+		String member = pairing.memberWithSecret(server, code, identity.id());
+		String secret = member == null ? null : pairing.secret(server, code, member);
+		if (server == null || member == null || secret == null)
+		{
+			under(groupMessage, Words.of("connect.removeLogIn"), true, false);
+			return;
+		}
+		String name = MapPin.safe(friendName);
+		Object[] choices = {"Remove", "Cancel"};
+		int chosen = JOptionPane.showOptionDialog(sidebar, removeQuestion(name, MapPin.safe(pairing.name(code))),
+			"Remove from group", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, choices, choices[1]);
+		if (chosen != 0)
+		{
+			return;
+		}
+		under(groupMessage, "Removing " + name + "…", false, false);
+		connectClient.remove(server, code, member, secret, friendId, outcome -> SwingUtilities.invokeLater(() ->
+		{
+			if (!server.equals(pairing.serverUrl()) || !code.equalsIgnoreCase(pairingCode()))
+			{
+				return;
+			}
+			if (outcome.message == null)
+			{
+				under(groupMessage, "Removed " + name + ".", false, true);
+			}
+			else
+			{
+				under(groupMessage, outcome.message, true, false);
+			}
+			refresh.run();
+		}));
+	}
+
+	/**
+	 * What Remove asks: who, from which group, and the two things that follow. Both names were typed by
+	 * somebody in the group, so the caller hands them in as words ({@link MapPin#safe}); a dialog's
+	 * message starting {@code <html>} would otherwise be drawn as markup.
+	 */
+	static String removeQuestion(String name, String group)
+	{
+		String from = group.isEmpty() ? "the group" : group;
+		return "Remove " + name + " from " + from + "?\n" + Words.of("connect.removeFollows");
+	}
+
 	/** What Rename asks, with the one rule a name has. */
 	static final String RENAME_PROMPT = "The name everybody in the group sees (up to " + Pairing.MAX_GROUP_NAME
 		+ " characters):";

@@ -145,6 +145,19 @@ public class SidebarWordsTest
 	}
 
 	/**
+	 * Remove asks who, from which group, and says what follows — and only what holds: the old invite
+	 * does not bring them back, a new one would. Names arrive as words, so no markup reaches the dialog.
+	 */
+	@Test
+	public void removeAsksWhoAndFromWhichGroupAndSaysWhatFollows()
+	{
+		assertEquals("Remove Cara from Sunday raids?\nTheir dot leaves everyone's map.\nOnly a new invite lets them back.",
+			ConnectCard.removeQuestion("Cara", "Sunday raids"));
+		assertTrue(ConnectCard.removeQuestion("Cara", "").startsWith("Remove Cara from the group?"));
+		assertEquals("Cara", MapPin.safe("<html><b>Cara</b>"));
+	}
+
+	/**
 	 * Before a group the card says one plain thing, in the reader's words rather than this code's.
 	 * While connected the first line is the group's name: "Connected" became the dot's tooltip when
 	 * the card went from three lines to two, so this asserts the name where it asserted the word.
