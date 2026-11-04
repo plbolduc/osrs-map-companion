@@ -19,9 +19,10 @@ A teleport step shows what to click: the item's sprite or the spell's icon, from
 Each step gets a numbered pin on the game's world map, and the step you are on is numbered in amber
 in both; the game's arrow points at it when it is in the loaded area.
 
-Press **Follow** to show the step you're on in a small box over the game; with **Shortest Path**
-installed, it also draws each walking step as you reach it. A route you ask for yourself is
-followed from the start, and **Pause** stops following it. With the box over the game, the
+Press **Follow** to show the step you're on in a small box over the game, with its notes, such as
+a warning that it lands in the Wilderness; with **Shortest Path** installed, it also draws each
+walking step as you reach it. A route you ask for yourself is followed from the start, and
+**Pause** stops following it. With the box over the game, the
 sidebar can stay closed: hold Shift and right-click the box for **Pause**, **Reroute** and
 **Dismiss**, or **End run** on a run. **Reroute** plans again from where you stand, and
 RuneLite's settings for the plugin can give Reroute and Follow a key of your own. The website

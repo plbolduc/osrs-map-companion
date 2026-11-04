@@ -255,6 +255,8 @@ answering a reviewer:
 - **A destination from the map says so in chat**: one local game message per new place, through
   `ChatMessageManager` with the name stripped of tags and escaped by `ChatMessageBuilder`. Only with
   *Destinations and meetups* on, and never for a pin chosen in this client.
+- **The step box says a step's notes**, as the sidebar does, with a Wilderness warning in the
+  sidebar's pink; nothing new is read or sent.
 
 ## Before submission
 
