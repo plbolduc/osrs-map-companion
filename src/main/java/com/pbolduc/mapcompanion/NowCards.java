@@ -261,15 +261,15 @@ final class NowCards extends JPanel
 		});
 	}
 
-	/** The destination card's Reroute or Follow, for a hotkey, while the card shows it; else null. EDT. */
+	/** The destination card's button for a press from the game, while the card shows it; else null. EDT. */
 	@Nullable
-	JButton hotkey(boolean rerouting)
+	JButton actButton(MapCompanionPanel.Act act)
 	{
 		if (!destinationSlot.isVisible())
 		{
 			return null;
 		}
-		JButton own = rerouting ? rerouteButton : followButton;
+		JButton own = act == MapCompanionPanel.Act.REROUTE ? rerouteButton : act == MapCompanionPanel.Act.FOLLOW ? followButton : dismissButton;
 		return shownDestinationActions.contains(own) ? own : null;
 	}
 

@@ -32,15 +32,20 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import net.runelite.api.MenuEntry;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.callback.ClientThread;
+import net.runelite.client.ui.overlay.OverlayMenuEntry;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -209,6 +214,56 @@ public class RouteStepOverlayTest
 		assertEquals("a walk is words alone", 0, picturePixels);
 		assertEquals("in a box narrower by the picture and its gap", shown.width - 20, walk.width);
 		assertEquals(1, asked.size());
+	}
+
+	/**
+	 * Shift and a right-click on the box offer the card's own buttons in the card's words, so a route
+	 * can be paused, planned again or put away with the sidebar shut: Dismiss under a destination's
+	 * steps, End run under a run's leg. Each entry presses that button, as a route key does.
+	 */
+	@Test
+	public void itsMenuPressesTheCardsOwnButtons() throws Exception
+	{
+		RelayResponse.Destination destination = received();
+		route.follow(true);
+		RouteStepOverlay overlay = overlay(destination, new GameSprites(null, null, null));
+		List<MapCompanionPanel.Act> pressed = new ArrayList<>();
+		overlay.pressWith(pressed::add);
+		drawn(overlay);
+		assertEquals(Arrays.asList("Pause", "Reroute", "Dismiss"), options(overlay));
+		for (OverlayMenuEntry entry : overlay.getMenuEntries())
+		{
+			choose(entry);
+		}
+		assertEquals(Arrays.asList(MapCompanionPanel.Act.FOLLOW, MapCompanionPanel.Act.REROUTE, MapCompanionPanel.Act.END), pressed);
+
+		DestinationState destinations = new DestinationState(new Gson());
+		FarmRunState farm = new FarmRunState();
+		FarmRunRoute run = new FarmRunRoute(farm, destinations, route, new ClientThread());
+		HarnessGame game = new HarnessGame();
+		game.login("Example", 444, 3222, 3218, 0);
+		RouteStepOverlay leg = new RouteStepOverlay(game.client(),
+			new HarnessConfig(new HarnessStore(), MapCompanionConfig.DEFAULT_MAP_URL), destinations, route, run,
+			new GameSprites(null, null, null));
+		String json = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "contract", "farm-run.json")), StandardCharsets.UTF_8);
+		farm.accept(new Gson().fromJson(json, RelayResponse.FarmRun.class), 1, 1_000);
+		run.sync();
+		drawn(leg);
+		assertEquals(Arrays.asList("Pause", "Reroute", "End run"), options(leg));
+	}
+
+	private static List<String> options(RouteStepOverlay overlay)
+	{
+		return overlay.getMenuEntries().stream().map(OverlayMenuEntry::getOption).collect(Collectors.toList());
+	}
+
+	/** A choice of an entry, as RuneLite's menu makes one: the callback the overlay gave the entry. */
+	@SuppressWarnings("unchecked")
+	private static void choose(OverlayMenuEntry entry) throws ReflectiveOperationException
+	{
+		Field callback = OverlayMenuEntry.class.getDeclaredField("callback");
+		callback.setAccessible(true);
+		((Consumer<MenuEntry>) callback.get(entry)).accept(null);
 	}
 
 	/** White pixels drawn outside the box by the last {@link #drawn}. */

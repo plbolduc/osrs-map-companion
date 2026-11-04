@@ -73,6 +73,9 @@ often. A clean run is now 443 tests with no failures or skips.
       leaves both letters readable. In a meetup's roll-up, hovering a disc names that member and
       hovering an answer's word names everyone under it.
 - [ ] Receive a destination, preserve an existing quest hint arrow, and test clearing it.
+- [ ] Follow a route and hold Shift while right-clicking the step box: Pause, Reroute and Dismiss
+      sit under the game's first entry, End run in Dismiss's place on a farm run's leg, and each
+      does what the sidebar's button does. A plain left-click on the box still walks.
 - [ ] Use two characters in one group: see only the other member on the game world map, including
       an edge pin when panned away. Turn sharing off and log out; pins must disappear.
 - [ ] Recover after an unavailable map; switch groups with a snapshot outstanding and confirm the

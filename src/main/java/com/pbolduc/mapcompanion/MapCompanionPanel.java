@@ -219,7 +219,8 @@ public class MapCompanionPanel extends PluginPanel
 			shortestPath, routePress, clueReader, farmRunRoute, sprites, this::refresh, this::mapUrl);
 		this.dropLuck = new DropLuckPanel(lootLog, DropLuckPanel.Pictures.of(itemManager));
 		this.starsPanel = new StarsPanel(starsClient, destinationState, clientThread, destinationMarker, routePress, this::mapUrl,
-			destinationRoute, shortestPath, config, sprites, nowCards::hotkey, this::refresh);
+			destinationRoute, shortestPath, config, sprites,
+			rerouting -> nowCards.actButton(rerouting ? Act.REROUTE : Act.FOLLOW), this::refresh);
 		this.starsPanel.pictures(sprites);
 
 		setLayout(new BorderLayout());
@@ -668,22 +669,28 @@ public class MapCompanionPanel extends PluginPanel
 		nowCards.scrollRectToVisible(new Rectangle(0, 0, nowCards.getWidth(), height));
 	}
 
-	/**
-	 * A hotkey, taken as the card it acts on would take a click: a run's own buttons while a run is
-	 * shown and no other route is followed, otherwise the destination's. The key presses that very
-	 * button, so it obeys every rule the button does — Reroute inside its wait is disabled, and Follow
-	 * is offered only where the card offers it. EDT.
-	 */
-	void pressHotkey(boolean rerouting)
+	/** What a route key or the step box's menu presses: Follow or Pause, Reroute, and Dismiss or End run. */
+	enum Act
 	{
-		JButton button = farmRunPanel.hotkey(rerouting);
+		FOLLOW, REROUTE, END
+	}
+
+	/**
+	 * A press from the game, a key's or the box's menu's, taken as the card it acts on would take a
+	 * click: a run's own buttons while a run is shown and no other route is followed, otherwise the
+	 * destination's. It presses that very button, so it obeys every rule the button does — Reroute
+	 * inside its wait is disabled, and Follow is offered only where the card offers it. EDT.
+	 */
+	void act(Act act)
+	{
+		JButton button = farmRunPanel.actButton(act);
 		if (button == null)
 		{
-			button = portTasksPanel.hotkey(rerouting);
+			button = portTasksPanel.actButton(act);
 		}
 		if (button == null)
 		{
-			button = nowCards.hotkey(rerouting);
+			button = nowCards.actButton(act);
 		}
 		press(button);
 	}
