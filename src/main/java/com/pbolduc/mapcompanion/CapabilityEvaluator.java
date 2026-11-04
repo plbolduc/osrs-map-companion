@@ -94,7 +94,8 @@ public class CapabilityEvaluator
 			new Capability("masterScrollBook", "^master scroll book"),
 			new Capability("slayerRing", "^slayer ring"),
 			new Capability("amuletOfGlory", "^(?:amulet of glory\\s*\\(t?[1-9][0-9]*\\)|amulet of eternal glory)$"),
-			new Capability("constructionCape", "^construction cape"),
+			/* The game shortens it: "Construct. cape", and "Construct. cape(t)" trimmed. */
+			new Capability("constructionCape", "^construct(?:ion|\\.) cape"),
 			new Capability("skillsNecklace", "^skills necklace\\s*\\([1-9][0-9]*\\)$"),
 			new Capability("pendantOfAtes", "^pendant of ates"),
 			new Capability("radasBlessing", "^rada'?s blessing"),

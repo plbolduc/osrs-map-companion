@@ -93,6 +93,40 @@ public class RouteStepIconsTest
 		assertTrue("only " + rows + " item rows", rows > 100);
 	}
 
+	/**
+	 * Every item the map pictures a teleport with, under a head that names a travel flag, is one that
+	 * flag's rule recognises by the name the client prints for it, which is what the vocabulary is
+	 * matched against and what this table holds. The ring of the elements is told by its id, because
+	 * its empty twin shares its name and this table pictures it with that twin, so its rule is
+	 * {@code CapabilityEvaluatorTest}'s to hold.
+	 */
+	@Test
+	public void everyItemPicturedForATravelFlagIsOneTheFlagRecognises() throws IOException
+	{
+		List<String> unknown = new ArrayList<>();
+		int flagged = 0;
+		for (String part : new String[]{"itemsByLabel", "itemsByHead"})
+		{
+			for (Map.Entry<String, JsonElement> row : table().getAsJsonObject(part).entrySet())
+			{
+				String head = row.getKey().split(":")[0];
+				CapabilityEvaluator.ItemTest flag = CapabilityEvaluator.itemTest(head);
+				if (flag == null || head.equals("ring of the elements"))
+				{
+					continue;
+				}
+				JsonArray item = row.getValue().getAsJsonArray();
+				if (!flag.grants(item.get(1).getAsInt(), item.get(0).getAsString()))
+				{
+					unknown.add(row.getKey() + ": " + item.get(0).getAsString());
+				}
+				flagged++;
+			}
+		}
+		assertEquals(new ArrayList<String>(), unknown);
+		assertTrue("only " + flagged + " rows name a flag", flagged > 30);
+	}
+
 	@Test
 	public void everySpellIsTheSpriteTheClientNames() throws IOException, ReflectiveOperationException
 	{

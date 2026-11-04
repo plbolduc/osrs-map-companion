@@ -26,6 +26,7 @@
 package com.pbolduc.mapcompanion;
 
 import java.util.Arrays;
+import net.runelite.api.gameval.ItemID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
@@ -73,6 +74,24 @@ public class CapabilityEvaluatorTest
 					 evaluator.evaluate());
 	}
 
+	/**
+	 * The game shortens the cape's name to "Construct. cape", trimmed or not, and either one carried or
+	 * worn is the flag the map routes by and the bank checklist reads.
+	 */
+	@Test
+	public void theConstructionCapeIsKnownByTheNameTheGameGivesIt()
+	{
+		game.define(ItemID.SKILLCAPE_CONSTRUCTION, "Construct. cape", false);
+		game.define(ItemID.SKILLCAPE_CONSTRUCTION_TRIMMED, "Construct. cape(t)", false);
+		game.carry(ItemID.SKILLCAPE_CONSTRUCTION);
+		assertEquals(Arrays.asList("constructionCape"), evaluator.evaluate());
+		game.carry();
+		game.equip(ItemID.SKILLCAPE_CONSTRUCTION_TRIMMED);
+		assertEquals(Arrays.asList("constructionCape"), evaluator.evaluate());
+		assertTrue("and the bank outlines it for a run that needs one",
+			CapabilityEvaluator.itemTest("Construction cape").grants(ItemID.SKILLCAPE_CONSTRUCTION, "Construct. cape"));
+	}
+
 	@Test
 	public void trimmedImbuedAndEternalVariantsRemainUsable()
 	{
@@ -89,7 +108,7 @@ public class CapabilityEvaluatorTest
 	public void notedItemsCannotGrantAnyCapability()
 	{
 		game.define(1, "Amulet of glory(6)", true);
-		game.define(2, "Construction cape", true);
+		game.define(2, "Construct. cape", true);
 		game.carry(1, 2);
 		assertTrue(evaluator.evaluate().isEmpty());
 	}
