@@ -102,6 +102,7 @@ now.routeBackTip=Plan the way back from where you stand
 now.routeBackUnsharedTip=Plan the way back from where you stand. Sharing it is off; the map doesn't keep the tile.
 now.arrival=, from your group. Follow it from the sidebar
 now.arrivalKey= or with
+now.arrivalYours=, from the map. Following it
 
 # GroupPanel: the Group tab, its friends and its meetups.
 group.meetupsOff=Meetups show here with Destinations and meetups on (Settings → In RuneLite).

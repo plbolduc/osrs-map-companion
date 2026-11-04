@@ -130,13 +130,28 @@ public class DestinationStateTest
 	{
 		RelayResponse.Destination bank = place("<col=ff0000>Lumbridge Castle bank</col>", 3208, 3220, 302);
 		assertEquals("Lumbridge Castle bank (W302), from your group. Follow it from the sidebar.",
-			NowCards.arrivalLine(bank, 444, Keybind.NOT_SET));
+			NowCards.arrivalLine(bank, 444, Keybind.NOT_SET, false));
 		Keybind key = new Keybind(KeyEvent.VK_F, InputEvent.CTRL_DOWN_MASK);
 		assertEquals("Lumbridge Castle bank, from your group. Follow it from the sidebar or with " + key + ".",
-			NowCards.arrivalLine(bank, 302, key));
+			NowCards.arrivalLine(bank, 302, key, false));
 		assertTrue(key.toString(), key.toString().contains("F"));
 		assertEquals("A place, from your group. Follow it from the sidebar.",
-			NowCards.arrivalLine(place(" ", 3208, 3220, null), 302, Keybind.NOT_SET));
+			NowCards.arrivalLine(place(" ", 3208, 3220, null), 302, Keybind.NOT_SET, false));
+	}
+
+	/**
+	 * A place the player sent this RuneLite from the map is followed from the start, so its line says
+	 * that rather than where Follow is, and never that the group sent it.
+	 */
+	@Test
+	public void theArrivalLineOfYourOwnSendSaysItIsFollowed()
+	{
+		RelayResponse.Destination bank = place("Lumbridge Castle bank", 3208, 3220, 302);
+		Keybind key = new Keybind(KeyEvent.VK_F, InputEvent.CTRL_DOWN_MASK);
+		assertEquals("Lumbridge Castle bank (W302), from the map. Following it.",
+			NowCards.arrivalLine(bank, 444, key, true));
+		assertEquals("Lumbridge Castle bank, from the map. Following it.",
+			NowCards.arrivalLine(bank, 302, Keybind.NOT_SET, true));
 	}
 
 	private static RelayResponse.Directive directive(RelayResponse.Destination destination)

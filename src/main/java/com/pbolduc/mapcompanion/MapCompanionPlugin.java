@@ -783,14 +783,16 @@ public class MapCompanionPlugin extends Plugin
 
 	/**
 	 * One local chat line when a place arrives from the map. It shows in the sidebar and on the world
-	 * map, but nothing over the game said so, and a place the group sends waits for Follow.
+	 * map, but nothing over the game said so, and a place the group sends waits for Follow. One the
+	 * player sent here themselves is followed from the start (see DestinationRoute.sync), and says so.
 	 */
 	private void announceArrival()
 	{
 		RelayResponse.Destination arrived = destinationState.takeArrival();
 		if (arrived != null && config.showDestination())
 		{
-			say("Destination: ", NowCards.arrivalLine(arrived, client.getWorld(), config.followHotkey()));
+			boolean yours = DestinationRoute.sentHere(arrived, arrived.targetMemberId != null ? identity.id() : null);
+			say("Destination: ", NowCards.arrivalLine(arrived, client.getWorld(), config.followHotkey(), yours));
 		}
 	}
 
@@ -1299,7 +1301,9 @@ public class MapCompanionPlugin extends Plugin
 		 * Before the pairing checks: a destination pinned from the Stars tab needs no group, and a
 		 * route already received is followed whether or not the next post can be made.
 		 */
-		destinationRoute.sync(DestinationSceneOverlay.shown(config, destinationState));
+		RelayResponse.Destination shown = DestinationSceneOverlay.shown(config, destinationState);
+		/* This client's member, asked only of a destination that names one: see DestinationRoute.sync. */
+		destinationRoute.sync(shown, shown != null && shown.targetMemberId != null ? identity.id() : null);
 		if (destinationRoute.hasRoute())
 		{
 			/* A voyage's rows are ticked by the deck and the boats' ports, read here and never sent. */

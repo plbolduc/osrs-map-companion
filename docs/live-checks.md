@@ -79,6 +79,12 @@ often. A clean run is now 443 tests with no failures or skips.
 - [ ] Send a place from the website: one chat line names it, with its world while you are on
       another, once. A hop or a relog does not say it again, and a pin from Stars or a search pick
       says nothing.
+- [ ] Press **Send to RuneLite** on a place card in the browser *Open the map* opened: Home's card
+      arrives already followed, its first button reading **Pause**, with the step box over the game,
+      the chat line saying *from the map. Following it.* and, with Shortest Path, the first walk
+      drawn. A star's button does the same, its route arriving a few seconds after the place. A
+      friend's **Send to everyone** arrives with **Follow**, says *from your group*, and draws
+      nothing until it is pressed.
 - [ ] Use two characters in one group: see only the other member on the game world map, including
       an edge pin when panned away. Turn sharing off and log out; pins must disappear.
 - [ ] Recover after an unavailable map; switch groups with a snapshot outstanding and confirm the

@@ -293,6 +293,15 @@ public class RelayResponse
 		/** One short line of why, in the sender's words: "T7 · ~16m left". */
 		public String note;
 		/**
+		 * The member this was sent to alone, or null for a send to the whole group.
+		 *
+		 * <p>The map lets a browser name only a RuneLite bound to it, so a destination naming this
+		 * client's member is its player's own Send to RuneLite, and {@link DestinationRoute} follows it
+		 * from the start, as it follows a place picked in the sidebar. One naming nobody is a send to
+		 * everyone, a friend's included, and arrives unfollowed.
+		 */
+		public String targetMemberId;
+		/**
 		 * The map's ways there, each step by step in the website's own words, or null.
 		 *
 		 * <p>Null is today's destination exactly: a pin, an arrow and a line in the sidebar. The map
