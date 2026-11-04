@@ -166,6 +166,55 @@ public class DestinationRouteTest
 		assertNull(route.view());
 	}
 
+	/** A destination as the map sends one to a single member: the player's own Send to RuneLite. */
+	private static RelayResponse.Destination sentTo(String memberId, RelayResponse.Destination destination)
+	{
+		destination.targetMemberId = memberId;
+		return destination;
+	}
+
+	/**
+	 * A place the player sent their own RuneLite from the map is theirs, so it is followed from the
+	 * start, as a place picked in the sidebar is — the box over the game and Shortest Path come up
+	 * without a Follow to press.
+	 */
+	@Test
+	public void aPlaceSentToThisMemberIsFollowedFromTheStart()
+	{
+		DestinationRoute route = new DestinationRoute();
+		route.sync(sentTo("sim-mine", destination("Al Kharid bank", route("item:ring-of-dueling", alKharid()))), "sim-mine");
+		assertTrue(route.view().following);
+	}
+
+	/** Its route can arrive a few seconds after the place; the following starts when it does. */
+	@Test
+	public void aRouteArrivingAfterThePlaceSentToThisMemberStartsTheFollowing()
+	{
+		DestinationRoute route = new DestinationRoute();
+		route.sync(sentTo("sim-mine", destination("Al Kharid bank", null)), "sim-mine");
+		assertFalse(route.view().following);
+		route.sync(sentTo("sim-mine", destination("Al Kharid bank", route("item:ring-of-dueling", alKharid()))), "sim-mine");
+		assertTrue(route.view().following);
+
+		/* Paused, it stays paused when the same place keeps arriving with its route. */
+		route.follow(false);
+		route.sync(sentTo("sim-mine", destination("Al Kharid bank", route("item:ring-of-dueling", alKharid()))), "sim-mine");
+		assertFalse(route.view().following);
+	}
+
+	/** A send to everyone, a friend's included, never takes over the player's own target. */
+	@Test
+	public void aPlaceSentToTheGroupOrToAnotherMemberArrivesUnfollowed()
+	{
+		DestinationRoute route = new DestinationRoute();
+		route.sync(destination("Al Kharid bank", route("item:ring-of-dueling", alKharid())), "sim-mine");
+		assertFalse(route.view().following);
+		route.sync(sentTo("sim-friend", destination("Varrock west bank", route("item:ring-of-dueling", alKharid()))), "sim-mine");
+		assertFalse(route.view().following);
+		route.sync(sentTo("sim-mine", destination("Lumbridge Castle bank", route("item:ring-of-dueling", alKharid()))), null);
+		assertFalse("a client that does not know its member follows nothing it was sent", route.view().following);
+	}
+
 	@Test
 	public void nothingMovesWhereTheTileCannotBeTrusted()
 	{

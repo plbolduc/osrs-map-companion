@@ -265,6 +265,11 @@ answering a reviewer:
   `ItemManager.getItemOutline`, matched with `ItemVariationMapping` and the travel vocabulary's
   charge rules, and the spellbook widget whose sprite is the step's spell icon. It is drawn only,
   under a new **In RuneLite** setting, *Step's teleport outlined*, on by default; nothing is sent.
+- **A place sent to your own RuneLite is followed from the start**: the plugin reads a destination's
+  `targetMemberId`, which the map has always sent, and follows one that names this client's member,
+  as it follows a place picked in the sidebar, and its chat line says so. The map lets a browser
+  name only a RuneLite bound to it, so a friend's send is never followed unasked. Nothing new is
+  sent.
 
 ## Before submission
 

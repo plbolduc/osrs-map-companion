@@ -145,11 +145,17 @@ public class DestinationRoute
 	private boolean refused;
 	private long nextRerouteMs;
 	/**
-	 * The player asked to follow this route: pressed Follow, or Reroute. Only then is Shortest Path
-	 * drawn on, because a destination that merely arrived — a friend's included — must never replace
-	 * the target the player gave it themselves.
+	 * The player asked to follow this route: pressed Follow or Reroute, pressed Route here, or sent
+	 * the place to their own RuneLite from the website. Only then is Shortest Path drawn on, because a
+	 * destination that merely arrived — a friend's included — must never replace the target the
+	 * player gave it themselves.
 	 */
 	private boolean following;
+	/**
+	 * The destination was sent to this member alone and arrived before its route: follow the route
+	 * the moment it arrives, unless the player has said otherwise first. See {@link #sync(RelayResponse.Destination, String)}.
+	 */
+	private boolean followWhenRouted;
 	/** Where the boats were moored on the last tick ashore before this voyage docked; see {@link #done}. */
 	@Nullable
 	private Map<Integer, String> ashore;
@@ -261,8 +267,22 @@ public class DestinationRoute
 			+ "|" + destination.name + "|" + destination.note;
 	}
 
-	/** Bring the route in line with the destination being shown, or none. Called on the game tick. */
+	/** Bring the route in line with the destination being shown, or none, knowing no member. */
 	synchronized void sync(@Nullable RelayResponse.Destination destination)
+	{
+		sync(destination, null);
+	}
+
+	/**
+	 * Bring the route in line with the destination being shown, or none. Called on the game tick
+	 * with this client's member id.
+	 *
+	 * <p>A destination sent to this member alone is the player's own Send to RuneLite, from the map
+	 * beside the game, and is followed from the start as a place picked in the sidebar is: at once if
+	 * its route came with it, or the moment its route arrives, which can be a few seconds after the
+	 * place. Every other destination arrives unfollowed; see {@link #following}.
+	 */
+	synchronized void sync(@Nullable RelayResponse.Destination destination, @Nullable String memberId)
 	{
 		String incoming = keyOf(destination);
 		if (!Objects.equals(incoming, key))
@@ -273,15 +293,34 @@ public class DestinationRoute
 			rerouted = false;
 			rerouting = false;
 			following = false;
+			followWhenRouted = sentHere(destination, memberId);
 			message = null;
 			refused = false;
 			adopt(destination == null ? null : destination.route);
+			followIfOwed();
 			return;
 		}
 		if (destination != null && destination.route != null && !rerouted
 			&& !signature(destination.route).equals(received))
 		{
 			adopt(destination.route);
+			followIfOwed();
+		}
+	}
+
+	/** Whether a destination was sent to this member alone. */
+	static boolean sentHere(@Nullable RelayResponse.Destination destination, @Nullable String memberId)
+	{
+		return destination != null && memberId != null && memberId.equals(destination.targetMemberId);
+	}
+
+	/** Start following a route sent to this member alone, once there is a route to follow. */
+	private void followIfOwed()
+	{
+		if (followWhenRouted && route != null)
+		{
+			followWhenRouted = false;
+			following = true;
 		}
 	}
 
@@ -366,6 +405,7 @@ public class DestinationRoute
 	/** Follow this route, or stop. The player's own press; see {@link #following}. */
 	synchronized void follow(boolean on)
 	{
+		followWhenRouted = false;
 		following = on && route != null;
 		if (following)
 		{
@@ -378,6 +418,7 @@ public class DestinationRoute
 	/** Stop following because something else took Shortest Path over, and say so. */
 	synchronized void stopFollowing(String why)
 	{
+		followWhenRouted = false;
 		if (following)
 		{
 			following = false;
@@ -449,6 +490,7 @@ public class DestinationRoute
 			route = answer;
 			rerouted = true;
 			/* Reroute is a press of the player's own, as Follow is. */
+			followWhenRouted = false;
 			following = true;
 			chosen = best(answer);
 			step = 0;
@@ -515,6 +557,7 @@ public class DestinationRoute
 		message = null;
 		refused = false;
 		adopt(destination.route);
+		followWhenRouted = false;
 		following = route != null;
 	}
 
@@ -527,6 +570,7 @@ public class DestinationRoute
 		received = null;
 		rerouted = false;
 		rerouting = false;
+		followWhenRouted = false;
 		following = false;
 		message = null;
 		refused = false;

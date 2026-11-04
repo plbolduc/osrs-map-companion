@@ -681,12 +681,18 @@ final class NowCards extends JPanel
 	/**
 	 * What the chat box says after "Destination:" when a place arrives from the map: the place in the
 	 * tile label's words, its world while the player is on another, and where Follow is, with the
-	 * player's own key for it once they have chosen one.
+	 * player's own key for it once they have chosen one. A place the player sent this RuneLite
+	 * themselves ({@code yours}) is already being followed, so the line says that instead.
 	 */
-	static String arrivalLine(RelayResponse.Destination destination, int world, Keybind follow)
+	static String arrivalLine(RelayResponse.Destination destination, int world, Keybind follow, boolean yours)
 	{
 		String name = DestinationSceneOverlay.name(destination.name, 40);
-		return (name == null ? "A place" : name) + DestinationSceneOverlay.elsewhere(destination, world) + Words.of("now.arrival")
+		String place = (name == null ? "A place" : name) + DestinationSceneOverlay.elsewhere(destination, world);
+		if (yours)
+		{
+			return place + Words.of("now.arrivalYours") + ".";
+		}
+		return place + Words.of("now.arrival")
 			+ (Keybind.NOT_SET.equals(follow) ? "" : Words.of("now.arrivalKey") + " " + follow) + ".";
 	}
 }
