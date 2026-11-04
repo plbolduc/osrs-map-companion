@@ -34,6 +34,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,14 +88,15 @@ public class RouteStepsViewTest
 	 * The numbers stand in a column of their own, the digit alone, and the step you are on has its
 	 * number in bold amber, its pin's colour on the world map, with its title bold and white. This
 	 * pinned "▸ 1. Lumbridge Home Teleport" as one line: the mark the folds also use, before a
-	 * number that started at a different x on every kind of row.
+	 * number that started at a different x on every kind of row. The line over the steps is the way's
+	 * length alone, because step 1 already names the way.
 	 */
 	@Test
 	public void numbersTheStepsMarksTheCurrentOneAndFoldsTheOtherWays() throws IOException
 	{
 		receive();
 		assertEquals(
-			"Lumbridge Home Teleport · 52 tiles | 1 | Lumbridge Home Teleport | Standard spellbook"
+			"52 tiles | 1 | Lumbridge Home Teleport | Standard spellbook"
 			+ " | Ten seconds to cast, and a combat hit stops it | 2 | Walk 12 tiles to the bank | ▸ 3 other ways",
 			shown());
 		/* Colours, not weights: the test's look and feel draws every label bold already. */
@@ -121,7 +123,7 @@ public class RouteStepsViewTest
 		route.advance(new WorldPoint(3222, 3218, 0));
 		view.show(route.view());
 		/* A step behind is its title alone, so the step being walked is the first bright line. */
-		assertEquals("Lumbridge Home Teleport · 52 tiles | 1 | Lumbridge Home Teleport | 2 | Walk 12 tiles to the bank"
+		assertEquals("52 tiles | 1 | Lumbridge Home Teleport | 2 | Walk 12 tiles to the bank"
 			+ " | ▸ 3 other ways", shown());
 		assertEquals(ColorScheme.MEDIUM_GRAY_COLOR, label("1").getForeground());
 		assertEquals(MapPin.AMBER, label("2").getForeground());
@@ -209,7 +211,8 @@ public class RouteStepsViewTest
 		assertTrue(shown(), shown().endsWith("▾ 3 other ways | Walk | Lumbridge tablet · 58 tiles | Docking point · 1340 tiles"));
 		assertTrue(SidebarWords.press(view, "Walk"));
 		view.show(route.view());
-		assertTrue(shown(), shown().startsWith("Walk | 1 | Walk 140 tiles"));
+		/* The walk has no price and its step says Walk, so there is nothing to say over it. */
+		assertTrue(shown(), shown().startsWith("1 | Walk 140 tiles"));
 		assertTrue("the best way is now the other one", shown().contains("Lumbridge Home Teleport · 52 tiles · best"));
 	}
 
@@ -263,7 +266,29 @@ public class RouteStepsViewTest
 
 		assertTrue(SidebarWords.press(view, "Lumbridge tablet · 58 tiles · not yet"));
 		view.show(route.view());
-		assertTrue(shown(), shown().startsWith("Lumbridge tablet · 58 tiles"));
+		assertTrue(shown(), shown().startsWith("58 tiles | 1 | Use Lumbridge tablet"));
+	}
+
+	/**
+	 * The way's name goes from the line over the steps only where the first step says it. A voyage's
+	 * "Docking point" starts with a walk to the boat, so dropping it would leave the player not knowing
+	 * which of the ways they are on.
+	 */
+	@Test
+	public void theWaysNameStaysWhereTheFirstStepDoesNotSayIt()
+	{
+		RelayResponse.RouteOption docking = new RelayResponse.RouteOption();
+		docking.label = "Docking point";
+		docking.tiles = 1340;
+		RelayResponse.RouteStep walk = new RelayResponse.RouteStep();
+		walk.title = "Walk to Port Sarim";
+		assertEquals("Docking point · 1340 tiles", RouteStepsView.currentWayLine(docking, Arrays.asList(walk)));
+		RelayResponse.RouteStep board = new RelayResponse.RouteStep();
+		board.title = "Use the docking point";
+		assertEquals("whatever its capitals", "1340 tiles", RouteStepsView.currentWayLine(docking, Arrays.asList(board)));
+		docking.tiles = null;
+		assertEquals("", RouteStepsView.currentWayLine(docking, Arrays.asList(board)));
+		assertEquals("Docking point", RouteStepsView.currentWayLine(docking, null));
 	}
 
 	/** The visible button with exactly these words. */

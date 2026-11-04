@@ -514,7 +514,9 @@ Status: **built**, on `claude/where-to-go`, and not yet seen in a real client. I
 of `docs/plan-where-to-go-for-a-task.md` in `osrs-stars-map`.
 
 - **Under the destination's name**, when the map sent a route: the way being followed and its
-  length in run tiles, *Lumbridge Home Teleport · 52 tiles*, then its steps in the card's own words,
+  length in run tiles, then its steps in the card's own words. The way's name is left out where the
+  first step already says it, so *52 tiles* sits over *Cast Lumbridge Home Teleport*, while a voyage
+  keeps *Docking point · 1340 tiles* over its walk to the boat. The steps are
   numbered as the website numbers them, each with the detail and notes the card prints under it.
   The numbers stand in a column of their own, 14px and right-aligned, as the website's journey row
   puts them, and a wrapped title and the lines under it start under the title's first letter.
