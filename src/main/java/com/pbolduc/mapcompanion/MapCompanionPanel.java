@@ -215,6 +215,20 @@ public class MapCompanionPanel extends PluginPanel
 		this.connectCard = new ConnectCard(this, config, settings, plugin, identity, pairing, relay, directiveStream, connectClient,
 			recommendedSharing, this::refresh, this::openSettings, this::applyMapAddress, this::mapUrl);
 		this.groupPanel = new GroupPanel(destinationState, groupState, routePress, meetupClient, config, sprites, connectCard.copyInviteButton);
+		groupPanel.remover(new GroupPanel.Remover()
+		{
+			@Override
+			public boolean offered()
+			{
+				return connectCard.offersRemove();
+			}
+
+			@Override
+			public void remove(String memberId, String name)
+			{
+				connectCard.removeMember(memberId, name);
+			}
+		});
 		this.nowCards = new NowCards(config, destinationState, deathWatcher, destinationMarker, destinationRoute,
 			shortestPath, routePress, clueReader, farmRunRoute, sprites, this::refresh, this::mapUrl);
 		this.dropLuck = new DropLuckPanel(lootLog, DropLuckPanel.Pictures.of(itemManager));

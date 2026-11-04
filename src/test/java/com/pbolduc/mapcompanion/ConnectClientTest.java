@@ -219,6 +219,42 @@ public class ConnectClientTest
 		assertTrue(sent.isEmpty());
 	}
 
+	/**
+	 * Remove from group: the member's own headers and the friend by member id, never a browser, and the
+	 * map's 204 is the removal. Its refusal for somebody who runs the group is printed as it wrote it.
+	 */
+	@Test
+	public void removeNamesTheFriendAsTheMemberAndPrintsTheMapsRefusal() throws Exception
+	{
+		ConnectClient client = client(204, "");
+		ConnectClient.Outcome outcome = outcome(done -> client.remove(MAP, "ABC234", "zezima", SECRET, "friend", done));
+		assertNull(outcome.message);
+		assertNull(outcome.joined);
+		Request request = sent.get(0);
+		assertEquals("DELETE", request.method());
+		assertEquals(MAP + "/api/companion/member", request.url().toString());
+		assertEquals("ABC234", request.header("X-Companion-Code"));
+		assertEquals("zezima", request.header("X-Companion-Member"));
+		assertEquals(SECRET, request.header("X-Companion-Member-Secret"));
+		assertEquals("{\"memberId\":\"friend\"}", body(request).toString());
+
+		ConnectClient refused = client(409, "{\"reason\":\"runs_group\",\"error\":\"They help run this group, so they can only be removed on the website.\"}");
+		ConnectClient.Outcome no = outcome(done -> refused.remove(MAP, "ABC234", "zezima", SECRET, "zezima alt", done));
+		assertEquals("They help run this group, so they can only be removed on the website.", no.message);
+		ConnectClient busy = client(503, "");
+		assertEquals(ConnectClient.BUSY, outcome(done -> busy.remove(MAP, "ABC234", "zezima", SECRET, "friend", done)).message);
+	}
+
+	/** No secret, or nobody named, is a request certain to be refused, so none is sent. */
+	@Test
+	public void removeAsksNothingWithoutASecretOrAFriend() throws Exception
+	{
+		ConnectClient client = client(204, "");
+		assertEquals(ConnectClient.FAILED, outcome(done -> client.remove(MAP, "ABC234", "zezima", null, "friend", done)).message);
+		assertEquals(ConnectClient.FAILED, outcome(done -> client.remove(MAP, "ABC234", "zezima", SECRET, "", done)).message);
+		assertTrue(sent.isEmpty());
+	}
+
 	@Test
 	public void openMapOpensTheLinkTheMapMadeForThisMember() throws Exception
 	{

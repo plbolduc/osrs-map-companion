@@ -30,13 +30,20 @@ member may (`groupOwner`): its RuneLite made the group, or it is bound to an own
 makes one `PATCH /api/companion/group` with the group code, member id and member secret and the new
 name, and keeps the name the map answers with.
 
+**Remove from group.** A friend's card in the Group tab offers **Remove from group…** on a
+right-click, to the same member Rename is offered to. After a confirmation, a press makes one
+`DELETE /api/companion/member` with the group code, member id and member secret and, as JSON, the
+member id of the friend the roster row names. It never names a browser. The map answers 204, or
+refuses somebody who runs the group with a sentence the sidebar prints. Nothing is retried, and the
+friend leaves the roster when the stream next says who is in the group.
+
 **Open the map.** While connected, **Open the map** makes one `POST /api/companion/link` with
 the group code, member id and member secret, and opens the link the map answers with: the map's own
 page, with a one-time token in the URL fragment, which the browser does not send to the map. The
 token is good for ten minutes and once. The map adds that browser to the group as this member, and
 as the group's owner when this RuneLite made the group. A link on another site or in another shape
 is not opened, and with no answer the plain map opens instead, which needs no request. On the login
-screen, where no character names a member, it and **Rename group…** use a character of this RuneLite
+screen, where no character names a member, it, **Rename group…** and **Remove from group…** use a character of this RuneLite
 that the group has already issued a secret to.
 
 While logged in, connecting sends a random member id, your alias, a sender timestamp and pairing

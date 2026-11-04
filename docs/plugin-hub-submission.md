@@ -115,6 +115,9 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RoutePress`, `SearchClien
   token in the URL fragment; otherwise the plain map opens. Never retried.
 - **PATCH /api/companion/group** — one **Rename group…** press, offered only when the map's reply said
   this member may (`groupOwner`). The same three headers; JSON is the new name. No retry.
+- **DELETE /api/companion/member** — one **Remove from group…** press, from a friend's right-click,
+  confirmed first and offered only where Rename is. The same three headers; JSON is the friend's
+  member id from the roster. No retry.
 
 - **POST /api/companion/snapshot** — logged-in state changes, at least two seconds apart, plus
   six-second idle heartbeats (twenty seconds with a stream). JSON comes from `SnapshotBuilder`;

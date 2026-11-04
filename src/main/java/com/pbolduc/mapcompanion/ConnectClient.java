@@ -62,12 +62,15 @@ import okhttp3.Response;
  *   <li><b>Rename group</b> — {@code PATCH /api/companion/group} with the new name, under the same
  *       headers, for a member the map has said may ({@code groupOwner}): the group's maker, or a
  *       member bound to an owner's browser. A group made by Connect is "Our group" until then.
+ *   <li><b>Remove from group</b> — {@code DELETE /api/companion/member} with the member id of the
+ *       friend to remove, under the same headers, for the same member Rename is offered to. The map
+ *       refuses anybody who runs the group, who is removed on the website.
  * </ul>
  *
  * <p><b>What it sends.</b> The installation key the snapshot already carries, so the map knows which
  * RuneLite made or joined a group, and on Join the code and token the player pasted. Open the map
  * sends the code, member id and secret every member request sends, and Rename group sends them with
- * the new name. No character data: a group is made before anything is shared, and the sharing
+ * the new name, Remove from group with the friend's member id. No character data: a group is made before anything is shared, and the sharing
  * choices are offered after.
  *
  * <p><b>When.</b> Only on a press, and one at a time. On the map the plugin was installed for, the
@@ -83,6 +86,7 @@ final class ConnectClient
 	static final String CONNECT = "/api/companion/connect";
 	static final String LINK = "/api/companion/link";
 	static final String GROUP = "/api/companion/group";
+	static final String MEMBER = "/api/companion/member";
 	private static final String INSTALLATION_HEADER = "X-Companion-Installation";
 
 	static final String UNREACHABLE = Words.of("connect.unreachable");
@@ -119,6 +123,12 @@ final class ConnectClient
 		{
 			return new Outcome(null, name, null);
 		}
+
+		/** A removal the map took: nothing to keep and nothing to say but that it happened. */
+		static Outcome removed()
+		{
+			return new Outcome(null, null, null);
+		}
 	}
 
 	/** What {@code /api/companion/connect} reads: nothing, or a code and the token beside it. */
@@ -132,6 +142,12 @@ final class ConnectClient
 	static final class Rename
 	{
 		String name;
+	}
+
+	/** What a removal sends: the friend, by the member id their roster row carries, never a browser. */
+	static final class Removal
+	{
+		String memberId;
 	}
 
 	/** And what it answers. {@code runeliteCode} is absent when the map needs no ticket. */
@@ -308,7 +324,54 @@ final class ConnectClient
 	}
 
 	/**
-	 * What Connect, Join and Rename say to an answer the map refused: busy, the map's own sentence, or
+	 * Remove a friend from the group, as a member who runs it. Offered only where Rename is, so a
+	 * refusal is rare; the one the map gives on purpose, for somebody who runs the group too, is
+	 * printed as it wrote it, and says to use the website.
+	 */
+	void remove(String server, String code, @Nullable String memberId, @Nullable String secret, String friend,
+		Consumer<Outcome> done)
+	{
+		HttpUrl url = HttpUrl.parse(server + MEMBER);
+		if (url == null || code.isEmpty() || memberId == null || !JoinCode.isWellFormedSecret(secret) || friend.isEmpty())
+		{
+			done.accept(Outcome.refused(FAILED));
+			return;
+		}
+		synchronized (this)
+		{
+			if (busy)
+			{
+				done.accept(Outcome.refused(ONE_AT_A_TIME));
+				return;
+			}
+			busy = true;
+		}
+		Removal body = new Removal();
+		body.memberId = friend;
+		Request request = CompanionHttp.member(url, code, memberId, secret).delete(CompanionHttp.json(gson, body))
+			.build();
+		CompanionHttp.enqueue(http.newCall(request),
+			(call, error) -> finish(done, Outcome.refused(UNREACHABLE)),
+			(call, response) -> finish(done, readRemove(response)));
+	}
+
+	/** One answer to a removal: done, or why not. The map answers 204 with no body. Package-private for its test. */
+	Outcome readRemove(Response response)
+	{
+		try (Response close = response)
+		{
+			String text = CompanionHttp.readBounded(close.body(), CompanionHttp.MAX_REPLY_BYTES);
+			Outcome refused = whenRefused(close, text);
+			return refused != null ? refused : Outcome.removed();
+		}
+		catch (IOException | RuntimeException unreadable)
+		{
+			return Outcome.refused(FAILED);
+		}
+	}
+
+	/**
+	 * What Connect, Join, Rename and Remove say to an answer the map refused: busy, the map's own sentence, or
 	 * FAILED when it wrote none. Null for an answer it did not refuse, which the caller reads.
 	 */
 	@Nullable

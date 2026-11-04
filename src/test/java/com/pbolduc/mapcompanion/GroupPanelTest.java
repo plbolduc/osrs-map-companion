@@ -318,6 +318,51 @@ public class GroupPanelTest
 		});
 	}
 
+	/**
+	 * Remove from group… is a friend card's right-click, offered only while the status card says this
+	 * RuneLite runs the group, and asked at the click: the rows are not rebuilt when that changes.
+	 */
+	@Test
+	public void aFriendsCardOffersRemoveOnlyToWhoeverRunsTheGroup() throws Exception
+	{
+		AtomicReference<GroupPanel> panel = new AtomicReference<>();
+		SwingUtilities.invokeAndWait(() -> panel.set(panel()));
+		social();
+		java.util.concurrent.atomic.AtomicBoolean runs = new java.util.concurrent.atomic.AtomicBoolean(false);
+		List<String> removed = new CopyOnWriteArrayList<>();
+		RelayResponse.RosterRow cara = new RelayResponse.RosterRow();
+		cara.id = "cara";
+		cara.name = "Cara";
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.get().remover(new GroupPanel.Remover()
+			{
+				@Override
+				public boolean offered()
+				{
+					return runs.get();
+				}
+
+				@Override
+				public void remove(String memberId, String name)
+				{
+					removed.add(memberId + "/" + name);
+				}
+			});
+			panel.get().refresh(true);
+			Component name = named(panel.get(), "group.route.cara");
+			assertTrue("the card's parts answer a right-click", name.getMouseListeners().length > 0);
+			assertNull("nothing for a member who does not run the group", panel.get().friendMenu(cara));
+			runs.set(true);
+			javax.swing.JPopupMenu menu = panel.get().friendMenu(cara);
+			assertNotNull(menu);
+			javax.swing.JMenuItem item = (javax.swing.JMenuItem) menu.getComponent(0);
+			assertEquals(GroupPanel.REMOVE, item.getText());
+			item.doClick();
+		});
+		assertEquals(Collections.singletonList("cara/Cara"), removed);
+	}
+
 	@Test
 	public void routeToAFriendWaitsForTheirDotThenGoesOnceToWhereTheyStand() throws Exception
 	{

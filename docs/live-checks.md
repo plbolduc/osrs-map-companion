@@ -363,6 +363,13 @@ The website plan's second session, once the routes in the game are built: a memb
       Switch ▾, and an expired invite is refused under its Paste and Join; Hide the code field folds
       it. In Settings → Advanced, Apply with `osrs-map.com` writes `https://osrs-map.com` into the
       field, and with `http://example.com` says why under Apply, with Settings still open.
+- [ ] **Remove from group.** In a group Connect made, the maker right-clicks a friend's card, on the
+      name, on where they are and on Route: each offers *Remove from group…*, and the friend's own
+      right-click offers nothing. The dialog names the friend and the group, and Cancel is the
+      default. Remove: the line under Copy invite · Switch ▾ says *Removed Cara.*, Cara's card goes
+      from the maker's Group tab, and Cara's status card says *Removed from this group*. Cara's old
+      invite is refused; a new one lets her back. Right-click the maker's own second character, if
+      it is listed: the map's refusal says to use the website.
 - [ ] **The group's dialogs.** Rename group… opens with the cursor in its field, stops at the 24th
       character and renames on Enter. Leave group's window is titled with the group's name, its
       buttons are Leave group and Cancel, and Enter cancels; leave a group made by Connect while a
