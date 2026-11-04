@@ -260,6 +260,11 @@ answering a reviewer:
   *Destinations and meetups* on, and never for a pin chosen in this client.
 - **The step box says a step's notes**, as the sidebar does, with a Wilderness warning in the
   sidebar's pink; nothing new is read or sent.
+- **The step's teleport is outlined**: `TeleportOutlineOverlay`, a `WidgetItemOverlay` on the
+  inventory, worn items and spellbook, outlines the followed step's item with
+  `ItemManager.getItemOutline`, matched with `ItemVariationMapping` and the travel vocabulary's
+  charge rules, and the spellbook widget whose sprite is the step's spell icon. It is drawn only,
+  under a new **In RuneLite** setting, *Step's teleport outlined*, on by default; nothing is sent.
 
 ## Before submission
 

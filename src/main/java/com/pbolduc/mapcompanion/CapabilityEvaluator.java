@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.Set;
 import javax.annotation.Nullable;
@@ -41,6 +42,7 @@ import net.runelite.api.gameval.ItemID;
 import net.runelite.api.Item;
 import net.runelite.api.ItemComposition;
 import net.runelite.api.ItemContainer;
+import net.runelite.client.game.ItemVariationMapping;
 
 /**
  * Which travel unlocks the player is carrying, as yes/no answers.
@@ -180,6 +182,46 @@ public class CapabilityEvaluator
 		return null;
 	}
 
+	/** A diary item's tier, the number its name ends in: "Ardougne cloak 2". */
+	private static final Pattern TIER = Pattern.compile(" ([1-9])$");
+
+	/**
+	 * What an item in hand must be to be the one a route step uses, by the id the map sent: that item,
+	 * or one of its family that can make the same trip. The vocabulary's own rule decides the family
+	 * where it names the item, charges and all, so an emptied glory is never it, even were it the one
+	 * the step pictures; RuneLite's variations decide it elsewhere, a trimmed cape among them. The map
+	 * names a diary item at the lowest tier its trip asks for, so a lower tier is not it. A flag told by
+	 * its id is that one item, whichever twin the step pictures.
+	 */
+	static ItemTest stepItem(int stepItem, @Nullable String stepName)
+	{
+		int tier = tier(stepName);
+		for (Capability capability : CAPABILITIES)
+		{
+			if (stepName != null && capability.name.matcher(stepName).find())
+			{
+				return capability.itemId != 0 ? (itemId, name) -> itemId == capability.itemId
+					: (itemId, name) -> name != null && !spent(name) && tier(name) >= tier && capability.name.matcher(name).find();
+			}
+		}
+		int family = ItemVariationMapping.map(stepItem);
+		return (itemId, name) -> itemId == stepItem || name != null && !spent(name) && tier(name) >= tier
+			&& ItemVariationMapping.map(itemId) == family;
+	}
+
+	private static int tier(@Nullable String name)
+	{
+		Matcher tier = TIER.matcher(name == null ? "" : name.trim());
+		return tier.find() ? Integer.parseInt(tier.group(1)) : 0;
+	}
+
+	/** Xeric's talisman, Pharaoh's sceptre, the ring of shadows, the giantsoul amulet: spent, no teleport. */
+	private static boolean spent(String name)
+	{
+		String lower = name.toLowerCase();
+		return lower.contains("(inert)") || lower.contains("(uncharged)");
+	}
+
 	@Inject
 	CapabilityEvaluator(Client client)
 	{
@@ -258,10 +300,8 @@ public class CapabilityEvaluator
 				{
 					continue;
 				}
-				String lower = name.toLowerCase();
-				if (lower.contains("(inert)") || lower.contains("(uncharged)"))
+				if (spent(name))
 				{
-					/* Xeric's talisman, Pharaoh's sceptre, the ring of shadows, the giantsoul amulet: spent, no teleport. */
 					continue;
 				}
 				into.add(name.trim());

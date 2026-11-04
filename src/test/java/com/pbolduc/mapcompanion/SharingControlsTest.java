@@ -68,14 +68,15 @@ public class SharingControlsTest
 			assertEquals(expected, actual);
 			/*
 			 * Sharing's six switches — the name, the four groups and where you died — and this client's
-			 * nine: the two that receive from the map, Route here on the world map, which asks the map
-			 * only on a press of its own, as every Route does, the meetup reminder, and the five that only
+			 * ten: the two that receive from the map, Route here on the world map, which asks the map
+			 * only on a press of its own, as every Route does, the meetup reminder, and the six that only
 			 * draw on this client: Drop luck's chat line, the destination's hint arrow, the followed step's
-			 * box over the game, a farm run's teleports outlined in the bank, and a followed route's walks
-			 * handed to Shortest Path, which is a plugin message inside the client rather than anything
-			 * sent. It was 34 while each field had a box; a group's switch writes those now.
+			 * box over the game and its teleport outlined where it is clicked, a farm run's teleports
+			 * outlined in the bank, and a followed route's walks handed to Shortest Path, which is a plugin
+			 * message inside the client rather than anything sent. It was 34 while each field had a box;
+			 * a group's switch writes those now.
 			 */
-			assertEquals(15, actual.size());
+			assertEquals(16, actual.size());
 			for (SharingFields.Section section : SharingFields.GROUPS)
 			{
 				for (SharingFields.Field field : section.fields)
@@ -422,7 +423,8 @@ public class SharingControlsTest
 				}
 				assertFalse("choosing data is not permission to connect", pairing.hasServerConsent());
 			}
-			assertEquals(15, pressed);
+			/* Every box above, the step's teleport outlined among them. */
+			assertEquals(16, pressed);
 			assertNull(store.get(Pairing.KEY_SERVER_CONSENT));
 		});
 	}

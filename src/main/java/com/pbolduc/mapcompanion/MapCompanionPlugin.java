@@ -308,6 +308,9 @@ public class MapCompanionPlugin extends Plugin
 	private FarmBankOverlay farmBankOverlay;
 
 	@Inject
+	private TeleportOutlineOverlay teleportOutlineOverlay;
+
+	@Inject
 	private KeyManager keyManager;
 
 	/* The two route keys, unset until the player chooses one; see act. */
@@ -554,6 +557,7 @@ public class MapCompanionPlugin extends Plugin
 		routeStepOverlay.pressWith(this::act);
 		overlayManager.add(routeStepOverlay);
 		overlayManager.add(farmBankOverlay);
+		overlayManager.add(teleportOutlineOverlay);
 		keyManager.registerKeyListener(rerouteKey);
 		keyManager.registerKeyListener(followKey);
 		relay.reset();
@@ -610,6 +614,7 @@ public class MapCompanionPlugin extends Plugin
 		overlayManager.remove(voyageMapOverlay);
 		overlayManager.remove(routeStepOverlay);
 		overlayManager.remove(farmBankOverlay);
+		overlayManager.remove(teleportOutlineOverlay);
 		keyManager.unregisterKeyListener(rerouteKey);
 		keyManager.unregisterKeyListener(followKey);
 	}

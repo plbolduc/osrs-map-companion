@@ -286,16 +286,11 @@ class RouteStepOverlay extends OverlayPanel
 	@Nullable
 	static Box box(@Nullable DestinationRoute.View view, @Nullable String name, boolean leg)
 	{
-		if (view == null || !view.following || !view.hasRoute() || view.arrived())
+		RelayResponse.RouteStep step = followed(view);
+		if (step == null)
 		{
 			return null;
 		}
-		List<RelayResponse.RouteStep> steps = view.steps();
-		if (view.step < 0 || view.step >= steps.size())
-		{
-			return null;
-		}
-		RelayResponse.RouteStep step = steps.get(view.step);
 		String named = DestinationSceneOverlay.name(name, NAME_MAX);
 		String title = named == null ? "Route" : named;
 		String line = leg ? step.title : RouteStepsView.stepLine(view.step, step);
@@ -309,6 +304,13 @@ class RouteStepOverlay extends OverlayPanel
 			}
 		}
 		return new Box(title, Text.removeTags(line), said(step.detail), notes, step.itemId, step.spriteId);
+	}
+
+	/** The step a followed route is on, the one the box says; null when none is followed or it has arrived. */
+	@Nullable
+	static RelayResponse.RouteStep followed(@Nullable DestinationRoute.View view)
+	{
+		return view == null || !view.following || view.step < 0 ? null : view.current();
 	}
 
 	/** A line of the step's, its tags taken out, or null when nothing is left of it. */
