@@ -29,6 +29,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.IntConsumer;
 import javax.annotation.Nullable;
 import javax.swing.JButton;
@@ -201,8 +202,9 @@ final class RouteStepsView extends JPanel
 		RelayResponse.RouteOption current = view.way();
 		/* Arrived: the route has done its work, and one line in the way's place says so. */
 		boolean there = view.arrived();
-		way.setVisible(!there);
-		MapCompanionPanel.setWrapped(way, wayLine(current), WIDTH);
+		String line = currentWayLine(current, view.steps());
+		way.setVisible(!there && !line.isEmpty());
+		MapCompanionPanel.setWrapped(way, line, WIDTH);
 
 		boolean nowhere = view.origin == null && !view.rerouted;
 		origin.setVisible(nowhere && !there);
@@ -467,7 +469,28 @@ final class RouteStepsView extends JPanel
 		return (index + 1) + ". " + step.title;
 	}
 
-	/** The way being followed, with its length where the map priced one. */
+	/**
+	 * The line over the steps of the way being followed: its length, and its name only when the first
+	 * step does not already say it. "Lumbridge Home Teleport · 52 tiles" sat over "Cast Lumbridge Home
+	 * Teleport", the same words twice in two lines; a way named for something its first step does not
+	 * mention, such as a voyage's "Docking point", keeps its name. Empty when there is nothing to add.
+	 */
+	static String currentWayLine(@Nullable RelayResponse.RouteOption way, @Nullable List<RelayResponse.RouteStep> steps)
+	{
+		if (way == null)
+		{
+			return "";
+		}
+		String first = steps == null || steps.isEmpty() || steps.get(0).title == null ? "" : steps.get(0).title;
+		boolean named = way.label != null && first.toLowerCase(Locale.ROOT).contains(way.label.toLowerCase(Locale.ROOT));
+		if (!named)
+		{
+			return wayLine(way);
+		}
+		return way.tiles == null ? "" : way.tiles + " tiles";
+	}
+
+	/** A way, with its length where the map priced one. */
 	static String wayLine(@Nullable RelayResponse.RouteOption way)
 	{
 		if (way == null)
