@@ -813,8 +813,10 @@ A meetup was three rows of buttons: Route, then the four answers two by two. Rou
 the title, and the four answers keep their grid. A meetup card is 146px where it was 186.
 
 A friend's **Route** sits beside their name the same way, reading *Finding…*, *Planning…* and
-*Reroute* there, so the words are next to the name they are about. **World map** keeps the row
-under the card, and with the group layer on it still reads *On world map* and is not pressable.
+*Reroute* there, so the words are next to the name they are about. **World map** sits under Route
+in the same corner rather than on a full-width row under the card, which was a row per friend for a
+button pressed now and then; the line saying where the friend is wraps in the narrower column that
+leaves. With the group layer on it still reads *On world map* and is not pressable.
 
 ### The status card
 
