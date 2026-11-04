@@ -30,6 +30,8 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +48,7 @@ import net.runelite.client.ui.overlay.OverlayPanel;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.components.ComponentOrientation;
 import net.runelite.client.ui.overlay.components.ImageComponent;
+import net.runelite.client.ui.overlay.components.LayoutableRenderableEntity;
 import net.runelite.client.ui.overlay.components.LineComponent;
 import net.runelite.client.ui.overlay.components.SplitComponent;
 import net.runelite.client.util.ImageUtil;
@@ -53,7 +56,10 @@ import net.runelite.client.util.Text;
 
 /**
  * The step being walked, in a small box over the game, so a followed route can be walked with the
- * sidebar closed: where it goes, the step the sidebar marks, and the step's own detail.
+ * sidebar closed: where it goes, the step the sidebar marks, and the lines the sidebar prints under
+ * it, its detail and its notes. A note is where the map warns that a step lands in the Wilderness,
+ * so one that names it is drawn in the sidebar's pink for the Wilderness, as the map's card draws it
+ * in red; the box is the only place a player with the sidebar shut would read it.
  *
  * <p>Only while the route is followed, which the player chose, and gone once arrived; the scene's
  * tile, the minimap's dot and the arrow already say where the step ends. Nothing inside an
@@ -186,25 +192,35 @@ class RouteStepOverlay extends OverlayPanel
 			.left(title(box, destination, client.getWorld()))
 			.leftFont(FontManager.getRunescapeBoldFont())
 			.build());
-		LineComponent step = LineComponent.builder().left(box.step).build();
-		LineComponent detail = box.detail == null ? null : LineComponent.builder().left(box.detail).leftColor(Color.LIGHT_GRAY).build();
+		List<LineComponent> words = new ArrayList<>();
+		words.add(LineComponent.builder().left(box.step).build());
+		if (box.detail != null)
+		{
+			words.add(LineComponent.builder().left(box.detail).leftColor(Color.LIGHT_GRAY).build());
+		}
+		for (String note : box.notes)
+		{
+			words.add(LineComponent.builder().left(note)
+				.leftColor(note.contains("Wilderness") ? MapCompanionPanel.REFUSED : Color.LIGHT_GRAY).build());
+		}
 		if (pictured)
 		{
-			/* The picture before the words, and the detail under them past it, as the sidebar's row has them. */
+			/* The picture before the words, and the lines under the step past it, as the sidebar's row has them. */
+			LayoutableRenderableEntity column = words.get(words.size() - 1);
+			for (int i = words.size() - 2; i >= 0; i--)
+			{
+				column = SplitComponent.builder().first(words.get(i)).second(column).build();
+			}
 			panelComponent.getChildren().add(SplitComponent.builder()
 				.orientation(ComponentOrientation.HORIZONTAL)
 				.gap(new Point(PICTURE_GAP, 0))
 				.first(new ImageComponent(picture(box)))
-				.second(detail == null ? step : SplitComponent.builder().first(step).second(detail).build())
+				.second(column)
 				.build());
 		}
 		else
 		{
-			panelComponent.getChildren().add(step);
-			if (detail != null)
-			{
-				panelComponent.getChildren().add(detail);
-			}
+			panelComponent.getChildren().addAll(words);
 		}
 		return super.render(graphics);
 	}
@@ -238,6 +254,8 @@ class RouteStepOverlay extends OverlayPanel
 		final String step;
 		@Nullable
 		final String detail;
+		/** What the sidebar prints under the step: a Wilderness warning, a ride's asks, a note. */
+		final List<String> notes;
 		/** The step's picture by the id the map sent, the item clicked or the spell's icon; both null for words alone. */
 		@Nullable
 		final Integer itemId;
@@ -280,9 +298,25 @@ class RouteStepOverlay extends OverlayPanel
 		RelayResponse.RouteStep step = steps.get(view.step);
 		String named = DestinationSceneOverlay.name(name, NAME_MAX);
 		String title = named == null ? "Route" : named;
-		String detail = step.detail == null || Text.removeTags(step.detail).trim().isEmpty() ? null : Text.removeTags(step.detail).trim();
 		String line = leg ? step.title : RouteStepsView.stepLine(view.step, step);
-		return new Box(title, Text.removeTags(line), detail, step.itemId, step.spriteId);
+		List<String> notes = new ArrayList<>();
+		for (String note : step.notes == null ? Collections.<String>emptyList() : step.notes)
+		{
+			String said = said(note);
+			if (said != null)
+			{
+				notes.add(said);
+			}
+		}
+		return new Box(title, Text.removeTags(line), said(step.detail), notes, step.itemId, step.spriteId);
+	}
+
+	/** A line of the step's, its tags taken out, or null when nothing is left of it. */
+	@Nullable
+	private static String said(@Nullable String text)
+	{
+		String said = text == null ? "" : Text.removeTags(text).trim();
+		return said.isEmpty() ? null : said;
 	}
 
 	/** The box's first line: the destination's name, and its world while the player is on another. */
