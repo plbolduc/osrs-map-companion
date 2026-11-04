@@ -166,4 +166,4 @@ search.boxTip=Search the map: a place, a character, a monster or an item. A pick
 
 # UpdateNotice: the one chat line an update says, on the first login after it. Every release writes
 # it again for what that release changed, and moves CompanionVersion.LINE_VERSION with it.
-update.line=connect and invite from the sidebar, farm and port-task runs, Route here on the world map, your step over the game, star routes on Stars, and sharing in six switches.
+update.line=places you send yourself are followed from the start, your step's teleport is outlined, the step box shows notes and has a Shift-right-click menu, and you can remove a friend from Group.
