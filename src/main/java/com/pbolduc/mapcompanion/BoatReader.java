@@ -113,6 +113,23 @@ public class BoatReader
 		this.client = client;
 	}
 
+	/**
+	 * Whether this varbit is one a boat's mooring or focus is read from — what a reader of the
+	 * moorings asks before reading again, because each read looks every port up in the game's
+	 * database.
+	 */
+	static boolean watches(int varbitId)
+	{
+		for (int i = 0; i < SLOTS; i++)
+		{
+			if (varbitId == PORT[i] || varbitId == FOCUS[i] || varbitId == OWNED[i])
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public void onSessionResumed(long nowMs)
 	{
 		settle.resumed(nowMs);

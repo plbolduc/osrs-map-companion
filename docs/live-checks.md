@@ -189,6 +189,15 @@ steps wait on these readings (`osrs-stars-map/docs/plan-where-to-go-for-a-task.m
         it keeps the port the boat left until it docks, the reader could keep sending while aboard;
       - `SAILING_BOAT_1_TELEPORT_FOCUS` (19270) reads 0, 1 and 2 for no focus, a teleportation
         focus and a greater one.
+- [ ] **Your boats on the world map (`BoatPins`, built and tested, not yet seen live).** With
+      *Your boats on the world map* on, its default, and before Connect, open the world map:
+      - a gold-ringed boat pin stands at each port one of your boats is moored at, on the pier
+        rather than in the sea or the town, at the mooring the website marks. Hover names the port;
+      - every port a boat is at has a pin. One missing means the game's `SailingDock` name for it
+        differs from the map's `lib/mooring-requirements.ts`, whose join would miss it too;
+      - the pins stay through a hop, go while you stand on a deck, and come back at the new
+        mooring once you step ashore after docking somewhere else;
+      - logging out, switching character or turning the setting off takes them all away.
 - [ ] **Following a voyage (`DestinationRoute`, built and tested, not yet seen live).** Send a
       place across the water with *Progress and travel* on, press **Follow**, and sail it:
       - *Board your boat* ticks on stepping onto the deck, not at the gangplank. The deck test is

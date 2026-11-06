@@ -63,6 +63,8 @@ class MapPin extends WorldMapPoint
 {
 	/** The map's amber: the colour of "the thing you asked about", there and here. */
 	static final Color AMBER = new Color(245, 158, 11);
+	/** The gold of the website's ring round what is yours: its amber-400. */
+	static final Color GOLD = new Color(251, 191, 36);
 
 	private static final int DISC = 18;
 	private static final int TAIL = 8;
@@ -82,8 +84,14 @@ class MapPin extends WorldMapPoint
 	 */
 	MapPin(WorldPoint where, Color colour, String text, boolean faded, String name, @Nullable Supplier<String> tooltip)
 	{
+		this(where, disc(colour, text, faded), faded, name, tooltip);
+	}
+
+	/** A pin wearing a picture of its own rather than a member's disc — see {@link #boatDisc}. */
+	MapPin(WorldPoint where, BufferedImage disc, boolean faded, String name, @Nullable Supplier<String> tooltip)
+	{
 		super(where, null);
-		this.disc = disc(colour, text, faded);
+		this.disc = disc;
 		this.pin = pin(disc, faded);
 		this.tip = new Point(pin.getWidth() / 2, pin.getHeight() - 1);
 		this.tooltip = tooltip;
@@ -209,6 +217,29 @@ class MapPin extends WorldMapPoint
 			int y = (image.getHeight() - metrics.getHeight()) / 2 + metrics.getAscent();
 			g.drawString(text, x, y);
 		}
+		g.dispose();
+		return image;
+	}
+
+	/**
+	 * The player's own boat: a dark disc in a gold ring, the picture the website puts round the
+	 * mooring that holds it and round a saved house, so "yours" is one mark on both. A hull and a
+	 * sail are drawn rather than a letter, because a boat has no initials to give.
+	 */
+	static BufferedImage boatDisc()
+	{
+		BufferedImage image = new BufferedImage(DISC + 2, DISC + 2, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g = image.createGraphics();
+		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		g.setColor(new Color(41, 37, 36));
+		g.fillOval(1, 1, DISC - 1, DISC - 1);
+		g.setColor(GOLD);
+		g.setStroke(new BasicStroke(2f));
+		g.drawOval(1, 1, DISC - 1, DISC - 1);
+		g.setColor(new Color(244, 244, 245));
+		/* The sail, a triangle off the mast, then the hull under it. */
+		g.fillPolygon(new int[]{10, 10, 15}, new int[]{4, 12, 12}, 3);
+		g.fillPolygon(new int[]{4, 16, 14, 6}, new int[]{13, 13, 16, 16}, 4);
 		g.dispose();
 		return image;
 	}

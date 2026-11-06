@@ -34,6 +34,10 @@ as a line on the world map, and the docking mooring's Sailing level and quests s
 Shortest Path draws only the walks. With **Progress and travel** shared, which includes your boats
 and moorings, voyages start where your boats are.
 
+Each of your boats is pinned on the game's world map at the port where it is moored, read from
+your own client with nothing sent, so the pins need no Connect. Two boats at one port share a pin.
+**Your boats on the world map** in Settings turns them off.
+
 ## Search for a place or item
 
 Search for banks, shops, NPCs, monsters and items from **Home**. An item can show the monsters

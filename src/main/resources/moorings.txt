@@ -1,0 +1,66 @@
+# Every Sailing mooring by name, matched to the port the game's SailingDock table names, at
+# the wiki's map-pin tile: name|x|y. BoatPins reads it to pin your boats on the world map.
+# Generated from lib/mooring-requirements.ts in the osrs-stars-map repository by
+# `npm run sync:plugin-moorings`. Do not edit here: lib/plugin-contract.test.ts asserts
+# the two agree.
+Port Sarim|3051|3193
+The Pandemonium|3070|2987
+Land's End|1507|3403
+Hosidius|1726|3452
+Musa Point|2961|3146
+Port Piscarilius|1845|3687
+Rimmington|2906|3225
+Catherby|2796|3412
+Brimhaven|2758|3230
+Ardougne|2671|3265
+Port Khazard|2686|3162
+Witchaven|2747|3305
+Entrana|2879|3336
+Civitas illa Fortis|1775|3142
+Corsair Cove|2580|2844
+Dognose Island|3061|2631
+Cairn Isle|2750|2952
+Chinchompa Island|1893|3429
+Sunset Coast|1512|2974
+Remote Island|2972|2602
+The Summer Shore|3174|2367
+The Little Pearl|3354|2216
+Aldarin|1452|2970
+Vatrachos Island|1872|2984
+The Onyx Crest|2997|2288
+Ruins of Unkah|3144|2825
+Shimmering Atoll|1557|2770
+Void Knights' Outpost|2651|2678
+Port Roberts|1861|3307
+Anglers' Retreat|2466|2720
+Red Rock|2809|2509
+Minotaurs' Rest|1958|3116
+Isle of Souls|2283|2822
+Isle of Bones|2533|2530
+Laguna Aurorae|1202|2732
+Charred Island|2660|2394
+Tear of the Soul|2318|2773
+Rellekka|2630|3705
+Wyrmscraig|2568|2296
+Wyrmscraig Cavern|2582|8606
+Wintumber Island|2057|2605
+The Crown Jewel|1765|2658
+Etceteria|2613|3840
+Port Tyras|2144|3120
+Lledrith Island|2097|3187
+Deepfin Point|1923|2758
+Jatizso|2412|3780
+Neitiznot|2309|3782
+Rainbow's End|2345|2269
+Prifddinas|2158|3324
+Sunbleak Island|2189|2326
+Ynysdail|2222|3464
+Waterbirth Island|2543|3765
+Piscatoris|2304|3689
+Lunar Isle|2152|3881
+Buccaneers' Haven|2080|3690
+Drumstick Isle|2150|3529
+Weiss|2861|3971
+Brittle Isle|1954|4055
+Grimstone|2928|4055
+Last Light|2850|2330

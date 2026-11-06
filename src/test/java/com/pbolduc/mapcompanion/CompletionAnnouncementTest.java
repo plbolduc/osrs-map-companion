@@ -79,6 +79,7 @@ public class CompletionAnnouncementTest
 		plugin.destinationState = new DestinationState(new Gson());
 		plugin.destinationMarker = new TestDestinationMarker();
 		plugin.groupMarkers = new GroupMarkers(null, null);
+		plugin.boatPins = new BoatPins(null, null);
 		plugin.rewardObserver = new RewardObserver(definitions.client, catalog, catalog::contains, () -> 1000L);
 		TestFarmRuns.attach(plugin);
 		set("client", game.client());

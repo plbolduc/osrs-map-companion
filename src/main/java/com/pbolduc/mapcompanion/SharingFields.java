@@ -160,6 +160,7 @@ final class SharingFields
 	 */
 	static final Field DESTINATIONS = field("showDestination", MapCompanionConfig::showDestination);
 	static final Field GROUP_ON_WORLD_MAP = field("showGroupOnWorldMap", MapCompanionConfig::showGroupOnWorldMap);
+	static final Field BOATS_ON_WORLD_MAP = field("showBoatsOnWorldMap", MapCompanionConfig::showBoatsOnWorldMap);
 	static final Field HINT_ARROW = field("destinationHintArrow", MapCompanionConfig::destinationHintArrow);
 	static final Field STEP_ON_SCREEN = field("showStepOnScreen", MapCompanionConfig::showStepOnScreen);
 	static final Field STEP_TELEPORT = field("outlineStepTeleport", MapCompanionConfig::outlineStepTeleport);
@@ -170,6 +171,6 @@ final class SharingFields
 	static final Field BANK_MARKS = field("markFarmRunInBank", MapCompanionConfig::markFarmRunInBank);
 
 	static final List<Field> CLIENT = Collections.unmodifiableList(Arrays.asList(
-		DESTINATIONS, GROUP_ON_WORLD_MAP, HINT_ARROW, STEP_ON_SCREEN, STEP_TELEPORT, SHORTEST_PATH, ROUTE_HERE, NOTIFY_MEETUPS,
+		DESTINATIONS, GROUP_ON_WORLD_MAP, BOATS_ON_WORLD_MAP, HINT_ARROW, STEP_ON_SCREEN, STEP_TELEPORT, SHORTEST_PATH, ROUTE_HERE, NOTIFY_MEETUPS,
 		DROP_LUCK_CHAT, BANK_MARKS));
 }
