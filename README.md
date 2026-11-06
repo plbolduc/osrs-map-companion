@@ -97,19 +97,27 @@ Can't or On my way.
 
 ## On osrs-map.com
 
+<p>
+  <img src="docs/mockups/website-group.jpg" width="600" alt="The website with two friends, Bob and Cara, on the map at Lumbridge: the Group tab lists both with their world and Bob's Dragon Slayer I quest, a Barrows run meetup tonight with Going, Maybe, Can't and On my way, and a teleport's card with its ways there">
+</p>
+
 **Open the map** opens the website as you, for a bigger map on another screen: you and your
-friends as you play, with your task, clue, farm patches and birdhouses on it.
+friends as you play, your meetups, and your task, clue, farm patches and birdhouses.
 
 <p>
-  <img src="docs/mockups/website-slayer.jpg" width="360" alt="The website's Slayer panel for 143 Aberrant spectres: ranked places, monster variants, access requirements and controls for the list">
+  <img src="docs/mockups/website-route.jpg" width="600" alt="A route to Ynysdail drawn on the website's map: five numbered steps, the Sailors' amulet to Deepfin Point, the ship to Prifddinas, a walk to the boat and the boat to the island, each with a numbered pin on the map">
+</p>
+
+Any place on the map has its fastest ways there, teleports and rides included, drawn as numbered
+pins. **Send to RuneLite** puts the route in your sidebar.
+
+<p>
+  <img src="docs/mockups/website-slayer.jpg" width="270" alt="The website's Slayer panel for 143 Aberrant spectres: ranked places, monster variants, access requirements and controls for the list">
+  <img src="docs/mockups/website-sailing.jpg" width="270" alt="Port Sarim's task board on the website: courier tasks ranked by XP per sailed tile, then bounty tasks ranked for the whole trip and hunt">
 </p>
 
 Compare every place for your Slayer task, or a port's courier and bounty jobs, and send the one you
 pick to RuneLite.
-
-<p>
-  <img src="docs/mockups/website-sailing.jpg" width="360" alt="Port Sarim's task board on the website: courier tasks ranked by XP per sailed tile, then bounty tasks ranked for the whole trip and hunt">
-</p>
 
 ## Drop luck
 
