@@ -2,8 +2,8 @@
 
 Where to go for what you are doing, and the fastest way there, teleports included. A drop, your
 Slayer task, a clue, a farm run, a Sailing port task, a shooting star or a friend becomes numbered
-steps in your sidebar, planned around what your account can use. Map Companion plans the
-journey; [Shortest Path](https://github.com/Skretzo/shortest-path) draws each walk.
+steps in your sidebar, planned around what your account can use. [osrs-map.com](https://osrs-map.com)
+plans the journey; [Shortest Path](https://github.com/Skretzo/shortest-path) draws each walk.
 
 Play with friends too: see where they are and what they are doing, from levels and drops to
 quests, route to them, and plan meetups.
