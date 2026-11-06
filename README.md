@@ -1,10 +1,15 @@
 # OSRS Map Companion
 
-Bring [osrs-map.com](https://osrs-map.com)'s routes, search and shooting stars into RuneLite,
-and see your character and friends on the website.
+Where to go for what you are doing, and the fastest way there, teleports included. A drop, your
+Slayer task, a clue, a farm run, a Sailing port task, a shooting star or a friend becomes numbered
+steps in your sidebar, planned around what your account can use. Map Companion plans the
+journey; [Shortest Path](https://github.com/Skretzo/shortest-path) draws each walk.
+
+Play with friends too: see where they are and what they are doing, from levels and drops to
+quests, route to them, and plan meetups.
 
 [Getting started](#getting-started) · [Search](#search-for-a-place-or-item) ·
-[Farm runs](#farm-runs-in-runelite) · [Slayer](#slayer-in-runelite) · [Sailing](#sailing-on-the-website) ·
+[Slayer](#slayer-in-runelite) · [Farm runs](#farm-runs-in-runelite) · [Sailing](#port-tasks-in-runelite) ·
 [What's new](https://osrs-map.com/whats-new)
 
 ## Routes in RuneLite
@@ -56,78 +61,6 @@ Search for banks, shops, NPCs, monsters and items from **Home**. An item can sho
 that drop it and the shops that sell it. Pick a place, monster or shop to plan the way there.
 Results use the game's map icons and item sprites.
 
-## Farm runs in RuneLite
-
-<p>
-  <img src="docs/mockups/sidebar-farm-run.png" width="300" alt="A farm run's card in the sidebar: Before you leave counting one teleport not on you, Falador done and folded to one line, Catherby next with its number in amber and This leg's steps under it, the birdhouse done and the bank visited, and Pause, Reroute and End run">
-</p>
-
-Build a run on the website and press **Send run to RuneLite**, or choose a preset, **Ready now**,
-**Birdhouses** or your **Farming contract** under **Farm run** on Home and press **Start run**;
-the choice steps aside while the run is going, so a stray press cannot replace it.
-The sidebar lists your stops and how to reach each one, with the steps to the next stop under it
-as **This leg**; a finished stop folds to one line. **Before you leave** is a bank checklist:
-closed, it counts the teleports it can tell you are not carrying, and in the bank it outlines them.
-Numbered pins mark the stops on the game's world map.
-
-A farm stop becomes **Done** after the plugin witnesses every patch it needs being replanted.
-Arriving or harvesting alone does not finish it. Birdhouses use a fresh seeded Time Tracking
-sighting, labelled as such. Personal stops say **Visited** when you reach them.
-**Reroute** reorders what remains from where you stand; **End run** clears the run.
-**Pause** keeps the itinerary, and **Follow** resumes it. A route you choose yourself
-pauses the run. With Shortest Path installed, its walking legs can be drawn as you reach them.
-Runs live in the map server's memory. If that server restarts, the old run ends and **Start run**
-can make a new one in the same client session.
-
-## Friends and meetups
-
-<p>
-  <img src="docs/mockups/sidebar-group.png" width="300" alt="The Group tab: three friends with their initials on their discs and a dot in each corner for online, idle or offline, Route beside a name, a Woodcutting level, an Abyssal whip drop and a quest finished, then a star-hunt meetup with each answer and who gave it, and tomorrow's raid folded to one line">
-</p>
-
-**Group** shows your friends' locations and their latest news: a level, a drop, a quest or an
-achievement diary. Friends who share their position appear on the website and, if you enable it,
-on RuneLite's world map in the same colours. **Route** plans the way to a friend's current position.
-
-If you made the group or own it, right-click a friend and choose **Remove from group…** to take them out;
-only a new invite lets them back. Co-owners are removed on the website.
-
-Create a meetup with **Meet here…**, see who is coming, and answer **Going**, **Maybe**, **Can't**
-or **On my way**. You can turn on a reminder before it starts.
-
-## Shooting stars
-
-<p>
-  <img src="docs/mockups/stars-tab-list.png" width="300" alt="The Stars tab: a star at Rimmington mine pinned with its route under it, a Rimmington tablet and a walk, with Pause, Reroute and Unpin; then the tier and world filters, and the stars grouped by site, each tier in its own colour, with Data from Star Miners at the foot">
-</p>
-
-**Stars** lists active stars by site, world, tier and estimated time left. Filter by tier and
-world type, and save favourite sites; your filters and favourites stay on your computer.
-Pick a precise site to pin it on the world map or plan a route there. The route's steps show under
-the star as they do on Home, so you can stay on Stars while you hop.
-
-To change worlds, type `::hop` and the world, for example `::hop 444`.
-
-## Drop luck
-
-<p>
-  <img src="docs/mockups/sidebar-drop-luck.png" width="300" alt="Drop luck for an Aberrant spectre: 1,300 recorded kills without the selected robe bottom, a Very dry verdict, and the chance over the next 100 kills">
-</p>
-
-See how lucky or dry you are on the monster you are killing, with sourced drop odds, a dry-streak
-comparison and the chance over your next kills. **All monsters** opens your recorded history.
-Optional chat lines report your luck when a drop lands. Drop luck also works without connecting
-to the website.
-
-## Your character on the website
-
-The website follows your character's position, floor and world as you play. See your slayer task,
-clue step, hunter rumour, Mahogany Homes job and farming contract on the map, alongside birdhouse
-timers and the farm patches you have visited.
-Patch tracking includes hops, bushes, hardwood and spirit trees, cactus and the Guild's
-special patches, alongside herbs, allotments, flowers and trees.
-Completed farming contracts point back to Guildmaster Jane to hand them in.
-
 <a id="slayer-on-the-website"></a>
 
 ## Slayer in RuneLite
@@ -154,15 +87,28 @@ Share your task to compare ranked places to do it and the other monsters that co
 See access requirements, filter out Wilderness or unusable places, and send your chosen place
 to RuneLite to follow the route there.
 
-## Sailing on the website
+## Farm runs in RuneLite
 
 <p>
-  <img src="docs/mockups/website-sailing.jpg" width="360" alt="Port Sarim's task board on the website: courier tasks ranked by XP per sailed tile, then bounty tasks ranked for the whole trip and hunt">
+  <img src="docs/mockups/sidebar-farm-run.png" width="300" alt="A farm run's card in the sidebar: Before you leave counting one teleport not on you, Falador done and folded to one line, Catherby next with its number in amber and This leg's steps under it, the birdhouse done and the bank visited, and Pause, Reroute and End run">
 </p>
 
-Open a port task board on osrs-map.com to compare courier and bounty jobs, their levels and XP.
-Couriers are ranked by XP per sailed tile; bounties account for the sail out and back and the
-expected hunting. A bounty's pin opens the creature on the map.
+Build a run on the website and press **Send run to RuneLite**, or choose a preset, **Ready now**,
+**Birdhouses** or your **Farming contract** under **Farm run** on Home and press **Start run**;
+the choice steps aside while the run is going, so a stray press cannot replace it.
+The sidebar lists your stops and how to reach each one, with the steps to the next stop under it
+as **This leg**; a finished stop folds to one line. **Before you leave** is a bank checklist:
+closed, it counts the teleports it can tell you are not carrying, and in the bank it outlines them.
+Numbered pins mark the stops on the game's world map.
+
+A farm stop becomes **Done** after the plugin witnesses every patch it needs being replanted.
+Arriving or harvesting alone does not finish it. Birdhouses use a fresh seeded Time Tracking
+sighting, labelled as such. Personal stops say **Visited** when you reach them.
+**Reroute** reorders what remains from where you stand; **End run** clears the run.
+**Pause** keeps the itinerary, and **Follow** resumes it. A route you choose yourself
+pauses the run. With Shortest Path installed, its walking legs can be drawn as you reach them.
+Runs live in the map server's memory. If that server restarts, the old run ends and **Start run**
+can make a new one in the same client session.
 
 ## Port tasks in RuneLite
 
@@ -177,6 +123,65 @@ pickup and drop-off in the order that fits your boat's hold, then each bounty ou
 and back to its board. Each stop's voyage starts where your boat docked last, draws on the world
 map, and ticks off from the task's own counters. The website's **You → Port tasks** shows the
 same order.
+
+## Sailing on the website
+
+<p>
+  <img src="docs/mockups/website-sailing.jpg" width="360" alt="Port Sarim's task board on the website: courier tasks ranked by XP per sailed tile, then bounty tasks ranked for the whole trip and hunt">
+</p>
+
+Open a port task board on osrs-map.com to compare courier and bounty jobs, their levels and XP.
+Couriers are ranked by XP per sailed tile; bounties account for the sail out and back and the
+expected hunting. A bounty's pin opens the creature on the map.
+
+## Shooting stars
+
+<p>
+  <img src="docs/mockups/stars-tab-list.png" width="300" alt="The Stars tab: a star at Rimmington mine pinned with its route under it, a Rimmington tablet and a walk, with Pause, Reroute and Unpin; then the tier and world filters, and the stars grouped by site, each tier in its own colour, with Data from Star Miners at the foot">
+</p>
+
+**Stars** lists active stars by site, world, tier and estimated time left. Filter by tier and
+world type, and save favourite sites; your filters and favourites stay on your computer.
+Pick a precise site to pin it on the world map or plan a route there. The route's steps show under
+the star as they do on Home, so you can stay on Stars while you hop.
+
+To change worlds, type `::hop` and the world, for example `::hop 444`.
+
+## Friends and meetups
+
+<p>
+  <img src="docs/mockups/sidebar-group.png" width="300" alt="The Group tab: three friends with their initials on their discs and a dot in each corner for online, idle or offline, Route beside a name, a Woodcutting level, an Abyssal whip drop and a quest finished, then a star-hunt meetup with each answer and who gave it, and tomorrow's raid folded to one line">
+</p>
+
+**Group** shows your friends' locations and their latest news: a level, a drop, a quest or an
+achievement diary. Friends who share their position appear on the website and, if you enable it,
+on RuneLite's world map in the same colours. **Route** plans the way to a friend's current position.
+
+If you made the group or own it, right-click a friend and choose **Remove from group…** to take them out;
+only a new invite lets them back. Co-owners are removed on the website.
+
+Create a meetup with **Meet here…**, see who is coming, and answer **Going**, **Maybe**, **Can't**
+or **On my way**. You can turn on a reminder before it starts.
+
+## Your character on the website
+
+The website follows your character's position, floor and world as you play. See your slayer task,
+clue step, hunter rumour, Mahogany Homes job and farming contract on the map, alongside birdhouse
+timers and the farm patches you have visited.
+Patch tracking includes hops, bushes, hardwood and spirit trees, cactus and the Guild's
+special patches, alongside herbs, allotments, flowers and trees.
+Completed farming contracts point back to Guildmaster Jane to hand them in.
+
+## Drop luck
+
+<p>
+  <img src="docs/mockups/sidebar-drop-luck.png" width="300" alt="Drop luck for an Aberrant spectre: 1,300 recorded kills without the selected robe bottom, a Very dry verdict, and the chance over the next 100 kills">
+</p>
+
+See how lucky or dry you are on the monster you are killing, with sourced drop odds, a dry-streak
+comparison and the chance over your next kills. **All monsters** opens your recorded history.
+Optional chat lines report your luck when a drop lands. Drop luck also works without connecting
+to the website.
 
 The pictures use made-up characters and stars.
 
