@@ -119,9 +119,9 @@ import net.runelite.client.util.ImageUtil;
 @Slf4j
 @PluginDescriptor(
 	name = "OSRS Map Companion",
-	description = "Step-by-step routes, search, farm runs and shooting stars from osrs-map.com in your sidebar, "
+	description = "Step-by-step routes with teleports, search, farm runs and shooting stars from osrs-map.com in your sidebar, "
 		+ "with the friends you invite on the world map.",
-	tags = {"map", "routes", "search", "stars", "farming", "slayer", "clue", "sailing", "group", "friends", "travel"}
+	tags = {"map", "routes", "teleport", "navigation", "search", "stars", "farming", "slayer", "clue", "sailing", "group", "friends", "travel"}
 )
 public class MapCompanionPlugin extends Plugin
 {

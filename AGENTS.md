@@ -55,4 +55,5 @@ what, what may leave the machine, and how to commit.
   and pending live-client checks in the picture's evidence; never claim a renderer is a game visit.
 - After an affected README change, read it as a new player, check links and picture files, and
   inspect a phone preview in both themes for legibility and overflow. Keep capture provenance in
-  `docs/review-evidence/`; `readme-2026-11-02.md` records the current pictures and their limitations.
+  `docs/review-evidence/`; `readme-2026-11-02.md` and `readme-2026-11-06.md` record the current
+  pictures and their limitations.

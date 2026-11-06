@@ -245,7 +245,11 @@ screenshot tools are outside `src/main`. Bundled third-party notices accompany t
 ## Changes since the approved submission
 
 What the next Hub update brings. Its description names each in a few words; the detail here is for
-answering a reviewer. Nothing yet since 1.5.0.
+answering a reviewer. Since 1.5.0:
+
+- **The listing says the routes use teleports.** `description=` and the descriptor say *routes with
+  teleports*, and the tags gain `teleport` and `navigation`. The README opens on the same idea and
+  its sections are reordered, not reworded.
 
 ## Before submission
 
