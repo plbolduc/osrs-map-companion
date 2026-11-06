@@ -166,4 +166,4 @@ search.boxTip=Search the map: a place, a character, a monster or an item. A pick
 
 # UpdateNotice: the one chat line an update says, on the first login after it. Every release writes
 # it again for what that release changed, and moves CompanionVersion.LINE_VERSION with it.
-update.line=places you send yourself are followed from the start, your step's teleport is outlined, the step box shows notes and has a Shift-right-click menu, and you can remove a friend from Group.
+update.line=your boats are pinned on the world map at the port where each one is moored.
