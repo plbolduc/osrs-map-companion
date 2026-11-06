@@ -250,6 +250,9 @@ answering a reviewer. Since 1.5.0:
 - **The listing says the routes use teleports.** `description=` and the descriptor say *routes with
   teleports*, and the tags gain `teleport` and `navigation`. The README opens on the same idea and
   its sections are reordered, not reworded.
+- **Your boats on the world map.** A pin at each port one of the player's boats is moored at, from
+  the boat reader voyages already use and a bundled table of moorings (`moorings.txt`). Nothing new
+  is sent or requested; a new setting, on by default, turns the pins off.
 
 ## Before submission
 

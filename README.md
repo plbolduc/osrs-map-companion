@@ -67,7 +67,8 @@ are missing, and ticks a stop off once you have replanted it.
 </p>
 
 A voyage in your own boat is its own steps, board, sail and dock, starting where your boat is.
-They tick off as you go, and the sail is drawn on the world map.
+They tick off as you go, and the sail is drawn on the world map. Each of your boats is pinned on
+the world map at the port where it is moored, with nothing sent and no Connect needed.
 
 <p>
   <img src="docs/mockups/sidebar-port-tasks.png" width="225" alt="A port-task run in the RuneLite Port tasks card: Port Khazard done and folded to one line, Ardougne next with its crates to deliver and This leg's steps under it, from the walk to the boat to the ledger table, then the osprey hunt and Brimhaven's task board">
@@ -262,8 +263,9 @@ rename it there, and remove a friend by right-clicking them under **Group**.
 
 Under **In RuneLite**, **Destinations and meetups**, **Group on the world map** and **Meetup reminder**
 start off; the step after Connect ticks the first two for you to confirm. **Drop luck in chat**,
-**Hint arrow to a destination**, **Step on screen**, **Step's teleport outlined**, **Draw paths with
-Shortest Path** and **Farm run teleports in the bank** start on; none of them sends anything.
+**Your boats on the world map**, **Hint arrow to a destination**, **Step on screen**, **Step's
+teleport outlined**, **Draw paths with Shortest Path** and **Farm run teleports in the bank** start
+on; none of them sends anything.
 **Route here on the world map** starts on too, and sends only when you choose it. The keys for
 Reroute and Follow, and how many minutes before a meetup the reminder comes, are in RuneLite's own
 settings for the plugin.

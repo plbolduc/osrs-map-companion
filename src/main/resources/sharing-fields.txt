@@ -29,6 +29,7 @@ shareName|Character name|The display name of the character you are logged in as.
 shareDeath|Where you died|The tile of your most recent death, forgotten after an hour.
 showDestination|Destinations and meetups|Receive destinations and meetup details. Nothing is clicked or walked for you.
 showGroupOnWorldMap|Group on the world map|Receive the positions your group already shares and draw them on the world map.
+showBoatsOnWorldMap|Your boats on the world map|Pin each of your boats at the port where it is moored. Nothing leaves this computer.
 destinationHintArrow|Hint arrow to a destination|Point the game's own arrow at a destination once it is nearby. Nothing leaves this computer.
 showStepOnScreen|Step on screen|While you follow a route, the step you are on in a small box over the game. Nothing leaves this computer.
 outlineStepTeleport|Step's teleport outlined|While you follow a route, the item or spell a teleport step uses, outlined where you click it. Nothing leaves this computer.

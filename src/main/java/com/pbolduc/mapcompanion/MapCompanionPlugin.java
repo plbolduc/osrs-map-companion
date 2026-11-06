@@ -258,6 +258,18 @@ public class MapCompanionPlugin extends Plugin
 	@Inject
 	DestinationArrow destinationArrow;
 
+	/** Package-private like {@link #destinationMarker}, so a test can stand one in. */
+	@Inject
+	BoatPins boatPins;
+
+	/**
+	 * Whether the boats' pins should be read again: a boat's varbit moved, a session began, the
+	 * setting came on, or the player stepped off a deck. Each read looks every port up in the game's
+	 * database, so it is not done every tick for a reading that has not moved. Volatile because a
+	 * character switch is announced off the client thread that reads it.
+	 */
+	private volatile boolean boatPinsStale = true;
+
 	@Inject
 	private DestinationRoute destinationRoute;
 
@@ -647,6 +659,7 @@ public class MapCompanionPlugin extends Plugin
 		destinationRoute.clear();
 		shortestPath.shutDown();
 		destinationMarker.remove();
+		boatPins.clear();
 		destinationArrow.clear();
 		xpTracker.reset();
 		clueReader.reset();
@@ -919,6 +932,9 @@ public class MapCompanionPlugin extends Plugin
 		travelUnlockReader.onSessionEnded();
 		stashReader.onSessionEnded();
 		boatReader.onSessionEnded();
+		/* Another character's boats are not this one's. */
+		boatPins.clear();
+		boatPinsStale = true;
 		portTaskReader.onSessionEnded();
 		birdhouseReader.onSessionEnded();
 		questReader.onSessionEnded();
@@ -1139,6 +1155,12 @@ public class MapCompanionPlugin extends Plugin
 			travelUnlockReader.onSessionEnded();
 			stashReader.onSessionEnded();
 			boatReader.onSessionEnded();
+			boatPinsStale = true;
+			if (state == GameState.LOGIN_SCREEN)
+			{
+				/* A hop is the same character, whose pins stay until the next reading settles. */
+				boatPins.clear();
+			}
 			if (state == GameState.HOPPING)
 			{
 				/*
@@ -1227,6 +1249,32 @@ public class MapCompanionPlugin extends Plugin
 		cargoHolds.unloaded(event.getWorldView().getId());
 	}
 
+	/**
+	 * Pin the player's boats on the world map, from the reading voyages already tick by — see
+	 * {@link BoatPins}. Aboard, or with the setting off, nothing is drawn. A reading that has not
+	 * settled since a login or a hop keeps what is drawn: a logout cleared it already, and a hop is
+	 * the same character with the same boats.
+	 */
+	private void syncBoatPins(long now)
+	{
+		if (!config.showBoatsOnWorldMap() || WorldTiles.aboard(client))
+		{
+			boatPins.sync(null);
+			boatPinsStale = true;
+			return;
+		}
+		if (!boatPinsStale)
+		{
+			return;
+		}
+		List<CompanionSnapshot.Boat> boats = boatReader.read(now);
+		if (boats != null)
+		{
+			boatPins.sync(boats);
+			boatPinsStale = false;
+		}
+	}
+
 	@Subscribe
 	public void onVarbitChanged(VarbitChanged event)
 	{
@@ -1235,6 +1283,10 @@ public class MapCompanionPlugin extends Plugin
 		 * doing any reading here. What actually changed is worked out once, on the tick.
 		 */
 		dirty = true;
+		if (BoatReader.watches(event.getVarbitId()))
+		{
+			boatPinsStale = true;
+		}
 	}
 
 	/**
@@ -1312,6 +1364,7 @@ public class MapCompanionPlugin extends Plugin
 		}
 		/* The step pins follow the step; unchanged, this compares one string and returns. */
 		destinationMarker.sync();
+		syncBoatPins(now);
 		destinationArrow.sync();
 		announceArrival();
 		shortestPath.tick(client.getTickCount(), destinationRoute.view(), config.drawWithShortestPath(),

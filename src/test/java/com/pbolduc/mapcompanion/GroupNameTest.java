@@ -133,6 +133,7 @@ public class GroupNameTest
 		plugin.destinationState = new DestinationState(gson);
 		plugin.destinationMarker = new TestDestinationMarker();
 		plugin.groupMarkers = new GroupMarkers(null, null);
+		plugin.boatPins = new BoatPins(null, null);
 		HarnessGame game = new HarnessGame();
 		plugin.rewardObserver = new RewardObserver(game.client(), new CollectionItemCatalog(game.client()));
 		TestFarmRuns.attach(plugin);

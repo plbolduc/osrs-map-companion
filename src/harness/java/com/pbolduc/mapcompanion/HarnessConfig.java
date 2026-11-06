@@ -230,6 +230,12 @@ final class HarnessConfig implements MapCompanionConfig
 	}
 
 	@Override
+	public boolean showBoatsOnWorldMap()
+	{
+		return on("showBoatsOnWorldMap", MapCompanionConfig.super.showBoatsOnWorldMap());
+	}
+
+	@Override
 	public boolean destinationHintArrow()
 	{
 		return on("destinationHintArrow", MapCompanionConfig.super.destinationHintArrow());

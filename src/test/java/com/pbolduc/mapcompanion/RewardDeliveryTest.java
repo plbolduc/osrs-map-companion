@@ -59,6 +59,7 @@ public class RewardDeliveryTest
 		plugin.destinationState = new DestinationState(new Gson());
 		plugin.destinationMarker = new TestDestinationMarker();
 		plugin.groupMarkers = new GroupMarkers(null, null);
+		plugin.boatPins = new BoatPins(null, null);
 		plugin.pairing = new Pairing(store, new Gson());
 		plugin.rewardObserver = new RewardObserver(game.client, catalog, catalog::contains, () -> 1000L);
 		TestFarmRuns.attach(plugin);

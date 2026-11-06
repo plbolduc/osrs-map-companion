@@ -324,12 +324,26 @@ public interface MapCompanionConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "showBoatsOnWorldMap",
+		name = "Your boats on the world map",
+		description =
+			"Pin each of your boats on the game's world map, at the port where it is moored. Read from "
+			+ "your own client and not sent anywhere; works without Connect.",
+		position = 35,
+		section = clientSection
+	)
+	default boolean showBoatsOnWorldMap()
+	{
+		return true;
+	}
+
+	@ConfigItem(
 		keyName = "destinationHintArrow",
 		name = "Hint arrow to a destination",
 		description =
 			"When a destination is in the area the game has loaded, point the game's own hint arrow at it, "
 			+ "as RuneLite's clue plugin does. Never replaces an arrow the game or another plugin set.",
-		position = 35,
+		position = 36,
 		section = clientSection
 	)
 	default boolean destinationHintArrow()
@@ -343,7 +357,7 @@ public interface MapCompanionConfig extends Config
 		description =
 			"When you follow a route the map sent, have the Shortest Path plugin, if you have it, draw each "
 			+ "walking step. A destination somebody sends never changes its path until you press Follow or Reroute.",
-		position = 36,
+		position = 37,
 		section = clientSection
 	)
 	default boolean drawWithShortestPath()
@@ -357,7 +371,7 @@ public interface MapCompanionConfig extends Config
 		description =
 			"Add Route here to a right-click of the game's world map, below Cancel. Choosing it asks the map "
 			+ "for the way to that spot and sends that spot and where you stand, as Route does.",
-		position = 37,
+		position = 38,
 		section = clientSection
 	)
 	default boolean routeHereOnWorldMap()
@@ -371,7 +385,7 @@ public interface MapCompanionConfig extends Config
 		description =
 			"While you follow a route, show the step you are on in a small box over the game, so the sidebar "
 			+ "can stay closed. Hidden inside instances. Nothing leaves this computer.",
-		position = 38,
+		position = 39,
 		section = clientSection
 	)
 	default boolean showStepOnScreen()
@@ -386,7 +400,7 @@ public interface MapCompanionConfig extends Config
 			"While you follow a route, outline the item a teleport step uses in your inventory or worn items, "
 			+ "and its spell in your spellbook while you can cast it. Nothing is clicked, and nothing leaves "
 			+ "this computer.",
-		position = 39,
+		position = 40,
 		section = clientSection
 	)
 	default boolean outlineStepTeleport()
@@ -401,7 +415,7 @@ public interface MapCompanionConfig extends Config
 			"A key that presses Reroute on the run or route you follow, as the sidebar's button would, with "
 			+ "its same wait between presses. Unset until you choose one; pick one with Ctrl, Alt or Shift so "
 			+ "typing in chat does not press it.",
-		position = 40,
+		position = 41,
 		section = clientSection
 	)
 	default Keybind rerouteHotkey()
@@ -415,7 +429,7 @@ public interface MapCompanionConfig extends Config
 		description =
 			"A key that presses Follow, or Pause while you follow, on the run or route the sidebar shows, "
 			+ "where the card offers it. Unset until you choose one.",
-		position = 41,
+		position = 42,
 		section = clientSection
 	)
 	default Keybind followHotkey()
@@ -429,7 +443,7 @@ public interface MapCompanionConfig extends Config
 		description =
 			"While a farm run is going, outline in your bank the teleports its Before you leave list names "
 			+ "that you are not carrying. Nothing in the bank moves, and nothing leaves this computer.",
-		position = 42,
+		position = 43,
 		section = clientSection
 	)
 	default boolean markFarmRunInBank()
