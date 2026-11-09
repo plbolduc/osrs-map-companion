@@ -157,6 +157,7 @@ public class TasksThroughAHopTest
 		set("cargoHolds", holds);
 		set("portTaskReader", ports);
 		set("birdhouseReader", new BirdhouseReader(key -> null));
+		set("dailyReader", new DailyReader(game.client()));
 		set("assignmentReader", new AssignmentReader(game.client(), store));
 		set("deathWatcher", construct(DeathWatcher.class));
 		set("lootLog", new LootLog(game.client(), store, gson));

@@ -279,6 +279,9 @@ public class WireContractTest
 			portSlot(3, "locked", null, null, null, null),
 			portSlot(4, "unknown", null, null, null, null));
 		s.portTasks.hold = 60;
+		s.dailies = new LinkedHashMap<>();
+		s.dailies.put("zaff-battlestaves", true);
+		s.dailies.put("bert-sand", false);
 		s.stashUnits = new HashMap<>();
 		s.stashUnits.put(28960, true);
 		Map<String, String> rewards = new HashMap<>();

@@ -189,8 +189,9 @@ turns on, or off, everything it can send:
   including crop, stages, observation age, estimated growth windows and witnessed replant receipts
   for the 99 patches supported by RuneLite's crop tracker (including grapes, coral and seaweed);
   which Sailing port task each of your five slots holds, with crates collected and delivered or
-  bounty parts still owed, and whether a slot is empty, locked or unreadable; and how many crates
-  the cargo hold of the boat you last stood on carries. Cargo is not read.
+  bounty parts still owed, and whether a slot is empty, locked or unreadable; how many crates
+  the cargo hold of the boat you last stood on carries, though cargo is not read; and which of the
+  dailies the map plans you have collected today.
   With your Slayer task, the Slayer list's order, Wilderness filter and delivery receipt. These
   request your own sidebar list through the existing connection. They add no poll.
 - **Loot and milestones:** observed loot kills for every monster, how long ago each was last killed,

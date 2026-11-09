@@ -141,7 +141,7 @@ final class SharingFields
 	static final Section TASKS = new Section("tasks", MapCompanionConfig.KEY_SHARE_TASKS,
 		MapCompanionConfig::shareTasksAndTimers,
 		field("shareSlayer"), field("shareClue"), field("shareFarming"), field("shareBirdhouses"), field("shareHunterRumours"),
-		field("shareMahoganyHomes"), field("shareFarmingContracts"), field("sharePortTasks"));
+		field("shareMahoganyHomes"), field("shareFarmingContracts"), field("sharePortTasks"), field("shareDailies"));
 
 	static final Section LOOT = new Section("loot", MapCompanionConfig.KEY_SHARE_LOOT_GROUP,
 		MapCompanionConfig::shareLootAndMilestones,

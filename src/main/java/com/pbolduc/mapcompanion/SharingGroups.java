@@ -27,6 +27,7 @@ package com.pbolduc.mapcompanion;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
@@ -73,10 +74,17 @@ final class SharingGroups
 	 * Which release's field list {@link #KEY_SETTLED} was written with: 1 for the groups as they first
 	 * shipped, one more each release that adds a field to a group. Never lowered.
 	 */
-	static final int GENERATION = 1;
+	static final int GENERATION = 2;
 
 	/** Each field added to a group after the first generation, with the generation that added it. */
-	static final Map<String, Integer> ADDED = Collections.emptyMap();
+	static final Map<String, Integer> ADDED = Collections.unmodifiableMap(added());
+
+	private static Map<String, Integer> added()
+	{
+		Map<String, Integer> added = new HashMap<>();
+		added.put("shareDailies", 2);
+		return added;
+	}
 
 	private SharingGroups()
 	{

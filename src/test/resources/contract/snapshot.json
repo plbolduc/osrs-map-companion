@@ -1,6 +1,12 @@
 {
   "v": 1,
   "runReceiverVersion": 1,
+  "slayerPreferences": {
+    "v": 1,
+    "order": "best",
+    "hideWilderness": true,
+    "seenRevision": 0
+  },
   "member": {
     "id": "b3f1c2d4-0000-4000-8000-000000000000",
     "nick": "Zezima",
@@ -112,6 +118,10 @@
       }
     ],
     "hold": 60
+  },
+  "dailies": {
+    "zaff-battlestaves": true,
+    "bert-sand": false
   },
   "diaryRewards": {
     "Varrock": "medium"
@@ -253,11 +263,5 @@
     "msSinceLastDrop": 1500
   },
   "idleMs": 0,
-  "sentAtMs": 1800000000000,
-  "slayerPreferences": {
-    "v": 1,
-    "order": "best",
-    "hideWilderness": true,
-    "seenRevision": 0
-  }
+  "sentAtMs": 1800000000000
 }

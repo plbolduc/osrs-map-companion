@@ -105,7 +105,7 @@ public class SharingGroupsTest
 		assertEquals("false", fixture.store.get(MapCompanionConfig.KEY_SHARE_TASKS));
 		assertEquals("false", fixture.store.get(MapCompanionConfig.KEY_SHARE_LOOT_GROUP));
 		assertEquals("only the switch that disagreed, and the marker",
-			Arrays.asList(MapCompanionConfig.KEY_SHARE_MAP_PRESENCE + "=true", SharingGroups.KEY_SETTLED + "=1"), fixture.written);
+			Arrays.asList(MapCompanionConfig.KEY_SHARE_MAP_PRESENCE + "=true", SharingGroups.KEY_SETTLED + "=" + SharingGroups.GENERATION), fixture.written);
 		assertEquals(Arrays.asList(SharingFields.PROGRESS.fields.get(0), SharingFields.PROGRESS.fields.get(7)),
 			SharingGroups.shared(SharingFields.PROGRESS, fixture.config, fixture.store));
 		assertEquals("Skill levels", SharingFields.PROGRESS.fields.get(0).label);
@@ -160,7 +160,7 @@ public class SharingGroupsTest
 		}
 		fixture.written.clear();
 		SharingGroups.settle(fixture.config, fixture.store);
-		assertEquals(Arrays.asList(MapCompanionConfig.KEY_SHARE_LOOT_GROUP + "=true", SharingGroups.KEY_SETTLED + "=1"), fixture.written);
+		assertEquals(Arrays.asList(MapCompanionConfig.KEY_SHARE_LOOT_GROUP + "=true", SharingGroups.KEY_SETTLED + "=" + SharingGroups.GENERATION), fixture.written);
 	}
 
 	/**
@@ -404,7 +404,7 @@ public class SharingGroupsTest
 		assertTrue("read by key, and no field of a group RuneLite leaves undeclared: " + stray, stray.isEmpty());
 		assertEquals("every field RuneLite does not declare is read", undeclared, new LinkedHashSet<>(groupFieldKeys().stream()
 			.filter(read::contains).collect(Collectors.toList())));
-		assertEquals(22, undeclared.size());
+		assertEquals(23, undeclared.size());
 	}
 
 	/**

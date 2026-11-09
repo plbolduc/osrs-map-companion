@@ -121,6 +121,11 @@ public class CompanionSnapshot
 	 */
 	public PortTasks portTasks;
 	/**
+	 * The dailies read, by the map's daily id, true when collected today; see {@link DailyReader}. Null
+	 * while not shared, unsettled, or after the session crossed midnight UTC. A daily not read is absent.
+	 */
+	public Map<String, Boolean> dailies;
+	/**
 	 * The highest diary reward tier actually collected in each region, on the same terms.
 	 *
 	 * <p>Separate from {@link #diaries} because finishing the tasks and going to take the cloak are

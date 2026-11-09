@@ -55,6 +55,14 @@ often. A clean run is now 443 tests with no failures or skips.
 
 ## Still to verify
 
+- [ ] **Dailies collected (`DailyReader`, from Daily Task Indicators' varbits, not yet seen live).**
+      With *Dailies collected* on, buy Zaff's battlestaves, take Bert's sand and the flax keeper's
+      bow strings: each reads collected on the map's Dailies within a snapshot, the others waiting.
+      Buy fewer battlestaves than offered: does `ZAFF_LAST_CLAIMED` stay 0 until the last, or does
+      the map say collected while some are left? Take 14 herb boxes, then the 15th. Stay logged in
+      across 00:00 UTC: the map stops saying collected until the next login; note whether the
+      varbits reset at midnight while logged in, which would let the reader keep reading.
+
 - [ ] Log back in: the same character keeps its member identity. Withdraw Position while logged in
       and confirm the next accepted snapshot clears the map pin.
 - [ ] Walk a short distance manually and verify live movement and reconnection.

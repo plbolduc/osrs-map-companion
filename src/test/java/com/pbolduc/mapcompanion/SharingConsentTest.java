@@ -161,7 +161,7 @@ public class SharingConsentTest
 				}
 			}
 		}
-		assertEquals(32, remoteFeatures);
+		assertEquals(33, remoteFeatures);
 
 		String guide = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get("docs", "plugin-hub-submission.md")),
 			java.nio.charset.StandardCharsets.UTF_8);

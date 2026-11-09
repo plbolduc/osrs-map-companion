@@ -1,0 +1,15 @@
+# The game variables the progress readers read, one row a line: kind|key|NAME=id,...|extra.
+# Every NAME is the RuneLite gameval constant the number was copied from, and GameReadsTest holds
+# each number to it, so a renumbered variable fails the build by name rather than reading another.
+#
+# daily|map daily id|claim varbit|collected once it reaches this|diary tiers that multiply it
+# The claim varbits and both counts are RuneLite's Daily Task Indicators plugin's. The keys are the
+# map's daily ids (osrs-stars-map lib/dailies.ts), which its contract test holds to this file.
+daily|zaff-battlestaves|ZAFF_LAST_CLAIMED=4539|1
+daily|cromperty-essence|ARDOUGNE_FREE_ESSENCE=4547|1
+daily|bert-sand|YANILLE_SAND_CLAIMED=4549|1
+daily|flax-keeper-bow-strings|SEERS_FREE_FLAX=4559|1
+daily|rantz-ogre-arrows|WESTERN_RANTZ_ARROWS=4563|1
+daily|thirus-dynamite|KOUREND_FREE_DYNAMITE=7939|1
+daily|nmz-herb-boxes|NZONE_HERBBOXES_PURCHASED=3961|15
+daily|robin-bonemeal|MORYTANIA_SLIME_CLAIMED=4543|13|MORYTANIA_DIARY_MEDIUM_COMPLETE=4488,MORYTANIA_DIARY_HARD_COMPLETE=4489,MORYTANIA_DIARY_ELITE_COMPLETE=4490

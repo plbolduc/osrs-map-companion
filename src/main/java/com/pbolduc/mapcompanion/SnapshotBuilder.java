@@ -78,6 +78,7 @@ public class SnapshotBuilder
 	private final BirdhouseReader birdhouseReader;
 	private final AssignmentReader assignmentReader;
 	private final PortTaskReader portTaskReader;
+	private final DailyReader dailyReader;
 	private final CapabilityEvaluator capabilities;
 	private final FarmingObserver farming;
 	private final XpTracker xpTracker;
@@ -256,6 +257,10 @@ public class SnapshotBuilder
 		if (settings.on("sharePortTasks"))
 		{
 			snapshot.portTasks = portTaskReader.wire(nowMs);
+		}
+		if (settings.on("shareDailies"))
+		{
+			snapshot.dailies = dailyReader.read(nowMs);
 		}
 
 		if (settings.on("shareFarming"))

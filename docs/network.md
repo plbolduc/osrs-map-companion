@@ -67,6 +67,15 @@ that boat spawns and RuneLite's account type for an Ultimate Ironman's limit. It
 stand on a boat with a hold, and forgotten at logout, a hop or a character change, so the map plans
 as if only one task's crates fit until it has been seen.
 
+**Dailies collected** sends, for eight of the dailies the map plans a run through, whether each has
+been collected today, keyed by the map's own daily id: Zaff's battlestaves, Wizard Cromperty's
+essence, Bert's sand, the flax keeper's bow strings, Rantz's arrows, Thirus's dynamite, Nightmare
+Zone's herb boxes and Robin's bonemeal. Each is a claim varbit read as RuneLite's Daily Task
+Indicators reads it; the herb boxes and the bonemeal count as collected only once the day's allowance
+is taken, and Robin is left out until the Morytania medium diary is done. The Miscellania kingdom has
+no claim varbit and is never sent. Nothing is sent for fifteen seconds after a login or hop, nor after
+the session has crossed midnight UTC, when the game resets them, until the next login.
+
 **Farming patches** covers the 99 crop patches in RuneLite 1.13.4's Time Tracking catalogue,
 excluding compost bins. This includes the additional hops, bushes, hardwood, spirit trees,
 cactus, special Guild crops, calquat, belladonna, mushrooms, grapes, crystal trees, Hespori and

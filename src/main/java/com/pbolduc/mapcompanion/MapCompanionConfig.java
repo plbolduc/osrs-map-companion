@@ -238,7 +238,7 @@ public interface MapCompanionConfig extends Config
 		keyName = KEY_SHARE_TASKS,
 		name = "Tasks and timers",
 		description = "Slayer task, Clue step, Farming patches, Birdhouses, Hunter rumours, Mahogany Homes, "
-			+ "Farming contracts, and Port tasks. On shares all eight; off stops all eight.",
+			+ "Farming contracts, Port tasks, and Dailies collected. On shares all nine; off stops all nine.",
 		position = 4,
 		section = sharingSection
 	)

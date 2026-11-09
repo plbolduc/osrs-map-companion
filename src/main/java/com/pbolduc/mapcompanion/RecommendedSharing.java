@@ -81,7 +81,7 @@ final class RecommendedSharing extends JPanel
 		"sharePosition", "shareActivity", "shareAccountType",
 		"shareSkills", "shareQuests", "shareQuestLog", "shareDiaries", "sharePermanentTravel", "shareCapabilities", "shareStash", "shareBoats",
 		"shareSlayer", "shareClue", "shareFarming", "shareBirdhouses", "shareHunterRumours", "shareMahoganyHomes", "shareFarmingContracts",
-		"sharePortTasks",
+		"sharePortTasks", "shareDailies",
 		"shareLoot", MapCompanionConfig.KEY_SHARE_MILESTONES, MapCompanionConfig.KEY_SHARE_PETS, MapCompanionConfig.KEY_SHARE_COLLECTION,
 		MapCompanionConfig.KEY_SHARE_NAME,
 		"showDestination", "showGroupOnWorldMap"));
