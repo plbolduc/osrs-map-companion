@@ -122,7 +122,9 @@ pins. **Send to RuneLite** puts the route in your sidebar.
 </p>
 
 Compare every place for your Slayer task, or a port's courier and bounty jobs, and send the one you
-pick to RuneLite.
+pick to RuneLite. What the plugin reads from your game fills the website in as you play: Mortimer's
+offer ranked as soon as you open it, the sea charts you have charted marked on the map, and the
+dailies you have collected left out of a dailies run.
 
 ## Drop luck
 
