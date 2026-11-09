@@ -26,7 +26,6 @@
 package com.pbolduc.mapcompanion;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.FocusAdapter;
@@ -35,7 +34,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -87,9 +85,7 @@ final class SharingControls extends JPanel
 	{
 		this.config = config;
 		this.store = store;
-		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		setBackground(ColorScheme.DARK_GRAY_COLOR);
-		setAlignmentX(Component.LEFT_ALIGNMENT);
+		MapCompanionPanel.column(this, ColorScheme.DARK_GRAY_COLOR);
 
 		/* The six switches, in the order the step after Connect and RuneLite's list give them. */
 		add(row(choice(SharingFields.NAME, true)));
@@ -102,7 +98,7 @@ final class SharingControls extends JPanel
 		nameBox.add(nicknameLabel);
 		nickname.setName("nickname");
 		MapCompanionPanel.capped(nickname);
-		nickname.setAlignmentX(Component.LEFT_ALIGNMENT);
+		MapCompanionPanel.left(nickname);
 		nickname.setToolTipText(Words.of("settings.nicknameTip"));
 		nickname.addActionListener(e -> saveNickname());
 		nickname.addFocusListener(new FocusAdapter()
@@ -255,11 +251,7 @@ final class SharingControls extends JPanel
 
 	static JPanel column()
 	{
-		JPanel panel = new JPanel();
-		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-		panel.setBackground(ColorScheme.DARK_GRAY_COLOR);
-		panel.setAlignmentX(Component.LEFT_ALIGNMENT);
-		return panel;
+		return MapCompanionPanel.column(ColorScheme.DARK_GRAY_COLOR);
 	}
 
 	/** RuneLite-style disclosure arrows; a header controls visibility alone. */

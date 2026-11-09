@@ -48,7 +48,6 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
 import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -145,9 +144,7 @@ final class DropLuckPanel extends JPanel
 	{
 		this.log = log;
 		this.pictures = pictures;
-		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		setBackground(ColorScheme.DARK_GRAY_COLOR);
-		setAlignmentX(Component.LEFT_ALIGNMENT);
+		column(this, ColorScheme.DARK_GRAY_COLOR);
 		search.setIcon(IconTextField.Icon.SEARCH);
 		search.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		search.setHoverBackgroundColor(ColorScheme.DARKER_GRAY_HOVER_COLOR);
@@ -297,12 +294,7 @@ final class DropLuckPanel extends JPanel
 			small("Back ›", ColorScheme.BRAND_ORANGE));
 		bar.setBorder(BorderFactory.createCompoundBorder(
 			BorderFactory.createLineBorder(new Color(0x7a5410)), new EmptyBorder(3, 6, 3, 6)));
-		clickable(bar, () ->
-		{
-			view = View.CARD;
-			opened = null;
-			invalidateAndRefresh();
-		});
+		clickable(bar, () -> open(null, null));
 		return fill(bar);
 	}
 
@@ -334,11 +326,11 @@ final class DropLuckPanel extends JPanel
 		Integer taskLeft = isNow ? log.taskRemaining(monster.npc) : null;
 		card.add(wrapped(DropLuckView.context(monster, isNow, taskLeft, now), TEXT_WIDTH, 11f,
 			taskLeft != null ? ColorScheme.BRAND_ORANGE : ColorScheme.LIGHT_GRAY_COLOR));
-		card.add(gap(6, ColorScheme.DARKER_GRAY_COLOR));
+		card.add(inset(6));
 
 		if (monster.drops.isEmpty())
 		{
-			card.add(wrapped(Words.of("luck.noDrops"), TEXT_WIDTH, 11f, ColorScheme.LIGHT_GRAY_COLOR));
+			card.add(note(Words.of("luck.noDrops")));
 			add(card);
 			return;
 		}
@@ -350,10 +342,10 @@ final class DropLuckPanel extends JPanel
 		}
 		if (selected != null)
 		{
-			card.add(gap(6, ColorScheme.DARKER_GRAY_COLOR));
+			card.add(inset(6));
 			/* A one-pixel gap in the page's colour, between the drops and the one picked. */
 			card.add(space(1));
-			card.add(gap(6, ColorScheme.DARKER_GRAY_COLOR));
+			card.add(inset(6));
 			buildDetail(card, monster, selected, pinnedHere && selected.item.equalsIgnoreCase(pin[1]), taskLeft);
 		}
 		add(card);
@@ -427,17 +419,17 @@ final class DropLuckPanel extends JPanel
 		card.add(MapCompanionPanel.fill(MapCompanionPanel.bar(6, ColorScheme.DARKER_GRAY_COLOR, null,
 			wrapped(detail.verdict, TEXT_WIDTH - pin.getPreferredSize().width - 6, 13f, Color.WHITE), pinAtTop),
 			ColorScheme.DARKER_GRAY_COLOR));
-		card.add(gap(5, ColorScheme.DARKER_GRAY_COLOR));
-		card.add(wrapped(detail.sinceLabel, TEXT_WIDTH, 11f, ColorScheme.LIGHT_GRAY_COLOR));
+		card.add(inset(5));
+		card.add(note(detail.sinceLabel));
 		/* Two labels, not one with a <font size>: a size change in markup leaves RuneLite's font and its "·". */
 		card.add(wrapped(detail.sinceValue, TEXT_WIDTH, 13f, Color.WHITE));
 		if (detail.sinceComparison != null)
 		{
-			card.add(wrapped(detail.sinceComparison, TEXT_WIDTH, 11f, ColorScheme.LIGHT_GRAY_COLOR));
+			card.add(note(detail.sinceComparison));
 		}
 		if (detail.drierThan >= 0)
 		{
-			card.add(gap(3, ColorScheme.DARKER_GRAY_COLOR));
+			card.add(inset(3));
 			card.add(new Strip(detail.drierThan));
 			JPanel ends = new JPanel(new GridLayout(1, 3));
 			ends.setBackground(ColorScheme.DARKER_GRAY_COLOR);
@@ -452,26 +444,21 @@ final class DropLuckPanel extends JPanel
 		}
 		if (detail.aheadLabel != null)
 		{
-			card.add(gap(5, ColorScheme.DARKER_GRAY_COLOR));
-			card.add(wrapped(detail.aheadLabel, TEXT_WIDTH, 11f, ColorScheme.LIGHT_GRAY_COLOR));
+			card.add(inset(5));
+			card.add(note(detail.aheadLabel));
 			card.add(wrapped(detail.aheadValue, TEXT_WIDTH, 13f, Color.WHITE));
 		}
 		if (detail.median != null)
 		{
-			card.add(gap(4, ColorScheme.DARKER_GRAY_COLOR));
-			card.add(wrapped(detail.median, TEXT_WIDTH, 11f, ColorScheme.LIGHT_GRAY_COLOR));
+			card.add(inset(4));
+			card.add(note(detail.median));
 		}
 	}
 
 	private void buildList(List<LootLog.Monster> monsters, @Nullable String[] pin, long now)
 	{
 		add(fill(MapCompanionPanel.bar(0, ColorScheme.DARK_GRAY_COLOR, small("Drop luck · your monsters", ColorScheme.LIGHT_GRAY_COLOR),
-			null, link("Close", () ->
-		{
-			view = View.CARD;
-			opened = null;
-			invalidateAndRefresh();
-		}))));
+			null, link("Close", () -> open(null, null)))));
 		add(space(4));
 		add(search);
 		add(space(4));
@@ -607,7 +594,19 @@ final class DropLuckPanel extends JPanel
 		return row;
 	}
 
-	private void open(String npc, @Nullable String item)
+	/** A card's grey line of small print. */
+	private static JLabel note(String text)
+	{
+		return wrapped(text, TEXT_WIDTH, 11f, ColorScheme.LIGHT_GRAY_COLOR);
+	}
+
+	/** Space between a card's lines, in the card's own grey. */
+	private static JPanel inset(int height)
+	{
+		return gap(height, ColorScheme.DARKER_GRAY_COLOR);
+	}
+
+	private void open(@Nullable String npc, @Nullable String item)
 	{
 		view = View.CARD;
 		opened = npc;

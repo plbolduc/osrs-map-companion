@@ -71,9 +71,6 @@ final class RunView extends JPanel
 	private static final int WIDTH = MapCompanionPanel.CARD_TEXT_WIDTH;
 	/** A stop's picture, at the size This leg draws a step's. */
 	private static final int PICTURE = 16;
-	/** The next stop's number, in its world-map pin's colour. */
-	private static final String AMBER_HTML = String.format("#%02x%02x%02x",
-		MapPin.AMBER.getRed(), MapPin.AMBER.getGreen(), MapPin.AMBER.getBlue());
 	static final String CHANGED = Words.of("run.changed");
 	/** A birdhouse stop not yet done: what will tick it, in the player's words rather than the evidence's. */
 	static final String BIRDHOUSE_PENDING = Words.of("run.birdhousePending");
@@ -419,7 +416,7 @@ final class RunView extends JPanel
 	{
 		String name = MapCompanionPanel.escape(stop.name);
 		String number = stop.n + ".";
-		return "<html><body width='" + WIDTH + "'>" + (next ? "<b><font color='" + AMBER_HTML + "'>" + number + "</font></b>" : number)
+		return "<html><body width='" + WIDTH + "'>" + (next ? "<b><font color='" + MapPin.AMBER_FONT + "'>" + number + "</font></b>" : number)
 			+ " " + name + "</body></html>";
 	}
 
@@ -470,7 +467,7 @@ final class RunView extends JPanel
 		}
 		for (RelayResponse.FarmStop stop : run.stops)
 		{
-			if (line.name.equalsIgnoreCase(stop.item) && firstPictured(stop) != null)
+			if (line.name.equalsIgnoreCase(stop.item) && RouteStepsView.firstPictured(stop.steps) != null)
 			{
 				picture(picture, stop);
 				return;
@@ -558,21 +555,7 @@ final class RunView extends JPanel
 	/** Whether a stop has a picture to show: a step the map gave an item or spell id, or an item it names. */
 	private static boolean pictured(RelayResponse.FarmStop stop)
 	{
-		return stop.item != null || firstPictured(stop) != null;
-	}
-
-	/** The stop's first step with an item or spell id: the teleport This leg draws for it. */
-	@Nullable
-	private static RelayResponse.RouteStep firstPictured(RelayResponse.FarmStop stop)
-	{
-		for (RelayResponse.RouteStep step : stop.steps)
-		{
-			if (step.itemId != null || step.spriteId != null)
-			{
-				return step;
-			}
-		}
-		return null;
+		return stop.item != null || RouteStepsView.firstPictured(stop.steps) != null;
 	}
 
 	/**
@@ -581,14 +564,10 @@ final class RunView extends JPanel
 	 */
 	private void picture(JLabel icon, RelayResponse.FarmStop stop)
 	{
-		RelayResponse.RouteStep step = firstPictured(stop);
-		if (step != null && step.itemId != null)
+		RelayResponse.RouteStep step = RouteStepsView.firstPictured(stop.steps);
+		if (step != null)
 		{
-			sprites.item(icon, step.itemId, PICTURE);
-		}
-		else if (step != null)
-		{
-			sprites.sprite(icon, step.spriteId, PICTURE);
+			RouteStepsView.draw(icon, step, sprites);
 		}
 		else if (stop.item != null)
 		{

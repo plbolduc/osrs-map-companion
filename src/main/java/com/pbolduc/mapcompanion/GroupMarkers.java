@@ -33,11 +33,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import javax.annotation.Nullable;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.ui.overlay.worldmap.WorldMapPointManager;
@@ -198,6 +198,7 @@ public class GroupMarkers
 
 	/** What a point is drawn from, apart from where. Two equal looks share a picture. */
 	@AllArgsConstructor(access = AccessLevel.PRIVATE)
+	@EqualsAndHashCode
 	static final class Look
 	{
 		final String name;
@@ -236,24 +237,6 @@ public class GroupMarkers
 				text.append(" · not heard from lately");
 			}
 			return text.toString();
-		}
-
-		@Override
-		public boolean equals(Object o)
-		{
-			if (!(o instanceof Look))
-			{
-				return false;
-			}
-			Look other = (Look) o;
-			return stale == other.stale && name.equals(other.name) && colour.equals(other.colour)
-				&& tooltip.equals(other.tooltip);
-		}
-
-		@Override
-		public int hashCode()
-		{
-			return Objects.hash(name, colour, stale, tooltip);
 		}
 	}
 

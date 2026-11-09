@@ -118,9 +118,7 @@ final class SearchPanel extends JPanel
 		this.search = search;
 		this.press = press;
 		this.sprites = sprites;
-		setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.Y_AXIS));
-		setBackground(ColorScheme.DARK_GRAY_COLOR);
-		MapCompanionPanel.left(this);
+		MapCompanionPanel.column(this, ColorScheme.DARK_GRAY_COLOR);
 		setName("companionSearch");
 		box.setName("search.box");
 		box.putClientProperty("JTextField.placeholderText", PLACEHOLDER);

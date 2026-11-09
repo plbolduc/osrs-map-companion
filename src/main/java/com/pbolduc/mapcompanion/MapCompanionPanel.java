@@ -47,6 +47,7 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.Locale;
 import javax.annotation.Nullable;
+import javax.swing.AbstractButton;
 import javax.swing.border.EmptyBorder;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -320,8 +321,7 @@ public class MapCompanionPanel extends PluginPanel
 	/** Also called when the plugin shuts down, in case the sidebar was never opened or closed. */
 	void stopRefreshing()
 	{
-		starsPanel.active(false);
-		timer.stop();
+		onDeactivate();
 	}
 
 	/**
@@ -351,10 +351,15 @@ public class MapCompanionPanel extends PluginPanel
 	/** A vertical stack whose children keep the left margin — see {@link #left}. */
 	static JPanel column(Color background)
 	{
-		JPanel column = new JPanel();
-		column.setLayout(new BoxLayout(column, BoxLayout.Y_AXIS));
-		column.setBackground(background);
-		return left(column);
+		return column(new JPanel(), background);
+	}
+
+	/** Makes {@code panel} one of those columns: every sidebar page and card starts as one. */
+	static <T extends JPanel> T column(T panel, Color background)
+	{
+		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+		panel.setBackground(background);
+		return left(panel);
 	}
 
 	/**
@@ -462,8 +467,7 @@ public class MapCompanionPanel extends PluginPanel
 	 */
 	static JLabel taskCard(JPanel card, String name, String title, GameSprites sprites, String skill)
 	{
-		card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
-		card.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		column(card, ColorScheme.DARKER_GRAY_COLOR);
 		/* Each card's inset; the gap between cards is the Tasks column's to draw. */
 		card.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
 		card.setName(name);
@@ -471,7 +475,7 @@ public class MapCompanionPanel extends PluginPanel
 		heading.setForeground(Color.WHITE);
 		heading.setFont(heading.getFont().deriveFont(Font.BOLD, 13f));
 		sprites.skill(heading, skill, 16);
-		left(card).add(heading);
+		card.add(heading);
 		return heading;
 	}
 
@@ -499,10 +503,16 @@ public class MapCompanionPanel extends PluginPanel
 		JButton button = new JButton(text);
 		button.setFont(button.getFont().deriveFont(11f));
 		button.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+		button.setHorizontalAlignment(SwingConstants.LEFT);
+		return bare(button, 3, 0, 3);
+	}
+
+	/** A button drawn as only its text or icon, with the hand that says it is one, inset as given. */
+	static <T extends AbstractButton> T bare(T button, int top, int left, int bottom)
+	{
 		button.setBorderPainted(false);
 		button.setContentAreaFilled(false);
-		button.setHorizontalAlignment(SwingConstants.LEFT);
-		button.setBorder(BorderFactory.createEmptyBorder(3, 0, 3, 0));
+		button.setBorder(BorderFactory.createEmptyBorder(top, left, bottom, 0));
 		button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		return button;
 	}
@@ -540,15 +550,7 @@ public class MapCompanionPanel extends PluginPanel
 		}
 		else
 		{
-			ZonedDateTime at = Instant.ofEpochMilli(startsAtMs).atZone(zone);
-			long days = ChronoUnit.DAYS.between(
-							Instant.ofEpochMilli(nowMs).atZone(zone).toLocalDate(), at.toLocalDate());
-			String day = days == 0 ? "today"
-						 : days == 1 ? "tomorrow"
-						 : days < 7 ? at.format(DateTimeFormatter.ofPattern("EEE", Locale.ENGLISH))
-						 : at.format(DateTimeFormatter.ofPattern("d MMM", Locale.ENGLISH));
-			when = "Meetup " + day + " "
-				   + at.format(DateTimeFormatter.ofPattern(clockPattern(locale), Locale.ENGLISH));
+			when = "Meetup " + startsOn(startsAtMs, nowMs, zone, locale, "today", "tomorrow", "EEE");
 		}
 		return world == null ? when : when + " · W" + world;
 	}
@@ -571,11 +573,21 @@ public class MapCompanionPanel extends PluginPanel
 	 */
 	static String meetupStarts(long startsAtMs, long nowMs, ZoneId zone, Locale locale)
 	{
+		return startsOn(startsAtMs, nowMs, zone, locale, "Today", "Tomorrow", "EEEE");
+	}
+
+	/**
+	 * The day and the clock both of those say, in the words each gives today, tomorrow and a weekday
+	 * within the week; a date past it. A meetup already begun has a date, as it is no day to come.
+	 */
+	private static String startsOn(long startsAtMs, long nowMs, ZoneId zone, Locale locale, String today,
+		String tomorrow, String weekday)
+	{
 		ZonedDateTime at = Instant.ofEpochMilli(startsAtMs).atZone(zone);
 		long days = ChronoUnit.DAYS.between(Instant.ofEpochMilli(nowMs).atZone(zone).toLocalDate(), at.toLocalDate());
-		String day = days == 0 ? "Today"
-			: days == 1 ? "Tomorrow"
-			: days > 1 && days < 7 ? at.format(DateTimeFormatter.ofPattern("EEEE", Locale.ENGLISH))
+		String day = days == 0 ? today
+			: days == 1 ? tomorrow
+			: days > 1 && days < 7 ? at.format(DateTimeFormatter.ofPattern(weekday, Locale.ENGLISH))
 			: at.format(DateTimeFormatter.ofPattern("d MMM", Locale.ENGLISH));
 		return day + " " + at.format(DateTimeFormatter.ofPattern(clockPattern(locale), Locale.ENGLISH));
 	}

@@ -63,6 +63,8 @@ class MapPin extends WorldMapPoint
 {
 	/** The map's amber: the colour of "the thing you asked about", there and here. */
 	static final Color AMBER = new Color(245, 158, 11);
+	/** The same amber as a font colour, for the sidebar's HTML labels. */
+	static final String AMBER_FONT = String.format("#%06x", AMBER.getRGB() & 0xFFFFFF);
 	/** The gold of the website's ring round what is yours: its amber-400. */
 	static final Color GOLD = new Color(251, 191, 36);
 
@@ -195,18 +197,9 @@ class MapPin extends WorldMapPoint
 	static BufferedImage disc(Color colour, String text, boolean faded)
 	{
 		BufferedImage image = new BufferedImage(DISC + 2, DISC + 2, BufferedImage.TYPE_INT_ARGB);
-		Graphics2D g = image.createGraphics();
-		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		Graphics2D g = paint(image, faded);
 		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-		if (faded)
-		{
-			g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, FADED));
-		}
-		g.setColor(colour);
-		g.fillOval(1, 1, DISC - 1, DISC - 1);
-		g.setColor(Color.BLACK);
-		g.setStroke(new BasicStroke(1.2f));
-		g.drawOval(1, 1, DISC - 1, DISC - 1);
+		ring(g, colour, Color.BLACK, 1.2f);
 		if (!text.isEmpty())
 		{
 			/** Near-black on the palette's light hues, the contrast the website's discs use. */
@@ -229,13 +222,8 @@ class MapPin extends WorldMapPoint
 	static BufferedImage boatDisc()
 	{
 		BufferedImage image = new BufferedImage(DISC + 2, DISC + 2, BufferedImage.TYPE_INT_ARGB);
-		Graphics2D g = image.createGraphics();
-		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		g.setColor(new Color(41, 37, 36));
-		g.fillOval(1, 1, DISC - 1, DISC - 1);
-		g.setColor(GOLD);
-		g.setStroke(new BasicStroke(2f));
-		g.drawOval(1, 1, DISC - 1, DISC - 1);
+		Graphics2D g = paint(image, false);
+		ring(g, new Color(41, 37, 36), GOLD, 2f);
 		g.setColor(new Color(244, 244, 245));
 		/* The sail, a triangle off the mast, then the hull under it. */
 		g.fillPolygon(new int[]{10, 10, 15}, new int[]{4, 12, 12}, 3);
@@ -244,22 +232,39 @@ class MapPin extends WorldMapPoint
 		return image;
 	}
 
+	/** Antialiased drawing on {@code image}, at the fade of a friend who is not here when {@code faded}. */
+	private static Graphics2D paint(BufferedImage image, boolean faded)
+	{
+		Graphics2D g = image.createGraphics();
+		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		if (faded)
+		{
+			g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, FADED));
+		}
+		return g;
+	}
+
+	/** A member-sized disc of {@code fill} with an {@code edge} ring {@code width} wide. */
+	private static void ring(Graphics2D g, Color fill, Color edge, float width)
+	{
+		g.setColor(fill);
+		g.fillOval(1, 1, DISC - 1, DISC - 1);
+		g.setColor(edge);
+		g.setStroke(new BasicStroke(width));
+		g.drawOval(1, 1, DISC - 1, DISC - 1);
+	}
+
 	/** The disc with a point under it, the tip on the tile; the point fades with the disc. */
 	private static BufferedImage pin(BufferedImage disc, boolean faded)
 	{
 		int width = disc.getWidth();
 		BufferedImage image = new BufferedImage(width, disc.getHeight() + TAIL, BufferedImage.TYPE_INT_ARGB);
-		Graphics2D g = image.createGraphics();
-		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		Graphics2D g = paint(image, faded);
 		int top = disc.getHeight() - 4;
 		Polygon tail = new Polygon(
 			new int[]{width / 2 - 4, width / 2 + 4, width / 2},
 			new int[]{top, top, image.getHeight() - 1},
 			3);
-		if (faded)
-		{
-			g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, FADED));
-		}
 		g.setColor(Color.BLACK);
 		g.fillPolygon(tail);
 		/* The disc carries its own fade; drawing it under this one too would fade it twice. */

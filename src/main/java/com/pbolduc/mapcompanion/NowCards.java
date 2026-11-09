@@ -31,7 +31,6 @@ import java.util.function.Supplier;
 import java.util.List;
 import javax.annotation.Nullable;
 import javax.swing.border.EmptyBorder;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -201,9 +200,7 @@ final class NowCards extends JPanel
 			destinationRoute.choose(way);
 			refresh.run();
 		}, sprites);
-		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		setBackground(ColorScheme.DARK_GRAY_COLOR);
-		left(this);
+		MapCompanionPanel.column(this, ColorScheme.DARK_GRAY_COLOR);
 
 		/*
 		 * Now: a destination with its dismiss, a death, a clue. "From the map" named only the first —
