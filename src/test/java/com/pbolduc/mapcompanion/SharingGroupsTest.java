@@ -118,6 +118,38 @@ public class SharingGroupsTest
 	}
 
 	/** RuneLite's settings have never been written for a profile that has no switches yet either. */
+	/**
+	 * A field an update adds to a group the player had switched on starts off all the same: the press
+	 * that turned the group on never named it. Port tasks stands in for the new field, as if a release
+	 * after the first generation had added it.
+	 */
+	@Test
+	public void aFieldAddedByAnUpdateStaysOffInAGroupThatWasOn()
+	{
+		Fixture fixture = new Fixture();
+		for (SharingFields.Field field : SharingFields.TASKS.fields)
+		{
+			fixture.store.set(field.key, Boolean.toString(!field.key.equals("sharePortTasks")));
+		}
+		fixture.store.set(MapCompanionConfig.KEY_SHARE_TASKS, "true");
+		fixture.store.set(SharingGroups.KEY_SETTLED, "1");
+		Map<String, Integer> added = new LinkedHashMap<>();
+		added.put("sharePortTasks", 2);
+		fixture.written.clear();
+
+		SharingGroups.settle(fixture.config, fixture.store, added, 2);
+
+		assertFalse("the new field is not shared until chosen", fixture.store.on("sharePortTasks"));
+		assertTrue("the fields the press named stay shared", fixture.store.on("shareSlayer") && fixture.store.on("shareClue"));
+		assertEquals("the switch says what is shared now, and the profile is read with the new list",
+			Arrays.asList(MapCompanionConfig.KEY_SHARE_TASKS + "=false", SharingGroups.KEY_SETTLED + "=2"), fixture.written);
+
+		/* Once read with the new list, a switch pressed while the plugin was not listening wins again, the new field too. */
+		fixture.store.set(MapCompanionConfig.KEY_SHARE_TASKS, "true");
+		SharingGroups.settle(fixture.config, fixture.store, added, 2);
+		assertTrue(fixture.store.on("sharePortTasks"));
+	}
+
 	@Test
 	public void anUpdateWithNoSwitchesStoredReadsThemAsOff()
 	{
