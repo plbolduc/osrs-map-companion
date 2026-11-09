@@ -31,11 +31,13 @@ import com.google.inject.Singleton;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.EnumSet;
 import java.util.function.Consumer;
 import javax.swing.SwingUtilities;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.Skill;
+import net.runelite.api.WorldType;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import okhttp3.Call;
@@ -144,7 +146,8 @@ final class StarsClient
 			if (mining != null && mining < 1) mining = null;
 			if (total != null && total < 1) total = null;
 			Integer knownMining = mining, knownTotal = total;
-			SwingUtilities.invokeLater(() -> update(server, code, profile, allowed, between, knownMining, knownTotal));
+			String game = allowed ? gameOf(client.getWorldType()) : null;
+			SwingUtilities.invokeLater(() -> update(server, code, profile, allowed, between, knownMining, knownTotal, game));
 		});
 	}
 
@@ -158,7 +161,21 @@ final class StarsClient
 		return state == GameState.HOPPING || state == GameState.LOADING || state == GameState.CONNECTION_LOST;
 	}
 
-	private void update(String server, String code, String profile, boolean allowed, boolean between, Integer mining, Integer total)
+	/**
+	 * The game a world's type says the player is in, named as the map names a star's. Quest
+	 * Speedrunning is a game no star is listed in, so its list is empty and says why. Everything
+	 * else, Deadman and PvP included, is the main game's characters; the risk filters own those.
+	 */
+	static String gameOf(EnumSet<WorldType> types)
+	{
+		if (types == null) return StarsModel.MAIN;
+		if (types.contains(WorldType.SEASONAL)) return StarsModel.LEAGUE;
+		if (types.contains(WorldType.HARDCORE_MAIN)) return StarsModel.HARDCORE;
+		if (types.contains(WorldType.QUEST_SPEEDRUNNING) || types.contains(WorldType.FRESH_START_WORLD)) return StarsModel.NONE;
+		return StarsModel.MAIN;
+	}
+
+	private void update(String server, String code, String profile, boolean allowed, boolean between, Integer mining, Integer total, String game)
 	{
 		if (!active) return;
 		/* The list is a character's: none until RuneLite names the one logged in. */
@@ -202,6 +219,7 @@ final class StarsClient
 		if (between) return;
 		model.miningLevel = mining;
 		model.skillTotal = total;
+		if (game != null) model.playerGame = game;
 		if (feedCall == null && System.currentTimeMillis() >= nextFeed) fetchFeed(server);
 	}
 
@@ -221,7 +239,6 @@ final class StarsClient
 		StarsModel.Filters f = preferences.filters;
 		f.minTier = Math.max(1, Math.min(9, f.minTier));
 		if (!f.showMembers && !f.showFreeToPlay) f.showMembers = true;
-		if (!"only".equals(f.leagueWorlds)) f.leagueWorlds = "exclude";
 		preferences.favorites.removeIf(favorite -> favorite == null || favorite.key == null || favorite.name == null
 			|| favorite.name.isEmpty() || favorite.name.length() > 200);
 		return preferences;

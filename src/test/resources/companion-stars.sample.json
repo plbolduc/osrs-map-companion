@@ -23,7 +23,8 @@
       "pvp": false,
       "deadman": false,
       "league": false,
-      "country": null
+      "country": null,
+      "game": "main"
     },
     {
       "id": "301|crafting guild",
@@ -45,7 +46,8 @@
       "pvp": false,
       "deadman": false,
       "league": false,
-      "country": null
+      "country": null,
+      "game": "main"
     },
     {
       "id": "319|wilderness rune mine",
@@ -67,14 +69,38 @@
       "pvp": false,
       "deadman": false,
       "league": false,
-      "country": null
+      "country": null,
+      "game": "main"
+    },
+    {
+      "id": "640|varrock east mine",
+      "siteKey": "label:varrock east mine",
+      "name": "Varrock east mine",
+      "favoriteKey": "varrock east mine",
+      "rank": 3,
+      "world": 640,
+      "calledTier": 6,
+      "ageMs": 240000,
+      "remainingMs": 2280000,
+      "precise": false,
+      "x": 3232,
+      "y": 3232,
+      "plane": 0,
+      "members": true,
+      "requiredTotal": 0,
+      "wilderness": false,
+      "pvp": false,
+      "deadman": false,
+      "league": false,
+      "country": null,
+      "game": "hardcore"
     },
     {
       "id": "416|mining guild",
       "siteKey": "label:mining guild",
       "name": "Mining Guild",
       "favoriteKey": "mining guild",
-      "rank": 3,
+      "rank": 4,
       "world": 416,
       "calledTier": 6,
       "ageMs": 300000,
@@ -89,14 +115,15 @@
       "pvp": false,
       "deadman": false,
       "league": false,
-      "country": null
+      "country": null,
+      "game": "main"
     },
     {
       "id": "330|rimmington mine",
       "siteKey": "tile:2974,3241",
       "name": "Rimmington mine",
       "favoriteKey": "rimmington mine",
-      "rank": 4,
+      "rank": 5,
       "world": 330,
       "calledTier": 6,
       "ageMs": 480000,
@@ -111,14 +138,15 @@
       "pvp": false,
       "deadman": false,
       "league": false,
-      "country": null
+      "country": null,
+      "game": "main"
     },
     {
       "id": "421|mining guild",
       "siteKey": "label:mining guild",
       "name": "Mining Guild",
       "favoriteKey": "mining guild",
-      "rank": 5,
+      "rank": 6,
       "world": 421,
       "calledTier": 5,
       "ageMs": 360000,
@@ -133,14 +161,15 @@
       "pvp": false,
       "deadman": false,
       "league": false,
-      "country": null
+      "country": null,
+      "game": "main"
     },
     {
       "id": "306|al kharid mine",
       "siteKey": "tile:3296,3298",
       "name": "Al Kharid mine",
       "favoriteKey": "al kharid mine",
-      "rank": 6,
+      "rank": 7,
       "world": 306,
       "calledTier": 4,
       "ageMs": 780000,
@@ -155,14 +184,15 @@
       "pvp": false,
       "deadman": false,
       "league": false,
-      "country": null
+      "country": null,
+      "game": "main"
     },
     {
       "id": "444|rimmington mine",
       "siteKey": "tile:2974,3241",
       "name": "Rimmington mine",
       "favoriteKey": "rimmington mine",
-      "rank": 7,
+      "rank": 8,
       "world": 444,
       "calledTier": 4,
       "ageMs": 780000,
@@ -177,7 +207,8 @@
       "pvp": false,
       "deadman": false,
       "league": false,
-      "country": null
+      "country": null,
+      "game": "main"
     }
   ],
   "stale": false,

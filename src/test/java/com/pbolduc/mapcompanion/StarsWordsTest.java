@@ -34,18 +34,19 @@ import java.io.InterruptedIOException;
 import java.lang.reflect.Proxy;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import javax.swing.AbstractButton;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
+import net.runelite.api.WorldType;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.ui.ColorScheme;
 import okhttp3.MediaType;
@@ -226,7 +227,12 @@ public class StarsWordsTest
 		assertEquals("For Mining 5: T1 needs 10", StarsPanel.levelsLine(5, null));
 		assertEquals("Worlds up to 1620 total", StarsPanel.levelsLine(null, 1620));
 
-		scene(fixture().replace("\"leagueSeason\": false", "\"leagueSeason\": true"), false);
+		/*
+		 * This also asserted the League dropdown's two choices. The list now follows the world the
+		 * player is on, so there is no choice to word; what a League or Hardcore world says is the
+		 * line over the list, asserted in the two tests below.
+		 */
+		scene(fixture(), false);
 		open();
 		until(() -> service.model.feed != null);
 		SwingUtilities.invokeAndWait(() ->
@@ -235,9 +241,60 @@ public class StarsWordsTest
 			((JToggleButton) named(panel, "stars.filters")).doClick();
 			assertEquals("the levels the game read", "For Mining 72: up to T7 · worlds up to 1620 total",
 				text(named(panel, "stars.levels")));
-			JComboBox<?> league = (JComboBox<?>) named(panel, "stars.league");
-			assertEquals("Show main game worlds", league.getItemAt(0));
-			assertEquals("Show League worlds", league.getItemAt(1));
+			assertTrue("no League choice left under More filters", named(panel, "stars.league") == null);
+		});
+	}
+
+	/**
+	 * On a main world the list is the main game's and says nothing about it. The fixture's world 640
+	 * is a Hardcore World: a star a main-game character cannot reach, so it is never offered.
+	 */
+	@Test
+	public void aMainWorldListsTheMainGameAndNeverAHardcoreStar() throws Exception
+	{
+		scene(fixture(), false);
+		open();
+		until(() -> service.model.feed != null);
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.refresh();
+			assertFalse("no game line on the main game", named(panel, "stars.game").isVisible());
+			assertTrue(service.model.sites().stream().flatMap(site -> site.worlds.stream()).noneMatch(star -> star.world == 640));
+		});
+	}
+
+	/** On a Hardcore World only its stars are listed, and the gold line over them says whose they are. */
+	@Test
+	public void aHardcoreWorldListsOnlyItsStarsAndSaysSo() throws Exception
+	{
+		worldTypes = EnumSet.of(WorldType.MEMBERS, WorldType.HARDCORE_MAIN);
+		scene(fixture(), false);
+		open();
+		until(() -> service.model.feed != null && StarsModel.HARDCORE.equals(service.model.playerGame));
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.refresh();
+			assertTrue(named(panel, "stars.game").isVisible());
+			assertEquals("Hardcore Worlds", text(named(panel, "stars.game")));
+			List<StarsModel.Site> sites = service.model.sites();
+			assertEquals(1, sites.size());
+			assertEquals(640, sites.get(0).worlds.get(0).world);
+		});
+	}
+
+	/** With no Hardcore star up, the empty list is the game's, not the filters'. */
+	@Test
+	public void aHardcoreWorldWithNoStarSaysNoneHasBeenCalled() throws Exception
+	{
+		worldTypes = EnumSet.of(WorldType.MEMBERS, WorldType.HARDCORE_MAIN);
+		scene(fixture().replace("\"game\": \"hardcore\"", "\"game\": \"main\""), false);
+		open();
+		until(() -> service.model.feed != null && StarsModel.HARDCORE.equals(service.model.playerGame));
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.refresh();
+			assertTrue(words(panel).contains("No star has been called on Hardcore Worlds yet."));
+			assertFalse(words(panel).contains("No stars match these filters."));
 		});
 	}
 
@@ -247,6 +304,8 @@ public class StarsWordsTest
 	 */
 	/** The game's state in the scene: logged in, unless a test is about the login screen. */
 	private GameState playing = GameState.LOGGED_IN;
+	/** The world's type in the scene: an ordinary members world, unless a test hops elsewhere. */
+	private EnumSet<WorldType> worldTypes = EnumSet.of(WorldType.MEMBERS);
 
 	private void scene(String feed, boolean hold)
 	{
@@ -271,6 +330,8 @@ public class StarsWordsTest
 						return 72;
 					case "getTotalLevel":
 						return 1620;
+					case "getWorldType":
+						return worldTypes;
 					default:
 						throw new UnsupportedOperationException(method.getName());
 				}

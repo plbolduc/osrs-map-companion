@@ -32,6 +32,7 @@ import java.io.InterruptedIOException;
 import java.lang.reflect.Proxy;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
@@ -42,6 +43,7 @@ import javax.annotation.Nullable;
 import javax.swing.SwingUtilities;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
+import net.runelite.api.WorldType;
 import net.runelite.client.callback.ClientThread;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -168,6 +170,8 @@ public class StarsHopTest
 						return 72;
 					case "getTotalLevel":
 						return 1620;
+					case "getWorldType":
+						return EnumSet.of(WorldType.MEMBERS);
 					default:
 						throw new UnsupportedOperationException(method.getName());
 				}

@@ -84,7 +84,8 @@ order your hold allows, then each bounty out to its creature and back.
 </p>
 
 **Stars** lists active stars by site, world, tier and time left. Filter them, save favourite
-sites, and route to one; its steps stay under the star while you hop.
+sites, and route to one; its steps stay under the star while you hop. On a Hardcore or League
+world it lists that game's stars instead.
 
 ## Friends and meetups
 

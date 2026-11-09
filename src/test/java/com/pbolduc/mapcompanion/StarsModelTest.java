@@ -28,7 +28,9 @@ package com.pbolduc.mapcompanion;
 import com.google.gson.Gson;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.EnumSet;
 import java.util.List;
+import net.runelite.api.WorldType;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -67,6 +69,45 @@ public class StarsModelTest
 		model.preferences.filters.hidePvpWorlds = false; star.pvp = false; star.deadman = true;
 		model.preferences.filters.hideDeadmanWorlds = true; assertFalse(model.passes(star, 0));
 		star.deadman = false; star.remainingMs = 0; assertFalse(model.passes(star, 0));
+	}
+	/**
+	 * A character is in one game, so the list is the game of the world the player is on. The
+	 * fixture's world 640 is a Hardcore World, carried from the website's own projection.
+	 */
+	@Test public void theListIsTheGameOfTheWorldThePlayerIsOn()
+	{
+		StarsModel model = fixture();
+		StarsModel.Star hardcore = model.feed.rows.stream().filter(s -> s.world == 640).findFirst().get();
+		StarsModel.Star main = model.feed.rows.stream().filter(s -> s.world == 302).findFirst().get();
+		assertFalse("a main world never offers a Hardcore star", model.passes(hardcore, 0));
+		assertTrue(model.passes(main, 0));
+		model.playerGame = StarsModel.HARDCORE;
+		assertTrue(model.passes(hardcore, 0));
+		assertFalse("a Hardcore World never offers a main-game star", model.passes(main, 0));
+		assertFalse(model.noneInGame());
+		model.playerGame = StarsModel.LEAGUE;
+		assertTrue("stars up, but none in this game", model.noneInGame());
+	}
+	/** A map from before the field still says which stars are League ones, and that is honoured. */
+	@Test public void aMapOlderThanTheGameFieldFallsBackOnItsLeagueFlag()
+	{
+		StarsModel.Star star = new StarsModel.Star();
+		assertEquals(StarsModel.MAIN, StarsModel.gameOf(star));
+		star.league = true;
+		assertEquals(StarsModel.LEAGUE, StarsModel.gameOf(star));
+		star.game = StarsModel.NONE;
+		assertEquals(StarsModel.NONE, StarsModel.gameOf(star));
+	}
+	/** Deadman and PvP stay the main game's characters; the risk filters own those worlds. */
+	@Test public void aWorldsTypeNamesItsGame()
+	{
+		assertEquals(StarsModel.MAIN, StarsClient.gameOf(EnumSet.of(WorldType.MEMBERS)));
+		assertEquals(StarsModel.MAIN, StarsClient.gameOf(EnumSet.of(WorldType.MEMBERS, WorldType.DEADMAN)));
+		assertEquals(StarsModel.MAIN, StarsClient.gameOf(EnumSet.of(WorldType.MEMBERS, WorldType.PVP)));
+		assertEquals(StarsModel.HARDCORE, StarsClient.gameOf(EnumSet.of(WorldType.MEMBERS, WorldType.HARDCORE_MAIN)));
+		assertEquals(StarsModel.LEAGUE, StarsClient.gameOf(EnumSet.of(WorldType.MEMBERS, WorldType.SEASONAL)));
+		assertEquals(StarsModel.NONE, StarsClient.gameOf(EnumSet.of(WorldType.MEMBERS, WorldType.QUEST_SPEEDRUNNING)));
+		assertEquals(StarsModel.MAIN, StarsClient.gameOf(null));
 	}
 	@Test public void metadataAndAccountUnknownsAbstainAndTotalGatesStayLocal()
 	{
