@@ -479,7 +479,7 @@ final class RoutePress
 			}
 			else
 			{
-				landing.land(gson.fromJson(CompanionHttp.readBounded(close.body(), CompanionHttp.MAX_REPLY_BYTES), Answer.class),
+				landing.land(gson.fromJson(CompanionHttp.readBounded(close.body()), Answer.class),
 					null, now + Math.max(MIN_GAP_MS, waitMs));
 			}
 		}
@@ -546,7 +546,7 @@ final class RoutePress
 	{
 		try
 		{
-			String said = CompanionHttp.said(gson, CompanionHttp.readBounded(response.body(), CompanionHttp.MAX_REPLY_BYTES), MAX_REFUSAL);
+			String said = CompanionHttp.said(gson, CompanionHttp.readBounded(response.body()), MAX_REFUSAL);
 			return said != null ? said : NOT_FOUND;
 		}
 		catch (IOException | RuntimeException unreadable)

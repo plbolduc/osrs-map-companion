@@ -233,16 +233,11 @@ final class MeetupClient
 	{
 		clientThread.invokeLater(() ->
 		{
-			if (client.getGameState() != GameState.LOGGED_IN || WorldTiles.isInstance(client))
-			{
-				said = new Said("meet", false, client.getGameState() == GameState.LOGGED_IN ? NEEDS_TILE : LOG_IN,
-					destinations.generation());
-				return;
-			}
-			WorldPoint here = DestinationRoute.standing(client);
+			boolean playing = client.getGameState() == GameState.LOGGED_IN;
+			WorldPoint here = !playing || WorldTiles.isInstance(client) ? null : DestinationRoute.standing(client);
 			if (here == null)
 			{
-				said = new Said("meet", false, NEEDS_TILE, destinations.generation());
+				said = new Said("meet", false, playing ? NEEDS_TILE : LOG_IN, destinations.generation());
 				return;
 			}
 			NewMeetup meetup = new NewMeetup();
@@ -318,7 +313,7 @@ final class MeetupClient
 				finish(source, asked, why, now + Math.max(FAILURE_GAP_MS, wait == null ? 0L : StarsClient.retryDelay(wait)));
 				return;
 			}
-			String text = CompanionHttp.readBounded(close.body(), CompanionHttp.MAX_REPLY_BYTES);
+			String text = CompanionHttp.readBounded(close.body());
 			if (!making)
 			{
 				if (asked == destinations.generation() && onAnswered != null)

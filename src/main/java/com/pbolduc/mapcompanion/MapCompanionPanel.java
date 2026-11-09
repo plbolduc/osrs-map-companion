@@ -860,7 +860,7 @@ public class MapCompanionPanel extends PluginPanel
 
 	private String pairingCode()
 	{
-		return config.pairingCode() == null ? "" : config.pairingCode().trim();
+		return Pairing.codeIn(config);
 	}
 
 	private String mapUrl()

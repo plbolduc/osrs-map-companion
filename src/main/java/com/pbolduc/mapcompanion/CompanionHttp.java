@@ -170,6 +170,12 @@ final class CompanionHttp
 		}
 	}
 
+	/** A reply as text, refusing one longer than {@link #MAX_REPLY_BYTES}: every client's limit but one. */
+	static String readBounded(@Nullable ResponseBody body) throws IOException
+	{
+		return readBounded(body, MAX_REPLY_BYTES);
+	}
+
 	/** The body as text, refusing one longer than {@code limit} bytes before it is all in memory. */
 	static String readBounded(@Nullable ResponseBody body, int limit) throws IOException
 	{

@@ -233,7 +233,7 @@ public class Pairing
 	public boolean hasServerConsent(String server, String code)
 	{
 		return server != null && server.equals(serverUrl()) && tidyCode(code).equals(tidyCode(code()))
-			&& DISCLOSURE_VERSION.equals(readMap(KEY_SERVER_CONSENT).get(server))
+			&& approvedMap(server)
 			&& scopedKey(server, code).equals(store.get(KEY_ACTIVE_CONNECTION));
 	}
 
@@ -259,7 +259,7 @@ public class Pairing
 		{
 			return false;
 		}
-		if (!DISCLOSURE_VERSION.equals(readMap(KEY_SERVER_CONSENT).get(server)) && !confirm.getAsBoolean())
+		if (!approvedMap(server) && !confirm.getAsBoolean())
 		{
 			return false;
 		}
@@ -312,6 +312,13 @@ public class Pairing
 		return value == null ? "" : value.trim();
 	}
 
+	/** The same code as the settings hold it, for the panels and handlers that read the config. */
+	static String codeIn(MapCompanionConfig config)
+	{
+		String value = config.pairingCode();
+		return value == null ? "" : value.trim();
+	}
+
 	/**
 	 * The suffix to send as a header, or null when there is nothing to prove.
 	 *
@@ -323,7 +330,7 @@ public class Pairing
 	public String suffix()
 	{
 		String value = store.get(MapCompanionConfig.KEY_PAIRING_SUFFIX);
-		String tidy = value == null ? "" : value.trim().toUpperCase(Locale.ROOT);
+		String tidy = tidyCode(value);
 		return JoinCode.isWellFormedSuffix(tidy) ? tidy : null;
 	}
 
@@ -582,7 +589,10 @@ public class Pairing
 		}
 		catch (JsonParseException e)
 		{
-			/** Hand-edited or half-written: the map sends the name again on the next reply. */
+			/*
+			 * Hand-edited or half-written: the map sends a name again on its next reply, and issues
+			 * again for a member it has no secret for.
+			 */
 			return new LinkedHashMap<>();
 		}
 	}
@@ -604,22 +614,7 @@ public class Pairing
 	/** What is stored, as a map. Anything unreadable is simply not there, as with the code list. */
 	private Map<String, String> secrets()
 	{
-		String json = store.get(KEY_MEMBER_SECRETS);
-		if (json == null || json.trim().isEmpty())
-		{
-			return new LinkedHashMap<>();
-		}
-		Map<String, String> parsed;
-		try
-		{
-			parsed = gson.fromJson(json, SECRETS_TYPE);
-		}
-		catch (JsonParseException e)
-		{
-			/** Hand-edited or half-written: the map will issue again for a member it has no secret for. */
-			return new LinkedHashMap<>();
-		}
-		return parsed == null ? new LinkedHashMap<>() : parsed;
+		return readMap(KEY_MEMBER_SECRETS);
 	}
 
 	/**
@@ -800,7 +795,7 @@ public class Pairing
 		List<String> codes = new ArrayList<>();
 		for (String candidate : parsed)
 		{
-			String tidy = candidate == null ? "" : candidate.trim().toUpperCase(Locale.ROOT);
+			String tidy = tidyCode(candidate);
 			if (JoinCode.isWellFormedCode(tidy) && !codes.contains(tidy) && codes.size() < MAX_KNOWN_CODES)
 			{
 				codes.add(tidy);
@@ -812,7 +807,7 @@ public class Pairing
 	/** Put a code at the head of the list, keeping it unique and bounded. */
 	public void remember(String code)
 	{
-		String tidy = code == null ? "" : code.trim().toUpperCase(Locale.ROOT);
+		String tidy = tidyCode(code);
 		if (!JoinCode.isWellFormedCode(tidy))
 		{
 			return;
@@ -831,7 +826,7 @@ public class Pairing
 
 	public synchronized void forget(String code)
 	{
-		String tidy = code == null ? "" : code.trim().toUpperCase(Locale.ROOT);
+		String tidy = tidyCode(code);
 		List<String> codes = new ArrayList<>();
 		for (String existing : knownCodes())
 		{

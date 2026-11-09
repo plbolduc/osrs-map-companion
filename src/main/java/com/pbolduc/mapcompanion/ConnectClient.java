@@ -31,6 +31,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import javax.annotation.Nullable;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -205,6 +206,19 @@ final class ConnectClient
 			done.accept(Outcome.refused(FAILED));
 			return;
 		}
+		Request request = CompanionHttp.request(url)
+			.header(INSTALLATION_HEADER, installationKey)
+			.post(CompanionHttp.json(gson, ask))
+			.build();
+		sendOne(request, done, response -> read(response, expectedCode));
+	}
+
+	/**
+	 * Sends one of Connect, Join, Rename and Remove, or refuses at once while another is in flight:
+	 * the sidebar disables its buttons while it waits, and this holds when a press beats the repaint.
+	 */
+	private void sendOne(Request request, Consumer<Outcome> done, Function<Response, Outcome> read)
+	{
 		synchronized (this)
 		{
 			if (busy)
@@ -214,13 +228,9 @@ final class ConnectClient
 			}
 			busy = true;
 		}
-		Request request = CompanionHttp.request(url)
-			.header(INSTALLATION_HEADER, installationKey)
-			.post(CompanionHttp.json(gson, ask))
-			.build();
 		CompanionHttp.enqueue(http.newCall(request),
 			(call, error) -> finish(done, Outcome.refused(UNREACHABLE)),
-			(call, response) -> finish(done, read(response, expectedCode)));
+			(call, response) -> finish(done, read.apply(response)));
 	}
 
 	private void finish(Consumer<Outcome> done, Outcome outcome)
@@ -242,14 +252,8 @@ final class ConnectClient
 	 */
 	Outcome read(Response response, @Nullable String expectedCode)
 	{
-		try (Response close = response)
+		return reply(response, text ->
 		{
-			String text = CompanionHttp.readBounded(close.body(), CompanionHttp.MAX_REPLY_BYTES);
-			Outcome refused = whenRefused(close, text);
-			if (refused != null)
-			{
-				return refused;
-			}
 			Answer answer = gson.fromJson(text, Answer.class);
 			if (answer == null || !JoinCode.isWellFormedCode(answer.code)
 				|| (expectedCode != null && !expectedCode.equals(answer.code)))
@@ -263,11 +267,7 @@ final class ConnectClient
 				return Outcome.refused(FAILED);
 			}
 			return Outcome.joined(joined, Pairing.tidyName(answer.name));
-		}
-		catch (IOException | RuntimeException unreadable)
-		{
-			return Outcome.refused(FAILED);
-		}
+		});
 	}
 
 	/**
@@ -278,49 +278,27 @@ final class ConnectClient
 	void rename(String server, String code, @Nullable String memberId, @Nullable String secret, String name,
 		Consumer<Outcome> done)
 	{
-		HttpUrl url = HttpUrl.parse(server + GROUP);
-		if (url == null || code.isEmpty() || memberId == null || !JoinCode.isWellFormedSecret(secret))
+		HttpUrl url = memberUrl(server + GROUP, code, memberId, secret);
+		if (url == null)
 		{
 			done.accept(Outcome.refused(FAILED));
 			return;
 		}
-		synchronized (this)
-		{
-			if (busy)
-			{
-				done.accept(Outcome.refused(ONE_AT_A_TIME));
-				return;
-			}
-			busy = true;
-		}
 		Rename body = new Rename();
 		body.name = name;
-		Request request = CompanionHttp.member(url, code, memberId, secret).patch(CompanionHttp.json(gson, body))
-			.build();
-		CompanionHttp.enqueue(http.newCall(request),
-			(call, error) -> finish(done, Outcome.refused(UNREACHABLE)),
-			(call, response) -> finish(done, readRename(response)));
+		sendOne(CompanionHttp.member(url, code, memberId, secret).patch(CompanionHttp.json(gson, body)).build(), done,
+			this::readRename);
 	}
 
 	/** One answer to a rename: the name the map now has, or why not. Package-private for its test. */
 	Outcome readRename(Response response)
 	{
-		try (Response close = response)
+		return reply(response, text ->
 		{
-			String text = CompanionHttp.readBounded(close.body(), CompanionHttp.MAX_REPLY_BYTES);
-			Outcome refused = whenRefused(close, text);
-			if (refused != null)
-			{
-				return refused;
-			}
 			Answer answer = gson.fromJson(text, Answer.class);
 			String named = answer == null ? null : Pairing.tidyName(answer.name);
 			return named != null ? Outcome.named(named) : Outcome.refused(FAILED);
-		}
-		catch (IOException | RuntimeException unreadable)
-		{
-			return Outcome.refused(FAILED);
-		}
+		});
 	}
 
 	/**
@@ -331,43 +309,48 @@ final class ConnectClient
 	void remove(String server, String code, @Nullable String memberId, @Nullable String secret, String friend,
 		Consumer<Outcome> done)
 	{
-		HttpUrl url = HttpUrl.parse(server + MEMBER);
-		if (url == null || code.isEmpty() || memberId == null || !JoinCode.isWellFormedSecret(secret) || friend.isEmpty())
+		HttpUrl url = memberUrl(server + MEMBER, code, memberId, secret);
+		if (url == null || friend.isEmpty())
 		{
 			done.accept(Outcome.refused(FAILED));
 			return;
 		}
-		synchronized (this)
-		{
-			if (busy)
-			{
-				done.accept(Outcome.refused(ONE_AT_A_TIME));
-				return;
-			}
-			busy = true;
-		}
 		Removal body = new Removal();
 		body.memberId = friend;
-		Request request = CompanionHttp.member(url, code, memberId, secret).delete(CompanionHttp.json(gson, body))
-			.build();
-		CompanionHttp.enqueue(http.newCall(request),
-			(call, error) -> finish(done, Outcome.refused(UNREACHABLE)),
-			(call, response) -> finish(done, readRemove(response)));
+		sendOne(CompanionHttp.member(url, code, memberId, secret).delete(CompanionHttp.json(gson, body)).build(), done,
+			this::readRemove);
 	}
 
 	/** One answer to a removal: done, or why not. The map answers 204 with no body. Package-private for its test. */
 	Outcome readRemove(Response response)
 	{
+		return reply(response, text -> Outcome.removed());
+	}
+
+	/**
+	 * An answer read the way all four read one: refused as {@link #whenRefused} says, otherwise what
+	 * {@code read} makes of the text, and FAILED for a reply too long or not the shape it expects.
+	 */
+	private Outcome reply(Response response, Function<String, Outcome> read)
+	{
 		try (Response close = response)
 		{
-			String text = CompanionHttp.readBounded(close.body(), CompanionHttp.MAX_REPLY_BYTES);
+			String text = CompanionHttp.readBounded(close.body());
 			Outcome refused = whenRefused(close, text);
-			return refused != null ? refused : Outcome.removed();
+			return refused != null ? refused : read.apply(text);
 		}
 		catch (IOException | RuntimeException unreadable)
 		{
 			return Outcome.refused(FAILED);
 		}
+	}
+
+	/** The address of a member's own request, or null when it lacks a code, a member or a usable secret. */
+	@Nullable
+	private static HttpUrl memberUrl(String address, String code, @Nullable String memberId, @Nullable String secret)
+	{
+		HttpUrl url = HttpUrl.parse(address);
+		return url == null || code.isEmpty() || memberId == null || !JoinCode.isWellFormedSecret(secret) ? null : url;
 	}
 
 	/**
@@ -399,8 +382,8 @@ final class ConnectClient
 	 */
 	void link(String server, String code, @Nullable String memberId, @Nullable String secret, Consumer<String> done)
 	{
-		HttpUrl url = HttpUrl.parse(server + LINK);
-		if (url == null || code.isEmpty() || memberId == null || !JoinCode.isWellFormedSecret(secret))
+		HttpUrl url = memberUrl(server + LINK, code, memberId, secret);
+		if (url == null)
 		{
 			done.accept(null);
 			return;
@@ -422,7 +405,7 @@ final class ConnectClient
 			{
 				return null;
 			}
-			Link link = gson.fromJson(CompanionHttp.readBounded(close.body(), CompanionHttp.MAX_REPLY_BYTES), Link.class);
+			Link link = gson.fromJson(CompanionHttp.readBounded(close.body()), Link.class);
 			return link != null && isMapLink(asked, link.url) ? link.url : null;
 		}
 		catch (IOException | RuntimeException unreadable)

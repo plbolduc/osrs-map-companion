@@ -1641,6 +1641,6 @@ final class ConnectCard extends JPanel
 
 	private String pairingCode()
 	{
-		return config.pairingCode() == null ? "" : config.pairingCode().trim();
+		return Pairing.codeIn(config);
 	}
 }

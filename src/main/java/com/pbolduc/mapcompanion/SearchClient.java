@@ -425,7 +425,7 @@ final class SearchClient
 					else
 					{
 						next = 0L;
-						answer = gson.fromJson(CompanionHttp.readBounded(close.body(), CompanionHttp.MAX_REPLY_BYTES), Answer.class);
+						answer = gson.fromJson(CompanionHttp.readBounded(close.body()), Answer.class);
 						if (answer == null)
 						{
 							why = UNREADABLE;

@@ -96,7 +96,6 @@ final class SettingsPage extends JPanel
 	private final Runnable refresh;
 	/** Settings in place of the daily page, or the daily page back. See {@link SidebarPages}. */
 	private final Consumer<Boolean> settingsOpen;
-	private final Supplier<String> mapUrl;
 
 	private final JButton previewButton = smallButton("Show what's sent");
 	private final SharingControls sharingControls;
@@ -133,7 +132,6 @@ final class SettingsPage extends JPanel
 		this.connectCard = connectCard;
 		this.refresh = refresh;
 		this.settingsOpen = settingsOpen;
-		this.mapUrl = mapUrl;
 		this.sharingControls = new SharingControls(config, settings);
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		setBackground(ColorScheme.DARK_GRAY_COLOR);
@@ -473,6 +471,6 @@ final class SettingsPage extends JPanel
 
 	private String pairingCode()
 	{
-		return config.pairingCode() == null ? "" : config.pairingCode().trim();
+		return Pairing.codeIn(config);
 	}
 }

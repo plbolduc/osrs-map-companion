@@ -695,7 +695,7 @@ public class MapCompanionPlugin extends Plugin
 	 */
 	private void restStatus()
 	{
-		String code = config.pairingCode() == null ? "" : config.pairingCode().trim();
+		String code = Pairing.codeIn(config);
 		boolean playing = client.getGameState() == GameState.LOGGED_IN;
 		loggedOut = !playing;
 		setStatus(code.isEmpty() ? Health.IDLE : Health.WAITING, restingStatus(!code.isEmpty(), playing));
@@ -786,7 +786,7 @@ public class MapCompanionPlugin extends Plugin
 	/** This version's one line, on the first login after an update; see {@link UpdateNotice}. */
 	private void announceUpdate()
 	{
-		boolean usedBefore = config.pairingCode() != null && !config.pairingCode().trim().isEmpty();
+		boolean usedBefore = !Pairing.codeIn(config).isEmpty();
 		String line = UpdateNotice.due(ConfigStore.of(configManager), usedBefore);
 		if (line != null)
 		{
@@ -1386,7 +1386,7 @@ public class MapCompanionPlugin extends Plugin
 		storeIssuedSecret();
 		storeToldName();
 
-		String code = config.pairingCode() == null ? "" : config.pairingCode().trim();
+		String code = Pairing.codeIn(config);
 		if (code.isEmpty())
 		{
 			/*
@@ -1667,8 +1667,7 @@ public class MapCompanionPlugin extends Plugin
 		RewardContext(MapCompanionConfig config, ConfigStore settings)
 		{
 			server = Pairing.normalizeServer(config.relayUrl());
-			String configuredCode = config.pairingCode();
-			code = configuredCode == null ? "" : configuredCode.trim();
+			code = Pairing.codeIn(config);
 			enabled = settings.on(MapCompanionConfig.KEY_SHARE_MILESTONES);
 			pets = settings.on(MapCompanionConfig.KEY_SHARE_PETS);
 			collections = settings.on(MapCompanionConfig.KEY_SHARE_COLLECTION);
