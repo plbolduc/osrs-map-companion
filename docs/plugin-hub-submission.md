@@ -6,7 +6,9 @@
 30 October, to 1.4.0 (`6df00cf`) in
 [runelite/plugin-hub#19965](https://github.com/runelite/plugin-hub/pull/19965) on 2 November, and
 to 1.5.0 (`eaa882b`) in [runelite/plugin-hub#20137](https://github.com/runelite/plugin-hub/pull/20137)
-on 4 November; RuneLite's review bot approved and merged both updates itself. The steps below are
+on 4 November, and to 1.6.0 (`f2d681f`) in
+[runelite/plugin-hub#20209](https://github.com/runelite/plugin-hub/pull/20209) on 6 November;
+RuneLite's review bot approved and merged each update itself. The steps below are
 how it was submitted; a release after that is a merged plugin
 commit, then `commit=` updated in the Hub's `plugins/osrs-map-companion`. Completed and outstanding game checks
 are recorded in [Live checks](live-checks.md). A successful build does not establish live-event
@@ -245,14 +247,13 @@ screenshot tools are outside `src/main`. Bundled third-party notices accompany t
 ## Changes since the approved submission
 
 What the next Hub update brings. Its description names each in a few words; the detail here is for
-answering a reviewer. Since 1.5.0:
+answering a reviewer. Since 1.6.0:
 
-- **The listing says the routes use teleports.** `description=` and the descriptor say *routes with
-  teleports*, and the tags gain `teleport` and `navigation`. The README opens on the same idea and
-  its sections are reordered, not reworded.
-- **Your boats on the world map.** A pin at each port one of the player's boats is moored at, from
-  the boat reader voyages already use and a bundled table of moorings (`moorings.txt`). Nothing new
-  is sent or requested; a new setting, on by default, turns the pins off.
+- **Stars lists the stars of the game you are logged into.** The world's type
+  (`WorldType.HARDCORE_MAIN`, `SEASONAL`) says whether the player is on a Hardcore World, a League
+  or the main game, and the tab lists only that game's stars, read from a `game` field the map now
+  sends with each star; a map without it falls back on the existing `league` flag. The League choice
+  under More filters is gone. Nothing new is sent or requested.
 
 ## Before submission
 
