@@ -72,7 +72,7 @@ import net.runelite.api.gameval.VarbitID;
  * either way to follow a voyage, which sends nothing.
  */
 @Singleton
-public class BoatReader
+public class BoatReader extends SettlingReader
 {
 	/** Five boats at most, the n of {@code SAILING_BOAT_n_*}. */
 	static final int SLOTS = 5;
@@ -105,7 +105,6 @@ public class BoatReader
 	private static final int MAX_PORT = 48;
 
 	private final Client client;
-	private final SessionSettle settle = new SessionSettle(15_000L);
 
 	@Inject
 	BoatReader(Client client)
@@ -128,16 +127,6 @@ public class BoatReader
 			}
 		}
 		return false;
-	}
-
-	public void onSessionResumed(long nowMs)
-	{
-		settle.resumed(nowMs);
-	}
-
-	public void onSessionEnded()
-	{
-		settle.ended();
 	}
 
 	/**

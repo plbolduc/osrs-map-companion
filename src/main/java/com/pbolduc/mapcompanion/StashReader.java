@@ -39,10 +39,9 @@ import net.runelite.client.plugins.cluescrolls.clues.emote.STASHUnit;
  * items. Cache for a minute so a position update never runs a hundred scripts on the game thread.
  */
 @Singleton
-public class StashReader
+public class StashReader extends SettlingReader
 {
 	private final Client client;
-	private final SessionSettle settle = new SessionSettle(15_000L);
 	private Map<Integer, Boolean> cached;
 	private long readAt;
 
@@ -52,14 +51,10 @@ public class StashReader
 		this.client = client;
 	}
 
-	public void onSessionResumed(long nowMs)
-	{
-		settle.resumed(nowMs);
-	}
-
+	@Override
 	public void onSessionEnded()
 	{
-		settle.ended();
+		super.onSessionEnded();
 		cached = null;
 	}
 

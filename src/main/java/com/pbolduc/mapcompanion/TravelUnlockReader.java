@@ -42,10 +42,9 @@ import net.runelite.api.Client;
  * The house numbers are the same table's teleportation_items.tsv outside-house destinations.
  */
 @Singleton
-public class TravelUnlockReader
+public class TravelUnlockReader extends SettlingReader
 {
 	private final Client client;
-	private final SessionSettle settle = new SessionSettle(15_000L);
 	private static final String[] HOUSES = {
 		null, "rimmington", "taverley", "pollnivneach", "rellekka", "brimhaven",
 		"yanille", "hosidius", "prifddinas", "aldarin"
@@ -78,16 +77,6 @@ public class TravelUnlockReader
 	TravelUnlockReader(Client client)
 	{
 		this.client = client;
-	}
-
-	public void onSessionResumed(long nowMs)
-	{
-		settle.resumed(nowMs);
-	}
-
-	public void onSessionEnded()
-	{
-		settle.ended();
 	}
 
 	@Nullable

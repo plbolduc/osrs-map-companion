@@ -79,16 +79,8 @@ import net.runelite.api.Client;
  * {@code CoordinateClue} reads it.
  */
 @Singleton
-public class DiaryReader
+public class DiaryReader extends SettlingReader
 {
-	/**
-	 * How long a session must be up before a diary flag is believed.
-	 *
-	 * <p>Same number and same reason as {@link FarmingObserver}: a zero read in the login window is
-	 * not a missing answer, it is a confident claim that nothing has ever been finished.
-	 */
-	private static final long SETTLE_MS = 15_000L;
-
 	/** Easy, medium, hard, elite — the order every id table below is written in. */
 	static final String[] TIERS = {"easy", "medium", "hard", "elite"};
 
@@ -135,24 +127,11 @@ public class DiaryReader
 		);
 
 	private final Client client;
-	private final SessionSettle settle = new SessionSettle(SETTLE_MS);
 
 	@Inject
 	private DiaryReader(Client client)
 	{
 		this.client = client;
-	}
-
-	/** The client is up. Starts the settling clock, but only if it was not already running. */
-	public void onSessionResumed(long nowMs)
-	{
-		settle.resumed(nowMs);
-	}
-
-	/** Logged out or hopping. Every flag is about to read zero, so believe none of them. */
-	public void onSessionEnded()
-	{
-		settle.ended();
 	}
 
 	/**
@@ -200,12 +179,7 @@ public class DiaryReader
 		Map<String, Boolean[]> out = new LinkedHashMap<>();
 		for (Region region : REGIONS)
 		{
-			int[] values = new int[region.completion.length];
-			for (int i = 0; i < values.length; i++)
-			{
-				values[i] = value(region.completion[i]);
-			}
-			out.put(region.name, tierFlags(values, region.completeAt));
+			out.put(region.name, tierFlags(values(region.completion), region.completeAt));
 		}
 		return out;
 	}
@@ -242,12 +216,7 @@ public class DiaryReader
 		Map<String, String> out = new LinkedHashMap<>();
 		for (Region region : REGIONS)
 		{
-			int[] ids = completion ? region.completion : region.rewards;
-			int[] values = new int[ids.length];
-			for (int i = 0; i < ids.length; i++)
-			{
-				values[i] = value(ids[i]);
-			}
+			int[] values = values(completion ? region.completion : region.rewards);
 			/**
 			 * A reward is a flag somebody either took or did not, so it is read at 1 for every
 			 * region including Karamja. The two-valued reading is about the older completion flags
@@ -258,6 +227,12 @@ public class DiaryReader
 				: tierFrom(values, DONE_AT_ONE));
 		}
 		return out;
+	}
+
+	/** Each varbit's value in order, as {@link #value} reads one. */
+	private int[] values(int[] varbits)
+	{
+		return Arrays.stream(varbits).map(this::value).toArray();
 	}
 
 	private int value(int varbit)

@@ -38,28 +38,13 @@ final class AccountTypes
 {
 	static final int VARBIT = 1777;
 
+	/** The wire's names, indexed by the varbit's value. */
+	private static final String[] NAMES = {"normal", "ironman", "uim", "hcim", "gim", "hcgim", "ugim"};
+
 	@Nullable
 	static String name(int value)
 	{
-		switch (value)
-		{
-			case 0:
-				return "normal";
-			case 1:
-				return "ironman";
-			case 2:
-				return "uim";
-			case 3:
-				return "hcim";
-			case 4:
-				return "gim";
-			case 5:
-				return "hcgim";
-			case 6:
-				return "ugim";
-			default:
-				return null;
-		}
+		return value >= 0 && value < NAMES.length ? NAMES[value] : null;
 	}
 
 	private AccountTypes()
