@@ -14,7 +14,7 @@ shareCapabilities|Carried travel items|Derived yes/no travel flags; your invento
 shareStash|STASH construction|Built STASH units; stored equipment is never read.
 shareBoats|Boats and moorings|Where each boat is moored and its teleport focus, so voyages start at your boat; boat names are never sent.
 shareSeaCharts|Sea charts charted|Which Sailing sea charting tasks you have charted.
-shareSlayer|Slayer task|Your current assignment and remaining count.
+shareSlayer|Slayer task|Your current assignment and remaining count, or what Mortimer offers while you choose.
 shareClue|Clue step|Your current clue scroll step.
 shareFarming|Farming patches|Patch states you have observed, for planning runs.
 shareBirdhouses|Birdhouses|States observed by RuneLite Time Tracking, with their age.

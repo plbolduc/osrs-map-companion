@@ -136,7 +136,9 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RoutePress`, `SearchClien
   stood on carries, from its spawned hold and hull objects. Cargo is never read. With Dailies
   collected enabled it carries `dailies`: for eight dailies, by the map's id, whether each was
   collected today, from the claim varbits RuneLite's Daily Task Indicators reads. With Sea charts
-  charted enabled it carries `seaCharts`, the charted tasks' ids, from the twelve charting varps. Headers: `X-Companion-Code`, optional
+  charted enabled it carries `seaCharts`, the charted tasks' ids, from the twelve charting varps.
+  With Slayer task enabled and no task held it carries `mortimerOffer`, the tasks Mortimer's choice
+  interface offers, read from its varbits and the client's `SlayerTask` table by value. Headers: `X-Companion-Code`, optional
   `X-Companion-Member-Secret`, `X-Companion-Installation`, and `X-Companion-Suffix`
   until the browser-link suffix is claimed.
 - **POST /api/companion/invite** — one **Copy invite** press. Group code and optional member-secret
@@ -261,6 +263,8 @@ answering a reviewer. Since 1.6.0:
   or the main game, and the tab lists only that game's stars, read from a `game` field the map now
   sends with each star; a map without it falls back on the existing `league` flag. The League choice
   under More filters is gone. Nothing new is sent or requested.
+- **Mortimer's offer** goes under the existing Slayer task choice: the two or three tasks Mortimer's
+  interface offers and each one's mortifier, only while it is open or unchanged since, as above.
 - **Sea charts charted:** a new sharing choice under Progress and travel, off until chosen and in
   the one press at Connect, sending the ids of the sea charting tasks charted. No request is added.
 - **Dailies collected:** a new sharing choice under Tasks and timers, off until chosen and in the one

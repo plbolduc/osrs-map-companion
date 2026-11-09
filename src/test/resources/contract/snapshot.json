@@ -196,6 +196,20 @@
     "remaining": 43,
     "areaName": "Kalphite Lair"
   },
+  "mortimerOffer": [
+    {
+      "taskId": 46,
+      "taskName": "Gargoyles",
+      "mortifier": "superior",
+      "value": 250
+    },
+    {
+      "taskId": 45,
+      "taskName": "Kurask",
+      "mortifier": "quantity",
+      "value": -20
+    }
+  ],
   "clue": {
     "tier": "hard",
     "text": "Talk to the bartender.",

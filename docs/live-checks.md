@@ -55,6 +55,14 @@ often. A clean run is now 443 tests with no failures or skips.
 
 ## Still to verify
 
+- [ ] **Mortimer's offer (`MortimerOfferReader`, from the game's task choice script, not yet seen
+      live).** With *Slayer task* shared and no task, talk to Mortimer and open the choice: the map's
+      Mortimer picker fills with the same two or three tasks, mortifiers and amounts, and says it was
+      read from the game. A quantity mortifier shown as *-20 Assigned* reads as -20. Close the
+      interface without choosing: the offer stays. Choose one: it goes. With 50 tasks done, a third
+      offer appears; before that the third slot is empty. Note whether the offer varbits keep an old
+      roll after a task is taken, which is why only an offer seen on the interface counts.
+
 - [ ] **Sea charts charted (`SeaChartReader`, from the game cache's varbit layout, not yet seen
       live).** With *Sea charts charted* on, chart one task, say the Port Sarim task board (id 0):
       the map's Sea charting layer marks it charted within a snapshot. Note whether the twelve

@@ -80,6 +80,7 @@ public class SnapshotBuilder
 	private final PortTaskReader portTaskReader;
 	private final DailyReader dailyReader;
 	private final SeaChartReader seaChartReader;
+	private final MortimerOfferReader mortimerOfferReader;
 	private final CapabilityEvaluator capabilities;
 	private final FarmingObserver farming;
 	private final XpTracker xpTracker;
@@ -232,6 +233,7 @@ public class SnapshotBuilder
 				slayerState.unread(identity.id(), config.slayerOrder(), config.slayerHideWilderness());
 			}
 			snapshot.slayerPreferences = slayerState.preferences();
+			snapshot.mortimerOffer = mortimerOfferReader.offer();
 		}
 		else
 		{

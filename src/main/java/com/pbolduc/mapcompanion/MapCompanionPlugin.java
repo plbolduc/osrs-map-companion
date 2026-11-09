@@ -238,6 +238,9 @@ public class MapCompanionPlugin extends Plugin
 	private SeaChartReader seaChartReader;
 
 	@Inject
+	private MortimerOfferReader mortimerOfferReader;
+
+	@Inject
 	private CargoHolds cargoHolds;
 
 	@Inject
@@ -710,6 +713,7 @@ public class MapCompanionPlugin extends Plugin
 		birdhouseReader.onSessionEnded();
 		dailyReader.onSessionEnded();
 		seaChartReader.onSessionEnded();
+		mortimerOfferReader.onSessionEnded();
 		questReader.onSessionEnded();
 		assignmentReader.onSessionEnded();
 	}
@@ -2100,7 +2104,6 @@ public class MapCompanionPlugin extends Plugin
 		portTaskReader.onSessionResumed(now);
 		birdhouseReader.onSessionResumed(now);
 		dailyReader.onSessionResumed(now);
-		seaChartReader.onSessionResumed(now);
 		questReader.onSessionResumed(now);
 		deathWatcher.onSessionResumed(now);
 		assignmentReader.observe(now);
@@ -2108,6 +2111,12 @@ public class MapCompanionPlugin extends Plugin
 		 * Read every tick while the choice is on, for the sidebar as much as the snapshot: the slots
 		 * are five varbits and a cached row each. Off, nothing is read or shown.
 		 */
+		seaChartReader.onSessionResumed(now);
+		mortimerOfferReader.onSessionResumed(now);
+		if (settings().on("shareSlayer"))
+		{
+			mortimerOfferReader.observe(now);
+		}
 		if (settings().on("sharePortTasks"))
 		{
 			portTaskReader.read(now);

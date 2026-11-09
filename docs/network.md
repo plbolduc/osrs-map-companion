@@ -67,6 +67,13 @@ that boat spawns and RuneLite's account type for an Ultimate Ironman's limit. It
 stand on a boat with a hold, and forgotten at logout, a hop or a character change, so the map plans
 as if only one task's crates fit until it has been seen.
 
+**Slayer task** also carries `mortimerOffer` while Mortimer's choice is open and the player holds
+no task: each offered task's id in the client's `SlayerTask` table, its name from that table, its
+mortifier (`points`, `quantity`, `clue`, `superior` or `xp`) and the mortifier's amount, negative for
+a smaller task. It is read as the game's own task choice script reads it, from the three offers'
+varbits, and only while each task it names appears on the choice interface; once seen it is held while
+the varbits stay the same and no task is taken, and dropped on a new roll, a task taken or a new session.
+
 **Sea charts charted** sends the ids of the Sailing sea charting tasks this character has charted,
 lowest first, the same ids the map's charting tasks carry. The game keeps one bit a task in twelve
 varps, `SAILING_CHARTING_COMPLETION_0` to `_11`, and task *n* is bit *n* mod 32 of varp *n* / 32: each

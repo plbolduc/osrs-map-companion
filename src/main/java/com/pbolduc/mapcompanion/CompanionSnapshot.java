@@ -157,6 +157,8 @@ public class CompanionSnapshot
 	public Boolean detailsTruncated;
 	public List<String> capabilities;
 	public Slayer slayer;
+	/** The tasks Mortimer offers while the player chooses, under the Slayer task; see {@link MortimerOfferReader}. */
+	public List<MortimerTask> mortimerOffer;
 	public Clue clue;
 	public Farming farming;
 	public Loot loot;
@@ -240,6 +242,17 @@ public class CompanionSnapshot
 	}
 
 	/** A resolved task name, never the chat or dialogue it was read from. */
+	public static class MortimerTask
+	{
+		/** The {@code SlayerTask} table's id column, as the offer varbit holds it. */
+		public int taskId;
+		public String taskName;
+		/** points, quantity, clue, superior or xp. */
+		public String mortifier;
+		/** The mortifier's amount, negative for a smaller task. */
+		public int value;
+	}
+
 	public static class Assignment
 	{
 		public String name;

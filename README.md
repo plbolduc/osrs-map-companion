@@ -182,7 +182,7 @@ turns on, or off, everything it can send:
   have built; where each of your boats is moored and whether it carries a teleport focus, so the
   map's voyages start at your boat; and which Sailing sea charting tasks you have charted. STASH
   contents are not read, and boat names are not sent.
-- **Tasks and timers:** your current slayer task and remaining count; your active clue step
+- **Tasks and timers:** your current slayer task and remaining count; with no task, the tasks Mortimer offers while you choose, each with its mortifier; your active clue step
   (tier, item id, observed clue text and resolved tile); your observed hunter rumour;
   your Mahogany Homes customer and tier; the crop requested by your farming contract and whether
   it is ready to hand in;

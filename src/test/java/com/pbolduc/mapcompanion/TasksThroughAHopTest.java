@@ -159,6 +159,7 @@ public class TasksThroughAHopTest
 		set("birdhouseReader", new BirdhouseReader(key -> null));
 		set("dailyReader", new DailyReader(game.client()));
 		set("seaChartReader", new SeaChartReader(game.client()));
+		set("mortimerOfferReader", new MortimerOfferReader(game.client()));
 		set("assignmentReader", new AssignmentReader(game.client(), store));
 		set("deathWatcher", construct(DeathWatcher.class));
 		set("lootLog", new LootLog(game.client(), store, gson));

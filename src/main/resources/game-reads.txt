@@ -18,3 +18,19 @@ daily|robin-bonemeal|MORYTANIA_SLIME_CLAIMED=4543|13|MORYTANIA_DIARY_MEDIUM_COMP
 # varp index * 32 + bit. Read from the game cache (2757): every SAILING_CHARTING_..._COMPLETE varbit
 # is that bit, and its task's SailingChartingCore unique id is that number.
 charting|completion|SAILING_CHARTING_COMPLETION_0=5016,SAILING_CHARTING_COMPLETION_1=5017,SAILING_CHARTING_COMPLETION_2=5018,SAILING_CHARTING_COMPLETION_3=5019,SAILING_CHARTING_COMPLETION_4=5020,SAILING_CHARTING_COMPLETION_5=5021,SAILING_CHARTING_COMPLETION_6=5022,SAILING_CHARTING_COMPLETION_7=5023,SAILING_CHARTING_COMPLETION_8=5024,SAILING_CHARTING_COMPLETION_9=5025,SAILING_CHARTING_COMPLETION_10=5026,SAILING_CHARTING_COMPLETION_11=5027
+#
+# mortimer|slot|task, modifier id, value, negative, boss task varbits, in that order
+# The order and meaning are the game's task choice script's (9739 in cache 2757), which reads these
+# five a slot; the third slot's task is zero until 50 tasks with Mortimer unlock it.
+mortimer|1|SLAYER_CHOOSE_TASK_1=15799,SLAYER_CHOOSE_TASK_1_MODIFIER_ID=15789,SLAYER_CHOOSE_TASK_1_MODIFIER_VALUE=15792,SLAYER_CHOOSE_TASK_1_MODIFIER_NEGATIVE=15793,SLAYER_CHOOSE_TASK_1_BOSS_ID=15803
+mortimer|2|SLAYER_CHOOSE_TASK_2=15801,SLAYER_CHOOSE_TASK_2_MODIFIER_ID=15790,SLAYER_CHOOSE_TASK_2_MODIFIER_VALUE=15794,SLAYER_CHOOSE_TASK_2_MODIFIER_NEGATIVE=15795,SLAYER_CHOOSE_TASK_2_BOSS_ID=15787
+mortimer|3|SLAYER_CHOOSE_TASK_3=15802,SLAYER_CHOOSE_TASK_3_MODIFIER_ID=15791,SLAYER_CHOOSE_TASK_3_MODIFIER_VALUE=15797,SLAYER_CHOOSE_TASK_3_MODIFIER_NEGATIVE=15798,SLAYER_CHOOSE_TASK_3_BOSS_ID=15788
+#
+# mortifier|SlayerModifiers id|the map's name for it
+# The SlayerModifiers table's (131) rows in cache 2757: 1 Slayer Points Increase, 2 Slayer Quantity
+# Change, 3 Increased Clue Drop Chance, 4 Increased Superior Unique Chance, 5 Increased Slayer XP.
+mortifier|1|points
+mortifier|2|quantity
+mortifier|3|clue
+mortifier|4|superior
+mortifier|5|xp
