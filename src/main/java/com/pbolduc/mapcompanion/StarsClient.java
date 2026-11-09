@@ -293,7 +293,7 @@ final class StarsClient
 				}
 				catch (IOException | RuntimeException error)
 				{
-					finish(null, "The map returned unreadable data.", 30_000);
+					finish(null, RoutePress.UNREADABLE, 30_000);
 				}
 			}
 
@@ -313,7 +313,7 @@ final class StarsClient
 						}
 						catch (RuntimeException unreadable)
 						{
-							errorResult("The map returned unreadable data.", delay);
+							errorResult(RoutePress.UNREADABLE, delay);
 						}
 					}
 					else errorResult(error, delay);

@@ -62,6 +62,9 @@ import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.ui.components.IconTextField;
 import net.runelite.client.util.AsyncBufferedImage;
 import net.runelite.client.util.ImageUtil;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.column;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.gap;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.left;
 
 /**
  * Drop luck in the sidebar: one monster's card, or the list of every monster tracked.
@@ -273,7 +276,7 @@ final class DropLuckPanel extends JPanel
 		if (bar)
 		{
 			add(nowBar(now0));
-			add(gap(6));
+			add(space(6));
 		}
 		if (view == View.LIST)
 		{
@@ -348,7 +351,8 @@ final class DropLuckPanel extends JPanel
 		if (selected != null)
 		{
 			card.add(gap(6, ColorScheme.DARKER_GRAY_COLOR));
-			card.add(rule());
+			/* A one-pixel gap in the page's colour, between the drops and the one picked. */
+			card.add(space(1));
 			card.add(gap(6, ColorScheme.DARKER_GRAY_COLOR));
 			buildDetail(card, monster, selected, pinnedHere && selected.item.equalsIgnoreCase(pin[1]), taskLeft);
 		}
@@ -468,9 +472,9 @@ final class DropLuckPanel extends JPanel
 			opened = null;
 			invalidateAndRefresh();
 		}))));
-		add(gap(4));
+		add(space(4));
 		add(search);
-		add(gap(4));
+		add(space(4));
 		JPanel sorts = new JPanel(new GridLayout(1, 3, 2, 0));
 		sorts.setBackground(ColorScheme.DARK_GRAY_COLOR);
 		for (DropLuckView.Sort option : DropLuckView.Sort.values())
@@ -492,7 +496,7 @@ final class DropLuckPanel extends JPanel
 			sorts.add(button);
 		}
 		add(fill(sorts));
-		add(gap(6));
+		add(space(6));
 		add(results);
 		fillResults(monsters, pin, now);
 	}
@@ -522,7 +526,7 @@ final class DropLuckPanel extends JPanel
 				{
 					results.add(section("Pinned"));
 					results.add(pinnedRow(pinnedMonster, drop));
-					results.add(gap(4));
+					results.add(space(4));
 				}
 			}
 		}
@@ -814,49 +818,14 @@ final class DropLuckPanel extends JPanel
 		return card;
 	}
 
-	private static JPanel column(Color background)
-	{
-		JPanel column = new JPanel();
-		column.setLayout(new BoxLayout(column, BoxLayout.Y_AXIS));
-		column.setBackground(background);
-		return left(column);
-	}
-
-	private static JComponent rule()
-	{
-		JPanel rule = new JPanel();
-		rule.setBackground(ColorScheme.DARK_GRAY_COLOR);
-		rule.setPreferredSize(new Dimension(1, 1));
-		rule.setMaximumSize(new Dimension(Integer.MAX_VALUE, 1));
-		/* A one-pixel gap in the page's colour: it needs a gap's minimum too, or a squeeze thickens it. */
-		rule.setMinimumSize(new Dimension(0, 1));
-		return left(rule);
-	}
-
-	private static JPanel gap(int height)
+	/** A gap in the page's colour, where the panel's own gap takes the colour it sits on. */
+	private static JPanel space(int height)
 	{
 		return gap(height, ColorScheme.DARK_GRAY_COLOR);
-	}
-
-	private static JPanel gap(int height, Color background)
-	{
-		JPanel spacer = new JPanel();
-		spacer.setBackground(background);
-		spacer.setPreferredSize(new Dimension(1, height));
-		spacer.setMaximumSize(new Dimension(Integer.MAX_VALUE, height));
-		/* A plain panel's FlowLayout asks for 10px at least, and a squeezed column grows a gap to that. */
-		spacer.setMinimumSize(new Dimension(0, height));
-		return left(spacer);
 	}
 
 	private static JComponent fill(JComponent component)
 	{
 		return MapCompanionPanel.fill(component, ColorScheme.DARK_GRAY_COLOR);
-	}
-
-	private static <T extends JComponent> T left(T component)
-	{
-		component.setAlignmentX(Component.LEFT_ALIGNMENT);
-		return component;
 	}
 }

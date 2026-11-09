@@ -1229,7 +1229,7 @@ public class LootLog
 	 * What {@link #summary()} says on a world whose kills are not counted, with the reason: a player who
 	 * hops to a free world should not read it as their kill log stopping for good.
 	 */
-	static final String PAUSED = "Not counted on this world: drop luck counts normal members worlds only.";
+	static final String PAUSED = Words.of("luck.paused");
 
 	/**
 	 * Whether there is anything to forget.

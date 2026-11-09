@@ -1257,11 +1257,7 @@ final class GroupPanel extends JPanel
 
 	private static JLabel line(JLabel line)
 	{
-		line.setFont(line.getFont().deriveFont(11f));
-		line.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
-		line.setBorder(new EmptyBorder(4, 0, 0, 0));
-		line.setVisible(false);
-		return line;
+		return NowCards.said(line);
 	}
 
 	/**

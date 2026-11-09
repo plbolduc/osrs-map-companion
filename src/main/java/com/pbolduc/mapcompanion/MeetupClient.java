@@ -81,7 +81,7 @@ final class MeetupClient
 	static final String ONE_AT_A_TIME = "The last answer is still on its way.";
 	static final String GONE = Words.of("meetup.gone");
 	static final String REFUSED = Words.of("meetup.refused");
-	static final String UNREACHABLE = "The map could not be reached.";
+	static final String UNREACHABLE = RoutePress.UNREACHABLE;
 	static final String FAILED = Words.of("meetup.failed");
 	static final String MADE = "Meetup made. Its link is copied.";
 	static final String MADE_NO_LINK = "Meetup made.";

@@ -354,7 +354,7 @@ final class FarmRunClient
 			{
 				int code = close.code();
 				String why = code == 429 || code == 503 ? MapWait.BUSY
-							 : code == 403 || code == 410 ? RoutePress.NOT_CONNECTED : "The map could not prepare that run.";
+							 : code == 403 || code == 410 ? RoutePress.NOT_CONNECTED : Words.of("farm.notPrepared");
 				String words = CompanionHttp.said(gson, CompanionHttp.readBounded(close.body(), CompanionHttp.MAX_REPLY_BYTES), 240);
 				boolean worded = words != null;
 				why = worded ? words : why;

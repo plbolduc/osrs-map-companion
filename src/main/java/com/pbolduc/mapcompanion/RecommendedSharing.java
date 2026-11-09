@@ -420,11 +420,7 @@ final class RecommendedSharing extends JPanel
 
 	private static JPanel column()
 	{
-		JPanel panel = new JPanel();
-		panel.setLayout(new javax.swing.BoxLayout(panel, javax.swing.BoxLayout.Y_AXIS));
-		panel.setBackground(BACK);
-		panel.setAlignmentX(Component.LEFT_ALIGNMENT);
-		return panel;
+		return MapCompanionPanel.column(BACK);
 	}
 
 	private static <T extends JComponent> T indented(T component)

@@ -385,7 +385,7 @@ final class NowCards extends JPanel
 	}
 
 	/** The line a press's refusal is said in, under the buttons it came from, in the refusal pink. */
-	private static JLabel said(JLabel line)
+	static JLabel said(JLabel line)
 	{
 		line.setFont(line.getFont().deriveFont(11f));
 		line.setForeground(ColorScheme.LIGHT_GRAY_COLOR);

@@ -748,7 +748,7 @@ final class StarsPanel extends JPanel
 	static String noneInGame(String game)
 	{
 		String name = gameName(game);
-		return StarsModel.NONE.equals(game) ? "Stars are not listed for Speedrunning worlds."
+		return StarsModel.NONE.equals(game) ? Words.of("stars.speedrunning")
 			: "No star has been called on " + (name == null ? "the main game" : name) + " yet.";
 	}
 
@@ -812,18 +812,9 @@ final class StarsPanel extends JPanel
 		if (!html.equals(label.getText())) label.setText(html);
 	}
 
-	private static <T extends JComponent> T left(T component)
-	{
-		component.setAlignmentX(Component.LEFT_ALIGNMENT);
-		return component;
-	}
-
 	private static JPanel column()
 	{
-		JPanel panel = new JPanel();
-		panel.setBackground(ColorScheme.DARK_GRAY_COLOR);
-		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-		return left(panel);
+		return MapCompanionPanel.column(ColorScheme.DARK_GRAY_COLOR);
 	}
 
 	/** One component the full width of the column, at its own height. */
@@ -832,7 +823,7 @@ final class StarsPanel extends JPanel
 		JPanel holder = new Row();
 		holder.setOpaque(false);
 		holder.add(component, BorderLayout.CENTER);
-		return left(holder);
+		return MapCompanionPanel.left(holder);
 	}
 
 	/**
