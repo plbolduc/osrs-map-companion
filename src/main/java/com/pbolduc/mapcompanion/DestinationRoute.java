@@ -193,12 +193,6 @@ public class DestinationRoute
 		@Nullable
 		final String boatAway;
 
-		View(String key, WorldPoint target, List<RelayResponse.RouteOption> ways, int chosen, int step, @Nullable String origin,
-			boolean rerouted, boolean rerouting, @Nullable String message, long nextRerouteMs, boolean following, long revision)
-		{
-			this(key, target, ways, chosen, step, origin, rerouted, rerouting, message, false, nextRerouteMs, following, revision, null);
-		}
-
 		boolean hasRoute()
 		{
 			return !ways.isEmpty();
@@ -287,16 +281,9 @@ public class DestinationRoute
 		String incoming = keyOf(destination);
 		if (!Objects.equals(incoming, key))
 		{
-			key = incoming;
-			target = destination == null ? null : new WorldPoint(destination.x, destination.y, destination.plane);
-			generation++;
-			rerouted = false;
-			rerouting = false;
+			retarget(destination);
 			following = false;
 			followWhenRouted = sentHere(destination, memberId);
-			message = null;
-			refused = false;
-			adopt(destination == null ? null : destination.route);
 			followIfOwed();
 			return;
 		}
@@ -322,6 +309,22 @@ public class DestinationRoute
 			followWhenRouted = false;
 			following = true;
 		}
+	}
+
+	/**
+	 * Another destination, or none: its key and tile, a new generation that no reroute in flight
+	 * belongs to, nothing said, and the route it came with. Whether it is followed is the caller's.
+	 */
+	private void retarget(@Nullable RelayResponse.Destination destination)
+	{
+		key = keyOf(destination);
+		target = destination == null ? null : new WorldPoint(destination.x, destination.y, destination.plane);
+		generation++;
+		rerouted = false;
+		rerouting = false;
+		message = null;
+		refused = false;
+		adopt(destination == null ? null : destination.route);
 	}
 
 	private void adopt(@Nullable RelayResponse.Route incoming)
@@ -549,14 +552,7 @@ public class DestinationRoute
 	 */
 	synchronized void adoptPressed(RelayResponse.Destination destination)
 	{
-		key = keyOf(destination);
-		target = new WorldPoint(destination.x, destination.y, destination.plane);
-		generation++;
-		rerouted = false;
-		rerouting = false;
-		message = null;
-		refused = false;
-		adopt(destination.route);
+		retarget(destination);
 		followWhenRouted = false;
 		following = route != null;
 	}

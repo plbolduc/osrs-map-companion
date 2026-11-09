@@ -136,7 +136,7 @@ final class FarmRunWire
 		}
 		List<RelayResponse.FarmStop> stops = new ArrayList<>();
 		Set<Integer> taken = new HashSet<>();
-		for (RelayResponse.FarmStop stop : run.stops.subList(0, Math.min(MAX_STOPS, run.stops.size())))
+		for (RelayResponse.FarmStop stop : RouteWire.first(run.stops, MAX_STOPS))
 		{
 			RelayResponse.FarmStop clean = stop(stop);
 			if (clean != null && taken.add(clean.n))
@@ -214,34 +214,12 @@ final class FarmRunWire
 		clean.method = RouteWire.text(stop.method, 120);
 		clean.item = RouteWire.text(stop.item, 80);
 		clean.costTiles = Math.max(0, stop.costTiles);
-		clean.tasks = new ArrayList<>();
-		if (stop.tasks != null)
-		{
-			for (RelayResponse.RunTask tick : stop.tasks)
-			{
-				RelayResponse.RunTask kept = tick(tick);
-				if (kept != null && clean.tasks.size() < MAX_TICKS)
-				{
-					clean.tasks.add(kept);
-				}
-			}
-		}
+		clean.tasks = RouteWire.cleaned(stop.tasks, MAX_TICKS, FarmRunWire::tick);
 		clean.voyage = RouteWire.voyage(stop.voyage);
 		boolean tracked = !clean.patchIds.isEmpty() || clean.birdhouseId != null || !clean.tasks.isEmpty();
 		clean.done = stop.done && tracked;
 		clean.visited = stop.visited && !tracked;
-		clean.steps = new ArrayList<>();
-		if (stop.steps != null)
-		{
-			for (RelayResponse.RouteStep step : stop.steps)
-			{
-				RelayResponse.RouteStep kept = RouteWire.step(step);
-				if (kept != null && clean.steps.size() < MAX_STEPS)
-				{
-					clean.steps.add(kept);
-				}
-			}
-		}
+		clean.steps = RouteWire.cleaned(stop.steps, MAX_STEPS, RouteWire::step);
 		return clean;
 	}
 

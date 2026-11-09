@@ -30,7 +30,10 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.TypeAdapterFactory;
 import com.google.gson.reflect.TypeToken;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 
@@ -109,15 +112,7 @@ final class RouteWire
 		{
 			return null;
 		}
-		List<RelayResponse.RouteOption> kept = new ArrayList<>();
-		for (RelayResponse.RouteOption option : route.options)
-		{
-			RelayResponse.RouteOption clean = option(option);
-			if (clean != null)
-			{
-				kept.add(clean);
-			}
-		}
+		List<RelayResponse.RouteOption> kept = cleaned(route.options, Integer.MAX_VALUE, RouteWire::option);
 		if (kept.isEmpty())
 		{
 			return null;
@@ -149,6 +144,33 @@ final class RouteWire
 		return clean;
 	}
 
+	/**
+	 * Each of {@code from} that {@code clean} keeps, the first {@code max} of them: every list the
+	 * map sends is read this way, so a bad entry costs only itself and a long list only its tail.
+	 */
+	static <T> List<T> cleaned(@Nullable List<T> from, int max, UnaryOperator<T> clean)
+	{
+		List<T> out = new ArrayList<>();
+		if (from != null)
+		{
+			for (T item : from)
+			{
+				T kept = clean.apply(item);
+				if (kept != null && out.size() < max)
+				{
+					out.add(kept);
+				}
+			}
+		}
+		return out;
+	}
+
+	/** The first {@code max} of a list the map sent, before any is read; none for a list it left out. */
+	static <T> List<T> first(@Nullable List<T> from, int max)
+	{
+		return from == null ? Collections.emptyList() : from.subList(0, Math.min(max, from.size()));
+	}
+
 	@Nullable
 	private static RelayResponse.RouteOption option(@Nullable RelayResponse.RouteOption option)
 	{
@@ -166,15 +188,7 @@ final class RouteWire
 		{
 			return null;
 		}
-		List<RelayResponse.RouteStep> steps = new ArrayList<>();
-		for (RelayResponse.RouteStep step : option.steps)
-		{
-			RelayResponse.RouteStep clean = step(step);
-			if (clean != null && steps.size() < MAX_STEPS)
-			{
-				steps.add(clean);
-			}
-		}
+		List<RelayResponse.RouteStep> steps = cleaned(option.steps, MAX_STEPS, RouteWire::step);
 		if (steps.isEmpty())
 		{
 			return null;
@@ -225,24 +239,24 @@ final class RouteWire
 			}
 		}
 		clean.line = points.size() < 2 ? null : points.toArray(new int[0][]);
-		List<RelayResponse.Gate> gates = new ArrayList<>();
-		if (voyage.gates != null)
-		{
-			for (RelayResponse.Gate gate : voyage.gates)
-			{
-				String said = gate == null ? null : text(gate.text, MAX_GATE);
-				String tier = gate == null ? null : gate.tier;
-				if (said != null && ("met".equals(tier) || "unmet".equals(tier) || "unknown".equals(tier)) && gates.size() < MAX_GATES)
-				{
-					RelayResponse.Gate kept = new RelayResponse.Gate();
-					kept.text = said;
-					kept.tier = tier;
-					gates.add(kept);
-				}
-			}
-		}
+		List<RelayResponse.Gate> gates = cleaned(voyage.gates, MAX_GATES, RouteWire::gate);
 		clean.gates = gates.isEmpty() ? null : gates;
 		return clean;
+	}
+
+	/** A gate on a voyage as the map may send one: its words and one of the three tiers it knows. */
+	@Nullable
+	private static RelayResponse.Gate gate(@Nullable RelayResponse.Gate gate)
+	{
+		String said = gate == null ? null : text(gate.text, MAX_GATE);
+		if (said == null || !Arrays.asList("met", "unmet", "unknown").contains(gate.tier))
+		{
+			return null;
+		}
+		RelayResponse.Gate kept = new RelayResponse.Gate();
+		kept.text = said;
+		kept.tier = gate.tier;
+		return kept;
 	}
 
 	@Nullable
@@ -261,18 +275,7 @@ final class RouteWire
 		clean.slot = step.slot;
 		clean.title = title;
 		clean.detail = text(step.detail, MAX_DETAIL);
-		List<String> notes = new ArrayList<>();
-		if (step.notes != null)
-		{
-			for (String note : step.notes)
-			{
-				String kept = text(note, MAX_NOTE);
-				if (kept != null && notes.size() < MAX_NOTES)
-				{
-					notes.add(kept);
-				}
-			}
-		}
+		List<String> notes = cleaned(step.notes, MAX_NOTES, note -> text(note, MAX_NOTE));
 		clean.notes = notes.isEmpty() ? null : notes;
 		/* A voyage's rows are sailed, never walked, whatever the wire says: Shortest Path cannot sail. */
 		clean.walk = step.walk && !voyageSlot(step.slot);

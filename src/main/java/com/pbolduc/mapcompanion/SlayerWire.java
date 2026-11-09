@@ -63,7 +63,7 @@ final class SlayerWire
 		value.areaName = RouteWire.text(value.areaName, 100);
 		List<RelayResponse.SlayerSpot> rows = new ArrayList<>();
 		Set<String> ids = new HashSet<>();
-		for (RelayResponse.SlayerSpot row : value.rows.subList(0, Math.min(MAX_SPOTS, value.rows.size())))
+		for (RelayResponse.SlayerSpot row : RouteWire.first(value.rows, MAX_SPOTS))
 		{
 			if (row == null || row.id == null || row.id.length() > 200
 				|| !row.id.matches("slayer:[^<>\\r\\n]{1,160}#[0-9]+:[0-9]+,[0-9]+,[0-3]")
@@ -85,17 +85,16 @@ final class SlayerWire
 			row.kinds = words(row.kinds, 32, 100);
 			row.labels = words(row.labels, 12, 160);
 			List<RelayResponse.SlayerAsk> asks = new ArrayList<>();
-			if (row.asks != null)
-				for (RelayResponse.SlayerAsk ask : row.asks.subList(0, Math.min(24, row.asks.size())))
+			for (RelayResponse.SlayerAsk ask : RouteWire.first(row.asks, 24))
+			{
+				if (ask == null || (ask.text = RouteWire.text(ask.text, 200)) == null)
 				{
-					if (ask == null || (ask.text = RouteWire.text(ask.text, 200)) == null)
-					{
-						continue;
-					}
-					ask.tier = tier(ask.tier);
-					ask.skill = RouteWire.text(ask.skill, 24);
-					asks.add(ask);
+					continue;
 				}
+				ask.tier = tier(ask.tier);
+				ask.skill = RouteWire.text(ask.skill, 24);
+				asks.add(ask);
+			}
 			row.asks = asks;
 			rows.add(row);
 		}
@@ -107,34 +106,32 @@ final class SlayerWire
 		value.note = RouteWire.text(value.note, 300);
 		value.notes = words(value.notes, 12, 300);
 		List<RelayResponse.SlayerKind> kinds = new ArrayList<>();
-		if (value.kinds != null)
-			for (RelayResponse.SlayerKind kind : value.kinds.subList(0, Math.min(MAX_KINDS, value.kinds.size())))
+		for (RelayResponse.SlayerKind kind : RouteWire.first(value.kinds, MAX_KINDS))
+		{
+			if (kind == null || (kind.name = RouteWire.text(kind.name, 100)) == null)
 			{
-				if (kind == null || (kind.name = RouteWire.text(kind.name, 100)) == null)
-				{
-					continue;
-				}
-				kind.facts = RouteWire.text(kind.facts, 200);
-				kind.best = RouteWire.text(kind.best, 160);
-				kinds.add(kind);
+				continue;
 			}
+			kind.facts = RouteWire.text(kind.facts, 200);
+			kind.best = RouteWire.text(kind.best, 160);
+			kinds.add(kind);
+		}
 		value.kinds = kinds;
 		List<RelayResponse.SlayerBoss> bosses = new ArrayList<>();
-		if (value.bosses != null)
-			for (RelayResponse.SlayerBoss boss : value.bosses.subList(0, Math.min(32, value.bosses.size())))
+		for (RelayResponse.SlayerBoss boss : RouteWire.first(value.bosses, 32))
+		{
+			if (boss == null || (boss.name = RouteWire.text(boss.name, 100)) == null)
 			{
-				if (boss == null || (boss.name = RouteWire.text(boss.name, 100)) == null)
-				{
-					continue;
-				}
-				boss.where = RouteWire.text(boss.where, 160);
-				boss.entrance = RouteWire.tile(boss.entrance);
-				if (boss.entrance != null && boss.entrance.plane == null)
-				{
-					boss.entrance.plane = 0;
-				}
-				bosses.add(boss);
+				continue;
 			}
+			boss.where = RouteWire.text(boss.where, 160);
+			boss.entrance = RouteWire.tile(boss.entrance);
+			if (boss.entrance != null && boss.entrance.plane == null)
+			{
+				boss.entrance.plane = 0;
+			}
+			bosses.add(boss);
+		}
 		value.bosses = bosses;
 		return value;
 	}
@@ -146,15 +143,14 @@ final class SlayerWire
 	private static List<String> words(@Nullable List<String> values, int count, int length)
 	{
 		List<String> result = new ArrayList<>();
-		if (values != null)
-			for (String value : values.subList(0, Math.min(count, values.size())))
+		for (String value : RouteWire.first(values, count))
+		{
+			String clean = RouteWire.text(value, length);
+			if (clean != null)
 			{
-				String clean = RouteWire.text(value, length);
-				if (clean != null)
-				{
-					result.add(clean);
-				}
+				result.add(clean);
 			}
+		}
 		return result;
 	}
 }

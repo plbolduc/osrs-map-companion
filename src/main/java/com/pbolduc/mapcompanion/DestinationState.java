@@ -106,13 +106,7 @@ public class DestinationState
 
 	public synchronized void accept(@Nullable RelayResponse.Directive directive)
 	{
-		if (directive == null)
-		{
-			destination = localDestination;
-			lastRemoteFingerprint = null;
-			return;
-		}
-		if (directive.destination == null)
+		if (directive == null || directive.destination == null)
 		{
 			destination = localDestination;
 			lastRemoteFingerprint = null;

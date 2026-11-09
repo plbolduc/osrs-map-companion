@@ -157,19 +157,17 @@ public class MilestoneOutbox
 		{
 			return;
 		}
-		Pending event = new Pending(KIND_NPC_DROP, ++sequence, nowMs);
+		Pending event = add(KIND_NPC_DROP, nowMs, nowMs);
 		event.npc = npc;
 		event.item = item;
 		event.itemId = itemId;
 		event.quantity = quantity;
-		enqueue(event, nowMs);
 	}
 
 	/** A settled observation. Unknown metadata is never filled from a nearby unrelated event. */
 	public synchronized void reward(RewardObservation observation, long nowMs)
 	{
-		if (observation == null || observation.item == null || observation.item.trim().isEmpty()
-			|| observation.item.length() > 80 || observation.item.matches(".*[\\p{Cntrl}].*")
+		if (observation == null || !plainName(observation.item)
 			|| (observation.itemId != null && (observation.itemId <= 0 || observation.itemId > 1_000_000))
 			|| (observation.quantity != null && observation.quantity <= 0)
 			|| !("item".equals(observation.rewardType) || "pet".equals(observation.rewardType)
@@ -178,20 +176,18 @@ public class MilestoneOutbox
 		{
 			return;
 		}
-		Pending event = new Pending(KIND_REWARD, ++sequence, observation.at);
+		Pending event = add(KIND_REWARD, observation.at, nowMs);
 		event.rewardType = observation.rewardType;
 		event.item = observation.item;
 		event.itemId = observation.itemId;
 		event.quantity = observation.quantity;
 		if (("npc".equals(observation.sourceKind) || "activity".equals(observation.sourceKind))
-			&& observation.sourceName != null && !observation.sourceName.trim().isEmpty()
-			&& observation.sourceName.length() <= 80 && !observation.sourceName.matches(".*[\\p{Cntrl}].*"))
+			&& plainName(observation.sourceName))
 		{
 			event.sourceKind = observation.sourceKind;
 			event.sourceName = observation.sourceName;
 		}
 		event.collectionNew = Boolean.TRUE.equals(observation.collectionNew) ? true : null;
-		enqueue(event, nowMs);
 	}
 
 	/**
@@ -207,10 +203,9 @@ public class MilestoneOutbox
 		{
 			return;
 		}
-		Pending event = new Pending(KIND_LEVEL, ++sequence, nowMs);
+		Pending event = add(KIND_LEVEL, nowMs, nowMs);
 		event.skill = skill;
 		event.level = level;
-		enqueue(event, nowMs);
 	}
 
 	/**
@@ -226,9 +221,8 @@ public class MilestoneOutbox
 		{
 			return;
 		}
-		Pending event = new Pending(KIND_QUEST, ++sequence, nowMs);
+		Pending event = add(KIND_QUEST, nowMs, nowMs);
 		event.quest = quest;
-		enqueue(event, nowMs);
 	}
 
 	/** A whole diary tier finished while watched: the region as the diary tab names it, and the tier. */
@@ -238,10 +232,9 @@ public class MilestoneOutbox
 		{
 			return;
 		}
-		Pending event = new Pending(KIND_DIARY, ++sequence, nowMs);
+		Pending event = add(KIND_DIARY, nowMs, nowMs);
 		event.region = region;
 		event.tier = tier;
-		enqueue(event, nowMs);
 	}
 
 	/** What the map accepts as a name: present, at most eighty characters, nothing unprintable. */
@@ -328,7 +321,8 @@ public class MilestoneOutbox
 		return pending.size();
 	}
 
-	private void enqueue(Pending event, long nowMs)
+	/** A new event of {@code kind} at the back of the queue, for its caller to fill in. */
+	private Pending add(String kind, long atMs, long nowMs)
 	{
 		sweep(nowMs);
 		while (pending.size() >= MAX_PENDING)
@@ -339,7 +333,9 @@ public class MilestoneOutbox
 			 */
 			pending.removeFirst();
 		}
+		Pending event = new Pending(kind, ++sequence, atMs);
 		pending.addLast(event);
+		return event;
 	}
 
 	private void sweep(long nowMs)

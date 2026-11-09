@@ -119,13 +119,6 @@ class FarmBankOverlay extends WidgetItemOverlay
 
 	static boolean grants(List<CapabilityEvaluator.ItemTest> tests, int itemId, @Nullable String name)
 	{
-		for (CapabilityEvaluator.ItemTest test : tests)
-		{
-			if (test.grants(itemId, name))
-			{
-				return true;
-			}
-		}
-		return false;
+		return tests.stream().anyMatch(test -> test.grants(itemId, name));
 	}
 }
