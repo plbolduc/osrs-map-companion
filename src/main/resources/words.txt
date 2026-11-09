@@ -97,8 +97,11 @@ settings.keysElsewhere=Keys for Reroute and Follow, and the reminder's minutes, 
 settings.nicknameTip=What your group sees beside your dot. Saves on Enter or when you leave the field.
 
 # NowCards: the cards under Now on Home, their Route buttons, the death card and the chat box's line
-# when a place arrives from the map; meetup.routeTip is the Group tab's meetup Route.
+# when a place arrives from the map, and Quest Helper's step; meetup.routeTip is the Group tab's
+# meetup Route.
 now.clueRouteTip=Plan the way to this step from where you stand. The map doesn't keep the clue or your tile.
+now.questStep=Quest Helper step
+now.questRouteTip=Plan the way to Quest Helper's step from where you stand. The map doesn't keep either tile.
 meetup.routeTip=Plan the way to this meetup from where you stand. Nobody is told you are coming.
 now.rerouteTip=Plan the way again from where you stand. The map doesn't keep your tile.
 now.routeTip=Plan the way here from where you stand. The map doesn't keep your tile.

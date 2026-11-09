@@ -153,7 +153,8 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RoutePress`, `SearchClien
   JSON is the destination's tile and the player's own tile, sent on the press even with position
   sharing off; the README says so. The answer replaces the sidebar's steps. Nothing is walked.
   `RoutePress` sends the same request for a pick from **Search**, with the row's id as the target,
-  and for **Route** beside the carried clue, the last death, a star and a meetup, and on a
+  and for **Route** beside the carried clue, the last death, Quest Helper's step, a star and a
+  meetup, and on a
   destination shown with no way yet, with that tile as the target; a clue step that is words goes
   as the clue itself, its tier, words and scroll item id, and a map above beginner as the same clue
   with its tier and scroll item id alone.
@@ -229,6 +230,9 @@ queued old frames are invalidated.
 or Reroute on, and `clear` for a path this plugin set and Shortest Path still shows. Nothing goes
 during a teleport or ride step, for a destination that merely arrived, or with the setting off, and
 Shortest Path's `config` override is never sent. Drawing a path is information; nothing walks.
+It also reads Quest Helper's own `path` and `clear` to Shortest Path, offering them only while
+`PluginManager` and `ConfigManager` say Quest Helper is running with its Shortest Path setting on,
+so Home can offer **Route** to the quest step; it posts nothing to Quest Helper.
 
 Reconnects use RuneLite's injected scheduler; focus checks stay within the plugin's search field.
 `shutDown` removes its panel and overlays on the EDT and queues everything a game tick touches on

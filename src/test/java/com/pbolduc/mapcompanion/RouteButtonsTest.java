@@ -131,7 +131,8 @@ public class RouteButtonsTest
 	{
 		String readme = new String(Files.readAllBytes(Paths.get("README.md")), StandardCharsets.UTF_8)
 			.replaceAll("\\s+", " ");
-		assertTrue(readme.contains("**Route**, beside your clue, your last death, a star or a meetup, sends the tile you are standing on and the tile it goes to"));
+		/* Quest Helper's step has its Route on Home too, and leaves as a tile the same way. */
+		assertTrue(readme.contains("**Route**, beside your clue, your last death, your Quest Helper step, a star or a meetup, sends the tile you are standing on and the tile it goes to"));
 		assertTrue(readme.contains("That includes your clue's tile and where you died when you do not share them"));
 		/* A map's Route sends its scroll as a worded step's sends its words, so the README names both. */
 		assertTrue(readme.contains("For a clue step that is words, or a map above beginner, Route sends the clue instead"));

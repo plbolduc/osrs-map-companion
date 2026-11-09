@@ -201,9 +201,10 @@ Each row's picture is the game's own, from the client's sprite cache: the map's 
 a world-map icon, and an item's `itemId`, where the map names one, picks its sprite. No picture is
 ever fetched from the map or anywhere else.
 
-**Route** beside the clue being carried, the last death, a star in the Stars tab or a meetup, or on
-the destination's card while it has no way yet, is the same request with a tile as its target: the
-clue's dig spot or beginner map, the death's tile, the star's tile, the meetup's, the destination's
+**Route** beside the clue being carried, the last death, Quest Helper's step, a star in the Stars tab
+or a meetup, or on the destination's card while it has no way yet, is the same request with a tile as
+its target: the clue's dig spot or beginner map, the death's tile, the step's, the star's tile, the
+meetup's, the destination's
 own: a star pinned on Stars, a Slayer spot set on the world map, a place the map sent bare. A clue
 or a death that is not shared leaves only in that request, once
 per press; the map plans with it and keeps nothing. A clue whose step is words names no tile, so
@@ -244,6 +245,14 @@ to follow, by pressing **Follow** or **Reroute**, it sends `path` with the curre
 start, your tile, and its end; it sends nothing for a teleport or a ride. It sends `clear` only for
 a path it set, and only once Shortest Path's answer still names that path. It never sends
 Shortest Path's `config`. A destination that merely arrives, a friend's included, sends nothing.
+
+**Quest Helper's step** is heard on the same messages. Quest Helper, with its own *Use 'Shortest
+Path' plugin* setting on, sends Shortest Path `path` with each quest step's tile as `target`, and
+`clear` when the step ends. This plugin reads that tile, whatever this setting says, and sends Quest
+Helper nothing. A message names no sender, so a `path` counts as Quest Helper's only when this plugin
+did not post it, and is offered only while RuneLite's plugin manager and config say Quest Helper is
+running with that setting on. The tile stays in this client, shown as *Quest Helper step* on Home,
+and leaves only in a **Route** press, as the target above.
 
 ## Identity and credentials
 

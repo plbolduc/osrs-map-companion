@@ -26,7 +26,9 @@ travel** to suggest routes around your account's quests, diaries, items and tran
 
 You can also plan a route to a friend, a meetup or a precise star site, back to where you died,
 and to the step of the clue you carry: a coordinate, a map, or a step in words, which the
-map places for you. Or right-click any spot on the game's world map and choose **Route here**.
+map places for you. With Quest Helper's *Use 'Shortest Path' plugin* setting on, Home shows your
+current quest step as *Quest Helper step* with **Route**; nothing is drawn or planned for it until
+you press Route, and each new step Quest Helper names replaces it. Or right-click any spot on the game's world map and choose **Route here**.
 
 A voyage in your own boat is its own steps: board your boat, sail, and dock, where the boat then
 stays. They tick when you step on deck, reach the far mooring and step ashore, the sail is drawn

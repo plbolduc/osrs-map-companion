@@ -30,6 +30,9 @@ diaries, items and unlocks your account has.
 **Works with Shortest Path.** Map Companion tells you where to go and which teleport to use;
 Shortest Path draws the walks.
 
+**Works with Quest Helper.** With Quest Helper's *Use 'Shortest Path' plugin* setting on, Home shows
+your current quest step, and **Route** plans the way there, teleports included.
+
 ## Search for a place or item
 
 <p>
@@ -219,8 +222,9 @@ it and does not keep it.
 answers with places and keeps nothing. Picking a result sends the tile you are standing on, as
 Reroute does, so the way is planned from there.
 
-**Route**, beside your clue, your last death, a star or a meetup, sends the tile you are standing on
-and the tile it goes to, once per press, as does **Route** on a destination that has no way yet.
+**Route**, beside your clue, your last death, your Quest Helper step, a star or a meetup, sends the
+tile you are standing on and the tile it goes to, once per press, as does **Route** on a destination
+that has no way yet.
 That includes your clue's tile and where you died when you do not share them: they leave in that
 one request and the map plans with them and keeps neither.
 For a clue step that is words, or a map above beginner, Route sends the clue instead, its tier, any
