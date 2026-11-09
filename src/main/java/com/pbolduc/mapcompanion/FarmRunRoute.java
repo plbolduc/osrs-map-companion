@@ -29,6 +29,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collections;
 import javax.annotation.Nullable;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import net.runelite.client.callback.ClientThread;
 
 /**
@@ -39,6 +41,7 @@ import net.runelite.client.callback.ClientThread;
  * overwritten on every tick. End removes only the destination this follower still owns.
  */
 @Singleton
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE, onConstructor_ = @Inject)
 final class FarmRunRoute
 {
 	private final FarmRunState state;
@@ -53,15 +56,6 @@ final class FarmRunRoute
 	/** The destination whose arrival paused the run, so the card can name it; see {@link #pausedFor}. */
 	@Nullable
 	private volatile RelayResponse.Destination detour;
-
-	@Inject
-	FarmRunRoute(FarmRunState state, DestinationState destinations, DestinationRoute route, ClientThread clientThread)
-	{
-		this.state = state;
-		this.destinations = destinations;
-		this.route = route;
-		this.clientThread = clientThread;
-	}
 
 	void follow(boolean on)
 	{

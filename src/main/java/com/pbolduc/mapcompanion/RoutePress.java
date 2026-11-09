@@ -244,25 +244,17 @@ final class RoutePress
 	}
 
 	/** A clue step by its words or its scroll, which the map turns into a place with its own clue table. */
+	@AllArgsConstructor(access = AccessLevel.PACKAGE)
 	static final class ClueTarget
 	{
 		final CompanionSnapshot.Clue clue;
-
-		ClueTarget(CompanionSnapshot.Clue clue)
-		{
-			this.clue = clue;
-		}
 	}
 
 	/** A public place, by the id the map's own search gave it. */
+	@AllArgsConstructor(access = AccessLevel.PACKAGE)
 	static final class PlaceId
 	{
 		final String id;
-
-		PlaceId(String id)
-		{
-			this.id = id;
-		}
 	}
 
 	private final OkHttpClient http;

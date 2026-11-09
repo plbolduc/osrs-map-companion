@@ -31,6 +31,8 @@ import java.awt.image.BufferedImage;
 import java.util.Locale;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import javax.swing.AbstractButton;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -58,6 +60,7 @@ import net.runelite.http.api.item.ItemPrice;
  * drawn over the game is handed its picture on the client thread instead, where it is drawn.
  */
 @Singleton
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE, onConstructor_ = @Inject)
 class GameSprites
 {
 	@Nullable
@@ -66,14 +69,6 @@ class GameSprites
 	private final SpriteManager sprites;
 	@Nullable
 	private final SkillIconManager skills;
-
-	@Inject
-	GameSprites(@Nullable ItemManager items, @Nullable SpriteManager sprites, @Nullable SkillIconManager skills)
-	{
-		this.items = items;
-		this.sprites = sprites;
-		this.skills = skills;
-	}
 
 	/**
 	 * A skill's small icon, the one the game draws beside a level, by the skill's name as the map

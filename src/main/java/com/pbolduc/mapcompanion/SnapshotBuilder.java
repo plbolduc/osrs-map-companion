@@ -34,6 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import net.runelite.api.Client;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.GameState;
@@ -51,6 +53,7 @@ import net.runelite.api.WorldType;
  * <p>Must run on the client thread: every read below is live game state.
  */
 @Singleton
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE, onConstructor_ = @Inject)
 public class SnapshotBuilder
 {
 	/**
@@ -82,55 +85,6 @@ public class SnapshotBuilder
 	private final MilestoneOutbox milestones;
 	private final SnapshotTrimmer trimmer;
 	private final DeathWatcher deathWatcher;
-
-	@Inject
-	private SnapshotBuilder(
-		Client client,
-		MapCompanionConfig config,
-		ConfigStore settings,
-		MemberIdentity identity,
-		SlayerTaskReader slayerReader,
-		ClueReader clueReader,
-		QuestReader questReader,
-		DiaryReader diaryReader,
-		TravelUnlockReader travelUnlockReader,
-		StashReader stashReader,
-		BoatReader boatReader,
-		BirdhouseReader birdhouseReader,
-		AssignmentReader assignmentReader,
-		CapabilityEvaluator capabilities,
-		FarmingObserver farming,
-		XpTracker xpTracker,
-		LootLog lootLog,
-		MilestoneOutbox milestones,
-		SnapshotTrimmer trimmer,
-		DeathWatcher deathWatcher,
-		SlayerState slayerState,
-		PortTaskReader portTaskReader)
-	{
-		this.client = client;
-		this.config = config;
-		this.settings = settings;
-		this.identity = identity;
-		this.slayerReader = slayerReader;
-		this.clueReader = clueReader;
-		this.questReader = questReader;
-		this.diaryReader = diaryReader;
-		this.travelUnlockReader = travelUnlockReader;
-		this.stashReader = stashReader;
-		this.boatReader = boatReader;
-		this.birdhouseReader = birdhouseReader;
-		this.assignmentReader = assignmentReader;
-		this.capabilities = capabilities;
-		this.farming = farming;
-		this.xpTracker = xpTracker;
-		this.lootLog = lootLog;
-		this.milestones = milestones;
-		this.trimmer = trimmer;
-		this.deathWatcher = deathWatcher;
-		this.slayerState = slayerState;
-		this.portTaskReader = portTaskReader;
-	}
 
 	@Nullable
 	public CompanionSnapshot build(long nowMs)
