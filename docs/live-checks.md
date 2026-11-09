@@ -60,6 +60,10 @@ often. A clean run is now 443 tests with no failures or skips.
 - [ ] Walk a short distance manually and verify live movement and reconnection.
 - [ ] Open Stars and pick a world, then hop with the world switcher and cross a loading line: the
       list and the pick stay through both, and no line says to log in. Log out: the list clears.
+- [ ] Log in on a Hardcore World: Stars says *Hardcore Worlds* in gold over the list and lists only
+      stars on Hardcore Worlds, or says none has been called there yet. Hop to an ordinary world:
+      the line goes and the main game's stars are back. This is the first client read of
+      `WorldType.HARDCORE_MAIN`, so it settles whether that is the type Jagex's Hardcore Worlds carry.
 - [ ] With friends whose news carries a picture, keep Group open past a minute: no card stretches or
       loses a line, and Copy invite and Switch stay at the foot. On Stars, with More filters closed,
       *Data from Star Miners* shows under the list.

@@ -133,9 +133,12 @@ final class StarsPanel extends JPanel
 	private final JToggleButton filters = toggle("⋯");
 	private final JPanel more = column(), rows = column(), selection = column();
 	private final JLabel levels = label(""), order = label("Most time left first"), count = label(""), status = label("");
+	/**
+	 * The game the list is about, in gold over it, only when it is not the main game: on a Hardcore
+	 * or League world the list is a different one, and nothing else on the tab would say why.
+	 */
+	private final JLabel game = label("");
 	private final JCheckBox wilderness = check("Wilderness"), pvp = check("PvP and high-risk worlds"), deadman = check("Deadman worlds"), depleted = check("Depleted stars");
-	/* Under the Hide boxes, each choice says it shows, so the box needs no label of its own. */
-	private final JComboBox<String> league = new JComboBox<>(new String[]{"Show main game worlds", "Show League worlds"});
 	private final Set<String> expanded = new HashSet<>();
 	private boolean selected, active, updating;
 	private String rendered;
@@ -189,7 +192,7 @@ final class StarsPanel extends JPanel
 		levels.setName("stars.levels");
 		count.setName("stars.count");
 		status.setName("stars.status");
-		league.setName("stars.league");
+		game.setName("stars.game");
 
 		/* The tier picker keeps the width its longest value needs; the three chips share the rest. */
 		JPanel controls = new JPanel(new GridBagLayout());
@@ -232,12 +235,14 @@ final class StarsPanel extends JPanel
 		more.add(pvp);
 		more.add(deadman);
 		more.add(depleted);
-		league.setFont(league.getFont().deriveFont(11f));
-		more.add(fill(league));
 		more.setVisible(false);
 		add(more);
 
 		add(gap(6));
+		game.setForeground(GOLD);
+		game.setFont(game.getFont().deriveFont(11f));
+		game.setVisible(false);
+		add(fill(game));
 		count.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
 		count.setFont(count.getFont().deriveFont(Font.BOLD, 11f));
 		add(fill(MapCompanionPanel.bar(0, getBackground(), order, null, count)));
@@ -271,7 +276,6 @@ final class StarsPanel extends JPanel
 		pvp.addActionListener(e -> change(() -> service.model.preferences.filters.hidePvpWorlds = pvp.isSelected()));
 		deadman.addActionListener(e -> change(() -> service.model.preferences.filters.hideDeadmanWorlds = deadman.isSelected()));
 		depleted.addActionListener(e -> change(() -> service.model.preferences.filters.hideDepleted = depleted.isSelected()));
-		league.addActionListener(e -> change(() -> service.model.preferences.filters.leagueWorlds = league.getSelectedIndex() == 1 ? "only" : "exclude"));
 	}
 
 	void selected(boolean on)
@@ -312,16 +316,18 @@ final class StarsPanel extends JPanel
 		pvp.setSelected(f.hidePvpWorlds);
 		deadman.setSelected(f.hideDeadmanWorlds);
 		depleted.setSelected(f.hideDepleted);
-		league.setSelectedIndex("only".equals(f.leagueWorlds) ? 1 : 0);
-		league.setVisible(model.feed != null && model.feed.leagueSeason);
 		updating = false;
+		String gameName = gameName(model.playerGame);
+		game.setText(gameName == null ? "" : gameName);
+		game.setVisible(gameName != null && model.feed != null);
 		wrap(levels, levelsLine(model.miningLevel, model.skillTotal), TEXT);
 		List<StarsModel.Site> sites = model.sites();
 		long elapsed = model.elapsed();
 		int stars = 0, locations = 0;
 		boolean loggedOut = !service.eligible() && active;
 		boolean empty = model.feed != null && model.feed.rows.isEmpty();
-		StringBuilder signature = new StringBuilder().append(model.feed != null).append(loggedOut).append(empty).append(service.message);
+		StringBuilder signature = new StringBuilder().append(model.feed != null).append(loggedOut).append(empty).append(service.message)
+			.append(model.playerGame);
 		for (StarsModel.Site site : sites)
 		{
 			stars += site.worlds.size();
@@ -403,8 +409,15 @@ final class StarsPanel extends JPanel
 			rows.add(site(site, elapsed));
 			rows.add(gap(4));
 		}
-		/* An hour with no stars at all is not the player's filters, and says so. */
-		if (stars == 0) rows.add(label(empty ? "No stars reported right now." : "No stars match these filters."));
+		/* An hour with no stars at all, or none in the player's game, is not the player's filters, and says so. */
+		if (stars == 0)
+		{
+			/* Wrapped, because the game's sentence is longer than the column the other two fit in. */
+			JLabel none = label("");
+			wrap(none, empty ? "No stars reported right now."
+				: model.noneInGame() ? noneInGame(model.playerGame) : "No stars match these filters.", TEXT);
+			rows.add(none);
+		}
 		/*
 		 * The pick heads the tab only while the player's own filters show it: what sits there is what
 		 * a press acts on, so it never offers a star the list has just hidden. It is kept, though, and
@@ -722,6 +735,22 @@ final class StarsPanel extends JPanel
 	static final String SOURCE = "star";
 	/** The tab while no character is logged in, since the list is asked for as one. */
 	static final String LOG_IN = "Log in to see stars.";
+
+	/** What the line over the list calls the player's game, or null for the main game's list. */
+	static String gameName(String game)
+	{
+		return StarsModel.HARDCORE.equals(game) ? "Hardcore Worlds"
+			: StarsModel.LEAGUE.equals(game) ? "League worlds"
+			: StarsModel.NONE.equals(game) ? "Speedrunning worlds" : null;
+	}
+
+	/** The empty list when stars are up but none in the player's game. */
+	static String noneInGame(String game)
+	{
+		String name = gameName(game);
+		return StarsModel.NONE.equals(game) ? "Stars are not listed for Speedrunning worlds."
+			: "No star has been called on " + (name == null ? "the main game" : name) + " yet.";
+	}
 
 	/**
 	 * The levels said as what they hide, since that is why they are shown: a star needs ten Mining a

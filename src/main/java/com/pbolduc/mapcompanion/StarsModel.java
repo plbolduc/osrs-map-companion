@@ -50,7 +50,6 @@ final class StarsModel
 		boolean hidePvpWorlds;
 		boolean hideDeadmanWorlds;
 		boolean hideDepleted = true;
-		String leagueWorlds = "exclude";
 
 		boolean safe()
 		{
@@ -88,7 +87,6 @@ final class StarsModel
 	{
 		int version;
 		boolean worldsAvailable;
-		boolean leagueSeason;
 		boolean stale;
 		long snapshotAgeSeconds;
 		long pollIntervalMs = 60_000;
@@ -111,6 +109,8 @@ final class StarsModel
 		Boolean members;
 		int requiredTotal;
 		boolean wilderness, pvp, deadman, league;
+		/** "main", "hardcore", "league" or "none"; absent from a map older than the field. */
+		String game;
 
 		int tier(long elapsed)
 		{
@@ -141,6 +141,18 @@ final class StarsModel
 			this.favorite = favorite;
 		}
 	}
+
+	/**
+	 * The game the player is logged into, from the world's type: the list shows its stars only.
+	 *
+	 * <p>A character exists in one game, so a Hardcore World's star is out of reach from a main
+	 * world and the other way round, and a list of both is half rows nobody reading can use. It
+	 * follows the world rather than a setting because the plugin knows the world, and a choice the
+	 * player had to remember to change on every hop between their accounts would be wrong as often
+	 * as it was right. It replaced the League dropdown under More filters for the same reason.
+	 */
+	String playerGame = MAIN;
+	static final String MAIN = "main", HARDCORE = "hardcore", LEAGUE = "league", NONE = "none";
 
 	Preferences preferences = new Preferences();
 	Feed feed;
@@ -186,10 +198,28 @@ final class StarsModel
 		if (tier < f.minTier || miningLevel != null && tier * 10 > miningLevel) return false;
 		if (f.hideDepleted && star.left(elapsed) <= 0 || f.hideWilderness && star.wilderness
 			|| f.hidePvpWorlds && star.pvp || f.hideDeadmanWorlds && star.deadman) return false;
-		if (feed.leagueSeason && ("only".equals(f.leagueWorlds) != star.league)) return false;
+		if (!gameOf(star).equals(playerGame)) return false;
 		if (star.members == null) return true;
 		if (skillTotal != null && star.requiredTotal > skillTotal) return false;
 		return star.members ? f.showMembers : f.showFreeToPlay;
+	}
+
+	/**
+	 * A star's game. A map from before the field said only whether a world was a league one, and
+	 * that is read rather than taking every star for the main game's.
+	 */
+	static String gameOf(Star star)
+	{
+		return star.game != null ? star.game : star.league ? LEAGUE : MAIN;
+	}
+
+	/**
+	 * Stars are up, but none in the player's game: the empty list is the game's, not the filters',
+	 * and says so rather than sending the player through filters that hid nothing.
+	 */
+	boolean noneInGame()
+	{
+		return feed != null && !feed.rows.isEmpty() && feed.rows.stream().noneMatch(star -> gameOf(star).equals(playerGame));
 	}
 
 	boolean favorite(String key, String tile)
