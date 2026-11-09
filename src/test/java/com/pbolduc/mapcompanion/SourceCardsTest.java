@@ -350,9 +350,14 @@ public class SourceCardsTest
 
 	/**
 	 * Quest Helper's step gets a card of its own once Quest Helper names one, with Route, which asks
-	 * the map for that tile, floor and all, as a death's Route does. While the answer is the
-	 * destination it reads Reroute; once Quest Helper moves on it is Route again, to the new step; and
-	 * Quest Helper's clear takes the card away and leaves the destination it made.
+	 * the map for that tile, floor and all, as a death's Route does. Once Quest Helper moves on it is
+	 * Route again, to the new step; and Quest Helper's clear takes the card away and leaves the
+	 * destination it made.
+	 *
+	 * <p>While the answer is the destination the card is not drawn at all. It read Reroute there, as
+	 * the clue's does, but the destination's own card above it is titled "Quest Helper step" too, so
+	 * Home said the same step twice; that card has its own Reroute. Dismissing the destination brings
+	 * the step's card back.
 	 */
 	@Test
 	public void questHelpersStepIsACardWhoseRouteAsksForItsTile() throws Exception
@@ -378,16 +383,26 @@ public class SourceCardsTest
 		assertEquals(2, target.get("plane").getAsInt());
 		assertEquals("Quest Helper step", destinations.getDestination().name);
 		refresh();
-		assertEquals("Reroute", route.getText());
+		assertFalse("the destination's own card says the step, once", shown(route));
 
 		shortestPath.onPluginMessage(QuestHelperStepTest.questHelperPath(new WorldPoint(3168, 3307, 0)));
 		refresh();
+		assertTrue("Quest Helper's next step is a card again", shown(route));
 		assertEquals("a new step is a new way, not the card above again", "Route", route.getText());
+		shortestPath.onPluginMessage(QuestHelperStepTest.questHelperPath(mill));
+		refresh();
+		assertFalse("back on the step the destination answers, the card goes again", shown(route));
 
 		shortestPath.onPluginMessage(new net.runelite.client.events.PluginMessage("shortestpath", "clear"));
 		refresh();
 		assertFalse(shown(route));
 		assertNotNull("the destination it made stays until dismissed", destinations.getDestination());
+
+		shortestPath.onPluginMessage(QuestHelperStepTest.questHelperPath(mill));
+		destinations.dismiss();
+		refresh();
+		assertTrue("with the destination gone, the step's card is back", shown(route));
+		assertEquals("Route", route.getText());
 	}
 
 	/** The clue card's Route reads Reroute too while the destination is the answer it asked for. */

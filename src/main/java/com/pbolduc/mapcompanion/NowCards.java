@@ -359,9 +359,7 @@ final class NowCards extends JPanel
 	{
 		RoutePress.Said said = routePress.said(source);
 		boolean planning = said != null && said.planning;
-		boolean routedHere = said != null && said.key != null
-			&& said.key.equals(DestinationRoute.keyOf(destinationState.getDestination()));
-		button.setText(planning ? "Planning…" : routedHere ? "Reroute" : label);
+		button.setText(planning ? "Planning…" : answeredHere(source) ? "Reroute" : label);
 		button.setEnabled(ready && !planning && routePress.ready());
 		MapWait.tip(button, tip, routePress.waitMs(now));
 		String message = said == null ? null : said.message;
@@ -371,6 +369,13 @@ final class NowCards extends JPanel
 			setWrapped(line, routePress.words(said, now), CARD_TEXT_WIDTH);
 			MapCompanionPanel.tone(line, said.refused());
 		}
+	}
+
+	/** Whether the destination on Home is the answer the last press from {@code source} made. */
+	private boolean answeredHere(String source)
+	{
+		RoutePress.Said said = routePress.said(source);
+		return said != null && said.key != null && said.key.equals(DestinationRoute.keyOf(destinationState.getDestination()));
 	}
 
 	/**
@@ -674,7 +679,12 @@ final class NowCards extends JPanel
 			routeState(clueRouteButton, clueSaid, "clue", "Route", asks && routable, loggedIn ? CLUE_ROUTE_TIP : RoutePress.LOG_IN, now);
 		}
 		WorldPoint step = shortestPath == null ? null : shortestPath.questStep();
-		questSlot.setVisible(step != null && paired);
+		/*
+		 * Not while the destination above is the answer to this step: that card already says "Quest
+		 * Helper step" and offers Reroute. Quest Helper's next step, or the destination dismissed,
+		 * brings it back.
+		 */
+		questSlot.setVisible(step != null && paired && !answeredHere("quest" + step));
 		if (questSlot.isVisible())
 		{
 			if (!questPictured)

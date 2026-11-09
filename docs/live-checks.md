@@ -296,12 +296,13 @@ The website plan's second session, once the routes in the game are built: a memb
 - [ ] **Quest Helper's step.** With Quest Helper installed and its *Use 'Shortest Path' plugin* on,
       start a quest: *Quest Helper step* appears under Now with the quest-start star and **Route**,
       and nothing is drawn or pinned for it. Press Route: the card above fills with the way to
-      Quest Helper's tile and is followed, and the step's card reads **Reroute**. Advance the quest:
-      the card reads **Route** again, for the new step's tile. Close the quest, turn that setting
-      off, or turn Quest Helper off: the card goes. With Shortest Path installed and *Draw paths with
-      Shortest Path* on, follow the route: Shortest Path draws this plugin's walk, the card still
-      names Quest Helper's step rather than that walk, and Quest Helper's next step takes Shortest
-      Path over as any other target does. This is the first live read of Quest Helper's messages,
+      Quest Helper's tile and is followed, titled *Quest Helper step* with its own **Reroute**, and
+      the step's small card goes, so the step is named once. Advance the quest: the small card is
+      back with **Route**, for the new step's tile; dismissing the destination brings it back too.
+      Close the quest, turn that setting off, or turn Quest Helper off: the card goes. With Shortest
+      Path installed and *Draw paths with Shortest Path* on, follow the route: Shortest Path draws
+      this plugin's walk, Quest Helper's next step brings the card back on its own tile rather than
+      that walk, and takes Shortest Path over as any other target does. This is the first live read of Quest Helper's messages,
       which `QuestHelperStepTest` builds from its source (`DetailedQuestStep.setShortestPath`).
 - [ ] **Three buttons fit.** Follow, Reroute and Dismiss sit on one row in the 225px sidebar
       without cutting a word.
