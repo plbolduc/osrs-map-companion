@@ -279,6 +279,7 @@ public class WireContractTest
 			portSlot(3, "locked", null, null, null, null),
 			portSlot(4, "unknown", null, null, null, null));
 		s.portTasks.hold = 60;
+		s.seaCharts = Arrays.asList(0, 3, 167);
 		s.dailies = new LinkedHashMap<>();
 		s.dailies.put("zaff-battlestaves", true);
 		s.dailies.put("bert-sand", false);

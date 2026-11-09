@@ -224,8 +224,8 @@ public interface MapCompanionConfig extends Config
 		keyName = KEY_SHARE_PROGRESS,
 		name = "Progress and travel",
 		description = "What the map ranks your routes by: Skill levels, Travel quest completion, Full quest progress, "
-			+ "Achievement diaries, Permanent travel and house, Carried travel items, STASH construction, and "
-			+ "Boats and moorings. On shares all eight; off stops all eight.",
+			+ "Achievement diaries, Permanent travel and house, Carried travel items, STASH construction, "
+			+ "Boats and moorings, and Sea charts charted. On shares all nine; off stops all nine.",
 		position = 3,
 		section = sharingSection
 	)

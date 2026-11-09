@@ -64,6 +64,11 @@
   "stashUnits": {
     "28960": true
   },
+  "seaCharts": [
+    0,
+    3,
+    167
+  ],
   "birdhouses": [
     {
       "id": "meadow-north",

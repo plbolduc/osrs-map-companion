@@ -135,7 +135,8 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RoutePress`, `SearchClien
   varbits and the client's `PortTask` table by value, and the crates the hold of the boat last
   stood on carries, from its spawned hold and hull objects. Cargo is never read. With Dailies
   collected enabled it carries `dailies`: for eight dailies, by the map's id, whether each was
-  collected today, from the claim varbits RuneLite's Daily Task Indicators reads. Headers: `X-Companion-Code`, optional
+  collected today, from the claim varbits RuneLite's Daily Task Indicators reads. With Sea charts
+  charted enabled it carries `seaCharts`, the charted tasks' ids, from the twelve charting varps. Headers: `X-Companion-Code`, optional
   `X-Companion-Member-Secret`, `X-Companion-Installation`, and `X-Companion-Suffix`
   until the browser-link suffix is claimed.
 - **POST /api/companion/invite** — one **Copy invite** press. Group code and optional member-secret
@@ -260,6 +261,8 @@ answering a reviewer. Since 1.6.0:
   or the main game, and the tab lists only that game's stars, read from a `game` field the map now
   sends with each star; a map without it falls back on the existing `league` flag. The League choice
   under More filters is gone. Nothing new is sent or requested.
+- **Sea charts charted:** a new sharing choice under Progress and travel, off until chosen and in
+  the one press at Connect, sending the ids of the sea charting tasks charted. No request is added.
 - **Dailies collected:** a new sharing choice under Tasks and timers, off until chosen and in the one
   press at Connect, sending which of eight dailies were collected today, as disclosed above. A
   group's switch that was on before this update does not turn it on. No request or poll is added.

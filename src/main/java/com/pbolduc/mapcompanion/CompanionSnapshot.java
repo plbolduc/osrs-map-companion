@@ -111,6 +111,8 @@ public class CompanionSnapshot
 	public List<Boat> boats;
 	/** Construction only; missing ids have no reading. */
 	public Map<Integer, Boolean> stashUnits;
+	/** The sea charting tasks charted, by the task id the map's tasks carry; see {@link SeaChartReader}. */
+	public List<Integer> seaCharts;
 	public List<Birdhouse> birdhouses;
 	public Assignment hunterRumour;
 	public Assignment mahoganyHome;

@@ -107,6 +107,7 @@ public class NetworkDisclosureTest
 		DISCLOSED.put("farmingContract", "the crop requested by your farming contract");
 		DISCLOSED.put("birdhouses", "birdhouse states and observation ages");
 		DISCLOSED.put("portTasks", "which Sailing port task each of your five slots holds");
+		DISCLOSED.put("seaCharts", "which Sailing sea charting tasks you have charted");
 		DISCLOSED.put("dailies", "which of the dailies the map plans you have collected today");
 		DISCLOSED.put("farming", "the state of farming patches you have walked past");
 		DISCLOSED.put("loot", "observed loot kills for every monster, how long ago each was last killed");
@@ -216,7 +217,7 @@ public class NetworkDisclosureTest
 		expected.put("Clue", "coordTile, itemId, mapTile, text, tier");
 		expected.put("CompanionSnapshot", "accountType, activeSkill, birdhouses, boats, capabilities, clue, dailies, death, "
 					 + "detailsTruncated, diaries, diaryRewards, farming, farmingContract, house, hunterRumour, idleMs, instanceLayout, instanced, loot, mahoganyHome, member, "
-					 + "milestones, portTasks, pos, questLog, questStates, questsCompleted, runReceiverVersion, sentAtMs, skills, slayer, slayerPreferences, stashUnits, travelUnlocks, v, world, worldFlags");
+					 + "milestones, portTasks, pos, questLog, questStates, questsCompleted, runReceiverVersion, seaCharts, sentAtMs, skills, slayer, slayerPreferences, stashUnits, travelUnlocks, v, world, worldFlags");
 		expected.put("Death", "msAgo, tile");
 		expected.put("Drop", "boostedSinceLast, boostedWatched, item, killsAtLast, obtained, trackedSinceKill");
 		expected.put("Farming", "patches, progressVersion");

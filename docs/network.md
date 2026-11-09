@@ -67,6 +67,13 @@ that boat spawns and RuneLite's account type for an Ultimate Ironman's limit. It
 stand on a boat with a hold, and forgotten at logout, a hop or a character change, so the map plans
 as if only one task's crates fit until it has been seen.
 
+**Sea charts charted** sends the ids of the Sailing sea charting tasks this character has charted,
+lowest first, the same ids the map's charting tasks carry. The game keeps one bit a task in twelve
+varps, `SAILING_CHARTING_COMPLETION_0` to `_11`, and task *n* is bit *n* mod 32 of varp *n* / 32: each
+of the 358 `SAILING_CHARTING_..._COMPLETE` varbits in the game cache is that bit, and its task has that
+id in the cache's `SailingChartingCore` table. An empty list is a character who has charted none.
+Nothing is sent for fifteen seconds after a login or hop.
+
 **Dailies collected** sends, for eight of the dailies the map plans a run through, whether each has
 been collected today, keyed by the map's own daily id: Zaff's battlestaves, Wizard Cromperty's
 essence, Bert's sand, the flax keeper's bow strings, Rantz's arrows, Thirus's dynamite, Nightmare

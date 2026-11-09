@@ -98,6 +98,7 @@ public class CompletionAnnouncementTest
 		set("portTaskReader", new PortTaskReader(game.client(), holds));
 		set("birdhouseReader", new BirdhouseReader(key -> null));
 		set("dailyReader", new DailyReader(game.client()));
+		set("seaChartReader", new SeaChartReader(game.client()));
 		set("assignmentReader", new AssignmentReader(game.client(), store));
 		set("deathWatcher", construct(DeathWatcher.class, game.client()));
 		set("lootLog", new LootLog(game.client(), store, new Gson()));

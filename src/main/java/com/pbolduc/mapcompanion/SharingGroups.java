@@ -83,6 +83,7 @@ final class SharingGroups
 	{
 		Map<String, Integer> added = new HashMap<>();
 		added.put("shareDailies", 2);
+		added.put("shareSeaCharts", 2);
 		return added;
 	}
 

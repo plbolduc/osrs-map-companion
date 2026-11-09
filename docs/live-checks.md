@@ -55,6 +55,12 @@ often. A clean run is now 443 tests with no failures or skips.
 
 ## Still to verify
 
+- [ ] **Sea charts charted (`SeaChartReader`, from the game cache's varbit layout, not yet seen
+      live).** With *Sea charts charted* on, chart one task, say the Port Sarim task board (id 0):
+      the map's Sea charting layer marks it charted within a snapshot. Note whether the twelve
+      `SAILING_CHARTING_COMPLETION_*` varps are sent to the client at login at all: a character with
+      tasks charted must not read as none charted after the fifteen-second settle.
+
 - [ ] **Dailies collected (`DailyReader`, from Daily Task Indicators' varbits, not yet seen live).**
       With *Dailies collected* on, buy Zaff's battlestaves, take Bert's sand and the flax keeper's
       bow strings: each reads collected on the map's Dailies within a snapshot, the others waiting.

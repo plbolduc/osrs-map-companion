@@ -404,7 +404,7 @@ public class SharingGroupsTest
 		assertTrue("read by key, and no field of a group RuneLite leaves undeclared: " + stray, stray.isEmpty());
 		assertEquals("every field RuneLite does not declare is read", undeclared, new LinkedHashSet<>(groupFieldKeys().stream()
 			.filter(read::contains).collect(Collectors.toList())));
-		assertEquals(23, undeclared.size());
+		assertEquals(24, undeclared.size());
 	}
 
 	/**

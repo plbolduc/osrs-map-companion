@@ -136,7 +136,7 @@ final class SharingFields
 	static final Section PROGRESS = new Section("progress", MapCompanionConfig.KEY_SHARE_PROGRESS,
 		MapCompanionConfig::shareProgressAndTravel,
 		field("shareSkills"), field("shareQuests"), field("shareQuestLog"), field("shareDiaries"), field("sharePermanentTravel"),
-		field("shareCapabilities"), field("shareStash"), field("shareBoats"));
+		field("shareCapabilities"), field("shareStash"), field("shareBoats"), field("shareSeaCharts"));
 
 	static final Section TASKS = new Section("tasks", MapCompanionConfig.KEY_SHARE_TASKS,
 		MapCompanionConfig::shareTasksAndTimers,

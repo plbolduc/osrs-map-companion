@@ -235,6 +235,9 @@ public class MapCompanionPlugin extends Plugin
 	private DailyReader dailyReader;
 
 	@Inject
+	private SeaChartReader seaChartReader;
+
+	@Inject
 	private CargoHolds cargoHolds;
 
 	@Inject
@@ -706,6 +709,7 @@ public class MapCompanionPlugin extends Plugin
 		}
 		birdhouseReader.onSessionEnded();
 		dailyReader.onSessionEnded();
+		seaChartReader.onSessionEnded();
 		questReader.onSessionEnded();
 		assignmentReader.onSessionEnded();
 	}
@@ -2096,6 +2100,7 @@ public class MapCompanionPlugin extends Plugin
 		portTaskReader.onSessionResumed(now);
 		birdhouseReader.onSessionResumed(now);
 		dailyReader.onSessionResumed(now);
+		seaChartReader.onSessionResumed(now);
 		questReader.onSessionResumed(now);
 		deathWatcher.onSessionResumed(now);
 		assignmentReader.observe(now);

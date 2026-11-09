@@ -79,6 +79,7 @@ public class SnapshotBuilder
 	private final AssignmentReader assignmentReader;
 	private final PortTaskReader portTaskReader;
 	private final DailyReader dailyReader;
+	private final SeaChartReader seaChartReader;
 	private final CapabilityEvaluator capabilities;
 	private final FarmingObserver farming;
 	private final XpTracker xpTracker;
@@ -194,6 +195,10 @@ public class SnapshotBuilder
 		if (settings.on("shareStash"))
 		{
 			snapshot.stashUnits = stashReader.read(nowMs);
+		}
+		if (settings.on("shareSeaCharts"))
+		{
+			snapshot.seaCharts = seaChartReader.read(nowMs);
 		}
 
 		/*

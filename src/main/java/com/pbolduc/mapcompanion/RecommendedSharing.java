@@ -79,7 +79,7 @@ final class RecommendedSharing extends JPanel
 	/** What one press shares: the four groups' fields, the character name, and the client's drawing. */
 	static final List<String> KEYS = Collections.unmodifiableList(Arrays.asList(
 		"sharePosition", "shareActivity", "shareAccountType",
-		"shareSkills", "shareQuests", "shareQuestLog", "shareDiaries", "sharePermanentTravel", "shareCapabilities", "shareStash", "shareBoats",
+		"shareSkills", "shareQuests", "shareQuestLog", "shareDiaries", "sharePermanentTravel", "shareCapabilities", "shareStash", "shareBoats", "shareSeaCharts",
 		"shareSlayer", "shareClue", "shareFarming", "shareBirdhouses", "shareHunterRumours", "shareMahoganyHomes", "shareFarmingContracts",
 		"sharePortTasks", "shareDailies",
 		"shareLoot", MapCompanionConfig.KEY_SHARE_MILESTONES, MapCompanionConfig.KEY_SHARE_PETS, MapCompanionConfig.KEY_SHARE_COLLECTION,
