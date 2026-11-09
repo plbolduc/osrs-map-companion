@@ -166,4 +166,4 @@ search.boxTip=Search the map: a place, a character, a monster or an item. A pick
 
 # UpdateNotice: the one chat line an update says, on the first login after it. Every release writes
 # it again for what that release changed, and moves CompanionVersion.LINE_VERSION with it.
-update.line=your boats are pinned on the world map at the port where each one is moored.
+update.line=the Stars tab lists the stars of the game you are logged into, so Hardcore World stars stay off the main game's list and the other way round.
