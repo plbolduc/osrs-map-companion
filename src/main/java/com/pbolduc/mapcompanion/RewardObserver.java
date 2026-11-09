@@ -26,7 +26,6 @@
 package com.pbolduc.mapcompanion;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.LongSupplier;
 import java.util.function.Predicate;
@@ -82,10 +81,7 @@ public final class RewardObserver
 	private static final String COLLECTION_PREFIX = "New item added to your collection log: ";
 	private static final String POPUP_PREFIX = "New item:";
 	private static final String UNTRADEABLE_PREFIX = "Untradeable drop: ";
-	private static final Set<String> PET_MESSAGES = new HashSet<>(Arrays.asList(
-			"You have a funny feeling like you're being followed.",
-			"You have a funny feeling like you would have been followed...",
-			"You feel something weird sneaking into your backpack."));
+	private static final Set<String> PET_MESSAGES = new HashSet<>(Resources.lines("/pet-messages.txt"));
 	private static final Pattern PICKPOCKET_MESSAGE = Pattern.compile("You pick (the )?.+'s? pocket.*");
 	/**
 	 * Exact core LootTrackerPlugin event labels, listed in reward-activities.txt with the source they

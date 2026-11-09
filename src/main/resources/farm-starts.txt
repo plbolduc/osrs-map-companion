@@ -1,0 +1,11 @@
+# The farm run card's picker, in its order: the run the map plans, a bar, then the name the list
+# shows for it. The first part is what the map is asked to plan, a wire value; the second is words.
+ready-now|Ready now
+preset:herb|Herb run
+preset:tree|Tree run
+preset:fruit|Fruit tree run
+preset:hardwood|Hardwood run
+preset:trees|Tree + fruit tree
+preset:herb-allotment|Herb + allotment + flower
+birdhouses|Birdhouses
+contract|Farming contract
