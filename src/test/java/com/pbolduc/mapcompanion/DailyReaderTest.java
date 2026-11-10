@@ -96,6 +96,45 @@ public class DailyReaderTest
 		assertTrue(reader.read(tomorrow + 15_000) != null);
 	}
 
+	/**
+	 * The day is the session's, not the first reading's. Reading begins only once the choice is shared,
+	 * so a session begun at 23:50 and first read at 00:05 is one that crossed midnight: its claims may
+	 * not have reset for a client that stayed logged in, and are not today's.
+	 */
+	@Test
+	public void aSessionBegunBeforeMidnightAndFirstReadAfterItSaysNothing()
+	{
+		game.setVarbit(VarbitID.ZAFF_LAST_CLAIMED, 1);
+		long tenToMidnight = NOON + 11 * 3_600_000L + 50 * 60_000L;
+		reader.onSessionResumed(tenToMidnight);
+		long fivePast = tenToMidnight + 15 * 60_000L;
+		reader.onSessionResumed(fivePast);
+		assertNull("yesterday's claim is not today's, however late reading began", reader.read(fivePast));
+		assertNull(reader.read(fivePast + 60_000L));
+	}
+
+	@Test
+	public void aSessionBegunAndReadOnTheSameDayAnswers()
+	{
+		long tenToMidnight = NOON + 11 * 3_600_000L + 50 * 60_000L;
+		reader.onSessionResumed(tenToMidnight);
+		assertTrue(reader.read(tenToMidnight + 20_000L) != null);
+	}
+
+	@Test
+	public void aSessionBegunAfterMidnightAnswersForTheNewDay()
+	{
+		game.setVarbit(VarbitID.ZAFF_LAST_CLAIMED, 1);
+		long tenToMidnight = NOON + 11 * 3_600_000L + 50 * 60_000L;
+		reader.onSessionResumed(tenToMidnight);
+		reader.onSessionEnded();
+		long fivePast = tenToMidnight + 15 * 60_000L;
+		reader.onSessionResumed(fivePast);
+		assertNull("settling first", reader.read(fivePast + 1_000L));
+		Map<String, Boolean> read = reader.read(fivePast + 15_000L);
+		assertTrue("a new login after midnight sees the reset, or the claim since it", read.get("zaff-battlestaves"));
+	}
+
 	private Map<String, Boolean> settledRead()
 	{
 		reader.onSessionResumed(NOON);

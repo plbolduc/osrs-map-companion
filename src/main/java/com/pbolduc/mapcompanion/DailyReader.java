@@ -53,13 +53,28 @@ public class DailyReader extends SettlingReader
 	private static final List<String[]> ROWS = GameReads.rows("daily");
 
 	private final Client client;
-	/** The UTC day of the settled session's first reading, or -1 before it. */
+	/** The UTC day the session began, or -1 while none has. */
 	private long day = -1;
 
 	@Inject
 	DailyReader(Client client)
 	{
 		this.client = client;
+	}
+
+	/**
+	 * The day is stamped here, on the session's first logged-in tick, and never in {@link #read}. Read
+	 * runs only while the choice is shared and the client paired, so a day stamped there could be a
+	 * later one than the session's: a choice turned on at 00:10 in a session begun at 23:50 would pass
+	 * claims that may not have reset as today's. The plugin calls this on every tick of a session,
+	 * whatever is shared, so only the first stamps; a plugin started mid-session counts from its own
+	 * first tick, as {@link SessionSettle} does.
+	 */
+	@Override
+	public void onSessionResumed(long nowMs)
+	{
+		super.onSessionResumed(nowMs);
+		day = day < 0 ? Math.floorDiv(nowMs, 86_400_000L) : day;
 	}
 
 	@Override
@@ -73,12 +88,10 @@ public class DailyReader extends SettlingReader
 	@Nullable
 	public Map<String, Boolean> read(long nowMs)
 	{
-		long today = Math.floorDiv(nowMs, 86_400_000L);
-		if (!settle.settled(nowMs) || day >= 0 && day != today)
+		if (!settle.settled(nowMs) || day != Math.floorDiv(nowMs, 86_400_000L))
 		{
 			return null;
 		}
-		day = today;
 		Map<String, Boolean> out = new LinkedHashMap<>();
 		try
 		{
