@@ -160,12 +160,22 @@ class ShortestPath
 		return installed;
 	}
 
-	/** Quest Helper's step while it is still running and sending them, or null. Any thread. */
+	/**
+	 * Quest Helper's step while it is still running and sending them, or null. Any thread.
+	 *
+	 * <p>Found not sending, the held step is dropped rather than hidden: a step kept would come back
+	 * when the setting is turned on again, naming a tile from before it. Quest Helper sends its step
+	 * again when the setting comes back on. Written from the sidebar's thread as well as the client
+	 * thread, which can lose only a step that arrived in the same instant the setting was found off.
+	 */
 	@Nullable
 	WorldPoint questStep()
 	{
-		WorldPoint step = questStep;
-		return step != null && questHelperSends.getAsBoolean() ? step : null;
+		if (!questHelperSends.getAsBoolean())
+		{
+			questStep = null;
+		}
+		return questStep;
 	}
 
 	/** The number of the step whose walk Shortest Path is drawing for this plugin, or zero. */
@@ -245,9 +255,12 @@ class ShortestPath
 		Map<String, Object> data = message.getData() != null ? message.getData() : Map.of();
 		Object target = data.get("target");
 		boolean ended = "clear".equals(message.getName());
-		if (ended || target instanceof WorldPoint && "path".equals(message.getName()))
+		if (!stopped && (ended || target instanceof WorldPoint && "path".equals(message.getName())))
 		{
-			/* Whose it is, Quest Helper's or another plugin's, is asked when the sidebar reads it. */
+			/*
+			 * Whose it is, Quest Helper's or another plugin's, is asked when the sidebar reads it. Not
+			 * while stopped: the listener shutDown leaves for its own last question hears paths too.
+			 */
 			questStep = ended ? null : (WorldPoint) target;
 		}
 		if (!"currentTarget".equals(message.getName()))

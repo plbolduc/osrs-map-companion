@@ -321,7 +321,9 @@ The website plan's second session, once the routes in the game are built: a memb
       Quest Helper's tile and is followed, titled *Quest Helper step* with its own **Reroute**, and
       the step's small card goes, so the step is named once. Advance the quest: the small card is
       back with **Route**, for the new step's tile; dismissing the destination brings it back too.
-      Close the quest, turn that setting off, or turn Quest Helper off: the card goes. With Shortest
+      Close the quest, turn that setting off, or turn Quest Helper off: the card goes. Turn the
+      setting back on: the card returns on the step Quest Helper is on now, never the tile from
+      before it went off. With Shortest
       Path installed and *Draw paths with Shortest Path* on, follow the route: Shortest Path draws
       this plugin's walk, Quest Helper's next step brings the card back on its own tile rather than
       that walk, and takes Shortest Path over as any other target does. This is the first live read of Quest Helper's messages,

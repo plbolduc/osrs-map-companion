@@ -274,8 +274,11 @@ Path' plugin* setting on, sends Shortest Path `path` with each quest step's tile
 `clear` when the step ends. This plugin reads that tile, whatever this setting says, and sends Quest
 Helper nothing. A message names no sender, so a `path` counts as Quest Helper's only when this plugin
 did not post it, and is offered only while RuneLite's plugin manager and config say Quest Helper is
-running with that setting on. The tile stays in this client, shown as *Quest Helper step* on Home,
-and leaves only in a **Route** press, as the target above.
+running with that setting on. While it is, another plugin's `path` reads the same, and its `clear`
+ends Quest Helper's step: nothing in a message tells the two apart. A tile held when the setting is
+found off is forgotten rather than kept for when it comes back, and nothing is heard while this plugin
+is stopped. The tile stays in this client, shown as *Quest Helper step* on Home, and leaves only in a
+**Route** press, as the target above.
 
 ## Identity and credentials
 

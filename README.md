@@ -31,7 +31,8 @@ diaries, items and unlocks your account has.
 Shortest Path draws the walks.
 
 **Works with Quest Helper.** With Quest Helper's *Use 'Shortest Path' plugin* setting on, Home shows
-your current quest step, and **Route** plans the way there, teleports included.
+your current quest step, and **Route** plans the way there, teleports included. A path handed to
+Shortest Path does not say which plugin sent it, so another plugin's path can show its tile there instead.
 
 ## Search for a place or item
 

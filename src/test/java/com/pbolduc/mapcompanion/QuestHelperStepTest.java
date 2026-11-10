@@ -101,6 +101,23 @@ public class QuestHelperStepTest
 		assertEquals(STEP, heard.questStep());
 	}
 
+	/**
+	 * Quest Helper's setting turned off and on again: the step held from before is gone rather than
+	 * hidden, and nothing is offered until Quest Helper names its step again, as it does when the
+	 * setting comes back on.
+	 */
+	@Test
+	public void aStepHeldWhileTheSettingWentOffDoesNotComeBackWithIt()
+	{
+		heard.onPluginMessage(questHelperPath(STEP));
+		sending = false;
+		assertNull(heard.questStep());
+		sending = true;
+		assertNull("the tile from before the setting went off", heard.questStep());
+		heard.onPluginMessage(questHelperPath(UPSTAIRS));
+		assertEquals(UPSTAIRS, heard.questStep());
+	}
+
 	@Test
 	public void aMalformedOrUnrelatedMessageIsIgnored()
 	{
@@ -152,6 +169,23 @@ public class QuestHelperStepTest
 		heard.onPluginMessage(questHelperPath(STEP));
 		heard.shutDown();
 		assertNull(heard.questStep());
+	}
+
+	/**
+	 * Stopped, nothing is taken as the step. shutDown leaves a listener on the bus for the answer to
+	 * its own last question, and that listener is this same method, so a path heard through it after
+	 * the plugin stopped would otherwise be offered when it started again. The next lifetime's first
+	 * tick hears again.
+	 */
+	@Test
+	public void aPathHeardAfterShuttingDownIsNotTaken()
+	{
+		heard.shutDown();
+		heard.onPluginMessage(questHelperPath(STEP));
+		assertNull(heard.questStep());
+		heard.tick(1, null, true, STANDING, () -> { });
+		heard.onPluginMessage(questHelperPath(UPSTAIRS));
+		assertEquals(UPSTAIRS, heard.questStep());
 	}
 
 	/**
