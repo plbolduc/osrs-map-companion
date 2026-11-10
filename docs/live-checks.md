@@ -489,6 +489,9 @@ continuously witnessed empty-to-newly-planted transition mints a stable completi
       moves the arrow/current leg. A mixed allotment stop waits for every selected patch.
 - [ ] Start Ready now, each preset, Birdhouses and a contract from the sidebar. With position
       sharing off, Start still plans from the tile sent on that press; no live position is shared.
+- [ ] Start the Dailies run with no website open. Its stops are the dailies your diaries and
+      quests allow; with Dailies collected on, one bought today is left out. Stand beside Advisor
+      Ghrim upstairs in Miscellania castle: his stop says Visited.
 - [ ] Open Before you leave. Known carried travel items are checked locally; unknown supplies
       make no inventory claim. Closed, the fold counts the teleports not on you, and the count
       follows a teleport taken from the bank. Complete a seeded birdhouse and check its weaker

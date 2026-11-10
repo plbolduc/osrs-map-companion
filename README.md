@@ -63,6 +63,8 @@ need, and counts your kills. **Route** takes you to the one you pick.
 Start a run from **Ready now**, **Birdhouses** or your farming contract, or build one on the
 website. The sidebar lists each stop and the way to it, checks in the bank which teleports you
 are missing, and ticks a stop off once you have replanted it.
+**Dailies run** visits every daily your diaries and quests allow, leaving out what you have
+collected today when **Dailies collected** is on.
 
 ## Sailing
 

@@ -128,6 +128,10 @@ final class FarmRunPanel extends JPanel
 	 * The line a kind of run says while the sharing choice it is planned from is off, or null when it
 	 * needs none or that choice is on. Ready now reads the patches this client has shared and a contract
 	 * the contract it shared; the presets and Birdhouses are planned from the map's own tables.
+	 *
+	 * <p>The dailies run says nothing: the map plans it from the account it already reads, and Dailies
+	 * collected only leaves out what was collected today. This line holds Start back, so a choice
+	 * that would only improve a run is not one it names.
 	 */
 	@Nullable
 	static String needs(String kind, ConfigStore settings)

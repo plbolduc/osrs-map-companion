@@ -65,7 +65,8 @@ to RuneLite to follow the route there.
 ## Farm runs in RuneLite
 
 Build a run on the website and press **Send run to RuneLite**, or choose a preset, **Ready now**,
-**Birdhouses** or your **Farming contract** under **Farm run** on Home and press **Start run**;
+**Birdhouses**, your **Farming contract** or the **Dailies run** under **Farm run** on Home and
+press **Start run**;
 the choice steps aside while the run is going, so a stray press cannot replace it.
 The sidebar lists your stops and how to reach each one, with the steps to the next stop under it
 as **This leg**; a finished stop folds to one line. **Before you leave** is a bank checklist:

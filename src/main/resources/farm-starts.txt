@@ -9,3 +9,4 @@ preset:trees|Tree + fruit tree
 preset:herb-allotment|Herb + allotment + flower
 birdhouses|Birdhouses
 contract|Farming contract
+dailies|Dailies run

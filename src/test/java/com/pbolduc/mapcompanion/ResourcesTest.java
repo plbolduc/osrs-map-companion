@@ -55,9 +55,12 @@ public class ResourcesTest
 	/** A literal resource name handed to {@code Resources.lines}. */
 	private static final Pattern READ = Pattern.compile("Resources[.]lines[(]\"(/[^\"]+)\"[)]");
 
-	/** The picker's nine runs, in its order: the wire kind the map plans, then the name in the list. */
+	/**
+	 * The picker's ten runs, in its order: the wire kind the map plans, then the name in the list. The
+	 * dailies run is the tenth, last because it is the one run in the list that visits no patch.
+	 */
 	@Test
-	public void theFarmRunPickerHasItsNineRunsInOrder()
+	public void theFarmRunPickerHasItsTenRunsInOrder()
 	{
 		assertEquals(Arrays.asList(
 			"ready-now|Ready now",
@@ -68,7 +71,8 @@ public class ResourcesTest
 			"preset:trees|Tree + fruit tree",
 			"preset:herb-allotment|Herb + allotment + flower",
 			"birdhouses|Birdhouses",
-			"contract|Farming contract"), Resources.lines("/farm-starts.txt"));
+			"contract|Farming contract",
+			"dailies|Dailies run"), Resources.lines("/farm-starts.txt"));
 	}
 
 	/** The game's three pet lines, which a chat message must match whole. */
