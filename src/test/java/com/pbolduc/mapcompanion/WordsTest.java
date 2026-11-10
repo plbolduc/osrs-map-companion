@@ -71,6 +71,25 @@ public class WordsTest
 		assertEquals("keys the source asks for that words.txt lacks", new TreeSet<String>(), missing);
 	}
 
+	/**
+	 * What a player is shown for each key the source asks for, through the reader the plugin uses
+	 * rather than this test's own reading of the file: never the key itself, which is what a line
+	 * missing from the jar, or one whose words are its own key, would put on the sidebar.
+	 */
+	@Test
+	public void everyKeyTheSourceAsksForReadsAsWords() throws IOException
+	{
+		Set<String> unread = new TreeSet<>();
+		for (String key : asked())
+		{
+			if (Words.of(key).equals(key))
+			{
+				unread.add(key);
+			}
+		}
+		assertEquals("keys that read as themselves", new TreeSet<String>(), unread);
+	}
+
 	@Test
 	public void everyLineIsAskedFor() throws IOException
 	{
