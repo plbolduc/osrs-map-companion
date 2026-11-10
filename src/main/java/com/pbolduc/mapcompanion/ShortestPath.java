@@ -237,7 +237,12 @@ class ShortestPath
 			/* Another plugin's, or this one's own, which the bus hands back before its post returns. */
 			return;
 		}
-		Map<String, Object> data = message.getData();
+		/*
+		 * RuneLite's constructors refuse null data, but this is another plugin's message on the event
+		 * bus, where a throw would skip the rest of it: null reads as no data, so a clear still ends
+		 * the step and a path with nothing in it is no step.
+		 */
+		Map<String, Object> data = message.getData() != null ? message.getData() : Map.of();
 		Object target = data.get("target");
 		boolean ended = "clear".equals(message.getName());
 		if (ended || target instanceof WorldPoint && "path".equals(message.getName()))
@@ -249,7 +254,7 @@ class ShortestPath
 		{
 			return;
 		}
-		Object id = data == null ? null : data.get("id");
+		Object id = data.get("id");
 		if (!(id instanceof String) || !((String) id).startsWith(ID))
 		{
 			return;

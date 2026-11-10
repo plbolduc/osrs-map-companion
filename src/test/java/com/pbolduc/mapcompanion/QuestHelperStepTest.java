@@ -25,6 +25,7 @@
  */
 package com.pbolduc.mapcompanion;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -117,6 +118,31 @@ public class QuestHelperStepTest
 		elsewhere.put("target", UPSTAIRS);
 		heard.onPluginMessage(new PluginMessage("some-other-plugin", "path", elsewhere));
 		assertEquals("none of those is a step, nor the end of one", STEP, heard.questStep());
+	}
+
+	/**
+	 * Another plugin's message with no data at all. RuneLite's constructors refuse one, so it is made
+	 * here by hand, but the bus carries whatever a plugin built: neither may throw inside it, a clear
+	 * still ends the step, and a path with nothing in it is no step.
+	 */
+	@Test
+	public void aMessageWithNoDataNeitherThrowsNorLeavesAStep() throws ReflectiveOperationException
+	{
+		heard.onPluginMessage(questHelperPath(STEP));
+		heard.onPluginMessage(withNoData("clear"));
+		assertNull("the clear ended the step", heard.questStep());
+		heard.onPluginMessage(withNoData("path"));
+		assertNull("and a path with no target is none", heard.questStep());
+		heard.onPluginMessage(withNoData("currentTarget"));
+	}
+
+	private static PluginMessage withNoData(String name) throws ReflectiveOperationException
+	{
+		PluginMessage message = new PluginMessage("shortestpath", name);
+		Field data = PluginMessage.class.getDeclaredField("data");
+		data.setAccessible(true);
+		data.set(message, null);
+		return message;
 	}
 
 	/** The plugin stopping forgets the step: Quest Helper names the next one only when it starts. */
