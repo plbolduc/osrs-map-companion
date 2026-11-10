@@ -189,6 +189,31 @@ public class SnapshotTrimmerTest
 		assertEquals(Boolean.TRUE, snapshot.detailsTruncated);
 	}
 
+	/**
+	 * The sea charts go whole after STASH, the largest catalogue at up to 384 ids, and only when
+	 * dropping STASH was not enough. Dailies and Mortimer's offer are never dropped; the worst case
+	 * fits with both, and this says by keeping them.
+	 */
+	@Test
+	public void dropsTheSeaChartsAfterStashAndNeverTheDailiesOrMortimersOffer()
+	{
+		CompanionSnapshot lighter = worstCase();
+		lighter.boats = null;
+		lighter.portTasks = null;
+		trimmer.fit(lighter);
+		assertNull(lighter.stashUnits);
+		assertNotNull("dropping STASH was enough", lighter.seaCharts);
+
+		CompanionSnapshot snapshot = worstCase();
+		trimmer.fit(snapshot);
+		assertNull(snapshot.stashUnits);
+		assertNull("more than STASH had to go", snapshot.seaCharts);
+		assertNotNull(snapshot.dailies);
+		assertNotNull(snapshot.mortimerOffer);
+		assertEquals(Boolean.TRUE, snapshot.detailsTruncated);
+		assertTrue(trimmer.sizeOf(snapshot) <= SnapshotTrimmer.BUDGET_BYTES);
+	}
+
 	@Test
 	public void aRealisticFullKillLogFitsWithoutTheOmissionNotice()
 	{
@@ -276,6 +301,11 @@ public class SnapshotTrimmerTest
 		snapshot.mahoganyHome = null;
 		snapshot.farmingContract = null;
 		snapshot.birdhouses = null;
+		snapshot.dailies = null;
+		snapshot.seaCharts = null;
+		snapshot.mortimerOffer = null;
+		snapshot.boats = null;
+		snapshot.portTasks = null;
 		/** No kill log, so the stage that would otherwise get under the cap first cannot. */
 		snapshot.loot = null;
 		/** Bulk the trimmer cannot touch, sized so the patch stage has to drop some but not all. */
@@ -317,7 +347,6 @@ public class SnapshotTrimmerTest
 		snapshot.worldFlags = new ArrayList<>(Arrays.asList(
 				"members", "pvp", "high_risk", "deadman", "league", "tournament", "beta", "speedrun"));
 		snapshot.pos = new CompanionSnapshot.Tile(3200, 3200, 0);
-		snapshot.instanced = Boolean.FALSE;
 		snapshot.idleMs = 1_234_567L;
 
 		snapshot.skills = new LinkedHashMap<>();
@@ -360,6 +389,62 @@ public class SnapshotTrimmerTest
 			house.observedMsAgo = 21_600_000;
 			snapshot.birdhouses.add(house);
 		}
+		snapshot.instanced = Boolean.TRUE;
+		snapshot.instanceLayout = WorldTiles.ASSEMBLED;
+		snapshot.runReceiverVersion = 1;
+		snapshot.slayerPreferences = new CompanionSnapshot.SlayerPreferences();
+		/** Every boat slot at a dock with the longest port name the reader keeps and a focus. */
+		snapshot.boats = new ArrayList<>();
+		for (int slot = 0; slot < BoatReader.SLOTS; slot++)
+		{
+			CompanionSnapshot.Boat boat = new CompanionSnapshot.Boat();
+			boat.slot = slot;
+			boat.dock = 9_999;
+			boat.port = pad("Port name " + slot, 48);
+			boat.focus = "teleport";
+			snapshot.boats.add(boat);
+		}
+		/** Every port task slot a courier with every count the wire has room for, and a hold. */
+		snapshot.portTasks = new CompanionSnapshot.PortTasks();
+		snapshot.portTasks.slots = new ArrayList<>();
+		for (int slot = 0; slot < 5; slot++)
+		{
+			CompanionSnapshot.PortTaskSlot task = new CompanionSnapshot.PortTaskSlot();
+			task.slot = slot;
+			task.state = PortTaskReader.COURIER;
+			task.taskId = 9_999;
+			task.taken = 999;
+			task.delivered = 999;
+			task.remaining = 999;
+			snapshot.portTasks.slots.add(task);
+		}
+		snapshot.portTasks.hold = 999;
+		/** Every daily the reader can answer, each as long as its id. */
+		snapshot.dailies = new LinkedHashMap<>();
+		for (String[] row : GameReads.rows("daily"))
+		{
+			snapshot.dailies.put(row[0], false);
+		}
+		/** Every bit of the twelve charting varps set: 384 ids, the most the reader can send. */
+		snapshot.seaCharts = new ArrayList<>();
+		for (int id = 0; id < 12 * 32; id++)
+		{
+			snapshot.seaCharts.add(id);
+		}
+		/**
+		 * Three offers, the most Mortimer makes, each named longer than RuneLite's longest Slayer task,
+		 * "The Thermonuclear Smoke Devil", with the longest mortifier and a wide amount.
+		 */
+		snapshot.mortimerOffer = new ArrayList<>();
+		for (int i = 0; i < 3; i++)
+		{
+			CompanionSnapshot.MortimerTask offered = new CompanionSnapshot.MortimerTask();
+			offered.taskId = 9_999;
+			offered.taskName = pad("Task name " + i, 30);
+			offered.mortifier = "superior";
+			offered.value = -9_999;
+			snapshot.mortimerOffer.add(offered);
+		}
 
 		snapshot.diaries = new LinkedHashMap<>();
 		snapshot.diaryRewards = new LinkedHashMap<>();
@@ -385,6 +470,7 @@ public class SnapshotTrimmerTest
 		snapshot.clue.tier = "master";
 		snapshot.clue.itemId = 19_835;
 		snapshot.clue.coordTile = new CompanionSnapshot.Tile(2200, 3200, 0);
+		snapshot.clue.mapTile = new CompanionSnapshot.Tile(2200, 3200, 0);
 		snapshot.clue.text = pad("A cryptic clue step as the interface printed it", 250);
 
 		snapshot.farming = new CompanionSnapshot.Farming();
