@@ -1982,11 +1982,6 @@ public class MapCompanionPlugin extends Plugin
 	}
 
 	/**
-	 * A Route to a friend that was waiting for their position, now that a frame brought positions.
-	 * Once, to where they stand in it; never into an instance. OkHttp's thread; the press hands
-	 * itself to the client thread.
-	 */
-	/**
 	 * A directive from the map, by the stream or in a post's reply, taken in by each part whose
 	 * setting is on: the group's social half, a Slayer partner's task, and the destination with the
 	 * farm run that rides along with it. {@code member} is who the directive was written for.
@@ -2009,6 +2004,11 @@ public class MapCompanionPlugin extends Plugin
 		}
 	}
 
+	/**
+	 * A Route to a friend that was waiting for their position, now that a frame brought positions.
+	 * Once, to where they stand in it; never into an instance. OkHttp's thread; the press hands
+	 * itself to the client thread.
+	 */
 	private void routeToArrivedFriend(@Nullable List<RelayResponse.MemberDot> members, long now)
 	{
 		RelayResponse.MemberDot dot = groupState.arrived(members, now);
