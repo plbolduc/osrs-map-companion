@@ -86,7 +86,7 @@
         "plane": 0
       },
       "patchIds": [],
-      "method": "Sail on",
+      "method": "Sail 42 tiles",
       "item": null,
       "costTiles": 84,
       "steps": [
@@ -132,7 +132,7 @@
         "plane": 0
       },
       "patchIds": [],
-      "method": "Sail on",
+      "method": "Sail 56 tiles",
       "item": null,
       "costTiles": 112,
       "steps": [

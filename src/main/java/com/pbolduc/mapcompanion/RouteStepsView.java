@@ -506,12 +506,14 @@ final class RouteStepsView extends JPanel
 
 	/**
 	 * What Shortest Path is doing for a followed route: drawing this step's walk, or waiting for the
-	 * next walk. Null when the route is not followed or there is no Shortest Path to draw with.
+	 * next walk. Null when the route is not followed, there is no Shortest Path to draw with, or no
+	 * walk is left on it: a sea charting run's legs are sails from end to end, and Shortest Path
+	 * draws walks only, so the line promised something that never came.
 	 */
 	@Nullable
 	static String shortestPathLine(DestinationRoute.View view, boolean available, int drawing)
 	{
-		if (!view.following || !available || view.arrived())
+		if (!view.following || !available || view.arrived() || !walkLeft(view.steps(), view.step))
 		{
 			return null;
 		}
@@ -520,6 +522,19 @@ final class RouteStepsView extends JPanel
 			return Words.of("steps.drawing") + " " + drawing + ".";
 		}
 		return Words.of("steps.drawsEach");
+	}
+
+	/** Whether a step from {@code from} on is one Shortest Path draws. */
+	static boolean walkLeft(List<RelayResponse.RouteStep> steps, int from)
+	{
+		for (int i = Math.max(0, from); i < steps.size(); i++)
+		{
+			if (steps.get(i).walk)
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** Everything this view would say, so an unchanged second does not rebuild it. */
