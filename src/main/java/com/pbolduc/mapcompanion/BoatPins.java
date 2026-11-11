@@ -27,7 +27,6 @@ package com.pbolduc.mapcompanion;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -71,7 +70,6 @@ public class BoatPins
 
 	private final WorldMapPointManager points;
 	private final ClientThread clientThread;
-	private final BufferedImage disc = MapPin.boatDisc();
 
 	/** Client thread only. */
 	private final List<MapPin> drawn = new ArrayList<>();
@@ -103,7 +101,7 @@ public class BoatPins
 		for (Map.Entry<String, List<CompanionSnapshot.Boat>> entry : byPort.entrySet())
 		{
 			String tooltip = tooltip(entry.getKey(), entry.getValue());
-			MapPin pin = new MapPin(MOORINGS.get(entry.getKey()), disc, false, "Your boat", () -> tooltip);
+			MapPin pin = MapPin.boat(MOORINGS.get(entry.getKey()), () -> tooltip);
 			pin.setSnapToEdge(false);
 			points.add(pin);
 			drawn.add(pin);

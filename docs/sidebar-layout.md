@@ -326,21 +326,28 @@ java '-Djava.awt.headless=true' "-Dlogback.configurationFile=$taskLogger" -cp "b
 
 ## On the game's world map, 12 October 2026
 
-Status: **built**. What the plugin draws on the world map is one picture, `MapPin`, in four uses:
-a friend in their disc's colour with their initials, the same friend faded once they have been
-quiet for thirty seconds, the destination in the map's amber, and the next meetup marked M.
+Status: **built**. What the plugin draws on the world map is one picture, `MapPin`: a friend in
+their disc's colour with their initials, the same friend faded once they have been quiet for
+thirty seconds, the destination in the map's amber with a dot for a place that has no letter, a
+route's steps by number, the next meetup marked M, and the player's boat in the gold rim of what
+is theirs.
 
 ![](mockups/world-map-pins.png)
 
-**A pin while its place is in view, a disc on the edge while it is not** (the bottom row). A
+**A pin while its place is in view, its head on the edge while it is not** (the bottom row). A
 point that vanished when the map was panned away said nothing about which way to go, which is
 the one thing a destination or a friend somewhere else is for. RuneLite's Party and clue plugins
 make the same choice with the same API, so the edge reads the way a player already knows.
 
+**One shape in two rims.** A pin is its head drawn out to a point on the tile, in a light rim
+inside a dark one, over a small shadow where the tip stands. It was a disc with a black triangle
+under it and one thin black edge, which sank into the map's dark ground and read as two marks.
+The game rings its own map icons light for the same reason: the map is every colour a member's
+disc can be, and an edge that is both light and dark shows on all of it.
+
 **Drawn, not loaded**, for the reason the destination's dot always was: a bundled PNG is one more
 artifact for a reviewer. The colours are the website's palette, so a friend is one colour on the
-map, in its panel and here. The pin's point fades with the disc; drawn solid under a faded disc it
-read as a second, darker marker.
+map, in its panel and here. A quiet friend's pin fades whole, rims and point with the head.
 
 **Settings.** *Show my group on the world map* starts off and is the only thing that asks the map
 for anybody's position. *Point the game's arrow at a destination* starts on, and only acts on a
@@ -348,7 +355,7 @@ destination the reader already chose to receive or pinned; it never replaces an 
 another plugin set. Both are in **In the client** above.
 
 The picture is the real `MapPin` at three times its size on the world map's parchment colour,
-from `docs/review-evidence/world-map-2026-10-12/PinShot.java`; compile it beside the plugin's own
+from `docs/review-evidence/world-map-2026-11-11/PinShot.java`; compile it beside the plugin's own
 classes (`build/classes/java/main`) and the harness classpath above. A running client is still the
 check for where the pins sit among the game's own icons, and is in the submission guide's list.
 

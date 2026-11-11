@@ -11,8 +11,9 @@ import net.runelite.api.coords.WorldPoint;
 
 /**
  * Paints every picture MapPin draws, at three times their size, on the world map's parchment
- * colour: a friend, the same friend gone quiet, the destination and a meetup, each as the pin it
- * is while its place is in view and as the disc it becomes on the map's edge. Compile beside the
+ * colour: a friend, the same friend gone quiet, the destination, a route's step, a meetup and the
+ * player's boat, each as the pin it is while its place is in view and as the head it becomes on
+ * the map's edge. Compile beside the
  * harness classpath as SidebarShot is (docs/sidebar-layout.md) and pass the output directory.
  */
 public class PinShot
@@ -25,10 +26,13 @@ public class PinShot
 			new MapPin(at, MapPin.colour("#38bdf8", Color.GRAY), MapPin.initials("Big Rob"), true, "Big Rob", null),
 			new MapPin(at, MapPin.colour("#a78bfa", Color.GRAY), MapPin.initials("Zezima"), false, "Zezima", null),
 			new MapPin(at, MapPin.AMBER, "", false, "Destination", null),
+			new MapPin(at, MapPin.AMBER, "1", false, "Step 1", null),
+			new MapPin(at, DestinationMarker.STEP, "2", false, "Step 2", null),
 			new MapPin(at, MapPin.AMBER, "M", false, "Star hunt", null),
+			MapPin.boat(at, null),
 		};
-		String[] labels = {"Friend", "Quiet", "Friend", "Destination", "Meetup"};
-		int scale = 3, cell = 34, width = cell * pins.length, height = 64;
+		String[] labels = {"Friend", "Quiet", "Friend", "Place", "Step", "Ahead", "Meetup", "Boat"};
+		int scale = 3, cell = 36, width = cell * pins.length, height = 76;
 		BufferedImage out = new BufferedImage(width * scale, height * scale, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = out.createGraphics();
 		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
@@ -42,10 +46,10 @@ public class PinShot
 			pins[i].onEdgeSnap();
 			BufferedImage disc = pins[i].getImage();
 			int dx = i * cell + (cell - disc.getWidth()) / 2;
-			g.drawImage(disc, dx * scale, 32 * scale, disc.getWidth() * scale, disc.getHeight() * scale, null);
+			g.drawImage(disc, dx * scale, 38 * scale, disc.getWidth() * scale, disc.getHeight() * scale, null);
 			g.setColor(new Color(0x3b2f1e));
 			g.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 9 * scale / 2));
-			g.drawString(labels[i], (i * cell + 2) * scale, 61 * scale);
+			g.drawString(labels[i], (i * cell + 2) * scale, 72 * scale);
 		}
 		g.dispose();
 		ImageIO.write(out, "png", new File(args[0], "world-map-pins.png"));

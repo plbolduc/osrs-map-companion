@@ -31,8 +31,12 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
-import java.awt.Polygon;
 import java.awt.RenderingHints;
+import java.awt.Shape;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Arc2D;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
@@ -42,8 +46,8 @@ import net.runelite.client.ui.overlay.worldmap.WorldMapPoint;
 import net.runelite.client.util.Text;
 
 /**
- * Everything this plugin puts on the game's world map: a pin while its place is in view, a disc
- * held at the map's edge while it is not.
+ * Everything this plugin puts on the game's world map: a pin while its place is in view, its
+ * head held at the map's edge while it is not.
  *
  * <p>The edge is the point. A destination, a meetup or a friend is useful mostly when it is
  * somewhere the reader is <i>not</i> looking, and a point that simply vanishes when the map is
@@ -51,8 +55,12 @@ import net.runelite.client.util.Text;
  * same choice in the same way — {@code snapToEdge}, and a different picture while snapped — so a
  * player already knows how to read it.
  *
+ * <p>A pin is one shape, a head drawn out to a point on its tile, in a light rim inside a dark
+ * one. The game's map is every colour a member's disc can be, and its own icons are ringed the
+ * same way for the same reason: an edge that is both light and dark shows on any of it.
+ *
  * <p>Drawn rather than loaded: a bundled PNG is one more artifact for a Plugin Hub reviewer, and
- * a coloured circle with two letters is a few lines of {@link Graphics2D}. The colours are the
+ * a coloured shape with two letters is a few lines of {@link Graphics2D}. The colours are the
  * map's, so a friend is the same colour on the website, in the sidebar and here.
  *
  * <p>Names arrive over the network, typed by whoever owns them, and RuneLite reads colour and
@@ -68,40 +76,58 @@ class MapPin extends WorldMapPoint
 	/** The gold of the website's ring round what is yours: its amber-400. */
 	static final Color GOLD = new Color(251, 191, 36);
 
+	/** Near-black, the ink of the letters and of the dark rim. */
+	private static final Color INK = new Color(24, 24, 27);
+	private static final Color RIM = new Color(250, 250, 250);
+
 	private static final int DISC = 18;
-	private static final int TAIL = 8;
+	/** The head's radius, a member's disc, and the room its rims and the tip's shadow take round it. */
+	private static final double R = DISC / 2.0;
+	private static final int PAD = 3;
+	/** From the head's centre to the tip on the tile. */
+	private static final int TAIL = 17;
 	/** The website draws a quiet member's disc at this opacity; the same number reads the same. */
 	private static final float FADED = 0.55f;
 	private static final int MAX_LABEL = 40;
 
 	private final BufferedImage pin;
-	private final BufferedImage disc;
+	private final BufferedImage head;
 	private final Point tip;
 	@Nullable
 	private final Supplier<String> tooltip;
 
 	/**
-	 * @param text one or two letters on the disc, or empty for a plain one
+	 * @param text one or two letters on the head, or empty for the dot of a place with none
 	 * @param tooltip computed when the map asks rather than once, so a countdown in it stays true
 	 */
 	MapPin(WorldPoint where, Color colour, String text, boolean faded, String name, @Nullable Supplier<String> tooltip)
 	{
-		this(where, disc(colour, text, faded), faded, name, tooltip);
+		this(where, colour, RIM, text, faded, name, tooltip);
 	}
 
-	/** A pin wearing a picture of its own rather than a member's disc — see {@link #boatDisc}. */
-	MapPin(WorldPoint where, BufferedImage disc, boolean faded, String name, @Nullable Supplier<String> tooltip)
+	private MapPin(WorldPoint where, Color fill, Color rim, @Nullable String text, boolean faded, String name,
+		@Nullable Supplier<String> tooltip)
 	{
 		super(where, null);
-		this.disc = disc;
-		this.pin = pin(disc, faded);
-		this.tip = new Point(pin.getWidth() / 2, pin.getHeight() - 1);
+		this.pin = drop(fill, rim, text, faded, TAIL);
+		this.head = drop(fill, rim, text, faded, 0);
+		this.tip = new Point(pin.getWidth() / 2, PAD + (int) R + TAIL);
 		this.tooltip = tooltip;
 		setSnapToEdge(true);
 		/** Pans the world map to the point. It does not walk, click or hop. */
 		setJumpOnClick(true);
 		setName(safe(name));
 		onEdgeUnsnap();
+	}
+
+	/**
+	 * The player's own boat: a dark head in a gold rim, the picture the website puts round the
+	 * mooring that holds it and round a saved house, so "yours" is one mark on both. A hull and a
+	 * sail are drawn rather than a letter, because a boat has no initials to give.
+	 */
+	static MapPin boat(WorldPoint where, @Nullable Supplier<String> tooltip)
+	{
+		return new MapPin(where, new Color(41, 37, 36), GOLD, null, false, "Your boat", tooltip);
 	}
 
 	@Override
@@ -119,8 +145,8 @@ class MapPin extends WorldMapPoint
 	@Override
 	public void onEdgeSnap()
 	{
-		setImage(disc);
-		/** Null centres the disc on the edge, which is where the direction is read from. */
+		setImage(head);
+		/** Null centres the head on the edge, which is where the direction is read from. */
 		setImagePoint(null);
 	}
 
@@ -182,8 +208,8 @@ class MapPin extends WorldMapPoint
 	}
 
 	/**
-	 * A member's disc as the world map draws it at its edge, their colour and initials, for the
-	 * sidebar to draw beside their name: the same person in the same picture in both places.
+	 * A member's disc, the colour and initials their pin's head wears on the world map, for the
+	 * sidebar to draw beside their name: the same person in the same colours in both places.
 	 */
 	static BufferedImage memberDisc(Color colour, @Nullable String name)
 	{
@@ -202,32 +228,8 @@ class MapPin extends WorldMapPoint
 		ring(g, colour, Color.BLACK, 1.2f);
 		if (!text.isEmpty())
 		{
-			/** Near-black on the palette's light hues, the contrast the website's discs use. */
-			g.setColor(new Color(24, 24, 27));
-			g.setFont(new Font(Font.SANS_SERIF, Font.BOLD, text.length() > 1 ? 8 : 10));
-			FontMetrics metrics = g.getFontMetrics();
-			int x = (image.getWidth() - metrics.stringWidth(text)) / 2;
-			int y = (image.getHeight() - metrics.getHeight()) / 2 + metrics.getAscent();
-			g.drawString(text, x, y);
+			letters(g, text, image.getWidth() / 2.0, image.getHeight() / 2.0);
 		}
-		g.dispose();
-		return image;
-	}
-
-	/**
-	 * The player's own boat: a dark disc in a gold ring, the picture the website puts round the
-	 * mooring that holds it and round a saved house, so "yours" is one mark on both. A hull and a
-	 * sail are drawn rather than a letter, because a boat has no initials to give.
-	 */
-	static BufferedImage boatDisc()
-	{
-		BufferedImage image = new BufferedImage(DISC + 2, DISC + 2, BufferedImage.TYPE_INT_ARGB);
-		Graphics2D g = paint(image, false);
-		ring(g, new Color(41, 37, 36), GOLD, 2f);
-		g.setColor(new Color(244, 244, 245));
-		/* The sail, a triangle off the mast, then the hull under it. */
-		g.fillPolygon(new int[]{10, 10, 15}, new int[]{4, 12, 12}, 3);
-		g.fillPolygon(new int[]{4, 16, 14, 6}, new int[]{13, 13, 16, 16}, 4);
 		g.dispose();
 		return image;
 	}
@@ -254,23 +256,90 @@ class MapPin extends WorldMapPoint
 		g.drawOval(1, 1, DISC - 1, DISC - 1);
 	}
 
-	/** The disc with a point under it, the tip on the tile; the point fades with the disc. */
-	private static BufferedImage pin(BufferedImage disc, boolean faded)
+	/**
+	 * A head of {@code fill}, drawn out to a point {@code tail} under its centre, or left round for
+	 * none. Painted solid and faded whole: fading each layer would show the rims through the fill.
+	 *
+	 * @param text the head's letters, empty for a place's dot, null for the boat
+	 */
+	private static BufferedImage drop(Color fill, Color rim, @Nullable String text, boolean faded, int tail)
 	{
-		int width = disc.getWidth();
-		BufferedImage image = new BufferedImage(width, disc.getHeight() + TAIL, BufferedImage.TYPE_INT_ARGB);
-		Graphics2D g = paint(image, faded);
-		int top = disc.getHeight() - 4;
-		Polygon tail = new Polygon(
-			new int[]{width / 2 - 4, width / 2 + 4, width / 2},
-			new int[]{top, top, image.getHeight() - 1},
-			3);
-		g.setColor(Color.BLACK);
-		g.fillPolygon(tail);
-		/* The disc carries its own fade; drawing it under this one too would fade it twice. */
-		g.setComposite(AlphaComposite.SrcOver);
-		g.drawImage(disc, 0, 0, null);
+		double centre = PAD + R;
+		int side = (int) (2 * centre);
+		BufferedImage solid = new BufferedImage(side, side + tail + (tail > 0 ? PAD - 1 : 0), BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g = paint(solid, false);
+		g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+		if (tail > 0)
+		{
+			/* What the tip stands on: without it a pin floats over the map rather than marking a tile. */
+			g.setColor(new Color(0, 0, 0, 70));
+			g.fill(new Ellipse2D.Double(centre - 5, centre + tail - 2, 10, 4));
+		}
+		Shape shape = outline(centre, centre, tail, Math.PI / 2);
+		g.setColor(INK);
+		g.setStroke(new BasicStroke(4.2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+		g.draw(shape);
+		g.setColor(rim);
+		g.setStroke(new BasicStroke(2.2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+		g.draw(shape);
+		g.setColor(fill);
+		g.fill(shape);
+		g.translate(centre, centre);
+		if (text == null)
+		{
+			g.setColor(new Color(244, 244, 245));
+			/* The sail, a triangle off the mast, then the hull under it. */
+			g.fillPolygon(new int[]{-1, -1, 4}, new int[]{-6, 2, 2}, 3);
+			g.fillPolygon(new int[]{-6, 6, 4, -4}, new int[]{3, 3, 6, 6}, 4);
+		}
+		else if (text.isEmpty())
+		{
+			g.setColor(INK);
+			g.fill(new Ellipse2D.Double(-3, -3, 6, 6));
+		}
+		else
+		{
+			letters(g, text, 0, 0);
+		}
 		g.dispose();
+		if (!faded)
+		{
+			return solid;
+		}
+		BufferedImage image = new BufferedImage(solid.getWidth(), solid.getHeight(), BufferedImage.TYPE_INT_ARGB);
+		Graphics2D quiet = paint(image, true);
+		quiet.drawImage(solid, 0, 0, null);
+		quiet.dispose();
 		return image;
+	}
+
+	/**
+	 * A circle of {@link #R} about a centre, drawn out to a point {@code reach} from it along
+	 * {@code angle} — radians clockwise from east, as the screen counts them — or the bare circle
+	 * where the reach is inside it.
+	 */
+	private static Shape outline(double x, double y, double reach, double angle)
+	{
+		if (reach <= R)
+		{
+			return new Ellipse2D.Double(x - R, y - R, 2 * R, 2 * R);
+		}
+		/* The point's sides leave the circle where they are tangent to it. */
+		double open = Math.toDegrees(Math.acos(R / reach));
+		Path2D shape = new Path2D.Double();
+		shape.moveTo(x + reach, y);
+		shape.append(new Arc2D.Double(x - R, y - R, 2 * R, 2 * R, open, 360 - 2 * open, Arc2D.OPEN), true);
+		shape.closePath();
+		return AffineTransform.getRotateInstance(angle, x, y).createTransformedShape(shape);
+	}
+
+	/** One or two letters centred on a point, near-black on the palette's light hues as the website's discs are. */
+	private static void letters(Graphics2D g, String text, double x, double y)
+	{
+		g.setColor(INK);
+		g.setFont(new Font(Font.SANS_SERIF, Font.BOLD, text.length() > 1 ? 8 : 10));
+		FontMetrics metrics = g.getFontMetrics();
+		g.drawString(text, (float) (x - metrics.stringWidth(text) / 2.0), (float) (y - metrics.getHeight() / 2.0 + metrics.getAscent()));
 	}
 }
