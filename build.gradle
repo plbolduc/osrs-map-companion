@@ -45,7 +45,7 @@ dependencies {
 }
 
 group = 'com.pbolduc.mapcompanion'
-version = '1.7.0'
+version = '1.8.0'
 
 /*
  * Java 11, because that is what the RuneLite client targets. Building against a newer release

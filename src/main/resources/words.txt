@@ -183,4 +183,4 @@ search.boxTip=Search the map: a place, a character, a monster or an item. A pick
 
 # UpdateNotice: the one chat line an update says, on the first login after it. Every release writes
 # it again for what that release changed, and moves CompanionVersion.LINE_VERSION with it.
-update.line=the Stars tab lists the stars of the game you are logged into, so Hardcore World stars stay off the main game's list and the other way round.
+update.line=Quest Helper's step shows on Home with Route, the Farm run card plans a Dailies run, and new sharing choices let the map mark your sea charts and dailies.

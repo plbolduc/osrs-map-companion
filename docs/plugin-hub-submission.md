@@ -6,8 +6,10 @@
 30 October, to 1.4.0 (`6df00cf`) in
 [runelite/plugin-hub#19965](https://github.com/runelite/plugin-hub/pull/19965) on 2 November, and
 to 1.5.0 (`eaa882b`) in [runelite/plugin-hub#20137](https://github.com/runelite/plugin-hub/pull/20137)
-on 4 November, and to 1.6.0 (`f2d681f`) in
-[runelite/plugin-hub#20209](https://github.com/runelite/plugin-hub/pull/20209) on 6 November;
+on 4 November, to 1.6.0 (`f2d681f`) in
+[runelite/plugin-hub#20209](https://github.com/runelite/plugin-hub/pull/20209) on 6 November, and
+to 1.7.0 (`21e336e`) in [runelite/plugin-hub#20370](https://github.com/runelite/plugin-hub/pull/20370)
+on 9 November;
 RuneLite's review bot approved and merged each update itself. The steps below are
 how it was submitted; a release after that is a merged plugin
 commit, then `commit=` updated in the Hub's `plugins/osrs-map-companion`. Completed and outstanding game checks
@@ -256,13 +258,13 @@ screenshot tools are outside `src/main`. Bundled third-party notices accompany t
 ## Changes since the approved submission
 
 What the next Hub update brings. Its description names each in a few words; the detail here is for
-answering a reviewer. Since 1.6.0:
+answering a reviewer. Since 1.7.0:
 
-- **Stars lists the stars of the game you are logged into.** The world's type
-  (`WorldType.HARDCORE_MAIN`, `SEASONAL`) says whether the player is on a Hardcore World, a League
-  or the main game, and the tab lists only that game's stars, read from a `game` field the map now
-  sends with each star; a map without it falls back on the existing `league` flag. The League choice
-  under More filters is gone. Nothing new is sent or requested.
+- **Quest Helper's step on Home.** With Quest Helper's *Use 'Shortest Path' plugin* setting on, the
+  tile it hands Shortest Path over the event bus is shown on Home with Route, which sends that tile
+  as any Route does. The tile stays in the client otherwise; nothing new is requested.
+- **A Dailies run** in the Farm run card's picker, one more row in `farm-starts.txt` asking the map
+  for `start: "dailies"` through the existing run request. No new request or kind of run.
 - **Mortimer's offer** goes under the existing Slayer task choice: the two or three tasks Mortimer's
   interface offers and each one's mortifier, only while it is open or unchanged since, as above.
 - **Sea charts charted:** a new sharing choice under Progress and travel, off until chosen and in
