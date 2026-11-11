@@ -59,6 +59,7 @@ final class FarmRunPanel extends JPanel
 	private static final List<String> STARTS = Resources.lines("/farm-starts.txt");
 
 	private final FarmRunClient client;
+	private final DestinationRoute routes;
 	private final ConfigStore settings;
 	private final JComboBox<String> kind = new JComboBox<>();
 	/* A button under the picker, the picker's width: it acts, and a link is a fold's own opener. */
@@ -67,6 +68,8 @@ final class FarmRunPanel extends JPanel
 	private final JLabel needs = MapCompanionPanel.label(11f, ColorScheme.LIGHT_GRAY_COLOR);
 	/** Connected and free to press, as of the last refresh: a new pick of kind is offered by it. EDT. */
 	private boolean ready;
+	/** The wait every Route shares, as that refresh found it: what Start run says while it is greyed. EDT. */
+	private long wait;
 	/*
 	 * The kind of run and Start run, hidden while a run is going or being planned: there is one run at
 	 * a time, so a press here would replace the run being walked. The Port tasks card holds the same
@@ -83,6 +86,7 @@ final class FarmRunPanel extends JPanel
 				 ShortestPath shortest, GameSprites sprites, MapCompanionConfig config, ConfigStore settings)
 	{
 		this.client = client;
+		this.routes = routes;
 		this.settings = settings;
 		this.run = new RunView(false, state, client, follower, routes, shortest, sprites, config);
 		MapCompanionPanel.taskCard(this, "farmRun", "Farm run", sprites, "Farming");
@@ -152,6 +156,8 @@ final class FarmRunPanel extends JPanel
 	{
 		String missing = needs(STARTS.get(kind.getSelectedIndex()).split("\\|")[0], settings);
 		start.setEnabled(ready && missing == null);
+		/* Greyed by the wait alone, it says how long is left; a choice that is off has the line under it. */
+		MapWait.tip(start, null, missing == null ? wait : 0L);
 		needs.setVisible(picker.isVisible() && missing != null);
 		MapCompanionPanel.setWrapped(needs, missing == null ? "" : missing, MapCompanionPanel.CARD_TEXT_WIDTH);
 	}
@@ -177,7 +183,9 @@ final class FarmRunPanel extends JPanel
 		picker.setVisible(!run.busy() && !run.otherBusy());
 		waiting.setVisible(!run.busy() && run.otherBusy());
 		ready = connected && loggedIn && client.ready();
-		kind.setEnabled(ready);
+		wait = routes.pressWait(System.currentTimeMillis());
+		/* Choosing asks the map nothing, so the wait between presses holds Start run and not the picker. */
+		kind.setEnabled(connected && loggedIn);
 		offer();
 		revalidate();
 		repaint();
