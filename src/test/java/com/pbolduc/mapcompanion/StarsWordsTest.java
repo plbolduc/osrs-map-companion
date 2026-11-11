@@ -208,9 +208,9 @@ public class StarsWordsTest
 			service.model.accept(feed);
 			service.model.preferences.filters.hideDepleted = false;
 			panel.refresh();
-			((AbstractButton) named(panel, "stars.site.tile:3296,3298")).doClick();
+			/* The star's own card says it: the picked world's line over the tab, which this read, is gone. */
 			List<String> words = words(panel);
-			assertTrue("the picked world says it plainly: " + words, words.contains("W306 · T3 · Depleted"));
+			assertTrue("the star's card says it plainly: " + words, words.stream().anyMatch(word -> word.endsWith("T3 · W306 · Depleted")));
 			for (String word : words)
 			{
 				assertFalse(word, word.contains("Depleted left"));

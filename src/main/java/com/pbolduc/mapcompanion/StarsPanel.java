@@ -65,14 +65,19 @@ import static com.pbolduc.mapcompanion.StarsModel.Star;
 
 /**
  * One native, narrow list of landing sites, with their worlds underneath and favourites first.
- * The controls share the website's meanings; expansion and the selected world stay on this
- * screen. Only a button can pin. A star's world is printed, and hopping is left to
- * the game's own world switcher.
+ * The controls share the website's meanings; expansion and the picked world stay on this
+ * screen. A star's world is printed, and hopping is left to the game's own world switcher.
  *
- * <p>The way to the picked star is drawn under it once the map has answered, the same steps and
- * buttons Home's destination card shows, because a star hunter lives on this tab while they hop and
- * sending them to Home for the steps lost their place in the list. It is one route seen twice: the
- * steps are read from {@link DestinationRoute}, and Follow and Reroute are Home's own buttons.
+ * <p>A press on a star picks it, and its card opens on Route and Pin under the star itself: the
+ * buttons are where the pointer already is, and the card above them says which star they act on.
+ * Only those buttons pin or ask the map anything. A pick alone does neither, since a Route is a
+ * question to the map that replaces whatever is pinned, and a list is there to be looked through.
+ *
+ * <p>The pinned star heads the tab, whatever is picked and whatever the filters hide, because what
+ * is pinned is being walked to. Its way is drawn under it once the map has answered, the same steps
+ * and buttons Home's destination card shows, because a star hunter lives on this tab while they hop
+ * and sending them to Home for the steps lost their place in the list. It is one route seen twice:
+ * the steps are read from {@link DestinationRoute}, and Follow and Reroute are Home's own buttons.
  *
  * <p>Every child of a vertical stack here is left-aligned and as wide as the column. BoxLayout
  * lines children up by their alignment point, so one centred child among left-aligned ones
@@ -113,6 +118,8 @@ final class StarsPanel extends JPanel
 	private static final int TEXT = COLUMN - 10;
 	/** A site card's text, beside the favourite and world-count buttons. */
 	private static final int CARD_TEXT = COLUMN - 62;
+	/** A line the width of a site card's inside. */
+	private static final int CARD_WIDE = COLUMN - 14;
 	private final StarsClient service;
 	private final DestinationState destinations;
 	private final ClientThread clientThread;
@@ -152,13 +159,21 @@ final class StarsPanel extends JPanel
 	private boolean selected, active, updating;
 	private String rendered;
 	/**
-	 * The picked star's Route and the line its last press left, while they are drawn: a wait counts
-	 * down in both on every refresh, where rebuilding the block each second would eat a press.
+	 * Each Route drawn and the line the last press left, while they are drawn: a wait counts down in
+	 * them on every refresh, where rebuilding the list each second would eat a press.
 	 */
-	@Nullable
-	private JButton starRoute;
+	private final List<JButton> starRoutes = new java.util.ArrayList<>();
 	@Nullable
 	private JLabel starSaid;
+	/** The star Route was last pressed for, which is where what the press said is drawn. */
+	@Nullable
+	private String asked;
+	/** The star pinned at the last refresh; see {@link #refresh}. */
+	@Nullable
+	private String wasPinned;
+	/** The picked star's card, to bring its buttons into view. */
+	@Nullable
+	private JComponent pickedCard;
 	private static final String STAR_ROUTE_TIP = Words.of("stars.routeTip");
 
 	/**
@@ -193,10 +208,7 @@ final class StarsPanel extends JPanel
 		setBackground(ColorScheme.DARK_GRAY_COLOR);
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		setAlignmentX(Component.LEFT_ALIGNMENT);
-		/*
-		 * The picked world first, above the filters: its Pin destination and Route are what a pick is
-		 * for, and under a list of a dozen sites they were a scroll away from every row but the last.
-		 */
+		/* The pinned star first, above the filters: it is the one being walked to. */
 		add(selection);
 		levels.setName("stars.levels");
 		count.setName("stars.count");
@@ -365,18 +377,36 @@ final class StarsPanel extends JPanel
 		/* Why the refresh failed is a hover away, so the line over the list stays short. */
 		status.setToolTipText(model.feed != null && service.message != null ? service.message : null);
 		RelayResponse.Destination destination = destinations.getDestination();
+		Star pinned = null;
+		for (Star star : model.feed == null ? List.<Star>of() : model.feed.rows)
+		{
+			if (pinned == null && pins(destination, star))
+			{
+				pinned = star;
+			}
+		}
+		/*
+		 * A pick ends with its pin: reached, unpinned or replaced, the star goes back to a plain row
+		 * rather than opening on Route and Pin for the place the player has just left or let go.
+		 */
+		String pinnedNow = pinned == null ? null : pinned.id;
+		if (wasPinned != null && !wasPinned.equals(pinnedNow) && wasPinned.equals(model.selected))
+		{
+			model.selected = null;
+		}
+		/* A star pinned from far down the list brings its way, at the head of the tab, into view. */
+		boolean headed = selected && pinnedNow != null && !pinnedNow.equals(wasPinned);
+		wasPinned = pinnedNow;
 		signature.append(model.selected).append(destination == null ? "" : destination.name + destination.world + destination.x + destination.y);
 		RoutePress.Said said = press.said(SOURCE);
-		signature.append(press.ready()).append(said == null ? "" : said.planning + "|" + said.message);
+		signature.append(press.ready()).append(said == null ? "" : said.planning + "|" + said.message).append(asked);
 		/*
 		 * The steps are drawn only under the star they lead to, and only the route of the destination
 		 * being shown: for a tick after a change the two can differ, as on Home's card. The view says
 		 * itself on every refresh, as Home's does, and rebuilds only when its words change.
 		 */
-		Star picked = model.find(model.selected);
 		DestinationRoute.View way = route.view();
-		boolean routed = picked != null && model.passes(picked, elapsed) && pins(destination, picked)
-			&& way != null && way.hasRoute() && way.key.equals(DestinationRoute.keyOf(destination));
+		boolean routed = pinned != null && way != null && way.hasRoute() && way.key.equals(DestinationRoute.keyOf(destination));
 		boolean drawable = routed && config != null && shortestPath != null && config.drawWithShortestPath()
 			&& shortestPath.installed() && !way.arrived();
 		steps.show(routed ? way : null, routed ? RouteStepsView.shortestPathLine(way, drawable, drawable ? shortestPath.drawing() : 0) : null);
@@ -389,8 +419,9 @@ final class StarsPanel extends JPanel
 		rendered = signature.toString();
 		rows.removeAll();
 		selection.removeAll();
-		starRoute = null;
+		starRoutes.clear();
 		starSaid = null;
+		pickedCard = null;
 		selection.setBorder(null);
 		if (model.feed == null)
 		{
@@ -417,7 +448,7 @@ final class StarsPanel extends JPanel
 				rows.add(gap(6));
 				restHeading = true;
 			}
-			rows.add(site(site, elapsed));
+			rows.add(site(site, elapsed, pinned));
 			rows.add(gap(4));
 		}
 		/* An hour with no stars at all, or none in the player's game, is not the player's filters, and says so. */
@@ -429,31 +460,30 @@ final class StarsPanel extends JPanel
 				: model.noneInGame() ? noneInGame(model.playerGame) : "No stars match these filters.", TEXT);
 			rows.add(none);
 		}
-		/*
-		 * The pick heads the tab only while the player's own filters show it: what sits there is what
-		 * a press acts on, so it never offers a star the list has just hidden. It is kept, though, and
-		 * comes back when the filter lets it.
-		 */
-		if (picked != null && model.passes(picked, elapsed))
+		if (pinned != null)
 		{
-			selection(picked, elapsed, destination, routed);
+			pinned(pinned, elapsed, routed);
 		}
 		countDown(said);
 		revalidate();
 		repaint();
+		if (headed)
+		{
+			SwingUtilities.invokeLater(() -> selection.scrollRectToVisible(new Rectangle(0, 0, selection.getWidth(), selection.getHeight())));
+		}
 	}
 
 	/** The picked star's Route and its line as of now: how long the map's wait has left, in each. */
 	private void countDown(@Nullable RoutePress.Said said)
 	{
 		long now = System.currentTimeMillis();
-		if (starRoute != null)
+		for (JButton starRoute : starRoutes)
 		{
 			MapWait.tip(starRoute, STAR_ROUTE_TIP, press.waitMs(now));
 		}
 		if (starSaid != null && said != null && said.message != null)
 		{
-			wrap(starSaid, press.words(said, now), TEXT);
+			wrap(starSaid, press.words(said, now), CARD_WIDE);
 		}
 	}
 
@@ -471,14 +501,16 @@ final class StarsPanel extends JPanel
 		return own == null ? "|" : "|" + own.getText() + own.isEnabled() + own.getToolTipText();
 	}
 
-	private JComponent site(StarsModel.Site site, long elapsed)
+	private JComponent site(StarsModel.Site site, long elapsed, @Nullable Star pinned)
 	{
 		boolean open = expanded.contains(site.key);
 		Star primary = site.worlds.isEmpty() ? null : site.worlds.get(0);
-		boolean holdsSelection = site.worlds.stream().anyMatch(star -> star.id.equals(service.model.selected));
+		/* The world picked here, which the list shows: the first, or any of them once they are listed. */
+		Star picked = site.worlds.stream().filter(star -> star.id.equals(service.model.selected)).findFirst().orElse(null);
 		JPanel box = column();
 		box.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-		box.setBorder(new CompoundBorder(new LineBorder(holdsSelection ? GOLD.darker() : EDGE),
+		box.setBorder(new CompoundBorder(
+			new LineBorder(picked != null || site.worlds.contains(pinned) ? GOLD.darker() : EDGE),
 			new EmptyBorder(5, 6, 5, 4)));
 		JPanel head = new JPanel(new BorderLayout(2, 0));
 		head.setBackground(box.getBackground());
@@ -525,6 +557,8 @@ final class StarsPanel extends JPanel
 			expand.addActionListener(e ->
 			{
 				if (!expanded.remove(site.key)) expanded.add(site.key);
+				/* Folded, the card names its first world alone, so a pick of another lets go. */
+				else if (picked != primary) service.model.selected = null;
 				redraw();
 			});
 			actions.add(expand, c);
@@ -540,6 +574,12 @@ final class StarsPanel extends JPanel
 			for (Star star : site.worlds) list.add(fill(world(site, star, elapsed, box.getBackground())));
 			box.add(MapCompanionPanel.gap(4, box.getBackground()));
 			box.add(fill(list));
+		}
+		/* The pinned star's buttons head the tab, so its card offers none of its own. */
+		if (picked != null && picked != pinned)
+		{
+			act(box, picked, elapsed);
+			pickedCard = box;
 		}
 		return fill(box);
 	}
@@ -577,21 +617,120 @@ final class StarsPanel extends JPanel
 		return world;
 	}
 
+	/** A press on a star picks it, and a second press lets it go. */
 	private void select(Star star)
 	{
-		service.model.selected = star.id;
+		service.model.selected = star.id.equals(service.model.selected) ? null : star.id;
 		redraw();
-		/* A pick far down the list scrolls up to its actions; one already in view stays put. */
-		SwingUtilities.invokeLater(() -> selection.scrollRectToVisible(new Rectangle(0, 0, selection.getWidth(), selection.getHeight())));
+		/* A pick at the foot of the view scrolls its buttons into it; one already in view stays put. */
+		SwingUtilities.invokeLater(() ->
+		{
+			if (pickedCard != null)
+			{
+				pickedCard.scrollRectToVisible(new Rectangle(0, 0, pickedCard.getWidth(), pickedCard.getHeight()));
+			}
+		});
 	}
 
-	private void selection(Star star, long elapsed, @Nullable RelayResponse.Destination destination, boolean routed)
+	/**
+	 * The picked star's buttons, at the foot of its own card. Route first: it pins the star as well
+	 * and is what most picks are for. Pin is the arrow and the world-map pin alone, with no question
+	 * to the map. A site whose tile is a guess gets the map instead, which can say where it might be.
+	 */
+	private void act(JPanel box, Star star, long elapsed)
 	{
-		boolean pinned = pins(destination, star);
+		JPanel actions = MapCompanionPanel.row(box.getBackground());
+		if (star.precise)
+		{
+			actions.add(route(star, elapsed));
+			JButton pin = button("Pin");
+			pin.setName("stars.pin");
+			pin.setToolTipText(Words.of("stars.pinTip"));
+			pin.setEnabled(star.left(elapsed) > 0);
+			pin.addActionListener(e ->
+			{
+				RelayResponse.Destination next = new RelayResponse.Destination();
+				next.x = star.x;
+				next.y = star.y;
+				next.plane = star.plane;
+				next.name = star.name;
+				next.world = star.world;
+				/*
+				 * No note. The destination's card writes it once and never again, and a tier and a time
+				 * left age by the minute; the world is printed from its own field, and this tab keeps the
+				 * star's line live.
+				 */
+				destinations.selectLocal(next);
+				clientThread.invokeLater(marker::sync);
+				redraw();
+			});
+			actions.add(pin);
+		}
+		else
+		{
+			JButton open = button(MapCompanionPanel.OPEN_WEBSITE);
+			open.setName("stars.open");
+			open.setToolTipText(Words.of("stars.openTip"));
+			open.addActionListener(e -> net.runelite.client.util.LinkBrowser.browse(mapUrl.get() + "/map?q="
+				+ java.net.URLEncoder.encode(star.name, java.nio.charset.StandardCharsets.UTF_8)));
+			actions.add(open);
+		}
+		box.add(MapCompanionPanel.gap(5, box.getBackground()));
+		box.add(fill(actions));
+		if (!star.precise)
+		{
+			JLabel note = label("");
+			wrap(note, Words.of("stars.approximate"), CARD_WIDE);
+			box.add(note);
+		}
+		said(box, star);
+	}
+
+	/**
+	 * Route, by the star's own tile, which is the one the game draws. The answer pins the star, so the
+	 * way there is one press whether or not it was pinned first.
+	 */
+	private JButton route(Star star, long elapsed)
+	{
+		RoutePress.Said said = press.said(SOURCE);
+		boolean planning = said != null && said.planning && star.id.equals(asked);
+		JButton route = button(planning ? "Planning…" : "Route");
+		route.setName("stars.route");
+		route.setEnabled(star.left(elapsed) > 0 && (said == null || !said.planning) && press.ready());
+		route.setToolTipText(STAR_ROUTE_TIP);
+		starRoutes.add(route);
+		route.addActionListener(e ->
+		{
+			asked = star.id;
+			/* No note, as Pin writes none: nothing on the card may age. */
+			press.press(RoutePress.Target.tile(SOURCE, new net.runelite.api.coords.WorldPoint(star.x, star.y, star.plane),
+				star.name, star.world, null));
+			redraw();
+		});
+		return route;
+	}
+
+	/** What the last press of Route said, under the buttons of the star it was pressed for. */
+	private void said(JPanel into, Star star)
+	{
+		RoutePress.Said said = press.said(SOURCE);
+		if (said != null && said.message != null && star.id.equals(asked))
+		{
+			JLabel line = label("");
+			wrap(line, said.message, CARD_WIDE);
+			MapCompanionPanel.tone(line, said.refused());
+			into.add(line);
+			starSaid = line;
+		}
+	}
+
+	/** The pinned star at the head of the tab: its live line, then its way, or Route while it has none. */
+	private void pinned(Star star, long elapsed, boolean routed)
+	{
 		selection.setBorder(new CompoundBorder(
 			new CompoundBorder(new EmptyBorder(0, 0, 8, 0), BorderFactory.createMatteBorder(0, 0, 1, 0, EDGE)),
 			new EmptyBorder(0, 0, 8, 0)));
-		selection.add(heading(pinned ? "Pinned destination" : "Selected world"));
+		selection.add(heading("Pinned destination"));
 		JLabel name = label("");
 		wrap(name, star.name, TEXT);
 		name.setForeground(GOLD);
@@ -600,6 +739,7 @@ final class StarsPanel extends JPanel
 		selection.add(label("<html>W" + star.world + " · " + font(tierColour(star.tier(elapsed)), "T" + star.tier(elapsed)) + " · "
 			+ font(lifeColour(star.left(elapsed), ColorScheme.LIGHT_GRAY_COLOR), StarsModel.timeLeft(star.left(elapsed))) + "</html>"));
 		selection.add(gap(5));
+		JPanel actions = MapCompanionPanel.row(getBackground());
 		if (routed)
 		{
 			/*
@@ -612,94 +752,19 @@ final class StarsPanel extends JPanel
 			way.add(steps);
 			selection.add(fill(way));
 			selection.add(gap(5));
-			JPanel actions = MapCompanionPanel.row(getBackground());
 			home(actions, false, "stars.follow");
 			home(actions, true, "stars.reroute");
-			actions.add(unpin());
-			selection.add(fill(actions));
 		}
-		else
+		else if (star.precise)
 		{
-			JPanel actions = MapCompanionPanel.row(getBackground());
-			if (!pinned)
-			{
-				/*
-				 * As plain as Route beside it. The orange Open the map is the one button on the page that
-				 * says press me, and a filled brown here is the colour Group gives an answer already chosen.
-				 */
-				JButton pin = button("Pin destination");
-				pin.setName("stars.pin");
-				pin.setEnabled(star.precise && star.left(elapsed) > 0);
-				pin.addActionListener(e -> {
-					RelayResponse.Destination next = new RelayResponse.Destination();
-					next.x = star.x;
-					next.y = star.y;
-					next.plane = star.plane;
-					next.name = star.name;
-					next.world = star.world;
-					/*
-					 * No note. The destination's card writes it once and never again, and a tier and a time
-					 * left age by the minute; the world is printed from its own field, and this tab keeps the
-					 * star's line live.
-					 */
-					destinations.selectLocal(next);
-					clientThread.invokeLater(marker::sync);
-					redraw();
-				});
-				actions.add(pin);
-			}
-			/*
-			 * Beside the pin, the way there: by the star's own tile, which is the one the game draws.
-			 * A site whose tile is a guess gets the map instead, which can say where it might be. A star
-			 * pinned with no way yet keeps it, beside Unpin, so the way there is still one press.
-			 */
-			if (star.precise)
-			{
-				RoutePress.Said said = press.said(SOURCE);
-				boolean planning = said != null && said.planning;
-				JButton route = button(planning ? "Planning…" : "Route");
-				route.setName("stars.route");
-				route.setEnabled(star.left(elapsed) > 0 && !planning && press.ready());
-				route.setToolTipText(STAR_ROUTE_TIP);
-				starRoute = route;
-				route.addActionListener(e ->
-				{
-					/* No note, as Pin destination writes none: nothing on the card may age. */
-					press.press(RoutePress.Target.tile(SOURCE, new net.runelite.api.coords.WorldPoint(star.x, star.y, star.plane),
-						star.name, star.world, null));
-					redraw();
-				});
-				actions.add(route);
-			}
-			else
-			{
-				JButton open = button(MapCompanionPanel.OPEN_WEBSITE);
-				open.setName("stars.open");
-				open.setToolTipText(Words.of("stars.openTip"));
-				open.addActionListener(e -> net.runelite.client.util.LinkBrowser.browse(mapUrl.get() + "/map?q="
-					+ java.net.URLEncoder.encode(star.name, java.nio.charset.StandardCharsets.UTF_8)));
-				actions.add(open);
-			}
-			if (pinned)
-			{
-				actions.add(unpin());
-			}
-			selection.add(fill(actions));
-			if (!star.precise && !pinned)
-			{
-				JLabel note = label("");
-				wrap(note, Words.of("stars.approximate"), TEXT);
-				selection.add(note);
-			}
-			RoutePress.Said said = press.said(SOURCE);
-			if (said != null && said.message != null)
-			{
-				JLabel line = label("");
-				wrap(line, said.message, TEXT);
-				MapCompanionPanel.tone(line, said.refused());
-				selection.add(line);
-				starSaid = line;
-			}
+			/* Pinned with no way yet, the way there is still one press. */
+			actions.add(route(star, elapsed));
+		}
+		actions.add(unpin());
+		selection.add(fill(actions));
+		if (!routed)
+		{
+			said(selection, star);
 		}
 	}
 

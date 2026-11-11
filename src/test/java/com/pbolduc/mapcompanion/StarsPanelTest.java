@@ -52,9 +52,9 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 /**
- * The top of the Stars tab is the picked world and the filters a player changes daily. The levels
- * the list is measured by are read once, so they wait in More filters; the filters stay on this
- * machine, with no switch that sends them anywhere.
+ * The top of the Stars tab is the pinned star and the filters a player changes daily, and a picked
+ * star's buttons are in its own card. The levels the list is measured by are read once, so they
+ * wait in More filters; the filters stay on this machine, with no switch that sends them anywhere.
  */
 public class StarsPanelTest
 {
@@ -105,11 +105,13 @@ public class StarsPanelTest
 	}
 
 	/**
-	 * What heads the tab is what Pin destination and Route act on, so it is a world the player picked,
-	 * never one picked for them, and never one their own filters have just hidden from the list.
+	 * Route and Pin sit in the card of the star they act on, so they are offered for a world the player
+	 * picked, never one picked for them, and never one their own filters have just hidden from the
+	 * list. This used to assert a Selected world block at the head of the tab: it repeated the row
+	 * above the filters to carry the two buttons, a scroll away from the star that was pressed.
 	 */
 	@Test
-	public void theTopIsAWorldThePlayerPickedAndTheirFiltersShow() throws Exception
+	public void aPickedStarsButtonsAreInItsOwnCardWhileTheFiltersShowIt() throws Exception
 	{
 		SwingUtilities.invokeAndWait(() ->
 		{
@@ -130,6 +132,10 @@ public class StarsPanelTest
 
 			((AbstractButton) named(stars, "stars.site.tile:2974,3241")).doClick();
 			assertNotNull("a press picks", named(stars, "stars.pin"));
+			assertTrue("in the star's own card", SwingUtilities.isDescendingFrom(named(stars, "stars.pin"),
+				named(stars, "stars.site.tile:2974,3241").getParent().getParent().getParent()));
+			assertEquals("Route first, since it pins as well", "stars.route", named(stars, "stars.pin").getParent().getComponent(0).getName());
+			assertFalse("and nothing heads the tab for a pick", words(stars).contains("Selected world"));
 
 			JComboBox<?> tier = (JComboBox<?>) named(stars, "stars.tier");
 			tier.setSelectedIndex(8);
@@ -137,6 +143,142 @@ public class StarsPanelTest
 			assertEquals("but it is still the pick", "302|rimmington mine", service.model.selected);
 			tier.setSelectedIndex(0);
 			assertNotNull("and shows again when the filter lets it", named(stars, "stars.pin"));
+
+			((AbstractButton) named(stars, "stars.site.tile:2974,3241")).doClick();
+			assertNull("a second press lets it go", service.model.selected);
+			assertNull(named(stars, "stars.pin"));
+		});
+	}
+
+	/**
+	 * A folded card names its first world alone, so folding it lets go of a pick of another: Route and
+	 * Pin never act on a world the card is not showing. A pick of the first world stays.
+	 */
+	@Test
+	public void foldingASiteLetsGoOfAWorldItNoLongerShows() throws Exception
+	{
+		SwingUtilities.invokeAndWait(() ->
+		{
+			Tab tab = new Tab();
+			AbstractButton expand = (AbstractButton) named(tab.stars, "stars.expand.tile:2974,3241");
+			expand.doClick();
+			((AbstractButton) named(tab.stars, "stars.world.330|rimmington mine")).doClick();
+			assertNotNull(named(tab.stars, "stars.pin"));
+			((AbstractButton) named(tab.stars, "stars.expand.tile:2974,3241")).doClick();
+			assertNull(tab.service.model.selected);
+			assertNull(named(tab.stars, "stars.pin"));
+
+			tab.pick();
+			((AbstractButton) named(tab.stars, "stars.expand.tile:2974,3241")).doClick();
+			((AbstractButton) named(tab.stars, "stars.expand.tile:2974,3241")).doClick();
+			assertEquals("the first world is still on the card", "302|rimmington mine", tab.service.model.selected);
+		});
+	}
+
+	/**
+	 * The pinned star is the one being walked to, so it heads the tab whatever is picked since and
+	 * whatever the filters hide, with Unpin always in reach.
+	 */
+	@Test
+	public void thePinnedStarHeadsTheTabWhateverIsPickedOrFiltered() throws Exception
+	{
+		SwingUtilities.invokeAndWait(() ->
+		{
+			Tab tab = new Tab();
+			tab.pick();
+			((AbstractButton) named(tab.stars, "stars.pin")).doClick();
+			((AbstractButton) named(tab.stars, "stars.site.tile:3296,3298")).doClick();
+			assertEquals("another star picked", "306|al kharid mine", tab.service.model.selected);
+			assertTrue(words(tab.stars).contains("Pinned destination"));
+			assertTrue(words(tab.stars).toString(), words(tab.stars).stream().anyMatch(line -> line.startsWith("W302")));
+			assertNotNull("with its own Route and Pin", named(tab.stars, "stars.pin"));
+
+			((JComboBox<?>) named(tab.stars, "stars.tier")).setSelectedIndex(8);
+			assertTrue("T9+ hides the T7 from the list, not from the head", words(tab.stars).contains("Pinned destination"));
+			assertNotNull(named(tab.stars, "stars.unpin"));
+		});
+	}
+
+	/**
+	 * A pick ends with its pin. Reached, the plugin dismisses the destination; the star then goes back
+	 * to a plain row rather than opening on Route and Pin for the place the player is standing at.
+	 */
+	@Test
+	public void aPickEndsWithItsPin() throws Exception
+	{
+		SwingUtilities.invokeAndWait(() ->
+		{
+			Tab tab = new Tab();
+			tab.pick();
+			tab.routeTo(302);
+			tab.stars.refresh();
+			assertTrue(words(tab.stars).contains("Pinned destination"));
+
+			tab.destinations.dismiss();
+			tab.stars.refresh();
+			assertFalse(words(tab.stars).contains("Pinned destination"));
+			assertNull(tab.service.model.selected);
+			assertNull(named(tab.stars, "stars.pin"));
+		});
+	}
+
+	/**
+	 * The buttons are in the star's card, which can be far down the list, and the pinned star's way
+	 * is at the head of the tab: pinning one brings the head into view, where the way would otherwise
+	 * arrive off the top of the sidebar.
+	 */
+	@Test
+	public void pinningAStarFromDownTheListBringsTheHeadOfTheTabIntoView() throws Exception
+	{
+		Tab[] made = new Tab[1];
+		javax.swing.JScrollPane[] pane = new javax.swing.JScrollPane[1];
+		SwingUtilities.invokeAndWait(() ->
+		{
+			Tab tab = new Tab();
+			made[0] = tab;
+			tab.stars.selected(true);
+			pane[0] = new javax.swing.JScrollPane(tab.stars);
+			pane[0].setSize(225, 120);
+			tab.pick();
+			layout(pane[0]);
+			pane[0].getViewport().setViewPosition(new java.awt.Point(0, 60));
+			assertEquals(60, pane[0].getViewport().getViewPosition().y);
+			((AbstractButton) named(tab.stars, "stars.pin")).doClick();
+			layout(pane[0]);
+		});
+		SwingUtilities.invokeAndWait(() ->
+			assertEquals("scrolled to the pinned star", 0, pane[0].getViewport().getViewPosition().y));
+	}
+
+	/** Lay a detached tree out as a window would, so a view has a size to scroll within. */
+	private static void layout(Container root)
+	{
+		root.doLayout();
+		for (Component child : root.getComponents())
+		{
+			if (child instanceof Container)
+			{
+				layout((Container) child);
+			}
+		}
+	}
+
+	/** What a press of Route said is drawn under the buttons of the star it was pressed for, in its card. */
+	@Test
+	public void whatAPressSaidIsUnderTheStarItWasPressedFor() throws Exception
+	{
+		SwingUtilities.invokeAndWait(() ->
+		{
+			Tab tab = new Tab();
+			tab.pick();
+			((AbstractButton) named(tab.stars, "stars.route")).doClick();
+			tab.press.refuse(StarsPanel.SOURCE, "The map could not be reached.");
+			tab.stars.refresh();
+			Component card = named(tab.stars, "stars.site.tile:2974,3241").getParent().getParent().getParent();
+			assertTrue(words((Container) card).toString(), words((Container) card).contains("The map could not be reached."));
+
+			((AbstractButton) named(tab.stars, "stars.site.tile:3296,3298")).doClick();
+			assertFalse("another star's card does not say it", words(tab.stars).contains("The map could not be reached."));
 		});
 	}
 
@@ -219,9 +361,13 @@ public class StarsPanelTest
 		});
 	}
 
-	/** The same mine on another world is another star: the pick keeps its plain block and its own Route. */
+	/**
+	 * The same mine on another world is another star. The one pinned heads the tab with its way, and
+	 * the pick keeps Route and Pin in its own card. This used to assert the pick heading the tab with
+	 * no steps: the head was the pick's then, and is the pinned star's now.
+	 */
 	@Test
-	public void aDestinationElsewhereLeavesThePlainSelection() throws Exception
+	public void aStarPinnedOnAnotherWorldLeavesThePickItsOwnButtons() throws Exception
 	{
 		SwingUtilities.invokeAndWait(() ->
 		{
@@ -231,12 +377,12 @@ public class StarsPanelTest
 			tab.offer(tab.follow, tab.reroute);
 			tab.stars.refresh();
 
-			assertTrue(words(tab.stars).contains("Selected world"));
-			assertFalse("no steps", stepsShowing(tab.stars));
-			assertNotNull(named(tab.stars, "stars.pin"));
+			assertEquals("302|rimmington mine", tab.service.model.selected);
+			assertTrue(words(tab.stars).toString(), words(tab.stars).stream().anyMatch(line -> line.startsWith("W330")));
+			assertTrue("W330's steps", stepsShowing(tab.stars));
+			assertNotNull(named(tab.stars, "stars.unpin"));
+			assertNotNull("W302's own", named(tab.stars, "stars.pin"));
 			assertNotNull(named(tab.stars, "stars.route"));
-			assertNull(named(tab.stars, "stars.follow"));
-			assertNull(named(tab.stars, "stars.unpin"));
 		});
 	}
 
@@ -255,13 +401,14 @@ public class StarsPanelTest
 			assertTrue("a button, as Dismiss is on Home", unpin instanceof JButton && ((JButton) unpin).isContentAreaFilled());
 			((AbstractButton) unpin).doClick();
 			assertNull(tab.destinations.getDestination());
-			assertTrue(words(tab.stars).contains("Selected world"));
+			assertFalse(words(tab.stars).contains("Pinned destination"));
 			assertFalse("no steps", stepsShowing(tab.stars));
-			assertNotNull(named(tab.stars, "stars.pin"));
+			/* It used to fall back to Selected world with Pin destination; the pick now ends with its pin. */
+			assertNull("the star is a plain row again", named(tab.stars, "stars.pin"));
 		});
 	}
 
-	/** Pin, then the way there, on one block: a star pinned with no way yet keeps its Route. */
+	/** Pin, then the way there, at the head of the tab: a star pinned with no way yet keeps its Route. */
 	@Test
 	public void aStarPinnedWithNoWayYetOffersRoute() throws Exception
 	{
@@ -336,8 +483,10 @@ public class StarsPanelTest
 			service.model.feed.rows.stream().filter(star -> star.world == 330).findFirst().get().remainingMs = 15 * 60_000L;
 			((AbstractButton) named(stars, "stars.world.330|rimmington mine")).doClick();
 			assertEquals("under twenty minutes", StarsPanel.FADING_TONE, cell(stars, "330|rimmington mine", 3).getForeground());
-			String picked = words(stars).stream().filter(line -> line.startsWith("W330")).findFirst().get();
-			assertEquals("W330 · T5 · ~15m left", picked);
+			/* The line is the pinned star's now, where it was the picked one's. */
+			((AbstractButton) named(stars, "stars.pin")).doClick();
+			String pinned = words(stars).stream().filter(line -> line.startsWith("W330")).findFirst().get();
+			assertEquals("W330 · T5 · ~15m left", pinned);
 		});
 	}
 
@@ -395,6 +544,7 @@ public class StarsPanelTest
 		final List<JButton> offered = new ArrayList<>();
 		final StarsClient service;
 		final StarsPanel stars;
+		final RoutePress press;
 
 		Tab()
 		{
@@ -403,7 +553,7 @@ public class StarsPanelTest
 			MemberIdentity identity = new MemberIdentity(store);
 			service = new StarsClient(new OkHttpClient(), new Gson(), null, new ClientThread(),
 				new HarnessConfig(store, MapCompanionConfig.DEFAULT_MAP_URL), pairing, identity, store);
-			RoutePress press = new RoutePress(new OkHttpClient(), new Gson(), null, new ClientThread(), pairing, identity,
+			press = new RoutePress(new OkHttpClient(), new Gson(), null, new ClientThread(), pairing, identity,
 				route, destinations, new TestDestinationMarker());
 			follow.addActionListener(e -> followed.incrementAndGet());
 			stars = new StarsPanel(service, destinations, new ClientThread(), new TestDestinationMarker(), press,
