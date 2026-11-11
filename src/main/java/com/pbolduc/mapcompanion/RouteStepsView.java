@@ -68,8 +68,12 @@ import static net.runelite.client.ui.ColorScheme.DARKER_GRAY_COLOR;
  * {@link GameSprites#sprite}, by the id the map sent. Both come from this client's cache, never from
  * the map; a step the map names no id for is words alone, as it always was. Each of the other ways
  * starts with the picture of its first step that has one, as the website's route chip leads with its
- * teleport, so ways are told apart by what they make you use; a way not open yet is greyed, its
- * picture faded, and still shows its steps when pressed.
+ * teleport, so ways are told apart by what they make you use.
+ *
+ * <p>The other ways are a small table: a way's name on as many lines as it needs, and its length in
+ * a column of its own at the far end, so lengths are compared down one edge and a long name never
+ * pushes the length off the row. The ways the account can take come first; the ones it cannot yet
+ * follow under one line saying so, their pictures faded, and still show their steps when pressed.
  *
  * <p>When Shortest Path is drawing a step's walk for this route, a line under the steps says so, so
  * the line on the ground is never taken for this plugin's own drawing.
@@ -241,25 +245,41 @@ final class RouteStepsView extends JPanel
 		/* Built only while open, so a folded list asks the client's cache for no pictures. */
 		boolean listed = open && more > 0 && !there;
 		otherWays.setVisible(listed);
-		/* The picture's place is kept on every way once one has a picture, so the words start at one x. */
+		/*
+		 * The picture's place is kept on every way once one has a picture, and the lengths' column is
+		 * as wide as the longest of them, so the names start at one x and wrap at one width.
+		 */
 		boolean pictured = false;
+		int priced = 0;
 		for (int i = 0; listed && i < view.ways.size(); i++)
 		{
-			pictured |= i != view.chosen && sprites != null && firstPictured(view.ways.get(i).steps) != null;
-		}
-		for (int i = 0; listed && i < view.ways.size(); i++)
-		{
-			if (i == view.chosen)
+			if (i != view.chosen)
 			{
-				continue;
+				pictured |= sprites != null && firstPictured(view.ways.get(i).steps) != null;
+				JLabel length = length(view.ways.get(i));
+				priced = Math.max(priced, length == null ? 0 : length.getPreferredSize().width + PICTURE_GAP);
 			}
-			int index = i;
-			RouteOption option = view.ways.get(i);
-			JButton pick = MapCompanionPanel.linkButton(otherLine(option));
-			pick.setForeground(option.blocked ? DONE : Color.WHITE);
-			pick.setToolTipText("Show this way's steps instead");
-			pick.addActionListener(e -> choose.accept(index));
-			otherWays.add(pictured ? led(option, pick, sprites) : pick);
+		}
+		/* The ways the account can take, then the ones it cannot yet, each in the map's own order. */
+		for (int pass = 0; listed && pass < 2; pass++)
+		{
+			boolean headed = pass == 0;
+			for (int i = 0; i < view.ways.size(); i++)
+			{
+				RouteOption option = view.ways.get(i);
+				if (i == view.chosen || option.blocked == (pass == 0))
+				{
+					continue;
+				}
+				if (!headed)
+				{
+					headed = true;
+					JLabel cannot = under(Words.of("steps.notYet"), WIDTH);
+					cannot.setBorder(new EmptyBorder(4, 0, 0, 0));
+					otherWays.add(cannot);
+				}
+				otherWays.add(other(i, option, pictured, priced));
+			}
 		}
 
 		MapCompanionPanel.show(drawn, shortestPath, WIDTH);
@@ -365,21 +385,51 @@ final class RouteStepsView extends JPanel
 	}
 
 	/**
-	 * Another way, led by the picture of the first of its steps that has one, in a place kept for it
-	 * whether or not it does. A way not open yet has its picture drawn disabled, which the look and
-	 * feel greys and dims as it does any control that cannot be used; its words are already grey.
+	 * Another way, as a row to press: the picture of the first of its steps that has one, in a place
+	 * kept for it whether or not it does; its name, wrapped; and its length at the far end. A way not
+	 * open yet has its picture drawn disabled, which the look and feel greys and dims as it does any
+	 * control that cannot be used, and its name in the grey of a step ahead, which still reads.
+	 *
+	 * @param priced the lengths' column, or 0 when no other way has a length
 	 */
-	private static JComponent led(RouteOption option, JButton pick, GameSprites sprites)
+	private JComponent other(int index, RouteOption option, boolean pictured, int priced)
 	{
-		JLabel picture = pictureSlot();
-		picture.setName("route.way.picture");
-		RouteStep shows = firstPictured(option.steps);
-		if (shows != null)
+		JLabel picture = null;
+		if (pictured)
 		{
-			draw(picture, shows, sprites);
+			picture = pictureSlot();
+			picture.setName("route.way.picture");
+			picture.setVerticalAlignment(SwingConstants.TOP);
+			picture.setBorder(new EmptyBorder(2, 0, 0, 0));
+			RouteStep shows = firstPictured(option.steps);
+			if (shows != null)
+			{
+				draw(picture, shows, sprites);
+			}
+			picture.setEnabled(!option.blocked);
 		}
-		picture.setEnabled(!option.blocked);
-		return MapCompanionPanel.left(MapCompanionPanel.bar(PICTURE_GAP, DARKER_GRAY_COLOR, picture, pick, null));
+		int width = WIDTH - priced - (pictured ? PICTURE + PICTURE_GAP : 0);
+		JButton pick = MapCompanionPanel.linkButton("<html><body width='" + width + "'>"
+			+ MapCompanionPanel.escape(option.label + (option.best ? " · best" : "")) + "</body></html>");
+		pick.setForeground(option.blocked ? AHEAD : Color.WHITE);
+		pick.setToolTipText("Show this way's steps instead");
+		pick.addActionListener(e -> choose.accept(index));
+		return MapCompanionPanel.left(MapCompanionPanel.bar(PICTURE_GAP, DARKER_GRAY_COLOR, picture, pick, length(option)));
+	}
+
+	/** A way's length for the far end of its row, level with its name's first line; null where the map priced none. */
+	@Nullable
+	private static JLabel length(RouteOption way)
+	{
+		if (way.tiles == null)
+		{
+			return null;
+		}
+		JLabel length = label(11f, AHEAD);
+		length.setText(way.tiles + " tiles");
+		length.setVerticalAlignment(SwingConstants.TOP);
+		length.setBorder(new EmptyBorder(3, 0, 0, 0));
+		return length;
 	}
 
 	/** The first step with the game's picture of what to click, or null when none has one: a way's or a run stop's. */
@@ -501,12 +551,6 @@ final class RouteStepsView extends JPanel
 			return "";
 		}
 		return way.label + (way.tiles == null ? "" : " · " + way.tiles + " tiles");
-	}
-
-	/** Another way, as a line to press: its name, its length, and whether it is the best or out of reach. */
-	static String otherLine(RouteOption way)
-	{
-		return wayLine(way) + (way.best ? " · best" : "") + (way.blocked ? " · not yet" : "");
 	}
 
 	/**

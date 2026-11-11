@@ -203,17 +203,26 @@ public class RouteStepsViewTest
 		assertEquals(Integer.valueOf(52), view.tiles());
 	}
 
+	/**
+	 * The other ways are a table: each way's name, then its length in a column of its own. One line
+	 * held both, "Lumbridge tablet · 58 tiles", and a long name cut the length off its end.
+	 */
 	@Test
 	public void anotherWayShowsItsOwnSteps() throws IOException
 	{
 		receive();
 		assertTrue(SidebarWords.press(view, "▸ 3 other ways"));
-		assertTrue(shown(), shown().endsWith("▾ 3 other ways | Walk | Lumbridge tablet · 58 tiles | Docking point · 1340 tiles"));
+		assertTrue(shown(), shown().endsWith("▾ 3 other ways | Walk | Lumbridge tablet | 58 tiles | Docking point | 1340 tiles"));
+		JLabel length = label("58 tiles");
+		assertSame("the length is on its way's row", button("Lumbridge tablet").getParent(), length.getParent());
+		assertEquals("at the far end", java.awt.BorderLayout.EAST,
+			((java.awt.BorderLayout) length.getParent().getLayout()).getConstraints(length));
+		assertTrue("and the name wraps rather than being cut", button("Docking point").getText().startsWith("<html><body width="));
 		assertTrue(SidebarWords.press(view, "Walk"));
 		view.show(route.view());
 		/* The walk has no price and its step says Walk, so there is nothing to say over it. */
 		assertTrue(shown(), shown().startsWith("1 | Walk 140 tiles"));
-		assertTrue("the best way is now the other one", shown().contains("Lumbridge Home Teleport · 52 tiles · best"));
+		assertTrue("the best way is now the other one", shown().contains("Lumbridge Home Teleport · best | 52 tiles"));
 	}
 
 	/**
@@ -231,7 +240,7 @@ public class RouteStepsViewTest
 
 		assertTrue(SidebarWords.press(view, "▸ 3 other ways"));
 		asked.clear();
-		assertTrue(SidebarWords.press(view, "Lumbridge tablet · 58 tiles"));
+		assertTrue(SidebarWords.press(view, "Lumbridge tablet"));
 		view.show(route.view());
 		/* The tablet's own step, then the home teleport's icon leading its way in the open fold. */
 		assertEquals(java.util.Arrays.asList("item 8008 at " + RouteStepsView.PICTURE, "sprite 356 at " + RouteStepsView.PICTURE),
@@ -241,8 +250,12 @@ public class RouteStepsViewTest
 	/**
 	 * Each other way starts with the picture of what it makes you use, the first of its steps that has
 	 * one, as the website's chip leads with its teleport; a way with none keeps the picture's place, so
-	 * the words start at one x. A way not open yet is grey with its picture faded, where it was as
-	 * white as the rest, and pressing it still shows its steps.
+	 * the words start at one x. A way not open yet comes after the ways that are, under a line saying
+	 * so, its picture faded, and pressing it still shows its steps.
+	 *
+	 * <p>This asserted "· not yet" on the end of the way's own line, in the grey of a step done. The
+	 * words were the first thing a long name cut off, and that grey was hard to read on the card; the
+	 * line over the group says it once, and the name is the grey of a step ahead.
 	 */
 	@Test
 	public void eachOtherWayStartsWithWhatItMakesYouUse() throws IOException
@@ -256,15 +269,17 @@ public class RouteStepsViewTest
 		assertTrue(SidebarWords.press(view, "▸ 3 other ways"));
 		assertTrue(asked.toString(), asked.contains("item 8008 at " + RouteStepsView.PICTURE));
 
-		JButton tablet = button("Lumbridge tablet · 58 tiles · not yet");
-		assertEquals("a way not open yet is grey", ColorScheme.MEDIUM_GRAY_COLOR, tablet.getForeground());
+		assertTrue("the ways that can be taken, then the one that cannot, under its line: " + shown(),
+			shown().endsWith("Walk | Docking point | 1340 tiles | You can't take these yet: | Lumbridge tablet | 58 tiles"));
+		JButton tablet = button("Lumbridge tablet");
+		assertEquals("a way not open yet is the grey of a step ahead", ColorScheme.LIGHT_GRAY_COLOR, tablet.getForeground());
 		assertFalse("and its picture faded", wayPicture(tablet).isEnabled());
 		JButton walk = button("Walk");
 		assertEquals(Color.WHITE, walk.getForeground());
 		assertTrue("a way with no picture keeps its place", wayPicture(walk).isEnabled());
 		assertEquals(null, wayPicture(walk).getIcon());
 
-		assertTrue(SidebarWords.press(view, "Lumbridge tablet · 58 tiles · not yet"));
+		assertTrue(SidebarWords.press(view, "Lumbridge tablet"));
 		view.show(route.view());
 		assertTrue(shown(), shown().startsWith("58 tiles | 1 | Use Lumbridge tablet"));
 	}
@@ -298,7 +313,7 @@ public class RouteStepsViewTest
 		collectButtons(view, buttons);
 		for (JButton button : buttons)
 		{
-			if (words.equals(button.getText()))
+			if (words.equals(SidebarWords.plain(button.getText())))
 			{
 				return button;
 			}
@@ -359,7 +374,7 @@ public class RouteStepsViewTest
 	{
 		receive();
 		assertTrue(SidebarWords.press(view, "▸ 3 other ways"));
-		assertTrue(SidebarWords.press(view, "Docking point · 1340 tiles"));
+		assertTrue(SidebarWords.press(view, "Docking point"));
 		view.show(route.view());
 		assertTrue(shown(), shown().contains("2 | Board your boat at Port Sarim | 3 | Sail to Catherby | About 650 tiles"
 			+ " | ✓ 20 Sailing | 4 | Dock at Catherby | Your boat stays there"));
@@ -374,7 +389,7 @@ public class RouteStepsViewTest
 	{
 		receive();
 		assertTrue(SidebarWords.press(view, "▸ 3 other ways"));
-		assertTrue(SidebarWords.press(view, "Docking point · 1340 tiles"));
+		assertTrue(SidebarWords.press(view, "Docking point"));
 		/* At the pier, then on the deck, then alongside Catherby's mooring. */
 		route.advance(new WorldPoint(3051, 3192, 0), new DestinationRoute.Sailing(false, null));
 		route.advance(new WorldPoint(3051, 3192, 0), new DestinationRoute.Sailing(true, null));
@@ -394,7 +409,7 @@ public class RouteStepsViewTest
 	{
 		receive();
 		assertTrue(SidebarWords.press(view, "▸ 3 other ways"));
-		assertTrue(SidebarWords.press(view, "Docking point · 1340 tiles"));
+		assertTrue(SidebarWords.press(view, "Docking point"));
 		Map<Integer, String> moored = new HashMap<>();
 		moored.put(1, "Rimmington");
 		route.advance(new WorldPoint(3100, 3200, 0), new DestinationRoute.Sailing(false, moored));

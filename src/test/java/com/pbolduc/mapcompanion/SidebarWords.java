@@ -80,10 +80,16 @@ final class SidebarWords
 		}
 	}
 
+	/** A button's words without the markup that wraps them, as a player reads them. */
+	static String plain(String text)
+	{
+		return text == null ? null : text.replaceAll("<[^>]+>", "").replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">");
+	}
+
 	/** Press the first button or clickable label whose words are exactly {@code text}. */
 	static boolean press(Component component, String text)
 	{
-		if (component instanceof JButton && text.equals(((JButton) component).getText()))
+		if (component instanceof JButton && text.equals(plain(((JButton) component).getText())))
 		{
 			((JButton) component).doClick();
 			return true;
