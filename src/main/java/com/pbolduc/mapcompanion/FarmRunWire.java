@@ -52,6 +52,10 @@ import javax.annotation.Nullable;
  * <p>One kind is not a farm run: {@code port-tasks}, the Sailing port tasks this character holds.
  * Its stops carry task ticks instead of patch ids, and the voyage each leg sails. A tick naming a
  * counter this build does not know is dropped rather than read as some other counter.
+ *
+ * <p>Nor is {@code sea-charts}, a sea charting run: every leg after the first a voyage, and each
+ * stop ticked by the map's {@code visited} alone, sent when this character's charts say its task
+ * is charted.
  */
 final class FarmRunWire
 {
@@ -63,7 +67,12 @@ final class FarmRunWire
 	private static final Pattern PATCH = Pattern.compile("[a-z0-9]+(?:-[a-z0-9]+)*");
 	/** The one run kind that is not a farm run: the Sailing port tasks this character holds. */
 	static final String PORT_TASKS = "port-tasks";
-	static final List<String> KINDS = Arrays.asList("sent", "ready-now", "preset", "birdhouses", "contract", PORT_TASKS);
+	/**
+	 * A sea charting run: the map ticks its stops, as the game's charts say each task is charted, and
+	 * this client never does, since a boat sails past one task's crate on its way to the next.
+	 */
+	static final String SEA_CHARTS = "sea-charts";
+	static final List<String> KINDS = Arrays.asList("sent", "ready-now", "preset", "birdhouses", "contract", PORT_TASKS, SEA_CHARTS);
 	/** The slot counters a port-task stop is ticked by; see {@link RelayResponse.RunTask}. */
 	static final List<String> COUNTERS = Arrays.asList("taken", "delivered", "remaining", "held");
 	/** Five task slots, each served at most twice at one port: a pickup and a drop-off. */

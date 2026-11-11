@@ -342,7 +342,7 @@ final class RunView extends JPanel
 
 	/**
 	 * The run's state, then what its count counts: a farm run the patches it can witness, a port-task
-	 * run its stops, all ticked by counters. A run not followed says so first, since Pause or another
+	 * run its stops, all ticked by counters, and a sea charting run the tasks the game says are charted. A run not followed says so first, since Pause or another
 	 * route changes nothing else on the card; a finished one says what it came to, done and visited
 	 * kept apart as the stops keep them.
 	 */
@@ -364,7 +364,7 @@ final class RunView extends JPanel
 			}
 			if (visited > 0)
 			{
-				came.add(visited + " visited");
+				came.add(visited + " " + reached(view));
 			}
 			return "Run finished" + (came.isEmpty() ? "" : " · " + String.join(", ", came));
 		}
@@ -376,9 +376,15 @@ final class RunView extends JPanel
 		else
 		{
 			count = view.tracked() > 0 ? view.trackedDone() + " of " + view.tracked() + " tracked done"
-				: view.visited.size() + " of " + view.run.stops.size() + " visited";
+				: view.visited.size() + " of " + view.run.stops.size() + " " + reached(view);
 		}
 		return view.following ? count : "Paused · " + count;
+	}
+
+	/** What a stop ticked without a replant came to: charted on a sea charting run, else visited. */
+	static String reached(FarmRunState.View view)
+	{
+		return FarmRunWire.SEA_CHARTS.equals(view.run.kind) ? "charted" : "visited";
 	}
 
 	/**
@@ -407,7 +413,7 @@ final class RunView extends JPanel
 			// A birdhouse is ticked by weaker evidence than a replant, so it says which.
 			return stop.birdhouseId == null ? "Done" : "Done · seen by Time Tracking";
 		}
-		return view.visited.contains(stop.n) ? "Visited"
+		return view.visited.contains(stop.n) ? (FarmRunWire.SEA_CHARTS.equals(view.run.kind) ? "Charted" : "Visited")
 			: view.here.contains(stop.n) ? "You're here" : "";
 	}
 
