@@ -30,6 +30,10 @@ diaries, items and unlocks your account has.
 **Works with Shortest Path.** Map Companion tells you where to go and which teleport to use;
 Shortest Path draws the walks.
 
+<p>
+  <img src="docs/mockups/sidebar-quest-step.png" width="205" alt="The Quest Helper step card on Home after Route: 52 tiles, casting Lumbridge Home Teleport, walking to the castle staircase and climbing to the bank, with Pause, Reroute and Dismiss">
+</p>
+
 **Works with Quest Helper.** With Quest Helper's *Use 'Shortest Path' plugin* setting on, Home shows
 your current quest step, and **Route** plans the way there, teleports included. A path handed to
 Shortest Path does not say which plugin sent it, so another plugin's path can show its tile there instead.
