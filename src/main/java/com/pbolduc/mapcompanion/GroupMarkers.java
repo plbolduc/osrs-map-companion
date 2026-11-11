@@ -78,6 +78,9 @@ public class GroupMarkers
 
 	private final WorldMapPointManager points;
 	private final ClientThread clientThread;
+	/** Which way a friend's head points from the map's edge. */
+	@Inject
+	MapEdge edge;
 
 	/** Client thread only. */
 	private final Map<String, Drawn> drawn = new HashMap<>();
@@ -170,7 +173,7 @@ public class GroupMarkers
 				MapPin.initials(look.name),
 				look.stale,
 				look.name,
-				() -> look.tooltip);
+				() -> look.tooltip).atEdge(edge, null);
 			points.add(pin);
 			drawn.put(dot.id, new Drawn(pin, look));
 		}

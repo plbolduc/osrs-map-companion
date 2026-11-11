@@ -49,8 +49,8 @@ import net.runelite.client.ui.overlay.worldmap.WorldMapPointManager;
  * {@code InterfaceID.Worldmap.MAP_CONTAINER}, whose bounds include the legend and search bar, so
  * the dot drew over chrome and the projection was approximate.
  *
- * <p>Both are {@link MapPin}s, so each stays on the map's edge, pointing the way, while its place
- * is out of view — which is when somebody needs a destination most. A click pans the world map;
+ * <p>Both are {@link MapPin}s, so each stays on the map's edge, pointing the way and saying what it
+ * is, while its place is out of view — which is when somebody needs a destination most. A click pans the world map;
  * it does not move the player. That is still drawing, not acting — the same line every other
  * part of this plugin holds.
  *
@@ -82,6 +82,9 @@ public class DestinationMarker
 	private final ClientThread clientThread;
 	private final DestinationRoute route;
 	private final FarmRunRoute farming;
+	/** Which way a held pin points. A field so the many tests that build this without a map need not hand it one. */
+	@Inject
+	MapEdge edge;
 	private final List<MapPin> farmStops = new ArrayList<>();
 	private String farmKey;
 
@@ -171,7 +174,7 @@ public class DestinationMarker
 		}
 
 		removeDestination();
-		current = new MapPin(where, MapPin.AMBER, "", false, "Destination", () -> tooltip);
+		current = new MapPin(where, MapPin.AMBER, "", false, "Destination", () -> tooltip).atEdge(edge, destination.name);
 		/*
 		 * Rebuilt rather than switched when this changes: a point let go of while held at the edge
 		 * keeps the edge's disc for a picture, because RuneLite only swaps it back while it snaps.
@@ -206,7 +209,7 @@ public class DestinationMarker
 		Integer world = event.world;
 		meetup = new MapPin(where, MapPin.AMBER, "M", false, title, () -> title + " · "
 			+ MapCompanionPanel.meetupWhen(startsAtMs, System.currentTimeMillis(), ZoneId.systemDefault(),
-				Locale.getDefault(Locale.Category.FORMAT), world));
+				Locale.getDefault(Locale.Category.FORMAT), world)).atEdge(edge, title);
 		meetupKey = key;
 		points.add(meetup);
 	}
@@ -261,7 +264,7 @@ public class DestinationMarker
 		String number = String.valueOf(pin.number);
 		String tooltip = pin.number + ". " + pin.title;
 		MapPin drawn = new MapPin(pin.where, pin.place == 0 ? MapPin.AMBER : STEP, number, pin.place < 0,
-			"Step " + number, () -> tooltip);
+			"Step " + number, () -> tooltip).atEdge(edge, pin.title);
 		drawn.setSnapToEdge(pin.place == 0);
 		steps.add(drawn);
 		points.add(drawn);
@@ -374,7 +377,7 @@ public class DestinationMarker
 			boolean current = next != null && stop.n == next.n;
 			String words = stop.n + ". " + stop.name + (done ? " · done" : visited ? " · visited" : current ? " · next" : "");
 			MapPin pin = new MapPin(FarmRunState.point(stop), current ? MapPin.AMBER : STEP, String.valueOf(stop.n),
-				done || visited, "Farm stop " + stop.n, () -> words);
+				done || visited, "Farm stop " + stop.n, () -> words).atEdge(edge, stop.name);
 			pin.setSnapToEdge(current && view.following);
 			farmStops.add(pin);
 			points.add(pin);

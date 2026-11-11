@@ -281,8 +281,18 @@ The website plan's second session, once the routes in the game are built: a memb
 - [ ] **Step pins.** The world map shows a numbered pin at each step's end, with the sidebar's
       numbers; only the current one holds the map's edge when panned away, the ones behind it fade,
       and the last step leaves the destination's own pin uncovered. All go with Dismiss.
-      Panned away from a followed route, the edge shows one amber disc, the current step's; on the
+      Panned away from a followed route, the edge shows one amber head, the current step's; on the
       last step it is the destination's.
+- [ ] **A pin held at the map's edge points the way (`MapEdge`, built and tested, not yet seen
+      live).** Follow a route and drag the world map until the current step is off the left of it:
+      its head sits on the left edge with its point out through the edge and the step's words
+      beside it, *Use Catherby tablet*. Drag so the step is off the top: the point turns up and
+      the words go under the head. Off a corner, the point lies between. Zoom the map in and out
+      with the step off one side: the head stays on that side. Drag the step back into view: the
+      words go as its tile comes under the head, and the pin stands on the tile again within a
+      head's width or two of the edge, as it did before. With *Group on the world map* on, a
+      friend's head points too and says nothing beside it. Hovering the words shows the pin's
+      tooltip, and clicking them pans the map to the place as clicking the head does.
 - [ ] **The arrow follows the step.** With the current step's end in the loaded scene, the game's
       arrow points there rather than at the destination; it moves on as each step is reached, and a
       quest's arrow set first is left alone.
