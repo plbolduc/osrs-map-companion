@@ -88,6 +88,7 @@ import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.HotkeyListener;
 import net.runelite.client.util.ImageUtil;
+import static com.pbolduc.mapcompanion.DestinationRoute.standing;
 
 /**
  * OSRS Map Companion.
@@ -1340,7 +1341,7 @@ public class MapCompanionPlugin extends Plugin
 		if (farmRunState.active())
 		{
 			farmRunState.carried(capabilityEvaluator.evaluate());
-			farmRunState.observe(farmingObserver.observations(now), birdhouseReader.read(now), DestinationRoute.standing(client), now);
+			farmRunState.observe(farmingObserver.observations(now), birdhouseReader.read(now), standing(client), now);
 			/* A port-task run's stops tick by the slots read this tick, and by nothing else. */
 			farmRunState.observePorts(settings().on("sharePortTasks") ? portTaskReader.latest() : null);
 		}
@@ -1355,8 +1356,15 @@ public class MapCompanionPlugin extends Plugin
 		if (destinationRoute.hasRoute())
 		{
 			/* A voyage's rows are ticked by the deck and the boats' ports, read here and never sent. */
-			destinationRoute.advance(DestinationRoute.standing(client),
+			destinationRoute.advance(standing(client),
 				DestinationRoute.Sailing.of(WorldTiles.aboard(client), boatReader.read(now)));
+		}
+		/* Reached, the place has no more to say; a run's stop is the run's to move on from. */
+		if (shown != null && !farmRunRoute.owns(shown) && destinationRoute.reaches(standing(client),
+			shown.world == null || shown.world == client.getWorld()))
+		{
+			destinationState.dismiss();
+			destinationRoute.sync(null);
 		}
 		/* The step pins follow the step; unchanged, this compares one string and returns. */
 		destinationMarker.sync();
@@ -1364,7 +1372,7 @@ public class MapCompanionPlugin extends Plugin
 		destinationArrow.sync();
 		announceArrival();
 		shortestPath.tick(client.getTickCount(), destinationRoute.view(), config.drawWithShortestPath(),
-			DestinationRoute.standing(client), farmRunRoute::takenOver);
+			standing(client), farmRunRoute::takenOver);
 		/*
 		 * The task counter, so a kill can be matched to the counter it moved — see TaskKills — and the
 		 * collection vocabulary's retry, which drop luck needs whether or not rewards are shared.

@@ -22,7 +22,8 @@ a friend sends to everyone shows its way without taking over the box or Shortest
 press **Follow**. With the box over the game, the sidebar can stay closed: hold Shift and
 right-click the box for **Pause**, **Reroute** and **Dismiss**, or **End run** on a run.
 **Reroute** plans again from where you stand, and RuneLite's settings for the plugin can give
-Reroute and Follow a key of your own. The website uses what you share under **Progress and
+Reroute and Follow a key of your own. When you reach the place, on its world if it names one, its
+pin, arrow and card go on their own; a farm run moves on to its next stop instead. The website uses what you share under **Progress and
 travel** to suggest routes around your account's quests, diaries, items and transport unlocks.
 
 You can also plan a route to a friend, a meetup or a precise star site, back to where you died,

@@ -71,6 +71,11 @@ import static com.pbolduc.mapcompanion.RelayResponse.RouteStep;
  * player has rerouted, the route that keeps riding in with the destination is the old answer and is
  * not put back.
  *
+ * <p><b>Reaching the place takes it down.</b> {@link #reaches} says when the player has come to the
+ * destination itself, route or no route, and the game tick then dismisses it as the player's own
+ * Dismiss would: a pin, an arrow and a card that go on saying where to go after the player is there
+ * are only something to tidy away.
+ *
  * <p>Read and written from three threads — the game tick, the sidebar and the Reroute reply — so
  * every field is behind this object's lock and the sidebar reads a copy.
  */
@@ -165,6 +170,8 @@ public class DestinationRoute
 	/** The port the chosen way boards a boat at, while no boat reads moored there. */
 	@Nullable
 	private String boatAway;
+	/** The player has been seen somewhere other than the destination since it was shown; see {@link #reaches}. */
+	private boolean away;
 
 	/** One moment of the route, for the sidebar and the pins. Never changes after it is made. */
 	@AllArgsConstructor
@@ -327,7 +334,32 @@ public class DestinationRoute
 		rerouting = false;
 		message = null;
 		refused = false;
+		away = false;
 		adopt(destination == null ? null : destination.route);
+	}
+
+	/**
+	 * Whether the player has just come to the destination: at the end of its way, or within
+	 * {@link #REACHED} tiles of its own tile on its floor, and on its world. Called on the game tick
+	 * with {@link #standing}; null, where the tile cannot be trusted, says nothing either way.
+	 *
+	 * <p>Only a player seen somewhere else first has come to it. A star pinned from the tile beside it
+	 * stays pinned, rather than the press seeming to do nothing; so does a place reached on another
+	 * world than its own, whose world is the half still to be acted on.
+	 *
+	 * @param onWorld whether the player is on the destination's world, or it names none
+	 */
+	synchronized boolean reaches(@Nullable WorldPoint where, boolean onWorld)
+	{
+		if (target == null || where == null)
+		{
+			return false;
+		}
+		boolean there = onWorld && (route != null && step >= route.options.get(chosen).steps.size()
+			|| where.getPlane() == target.getPlane() && Math.abs(where.getX() - target.getX()) <= REACHED
+				&& Math.abs(where.getY() - target.getY()) <= REACHED);
+		away |= !there;
+		return there && away;
 	}
 
 	private void adopt(@Nullable Route incoming)

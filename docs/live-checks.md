@@ -278,6 +278,12 @@ The website plan's second session, once the routes in the game are built: a memb
       raid's rooms they do not.
 - [ ] **Reroute.** Walk away from the route and press Reroute: the steps are planned from where
       you stand and the first is marked. Press it again at once: the sidebar says to wait.
+- [ ] **Reaching the place takes it down.** Follow a route to its end, or pin a star and walk to
+      it: within four tiles, on its floor and its world, the card, the pins, the arrow and the box
+      over the game all go, as with Dismiss, and the same place sent again by a friend stays hidden.
+      Pin a star while standing beside it: the pin stays, and goes after you walk off and come back.
+      Stand at a star's tile on another world: the pin stays and names the world; hop there and it
+      goes. A farm run's stop is not taken down this way; the run moves on by its own rules.
 - [ ] **Step pins.** The world map shows a numbered pin at each step's end, with the sidebar's
       numbers; only the current one holds the map's edge when panned away, the ones behind it fade,
       and the last step leaves the destination's own pin uncovered. All go with Dismiss.
