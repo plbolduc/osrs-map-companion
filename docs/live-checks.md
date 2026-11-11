@@ -380,10 +380,14 @@ The website plan's second session, once the routes in the game are built: a memb
       the pin's tooltip say it, *Near Lumbridge Castle*; where it names none, *Picked on the world map*.
       Between the press and the answer the spot has a faded amber pin, *Planning the way here…*,
       which stays put when the map is panned away and goes with the answer or the chat box's refusal.
-- [ ] **Route on a star and a meetup.** In Stars, a precise site's Route sits beside Pin
-      destination without cutting a word; an approximate one shows Open website. Press Route: the
-      steps show under the star, Stars stays the tab, and Follow and Reroute there act as Home's do
-      while you walk and hop; Unpin clears the star and Home's card together. A meetup's Route
+- [ ] **Route on a star and a meetup.** In Stars, press a precise site: Route and Pin open in its
+      own card, under the star, and a second press folds them away; an approximate one shows Open
+      website. Far down the list, the card scrolls so both buttons are in view. Press Route: the
+      star heads the tab as *Pinned destination* with its steps, the tab scrolls up to it, Stars
+      stays the tab, and Follow and
+      Reroute there act as Home's do while you walk and hop; Unpin clears the star and Home's card
+      together and the star is a plain row again. With one star pinned, press another: the pinned
+      one keeps the head of the tab and the other opens its own Route and Pin. A meetup's Route
       prints its world and its day and clock in the destination's line, with no countdown, and
       nobody in the group is told. Pressed on Group, a meetup's or a friend's Route turns the
       sidebar to Home once its way lands, with the card in view; a refusal stays under the button.

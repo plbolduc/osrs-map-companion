@@ -104,8 +104,9 @@ expected hunting. A bounty's pin opens the creature on the map.
 
 **Stars** lists active stars by site, world, tier and estimated time left. Filter by tier and
 world type, and save favourite sites; your filters and favourites stay on your computer.
-Pick a precise site to pin it on the world map or plan a route there. The route's steps show under
-the star as they do on Home, so you can stay on Stars while you hop.
+Press a star to open **Route** and **Pin** under it: Route plans the way there and pins the star,
+and Pin only marks it on the world map. The pinned star stays at the top of the tab with its steps,
+as on Home, so you can stay on Stars while you hop.
 
 To change worlds, type `::hop` and the world, for example `::hop 444`.
 
