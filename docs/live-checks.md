@@ -275,7 +275,9 @@ The website plan's second session, once the routes in the game are built: a memb
 
 - [ ] **The steps arrive.** Send a destination from a card with a route. The steps appear under
       the destination's card in the card's own words, the first one marked; the other ways fold
-      behind one line, and pressing one shows its steps.
+      behind one line, and pressing one shows its steps. Open, each way is its name with its
+      length at the row's far end, a long name wrapping under itself rather than being cut; ways
+      the account cannot take yet come last, under *You can't take these yet:*, pictures faded.
 - [ ] **Step pictures.** A route whose steps use an item (a games necklace, a tablet) and a spell
       (Lumbridge Home Teleport) shows each one's picture before its number, at 16px, as the
       card's sprite for that row: the item's sprite from the item cache and the spell's icon from
