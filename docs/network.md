@@ -165,7 +165,8 @@ removal carries the revision without a run. There is no additional poll or autom
 
 **Start run** and a run's **Reroute** each make one `POST /api/companion/run` with the same
 three member credentials as Route. Start sends a bounded preset/run-kind string, `port-tasks`
-from the Port tasks card; Reroute sends the run id and the `done` and `visited` ordinals. Both include the tile the player stands on,
+from the Port tasks card and `sea-charts` for the sea charting run, which the map plans from the
+**Sea charts charted** ids the snapshot already carries; Reroute sends the run id and the `done` and `visited` ordinals. Both include the tile the player stands on,
 even with position sharing off. They share Route's one-flight gate and Retry-After wait.
 **End run** makes one `DELETE /api/companion/run?run=<id>`; the id guard prevents an old End
 from erasing a replacement run. An initial plan can be cancelled before it has an id.

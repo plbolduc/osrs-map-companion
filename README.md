@@ -68,7 +68,9 @@ Start a run from **Ready now**, **Birdhouses** or your farming contract, or buil
 website. The sidebar lists each stop and the way to it, checks in the bank which teleports you
 are missing, and ticks a stop off once you have replanted it.
 **Dailies run** visits every daily your diaries and quests allow, leaving out what you have
-collected today when **Dailies collected** is on.
+collected today when **Dailies collected** is on. **Sea charting run** sails your boat through the
+nearest seas you have not charted, ticking each task as the game charts it; it needs **Sea charts
+charted** on.
 
 ## Sailing
 
