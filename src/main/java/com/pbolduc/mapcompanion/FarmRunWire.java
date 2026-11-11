@@ -77,6 +77,11 @@ final class FarmRunWire
 	static final List<String> COUNTERS = Arrays.asList("taken", "delivered", "remaining", "held");
 	/** Five task slots, each served at most twice at one port: a pickup and a drop-off. */
 	static final int MAX_TICKS = 10;
+	/**
+	 * A stop's name, longer than a run's: a sea charting stop is named by its task's sentence, at
+	 * most 102 characters. Every other stop's name is under sixty. The map's {@code MAX_STOP_NAME}.
+	 */
+	static final int MAX_STOP_NAME = 110;
 
 	/** A malformed counter is unknown, not a reason to lose the surrounding pairing reply. */
 	public static final class Revision implements TypeAdapterFactory
@@ -196,7 +201,7 @@ final class FarmRunWire
 		{
 			return null;
 		}
-		String name = RouteWire.text(stop.name, 60);
+		String name = RouteWire.text(stop.name, MAX_STOP_NAME);
 		RelayResponse.RouteTile tile = RouteWire.tile(stop.tile);
 		if (name == null || tile == null)
 		{

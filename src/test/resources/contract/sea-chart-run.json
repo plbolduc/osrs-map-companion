@@ -7,7 +7,7 @@
   "stops": [
     {
       "n": 1,
-      "name": "Spyglass · Kharidian Sea",
+      "name": "Use your spyglass to admire Chartin' Charles McAtless in the cave on the Pandemonium",
       "tile": {
         "x": 3051,
         "y": 9388,
@@ -69,7 +69,6 @@
           "title": "Enter Pandemonium Cave by the cave",
           "detail": "19t inside to Spyglass · Kharidian Sea",
           "notes": [
-            "Use your spyglass to admire Chartin' Charles McAtless in the cave on the Pandemonium.",
             "Done on foot: your boat waits at The Pandemonium"
           ],
           "at": {
@@ -127,7 +126,7 @@
     },
     {
       "n": 2,
-      "name": "Spyglass · Kharidian Sea",
+      "name": "Use your spyglass to get a good view of the Pandemonium from the cave entrance on the island",
       "tile": {
         "x": 3045,
         "y": 2995,
@@ -143,7 +142,6 @@
           "title": "Walk",
           "detail": "About 20 tiles to Spyglass · Kharidian Sea",
           "notes": [
-            "Use your spyglass to get a good view of the Pandemonium from the cave entrance on the island.",
             "Done on foot: your boat waits at The Pandemonium"
           ],
           "walk": true,
@@ -158,7 +156,7 @@
     },
     {
       "n": 3,
-      "name": "Captain's log · Kharidian Sea",
+      "name": "Find the wreck of the Pandemonium III west of the Kharidian Bandit Camp",
       "tile": {
         "x": 3143,
         "y": 2978,
@@ -193,9 +191,6 @@
           "slot": "sail",
           "title": "Sail to Captain's log · Kharidian Sea",
           "detail": "71 tiles at sea",
-          "notes": [
-            "Find the wreck of the Pandemonium III west of the Kharidian Bandit Camp."
-          ],
           "at": {
             "x": 3143,
             "y": 2978,
@@ -228,7 +223,7 @@
     },
     {
       "n": 4,
-      "name": "Current duck · Kharidian Sea",
+      "name": "Test the currents south west of the Kharidian Bandit Camp",
       "tile": {
         "x": 3145,
         "y": 2963,
@@ -243,9 +238,6 @@
           "slot": "sail",
           "title": "Sail to Current duck · Kharidian Sea",
           "detail": "31 tiles at sea",
-          "notes": [
-            "Test the currents south west of the Kharidian Bandit Camp."
-          ],
           "at": {
             "x": 3145,
             "y": 2963,

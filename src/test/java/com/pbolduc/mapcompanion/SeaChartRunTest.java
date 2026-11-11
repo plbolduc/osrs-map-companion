@@ -71,7 +71,10 @@ public class SeaChartRunTest
 		assertNull("the next task from the same dock is walked to", run.stops.get(1).voyage);
 		assertEquals("a sail after a task ashore leaves from the dock", "The Pandemonium", run.stops.get(2).voyage.from);
 		assertNull("a sail between tasks at sea docks nowhere", run.stops.get(3).voyage.to);
-		assertEquals("a sail at sea leaves from the task before", run.stops.get(2).name, run.stops.get(3).voyage.from);
+		/* A stop is named by its task's sentence; a voyage starts from the task before by its short name. */
+		assertEquals("a sail at sea leaves from the task before", "Captain's log · Kharidian Sea", run.stops.get(3).voyage.from);
+		assertEquals("a task's whole sentence is kept as the stop's name",
+			"Use your spyglass to get a good view of the Pandemonium from the cave entrance on the island", run.stops.get(1).name);
 		assertFalse("a charting stop has no evidence of its own to wait for", FarmRunState.tracked(run.stops.get(1)));
 	}
 
