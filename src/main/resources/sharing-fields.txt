@@ -13,7 +13,8 @@ sharePermanentTravel|Permanent travel and house|Verified permanent travel unlock
 shareCapabilities|Carried travel items|Derived yes/no travel flags; your inventory is never sent.
 shareStash|STASH construction|Built STASH units; stored equipment is never read.
 shareBoats|Boats and moorings|Where each boat is moored and its teleport focus, so voyages start at your boat; boat names are never sent.
-shareSlayer|Slayer task|Your current assignment and remaining count.
+shareSeaCharts|Sea charts charted|Which Sailing sea charting tasks you have charted.
+shareSlayer|Slayer task|Your current assignment and remaining count, or what Mortimer offers while you choose.
 shareClue|Clue step|Your current clue scroll step.
 shareFarming|Farming patches|Patch states you have observed, for planning runs.
 shareBirdhouses|Birdhouses|States observed by RuneLite Time Tracking, with their age.
@@ -21,6 +22,7 @@ shareHunterRumours|Hunter rumours|The rumour observed after checking a quetzal w
 shareMahoganyHomes|Mahogany Homes|The customer and tier observed in dialogue or game messages.
 shareFarmingContracts|Farming contracts|The crop requested by your current Farming Guild contract.
 sharePortTasks|Port tasks|Your Sailing port task slots and their counters; cargo is never read.
+shareDailies|Dailies collected|Which of the dailies the map plans, like Zaff's battlestaves, you have collected today.
 shareLoot|Observed kills and drops|Locally observed tracked monster kills and rated drop totals on normal members worlds; not lifetime kill counts.
 shareMilestones|Notable drops and levels|Notable observed rewards and real levels, and quests and diary tiers finished while you play, if those are shared. Activity rewards require Loot Tracker. {FEED_KEPT}
 sharePets|Include pet rewards|Observed pet rewards while Notable drops and levels is enabled; unknown pets stay unnamed.

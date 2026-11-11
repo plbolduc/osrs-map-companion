@@ -279,6 +279,21 @@ public class WireContractTest
 			portSlot(3, "locked", null, null, null, null),
 			portSlot(4, "unknown", null, null, null, null));
 		s.portTasks.hold = 60;
+		s.seaCharts = Arrays.asList(0, 3, 167);
+		CompanionSnapshot.MortimerTask gargoyles = new CompanionSnapshot.MortimerTask();
+		gargoyles.taskId = 46;
+		gargoyles.taskName = "Gargoyles";
+		gargoyles.mortifier = "superior";
+		gargoyles.value = 250;
+		CompanionSnapshot.MortimerTask kurask = new CompanionSnapshot.MortimerTask();
+		kurask.taskId = 45;
+		kurask.taskName = "Kurask";
+		kurask.mortifier = "quantity";
+		kurask.value = -20;
+		s.mortimerOffer = Arrays.asList(gargoyles, kurask);
+		s.dailies = new LinkedHashMap<>();
+		s.dailies.put("zaff-battlestaves", true);
+		s.dailies.put("bert-sand", false);
 		s.stashUnits = new HashMap<>();
 		s.stashUnits.put(28960, true);
 		Map<String, String> rewards = new HashMap<>();

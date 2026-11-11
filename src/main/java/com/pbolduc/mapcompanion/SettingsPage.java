@@ -33,7 +33,6 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.List;
 import javax.annotation.Nullable;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -96,7 +95,6 @@ final class SettingsPage extends JPanel
 	private final Runnable refresh;
 	/** Settings in place of the daily page, or the daily page back. See {@link SidebarPages}. */
 	private final Consumer<Boolean> settingsOpen;
-	private final Supplier<String> mapUrl;
 
 	private final JButton previewButton = smallButton("Show what's sent");
 	private final SharingControls sharingControls;
@@ -133,11 +131,8 @@ final class SettingsPage extends JPanel
 		this.connectCard = connectCard;
 		this.refresh = refresh;
 		this.settingsOpen = settingsOpen;
-		this.mapUrl = mapUrl;
 		this.sharingControls = new SharingControls(config, settings);
-		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		setBackground(ColorScheme.DARK_GRAY_COLOR);
-		left(this);
+		column(this, ColorScheme.DARK_GRAY_COLOR);
 
 		/*
 		 * Where an update's changes are written down, the same page the once-per-version chat line
@@ -473,6 +468,6 @@ final class SettingsPage extends JPanel
 
 	private String pairingCode()
 	{
-		return config.pairingCode() == null ? "" : config.pairingCode().trim();
+		return Pairing.codeIn(config);
 	}
 }

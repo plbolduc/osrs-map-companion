@@ -30,12 +30,15 @@ import com.google.inject.Singleton;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.callback.ClientThread;
+import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.events.PluginMessage;
+import net.runelite.client.plugins.PluginManager;
 
 /**
  * The walking steps of a followed route, handed to the Shortest Path plugin to draw.
@@ -65,8 +68,20 @@ import net.runelite.client.events.PluginMessage;
  * answer is posted on a later client frame: an answer to a question asked before this plugin's own
  * last {@code path} describes the path before it, and is not read as somebody else's.
  *
- * <p>Client thread only: the game tick drives it, and Shortest Path answers on the client thread.
- * The two fields the sidebar reads are volatile.
+ * <p><b>Quest Helper's step.</b> Quest Helper hands each quest step's tile to Shortest Path in the
+ * same shape, {@code path} with {@code start} and a {@code target} world point, and sends
+ * {@code clear} when the step ends — at the next step, a closed quest or a logout
+ * ({@code DetailedQuestStep.setShortestPath} and {@code removeShortestPath} in
+ * Zoinkwiz/quest-helper) — but only while its own setting, Use 'Shortest Path' plugin, is on. This
+ * listens for it so Home can offer Route, and sends Quest Helper nothing. A message names no sender,
+ * so a {@code path} counts as Quest Helper's only when it is not this plugin's own and Quest Helper is
+ * running with that setting on, read from RuneLite's plugin manager and config. A third plugin
+ * setting Shortest Path a path while Quest Helper sends its own is the case this cannot tell apart;
+ * the card then names a tile somebody asked Shortest Path to show. A step that began before this
+ * plugin started is heard at the next one: nothing asks Quest Helper for it.
+ *
+ * <p>Client thread only: the game tick drives it, and Shortest Path and Quest Helper post on the
+ * client thread. The fields the sidebar reads are volatile.
  */
 @Singleton
 class ShortestPath
@@ -113,13 +128,24 @@ class ShortestPath
 	private String drawnKey;
 	@Nullable
 	private Runnable onTakenOver;
+	/** The last message this posted: never Quest Helper's, though a {@code clear} of ours equals one. */
+	@Nullable
+	private volatile PluginMessage lastSent;
+	/** The tile of Quest Helper's step, or null; Home's Quest Helper step card routes to it. */
+	@Nullable
+	private volatile WorldPoint questStep;
+	/** Whether Quest Helper is running with its Use 'Shortest Path' plugin on; always, in a test. */
+	BooleanSupplier questHelperSends = () -> true;
 
 	@Inject
-	ShortestPath(EventBus eventBus, ClientThread clientThread)
+	ShortestPath(EventBus eventBus, ClientThread clientThread, PluginManager plugins, ConfigManager config)
 	{
 		this.post = eventBus::post;
 		this.eventBus = eventBus;
 		this.clientThread = clientThread;
+		/* Quest Helper's names: its @PluginDescriptor, and QuestHelperConfig's group and key. */
+		questHelperSends = () -> "true".equals(config.getConfiguration("questhelper", "useShortestPath"))
+			&& plugins.getPlugins().stream().anyMatch(p -> "Quest Helper".equals(p.getName()) && plugins.isPluginActive(p));
 	}
 
 	ShortestPath(Consumer<PluginMessage> post)
@@ -132,6 +158,24 @@ class ShortestPath
 	boolean installed()
 	{
 		return installed;
+	}
+
+	/**
+	 * Quest Helper's step while it is still running and sending them, or null. Any thread.
+	 *
+	 * <p>Found not sending, the held step is dropped rather than hidden: a step kept would come back
+	 * when the setting is turned on again, naming a tile from before it. Quest Helper sends its step
+	 * again when the setting comes back on. Written from the sidebar's thread as well as the client
+	 * thread, which can lose only a step that arrived in the same instant the setting was found off.
+	 */
+	@Nullable
+	WorldPoint questStep()
+	{
+		if (!questHelperSends.getAsBoolean())
+		{
+			questStep = null;
+		}
+		return questStep;
 	}
 
 	/** The number of the step whose walk Shortest Path is drawing for this plugin, or zero. */
@@ -177,7 +221,7 @@ class ShortestPath
 				Map<String, Object> data = new HashMap<>();
 				data.put("start", from);
 				data.put("target", target);
-				post.accept(new PluginMessage(NAMESPACE, "path", data));
+				send(new PluginMessage(NAMESPACE, "path", data));
 				ours = target;
 				drawnKey = key;
 				drawing = view.step + 1;
@@ -195,15 +239,35 @@ class ShortestPath
 		}
 	}
 
-	/** Read Shortest Path's answer. Called from the plugin's own {@code PluginMessage} subscription. */
+	/** Read Shortest Path's answer, or Quest Helper's step. Called from the plugin's own {@code PluginMessage} subscription. */
 	void onPluginMessage(PluginMessage message)
 	{
-		if (!NAMESPACE.equals(message.getNamespace()) || !"currentTarget".equals(message.getName()))
+		if (!NAMESPACE.equals(message.getNamespace()) || message == lastSent)
+		{
+			/* Another plugin's, or this one's own, which the bus hands back before its post returns. */
+			return;
+		}
+		/*
+		 * RuneLite's constructors refuse null data, but this is another plugin's message on the event
+		 * bus, where a throw would skip the rest of it: null reads as no data, so a clear still ends
+		 * the step and a path with nothing in it is no step.
+		 */
+		Map<String, Object> data = message.getData() != null ? message.getData() : Map.of();
+		Object target = data.get("target");
+		boolean ended = "clear".equals(message.getName());
+		if (!stopped && (ended || target instanceof WorldPoint && "path".equals(message.getName())))
+		{
+			/*
+			 * Whose it is, Quest Helper's or another plugin's, is asked when the sidebar reads it. Not
+			 * while stopped: the listener shutDown leaves for its own last question hears paths too.
+			 */
+			questStep = ended ? null : (WorldPoint) target;
+		}
+		if (!"currentTarget".equals(message.getName()))
 		{
 			return;
 		}
-		Map<String, Object> data = message.getData();
-		Object id = data == null ? null : data.get("id");
+		Object id = data.get("id");
 		if (!(id instanceof String) || !((String) id).startsWith(ID))
 		{
 			return;
@@ -223,7 +287,7 @@ class ShortestPath
 			cancelShutdown();
 			if (clear)
 			{
-				post.accept(new PluginMessage(NAMESPACE, "clear"));
+				send(new PluginMessage(NAMESPACE, "clear"));
 			}
 			return;
 		}
@@ -247,7 +311,7 @@ class ShortestPath
 		{
 			if (question == clearAsked)
 			{
-				post.accept(new PluginMessage(NAMESPACE, "clear"));
+				send(new PluginMessage(NAMESPACE, "clear"));
 				forget();
 				clearAsked = 0;
 			}
@@ -277,6 +341,7 @@ class ShortestPath
 		WorldPoint target = ours;
 		cancelShutdown();
 		stopped = true;
+		questStep = null;
 		forget();
 		installed = false;
 		awaiting = false;
@@ -311,7 +376,7 @@ class ShortestPath
 		}
 		Map<String, Object> data = new HashMap<>();
 		data.put("id", ID + question);
-		post.accept(new PluginMessage(NAMESPACE, "getTarget", data));
+		send(new PluginMessage(NAMESPACE, "getTarget", data));
 	}
 
 	private static boolean owns(Map<String, Object> data, WorldPoint expected)
@@ -337,10 +402,16 @@ class ShortestPath
 		asked++;
 		Map<String, Object> data = new HashMap<>();
 		data.put("id", ID + asked);
-		post.accept(new PluginMessage(NAMESPACE, "getTarget", data));
+		send(new PluginMessage(NAMESPACE, "getTarget", data));
 		askedAt = tick;
 		awaiting = true;
 		return asked;
+	}
+
+	private void send(PluginMessage message)
+	{
+		lastSent = message;
+		post.accept(message);
 	}
 
 	private void forget()

@@ -85,21 +85,6 @@ final class FarmRunClient
 		final boolean confirms;
 		final long atMs;
 
-		Said(boolean planning, @Nullable String message, long lifetime)
-		{
-			this(planning, message, lifetime, -1, false);
-		}
-
-		Said(boolean planning, @Nullable String message, long lifetime, long runGeneration)
-		{
-			this(planning, message, lifetime, runGeneration, false);
-		}
-
-		Said(boolean planning, @Nullable String message, long lifetime, long runGeneration, boolean port)
-		{
-			this(planning, message, lifetime, runGeneration, port, false);
-		}
-
 		Said(boolean planning, @Nullable String message, long lifetime, long runGeneration, boolean port, boolean confirms)
 		{
 			this.port = port;
@@ -286,7 +271,7 @@ final class FarmRunClient
 				{
 					gate.finishPress(System.currentTimeMillis() + RoutePress.MIN_GAP_MS);
 				}
-				said = new Said(false, unsent(playing, reroute, end), lifetime, -1, port);
+				said = new Said(false, unsent(playing, reroute, end), lifetime, -1, port, false);
 				return;
 			}
 			if (!held)
@@ -294,17 +279,17 @@ final class FarmRunClient
 				String refused = gate.beginPress(System.currentTimeMillis());
 				if (refused != null && !end)
 				{
-					said = new Said(false, refused, lifetime, -1, port);
+					said = new Said(false, refused, lifetime, -1, port, false);
 					return;
 				}
 				held = refused == null;
 			}
 			ticket = new Ticket(lifetime, end, held, member, port);
 			active = ticket;
-			said = new Said(true, end ? "Ending run…" : name != null ? "Planning " + name + "…" : "Planning run…", lifetime, -1, port);
+			said = new Said(true, end ? "Ending run…" : name != null ? "Planning " + name + "…" : "Planning run…", lifetime, -1, port, false);
 			call = http.newCall(request(server, code, member, secret, question, end, id));
 			CompanionHttp.enqueue(call,
-				(failed, error) -> finish(ticket, null, 0, RoutePress.UNREACHABLE, System.currentTimeMillis() + RoutePress.FAILURE_GAP_MS),
+				(failed, error) -> refuse(ticket, RoutePress.UNREACHABLE, System.currentTimeMillis() + RoutePress.FAILURE_GAP_MS),
 				(completed, response) -> handle(ticket, response));
 		}
 	}
@@ -347,15 +332,15 @@ final class FarmRunClient
 			long next = now + Math.max(RoutePress.MIN_GAP_MS, wait == null ? 0L : StarsClient.retryDelay(wait));
 			if (close.isRedirect())
 			{
-				finish(ticket, null, 0, RoutePress.REDIRECTS, now + 300_000L);
+				refuse(ticket, RoutePress.REDIRECTS, now + 300_000L);
 				return;
 			}
 			if (!close.isSuccessful())
 			{
 				int code = close.code();
 				String why = code == 429 || code == 503 ? MapWait.BUSY
-							 : code == 403 || code == 410 ? RoutePress.NOT_CONNECTED : "The map could not prepare that run.";
-				String words = CompanionHttp.said(gson, CompanionHttp.readBounded(close.body(), CompanionHttp.MAX_REPLY_BYTES), 240);
+							 : code == 403 || code == 410 ? RoutePress.NOT_CONNECTED : Words.of("farm.notPrepared");
+				String words = CompanionHttp.said(gson, CompanionHttp.readBounded(close.body()), 240);
 				boolean worded = words != null;
 				why = worded ? words : why;
 				/*
@@ -367,7 +352,7 @@ final class FarmRunClient
 				 * reply that cannot be read keeps the half minute.
 				 */
 				boolean answered = worded && (code == 409 || code == 404 || code == 400);
-				finish(ticket, null, 0, why, answered ? next : Math.max(next, now + RoutePress.FAILURE_GAP_MS));
+				refuse(ticket, why, answered ? next : Math.max(next, now + RoutePress.FAILURE_GAP_MS));
 				return;
 			}
 			if (ticket.end)
@@ -375,7 +360,7 @@ final class FarmRunClient
 				String epoch = close.header("X-Companion-Relay-Epoch");
 				if (DirectiveEpoch.clean(epoch) == null)
 				{
-					finish(ticket, null, 0, RoutePress.UNREADABLE, next);
+					refuse(ticket, RoutePress.UNREADABLE, next);
 					return;
 				}
 				String removed = close.header("X-Companion-Run-Revision");
@@ -388,24 +373,24 @@ final class FarmRunClient
 				return;
 			}
 			RelayResponse.Directive answer = gson.fromJson(
-												 CompanionHttp.readBounded(close.body(), CompanionHttp.MAX_REPLY_BYTES), RelayResponse.Directive.class);
+												 CompanionHttp.readBounded(close.body()), RelayResponse.Directive.class);
 			if (answer == null || answer.run == null || answer.runRevision <= 0 || answer.relayEpoch == null)
 			{
-				finish(ticket, null, 0, "The map returned no readable run.", next);
+				refuse(ticket, "The map returned no readable run.", next);
 				return;
 			}
 			finish(ticket, answer.run, answer.runRevision, answer.relayEpoch, null, next);
 		}
 		catch (IOException | RuntimeException unreadable)
 		{
-			finish(ticket, null, 0, RoutePress.UNREADABLE, System.currentTimeMillis() + RoutePress.FAILURE_GAP_MS);
+			refuse(ticket, RoutePress.UNREADABLE, System.currentTimeMillis() + RoutePress.FAILURE_GAP_MS);
 		}
 	}
 
-	private void finish(Ticket ticket, @Nullable RelayResponse.FarmRun run, long revision,
-						@Nullable String why, long next)
+	/** A press the map did not answer with a run: why, and when the next may go. */
+	private void refuse(Ticket ticket, String why, long next)
 	{
-		finish(ticket, run, revision, null, why, next);
+		finish(ticket, null, 0, null, why, next);
 	}
 
 	private synchronized void finish(Ticket ticket, @Nullable RelayResponse.FarmRun run, long revision,

@@ -1,6 +1,12 @@
 {
   "v": 1,
   "runReceiverVersion": 1,
+  "slayerPreferences": {
+    "v": 1,
+    "order": "best",
+    "hideWilderness": true,
+    "seenRevision": 0
+  },
   "member": {
     "id": "b3f1c2d4-0000-4000-8000-000000000000",
     "nick": "Zezima",
@@ -58,6 +64,11 @@
   "stashUnits": {
     "28960": true
   },
+  "seaCharts": [
+    0,
+    3,
+    167
+  ],
   "birdhouses": [
     {
       "id": "meadow-north",
@@ -112,6 +123,10 @@
       }
     ],
     "hold": 60
+  },
+  "dailies": {
+    "zaff-battlestaves": true,
+    "bert-sand": false
   },
   "diaryRewards": {
     "Varrock": "medium"
@@ -181,6 +196,20 @@
     "remaining": 43,
     "areaName": "Kalphite Lair"
   },
+  "mortimerOffer": [
+    {
+      "taskId": 46,
+      "taskName": "Gargoyles",
+      "mortifier": "superior",
+      "value": 250
+    },
+    {
+      "taskId": 45,
+      "taskName": "Kurask",
+      "mortifier": "quantity",
+      "value": -20
+    }
+  ],
   "clue": {
     "tier": "hard",
     "text": "Talk to the bartender.",
@@ -253,11 +282,5 @@
     "msSinceLastDrop": 1500
   },
   "idleMs": 0,
-  "sentAtMs": 1800000000000,
-  "slayerPreferences": {
-    "v": 1,
-    "order": "best",
-    "hideWilderness": true,
-    "seenRevision": 0
-  }
+  "sentAtMs": 1800000000000
 }

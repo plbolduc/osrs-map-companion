@@ -26,7 +26,9 @@ travel** to suggest routes around your account's quests, diaries, items and tran
 
 You can also plan a route to a friend, a meetup or a precise star site, back to where you died,
 and to the step of the clue you carry: a coordinate, a map, or a step in words, which the
-map places for you. Or right-click any spot on the game's world map and choose **Route here**.
+map places for you. With Quest Helper's *Use 'Shortest Path' plugin* setting on, Home shows your
+current quest step as *Quest Helper step* with **Route**; nothing is drawn or planned for it until
+you press Route, and each new step Quest Helper names replaces it. Or right-click any spot on the game's world map and choose **Route here**.
 
 A voyage in your own boat is its own steps: board your boat, sail, and dock, where the boat then
 stays. They tick when you step on deck, reach the far mooring and step ashore, the sail is drawn
@@ -63,7 +65,8 @@ to RuneLite to follow the route there.
 ## Farm runs in RuneLite
 
 Build a run on the website and press **Send run to RuneLite**, or choose a preset, **Ready now**,
-**Birdhouses** or your **Farming contract** under **Farm run** on Home and press **Start run**;
+**Birdhouses**, your **Farming contract** or the **Dailies run** under **Farm run** on Home and
+press **Start run**;
 the choice steps aside while the run is going, so a stray press cannot replace it.
 The sidebar lists your stops and how to reach each one, with the steps to the next stop under it
 as **This leg**; a finished stop folds to one line. **Before you leave** is a bank checklist:

@@ -26,6 +26,8 @@
 package com.pbolduc.mapcompanion;
 
 import javax.annotation.Nullable;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import net.runelite.api.ChatMessageType;
@@ -63,6 +65,7 @@ import net.runelite.client.ui.overlay.worldmap.WorldMapOverlay;
  * map the press was made on shows that it took. Client thread throughout.
  */
 @Singleton
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE, onConstructor_ = @Inject)
 class WorldMapRouteHere
 {
 	static final String OPTION = "Route here";
@@ -85,19 +88,6 @@ class WorldMapRouteHere
 	private boolean awaiting;
 	@Nullable
 	private RoutePress.Said before;
-
-	@Inject
-	WorldMapRouteHere(Client client, MapCompanionConfig config, WorldMapOverlay worldMap, RoutePress routePress,
-		Pairing pairing, ChatMessageManager chat, DestinationMarker marker)
-	{
-		this.client = client;
-		this.config = config;
-		this.worldMap = worldMap;
-		this.routePress = routePress;
-		this.pairing = pairing;
-		this.chat = chat;
-		this.marker = marker;
-	}
 
 	void menuOpened()
 	{

@@ -67,6 +67,29 @@ that boat spawns and RuneLite's account type for an Ultimate Ironman's limit. It
 stand on a boat with a hold, and forgotten at logout, a hop or a character change, so the map plans
 as if only one task's crates fit until it has been seen.
 
+**Slayer task** also carries `mortimerOffer` while Mortimer's choice is open and the player holds
+no task: each offered task's id in the client's `SlayerTask` table, its name from that table, its
+mortifier (`points`, `quantity`, `clue`, `superior` or `xp`) and the mortifier's amount, negative for
+a smaller task. It is read as the game's own task choice script reads it, from the three offers'
+varbits, and only while each task it names appears on the choice interface; once seen it is held while
+the varbits stay the same and no task is taken, and dropped on a new roll, a task taken or a new session.
+
+**Sea charts charted** sends the ids of the Sailing sea charting tasks this character has charted,
+lowest first, the same ids the map's charting tasks carry. The game keeps one bit a task in twelve
+varps, `SAILING_CHARTING_COMPLETION_0` to `_11`, and task *n* is bit *n* mod 32 of varp *n* / 32: each
+of the 358 `SAILING_CHARTING_..._COMPLETE` varbits in the game cache is that bit, and its task has that
+id in the cache's `SailingChartingCore` table. An empty list is a character who has charted none.
+Nothing is sent for fifteen seconds after a login or hop.
+
+**Dailies collected** sends, for eight of the dailies the map plans a run through, whether each has
+been collected today, keyed by the map's own daily id: Zaff's battlestaves, Wizard Cromperty's
+essence, Bert's sand, the flax keeper's bow strings, Rantz's arrows, Thirus's dynamite, Nightmare
+Zone's herb boxes and Robin's bonemeal. Each is a claim varbit read as RuneLite's Daily Task
+Indicators reads it; the herb boxes and the bonemeal count as collected only once the day's allowance
+is taken, and Robin is left out until the Morytania medium diary is done. The Miscellania kingdom has
+no claim varbit and is never sent. Nothing is sent for fifteen seconds after a login or hop, nor after
+the session has crossed midnight UTC, when the game resets them, until the next login.
+
 **Farming patches** covers the 99 crop patches in RuneLite 1.13.4's Time Tracking catalogue,
 excluding compost bins. This includes the additional hops, bushes, hardwood, spirit trees,
 cactus, special Guild crops, calquat, belladonna, mushrooms, grapes, crystal trees, Hespori and
@@ -201,9 +224,10 @@ Each row's picture is the game's own, from the client's sprite cache: the map's 
 a world-map icon, and an item's `itemId`, where the map names one, picks its sprite. No picture is
 ever fetched from the map or anywhere else.
 
-**Route** beside the clue being carried, the last death, a star in the Stars tab or a meetup, or on
-the destination's card while it has no way yet, is the same request with a tile as its target: the
-clue's dig spot or beginner map, the death's tile, the star's tile, the meetup's, the destination's
+**Route** beside the clue being carried, the last death, Quest Helper's step, a star in the Stars tab
+or a meetup, or on the destination's card while it has no way yet, is the same request with a tile as
+its target: the clue's dig spot or beginner map, the death's tile, the step's, the star's tile, the
+meetup's, the destination's
 own: a star pinned on Stars, a Slayer spot set on the world map, a place the map sent bare. A clue
 or a death that is not shared leaves only in that request, once
 per press; the map plans with it and keeps nothing. A clue whose step is words names no tile, so
@@ -244,6 +268,17 @@ to follow, by pressing **Follow** or **Reroute**, it sends `path` with the curre
 start, your tile, and its end; it sends nothing for a teleport or a ride. It sends `clear` only for
 a path it set, and only once Shortest Path's answer still names that path. It never sends
 Shortest Path's `config`. A destination that merely arrives, a friend's included, sends nothing.
+
+**Quest Helper's step** is heard on the same messages. Quest Helper, with its own *Use 'Shortest
+Path' plugin* setting on, sends Shortest Path `path` with each quest step's tile as `target`, and
+`clear` when the step ends. This plugin reads that tile, whatever this setting says, and sends Quest
+Helper nothing. A message names no sender, so a `path` counts as Quest Helper's only when this plugin
+did not post it, and is offered only while RuneLite's plugin manager and config say Quest Helper is
+running with that setting on. While it is, another plugin's `path` reads the same, and its `clear`
+ends Quest Helper's step: nothing in a message tells the two apart. A tile held when the setting is
+found off is forgotten rather than kept for when it comes back, and nothing is heard while this plugin
+is stopped. The tile stays in this client, shown as *Quest Helper step* on Home, and leaves only in a
+**Route** press, as the target above.
 
 ## Identity and credentials
 

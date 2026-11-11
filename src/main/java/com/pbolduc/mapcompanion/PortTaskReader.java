@@ -72,7 +72,7 @@ import net.runelite.api.gameval.VarbitID;
  * from the client's tables for the sidebar and stay here; the map has the same table.
  */
 @Singleton
-public class PortTaskReader
+public class PortTaskReader extends SettlingReader
 {
 	/** The slot varbits, slot 0 first. Each holds a task-id column value. */
 	static final int[] SLOT_IDS = {
@@ -170,7 +170,6 @@ public class PortTaskReader
 
 	private final Client client;
 	private final CargoHolds holds;
-	private final SessionSettle settle = new SessionSettle(15_000L);
 	/** Task id to its row, for this session's client. Client thread only. */
 	private final Map<Integer, Task> tasks = new HashMap<>();
 	/** The last settled reading, for the sidebar; null before one. */
@@ -193,12 +192,8 @@ public class PortTaskReader
 		this.holds = holds;
 	}
 
-	public void onSessionResumed(long nowMs)
-	{
-		settle.resumed(nowMs);
-	}
-
 	/** Logged out, another character, or the plugin stopping: forget the reading, the sidebar's copy too. */
+	@Override
 	public void onSessionEnded()
 	{
 		end();

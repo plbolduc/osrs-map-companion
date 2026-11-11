@@ -31,13 +31,13 @@ import java.util.function.Supplier;
 import java.util.List;
 import javax.annotation.Nullable;
 import javax.swing.border.EmptyBorder;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import net.runelite.api.coords.WorldPoint;
+import net.runelite.api.gameval.SpriteID;
 import net.runelite.client.config.Keybind;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.components.ThinProgressBar;
@@ -56,8 +56,9 @@ import static com.pbolduc.mapcompanion.MapCompanionPanel.syncRow;
 
 /**
  * Now, on Home: the destination the map sent, with its route steps and Follow, Reroute and
- * Dismiss, or Route while it has no way yet; where you died; and the clue being carried, each with
- * its Route. Meetups are the Group tab's, every one of the week with its answers.
+ * Dismiss, or Route while it has no way yet; where you died; the clue being carried; and Quest
+ * Helper's step, each with its Route. Meetups are the Group tab's, every one of the week with its
+ * answers.
  *
  * <p>What is happening now: what the map asked for, and where you died. Each is a card that is
  * hidden while there is nothing in it, and the heading goes with the last of them — see
@@ -139,6 +140,16 @@ final class NowCards extends JPanel
 	private final JButton clueRouteButton = smallButton("Route");
 	private final JLabel clueSaid = new JLabel();
 	private final JComponent clueSlot;
+	/*
+	 * Quest Helper's step, heard as it tells Shortest Path ({@link ShortestPath#questStep}), beside the
+	 * world map's quest-start star. Quest Helper draws the step itself; this adds the map's way there.
+	 */
+	private final JLabel questTitle = sized(12f);
+	private final JButton questRouteButton = smallButton("Route");
+	private final JLabel questSaid = new JLabel();
+	private final JComponent questSlot;
+	/** Whether the star was asked for: once, when the card first shows. */
+	private boolean questPictured;
 	private final JComponent destinationSlot;
 	private final JComponent deathSlot;
 	/** Route, pressed beside anything in the sidebar; see {@link RoutePress}. */
@@ -201,9 +212,7 @@ final class NowCards extends JPanel
 			destinationRoute.choose(way);
 			refresh.run();
 		}, sprites);
-		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		setBackground(ColorScheme.DARK_GRAY_COLOR);
-		left(this);
+		MapCompanionPanel.column(this, ColorScheme.DARK_GRAY_COLOR);
 
 		/*
 		 * Now: a destination with its dismiss, a death, a clue. "From the map" named only the first —
@@ -230,6 +239,21 @@ final class NowCards extends JPanel
 		deathSlot = nowCard(deathActions, deathSaid, deathLabel, grave);
 		clueActions.add(clueRouteButton);
 		clueSlot = nowCard(clueActions, clueSaid, clueTitle, clueDetail);
+		questTitle.setText(Words.of("now.questStep"));
+		questTitle.setIconTextGap(6);
+		questSlot = nowCard(row(ColorScheme.DARKER_GRAY_COLOR, questRouteButton), questSaid, questTitle);
+		questRouteButton.setName("now.quest.route");
+		questRouteButton.addActionListener(e ->
+		{
+			WorldPoint step = shortestPath.questStep();
+			if (step != null)
+			{
+				/* Each step is its own source, so Reroute is offered only while Quest Helper is still on it. */
+				routePress.press(RoutePress.Target.tile("quest" + step, step, questTitle.getText(), null, null)
+					.showing((label, box) -> sprites.sprite(label, SpriteID.Mapfunction.QUEST_START, 15)));
+			}
+			refresh.run();
+		});
 		add(gap(7, ColorScheme.DARK_GRAY_COLOR));
 
 		deathMapButton.addActionListener(e -> showDeathOnMap());
@@ -335,9 +359,7 @@ final class NowCards extends JPanel
 	{
 		RoutePress.Said said = routePress.said(source);
 		boolean planning = said != null && said.planning;
-		boolean routedHere = said != null && said.key != null
-			&& said.key.equals(DestinationRoute.keyOf(destinationState.getDestination()));
-		button.setText(planning ? "Planning…" : routedHere ? "Reroute" : label);
+		button.setText(planning ? "Planning…" : answeredHere(source) ? "Reroute" : label);
 		button.setEnabled(ready && !planning && routePress.ready());
 		MapWait.tip(button, tip, routePress.waitMs(now));
 		String message = said == null ? null : said.message;
@@ -347,6 +369,13 @@ final class NowCards extends JPanel
 			setWrapped(line, routePress.words(said, now), CARD_TEXT_WIDTH);
 			MapCompanionPanel.tone(line, said.refused());
 		}
+	}
+
+	/** Whether the destination on Home is the answer the last press from {@code source} made. */
+	private boolean answeredHere(String source)
+	{
+		RoutePress.Said said = routePress.said(source);
+		return said != null && said.key != null && said.key.equals(DestinationRoute.keyOf(destinationState.getDestination()));
 	}
 
 	/**
@@ -385,7 +414,7 @@ final class NowCards extends JPanel
 	}
 
 	/** The line a press's refusal is said in, under the buttons it came from, in the refusal pink. */
-	private static JLabel said(JLabel line)
+	static JLabel said(JLabel line)
 	{
 		line.setFont(line.getFont().deriveFont(11f));
 		line.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
@@ -509,7 +538,7 @@ final class NowCards extends JPanel
 		}
 	}
 
-	/** The four cards and the heading, from the connection the sidebar's refresh has just read. EDT. */
+	/** The five cards and the heading, from the connection the sidebar's refresh has just read. EDT. */
 	void refresh(boolean paired, boolean ready)
 	{
 		refresh(paired, ready, true);
@@ -649,8 +678,24 @@ final class NowCards extends JPanel
 			clueActions.setVisible(routable);
 			routeState(clueRouteButton, clueSaid, "clue", "Route", asks && routable, loggedIn ? CLUE_ROUTE_TIP : RoutePress.LOG_IN, now);
 		}
+		WorldPoint step = shortestPath == null ? null : shortestPath.questStep();
+		/*
+		 * Not while the destination above is the answer to this step: that card already says "Quest
+		 * Helper step" and offers Reroute. Quest Helper's next step, or the destination dismissed,
+		 * brings it back.
+		 */
+		questSlot.setVisible(step != null && paired && !answeredHere("quest" + step));
+		if (questSlot.isVisible())
+		{
+			if (!questPictured)
+			{
+				questPictured = true;
+				sprites.sprite(questTitle, SpriteID.Mapfunction.QUEST_START, 15);
+			}
+			routeState(questRouteButton, questSaid, "quest" + step, "Route", asks, loggedIn ? Words.of("now.questRouteTip") : RoutePress.LOG_IN, now);
+		}
 		/** The heading goes with the last card under it, rather than naming nothing. */
-		setVisible((destination != null && !farmDestination) || death != null || (clue != null && paired));
+		setVisible((destination != null && !farmDestination) || death != null || (clue != null && paired) || questSlot.isVisible());
 	}
 
 	/**

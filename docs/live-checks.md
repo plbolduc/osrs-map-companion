@@ -55,6 +55,28 @@ often. A clean run is now 443 tests with no failures or skips.
 
 ## Still to verify
 
+- [ ] **Mortimer's offer (`MortimerOfferReader`, from the game's task choice script, not yet seen
+      live).** With *Slayer task* shared and no task, talk to Mortimer and open the choice: the map's
+      Mortimer picker fills with the same two or three tasks, mortifiers and amounts, and says it was
+      read from the game. A quantity mortifier shown as *-20 Assigned* reads as -20. Close the
+      interface without choosing: the offer stays. Choose one: it goes. With 50 tasks done, a third
+      offer appears; before that the third slot is empty. Note whether the offer varbits keep an old
+      roll after a task is taken, which is why only an offer seen on the interface counts.
+
+- [ ] **Sea charts charted (`SeaChartReader`, from the game cache's varbit layout, not yet seen
+      live).** With *Sea charts charted* on, chart one task, say the Port Sarim task board (id 0):
+      the map's Sea charting layer marks it charted within a snapshot. Note whether the twelve
+      `SAILING_CHARTING_COMPLETION_*` varps are sent to the client at login at all: a character with
+      tasks charted must not read as none charted after the fifteen-second settle.
+
+- [ ] **Dailies collected (`DailyReader`, from Daily Task Indicators' varbits, not yet seen live).**
+      With *Dailies collected* on, buy Zaff's battlestaves, take Bert's sand and the flax keeper's
+      bow strings: each reads collected on the map's Dailies within a snapshot, the others waiting.
+      Buy fewer battlestaves than offered: does `ZAFF_LAST_CLAIMED` stay 0 until the last, or does
+      the map say collected while some are left? Take 14 herb boxes, then the 15th. Stay logged in
+      across 00:00 UTC: the map stops saying collected until the next login; note whether the
+      varbits reset at midnight while logged in, which would let the reader keep reading.
+
 - [ ] Log back in: the same character keeps its member identity. Withdraw Position while logged in
       and confirm the next accepted snapshot clears the map pin.
 - [ ] Walk a short distance manually and verify live movement and reconnection.
@@ -293,6 +315,19 @@ The website plan's second session, once the routes in the game are built: a memb
 - [ ] **Shortest Path, not installed.** Without it, Follow still shows the step you're on in the
       box over the game, and nothing about Shortest Path is in the sidebar; the steps and pins still
       work. With *Step on screen* off as well, there is no Follow.
+- [ ] **Quest Helper's step.** With Quest Helper installed and its *Use 'Shortest Path' plugin* on,
+      start a quest: *Quest Helper step* appears under Now with the quest-start star and **Route**,
+      and nothing is drawn or pinned for it. Press Route: the card above fills with the way to
+      Quest Helper's tile and is followed, titled *Quest Helper step* with its own **Reroute**, and
+      the step's small card goes, so the step is named once. Advance the quest: the small card is
+      back with **Route**, for the new step's tile; dismissing the destination brings it back too.
+      Close the quest, turn that setting off, or turn Quest Helper off: the card goes. Turn the
+      setting back on: the card returns on the step Quest Helper is on now, never the tile from
+      before it went off. With Shortest
+      Path installed and *Draw paths with Shortest Path* on, follow the route: Shortest Path draws
+      this plugin's walk, Quest Helper's next step brings the card back on its own tile rather than
+      that walk, and takes Shortest Path over as any other target does. This is the first live read of Quest Helper's messages,
+      which `QuestHelperStepTest` builds from its source (`DetailedQuestStep.setShortestPath`).
 - [ ] **Three buttons fit.** Follow, Reroute and Dismiss sit on one row in the 225px sidebar
       without cutting a word.
 - [ ] **Search.** Connected, type *bank* in the box at the top of Home: the rows match the
@@ -454,6 +489,9 @@ continuously witnessed empty-to-newly-planted transition mints a stable completi
       moves the arrow/current leg. A mixed allotment stop waits for every selected patch.
 - [ ] Start Ready now, each preset, Birdhouses and a contract from the sidebar. With position
       sharing off, Start still plans from the tile sent on that press; no live position is shared.
+- [ ] Start the Dailies run with no website open. Its stops are the dailies your diaries and
+      quests allow; with Dailies collected on, one bought today is left out. Stand beside Advisor
+      Ghrim upstairs in Miscellania castle: his stop says Visited.
 - [ ] Open Before you leave. Known carried travel items are checked locally; unknown supplies
       make no inventory claim. Closed, the fold counts the teleports not on you, and the count
       follows a teleport taken from the bank. Complete a seeded birdhouse and check its weaker

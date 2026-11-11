@@ -59,7 +59,9 @@ import java.util.List;
  *
  * <p>The optional full quest log goes before recent farming observations if the snapshot still
  * cannot fit. It is dropped whole: a subset must not masquerade as a complete log. STASH
- * construction is the next optional catalogue if the remaining fixed fields need space.
+ * construction is the next optional catalogue if the remaining fixed fields need space, then the
+ * sea charts charted. Both are dropped whole too, and the map reads an absent one as not told,
+ * never as none built or charted.
  * The worst-case test includes every category so a new one cannot silently outgrow the budget.
  * Any clipping sets detailsTruncated, which the map discloses alongside the shared facts.
  *
@@ -152,6 +154,16 @@ public class SnapshotTrimmer
 		if (!fits(snapshot) && snapshot.stashUnits != null)
 		{
 			snapshot.stashUnits = null;
+			lost = true;
+		}
+
+		/**
+		 * Then the sea charts, the largest catalogue at up to 384 ids. Dailies and Mortimer's offer are
+		 * a few hundred bytes together and are never dropped: the worst case fits with both kept.
+		 */
+		if (!fits(snapshot) && snapshot.seaCharts != null)
+		{
+			snapshot.seaCharts = null;
 			lost = true;
 		}
 

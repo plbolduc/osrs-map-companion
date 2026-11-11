@@ -27,7 +27,6 @@ package com.pbolduc.mapcompanion;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Cursor;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
@@ -41,7 +40,6 @@ import java.util.function.Supplier;
 import java.util.List;
 import javax.annotation.Nullable;
 import javax.swing.border.EmptyBorder;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -262,9 +260,7 @@ final class ConnectCard extends JPanel
 		this.settingsOpen = settingsOpen;
 		this.applyMapAddress = applyMapAddress;
 		this.mapUrl = mapUrl;
-		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		setBackground(ColorScheme.DARK_GRAY_COLOR);
-		left(this);
+		column(this, ColorScheme.DARK_GRAY_COLOR);
 
 		/* The status card. Dot beside the sentence, so the state reads at a glance and again in words. */
 		JPanel status = card();
@@ -285,12 +281,8 @@ final class ConnectCard extends JPanel
 		gearButton.setName("companion.settings");
 		gearButton.setToolTipText(Words.of("connect.settingsTip"));
 		gearButton.getAccessibleContext().setAccessibleName("Settings");
-		gearButton.setBorderPainted(false);
-		gearButton.setContentAreaFilled(false);
-		gearButton.setFocusPainted(false);
-		gearButton.setBorder(new EmptyBorder(0, 4, 0, 0));
+		MapCompanionPanel.bare(gearButton, 0, 4, 0).setFocusPainted(false);
 		gearButton.setVerticalAlignment(SwingConstants.TOP);
-		gearButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		status.add(left(MapCompanionPanel.bar(6, ColorScheme.DARKER_GRAY_COLOR, dot, statusLabel, gearButton)));
 		groupLabel.setFont(groupLabel.getFont().deriveFont(12f));
 		status.add(groupLabel);
@@ -502,7 +494,6 @@ final class ConnectCard extends JPanel
 		{
 			/* Connect's answer, on the card beside it as its refusals are, rather than under the field. */
 			refused("Connection cancelled.", true);
-			refresh.run();
 			return;
 		}
 		ask();
@@ -560,14 +551,12 @@ final class ConnectCard extends JPanel
 		if (outcome.joined == null)
 		{
 			refused(outcome.message != null ? outcome.message : ConnectClient.FAILED, making);
-			refresh.run();
 			return;
 		}
 		if (!RecommendedSharing.connect(pairing, outcome.joined, () -> true, config, settings,
 			() -> recommendedSharing.offer(pairing.serverLabel())))
 		{
 			refused(ConnectClient.FAILED, making);
-			refresh.run();
 			return;
 		}
 		pairing.rememberName(outcome.joined.code, outcome.name);
@@ -596,6 +585,7 @@ final class ConnectCard extends JPanel
 		{
 			refuse(message);
 		}
+		refresh.run();
 	}
 
 	/**
@@ -707,8 +697,7 @@ final class ConnectCard extends JPanel
 			return;
 		}
 		JoinCode found = JoinCode.parse(pasted);
-		say(found.invite != null ? "Found an invite to " + JoinCode.forDisplay(found.code) + ". Press Join."
-			: "Found " + JoinCode.forDisplay(found.code) + ". Press Join.");
+		say("Found " + (found.invite != null ? "an invite to " : "") + JoinCode.forDisplay(found.code) + ". Press Join.");
 	}
 
 	/**
@@ -1047,10 +1036,8 @@ final class ConnectCard extends JPanel
 			return;
 		}
 		String name = MapPin.safe(friendName);
-		Object[] choices = {"Remove", "Cancel"};
-		int chosen = JOptionPane.showOptionDialog(sidebar, removeQuestion(name, MapPin.safe(pairing.name(code))),
-			"Remove from group", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, choices, choices[1]);
-		if (chosen != 0)
+		if (!MapCompanionPanel.confirm(sidebar, removeQuestion(name, MapPin.safe(pairing.name(code))), "Remove from group",
+			"Remove"))
 		{
 			return;
 		}
@@ -1331,8 +1318,8 @@ final class ConnectCard extends JPanel
 		 * Character fields are separate from membership: all opt-ins off still sends the latter
 		 * after Connect. The tooltip and Advanced preview keep the precise disclosure reachable.
 		 */
-		MapCompanionPanel.showKeeping(sharingLabel, live ? sharingLine() : null, CARD_TEXT_WIDTH);
-		sharingLabel.setToolTipText(paired ? sharingList() : null);
+		MapCompanionPanel.showKeeping(sharingLabel, live ? SharingSummary.line(config, settings) : null, CARD_TEXT_WIDTH);
+		sharingLabel.setToolTipText(paired ? SharingSummary.list(config, settings) : null);
 	}
 
 	/**
@@ -1430,18 +1417,6 @@ final class ConnectCard extends JPanel
 		fieldAbove.repaint();
 		fieldBelow.revalidate();
 		fieldBelow.repaint();
-	}
-
-	/** A short summary of character sharing in Settings' switches, never a claim that membership sends nothing. */
-	private String sharingLine()
-	{
-		return SharingSummary.line(config, settings);
-	}
-
-	/** Every switch for the line's tooltip, one a line, wrapped to fit the screen. */
-	private String sharingList()
-	{
-		return SharingSummary.list(config, settings);
 	}
 
 	/**
@@ -1641,6 +1616,6 @@ final class ConnectCard extends JPanel
 
 	private String pairingCode()
 	{
-		return config.pairingCode() == null ? "" : config.pairingCode().trim();
+		return Pairing.codeIn(config);
 	}
 }

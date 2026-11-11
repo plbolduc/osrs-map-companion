@@ -143,7 +143,8 @@ public class RouteNotesTest
 	/*
 	 * Rewritten when Now stopped drawing the map's older single meetup: every meetup is the Group
 	 * tab's, with its answers and the Route the test above presses, so Now carries no Route of its
-	 * own for one while the week's meetups arrive.
+	 * own for one while the week's meetups arrive. Now has held Quest Helper's step's Route since too,
+	 * so its Routes are the clue's and that one, and neither is a meetup's.
 	 */
 	@Test
 	public void aMeetupIsRoutedFromGroupAndNotFromNow() throws Exception
@@ -161,8 +162,9 @@ public class RouteNotesTest
 				() -> { }, () -> MapCompanionConfig.DEFAULT_MAP_URL);
 			buttons(now, "Route", routes);
 		});
-		assertEquals("the clue's Route is the only one Now holds", 1, routes.size());
+		assertEquals("the clue's Route and the quest step's are the only ones Now holds", 2, routes.size());
 		assertEquals("now.clue.route", routes.get(0).getName());
+		assertEquals("now.quest.route", routes.get(1).getName());
 	}
 
 	/** The row keeps the distance it measured; the card under it carries the route's own length instead. */

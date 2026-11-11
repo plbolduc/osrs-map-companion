@@ -57,7 +57,7 @@ import net.runelite.api.Player;
  */
 @Slf4j
 @Singleton
-public class DeathWatcher
+public class DeathWatcher extends SettlingReader
 {
 	/**
 	 * After this long the marker stops being about a gravestone and starts being clutter.
@@ -107,12 +107,6 @@ public class DeathWatcher
 	 */
 	private volatile WorldPoint diedAt = null;
 	private volatile long diedAtMs = 0L;
-
-	/**
-	 * Fifteen seconds, as the other readers wait: right after a login or a hop every varbit reads
-	 * zero, and the timer is not believed, nor shown, until the session has settled. Client thread.
-	 */
-	private final SessionSettle settle = new SessionSettle(15_000L);
 
 	/** The stone as the last game tick read it; null while there is none or the reading is in doubt. */
 	@Nullable
@@ -187,16 +181,11 @@ public class DeathWatcher
 		return death;
 	}
 
-	/** The client is up: starts the settling clock. Client thread; see {@link SessionSettle}. */
-	public void onSessionResumed(long nowMs)
-	{
-		settle.resumed(nowMs);
-	}
-
 	/** Logged out or hopping: the timer is about to read zero, so nothing is shown until it settles. */
+	@Override
 	public void onSessionEnded()
 	{
-		settle.ended();
+		super.onSessionEnded();
 		stone = null;
 	}
 

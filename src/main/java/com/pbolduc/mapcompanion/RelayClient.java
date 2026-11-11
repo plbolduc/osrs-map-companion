@@ -314,9 +314,7 @@ public class RelayClient
 		{
 			previous.cancel();
 		}
-		fatalError = null;
-		fatalSinceMs = 0L;
-		refused = null;
+		clearRefusal();
 		nextAllowedPostMs = 0L;
 		everSucceeded = false;
 		lastSuccessMs = 0L;
@@ -422,10 +420,10 @@ public class RelayClient
 			fatalSinceMs = 0L;
 		}
 
-		HttpUrl url = snapshotUrl(baseUrl);
+		HttpUrl url = pathUnder(baseUrl, "api/companion/snapshot");
 		if (url == null)
 		{
-			fatalError = "The map address in the settings isn't a valid URL.";
+			fatalError = Words.of("relay.badAddress");
 			fatalSinceMs = now;
 			inFlight.set(false);
 			return false;
@@ -502,12 +500,12 @@ public class RelayClient
 		HttpUrl target = location == null ? null : requested.resolve(location);
 		if (target == null)
 		{
-			return "This map address redirects. Enter the address it points to under Settings → Advanced → Map address.";
+			return Words.of("relay.redirects");
 		}
 		/* The origin only: the path is this plugin's own, and a full URL from a server is not ours to print. */
 		String origin = target.scheme() + "://" + target.host()
 			+ (target.port() == HttpUrl.defaultPort(target.scheme()) ? "" : ":" + target.port());
-		return "This map address redirects to " + origin + ". Enter that under Settings → Advanced → Map address.";
+		return "This map address redirects to " + origin + Words.of("relay.redirectsTo");
 	}
 
 	private void recordTransient(String message, long now)
@@ -543,7 +541,7 @@ public class RelayClient
 		ResponseBody body = response.body();
 		if (response.isSuccessful() && body != null)
 		{
-			parsed = gson.fromJson(CompanionHttp.readBounded(body, CompanionHttp.MAX_REPLY_BYTES), RelayResponse.class);
+			parsed = gson.fromJson(CompanionHttp.readBounded(body), RelayResponse.class);
 		}
 
 		/* Read the body without holding the game thread's reset lock; only applying it is atomic. */
@@ -702,7 +700,7 @@ public class RelayClient
 		if (status == 403)
 		{
 			return "needs_code".equals(tidy)
-				   ? "This group needs an invite. Paste one from somebody in it."
+				   ? Words.of("relay.needsInvite")
 				   : null;
 		}
 		if (status == 410)
@@ -713,9 +711,9 @@ public class RelayClient
 			}
 			if ("removed".equals(tidy))
 			{
-				return "You were removed from this group.";
+				return Words.of("relay.removed");
 			}
-			return "That group is gone from the map.";
+			return Words.of("relay.gone");
 		}
 		return null;
 	}
@@ -890,7 +888,7 @@ public class RelayClient
 					ResponseBody body = r.body();
 					if (r.isSuccessful() && body != null)
 					{
-						Invite parsed = gson.fromJson(CompanionHttp.readBounded(body, CompanionHttp.MAX_REPLY_BYTES), Invite.class);
+						Invite parsed = gson.fromJson(CompanionHttp.readBounded(body), Invite.class);
 						if (parsed != null && isInviteUnder(url, parsed.url))
 						{
 							invite = parsed;
@@ -951,11 +949,11 @@ public class RelayClient
 		switch (code)
 		{
 			case 400:
-				return "That pairing code isn't the right shape — check it on the map's Companion panel.";
+				return Words.of("relay.badCode");
 			case 413:
-				return "This plugin sent more than the map accepts. Please report this.";
+				return Words.of("relay.tooLarge");
 			case 422:
-				return "The map didn't recognise this plugin's data. Update the plugin.";
+				return Words.of("relay.unrecognised");
 			default:
 				/** Reached for a malformed URL, not for a status we retry. Does not claim permanence. */
 				return "The map refused this plugin's data (" + code + ").";
@@ -976,12 +974,6 @@ public class RelayClient
 		{
 			return 30L;
 		}
-	}
-
-	@Nullable
-	private static HttpUrl snapshotUrl(String baseUrl)
-	{
-		return pathUnder(baseUrl, "api/companion/snapshot");
 	}
 
 	/**

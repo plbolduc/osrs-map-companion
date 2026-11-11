@@ -170,11 +170,6 @@ final class FarmRunState
 		REACHED, WAITING, GONE, UNREAD
 	}
 
-	static Tick tick(RelayResponse.RunTask tick, @Nullable List<PortTaskReader.Slot> slots)
-	{
-		return tick(tick, slots, null);
-	}
-
 	/**
 	 * @param last the last reading of this tick's slot while it still held the tick's task, or null
 	 *             where none was seen this run. A slot that has let go of a task finished it only if the
@@ -338,15 +333,16 @@ final class FarmRunState
 		run = clean;
 		changedAt = now;
 		for (RelayResponse.FarmStop stop : clean.stops)
+		{
 			if (stop.done)
 			{
 				done.add(stop.n);
 			}
-		for (RelayResponse.FarmStop stop : clean.stops)
 			if (stop.visited)
 			{
 				visited.add(stop.n);
 			}
+		}
 		finishTracked();
 	}
 

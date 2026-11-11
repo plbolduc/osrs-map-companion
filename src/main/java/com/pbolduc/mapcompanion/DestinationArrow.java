@@ -26,6 +26,8 @@
 package com.pbolduc.mapcompanion;
 
 import javax.annotation.Nullable;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import net.runelite.api.Client;
@@ -53,6 +55,7 @@ import net.runelite.api.coords.WorldPoint;
  * each is reached, and to the destination once there is no step ahead with a tile.
  */
 @Singleton
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE, onConstructor_ = @Inject)
 public class DestinationArrow
 {
 	private final Client client;
@@ -63,15 +66,6 @@ public class DestinationArrow
 	/** The point this class set and believes is still showing, or null. */
 	@Nullable
 	private WorldPoint ours;
-
-	@Inject
-	DestinationArrow(Client client, MapCompanionConfig config, DestinationState state, DestinationRoute route)
-	{
-		this.client = client;
-		this.config = config;
-		this.state = state;
-		this.route = route;
-	}
 
 	/** Bring the arrow in line with the destination. Called on the game tick. */
 	void sync()

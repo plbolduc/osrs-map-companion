@@ -133,7 +133,12 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RoutePress`, `SearchClien
   this adds no poll or stream. With Port tasks enabled it carries the five Sailing task
   slots (`portTasks`): each slot's state, the task id and the game's own counters, read from
   varbits and the client's `PortTask` table by value, and the crates the hold of the boat last
-  stood on carries, from its spawned hold and hull objects. Cargo is never read. Headers: `X-Companion-Code`, optional
+  stood on carries, from its spawned hold and hull objects. Cargo is never read. With Dailies
+  collected enabled it carries `dailies`: for eight dailies, by the map's id, whether each was
+  collected today, from the claim varbits RuneLite's Daily Task Indicators reads. With Sea charts
+  charted enabled it carries `seaCharts`, the charted tasks' ids, from the twelve charting varps.
+  With Slayer task enabled and no task held it carries `mortimerOffer`, the tasks Mortimer's choice
+  interface offers, read from its varbits and the client's `SlayerTask` table by value. Headers: `X-Companion-Code`, optional
   `X-Companion-Member-Secret`, `X-Companion-Installation`, and `X-Companion-Suffix`
   until the browser-link suffix is claimed.
 - **POST /api/companion/invite** — one **Copy invite** press. Group code and optional member-secret
@@ -153,7 +158,8 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RoutePress`, `SearchClien
   JSON is the destination's tile and the player's own tile, sent on the press even with position
   sharing off; the README says so. The answer replaces the sidebar's steps. Nothing is walked.
   `RoutePress` sends the same request for a pick from **Search**, with the row's id as the target,
-  and for **Route** beside the carried clue, the last death, a star and a meetup, and on a
+  and for **Route** beside the carried clue, the last death, Quest Helper's step, a star and a
+  meetup, and on a
   destination shown with no way yet, with that tile as the target; a clue step that is words goes
   as the clue itself, its tier, words and scroll item id, and a map above beginner as the same clue
   with its tier and scroll item id alone.
@@ -229,6 +235,9 @@ queued old frames are invalidated.
 or Reroute on, and `clear` for a path this plugin set and Shortest Path still shows. Nothing goes
 during a teleport or ride step, for a destination that merely arrived, or with the setting off, and
 Shortest Path's `config` override is never sent. Drawing a path is information; nothing walks.
+It also reads Quest Helper's own `path` and `clear` to Shortest Path, offering them only while
+`PluginManager` and `ConfigManager` say Quest Helper is running with its Shortest Path setting on,
+so Home can offer **Route** to the quest step; it posts nothing to Quest Helper.
 
 Reconnects use RuneLite's injected scheduler; focus checks stay within the plugin's search field.
 `shutDown` removes its panel and overlays on the EDT and queues everything a game tick touches on
@@ -254,6 +263,13 @@ answering a reviewer. Since 1.6.0:
   or the main game, and the tab lists only that game's stars, read from a `game` field the map now
   sends with each star; a map without it falls back on the existing `league` flag. The League choice
   under More filters is gone. Nothing new is sent or requested.
+- **Mortimer's offer** goes under the existing Slayer task choice: the two or three tasks Mortimer's
+  interface offers and each one's mortifier, only while it is open or unchanged since, as above.
+- **Sea charts charted:** a new sharing choice under Progress and travel, off until chosen and in
+  the one press at Connect, sending the ids of the sea charting tasks charted. No request is added.
+- **Dailies collected:** a new sharing choice under Tasks and timers, off until chosen and in the one
+  press at Connect, sending which of eight dailies were collected today, as disclosed above. A
+  group's switch that was on before this update does not turn it on. No request or poll is added.
 
 ## Before submission
 

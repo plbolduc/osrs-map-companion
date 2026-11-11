@@ -26,6 +26,7 @@
 package com.pbolduc.mapcompanion;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
@@ -52,6 +53,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Protocol;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import okio.Buffer;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -93,8 +95,9 @@ public class RunCardsTest
 	/** The map's answer to the next press. */
 	private int status = 200;
 	private String body = "{}";
-	/** Every press that reached the map. */
+	/** Every press that reached the map, and the body of the last. */
 	private int asked;
+	private String sent;
 	private final FarmRunClient client = new FarmRunClient(answering(), gson, game.client(), thread, pairing, identity,
 		state, destinations, route);
 	private final FarmRunRoute follower = new FarmRunRoute(state, destinations, route, thread);
@@ -317,6 +320,23 @@ public class RunCardsTest
 		assertTrue(enabled(farm, "Start run"));
 		assertFalse(shown(farm).contains(FarmRunPanel.NEEDS_PATCHES));
 		assertEquals(0, asked);
+	}
+
+	/**
+	 * The dailies run is planned from the account the map already reads, so it needs no sharing
+	 * choice: with Dailies collected and every farming choice off, Start run is pressable and asks
+	 * the map for the dailies run by its wire name.
+	 */
+	@Test
+	public void theDailiesRunNeedsNoSharingChoiceAndAsksForItself() throws Exception
+	{
+		refresh();
+		choose("Dailies run");
+		assertFalse(shown(farm).contains(FarmRunPanel.NEEDS_PATCHES));
+		assertTrue("nothing needs turning on", enabled(farm, "Start run"));
+		click(farm, "Start run");
+		assertEquals(1, asked);
+		assertEquals("dailies", gson.fromJson(sent, JsonObject.class).get("start").getAsString());
 	}
 
 	/**
@@ -1174,6 +1194,12 @@ public class RunCardsTest
 		return new OkHttpClient.Builder().dispatcher(new Dispatcher(inline)).addInterceptor(chain ->
 		{
 			asked++;
+			Buffer buffer = new Buffer();
+			if (chain.request().body() != null)
+			{
+				chain.request().body().writeTo(buffer);
+			}
+			sent = buffer.readUtf8();
 			return new Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1).code(status).message("")
 				.header("X-Companion-Relay-Epoch", EPOCH)
 				.body(ResponseBody.create(MediaType.get("application/json"), body)).build();

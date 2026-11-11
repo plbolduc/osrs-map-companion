@@ -413,7 +413,7 @@ final class DropOdds
 		double mean = kills.ordinary / rate.oneIn + kills.boosted / rate.boosted();
 		if (mean >= TOO_EARLY_MEAN)
 		{
-			return "~" + (mean < 10 ? trim(oneDecimal(mean)) : String.format(Locale.ROOT, "%,d", Math.round(mean)))
+			return "~" + (mean < 10 ? trim(oneDecimal(mean)) : count(Math.round(mean)))
 				+ " on average";
 		}
 		return boostedNow && rate.boostOneIn != null
@@ -425,7 +425,7 @@ final class DropOdds
 	static String grouped(double oneIn)
 	{
 		long whole = (long) Math.floor(oneIn);
-		String text = String.format(Locale.ROOT, "%,d", whole);
+		String text = count(whole);
 		if (oneIn == Math.rint(oneIn))
 		{
 			return text;
@@ -439,7 +439,7 @@ final class DropOdds
 		/* A per-kill rate folded from two rolls is not a fraction anybody wrote: one decimal. */
 		String rounded = oneDecimal(oneIn);
 		int dot = rounded.indexOf('.');
-		return String.format(Locale.ROOT, "%,d", Long.parseLong(rounded.substring(0, dot))) + rounded.substring(dot);
+		return count(Long.parseLong(rounded.substring(0, dot))) + rounded.substring(dot);
 	}
 
 	/**

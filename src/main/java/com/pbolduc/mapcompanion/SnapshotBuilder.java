@@ -34,6 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import net.runelite.api.Client;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.GameState;
@@ -51,6 +53,7 @@ import net.runelite.api.WorldType;
  * <p>Must run on the client thread: every read below is live game state.
  */
 @Singleton
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE, onConstructor_ = @Inject)
 public class SnapshotBuilder
 {
 	/**
@@ -75,6 +78,9 @@ public class SnapshotBuilder
 	private final BirdhouseReader birdhouseReader;
 	private final AssignmentReader assignmentReader;
 	private final PortTaskReader portTaskReader;
+	private final DailyReader dailyReader;
+	private final SeaChartReader seaChartReader;
+	private final MortimerOfferReader mortimerOfferReader;
 	private final CapabilityEvaluator capabilities;
 	private final FarmingObserver farming;
 	private final XpTracker xpTracker;
@@ -82,55 +88,6 @@ public class SnapshotBuilder
 	private final MilestoneOutbox milestones;
 	private final SnapshotTrimmer trimmer;
 	private final DeathWatcher deathWatcher;
-
-	@Inject
-	private SnapshotBuilder(
-		Client client,
-		MapCompanionConfig config,
-		ConfigStore settings,
-		MemberIdentity identity,
-		SlayerTaskReader slayerReader,
-		ClueReader clueReader,
-		QuestReader questReader,
-		DiaryReader diaryReader,
-		TravelUnlockReader travelUnlockReader,
-		StashReader stashReader,
-		BoatReader boatReader,
-		BirdhouseReader birdhouseReader,
-		AssignmentReader assignmentReader,
-		CapabilityEvaluator capabilities,
-		FarmingObserver farming,
-		XpTracker xpTracker,
-		LootLog lootLog,
-		MilestoneOutbox milestones,
-		SnapshotTrimmer trimmer,
-		DeathWatcher deathWatcher,
-		SlayerState slayerState,
-		PortTaskReader portTaskReader)
-	{
-		this.client = client;
-		this.config = config;
-		this.settings = settings;
-		this.identity = identity;
-		this.slayerReader = slayerReader;
-		this.clueReader = clueReader;
-		this.questReader = questReader;
-		this.diaryReader = diaryReader;
-		this.travelUnlockReader = travelUnlockReader;
-		this.stashReader = stashReader;
-		this.boatReader = boatReader;
-		this.birdhouseReader = birdhouseReader;
-		this.assignmentReader = assignmentReader;
-		this.capabilities = capabilities;
-		this.farming = farming;
-		this.xpTracker = xpTracker;
-		this.lootLog = lootLog;
-		this.milestones = milestones;
-		this.trimmer = trimmer;
-		this.deathWatcher = deathWatcher;
-		this.slayerState = slayerState;
-		this.portTaskReader = portTaskReader;
-	}
 
 	@Nullable
 	public CompanionSnapshot build(long nowMs)
@@ -240,6 +197,10 @@ public class SnapshotBuilder
 		{
 			snapshot.stashUnits = stashReader.read(nowMs);
 		}
+		if (settings.on("shareSeaCharts"))
+		{
+			snapshot.seaCharts = seaChartReader.read(nowMs);
+		}
 
 		/*
 		 * Null whenever the reader cannot vouch for every slot — unsettled, aboard, unreadable, or no
@@ -272,6 +233,7 @@ public class SnapshotBuilder
 				slayerState.unread(identity.id(), config.slayerOrder(), config.slayerHideWilderness());
 			}
 			snapshot.slayerPreferences = slayerState.preferences();
+			snapshot.mortimerOffer = mortimerOfferReader.offer();
 		}
 		else
 		{
@@ -302,6 +264,10 @@ public class SnapshotBuilder
 		if (settings.on("sharePortTasks"))
 		{
 			snapshot.portTasks = portTaskReader.wire(nowMs);
+		}
+		if (settings.on("shareDailies"))
+		{
+			snapshot.dailies = dailyReader.read(nowMs);
 		}
 
 		if (settings.on("shareFarming"))

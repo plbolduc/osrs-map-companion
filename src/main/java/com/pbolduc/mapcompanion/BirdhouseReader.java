@@ -40,10 +40,9 @@ import net.runelite.client.plugins.timetracking.TimeTrackingConfig;
  * The map therefore presents fifty minutes as an upper estimate, never a confirmed harvest.
  */
 @Singleton
-public class BirdhouseReader
+public class BirdhouseReader extends SettlingReader
 {
 	private final java.util.function.Function<String, String> stored;
-	private final SessionSettle settle = new SessionSettle(15_000L);
 	private static final String[] IDS = {"meadow-north", "meadow-south", "valley-north", "valley-south"};
 	static final int[] VARPS = {1626, 1627, 1628, 1629};
 
@@ -57,16 +56,6 @@ public class BirdhouseReader
 	BirdhouseReader(java.util.function.Function<String, String> stored)
 	{
 		this.stored = stored;
-	}
-
-	public void onSessionResumed(long nowMs)
-	{
-		settle.resumed(nowMs);
-	}
-
-	public void onSessionEnded()
-	{
-		settle.ended();
 	}
 
 	@Nullable

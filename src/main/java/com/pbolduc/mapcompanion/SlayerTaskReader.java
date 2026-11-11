@@ -88,9 +88,10 @@ public class SlayerTaskReader
 			return null;
 		}
 
+		/* The names come from the game's own tables, through SlayerTaskNames; null when it cannot say. */
 		String taskName = taskId == BOSS_TASK_SENTINEL
-						  ? bossName()
-						  : taskName(taskId);
+						  ? SlayerTaskNames.forBossId(client, client.getVarbitValue(VarbitIds.SLAYER_TARGET_BOSS))
+						  : SlayerTaskNames.forTaskId(client, taskId);
 
 		if (taskName == null || taskName.isEmpty())
 		{
@@ -106,7 +107,8 @@ public class SlayerTaskReader
 		CompanionSnapshot.Slayer slayer = new CompanionSnapshot.Slayer();
 		slayer.taskName = taskName;
 		slayer.remaining = remaining;
-		slayer.areaName = areaName(varPlayer(VarPlayerIds.SLAYER_AREA));
+		int area = varPlayer(VarPlayerIds.SLAYER_AREA);
+		slayer.areaName = area <= 0 ? null : SlayerTaskNames.forAreaId(client, area);
 		return slayer;
 	}
 
@@ -130,30 +132,5 @@ public class SlayerTaskReader
 		{
 			return -1;
 		}
-	}
-
-	/**
-	 * Resolve a task id to its display name through the game's own table.
-	 *
-	 * <p>Deliberately isolated: this is the one call whose API has moved across client versions, and
-	 * keeping it behind a method means a future change touches one place. Returning null on failure
-	 * is a supported outcome throughout — see the caller.
-	 */
-	@Nullable
-	private String taskName(int taskId)
-	{
-		return SlayerTaskNames.forTaskId(client, taskId);
-	}
-
-	@Nullable
-	private String bossName()
-	{
-		return SlayerTaskNames.forBossId(client, client.getVarbitValue(VarbitIds.SLAYER_TARGET_BOSS));
-	}
-
-	@Nullable
-	private String areaName(int areaId)
-	{
-		return areaId <= 0 ? null : SlayerTaskNames.forAreaId(client, areaId);
 	}
 }

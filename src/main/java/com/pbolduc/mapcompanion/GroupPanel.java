@@ -52,6 +52,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.LongConsumer;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.swing.Icon;
 import javax.swing.JButton;
@@ -113,8 +114,6 @@ final class GroupPanel extends JPanel
 	static final Color CHOSEN = new Color(117, 94, 52);
 	/** How long before its start a meetup's countdown turns amber; see {@link #imminent}. */
 	static final long IMMINENT_MS = 15 * 60_000L;
-	/** The map's amber, as a font colour: the colour of a meetup's countdown once it is imminent. */
-	private static final String AMBER = String.format("#%06x", MapPin.AMBER.getRGB() & 0xFFFFFF);
 	/**
 	 * A meetup's world while this client is on it: the green the website's friends list gives the
 	 * player's own world, after the game's own friends list. On any other world it keeps the line's grey.
@@ -216,9 +215,7 @@ final class GroupPanel extends JPanel
 		this.config = config;
 		this.sprites = sprites;
 		this.invite = invite;
-		setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.Y_AXIS));
-		setBackground(ColorScheme.DARK_GRAY_COLOR);
-		MapCompanionPanel.left(this);
+		MapCompanionPanel.column(this, ColorScheme.DARK_GRAY_COLOR);
 		setName("companionGroup");
 		add(friends);
 		meetHere.setName("group.meetHere");
@@ -375,6 +372,13 @@ final class GroupPanel extends JPanel
 	void refresh(boolean ready)
 	{
 		refresh(ready, System.currentTimeMillis());
+	}
+
+	/** Draws the tab again even where nothing it is drawn from has changed. */
+	private void redraw()
+	{
+		drawn = null;
+		refresh(ready);
 	}
 
 	/** The same, as of {@code now}: a confirmation is drawn only while it is news. */
@@ -755,8 +759,7 @@ final class GroupPanel extends JPanel
 		map.addActionListener(e ->
 		{
 			group.toggleShown(row.id);
-			drawn = null;
-			refresh(ready);
+			redraw();
 		});
 		return map;
 	}
@@ -771,20 +774,16 @@ final class GroupPanel extends JPanel
 		if (!loggedIn)
 		{
 			press.refuse(GroupState.source(id), RoutePress.LOG_IN);
-			drawn = null;
-			refresh(ready, loggedIn, System.currentTimeMillis());
-			return;
 		}
-		RelayResponse.MemberDot dot = group.routeTo(id, System.currentTimeMillis());
-		if (dot != null)
+		else
 		{
-			if (!dot.instance)
+			RelayResponse.MemberDot dot = group.routeTo(id, System.currentTimeMillis());
+			if (dot != null && !dot.instance)
 			{
 				press.press(GroupState.routeTarget(dot, destinations.getRoster()));
 			}
 		}
-		drawn = null;
-		refresh(ready, loggedIn, System.currentTimeMillis());
+		redraw();
 	}
 
 	/** One meetup: what, when, where, who, then Route and the answers. */
@@ -806,8 +805,7 @@ final class GroupPanel extends JPanel
 			press.press(RoutePress.Target.tile(source, new WorldPoint(meetup.x, meetup.y, meetup.plane), meetup.title,
 				meetup.world, MapCompanionPanel.meetupStarts(meetup.startsAtMs, System.currentTimeMillis(), ZoneId.systemDefault(),
 					Locale.getDefault(Locale.Category.FORMAT))));
-			drawn = null;
-			refresh(ready);
+			redraw();
 		});
 		/*
 		 * Route beside the title rather than on a row of its own over the answers: a meetup was three
@@ -887,8 +885,7 @@ final class GroupPanel extends JPanel
 	{
 		pressed.put(eventId, answer);
 		meetups.answer(eventId, answer);
-		drawn = null;
-		refresh(ready);
+		redraw();
 	}
 
 	/**
@@ -910,8 +907,7 @@ final class GroupPanel extends JPanel
 			{
 				openMeetups.add(meetup.id);
 			}
-			drawn = null;
-			refresh(ready);
+			redraw();
 		});
 		return line;
 	}
@@ -931,31 +927,20 @@ final class GroupPanel extends JPanel
 	@Nullable
 	static String whereLine(RelayResponse.RosterRow row)
 	{
-		List<String> parts = new ArrayList<>();
-		if (row.near != null)
-		{
-			parts.add(row.near);
-		}
-		if (Boolean.TRUE.equals(row.nearYou))
-		{
-			parts.add("Near you");
-		}
-		return parts.isEmpty() ? null : String.join(" · ", parts);
+		boolean nearYou = Boolean.TRUE.equals(row.nearYou);
+		return row.near == null && !nearYou ? null : dotted(row.near, nearYou ? "Near you" : null);
+	}
+
+	/** The parts there are, between dots. */
+	private static String dotted(@Nullable String... parts)
+	{
+		return Arrays.stream(parts).filter(Objects::nonNull).collect(Collectors.joining(" · "));
 	}
 
 	/** "near Lumbridge Castle · W302": where in words, and the world to be on. */
 	static String meetupWhere(RelayResponse.Meetup meetup)
 	{
-		List<String> parts = new ArrayList<>();
-		if (meetup.near != null)
-		{
-			parts.add(meetup.near);
-		}
-		if (meetup.world != null)
-		{
-			parts.add("W" + meetup.world);
-		}
-		return String.join(" · ", parts);
+		return dotted(meetup.near, meetup.world == null ? null : "W" + meetup.world);
 	}
 
 	/** The roll-up's answers in the order a reader asks them, who is coming before who is not. */
@@ -970,14 +955,8 @@ final class GroupPanel extends JPanel
 		Map<String, List<RelayResponse.MeetupAnswer>> answers = new LinkedHashMap<>();
 		for (String answer : ROLL_UP)
 		{
-			List<RelayResponse.MeetupAnswer> people = new ArrayList<>();
-			for (RelayResponse.MeetupAnswer face : who)
-			{
-				if (answer.equals(face.answer))
-				{
-					people.add(face);
-				}
-			}
+			List<RelayResponse.MeetupAnswer> people = who.stream().filter(face -> answer.equals(face.answer))
+				.collect(Collectors.toList());
 			if (!people.isEmpty())
 			{
 				answers.put("arrived".equals(answer) ? "Here" : answerWord(answer), people);
@@ -989,22 +968,13 @@ final class GroupPanel extends JPanel
 	/** "Going: Rob, Dax · Maybe: Sunday (you) · Here: Cara": the roll-up in words, for a screen reader. */
 	static String rollUpWords(List<RelayResponse.MeetupAnswer> who)
 	{
-		List<String> parts = new ArrayList<>();
-		for (Map.Entry<String, List<RelayResponse.MeetupAnswer>> answer : rollUp(who).entrySet())
-		{
-			parts.add(answer.getKey() + ": " + names(answer.getValue()));
-		}
-		return String.join(" · ", parts);
+		return rollUp(who).entrySet().stream().map(answer -> answer.getKey() + ": " + names(answer.getValue()))
+			.collect(Collectors.joining(" · "));
 	}
 
 	private static String names(List<RelayResponse.MeetupAnswer> people)
 	{
-		List<String> names = new ArrayList<>();
-		for (RelayResponse.MeetupAnswer face : people)
-		{
-			names.add(name(face));
-		}
-		return String.join(", ", names);
+		return people.stream().map(GroupPanel::name).collect(Collectors.joining(", "));
 	}
 
 	/**
@@ -1093,7 +1063,7 @@ final class GroupPanel extends JPanel
 	 */
 	static void setWhen(JLabel label, String line, long startsAtMs, long nowMs, int width)
 	{
-		setMarkup(label, markup(line, imminent(startsAtMs, nowMs) ? countdown(startsAtMs, nowMs) : null, AMBER, width));
+		setMarkup(label, markup(line, imminent(startsAtMs, nowMs) ? countdown(startsAtMs, nowMs) : null, MapPin.AMBER_FONT, width));
 	}
 
 	/**
@@ -1257,11 +1227,7 @@ final class GroupPanel extends JPanel
 
 	private static JLabel line(JLabel line)
 	{
-		line.setFont(line.getFont().deriveFont(11f));
-		line.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
-		line.setBorder(new EmptyBorder(4, 0, 0, 0));
-		line.setVisible(false);
-		return line;
+		return NowCards.said(line);
 	}
 
 	/**

@@ -111,6 +111,8 @@ public class CompanionSnapshot
 	public List<Boat> boats;
 	/** Construction only; missing ids have no reading. */
 	public Map<Integer, Boolean> stashUnits;
+	/** The sea charting tasks charted, by the task id the map's tasks carry; see {@link SeaChartReader}. */
+	public List<Integer> seaCharts;
 	public List<Birdhouse> birdhouses;
 	public Assignment hunterRumour;
 	public Assignment mahoganyHome;
@@ -120,6 +122,11 @@ public class CompanionSnapshot
 	 * not shared or while the session is too young to read; see {@link PortTaskReader}.
 	 */
 	public PortTasks portTasks;
+	/**
+	 * The dailies read, by the map's daily id, true when collected today; see {@link DailyReader}. Null
+	 * while not shared, unsettled, or after the session crossed midnight UTC. A daily not read is absent.
+	 */
+	public Map<String, Boolean> dailies;
 	/**
 	 * The highest diary reward tier actually collected in each region, on the same terms.
 	 *
@@ -150,6 +157,8 @@ public class CompanionSnapshot
 	public Boolean detailsTruncated;
 	public List<String> capabilities;
 	public Slayer slayer;
+	/** The tasks Mortimer offers while the player chooses, under the Slayer task; see {@link MortimerOfferReader}. */
+	public List<MortimerTask> mortimerOffer;
 	public Clue clue;
 	public Farming farming;
 	public Loot loot;
@@ -233,6 +242,17 @@ public class CompanionSnapshot
 	}
 
 	/** A resolved task name, never the chat or dialogue it was read from. */
+	public static class MortimerTask
+	{
+		/** The {@code SlayerTask} table's id column, as the offer varbit holds it. */
+		public int taskId;
+		public String taskName;
+		/** points, quantity, clue, superior or xp. */
+		public String mortifier;
+		/** The mortifier's amount, negative for a smaller task. */
+		public int value;
+	}
+
 	public static class Assignment
 	{
 		public String name;

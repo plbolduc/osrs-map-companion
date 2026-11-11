@@ -38,6 +38,7 @@ import java.awt.Rectangle;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import javax.annotation.Nullable;
 import javax.swing.border.Border;
@@ -138,7 +139,10 @@ final class StarsPanel extends JPanel
 	 * or League world the list is a different one, and nothing else on the tab would say why.
 	 */
 	private final JLabel game = label("");
-	private final JCheckBox wilderness = check("Wilderness"), pvp = check("PvP and high-risk worlds"), deadman = check("Deadman worlds"), depleted = check("Depleted stars");
+	private final JCheckBox wilderness = check("Wilderness", (f, on) -> f.hideWilderness = on),
+		pvp = check("PvP and high-risk worlds", (f, on) -> f.hidePvpWorlds = on),
+		deadman = check("Deadman worlds", (f, on) -> f.hideDeadmanWorlds = on),
+		depleted = check("Depleted stars", (f, on) -> f.hideDepleted = on);
 	private final Set<String> expanded = new HashSet<>();
 	private boolean selected, active, updating;
 	private String rendered;
@@ -272,10 +276,6 @@ final class StarsPanel extends JPanel
 			revalidate();
 			repaint();
 		});
-		wilderness.addActionListener(e -> change(() -> service.model.preferences.filters.hideWilderness = wilderness.isSelected()));
-		pvp.addActionListener(e -> change(() -> service.model.preferences.filters.hidePvpWorlds = pvp.isSelected()));
-		deadman.addActionListener(e -> change(() -> service.model.preferences.filters.hideDeadmanWorlds = deadman.isSelected()));
-		depleted.addActionListener(e -> change(() -> service.model.preferences.filters.hideDepleted = depleted.isSelected()));
 	}
 
 	void selected(boolean on)
@@ -295,6 +295,12 @@ final class StarsPanel extends JPanel
 		if (updating) return;
 		change.run();
 		service.changed();
+		redraw();
+	}
+
+	/** Draws the list again even where nothing it is drawn from has changed. */
+	private void redraw()
+	{
 		rendered = null;
 		refresh();
 	}
@@ -514,8 +520,7 @@ final class StarsPanel extends JPanel
 			expand.addActionListener(e ->
 			{
 				if (!expanded.remove(site.key)) expanded.add(site.key);
-				rendered = null;
-				refresh();
+				redraw();
 			});
 			actions.add(expand, c);
 		}
@@ -570,8 +575,7 @@ final class StarsPanel extends JPanel
 	private void select(StarsModel.Star star)
 	{
 		service.model.selected = star.id;
-		rendered = null;
-		refresh();
+		redraw();
 		/* A pick far down the list scrolls up to its actions; one already in view stays put. */
 		SwingUtilities.invokeLater(() -> selection.scrollRectToVisible(new Rectangle(0, 0, selection.getWidth(), selection.getHeight())));
 	}
@@ -635,8 +639,7 @@ final class StarsPanel extends JPanel
 					 */
 					destinations.selectLocal(next);
 					clientThread.invokeLater(marker::sync);
-					rendered = null;
-					refresh();
+					redraw();
 				});
 				actions.add(pin);
 			}
@@ -659,8 +662,7 @@ final class StarsPanel extends JPanel
 					/* No note, as Pin destination writes none: nothing on the card may age. */
 					press.press(RoutePress.Target.tile(SOURCE, new net.runelite.api.coords.WorldPoint(star.x, star.y, star.plane),
 						star.name, star.world, null));
-					rendered = null;
-					refresh();
+					redraw();
 				});
 				actions.add(route);
 			}
@@ -706,8 +708,7 @@ final class StarsPanel extends JPanel
 		{
 			destinations.dismiss();
 			clientThread.invokeLater(marker::sync);
-			rendered = null;
-			refresh();
+			redraw();
 		});
 		return unpin;
 	}
@@ -748,7 +749,7 @@ final class StarsPanel extends JPanel
 	static String noneInGame(String game)
 	{
 		String name = gameName(game);
-		return StarsModel.NONE.equals(game) ? "Stars are not listed for Speedrunning worlds."
+		return StarsModel.NONE.equals(game) ? Words.of("stars.speedrunning")
 			: "No star has been called on " + (name == null ? "the main game" : name) + " yet.";
 	}
 
@@ -812,18 +813,9 @@ final class StarsPanel extends JPanel
 		if (!html.equals(label.getText())) label.setText(html);
 	}
 
-	private static <T extends JComponent> T left(T component)
-	{
-		component.setAlignmentX(Component.LEFT_ALIGNMENT);
-		return component;
-	}
-
 	private static JPanel column()
 	{
-		JPanel panel = new JPanel();
-		panel.setBackground(ColorScheme.DARK_GRAY_COLOR);
-		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-		return left(panel);
+		return MapCompanionPanel.column(ColorScheme.DARK_GRAY_COLOR);
 	}
 
 	/** One component the full width of the column, at its own height. */
@@ -832,7 +824,7 @@ final class StarsPanel extends JPanel
 		JPanel holder = new Row();
 		holder.setOpaque(false);
 		holder.add(component, BorderLayout.CENTER);
-		return left(holder);
+		return MapCompanionPanel.left(holder);
 	}
 
 	/**
@@ -878,10 +870,7 @@ final class StarsPanel extends JPanel
 
 	private static JLabel label(String text)
 	{
-		JLabel label = new JLabel(text);
-		label.setFont(label.getFont().deriveFont(11f));
-		label.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
-		return label;
+		return cell(text, ColorScheme.LIGHT_GRAY_COLOR, 0);
 	}
 
 	private static JComponent heading(String text)
@@ -897,13 +886,9 @@ final class StarsPanel extends JPanel
 	{
 		JButton button = new JButton(text);
 		button.setFont(button.getFont().deriveFont(11f));
-		button.setBorderPainted(false);
-		button.setContentAreaFilled(false);
 		button.setFocusPainted(false);
 		button.setHorizontalAlignment(SwingConstants.LEFT);
-		button.setBorder(BorderFactory.createEmptyBorder(1, 0, 1, 0));
-		button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		return button;
+		return MapCompanionPanel.bare(button, 1, 0, 1);
 	}
 
 	/** One of the picked world's buttons, in small type with the inset Route has always had. */
@@ -966,11 +951,13 @@ final class StarsPanel extends JPanel
 		return button;
 	}
 
-	private static JCheckBox check(String text)
+	/** A filter's box, which sets its own one of the filters when it is pressed. */
+	private JCheckBox check(String text, BiConsumer<StarsModel.Filters, Boolean> set)
 	{
 		JCheckBox check = new JCheckBox(text);
 		check.setFont(check.getFont().deriveFont(11f));
 		check.setBackground(ColorScheme.DARK_GRAY_COLOR);
+		check.addActionListener(e -> change(() -> set.accept(service.model.preferences.filters, check.isSelected())));
 		return check;
 	}
 }

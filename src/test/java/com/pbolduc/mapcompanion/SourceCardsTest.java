@@ -73,6 +73,8 @@ public class SourceCardsTest
 	private final DestinationRoute route = new DestinationRoute();
 	private final ItemReadingsTestClient items = new ItemReadingsTestClient();
 	private final ClueReader clues = new ClueReader(items.client);
+	/** Shortest Path's side of the sidebar, which hears Quest Helper's step. */
+	private final ShortestPath shortestPath = new ShortestPath(message -> { });
 	private final List<Request> sent = new CopyOnWriteArrayList<>();
 	private final ClientThread thread = new ClientThread()
 	{
@@ -117,7 +119,7 @@ public class SourceCardsTest
 		};
 		press = new RoutePress(http, new Gson(), RoutePressTest.game(), thread, pairing, identity, route, destinations, marker);
 		SwingUtilities.invokeAndWait(() -> cards = new NowCards(config, destinations, deaths, marker, route,
-			new ShortestPath(message -> { }), press, clues, new FarmRunRoute(new FarmRunState(), destinations, route, thread),
+			shortestPath, press, clues, new FarmRunRoute(new FarmRunState(), destinations, route, thread),
 			new GameSprites(null, null, null), () -> { }, () -> MapCompanionConfig.DEFAULT_MAP_URL));
 		refresh();
 	}
@@ -331,6 +333,76 @@ public class SourceCardsTest
 			}
 		}
 		return null;
+	}
+
+	/** Whether the player can see {@code part}: it and every container up to the cards are shown. */
+	private boolean shown(Component part)
+	{
+		for (Component at = part; at != null && at != cards; at = at.getParent())
+		{
+			if (!at.isVisible())
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Quest Helper's step gets a card of its own once Quest Helper names one, with Route, which asks
+	 * the map for that tile, floor and all, as a death's Route does. Once Quest Helper moves on it is
+	 * Route again, to the new step; and Quest Helper's clear takes the card away and leaves the
+	 * destination it made.
+	 *
+	 * <p>While the answer is the destination the card is not drawn at all. It read Reroute there, as
+	 * the clue's does, but the destination's own card above it is titled "Quest Helper step" too, so
+	 * Home said the same step twice; that card has its own Reroute. Dismissing the destination brings
+	 * the step's card back.
+	 */
+	@Test
+	public void questHelpersStepIsACardWhoseRouteAsksForItsTile() throws Exception
+	{
+		cards(died(), RoutePressTest.ANSWER);
+		JButton route = button(cards, "now.quest.route");
+		assertFalse("no step heard, no card", shown(route));
+
+		WorldPoint mill = new WorldPoint(3166, 3305, 2);
+		shortestPath.onPluginMessage(QuestHelperStepTest.questHelperPath(mill));
+		refresh();
+		assertTrue(shown(route));
+		assertEquals("Route", route.getText());
+
+		SwingUtilities.invokeAndWait(route::doClick);
+		settle("quest" + mill);
+		assertEquals(1, sent.size());
+		okio.Buffer body = new okio.Buffer();
+		sent.get(0).body().writeTo(body);
+		com.google.gson.JsonObject target = new Gson().fromJson(body.readUtf8(), com.google.gson.JsonObject.class).getAsJsonObject("target");
+		assertEquals(3166, target.get("x").getAsInt());
+		assertEquals(3305, target.get("y").getAsInt());
+		assertEquals(2, target.get("plane").getAsInt());
+		assertEquals("Quest Helper step", destinations.getDestination().name);
+		refresh();
+		assertFalse("the destination's own card says the step, once", shown(route));
+
+		shortestPath.onPluginMessage(QuestHelperStepTest.questHelperPath(new WorldPoint(3168, 3307, 0)));
+		refresh();
+		assertTrue("Quest Helper's next step is a card again", shown(route));
+		assertEquals("a new step is a new way, not the card above again", "Route", route.getText());
+		shortestPath.onPluginMessage(QuestHelperStepTest.questHelperPath(mill));
+		refresh();
+		assertFalse("back on the step the destination answers, the card goes again", shown(route));
+
+		shortestPath.onPluginMessage(new net.runelite.client.events.PluginMessage("shortestpath", "clear"));
+		refresh();
+		assertFalse(shown(route));
+		assertNotNull("the destination it made stays until dismissed", destinations.getDestination());
+
+		shortestPath.onPluginMessage(QuestHelperStepTest.questHelperPath(mill));
+		destinations.dismiss();
+		refresh();
+		assertTrue("with the destination gone, the step's card is back", shown(route));
+		assertEquals("Route", route.getText());
 	}
 
 	/** The clue card's Route reads Reroute too while the destination is the answer it asked for. */

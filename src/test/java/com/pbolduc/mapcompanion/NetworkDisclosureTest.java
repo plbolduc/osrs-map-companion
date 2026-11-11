@@ -107,6 +107,9 @@ public class NetworkDisclosureTest
 		DISCLOSED.put("farmingContract", "the crop requested by your farming contract");
 		DISCLOSED.put("birdhouses", "birdhouse states and observation ages");
 		DISCLOSED.put("portTasks", "which Sailing port task each of your five slots holds");
+		DISCLOSED.put("mortimerOffer", "the tasks Mortimer offers while you choose, each with its mortifier");
+		DISCLOSED.put("seaCharts", "which Sailing sea charting tasks you have charted");
+		DISCLOSED.put("dailies", "which of the dailies the map plans you have collected today");
 		DISCLOSED.put("farming", "the state of farming patches you have walked past");
 		DISCLOSED.put("loot", "observed loot kills for every monster, how long ago each was last killed");
 		DISCLOSED.put("milestones", "an announcement of a notable reward, a real level gained, or a quest or "
@@ -213,9 +216,9 @@ public class NetworkDisclosureTest
 		expected.put("Birdhouse", "id, observedMsAgo, state");
 		expected.put("Boat", "dock, focus, port, slot");
 		expected.put("Clue", "coordTile, itemId, mapTile, text, tier");
-		expected.put("CompanionSnapshot", "accountType, activeSkill, birdhouses, boats, capabilities, clue, death, "
+		expected.put("CompanionSnapshot", "accountType, activeSkill, birdhouses, boats, capabilities, clue, dailies, death, "
 					 + "detailsTruncated, diaries, diaryRewards, farming, farmingContract, house, hunterRumour, idleMs, instanceLayout, instanced, loot, mahoganyHome, member, "
-					 + "milestones, portTasks, pos, questLog, questStates, questsCompleted, runReceiverVersion, sentAtMs, skills, slayer, slayerPreferences, stashUnits, travelUnlocks, v, world, worldFlags");
+					 + "milestones, mortimerOffer, portTasks, pos, questLog, questStates, questsCompleted, runReceiverVersion, seaCharts, sentAtMs, skills, slayer, slayerPreferences, stashUnits, travelUnlocks, v, world, worldFlags");
 		expected.put("Death", "msAgo, tile");
 		expected.put("Drop", "boostedSinceLast, boostedWatched, item, killsAtLast, obtained, trackedSinceKill");
 		expected.put("Farming", "patches, progressVersion");
@@ -223,6 +226,7 @@ public class NetworkDisclosureTest
 		expected.put("Member", "characterName, id, nick");
 		expected.put("Milestone", "collectionNew, id, item, itemId, kind, level, msAgo, npc, quantity, "
 					 + "quest, region, rewardType, sequence, session, skill, source, tier");
+		expected.put("MortimerTask", "mortifier, taskId, taskName, value");
 		expected.put("Npc", "drops, dropsComplete, kills, lastKillMsAgo, npc, ratedKey");
 		expected.put("Pin", "item, npc");
 		expected.put("PortTaskSlot", "delivered, remaining, slot, state, taken, taskId");

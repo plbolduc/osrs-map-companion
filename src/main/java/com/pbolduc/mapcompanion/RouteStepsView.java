@@ -126,9 +126,7 @@ final class RouteStepsView extends JPanel
 	{
 		this.choose = choose;
 		this.sprites = sprites;
-		setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.Y_AXIS));
-		setBackground(ColorScheme.DARKER_GRAY_COLOR);
-		MapCompanionPanel.left(this);
+		MapCompanionPanel.column(this, ColorScheme.DARKER_GRAY_COLOR);
 		add(way);
 		add(origin);
 		add(steps);
@@ -242,7 +240,7 @@ final class RouteStepsView extends JPanel
 		boolean pictured = false;
 		for (int i = 0; listed && i < view.ways.size(); i++)
 		{
-			pictured |= i != view.chosen && sprites != null && firstPictured(view.ways.get(i)) != null;
+			pictured |= i != view.chosen && sprites != null && firstPictured(view.ways.get(i).steps) != null;
 		}
 		for (int i = 0; listed && i < view.ways.size(); i++)
 		{
@@ -370,7 +368,7 @@ final class RouteStepsView extends JPanel
 	{
 		JLabel picture = pictureSlot();
 		picture.setName("route.way.picture");
-		RelayResponse.RouteStep shows = firstPictured(option);
+		RelayResponse.RouteStep shows = firstPictured(option.steps);
 		if (shows != null)
 		{
 			draw(picture, shows, sprites);
@@ -379,11 +377,11 @@ final class RouteStepsView extends JPanel
 		return MapCompanionPanel.left(MapCompanionPanel.bar(PICTURE_GAP, ColorScheme.DARKER_GRAY_COLOR, picture, pick, null));
 	}
 
-	/** The first step of a way with the game's picture of what to click, or null when none has one. */
+	/** The first step with the game's picture of what to click, or null when none has one: a way's or a run stop's. */
 	@Nullable
-	private static RelayResponse.RouteStep firstPictured(RelayResponse.RouteOption option)
+	static RelayResponse.RouteStep firstPictured(List<RelayResponse.RouteStep> steps)
 	{
-		for (RelayResponse.RouteStep step : option.steps)
+		for (RelayResponse.RouteStep step : steps)
 		{
 			if (step.itemId != null || step.spriteId != null)
 			{
@@ -410,7 +408,7 @@ final class RouteStepsView extends JPanel
 	}
 
 	/** A step's own picture: its item's sprite, or its spell's icon. */
-	private static void draw(JLabel slot, RelayResponse.RouteStep step, GameSprites sprites)
+	static void draw(JLabel slot, RelayResponse.RouteStep step, GameSprites sprites)
 	{
 		if (step.itemId != null)
 		{

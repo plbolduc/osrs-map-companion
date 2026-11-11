@@ -83,9 +83,9 @@ final class SearchClient
 
 	/** No character to search as: a search is asked as a member, and a member is a character. */
 	static final String LOG_IN = "Log in to search.";
-	static final String UNREACHABLE = "The map could not be reached.";
+	static final String UNREACHABLE = RoutePress.UNREACHABLE;
 	static final String FAILED = "The map could not search just now.";
-	static final String UNREADABLE = "The map returned unreadable data.";
+	static final String UNREADABLE = RoutePress.UNREADABLE;
 	static final String NOTHING = "Nothing on the map by that name.";
 	/** Under a one-letter box: {@link #MIN_QUERY} is two, and a query of one asks nothing. */
 	static final String ONE_MORE = "Type one more letter.";
@@ -425,7 +425,7 @@ final class SearchClient
 					else
 					{
 						next = 0L;
-						answer = gson.fromJson(CompanionHttp.readBounded(close.body(), CompanionHttp.MAX_REPLY_BYTES), Answer.class);
+						answer = gson.fromJson(CompanionHttp.readBounded(close.body()), Answer.class);
 						if (answer == null)
 						{
 							why = UNREADABLE;

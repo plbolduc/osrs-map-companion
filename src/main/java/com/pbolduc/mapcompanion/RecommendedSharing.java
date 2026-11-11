@@ -28,7 +28,6 @@ package com.pbolduc.mapcompanion;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
-import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -80,9 +79,9 @@ final class RecommendedSharing extends JPanel
 	/** What one press shares: the four groups' fields, the character name, and the client's drawing. */
 	static final List<String> KEYS = Collections.unmodifiableList(Arrays.asList(
 		"sharePosition", "shareActivity", "shareAccountType",
-		"shareSkills", "shareQuests", "shareQuestLog", "shareDiaries", "sharePermanentTravel", "shareCapabilities", "shareStash", "shareBoats",
+		"shareSkills", "shareQuests", "shareQuestLog", "shareDiaries", "sharePermanentTravel", "shareCapabilities", "shareStash", "shareBoats", "shareSeaCharts",
 		"shareSlayer", "shareClue", "shareFarming", "shareBirdhouses", "shareHunterRumours", "shareMahoganyHomes", "shareFarmingContracts",
-		"sharePortTasks",
+		"sharePortTasks", "shareDailies",
 		"shareLoot", MapCompanionConfig.KEY_SHARE_MILESTONES, MapCompanionConfig.KEY_SHARE_PETS, MapCompanionConfig.KEY_SHARE_COLLECTION,
 		MapCompanionConfig.KEY_SHARE_NAME,
 		"showDestination", "showGroupOnWorldMap"));
@@ -194,16 +193,11 @@ final class RecommendedSharing extends JPanel
 		share.addActionListener(e -> share());
 		card.add(MapCompanionPanel.fill(share, BACK));
 
-		JPanel links = new JPanel(new GridLayout(1, 2, 4, 0));
-		links.setBackground(BACK);
-		links.setAlignmentX(Component.LEFT_ALIGNMENT);
 		JButton skip = MapCompanionPanel.linkButton("Not now");
 		skip.setName("recommended.skip");
 		skip.setToolTipText(Words.of("share.skipTip"));
 		skip.addActionListener(e -> close());
-		links.add(skip);
-		MapCompanionPanel.capped(links);
-		card.add(links);
+		card.add(MapCompanionPanel.fill(skip, BACK));
 		setVisible(false);
 	}
 
@@ -215,16 +209,7 @@ final class RecommendedSharing extends JPanel
 	 */
 	static boolean offered(MapCompanionConfig config, ConfigStore store)
 	{
-		List<SharingFields.Field> asked = new ArrayList<>(all());
-		asked.add(SharingFields.NOTIFY_MEETUPS);
-		for (SharingFields.Field field : asked)
-		{
-			if (field.on(config, store))
-			{
-				return false;
-			}
-		}
-		return true;
+		return all().stream().noneMatch(field -> field.on(config, store)) && !SharingFields.NOTIFY_MEETUPS.on(config, store);
 	}
 
 	/**
@@ -420,11 +405,7 @@ final class RecommendedSharing extends JPanel
 
 	private static JPanel column()
 	{
-		JPanel panel = new JPanel();
-		panel.setLayout(new javax.swing.BoxLayout(panel, javax.swing.BoxLayout.Y_AXIS));
-		panel.setBackground(BACK);
-		panel.setAlignmentX(Component.LEFT_ALIGNMENT);
-		return panel;
+		return MapCompanionPanel.column(BACK);
 	}
 
 	private static <T extends JComponent> T indented(T component)

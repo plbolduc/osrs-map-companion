@@ -240,25 +240,16 @@ final class DropLuckView
 		double ahead = boostAhead ? rate.boosted() : rate.oneIn;
 		double drierThan = DropOdds.within(rate, drop.sinceKills());
 		String another = drop.obtained > 0 ? "another" : "one";
-		String aheadLabel;
-		String aheadValue;
-		if (taskAhead)
-		{
-			aheadLabel = "Rest of this Slayer task (" + DropOdds.count(taskLeft) + " kills)";
-			aheadValue = DropOdds.percent(DropOdds.within(ahead, taskLeft)) + "% chance of " + another;
-		}
-		else
-		{
-			aheadLabel = "Next 100 kills" + (ahead != rate.oneIn ? " " + rate.boostLabel : "");
-			aheadValue = DropOdds.percent(DropOdds.within(ahead, 100)) + "% chance of " + another;
-		}
+		String boost = ahead != rate.oneIn ? " " + rate.boostLabel : "";
+		String aheadLabel = taskAhead ? "Rest of this Slayer task (" + DropOdds.count(taskLeft) + " kills)"
+			: "Next 100 kills" + boost;
+		String aheadValue = DropOdds.percent(DropOdds.within(ahead, taskAhead ? taskLeft : 100)) + "% chance of " + another;
 		return new Detail(
 			DropOdds.verdict(drop.obtained, drop.watchedKills(), drop.sinceKills(), rate),
 			sinceLabel, sinceValue,
 			DropOdds.waitSoFar(drop.sinceKills(), rate),
 			drierThan, aheadLabel, aheadValue,
-			"Half of players get one within " + DropOdds.count(DropOdds.killsFor(0.5, ahead)) + " kills"
-				+ (ahead != rate.oneIn ? " " + rate.boostLabel : "") + ".");
+			"Half of players get one within " + DropOdds.count(DropOdds.killsFor(0.5, ahead)) + " kills" + boost + ".");
 	}
 
 	/** The list, filtered by a query on a monster's name or any of its drops, in the chosen order. */

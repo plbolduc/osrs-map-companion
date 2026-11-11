@@ -61,13 +61,12 @@ import net.runelite.client.config.ConfigManager;
  */
 @Slf4j
 @Singleton
-public class FarmingObserver
+public class FarmingObserver extends SettlingReader
 {
 	private static final String STORE_KEY = "patchObservationsV4";
 	private static final Type STORE_TYPE = new TypeToken<Map<String, Observation>>() {} .getType();
 	private static final long MAX_CONTINUITY_GAP_MS = 5_000L;
 	private static final long RECEIPT_TTL_MS = 6 * 60 * 60_000L;
-	private final SessionSettle settle = new SessionSettle(15_000L);
 
 	private static final class Observation
 	{
@@ -113,15 +112,10 @@ public class FarmingObserver
 		this.store = store;
 	}
 
-	/** Keep the existing login delay as well as the consecutive-tick observation baseline. */
-	public void onSessionResumed(long nowMs)
-	{
-		settle.resumed(nowMs);
-	}
-
+	@Override
 	public void onSessionEnded()
 	{
-		settle.ended();
+		super.onSessionEnded();
 		resetSession();
 		flush();
 	}

@@ -29,6 +29,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collections;
 import javax.annotation.Nullable;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import net.runelite.client.callback.ClientThread;
 
 /**
@@ -39,6 +41,7 @@ import net.runelite.client.callback.ClientThread;
  * overwritten on every tick. End removes only the destination this follower still owns.
  */
 @Singleton
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE, onConstructor_ = @Inject)
 final class FarmRunRoute
 {
 	private final FarmRunState state;
@@ -54,15 +57,6 @@ final class FarmRunRoute
 	@Nullable
 	private volatile RelayResponse.Destination detour;
 
-	@Inject
-	FarmRunRoute(FarmRunState state, DestinationState destinations, DestinationRoute route, ClientThread clientThread)
-	{
-		this.state = state;
-		this.destinations = destinations;
-		this.route = route;
-		this.clientThread = clientThread;
-	}
-
 	void follow(boolean on)
 	{
 		clientThread.invokeLater(() ->
@@ -75,7 +69,7 @@ final class FarmRunRoute
 					detour = null;
 				}
 				state.follow(on);
-				if (!on && owns(destinations.getDestination()))
+				if (!on && ownsShown())
 				{
 					route.follow(false);
 				}
@@ -98,7 +92,7 @@ final class FarmRunRoute
 	{
 		synchronized (destinations)
 		{
-			if (owns(destinations.getDestination()))
+			if (ownsShown())
 			{
 				state.follow(false);
 			}
@@ -111,11 +105,7 @@ final class FarmRunRoute
 		FarmRunState.View view = state.view();
 		if (view == null)
 		{
-			if (owns(destinations.getDestination()))
-			{
-				destinations.dismiss();
-				route.clear();
-			}
+			dropOwned();
 			selectedKey = null;
 			selectedRun = null;
 			detour = null;
@@ -123,7 +113,7 @@ final class FarmRunRoute
 		}
 		if (!view.following)
 		{
-			if (owns(destinations.getDestination()))
+			if (ownsShown())
 			{
 				route.follow(false);
 			}
@@ -133,7 +123,7 @@ final class FarmRunRoute
 		{
 			selectedKey = null;
 		}
-		if (selectedKey != null && !owns(destinations.getDestination()))
+		if (selectedKey != null && !ownsShown())
 		{
 			detour = destinations.getDestination();
 			state.follow(false);
@@ -143,11 +133,7 @@ final class FarmRunRoute
 		RelayResponse.FarmStop next = view.next();
 		if (next == null)
 		{
-			if (owns(destinations.getDestination()))
-			{
-				destinations.dismiss();
-				route.clear();
-			}
+			dropOwned();
 			selectedKey = null;
 			return;
 		}
@@ -163,6 +149,22 @@ final class FarmRunRoute
 		selectedKey = key;
 		selectedRun = view.run.id;
 		selectedRevision = view.revision;
+	}
+
+	/** Whether the destination shown now is the run's own stop. Caller holds the destinations lock. */
+	private boolean ownsShown()
+	{
+		return owns(destinations.getDestination());
+	}
+
+	/** The run's stop goes from the map and its route with it; another destination stays. */
+	private void dropOwned()
+	{
+		if (ownsShown())
+		{
+			destinations.dismiss();
+			route.clear();
+		}
 	}
 
 	boolean owns(@Nullable RelayResponse.Destination destination)

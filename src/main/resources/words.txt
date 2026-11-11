@@ -18,15 +18,27 @@ route.failed=The map could not plan a route just now.
 map.redirects=This map address redirects. Check Settings → Advanced → Map address.
 route.oneAtATime=The map is still planning the last route.
 
+# RelayClient: why the map refused a snapshot, and a map address it cannot use.
+relay.redirects=This map address redirects. Enter the address it points to under Settings → Advanced → Map address.
+relay.redirectsTo=. Enter that under Settings → Advanced → Map address.
+relay.badAddress=The map address in the settings isn't a valid URL.
+relay.needsInvite=This group needs an invite. Paste one from somebody in it.
+relay.removed=You were removed from this group.
+relay.gone=That group is gone from the map.
+relay.badCode=That pairing code isn't the right shape — check it on the map's Companion panel.
+relay.tooLarge=This plugin sent more than the map accepts. Please report this.
+relay.unrecognised=The map didn't recognise this plugin's data. Update the plugin.
+
 # MeetupClient: making a meetup and answering one.
 meetup.needsTile=You can't make a meetup inside an instance. Step outside, then press Make meetup.
 meetup.gone=That meetup isn't in this group any more.
 meetup.refused=The map would not take that meetup. A title and a time within the month are needed.
 meetup.failed=The map could not save that just now.
 
-# FarmRunClient: End pressed when the map cannot be told.
+# FarmRunClient: a run the map could not make, and End pressed when the map cannot be told.
 farm.endedNotConnected=Run ended here. Not connected to the group yet, so the map still has it.
 farm.endedLogIn=Run ended here. Log in to end it on the map too.
+farm.notPrepared=The map could not prepare that run.
 
 # ConnectCard: Connect, Join, the group's menu, Rename and Copy invite. What Copy invite puts on a
 # clipboard stays in the Java, where the map's contract test reads it.
@@ -85,8 +97,11 @@ settings.keysElsewhere=Keys for Reroute and Follow, and the reminder's minutes, 
 settings.nicknameTip=What your group sees beside your dot. Saves on Enter or when you leave the field.
 
 # NowCards: the cards under Now on Home, their Route buttons, the death card and the chat box's line
-# when a place arrives from the map; meetup.routeTip is the Group tab's meetup Route.
+# when a place arrives from the map, and Quest Helper's step; meetup.routeTip is the Group tab's
+# meetup Route.
 now.clueRouteTip=Plan the way to this step from where you stand. The map doesn't keep the clue or your tile.
+now.questStep=Quest Helper step
+now.questRouteTip=Plan the way to Quest Helper's step from where you stand. The map doesn't keep either tile.
 meetup.routeTip=Plan the way to this meetup from where you stand. Nobody is told you are coming.
 now.rerouteTip=Plan the way again from where you stand. The map doesn't keep your tile.
 now.routeTip=Plan the way here from where you stand. The map doesn't keep your tile.
@@ -123,6 +138,7 @@ stars.noWorldList=World list unavailable: PvP and Deadman filters cannot be chec
 stars.openTip=Show the possible spots on osrs-map.com in your browser
 stars.approximate=This spot is approximate. Open website shows where it might be.
 stars.noLevels=Levels not read yet: every tier and world shows
+stars.speedrunning=Stars are not listed for Speedrunning worlds.
 
 # SlayerPanel: the Slayer card and its places.
 slayer.getOne=Get one from a Slayer master and it shows here.
@@ -143,6 +159,7 @@ luck.noDrops=No notable drops yet. Kills are counted; a drop gets odds where its
 luck.unpinTip=Unpin: the card goes back to the last monster you killed
 luck.pinTip=Keep this drop on the card when you are not killing anything
 luck.recordedNoRate= recorded. No drop rate on file, so no odds.
+luck.paused=Not counted on this world: drop luck counts normal members worlds only.
 
 # FarmRunPanel, PortTasksPanel and RunView: farm and port-task runs.
 farm.afterPortRun=Start a farm run after the port run ends.

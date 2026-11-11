@@ -30,6 +30,14 @@ diaries, items and unlocks your account has.
 **Works with Shortest Path.** Map Companion tells you where to go and which teleport to use;
 Shortest Path draws the walks.
 
+<p>
+  <img src="docs/mockups/sidebar-quest-step.png" width="205" alt="The Quest Helper step card on Home after Route: 52 tiles, casting Lumbridge Home Teleport, walking to the castle staircase and climbing to the bank, with Pause, Reroute and Dismiss">
+</p>
+
+**Works with Quest Helper.** With Quest Helper's *Use 'Shortest Path' plugin* setting on, Home shows
+your current quest step, and **Route** plans the way there, teleports included. A path handed to
+Shortest Path does not say which plugin sent it, so another plugin's path can show its tile there instead.
+
 ## Search for a place or item
 
 <p>
@@ -59,6 +67,8 @@ need, and counts your kills. **Route** takes you to the one you pick.
 Start a run from **Ready now**, **Birdhouses** or your farming contract, or build one on the
 website. The sidebar lists each stop and the way to it, checks in the bank which teleports you
 are missing, and ticks a stop off once you have replanted it.
+**Dailies run** visits every daily your diaries and quests allow, leaving out what you have
+collected today when **Dailies collected** is on.
 
 ## Sailing
 
@@ -119,7 +129,9 @@ pins. **Send to RuneLite** puts the route in your sidebar.
 </p>
 
 Compare every place for your Slayer task, or a port's courier and bounty jobs, and send the one you
-pick to RuneLite.
+pick to RuneLite. What the plugin reads from your game fills the website in as you play: Mortimer's
+offer ranked as soon as you open it, the sea charts you have charted marked on the map, and the
+dailies you have collected left out of a dailies run.
 
 ## Drop luck
 
@@ -176,9 +188,10 @@ turns on, or off, everything it can send:
   travel; optionally the full quest and miniquest log; which achievement diary tier you have finished
   and which of those rewards you have collected; derived travel unlocks from carried/equipped items
   as yes/no flags; verified permanent transport unlocks, your house town and which STASH units you
-  have built; and where each of your boats is moored and whether it carries a teleport focus, so the
-  map's voyages start at your boat. STASH contents are not read, and boat names are not sent.
-- **Tasks and timers:** your current slayer task and remaining count; your active clue step
+  have built; where each of your boats is moored and whether it carries a teleport focus, so the
+  map's voyages start at your boat; and which Sailing sea charting tasks you have charted. STASH
+  contents are not read, and boat names are not sent.
+- **Tasks and timers:** your current slayer task and remaining count; with no task, the tasks Mortimer offers while you choose, each with its mortifier; your active clue step
   (tier, item id, observed clue text and resolved tile); your observed hunter rumour;
   your Mahogany Homes customer and tier; the crop requested by your farming contract and whether
   it is ready to hand in;
@@ -186,8 +199,9 @@ turns on, or off, everything it can send:
   including crop, stages, observation age, estimated growth windows and witnessed replant receipts
   for the 99 patches supported by RuneLite's crop tracker (including grapes, coral and seaweed);
   which Sailing port task each of your five slots holds, with crates collected and delivered or
-  bounty parts still owed, and whether a slot is empty, locked or unreadable; and how many crates
-  the cargo hold of the boat you last stood on carries. Cargo is not read.
+  bounty parts still owed, and whether a slot is empty, locked or unreadable; how many crates
+  the cargo hold of the boat you last stood on carries, though cargo is not read; and which of the
+  dailies the map plans you have collected today.
   With your Slayer task, the Slayer list's order, Wilderness filter and delivery receipt. These
   request your own sidebar list through the existing connection. They add no poll.
 - **Loot and milestones:** observed loot kills for every monster, how long ago each was last killed,
@@ -219,8 +233,9 @@ it and does not keep it.
 answers with places and keeps nothing. Picking a result sends the tile you are standing on, as
 Reroute does, so the way is planned from there.
 
-**Route**, beside your clue, your last death, a star or a meetup, sends the tile you are standing on
-and the tile it goes to, once per press, as does **Route** on a destination that has no way yet.
+**Route**, beside your clue, your last death, your Quest Helper step, a star or a meetup, sends the
+tile you are standing on and the tile it goes to, once per press, as does **Route** on a destination
+that has no way yet.
 That includes your clue's tile and where you died when you do not share them: they leave in that
 one request and the map plans with them and keeps neither.
 For a clue step that is words, or a map above beginner, Route sends the clue instead, its tier, any

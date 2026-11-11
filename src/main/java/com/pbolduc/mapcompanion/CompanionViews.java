@@ -29,6 +29,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.Insets;
+import java.util.Locale;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import javax.swing.BorderFactory;
@@ -65,9 +66,9 @@ final class CompanionViews extends JPanel
 	private final JPanel stars;
 	private final Consumer<Boolean> starsVisibility;
 	private final JPanel tabs = new JPanel(new GridLayout(1, 3, 3, 0));
-	private final JToggleButton homeTab = tab("Home", "home");
-	private final JToggleButton groupTab = tab("Group", "group");
-	private final JToggleButton starsTab = tab("Stars", "stars");
+	private final JToggleButton homeTab = tab("Home", View.HOME);
+	private final JToggleButton groupTab = tab("Group", View.GROUP);
+	private final JToggleButton starsTab = tab("Stars", View.STARS);
 	private View selected = View.HOME;
 	/** The last press's answer {@link #showAnswer} has seen, so each answer turns the page at most once. */
 	@Nullable
@@ -98,16 +99,15 @@ final class CompanionViews extends JPanel
 		content.add(group);
 		content.add(stars);
 		add(content, BorderLayout.CENTER);
-		homeTab.addActionListener(e -> select(View.HOME));
-		groupTab.addActionListener(e -> select(View.GROUP));
-		starsTab.addActionListener(e -> select(View.STARS));
 		select(View.HOME);
 	}
 
-	private static JToggleButton tab(String text, String id)
+	/** A tab, named for its view, which shows that view when pressed. */
+	private JToggleButton tab(String text, View view)
 	{
 		JToggleButton button = new JToggleButton(text);
-		button.setName("companionView." + id);
+		button.setName("companionView." + view.name().toLowerCase(Locale.ROOT));
+		button.addActionListener(e -> select(view));
 		button.setFont(button.getFont().deriveFont(12f));
 		button.setMargin(new Insets(4, 4, 4, 4));
 		button.putClientProperty("JButton.buttonType", "tab");

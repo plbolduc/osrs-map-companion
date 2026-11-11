@@ -36,6 +36,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.ui.overlay.worldmap.WorldMapPointManager;
@@ -72,6 +73,7 @@ import net.runelite.client.ui.overlay.worldmap.WorldMapPointManager;
  * mutates the world map's overlay list, which is game state.
  */
 @Singleton
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE, onConstructor_ = @Inject)
 public class DestinationMarker
 {
 	private final WorldMapPointManager points;
@@ -96,23 +98,6 @@ public class DestinationMarker
 
 	/** A step's disc ahead of the player: the map's light ink, so amber stays the place you are going to. */
 	static final Color STEP = new Color(228, 228, 231);
-
-	@Inject
-	DestinationMarker(
-		WorldMapPointManager points,
-		DestinationState state,
-		MapCompanionConfig config,
-		ClientThread clientThread,
-		DestinationRoute route,
-		FarmRunRoute farming)
-	{
-		this.points = points;
-		this.state = state;
-		this.config = config;
-		this.clientThread = clientThread;
-		this.route = route;
-		this.farming = farming;
-	}
 
 	/** Rebuild the live points from {@link DestinationState}, or remove them. */
 	void sync()

@@ -27,6 +27,7 @@ package com.pbolduc.mapcompanion;
 
 import com.google.inject.Inject;
 import java.awt.BorderLayout;
+import java.util.List;
 import javax.annotation.Nullable;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -54,13 +55,8 @@ final class FarmRunPanel extends JPanel
 	static final String NEEDS_PATCHES = Words.of("farm.needsPatches");
 	static final String NEEDS_CONTRACT = Words.of("farm.needsContract");
 	static final String PICKED = "Run: ";
-	private static final String[][] STARTS =
-	{
-		{"ready-now", "Ready now"}, {"preset:herb", "Herb run"}, {"preset:tree", "Tree run"},
-		{"preset:fruit", "Fruit tree run"}, {"preset:hardwood", "Hardwood run"},
-		{"preset:trees", "Tree + fruit tree"}, {"preset:herb-allotment", "Herb + allotment + flower"},
-		{"birdhouses", "Birdhouses"}, {"contract", "Farming contract"}
-	};
+	/** The picker's runs, in its order: the kind the map plans, then its name in the list. */
+	private static final List<String> STARTS = Resources.lines("/farm-starts.txt");
 
 	private final FarmRunClient client;
 	private final ConfigStore settings;
@@ -91,9 +87,9 @@ final class FarmRunPanel extends JPanel
 		this.run = new RunView(false, state, client, follower, routes, shortest, sprites, config);
 		MapCompanionPanel.taskCard(this, "farmRun", "Farm run", sprites, "Farming");
 		picker.setBackground(getBackground());
-		for (String[] choice : STARTS)
+		for (String choice : STARTS)
 		{
-			kind.addItem(choice[1]);
+			kind.addItem(choice.split("\\|")[1]);
 		}
 		kind.setFont(kind.getFont().deriveFont(11f));
 		kind.setToolTipText(Words.of("farm.kindTip"));
@@ -113,7 +109,7 @@ final class FarmRunPanel extends JPanel
 
 		start.addActionListener(e ->
 		{
-			String[] chosen = STARTS[kind.getSelectedIndex()];
+			String[] chosen = STARTS.get(kind.getSelectedIndex()).split("\\|");
 			if (needs(chosen[0], settings) == null)
 			{
 				client.start(chosen[0], chosen[1]);
@@ -132,6 +128,10 @@ final class FarmRunPanel extends JPanel
 	 * The line a kind of run says while the sharing choice it is planned from is off, or null when it
 	 * needs none or that choice is on. Ready now reads the patches this client has shared and a contract
 	 * the contract it shared; the presets and Birdhouses are planned from the map's own tables.
+	 *
+	 * <p>The dailies run says nothing: the map plans it from the account it already reads, and Dailies
+	 * collected only leaves out what was collected today. This line holds Start back, so a choice
+	 * that would only improve a run is not one it names.
 	 */
 	@Nullable
 	static String needs(String kind, ConfigStore settings)
@@ -150,7 +150,7 @@ final class FarmRunPanel extends JPanel
 	/** Start run, and the line under it, for the kind chosen now. EDT. */
 	private void offer()
 	{
-		String missing = needs(STARTS[kind.getSelectedIndex()][0], settings);
+		String missing = needs(STARTS.get(kind.getSelectedIndex()).split("\\|")[0], settings);
 		start.setEnabled(ready && missing == null);
 		needs.setVisible(picker.isVisible() && missing != null);
 		MapCompanionPanel.setWrapped(needs, missing == null ? "" : missing, MapCompanionPanel.CARD_TEXT_WIDTH);

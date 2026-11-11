@@ -141,42 +141,36 @@ public class LootLog
 	 */
 	interface NotableItems
 	{
+		/*
+		 * Each answers as a vocabulary that knows nothing would, which is all NONE is; the catalog's
+		 * own, of(), answers every one.
+		 */
+
 		/** False until the vocabulary is whole; a half-read catalog must not decide anything. */
-		boolean ready();
+		default boolean ready()
+		{
+			return false;
+		}
 
-		boolean notable(int itemId);
+		default boolean notable(int itemId)
+		{
+			return false;
+		}
 
-		boolean pet(int itemId);
+		default boolean pet(int itemId)
+		{
+			return false;
+		}
 
 		/** An item's id from its exact name, for a picture of a drop that has not fallen yet. */
 		@Nullable
-		Integer idFor(String name);
+		default Integer idFor(String name)
+		{
+			return null;
+		}
 
 		NotableItems NONE = new NotableItems()
 		{
-			@Override
-			public boolean ready()
-			{
-				return false;
-			}
-
-			@Override
-			public boolean notable(int itemId)
-			{
-				return false;
-			}
-
-			@Override
-			public boolean pet(int itemId)
-			{
-				return false;
-			}
-
-			@Override
-			public Integer idFor(String name)
-			{
-				return null;
-			}
 		};
 
 		static NotableItems of(CollectionItemCatalog catalog)
@@ -1229,7 +1223,7 @@ public class LootLog
 	 * What {@link #summary()} says on a world whose kills are not counted, with the reason: a player who
 	 * hops to a free world should not read it as their kill log stopping for good.
 	 */
-	static final String PAUSED = "Not counted on this world: drop luck counts normal members worlds only.";
+	static final String PAUSED = Words.of("luck.paused");
 
 	/**
 	 * Whether there is anything to forget.
@@ -1271,10 +1265,7 @@ public class LootLog
 		if (!Objects.equals(scope, loadedScope))
 		{
 			/* Still the old character's: write it there before it is dropped, and start a new window. */
-			flush();
-			savedAtMs = 0L;
-			tallies.clear();
-			loaded = false;
+			reload();
 			loadedScope = scope;
 		}
 		if (scope == null)

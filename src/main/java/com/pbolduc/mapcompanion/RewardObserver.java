@@ -26,7 +26,6 @@
 package com.pbolduc.mapcompanion;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.LongSupplier;
 import java.util.function.Predicate;
@@ -82,10 +81,7 @@ public final class RewardObserver
 	private static final String COLLECTION_PREFIX = "New item added to your collection log: ";
 	private static final String POPUP_PREFIX = "New item:";
 	private static final String UNTRADEABLE_PREFIX = "Untradeable drop: ";
-	private static final Set<String> PET_MESSAGES = new HashSet<>(Arrays.asList(
-			"You have a funny feeling like you're being followed.",
-			"You have a funny feeling like you would have been followed...",
-			"You feel something weird sneaking into your backpack."));
+	private static final Set<String> PET_MESSAGES = new HashSet<>(Resources.lines("/pet-messages.txt"));
 	private static final Pattern PICKPOCKET_MESSAGE = Pattern.compile("You pick (the )?.+'s? pocket.*");
 	/**
 	 * Exact core LootTrackerPlugin event labels, listed in reward-activities.txt with the source they
@@ -229,14 +225,7 @@ public final class RewardObserver
 		else if (message.startsWith(COLLECTION_PREFIX)
 				 && client.getVarbitValue(VarbitID.OPTION_COLLECTION_NEW_ITEM) == 1)
 		{
-			if (collections)
-			{
-				collection(message.substring(COLLECTION_PREFIX.length()));
-			}
-			else if (pets)
-			{
-				namePet(message.substring(COLLECTION_PREFIX.length()));
-			}
+			collected(message.substring(COLLECTION_PREFIX.length()), pets, collections);
 		}
 		else if (pets && message.startsWith(UNTRADEABLE_PREFIX))
 		{
@@ -279,16 +268,22 @@ public final class RewardObserver
 				String message = CollectionItemCatalog.clean(client.getVarcStrValue(VarClientID.NOTIFICATION_MAIN));
 				if (message != null && message.startsWith(POPUP_PREFIX))
 				{
-					if (collections)
-					{
-						collection(message.substring(POPUP_PREFIX.length()));
-					}
-					else if (pets)
-					{
-						namePet(message.substring(POPUP_PREFIX.length()));
-					}
+					collected(message.substring(POPUP_PREFIX.length()), pets, collections);
 				}
 			}
+		}
+	}
+
+	/** A new collection log slot, by the chat line or the popup: a collection item, or else a pet's name. */
+	private void collected(String itemName, boolean pets, boolean collections)
+	{
+		if (collections)
+		{
+			collection(itemName);
+		}
+		else if (pets)
+		{
+			namePet(itemName);
 		}
 	}
 
@@ -382,20 +377,8 @@ public final class RewardObserver
 
 	private Pending findNamed(Integer id, String name, boolean needsCollection, boolean needsLoot)
 	{
-		Pending found = null;
-		for (Pending reward : pending)
-		{
-			if (recent(reward) && !(needsCollection && reward.collection) && !(needsLoot && reward.loot)
-				&& !reward.ambiguousCollection && matches(reward, id, name))
-			{
-				if (found != null)
-				{
-					// Matching item names establish identity, not which of two receipts supplied it.
-					return null;
-				}
-				found = reward;
-			}
-		}
+		Pending found = only(reward -> recent(reward) && !(needsCollection && reward.collection)
+			&& !(needsLoot && reward.loot) && !reward.ambiguousCollection && matches(reward, id, name));
 		if (found != null && found.itemId == null)
 		{
 			found.itemId = id;
@@ -465,14 +448,23 @@ public final class RewardObserver
 
 	private Pending findUnclaimedPetItem()
 	{
+		return only(reward -> recent(reward) && !reward.pet && reward.itemId != null && catalog.isPet(reward.itemId));
+	}
+
+	/**
+	 * The one pending reward that fits, or null for none or more than one: matching item names
+	 * establish identity, not which of two receipts supplied it, and two candidate pet items cannot
+	 * establish which triggered a pet's message.
+	 */
+	private Pending only(Predicate<Pending> fits)
+	{
 		Pending found = null;
 		for (Pending reward : pending)
 		{
-			if (recent(reward) && !reward.pet && reward.itemId != null && catalog.isPet(reward.itemId))
+			if (fits.test(reward))
 			{
 				if (found != null)
 				{
-					// Two candidate pet items cannot establish which triggered this message.
 					return null;
 				}
 				found = reward;

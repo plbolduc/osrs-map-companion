@@ -26,9 +26,6 @@
 package com.pbolduc.mapcompanion;
 
 import java.awt.Color;
-import java.awt.Cursor;
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
@@ -51,9 +48,7 @@ final class SidebarPages extends JPanel
 	SidebarPages(JPanel daily, JPanel settingsContent)
 	{
 		this.daily = daily;
-		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		setBackground(ColorScheme.DARK_GRAY_COLOR);
-		MapCompanionPanel.left(this);
+		MapCompanionPanel.column(this, ColorScheme.DARK_GRAY_COLOR);
 		settings = MapCompanionPanel.column(ColorScheme.DARK_GRAY_COLOR);
 		settings.setName("companionSettings");
 		JButton back = new JButton("Settings", SidebarIcons.back());
@@ -63,12 +58,8 @@ final class SidebarPages extends JPanel
 		back.setForeground(Color.WHITE);
 		back.setIconTextGap(6);
 		back.setHorizontalAlignment(SwingConstants.LEFT);
-		back.setBorderPainted(false);
-		back.setContentAreaFilled(false);
 		back.setFocusPainted(false);
-		back.setBorder(BorderFactory.createEmptyBorder(0, 0, 8, 0));
-		back.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		MapCompanionPanel.capped(back);
+		MapCompanionPanel.capped(MapCompanionPanel.bare(back, 0, 0, 8));
 		back.addActionListener(e -> open(false));
 		settings.add(back);
 		settings.add(settingsContent);

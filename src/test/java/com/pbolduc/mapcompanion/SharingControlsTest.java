@@ -197,8 +197,8 @@ public class SharingControlsTest
 	public void everyOtherGroupWritesOnlyItsKnownIndividualOptIns() throws Exception
 	{
 		String[][] groupKeys = {
-			{MapCompanionConfig.KEY_SHARE_PROGRESS, "shareSkills", "shareQuests", "shareQuestLog", "shareDiaries", "sharePermanentTravel", "shareCapabilities", "shareStash", "shareBoats"},
-			{MapCompanionConfig.KEY_SHARE_TASKS, "shareSlayer", "shareClue", "shareFarming", "shareBirdhouses", "shareHunterRumours", "shareMahoganyHomes", "shareFarmingContracts", "sharePortTasks"},
+			{MapCompanionConfig.KEY_SHARE_PROGRESS, "shareSkills", "shareQuests", "shareQuestLog", "shareDiaries", "sharePermanentTravel", "shareCapabilities", "shareStash", "shareBoats", "shareSeaCharts"},
+			{MapCompanionConfig.KEY_SHARE_TASKS, "shareSlayer", "shareClue", "shareFarming", "shareBirdhouses", "shareHunterRumours", "shareMahoganyHomes", "shareFarmingContracts", "sharePortTasks", "shareDailies"},
 			{MapCompanionConfig.KEY_SHARE_LOOT_GROUP, "shareLoot", "shareMilestones", "sharePets", "shareCollectionLog"}
 		};
 		for (String[] group : groupKeys)

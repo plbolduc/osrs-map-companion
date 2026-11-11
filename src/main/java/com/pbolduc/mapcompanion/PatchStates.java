@@ -25,10 +25,6 @@
  */
 package com.pbolduc.mapcompanion;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.AccessLevel;
@@ -77,56 +73,44 @@ final class PatchStates
 	{
 		Map<String, Decoded[]> table = new HashMap<>();
 		try
-			(InputStream in = PatchStates.class.getResourceAsStream("/farming-crops.txt"))
 		{
-			if (in == null)
+			/* A missing or unreadable resource is no lines, and so no states: every crop unreadable. */
+			for (String line : Resources.lines("/farming-crops.txt"))
 			{
-				return table;
-			}
-			try
-				(BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8)))
-			{
-				for (String line; (line = reader.readLine()) != null;)
+				String[] row = line.split("\\|");
+				int value = Integer.parseInt(row[1]);
+				int stage = Integer.parseInt(row[4]);
+				int stages = Integer.parseInt(row[5]);
+				boolean weeds = "Weeds".equals(row[3]);
+				String state;
+				if (weeds || "EMPTY".equals(row[2]))
 				{
-					if (line.startsWith("#") || line.isEmpty())
-					{
-						continue;
-					}
-					String[] row = line.split("\\|");
-					int value = Integer.parseInt(row[1]);
-					int stage = Integer.parseInt(row[4]);
-					int stages = Integer.parseInt(row[5]);
-					boolean weeds = "Weeds".equals(row[3]);
-					String state;
-					if (weeds || "EMPTY".equals(row[2]))
-					{
-						state = EMPTY;
-					}
-					else if ("HARVESTABLE".equals(row[2]) || ("GROWING".equals(row[2]) && stage >= stages - 1))
-					{
-						state = READY;
-					}
-					else if ("GROWING".equals(row[2]))
-					{
-						state = GROWING;
-					}
-					else if ("DISEASED".equals(row[2]))
-					{
-						state = DISEASED;
-					}
-					else if ("DEAD".equals(row[2]))
-					{
-						state = DEAD;
-					}
-					else
-					{
-						state = UNKNOWN;
-					}
-					table.computeIfAbsent(row[0], ignored -> new Decoded[256])[value] = new Decoded(
-						state, weeds ? null : row[3], GROWING.equals(state) ? stages - 1 - stage : null,
-						!weeds && GROWING.equals(state) && stage == 0,
-						GROWING.equals(state) ? Integer.parseInt(row[6]) : null);
+					state = EMPTY;
 				}
+				else if ("HARVESTABLE".equals(row[2]) || ("GROWING".equals(row[2]) && stage >= stages - 1))
+				{
+					state = READY;
+				}
+				else if ("GROWING".equals(row[2]))
+				{
+					state = GROWING;
+				}
+				else if ("DISEASED".equals(row[2]))
+				{
+					state = DISEASED;
+				}
+				else if ("DEAD".equals(row[2]))
+				{
+					state = DEAD;
+				}
+				else
+				{
+					state = UNKNOWN;
+				}
+				table.computeIfAbsent(row[0], ignored -> new Decoded[256])[value] = new Decoded(
+					state, weeds ? null : row[3], GROWING.equals(state) ? stages - 1 - stage : null,
+					!weeds && GROWING.equals(state) && stage == 0,
+					GROWING.equals(state) ? Integer.parseInt(row[6]) : null);
 			}
 		}
 		catch (Exception e)

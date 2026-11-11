@@ -26,7 +26,10 @@
 package com.pbolduc.mapcompanion;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.annotation.Nullable;
 
 /**
@@ -48,6 +51,12 @@ import javax.annotation.Nullable;
  * a disabled plugin's settings too — so the switch wins. Letting the fields win every time would bring
  * back on, and share, a group switched off there while the plugin was disabled.
  *
+ * <p><b>A field an update adds starts off, even in a group whose switch is on.</b> The switch stood
+ * for the fields it listed when the player pressed it, and a field added since was never in that
+ * press. So a profile remembers which release's list it was last settled with ({@link #KEY_SETTLED}
+ * holds the {@link #GENERATION}), and a start that finds a field newer than that leaves the field
+ * as it is, off unless chosen, and moves the switch to what its fields now share instead.
+ *
  * <p>Nothing loops. A switch writes only the fields that differ from it; a field going on never turns
  * its switch off, which is what lets a switch's fan-out finish; and a switch moved because of a field
  * agrees with its fields, so its own event writes nothing.
@@ -60,6 +69,23 @@ final class SharingGroups
 	 * Reset, and either would make an untouched profile look read. Never renamed.
 	 */
 	static final String KEY_SETTLED = "sharingGroups";
+
+	/**
+	 * Which release's field list {@link #KEY_SETTLED} was written with: 1 for the groups as they first
+	 * shipped, one more each release that adds a field to a group. Never lowered.
+	 */
+	static final int GENERATION = 2;
+
+	/** Each field added to a group after the first generation, with the generation that added it. */
+	static final Map<String, Integer> ADDED = Collections.unmodifiableMap(added());
+
+	private static Map<String, Integer> added()
+	{
+		Map<String, Integer> added = new HashMap<>();
+		added.put("shareDailies", 2);
+		added.put("shareSeaCharts", 2);
+		return added;
+	}
 
 	private SharingGroups()
 	{
@@ -110,7 +136,15 @@ final class SharingGroups
 	 */
 	static void settle(MapCompanionConfig config, ConfigStore store)
 	{
-		boolean read = store.get(KEY_SETTLED) != null;
+		settle(config, store, ADDED, GENERATION);
+	}
+
+	/** {@link #settle(MapCompanionConfig, ConfigStore)} with the generations named, so a test can add a field. */
+	static void settle(MapCompanionConfig config, ConfigStore store, Map<String, Integer> added, int generation)
+	{
+		String marker = store.get(KEY_SETTLED);
+		boolean read = marker != null;
+		int settledWith = marker == null ? 0 : marker.matches("[0-9]{1,4}") ? Integer.parseInt(marker) : 1;
 		for (SharingFields.Section section : SharingFields.GROUPS)
 		{
 			boolean fields = on(section, config, store);
@@ -121,16 +155,29 @@ final class SharingGroups
 			}
 			if (read)
 			{
-				choose(section, shown, config, store);
+				/* The switch wins over the fields it stood for, never over one added since. */
+				for (SharingFields.Field field : section.fields)
+				{
+					boolean known = added.getOrDefault(field.key, 1) <= settledWith;
+					if (known && field.on(config, store) != shown)
+					{
+						store.set(field.key, Boolean.toString(shown));
+					}
+				}
+				boolean now = on(section, config, store);
+				if (now != shown)
+				{
+					store.set(section.key, Boolean.toString(now));
+				}
 			}
 			else
 			{
 				store.set(section.key, Boolean.toString(fields));
 			}
 		}
-		if (!read)
+		if (!read || settledWith < generation)
 		{
-			store.set(KEY_SETTLED, "1");
+			store.set(KEY_SETTLED, Integer.toString(generation));
 		}
 	}
 

@@ -150,15 +150,9 @@ public class ClueReader
 			return;
 		}
 		/* Establish the scroll before storing its text: the interface can precede the next snapshot. */
-		int opening = openingScrollItemId;
-		openingScrollItemId = -1;
-		if (read() == null)
+		if (!adoptOpening())
 		{
 			return;
-		}
-		if (opening > 0 && opening != lastScrollItemId && carried(opening))
-		{
-			lastScrollItemId = opening;
 		}
 		mapTile = null;
 		lastStepText = text.replaceAll("<[^>]*>", " ").replaceAll("\\s+", " ").trim();
@@ -296,20 +290,31 @@ public class ClueReader
 		return false;
 	}
 
-	/** Beginner pictures share an item id; only the opened interface identifies the destination. */
-	public void onMapWidget(int groupId)
+	/**
+	 * The scroll the player pressed Read on becomes the one whose step is on screen, wherever another
+	 * tier sits, and the old one's text goes with it. False when no clue is carried any more.
+	 */
+	private boolean adoptOpening()
 	{
-		BeginnerMapClue picture = BeginnerMapClue.forWidgetID(groupId);
-		if (picture == null) return;
 		int opening = openingScrollItemId;
 		openingScrollItemId = -1;
-		if (read() == null) return;
-		/* The picture belongs to the scroll that was Read, wherever another tier sits. */
+		if (read() == null)
+		{
+			return false;
+		}
 		if (opening > 0 && opening != lastScrollItemId && carried(opening))
 		{
 			lastScrollItemId = opening;
 			lastStepText = null;
 		}
+		return true;
+	}
+
+	/** Beginner pictures share an item id; only the opened interface identifies the destination. */
+	public void onMapWidget(int groupId)
+	{
+		BeginnerMapClue picture = BeginnerMapClue.forWidgetID(groupId);
+		if (picture == null || !adoptOpening()) return;
 		if (!"beginner".equals(tierOf(lastScrollItemId))) return;
 		// This implementation returns its stored world point; it does not use a clue-plugin instance.
 		WorldPoint point = picture.getLocation(null);

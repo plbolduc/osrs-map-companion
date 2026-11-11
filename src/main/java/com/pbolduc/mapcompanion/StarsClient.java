@@ -46,7 +46,6 @@ import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import okhttp3.ResponseBody;
 
 /**
  * Reads only this installation's approved map server, while Stars is visible and logged in.
@@ -68,7 +67,6 @@ final class StarsClient
 	private final Gson gson;
 	private final Client client;
 	private final ClientThread clientThread;
-	private final MapCompanionConfig config;
 	private final Pairing pairing;
 	private final MemberIdentity identity;
 	private final ConfigStore store;
@@ -98,7 +96,6 @@ final class StarsClient
 		this.gson = gson;
 		this.client = client;
 		this.clientThread = clientThread;
-		this.config = config;
 		this.pairing = pairing;
 		this.identity = identity;
 		this.store = store;
@@ -289,11 +286,11 @@ final class StarsClient
 						finish(null, "Stars unavailable. Retrying shortly.", delay);
 						return;
 					}
-					finish(readBounded(close.body()), null, delay);
+					finish(CompanionHttp.readBounded(close.body()), null, delay);
 				}
 				catch (IOException | RuntimeException error)
 				{
-					finish(null, "The map returned unreadable data.", 30_000);
+					finish(null, RoutePress.UNREADABLE, 30_000);
 				}
 			}
 
@@ -313,7 +310,7 @@ final class StarsClient
 						}
 						catch (RuntimeException unreadable)
 						{
-							errorResult("The map returned unreadable data.", delay);
+							errorResult(RoutePress.UNREADABLE, delay);
 						}
 					}
 					else errorResult(error, delay);
@@ -338,10 +335,5 @@ final class StarsClient
 		{
 			return 30_000;
 		}
-	}
-
-	static String readBounded(ResponseBody body) throws IOException
-	{
-		return CompanionHttp.readBounded(body, CompanionHttp.MAX_REPLY_BYTES);
 	}
 }

@@ -84,6 +84,7 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
+import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.HotkeyListener;
 import net.runelite.client.util.ImageUtil;
@@ -229,6 +230,15 @@ public class MapCompanionPlugin extends Plugin
 
 	@Inject
 	private PortTaskReader portTaskReader;
+
+	@Inject
+	private DailyReader dailyReader;
+
+	@Inject
+	private SeaChartReader seaChartReader;
+
+	@Inject
+	private MortimerOfferReader mortimerOfferReader;
 
 	@Inject
 	private CargoHolds cargoHolds;
@@ -563,13 +573,11 @@ public class MapCompanionPlugin extends Plugin
 					.panel(panel)
 					.build();
 		clientToolbar.addNavigation(navButton);
-		overlayManager.add(destinationSceneOverlay);
-		overlayManager.add(destinationMinimapOverlay);
-		overlayManager.add(voyageMapOverlay);
 		routeStepOverlay.pressWith(this::act);
-		overlayManager.add(routeStepOverlay);
-		overlayManager.add(farmBankOverlay);
-		overlayManager.add(teleportOutlineOverlay);
+		for (Overlay overlay : overlays())
+		{
+			overlayManager.add(overlay);
+		}
 		keyManager.registerKeyListener(rerouteKey);
 		keyManager.registerKeyListener(followKey);
 		relay.reset();
@@ -621,12 +629,10 @@ public class MapCompanionPlugin extends Plugin
 			panel.stopRefreshing();
 		}
 		clientToolbar.removeNavigation(navButton);
-		overlayManager.remove(destinationSceneOverlay);
-		overlayManager.remove(destinationMinimapOverlay);
-		overlayManager.remove(voyageMapOverlay);
-		overlayManager.remove(routeStepOverlay);
-		overlayManager.remove(farmBankOverlay);
-		overlayManager.remove(teleportOutlineOverlay);
+		for (Overlay overlay : overlays())
+		{
+			overlayManager.remove(overlay);
+		}
 		keyManager.unregisterKeyListener(rerouteKey);
 		keyManager.unregisterKeyListener(followKey);
 	}
@@ -661,18 +667,10 @@ public class MapCompanionPlugin extends Plugin
 		destinationMarker.remove();
 		boatPins.clear();
 		destinationArrow.clear();
-		xpTracker.reset();
-		clueReader.reset();
 		resetRewardDelivery();
 		farmingObserver.onSessionEnded();
 		diaryReader.onSessionEnded();
-		travelUnlockReader.onSessionEnded();
-		stashReader.onSessionEnded();
-		boatReader.onSessionEnded();
-		portTaskReader.onSessionEnded();
-		birdhouseReader.onSessionEnded();
-		questReader.onSessionEnded();
-		assignmentReader.onSessionEnded();
+		endSessions(false);
 		lastPosition = null;
 		meetupReminder.clear();
 		pickpocketTick = -1;
@@ -685,6 +683,41 @@ public class MapCompanionPlugin extends Plugin
 		restStatus();
 	}
 
+	/** The overlays this plugin draws, added at start-up and removed with the interface. */
+	private Overlay[] overlays()
+	{
+		return new Overlay[]{destinationSceneOverlay, destinationMinimapOverlay, voyageMapOverlay, routeStepOverlay,
+			farmBankOverlay, teleportOutlineOverlay};
+	}
+
+	/**
+	 * What every way a session ends forgets: a logout or a hop, another character, the plugin
+	 * stopping. A hop keeps the port tasks' last settled reading for the sidebar, as
+	 * {@link PortTaskReader#onHop} says. Client thread.
+	 */
+	private void endSessions(boolean hop)
+	{
+		xpTracker.reset();
+		clueReader.reset();
+		travelUnlockReader.onSessionEnded();
+		stashReader.onSessionEnded();
+		boatReader.onSessionEnded();
+		if (hop)
+		{
+			portTaskReader.onHop();
+		}
+		else
+		{
+			portTaskReader.onSessionEnded();
+		}
+		birdhouseReader.onSessionEnded();
+		dailyReader.onSessionEnded();
+		seaChartReader.onSessionEnded();
+		mortimerOfferReader.onSessionEnded();
+		questReader.onSessionEnded();
+		assignmentReader.onSessionEnded();
+	}
+
 	/**
 	 * The status before a tick has said anything: at the start of a lifetime, and at its end.
 	 *
@@ -695,7 +728,7 @@ public class MapCompanionPlugin extends Plugin
 	 */
 	private void restStatus()
 	{
-		String code = config.pairingCode() == null ? "" : config.pairingCode().trim();
+		String code = Pairing.codeIn(config);
 		boolean playing = client.getGameState() == GameState.LOGGED_IN;
 		loggedOut = !playing;
 		setStatus(code.isEmpty() ? Health.IDLE : Health.WAITING, restingStatus(!code.isEmpty(), playing));
@@ -740,13 +773,7 @@ public class MapCompanionPlugin extends Plugin
 				announceDropLuck(drop);
 			}
 		}
-		synchronized (rewardObserver)
-		{
-			if (activeRewardContext() != null)
-			{
-				rewardObserver.onNpcLoot(event);
-			}
-		}
+		whileRewarding(() -> rewardObserver.onNpcLoot(event));
 		dirty = true;
 	}
 
@@ -786,7 +813,7 @@ public class MapCompanionPlugin extends Plugin
 	/** This version's one line, on the first login after an update; see {@link UpdateNotice}. */
 	private void announceUpdate()
 	{
-		boolean usedBefore = config.pairingCode() != null && !config.pairingCode().trim().isEmpty();
+		boolean usedBefore = !Pairing.codeIn(config).isEmpty();
 		String line = UpdateNotice.due(ConfigStore.of(configManager), usedBefore);
 		if (line != null)
 		{
@@ -825,13 +852,7 @@ public class MapCompanionPlugin extends Plugin
 	@Subscribe
 	public void onLootReceived(LootReceived event)
 	{
-		synchronized (rewardObserver)
-		{
-			if (activeRewardContext() != null)
-			{
-				rewardObserver.onLootReceived(event);
-			}
-		}
+		whileRewarding(() -> rewardObserver.onLootReceived(event));
 	}
 
 	@Subscribe
@@ -926,19 +947,11 @@ public class MapCompanionPlugin extends Plugin
 		slayerState.clear();
 		milestones.reset();
 		completions.reset();
-		xpTracker.reset();
 		deathWatcher.clear();
-		clueReader.reset();
-		travelUnlockReader.onSessionEnded();
-		stashReader.onSessionEnded();
-		boatReader.onSessionEnded();
+		endSessions(false);
 		/* Another character's boats are not this one's. */
 		boatPins.clear();
 		boatPinsStale = true;
-		portTaskReader.onSessionEnded();
-		birdhouseReader.onSessionEnded();
-		questReader.onSessionEnded();
-		assignmentReader.onSessionEnded();
 		pickpocketTick = -1;
 		dirty = true;
 	}
@@ -1125,12 +1138,8 @@ public class MapCompanionPlugin extends Plugin
 	{
 		GameState state = event.getGameState();
 		loggedOut = loggedOutAfter(loggedOut, state);
-		if (state == GameState.LOGIN_SCREEN || state == GameState.HOPPING)
-		{
-			/* On no world until the next tick names one, so no meetup's world reads as this one meanwhile. */
-			groupState.onWorld(0);
-		}
-		if (state == GameState.LOGIN_SCREEN || state == GameState.HOPPING || state == GameState.CONNECTION_LOST)
+		boolean leaving = state == GameState.LOGIN_SCREEN || state == GameState.HOPPING;
+		if (leaving || state == GameState.CONNECTION_LOST)
 		{
 			/*
 			 * The readings either side of any of these are not one watched stretch of play, so the
@@ -1139,22 +1148,20 @@ public class MapCompanionPlugin extends Plugin
 			 */
 			completions.reset();
 		}
-		if (state == GameState.LOGIN_SCREEN || state == GameState.HOPPING)
+		if (leaving)
 		{
+			/* On no world until the next tick names one, so no meetup's world reads as this one meanwhile. */
+			groupState.onWorld(0);
 			rewardObserver.reset();
 			/**
 			 * Logging out stops the wire. Not "sends a final snapshot saying goodbye" — simply stops,
 			 * and the map's own staleness handling takes it from there, which is the same thing it
 			 * does when a client crashes or a laptop lid closes.
 			 */
-			xpTracker.reset();
-			clueReader.reset();
 			/** Patch and diary flags are about to read zero; {@link SessionSettle} has the window. */
 			farmingObserver.onSessionEnded();
 			diaryReader.onSessionEnded();
-			travelUnlockReader.onSessionEnded();
-			stashReader.onSessionEnded();
-			boatReader.onSessionEnded();
+			endSessions(state == GameState.HOPPING);
 			boatPinsStale = true;
 			if (state == GameState.LOGIN_SCREEN)
 			{
@@ -1167,17 +1174,12 @@ public class MapCompanionPlugin extends Plugin
 				 * The same character, back in seconds: the task cards keep the last settled reading
 				 * until the next one settles. Only what the sidebar shows; nothing unsettled is sent.
 				 */
-				portTaskReader.onHop();
 				slayerState.hop();
 			}
 			else
 			{
-				portTaskReader.onSessionEnded();
 				slayerState.loggedOut();
 			}
-			birdhouseReader.onSessionEnded();
-			questReader.onSessionEnded();
-			assignmentReader.onSessionEnded();
 			deathWatcher.onSessionEnded();
 			lastPosition = null;
 			lastSentFingerprint = null;
@@ -1217,13 +1219,7 @@ public class MapCompanionPlugin extends Plugin
 		boolean gained = xpTracker.observeLevel(event.getSkill(), event.getLevel());
 		if (gained)
 		{
-			synchronized (rewardObserver)
-			{
-				if (activeRewardContext() != null)
-				{
-					milestones.levelUp(XpTracker.displayName(event.getSkill()), event.getLevel(), now);
-				}
-			}
+			whileRewarding(() -> milestones.levelUp(XpTracker.displayName(event.getSkill()), event.getLevel(), now));
 		}
 		dirty = true;
 	}
@@ -1386,7 +1382,7 @@ public class MapCompanionPlugin extends Plugin
 		storeIssuedSecret();
 		storeToldName();
 
-		String code = config.pairingCode() == null ? "" : config.pairingCode().trim();
+		String code = Pairing.codeIn(config);
 		if (code.isEmpty())
 		{
 			/*
@@ -1417,16 +1413,11 @@ public class MapCompanionPlugin extends Plugin
 			return;
 		}
 
-		if (client.getGameState() != GameState.LOGGED_IN)
-		{
-			setStatus(Health.WAITING, "Waiting for login");
-			return;
-		}
 		/*
 		 * A member is one character, and RuneLite names the character's profile a tick or two after
 		 * the game says logged in. Until it does there is nobody to post as.
 		 */
-		String memberId = identity.id();
+		String memberId = client.getGameState() == GameState.LOGGED_IN ? identity.id() : null;
 		if (memberId == null)
 		{
 			setStatus(Health.WAITING, "Waiting for login");
@@ -1456,17 +1447,7 @@ public class MapCompanionPlugin extends Plugin
 				directive ->
 			{
 				/** Each half only while its own setting is on; the stream may be open for the other. */
-				destinationState.acceptSocial(directive, config.showDestination());
-				if (settings().on("shareSlayer"))
-				{
-					slayerState.accept(memberId, directive, System.currentTimeMillis());
-				}
-				if (config.showDestination())
-				{
-					destinationState.accept(directive);
-					farmRunState.acceptFor(memberId, directive.relayEpoch, directive.run, directive.runRevision, System.currentTimeMillis());
-					destinationMarker.sync();
-				}
+				acceptDirective(memberId, directive);
 				long at = System.currentTimeMillis();
 				groupState.dots(directive.members, at);
 				if (config.showGroupOnWorldMap())
@@ -1559,20 +1540,7 @@ public class MapCompanionPlugin extends Plugin
 			noteIssuedSecret(server, code, postedAs, response.memberSecret);
 			noteGroupName(server, code, response.groupName);
 			noteGroupOwner(server, code, response.groupOwner);
-			destinationState.acceptSocial(response.directive, config.showDestination());
-			if (settings().on("shareSlayer"))
-			{
-				slayerState.accept(postedAs, response.directive, System.currentTimeMillis());
-			}
-			if (config.showDestination())
-			{
-				destinationState.accept(response.directive);
-				if (response.directive != null)
-				{
-					farmRunState.acceptFor(postedAs, response.directive.relayEpoch, response.directive.run, response.directive.runRevision, System.currentTimeMillis());
-				}
-				destinationMarker.sync();
-			}
+			acceptDirective(postedAs, response.directive);
 		}))
 		{
 			/** Did not enqueue: another post is in flight, or a fatal is latched. Retry. */
@@ -1637,6 +1605,18 @@ public class MapCompanionPlugin extends Plugin
 		}
 	}
 
+	/** Runs {@code action} under the observer monitor, and only while rewards are being shared. */
+	private void whileRewarding(Runnable action)
+	{
+		synchronized (rewardObserver)
+		{
+			if (activeRewardContext() != null)
+			{
+				action.run();
+			}
+		}
+	}
+
 	/** Caller holds the observer monitor. Config writes become visible before ConfigChanged runs. */
 	private RewardContext activeRewardContext()
 	{
@@ -1667,8 +1647,7 @@ public class MapCompanionPlugin extends Plugin
 		RewardContext(MapCompanionConfig config, ConfigStore settings)
 		{
 			server = Pairing.normalizeServer(config.relayUrl());
-			String configuredCode = config.pairingCode();
-			code = configuredCode == null ? "" : configuredCode.trim();
+			code = Pairing.codeIn(config);
 			enabled = settings.on(MapCompanionConfig.KEY_SHARE_MILESTONES);
 			pets = settings.on(MapCompanionConfig.KEY_SHARE_PETS);
 			collections = settings.on(MapCompanionConfig.KEY_SHARE_COLLECTION);
@@ -1948,15 +1927,11 @@ public class MapCompanionPlugin extends Plugin
 		{
 			return Health.ERROR;
 		}
-		if (consecutiveFailures > 0 && everSucceeded)
+		if (!everSucceeded)
 		{
-			return Health.DEGRADED;
+			return Health.WAITING;
 		}
-		if (everSucceeded)
-		{
-			return Health.LIVE;
-		}
-		return Health.WAITING;
+		return consecutiveFailures > 0 ? Health.DEGRADED : Health.LIVE;
 	}
 
 	private void publishHealth()
@@ -2003,6 +1978,29 @@ public class MapCompanionPlugin extends Plugin
 		for (String line : due)
 		{
 			notifier.notify(notification, line);
+		}
+	}
+
+	/**
+	 * A directive from the map, by the stream or in a post's reply, taken in by each part whose
+	 * setting is on: the group's social half, a Slayer partner's task, and the destination with the
+	 * farm run that rides along with it. {@code member} is who the directive was written for.
+	 */
+	private void acceptDirective(@Nullable String member, @Nullable RelayResponse.Directive directive)
+	{
+		destinationState.acceptSocial(directive, config.showDestination());
+		if (settings().on("shareSlayer"))
+		{
+			slayerState.accept(member, directive, System.currentTimeMillis());
+		}
+		if (config.showDestination())
+		{
+			destinationState.accept(directive);
+			if (directive != null)
+			{
+				farmRunState.acceptFor(member, directive.relayEpoch, directive.run, directive.runRevision, System.currentTimeMillis());
+			}
+			destinationMarker.sync();
 		}
 	}
 
@@ -2105,6 +2103,7 @@ public class MapCompanionPlugin extends Plugin
 		boatReader.onSessionResumed(now);
 		portTaskReader.onSessionResumed(now);
 		birdhouseReader.onSessionResumed(now);
+		dailyReader.onSessionResumed(now);
 		questReader.onSessionResumed(now);
 		deathWatcher.onSessionResumed(now);
 		assignmentReader.observe(now);
@@ -2112,6 +2111,12 @@ public class MapCompanionPlugin extends Plugin
 		 * Read every tick while the choice is on, for the sidebar as much as the snapshot: the slots
 		 * are five varbits and a cached row each. Off, nothing is read or shown.
 		 */
+		seaChartReader.onSessionResumed(now);
+		mortimerOfferReader.onSessionResumed(now);
+		if (settings().on("shareSlayer"))
+		{
+			mortimerOfferReader.observe(now);
+		}
 		if (settings().on("sharePortTasks"))
 		{
 			portTaskReader.read(now);

@@ -244,25 +244,17 @@ final class RoutePress
 	}
 
 	/** A clue step by its words or its scroll, which the map turns into a place with its own clue table. */
+	@AllArgsConstructor(access = AccessLevel.PACKAGE)
 	static final class ClueTarget
 	{
 		final CompanionSnapshot.Clue clue;
-
-		ClueTarget(CompanionSnapshot.Clue clue)
-		{
-			this.clue = clue;
-		}
 	}
 
 	/** A public place, by the id the map's own search gave it. */
+	@AllArgsConstructor(access = AccessLevel.PACKAGE)
 	static final class PlaceId
 	{
 		final String id;
-
-		PlaceId(String id)
-		{
-			this.id = id;
-		}
 	}
 
 	private final OkHttpClient http;
@@ -479,7 +471,7 @@ final class RoutePress
 			}
 			else
 			{
-				landing.land(gson.fromJson(CompanionHttp.readBounded(close.body(), CompanionHttp.MAX_REPLY_BYTES), Answer.class),
+				landing.land(gson.fromJson(CompanionHttp.readBounded(close.body()), Answer.class),
 					null, now + Math.max(MIN_GAP_MS, waitMs));
 			}
 		}
@@ -546,7 +538,7 @@ final class RoutePress
 	{
 		try
 		{
-			String said = CompanionHttp.said(gson, CompanionHttp.readBounded(response.body(), CompanionHttp.MAX_REPLY_BYTES), MAX_REFUSAL);
+			String said = CompanionHttp.said(gson, CompanionHttp.readBounded(response.body()), MAX_REFUSAL);
 			return said != null ? said : NOT_FOUND;
 		}
 		catch (IOException | RuntimeException unreadable)

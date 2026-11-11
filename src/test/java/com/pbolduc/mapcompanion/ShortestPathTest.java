@@ -332,7 +332,7 @@ public class ShortestPathTest
 			{
 				timeouts.add(action);
 			}
-		});
+		}, null, null);
 		List<PluginMessage> posted = new ArrayList<>();
 		List<PluginMessage> questions = new ArrayList<>();
 		bus.register(PluginMessage.class, message ->
