@@ -816,8 +816,15 @@ public final class HarnessMain
 			farmRunState.observe(farmingObserver.observations(now), birdhouseReader.read(now), DestinationRoute.standing(game.client()), now);
 		}
 		farmRunRoute.sync();
-		destinationRoute.sync(DestinationSceneOverlay.shown(config, destinationState));
+		RelayResponse.Destination shown = DestinationSceneOverlay.shown(config, destinationState);
+		destinationRoute.sync(shown);
 		destinationRoute.advance(DestinationRoute.standing(game.client()));
+		if (shown != null && !farmRunRoute.owns(shown) && destinationRoute.reaches(DestinationRoute.standing(game.client()),
+			shown.world == null || shown.world == game.client().getWorld()))
+		{
+			destinationState.dismiss();
+			destinationRoute.sync(null);
+		}
 
 		if (suffixClaimed)
 		{

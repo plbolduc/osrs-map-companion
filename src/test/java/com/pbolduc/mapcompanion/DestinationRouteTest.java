@@ -166,6 +166,57 @@ public class DestinationRouteTest
 		assertNull(route.view());
 	}
 
+	/**
+	 * Reaching the place is what takes its pin down: within a few tiles of its own tile, on its floor
+	 * and its world, with or without a route. A walk past it on the floor below is not there, and
+	 * neither is its tile on another world, which is the half of a star still to be acted on.
+	 */
+	@Test
+	public void comingToThePlaceOnItsFloorAndWorldReachesIt()
+	{
+		DestinationRoute route = new DestinationRoute();
+		route.sync(destination("Al Kharid bank", null));
+		assertFalse("still in Lumbridge", route.reaches(new WorldPoint(3222, 3218, 0), true));
+		assertFalse("under it, on the floor below", route.reaches(new WorldPoint(3310, 3200, 0), true));
+		assertFalse("five tiles off", route.reaches(new WorldPoint(3315, 3200, 1), true));
+		assertFalse("at its tile on another world", route.reaches(new WorldPoint(3311, 3199, 1), false));
+		assertTrue("and there, once on its world", route.reaches(new WorldPoint(3311, 3199, 1), true));
+		assertFalse("where the tile cannot be trusted nothing is said", route.reaches(null, true));
+		route.sync(null);
+		assertFalse("no destination, nothing to reach", route.reaches(new WorldPoint(3311, 3199, 1), true));
+	}
+
+	/**
+	 * A place pinned from where the player already stands is kept: taken down at once, the press would
+	 * seem to have done nothing. It goes when they have been somewhere else and come back.
+	 */
+	@Test
+	public void aPlacePinnedWhereThePlayerStandsIsKeptUntilTheyLeaveAndComeBack()
+	{
+		DestinationRoute route = new DestinationRoute();
+		route.sync(destination("Al Kharid bank", null));
+		assertFalse(route.reaches(new WorldPoint(3310, 3200, 1), true));
+		assertFalse("and stays while they stand there", route.reaches(new WorldPoint(3309, 3201, 1), true));
+		assertFalse(route.reaches(new WorldPoint(3293, 3184, 0), true));
+		assertTrue(route.reaches(new WorldPoint(3310, 3200, 1), true));
+		route.sync(destination("Varrock west bank", null));
+		assertFalse("another place starts over", route.reaches(new WorldPoint(3310, 3200, 1), true));
+	}
+
+	/** The end of the way is the place, wherever the way's last step stops short of its tile. */
+	@Test
+	public void theEndOfTheWayReachesThePlace()
+	{
+		DestinationRoute route = new DestinationRoute();
+		RelayResponse.Destination far = destination("Al Kharid bank", route("item:ring-of-dueling", alKharid()));
+		far.x = 3330;
+		route.sync(far);
+		assertFalse(route.reaches(new WorldPoint(3293, 3184, 0), true));
+		assertTrue(route.advance(new WorldPoint(3310, 3200, 1)));
+		assertTrue(route.view().arrived());
+		assertTrue(route.reaches(new WorldPoint(3310, 3200, 1), true));
+	}
+
 	/** A destination as the map sends one to a single member: the player's own Send to RuneLite. */
 	private static RelayResponse.Destination sentTo(String memberId, RelayResponse.Destination destination)
 	{
