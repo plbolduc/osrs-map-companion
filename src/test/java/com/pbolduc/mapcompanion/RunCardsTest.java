@@ -962,6 +962,36 @@ public class RunCardsTest
 		assertEquals("Ready now", drawn[1]);
 	}
 
+	/**
+	 * After End run the kind of run was greyed with Start run for the wait between presses, though
+	 * choosing asks the map nothing, and neither said why. The picker stays; Start run waits and says
+	 * how long, on this card and on Port tasks, which the same wait holds.
+	 */
+	@Test
+	public void theWaitBetweenPressesHoldsStartRunAndNotThePicker() throws Exception
+	{
+		state.acceptFor(identity.id(), EPOCH, run("/contract/farm-run.json"), 1, System.currentTimeMillis());
+		refresh();
+		status = 204;
+		press(farm, "End run");
+		refresh();
+		assertTrue(route.pressWait(System.currentTimeMillis()) > 0L);
+		assertTrue(combo(farm).isEnabled());
+		choose("Herb run");
+		assertFalse(enabled(farm, "Start run"));
+		assertTrue(tip(farm), tip(farm).startsWith("The map asked to wait: "));
+		assertFalse(enabled(ports, "Start run"));
+		assertTrue(tip(ports), tip(ports).startsWith("The map asked to wait: "));
+	}
+
+	/** Start run's tooltip on a card, or "" with none. */
+	private static String tip(Component card) throws Exception
+	{
+		String[] tip = new String[1];
+		SwingUtilities.invokeAndWait(() -> tip[0] = button(card, "Start run").getToolTipText());
+		return tip[0] == null ? "" : tip[0];
+	}
+
 	/** Calls queued on a dispatcher that never runs them: a press stays in flight for the whole test. */
 	private static OkHttpClient neverAnswering()
 	{

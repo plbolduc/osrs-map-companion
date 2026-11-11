@@ -67,9 +67,11 @@ final class PortTasksPanel extends JPanel
 	static final String NEEDS_BOATS = Words.of("port.needsBoats");
 	static final String AFTER_FARM_RUN = "Start run after the farm run ends.";
 	static final String BOARD_ONCE = Words.of("port.boardOnce");
+	private static final String START_TIP = Words.of("port.startTip");
 	private final PortTaskReader reader;
 	private final ConfigStore settings;
 	private final FarmRunClient client;
+	private final DestinationRoute routes;
 	private final JPanel body = new JPanel();
 	/* The card's width, as the farm run's Start run is: it acts, so it is a button and not a link. */
 	private final JButton start = MapCompanionPanel.smallButton("Start run");
@@ -87,6 +89,7 @@ final class PortTasksPanel extends JPanel
 		this.reader = reader;
 		this.settings = settings;
 		this.client = client;
+		this.routes = routes;
 		this.run = new RunView(true, state, client, follower, routes, shortest, sprites, config);
 		/* The bold face's last "s" draws past its advance; two pixels keep it inside the label. */
 		MapCompanionPanel.taskCard(this, "portTasks", "Port tasks", sprites, "Sailing")
@@ -96,7 +99,7 @@ final class PortTasksPanel extends JPanel
 		add(MapCompanionPanel.left(body));
 		starter.setOpaque(false);
 		starter.setBorder(BorderFactory.createEmptyBorder(4, 0, 0, 0));
-		start.setToolTipText(Words.of("port.startTip"));
+		start.setToolTipText(START_TIP);
 		starter.add(start);
 		MapCompanionPanel.capped(starter);
 		add(MapCompanionPanel.left(starter));
@@ -138,6 +141,8 @@ final class PortTasksPanel extends JPanel
 		boolean after = offer && settings.on("shareBoats") && run.otherBusy();
 		starter.setVisible(offer && settings.on("shareBoats") && !after);
 		start.setEnabled(connected && loggedIn && client.ready() && !kept);
+		/* Greyed by the wait every Route shares, it says how long is left. A hop's window is not that wait. */
+		MapWait.tip(start, START_TIP, kept ? 0L : routes.pressWait(System.currentTimeMillis()));
 		hint.setVisible(offer && (!settings.on("shareBoats") || after));
 		MapCompanionPanel.setWrapped(hint, after ? AFTER_FARM_RUN : NEEDS_BOATS, WIDTH);
 		if (!worth)

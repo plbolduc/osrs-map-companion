@@ -797,7 +797,9 @@ Reroute again in a few seconds.* under a friend's Route for half a minute; a bus
 its own words, so Reroute is named only under Reroute. Every Route the wait greys says it in its
 tooltip, *The map asked to wait: 25s*, as a search row that takes no pick does, and Route here's
 chat line gives the seconds left as it is said. The gates are what they were: nothing is asked
-sooner, and the sidebar only says them.
+sooner, and the sidebar only says them. Both cards' *Start run* say it too. The farm run's kind of
+run is not greyed by the wait: choosing one asks the map nothing, so after *End run* the next run
+can be picked while *Start run* counts down.
 
 At the login screen the status card's *Logged out* is said once, and the presses that ask the map
 as a member wait for a character, greyed, since a member is a character: Reroute, Route back, the
