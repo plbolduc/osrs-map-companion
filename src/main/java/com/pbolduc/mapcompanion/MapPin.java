@@ -39,9 +39,11 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.util.function.Supplier;
+import java.util.function.ToDoubleFunction;
 import javax.annotation.Nullable;
 import net.runelite.api.Point;
 import net.runelite.api.coords.WorldPoint;
+import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.overlay.worldmap.WorldMapPoint;
 import net.runelite.client.util.Text;
 
@@ -54,6 +56,12 @@ import net.runelite.client.util.Text;
  * panned away says nothing about which way to go. RuneLite's own Party and clue plugins make the
  * same choice in the same way — {@code snapToEdge}, and a different picture while snapped — so a
  * player already knows how to read it.
+ *
+ * <p>Held there, the head turns its point the way the place lies, and the one the player asked
+ * about — the destination, the step being walked, the meetup — says what it is beside it. A bare
+ * disc with a 1 on it said neither: it sat on the left edge for a place to the left and for a
+ * place the map had only just scrolled past, and the number was a step the reader had to open
+ * the sidebar to read. A friend's head points and says nothing more; its letters are the name.
  *
  * <p>A pin is one shape, a head drawn out to a point on its tile, in a light rim inside a dark
  * one. The game's map is every colour a member's disc can be, and its own icons are ringed the
@@ -86,15 +94,34 @@ class MapPin extends WorldMapPoint
 	private static final int PAD = 3;
 	/** From the head's centre to the tip on the tile. */
 	private static final int TAIL = 17;
+	/** From the head's centre to its point at the edge: shorter, where it only has to show a way. */
+	private static final int NOSE = 13;
+	/** The side of the square a held head is painted on, whichever way it points. */
+	static final int HEAD = 2 * (NOSE + PAD);
+	/** Ways a held head is drawn pointing. An edge is exactly a quarter turn; only a corner lies between. */
+	private static final int WAYS = 16;
+	/** The label's height, its room either side of the words, and the most letters it holds. */
+	private static final int PILL = 16;
+	private static final int GAP = 6;
+	private static final int SAYS = 26;
 	/** The website draws a quiet member's disc at this opacity; the same number reads the same. */
 	private static final float FADED = 0.55f;
 	private static final int MAX_LABEL = 40;
 
+	private final Color fill;
+	private final Color rim;
+	@Nullable
+	private final String text;
+	private final boolean faded;
 	private final BufferedImage pin;
-	private final BufferedImage head;
 	private final Point tip;
 	@Nullable
 	private final Supplier<String> tooltip;
+	/** The head by the way it points, painted as each way is first asked for; the last is no way known. */
+	private final BufferedImage[] held = new BufferedImage[WAYS + 1];
+	@Nullable
+	private ToDoubleFunction<WorldPoint> way;
+	private String says = "";
 
 	/**
 	 * @param text one or two letters on the head, or empty for the dot of a place with none
@@ -109,8 +136,11 @@ class MapPin extends WorldMapPoint
 		@Nullable Supplier<String> tooltip)
 	{
 		super(where, null);
-		this.pin = drop(fill, rim, text, faded, TAIL);
-		this.head = drop(fill, rim, text, faded, 0);
+		this.fill = fill;
+		this.rim = rim;
+		this.text = text;
+		this.faded = faded;
+		this.pin = drop(TAIL, Math.PI / 2, true);
 		this.tip = new Point(pin.getWidth() / 2, PAD + (int) R + TAIL);
 		this.tooltip = tooltip;
 		setSnapToEdge(true);
@@ -118,6 +148,19 @@ class MapPin extends WorldMapPoint
 		setJumpOnClick(true);
 		setName(safe(name));
 		onEdgeUnsnap();
+	}
+
+	/**
+	 * How this pin holds the map's edge: pointing where {@code way} says its place lies, and saying
+	 * {@code says} beside its head, or nothing for null. Without a way it is a round head.
+	 */
+	MapPin atEdge(@Nullable ToDoubleFunction<WorldPoint> way, @Nullable String says)
+	{
+		this.way = way;
+		String words = plain(says);
+		this.says = words.length() <= SAYS ? words : words.substring(0, SAYS - 1) + "…";
+		java.util.Arrays.fill(held, null);
+		return this;
 	}
 
 	/**
@@ -142,12 +185,79 @@ class MapPin extends WorldMapPoint
 		return line.length() <= 80 ? line : line.substring(0, 79) + "…";
 	}
 
+	/**
+	 * RuneLite asks for the picture every frame before it places the point, and says only that a
+	 * point is held at the edge, never where. So a held pin looks again each time: the map scrolls
+	 * under it, a friend walks, and the way it points has to follow both.
+	 */
+	@Override
+	public BufferedImage getImage()
+	{
+		if (isCurrentlyEdgeSnapped())
+		{
+			setImage(heldPicture());
+		}
+		return super.getImage();
+	}
+
 	@Override
 	public void onEdgeSnap()
 	{
-		setImage(head);
-		/** Null centres the head on the edge, which is where the direction is read from. */
+		setImage(heldPicture());
+		/** Null centres the picture on the edge, which is where the direction is read from. */
 		setImagePoint(null);
+	}
+
+	/**
+	 * The head for the way the place lies now. With no way to point — the map shut, or the place
+	 * come back under the head before RuneLite lets go of it — it is round and says nothing: RuneLite
+	 * lets go only once the place is one and a half pictures inside the edge, and a wide label
+	 * would hold a place in plain view at the border for most of the map.
+	 */
+	private BufferedImage heldPicture()
+	{
+		double to = way == null ? Double.NaN : way.applyAsDouble(getWorldPoint());
+		boolean known = !Double.isNaN(to);
+		int slot = known ? Math.floorMod((int) Math.round(to * WAYS / (2 * Math.PI)), WAYS) : WAYS;
+		if (held[slot] == null)
+		{
+			double angle = slot * 2 * Math.PI / WAYS;
+			BufferedImage head = drop(known ? NOSE : 0, angle, false);
+			held[slot] = known && !says.isEmpty() ? labelled(head, angle) : head;
+		}
+		return held[slot];
+	}
+
+	/**
+	 * The head with what it is beside it, on the side away from the edge: inward of a head pointing
+	 * left or right, and over or under one pointing straight down or up, where a label to one side
+	 * would push the head off the column its place is in.
+	 */
+	private BufferedImage labelled(BufferedImage head, double angle)
+	{
+		Font font = FontManager.getRunescapeSmallFont();
+		Graphics2D measure = head.createGraphics();
+		int words = measure.getFontMetrics(font).stringWidth(says) + 2 * GAP;
+		measure.dispose();
+		double across = Math.cos(angle);
+		boolean upright = Math.abs(across) < 0.2;
+		/* The label tucks a little under the head's rim, which is drawn over it. */
+		int width = upright ? Math.max(HEAD, words) : HEAD + words - 10;
+		int x = upright ? (width - words) / 2 : across < 0 ? HEAD - 10 : 0;
+		int y = upright ? (Math.sin(angle) < 0 ? HEAD - 4 : 0) : (HEAD - PILL) / 2;
+		BufferedImage image = new BufferedImage(width, upright ? HEAD + PILL - 4 : HEAD, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g = paint(image, false);
+		g.setColor(new Color(24, 24, 27, 225));
+		g.fillRoundRect(x, y, words, PILL, 8, 8);
+		g.setColor(Color.BLACK);
+		g.drawRoundRect(x, y, words - 1, PILL - 1, 8, 8);
+		/* The game's small font is drawn to the pixel; smoothing it blurs the words the map's own labels keep sharp. */
+		g.setFont(font);
+		g.setColor(RIM);
+		g.drawString(says, x + GAP, y + PILL - 4);
+		g.drawImage(head, upright ? (width - HEAD) / 2 : across < 0 ? 0 : width - HEAD, upright && y == 0 ? PILL - 4 : 0, null);
+		g.dispose();
+		return image;
 	}
 
 	@Override
@@ -257,26 +367,26 @@ class MapPin extends WorldMapPoint
 	}
 
 	/**
-	 * A head of {@code fill}, drawn out to a point {@code tail} under its centre, or left round for
-	 * none. Painted solid and faded whole: fading each layer would show the rims through the fill.
-	 *
-	 * @param text the head's letters, empty for a place's dot, null for the boat
+	 * The head, drawn out to a point {@code reach} from its centre along {@code angle}, or left
+	 * round where the reach is inside it. A standing pin is painted tight over the shadow its tip
+	 * stands on; a held head on a square of {@link #HEAD}, whichever way it points. Painted solid
+	 * and faded whole: fading each layer would show the rims through the fill.
 	 */
-	private static BufferedImage drop(Color fill, Color rim, @Nullable String text, boolean faded, int tail)
+	private BufferedImage drop(int reach, double angle, boolean standing)
 	{
-		double centre = PAD + R;
+		double centre = standing ? PAD + R : HEAD / 2.0;
 		int side = (int) (2 * centre);
-		BufferedImage solid = new BufferedImage(side, side + tail + (tail > 0 ? PAD - 1 : 0), BufferedImage.TYPE_INT_ARGB);
+		BufferedImage solid = new BufferedImage(side, standing ? side + reach + PAD - 1 : side, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = paint(solid, false);
 		g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
 		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-		if (tail > 0)
+		if (standing)
 		{
 			/* What the tip stands on: without it a pin floats over the map rather than marking a tile. */
 			g.setColor(new Color(0, 0, 0, 70));
-			g.fill(new Ellipse2D.Double(centre - 5, centre + tail - 2, 10, 4));
+			g.fill(new Ellipse2D.Double(centre - 5, centre + reach - 2, 10, 4));
 		}
-		Shape shape = outline(centre, centre, tail, Math.PI / 2);
+		Shape shape = outline(centre, centre, reach, angle);
 		g.setColor(INK);
 		g.setStroke(new BasicStroke(4.2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 		g.draw(shape);

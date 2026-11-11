@@ -334,10 +334,23 @@ is theirs.
 
 ![](mockups/world-map-pins.png)
 
-**A pin while its place is in view, its head on the edge while it is not** (the bottom row). A
-point that vanished when the map was panned away said nothing about which way to go, which is
+**A pin while its place is in view, its head on the edge while it is not** (under the top row).
+A point that vanished when the map was panned away said nothing about which way to go, which is
 the one thing a destination or a friend somewhere else is for. RuneLite's Party and clue plugins
 make the same choice with the same API, so the edge reads the way a player already knows.
+
+**Held at the edge, the head points and the amber one says what it is.** The edge used to hold a
+bare disc: a *1* on the left border for a step to the left and for one the map had only just
+scrolled past, and a number the reader had to open the sidebar to read. The head now turns its
+point the way the place lies — straight out through the edge, and between the two in a corner —
+and the pin the player asked about has its words beside it on the side away from the edge: the
+step being walked, *Use Catherby tablet*; the destination's name when no step leads; the meetup's
+title; a farm run's next stop. A friend's head points and says nothing more, because its letters
+are the name and a group can be twenty-five heads. RuneLite tells a point that it is held and not
+where, so `MapEdge` works the place out again from the map's centre, zoom and widget, the three
+things the overlay itself reads. The words go as soon as the place is back under the head:
+RuneLite lets go of a held point only once it is one and a half pictures inside the edge, and a
+picture as wide as a label would have held a place in plain view at the border.
 
 **One shape in two rims.** A pin is its head drawn out to a point on the tile, in a light rim
 inside a dark one, over a small shadow where the tip stands. It was a disc with a black triangle

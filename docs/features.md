@@ -11,7 +11,8 @@ A teleport step shows what to click: the item's sprite or the spell's icon, from
 you follow the route, that item is outlined in your inventory or worn items, and that spell in
 your spellbook.
 Each step gets a numbered pin on the game's world map, and the step you are on is numbered in amber
-in both; the game's arrow points at it when it is in the loaded area.
+in both; the game's arrow points at it when it is in the loaded area. Drag the world map away from
+that step and its pin stays on the map's edge, pointing the way and naming the step.
 
 Press **Follow** to show the step you're on in a small box over the game, with its notes, such as
 a warning that it lands in the Wilderness; with **Shortest Path** installed, it also draws each
