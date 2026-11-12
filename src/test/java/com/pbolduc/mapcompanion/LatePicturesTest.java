@@ -29,7 +29,6 @@ import com.google.gson.Gson;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.GridLayout;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.InputStreamReader;
@@ -37,12 +36,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import javax.annotation.Nullable;
 import javax.swing.AbstractButton;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -110,18 +107,19 @@ public class LatePicturesTest
 	}
 
 	@Test
-	public void aPictureLandingLaterLeavesEveryFriendWholeAndTheGroupsButtonsOnThePage() throws Exception
+	public void aPictureLandingLaterLeavesEveryFriendWholeAndTheTabOnThePage() throws Exception
 	{
 		SwingUtilities.invokeAndWait(() ->
 		{
 			GroupPanel group = group();
-			/* The Group tab as the sidebar stacks it: the friends, then Copy invite and Switch. */
-			JPanel buttons = new JPanel(new GridLayout(1, 0, 4, 0));
-			MapCompanionPanel.syncRow(buttons, Arrays.asList(new JButton("Copy invite"), new JButton("Switch ▾")),
-				new ArrayList<>());
+			/*
+			 * The Group tab as the sidebar stacks it: the friends and meetups, alone. Copy invite and
+			 * Switch were stacked under them, and this asserted that a late picture did not push that
+			 * row off the page. The row is over the tabs now, where nothing in the tab can move it, so
+			 * what is asserted is the tab itself.
+			 */
 			JPanel tab = MapCompanionPanel.column(ColorScheme.DARK_GRAY_COLOR);
 			tab.add(group);
-			tab.add(MapCompanionPanel.left(buttons));
 			JPanel root = sidebar(tab);
 
 			for (JLabel news : waiting)
@@ -136,7 +134,7 @@ public class LatePicturesTest
 				assertEquals("a card at its own height, neither cut nor stretched", slot.getPreferredSize().height, slot.getHeight());
 				assertTrue("and inside the list", slot.getY() + slot.getHeight() <= friends.getHeight());
 			}
-			assertOnPage("Copy invite and Switch", buttons, root);
+			assertOnPage("the friends and meetups", group, root);
 		});
 	}
 
@@ -279,8 +277,7 @@ public class LatePicturesTest
 			destinations, new TestDestinationMarker());
 		MeetupClient meetups = new MeetupClient(new OkHttpClient(), new Gson(), game, now, pairing, identity, destinations, state,
 			link -> { });
-		GroupPanel group = new GroupPanel(destinations, state, press, meetups, config, later,
-			MapCompanionPanel.smallButton("Copy invite"));
+		GroupPanel group = new GroupPanel(destinations, state, press, meetups, config, later);
 		try
 		{
 			String stream = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "contract", "stream.json")),

@@ -74,14 +74,14 @@ public class AnsweredWherePressedTest
 		card.joinOpen = true;
 		draw();
 		Component field = named("join.field");
-		assertTrue("under Copy invite and Switch ▾, in the Group tab", card.groupActions.isAncestorOf(field));
+		assertTrue("under Copy invite and Switch ▾", card.groupActions.isAncestorOf(field));
 		assertTrue(shown(field));
 
 		/* Hide the code field */
 		card.joinOpen = false;
 		draw();
 		assertFalse(shown(named("join.field")));
-		assertFalse("back above the tabs, for the next time something there needs it", card.groupActions.isAncestorOf(field));
+		assertFalse("back under the orange button, for the next time something there needs it", card.groupActions.isAncestorOf(field));
 	}
 
 	@Test
@@ -194,7 +194,7 @@ public class AnsweredWherePressedTest
 		assertTrue(pairing.connect(JoinCode.parse("ABC234"), () -> true));
 		draw();
 		assertTrue(card.copyInviteButton.isEnabled());
-		card.refreshButtons(true, true, false, pairing.knownCodes(), groupPanel, System.currentTimeMillis());
+		card.refreshButtons(true, true, false, pairing.knownCodes(), System.currentTimeMillis());
 		assertFalse(card.copyInviteButton.isEnabled());
 		assertTrue(labelled(card.groupActions, "Switch ▾").isEnabled());
 	}
@@ -272,12 +272,11 @@ public class AnsweredWherePressedTest
 				});
 			MeetupClient meetups = new MeetupClient(new OkHttpClient(), new Gson(), MeetupClientTest.game(false), now,
 				pairing, identity, destinations, group, link -> { });
-			groupPanel = new GroupPanel(destinations, group, press, meetups, config, new GameSprites(null, null, null),
-				card.copyInviteButton);
+			groupPanel = new GroupPanel(destinations, group, press, meetups, config, new GameSprites(null, null, null));
 		}
 		groupPanel.refresh(ready, atMs);
 		card.refreshStatus(Health.LIVE, pairing.code(), paired, ready);
-		card.refreshButtons(paired, ready, pairing.knownCodes(), groupPanel, atMs);
+		card.refreshButtons(paired, ready, pairing.knownCodes(), atMs);
 	}
 
 	/** The first label reading these words, in the card above the tabs or in the Group tab's foot. */

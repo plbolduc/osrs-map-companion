@@ -131,6 +131,8 @@ public class MapCompanionPanel extends PluginPanel
 	/** The status card, the orange button, the join field and the group's buttons. See {@link ConnectCard}. */
 	private final ConnectCard connectCard;
 	private final CompanionViews views;
+	/** Copy invite and Switch ▾, between the orange button and the tabs. */
+	private final JPanel groupRow = column(DARK_GRAY_COLOR);
 	private final SidebarPages pages;
 	private final StarsPanel starsPanel;
 	/** Route, pressed anywhere in the sidebar; read here only to bring Home forward for its answer. */
@@ -199,7 +201,7 @@ public class MapCompanionPanel extends PluginPanel
 		this.recommendedSharing = new RecommendedSharing(config, settings, this::refresh);
 		this.connectCard = new ConnectCard(this, config, settings, plugin, identity, pairing, relay, directiveStream, connectClient,
 			recommendedSharing, this::refresh, this::openSettings, this::applyMapAddress, this::mapUrl);
-		this.groupPanel = new GroupPanel(destinationState, groupState, routePress, meetupClient, config, sprites, connectCard.copyInviteButton);
+		this.groupPanel = new GroupPanel(destinationState, groupState, routePress, meetupClient, config, sprites);
 		groupPanel.remover(new GroupPanel.Remover()
 		{
 			@Override
@@ -234,6 +236,14 @@ public class MapCompanionPanel extends PluginPanel
 
 		body.add(connectCard);
 		body.add(recommendedSharing);
+		/*
+		 * The group's buttons, over the tabs. An invite is wanted from any tab, and at the foot of the
+		 * Group tab every friend and every meetup put Copy invite a card further down.
+		 */
+		groupRow.add(gap(4, DARK_GRAY_COLOR));
+		groupRow.add(left(connectCard.groupActions));
+		groupRow.add(gap(4, DARK_GRAY_COLOR));
+		body.add(groupRow);
 		JPanel overview = column(DARK_GRAY_COLOR);
 		overview.setName("companionHome");
 		/* First, because "where is it and how do I get there" is the question the map answers best. */
@@ -267,8 +277,6 @@ public class MapCompanionPanel extends PluginPanel
 		JPanel group = column(DARK_GRAY_COLOR);
 		group.setName("companionGroupView");
 		group.add(groupPanel);
-		group.add(gap(4, DARK_GRAY_COLOR));
-		group.add(left(connectCard.groupActions));
 		views = new CompanionViews(overview, group, starsPanel, starsPanel::selected);
 		body.add(views);
 
@@ -700,9 +708,8 @@ public class MapCompanionPanel extends PluginPanel
 			drySection.setVisible(paused || dropLuck.hasContent());
 
 			/*
-			 * The group. In one: its invite beside the groups menu, which also joins another, or in the
-			 * Group tab's card while nobody else is in it. In none: the join field outright, and the
-			 * remembered groups under it.
+			 * The group. In one: its invite beside the groups menu, which also joins another, over the
+			 * tabs. In none: the join field outright, and the remembered groups under it.
 			 */
 			List<String> known = pairing.knownCodes();
 			/*
@@ -723,7 +730,9 @@ public class MapCompanionPanel extends PluginPanel
 			{
 				groupPanel.refresh(true, loggedIn, System.currentTimeMillis());
 			}
-			connectCard.refreshButtons(paired, ready, loggedIn, known, groupPanel, System.currentTimeMillis());
+			connectCard.refreshButtons(paired, ready, loggedIn, known, System.currentTimeMillis());
+			/* With the tabs: before a group there are none, and the step after a first Connect is the page. */
+			groupRow.setVisible(ready && views.isVisible());
 			/* Offered for the group just joined; leaving it, or a changed map, takes the offer away. */
 			if (!ready)
 			{

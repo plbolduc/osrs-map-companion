@@ -64,8 +64,8 @@ import static net.runelite.client.ui.ColorScheme.DARK_GRAY_COLOR;
 /**
  * The connection, at the top of the daily page: the status card with its dot and the gear, the one
  * orange button, the field that takes an invite or a code with Paste and Join under it, and the
- * remembered groups. Also the group's own buttons, Copy invite and Switch ▾, which sit under the
- * Group tab, and every dialog and message those presses open.
+ * remembered groups. Also the group's own buttons, Copy invite and Switch ▾, which sit over the
+ * tabs, and every dialog and message those presses open.
  *
  * <p>A class of its own because all of it is one conversation with the map — Connect, Join, Open the
  * map, Rename, an invite — and the state that conversation keeps, whether a press is waiting, why
@@ -150,9 +150,10 @@ final class ConnectCard extends JPanel
 	private String connectFailed;
 
 	/**
-	 * The foot of the Group tab: Copy invite and Switch ▾, the line that answers them, and the join
-	 * field while the menu's Join another group… has it open. Each press is answered under itself,
-	 * where the player is looking, which a line above the tabs is not once the tab has scrolled.
+	 * Under the orange button, over the tabs: Copy invite and Switch ▾, the line that answers them,
+	 * and the join field while the menu's Join another group… has it open. Over the tabs because an
+	 * invite is wanted from any of them, and under a list of friends and meetups the row had no fixed
+	 * place. Each press is answered under itself, where the player is looking.
 	 */
 	final JPanel groupActions = column(DARK_GRAY_COLOR);
 	private final JPanel groupButtons = row(DARK_GRAY_COLOR);
@@ -164,8 +165,8 @@ final class ConnectCard extends JPanel
 	/** The group the two lines above were said about: a line about one group is not news in the next. */
 	private String saidFor = "";
 	/**
-	 * Copy invite says Copied for a moment when the clipboard has the invite, on the button itself,
-	 * which in a group of one sits in the card at the top of the tab, far from the line under the row.
+	 * Copy invite says Copied for a moment when the clipboard has the invite, on the button itself
+	 * as well as on the line under the row.
 	 */
 	private final Timer copiedFlash = new Timer(2000, e -> showCopied(false));
 	static final String COPIED = "Copied";
@@ -195,7 +196,7 @@ final class ConnectCard extends JPanel
 	/**
 	 * The field and its line, as one piece that sits in one of two places: under the orange button
 	 * before a group, after a new map address and while the map refuses the group, where nothing else
-	 * offers a way in; and in the Group tab under Copy invite and Switch ▾ while the menu that opened
+	 * offers a way in; and under Copy invite and Switch ▾, over the tabs, while the menu that opened
 	 * it is what the player pressed.
 	 */
 	private final JPanel field = column(DARK_GRAY_COLOR);
@@ -1314,18 +1315,17 @@ final class ConnectCard extends JPanel
 
 	/**
 	 * The group's buttons, the join field and the orange button, from the remembered groups the
-	 * sidebar's refresh read. Called after the Group tab's own refresh, which decides whether its card
-	 * holds Copy invite. EDT.
+	 * sidebar's refresh read. EDT.
 	 */
-	void refreshButtons(boolean paired, boolean ready, List<String> known, GroupPanel groupPanel)
+	void refreshButtons(boolean paired, boolean ready, List<String> known)
 	{
-		refreshButtons(paired, ready, true, known, groupPanel, System.currentTimeMillis());
+		refreshButtons(paired, ready, true, known, System.currentTimeMillis());
 	}
 
 	/** The same, as of {@code now}: a confirmation is drawn only while it is news. */
-	void refreshButtons(boolean paired, boolean ready, List<String> known, GroupPanel groupPanel, long now)
+	void refreshButtons(boolean paired, boolean ready, List<String> known, long now)
 	{
-		refreshButtons(paired, ready, true, known, groupPanel, now);
+		refreshButtons(paired, ready, true, known, now);
 	}
 
 	/**
@@ -1333,19 +1333,15 @@ final class ConnectCard extends JPanel
 	 * member is a character, so Copy invite waits for one. Switch ▾, Rename group… and the orange
 	 * button act as the player, and stay.
 	 */
-	void refreshButtons(boolean paired, boolean ready, boolean loggedIn, List<String> known, GroupPanel groupPanel, long now)
+	void refreshButtons(boolean paired, boolean ready, boolean loggedIn, List<String> known, long now)
 	{
 		copyInviteButton.setEnabled(paired && loggedIn && pairing.hasServerConsent() && !copyingInvite);
 		knownGroupsRow.setVisible(!paired && !known.isEmpty());
 		List<JButton> groupRow = new ArrayList<>();
-		/* A group of one has Copy invite in the card that says so, from the Group tab's refresh just before. */
-		if (paired && !(ready && groupPanel.holdsInvite()))
-		{
-			groupRow.add(copyInviteButton);
-		}
 		if (paired)
 		{
-			/* Always, now that it also holds Join another group. */
+			/* Both, in a group of one too: the row is where an invite is looked for, on every tab. */
+			groupRow.add(copyInviteButton);
 			groupRow.add(switchButton);
 		}
 		shownGroupActions = syncRow(groupButtons, groupRow, shownGroupActions);
@@ -1390,8 +1386,8 @@ final class ConnectCard extends JPanel
 	}
 
 	/**
-	 * The field where it is wanted: in the Group tab under the group's buttons while the menu there
-	 * has it open, and under the orange button otherwise. It is one piece moved between two places,
+	 * The field where it is wanted: under the group's buttons while the menu there has it open, and
+	 * under the orange button otherwise. It is one piece moved between two places,
 	 * so what was typed in it and what it said go with it.
 	 */
 	private void placeField(boolean below)

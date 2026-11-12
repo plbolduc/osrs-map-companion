@@ -776,6 +776,13 @@ the menu's last row, under a rule, reading *Hide the code field* while the field
 of one, which is how Connect starts every group, *Copy invite* sits instead in the card that says
 *Just you so far*, under the sentence about it, and goes back beside *Switch ▾* once a friend is in.
 
+The row has since moved over the tabs, under the orange button, where it shows on every tab. An
+invite is wanted from Home as often as from Group, and at the foot of the Group tab every friend
+and every meetup put the row a card further down: with three friends and two meetups the tab
+painted 535px tall, and the row was its last 26. Over the tabs it is in view from the card of a
+group of one, so that card is its sentence alone and *Copy invite* stays beside *Switch ▾*. Home
+and Stars start 24px lower for it.
+
 Each of these presses is answered under itself. One line above the tabs said everything, so *Invite
 copied* and *Renamed to Sunday raids.* landed against the tab strip, out of sight once the Group tab
 had scrolled, and pushed the tabs down a line. Copy invite and the menu's *Rename group…* now answer
