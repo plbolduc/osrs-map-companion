@@ -325,8 +325,12 @@ public class StarsPanelTest
 
 	/**
 	 * A star hunter stays on Stars while they hop, so the way to the picked star is drawn under it
-	 * once the map answers: the steps Home's card draws, and Home's own Follow and Reroute as Home
-	 * offers them, pressed through rather than copied, so Stars never offers a press Home would not.
+	 * once the map answers: the steps Home's card draws, and Home's own Reroute as Home offers it,
+	 * pressed through rather than copied, so Stars never offers a press Home would not.
+	 *
+	 * <p>Two buttons, Reroute and Unpin. This asserted Home's Pause beside them; a way asked for here
+	 * is followed from the press, so a third button offered only to stop what nobody had started.
+	 * Paused from Home, the box over the game or a key, the way back is Home's Follow, offered here.
 	 */
 	@Test
 	public void theWayToThePickedStarShowsUnderItWithHomesOwnButtons() throws Exception
@@ -345,13 +349,19 @@ public class StarsPanelTest
 			assertNotNull("a view of the steps under the star", steps);
 			assertTrue("showing", showing(steps, tab.stars));
 			assertTrue(words(steps).toString(), words(steps).stream().anyMatch(line -> line.contains("Walk 12 tiles to the bank")));
+			assertNull("followed from the press, so no Pause here", named(tab.stars, "stars.follow"));
+			assertEquals("Reroute and Unpin", 2, named(tab.stars, "stars.unpin").getParent().getComponentCount());
+			assertFalse("pressable only while Home's is", named(tab.stars, "stars.reroute").isEnabled());
+			assertNull("the way is planned, so Route gives way to Reroute", named(tab.stars, "stars.route"));
+
+			/* Paused somewhere else: Home's card says Follow, and so does the star. */
+			tab.route.follow(false);
+			tab.follow.setText("Follow");
+			tab.stars.refresh();
 			AbstractButton follow = (AbstractButton) named(tab.stars, "stars.follow");
-			assertEquals("Home's own words", "Pause", follow.getText());
+			assertEquals("Home's own words", "Follow", follow.getText());
 			follow.doClick();
 			assertEquals("a press of Home's very button", 1, tab.followed.get());
-			assertFalse("pressable only while Home's is", named(tab.stars, "stars.reroute").isEnabled());
-			assertNotNull(named(tab.stars, "stars.unpin"));
-			assertNull("the way is planned, so Route gives way to Reroute", named(tab.stars, "stars.route"));
 
 			/* Home stops offering Follow, as it does on arrival: so does Stars. */
 			tab.offer(tab.reroute);

@@ -399,9 +399,10 @@ The website plan's second session, once the routes in the game are built: a memb
       own card, under the star, and a second press folds them away; an approximate one shows Open
       website. Far down the list, the card scrolls so both buttons are in view. Press Route: the
       star heads the tab as *Pinned destination* with its steps, the tab scrolls up to it, Stars
-      stays the tab, and Follow and
-      Reroute there act as Home's do while you walk and hop; Unpin clears the star and Home's card
-      together and the star is a plain row again. With one star pinned, press another: the pinned
+      stays the tab, and under the steps are two buttons, Reroute and Unpin. Reroute acts as
+      Home's does while you walk and hop; Unpin clears the star and Home's card together and the
+      star is a plain row again. Pause the route from Home, from the box over the game or with its
+      key: Follow appears beside Reroute on Stars, and goes again once pressed. With one star pinned, press another: the pinned
       one keeps the head of the tab and the other opens its own Route and Pin. A meetup's Route
       prints its world and its day and clock in the destination's line, with no countdown, and
       nobody in the group is told. Pressed on Group, a meetup's or a friend's Route turns the
