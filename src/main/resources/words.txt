@@ -190,4 +190,4 @@ search.boxTip=Search the map: a place, a character, a monster or an item. A pick
 
 # UpdateNotice: the one chat line an update says, on the first login after it. Every release writes
 # it again for what that release changed, and moves CompanionVersion.LINE_VERSION with it.
-update.line=Quest Helper's step shows on Home with Route, the Farm run card plans a Dailies run, and new sharing choices let the map mark your sea charts and dailies.
+update.line=sharing is three switches in Settings. If you share your position, your group now sees where you last died too; untick Where you died in RuneLite's settings for the plugin to stop that. Right-click the world map for a meetup there, and plan a sea charting run.

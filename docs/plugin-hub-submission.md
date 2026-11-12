@@ -7,9 +7,10 @@
 [runelite/plugin-hub#19965](https://github.com/runelite/plugin-hub/pull/19965) on 2 November, and
 to 1.5.0 (`eaa882b`) in [runelite/plugin-hub#20137](https://github.com/runelite/plugin-hub/pull/20137)
 on 4 November, to 1.6.0 (`f2d681f`) in
-[runelite/plugin-hub#20209](https://github.com/runelite/plugin-hub/pull/20209) on 6 November, and
+[runelite/plugin-hub#20209](https://github.com/runelite/plugin-hub/pull/20209) on 6 November,
 to 1.7.0 (`21e336e`) in [runelite/plugin-hub#20370](https://github.com/runelite/plugin-hub/pull/20370)
-on 9 November;
+on 9 November, and to 1.8.0 (`e70b06a`) in
+[runelite/plugin-hub#20477](https://github.com/runelite/plugin-hub/pull/20477) on 11 November;
 RuneLite's review bot approved and merged each update itself. The steps below are
 how it was submitted; a release after that is a merged plugin
 commit, then `commit=` updated in the Hub's `plugins/osrs-map-companion`. Completed and outstanding game checks
@@ -260,23 +261,29 @@ screenshot tools are outside `src/main`. Bundled third-party notices accompany t
 ## Changes since the approved submission
 
 What the next Hub update brings. Its description names each in a few words; the detail here is for
-answering a reviewer. Since 1.7.0:
+answering a reviewer. Since 1.8.0:
 
-- **Quest Helper's step on Home.** With Quest Helper's *Use 'Shortest Path' plugin* setting on, the
-  tile it hands Shortest Path over the event bus is shown on Home with Route, which sends that tile
-  as any Route does. The tile stays in the client otherwise; nothing new is requested.
-- **A Dailies run** in the Farm run card's picker, one more row in `farm-starts.txt` asking the map
-  for `start: "dailies"` through the existing run request. No new request or kind of run.
-- **Mortimer's offer** goes under the existing Slayer task choice: the two or three tasks Mortimer's
-  interface offers and each one's mortifier, only while it is open or unchanged since, as above.
-- **Sea charts charted:** a new sharing choice under Progress and travel, off until chosen and in
-  the one press at Connect, sending the ids of the sea charting tasks charted. No request is added.
 - **Sea charting run:** a new row in the farm run card's picker. Start sends `sea-charts` as the run
   kind on the existing run request; the map plans it from the sea charts already sent, and ticks a
   stop when they say its task is charted. No request, poll or field is added.
-- **Dailies collected:** a new sharing choice under Tasks and timers, off until chosen and in the one
-  press at Connect, sending which of eight dailies were collected today, as disclosed above. A
-  group's switch that was on before this update does not turn it on. No request or poll is added.
+- **A meetup at a spot picked on the world map:** a right-click on the game's world map offers
+  *Meet here* beside *Route here*, while the group shows in RuneLite. It is the existing meetup
+  request with the clicked tile in the place of the player's, as listed under Network requests.
+- **Copy invite on every tab:** the button moved from the foot of the Group tab to a row under
+  *Open the map*. The request and the clipboard write are the ones they were, on a press.
+- **A destination is taken down on arrival:** reaching a pinned place hides it in the client, as
+  the Dismiss or Unpin press does. Nothing is sent.
+- **The map address left the sidebar:** it is set in RuneLite's own settings for the plugin only.
+  The address rules are unchanged.
+- **Fewer snapshots, and a bounded wait:** a snapshot is built at most once in two seconds whether
+  or not it was posted, and a 429's `Retry-After` is held between five seconds and five minutes,
+  as every press's already was.
+- **No reply kept on disk:** every request carries `Cache-Control: no-store` beside the versioned
+  User-Agent, so RuneLite's HTTP cache writes no reply and no address. A fixed header.
+- **A member id per RuneLite profile:** a character's member id is stored under the installation
+  key of the RuneLite profile that minted it, so switching profile mints nothing and an update
+  changes nobody's id. Switching profile also turns on no sharing: the settings RuneLite replays
+  on a profile change are not read as presses.
 - **Three sharing switches in the sidebar:** Settings and the step after Connect draw *Where you
   are*, *Your account* and *Loot and milestones* where they drew six switches. RuneLite's list is
   unchanged, and so is every field. A switch only part of which is on shows a dash and names the
