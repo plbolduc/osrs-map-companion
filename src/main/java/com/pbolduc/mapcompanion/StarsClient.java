@@ -277,7 +277,7 @@ final class StarsClient
 			{
 				try (Response close = response)
 				{
-					long delay = retryDelay(close.header("Retry-After"));
+					long delay = MapWait.retryDelay(close.header("Retry-After"));
 					if (close.isRedirect())
 					{
 						finish(null, Words.of("map.redirects"), 300_000);
@@ -325,17 +325,5 @@ final class StarsClient
 				nextFeed = System.currentTimeMillis() + Math.max(60_000, delay);
 			}
 		});
-	}
-
-	static long retryDelay(String header)
-	{
-		try
-		{
-			return Math.max(5_000, Math.min(300_000, Long.parseLong(header) * 1_000));
-		}
-		catch (RuntimeException invalid)
-		{
-			return 30_000;
-		}
 	}
 }

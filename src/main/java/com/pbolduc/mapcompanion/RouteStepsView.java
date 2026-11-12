@@ -293,8 +293,7 @@ final class RouteStepsView extends JPanel
 	private void sayMessage(DestinationRoute.View view)
 	{
 		String status = view.rerouting ? "Planning from where you stand…"
-			: MapWait.waits(view.message) ? MapWait.tryAgain(view.message, view.nextRerouteMs - System.currentTimeMillis())
-			: view.message;
+			: MapWait.words(view.message, view.nextRerouteMs - System.currentTimeMillis());
 		MapCompanionPanel.show(message, status, WIDTH);
 		MapCompanionPanel.tone(message, !view.rerouting && view.refused);
 	}

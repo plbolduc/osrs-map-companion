@@ -213,7 +213,7 @@ final class MeetupClient
 	/** What a write said, as it is drawn at {@code now}: a wait it met counts down; see {@link MapWait}. */
 	String words(Said said, long now)
 	{
-		return MapWait.waits(said.message) ? MapWait.tryAgain(said.message, waitMs(now)) : said.message;
+		return MapWait.words(said.message, waitMs(now));
 	}
 
 	/** Answer a meetup: one of the map's four. A press, on any thread. */
@@ -300,19 +300,11 @@ final class MeetupClient
 		try (Response close = response)
 		{
 			long now = System.currentTimeMillis();
-			String wait = close.header("Retry-After");
 			int status = close.code();
-			if (status == 429 || status == 503)
-			{
-				finish(source, asked, MapWait.BUSY, now + StarsClient.retryDelay(wait));
-				return;
-			}
 			if (!close.isSuccessful())
 			{
-				String why = status == 403 || status == 410 ? RoutePress.NOT_CONNECTED
-					: status == 404 && !making ? GONE
-					: status == 400 && making ? REFUSED : FAILED;
-				finish(source, asked, why, now + Math.max(FAILURE_GAP_MS, wait == null ? 0L : StarsClient.retryDelay(wait)));
+				finish(source, asked, MapWait.why(status, status == 404 && !making ? GONE : status == 400 && making ? REFUSED : FAILED),
+					now + MapWait.after(close, FAILURE_GAP_MS));
 				return;
 			}
 			String text = CompanionHttp.readBounded(close.body());

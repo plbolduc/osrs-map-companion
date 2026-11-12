@@ -27,6 +27,7 @@ package com.pbolduc.mapcompanion;
 
 import javax.annotation.Nullable;
 import javax.swing.JButton;
+import okhttp3.Response;
 
 /**
  * The wait the plugin keeps before the map is asked again, in the words every line under a press
@@ -39,6 +40,9 @@ import javax.swing.JButton;
  * in when the refusal arrived still said "4s" a minute later. The gate is what decides when a
  * press may go: the five seconds after a worded no, the half minute after a failure, the map's own
  * Retry-After. Nothing here asks the map anything, or asks it sooner.
+ *
+ * <p>It is also where a reply that is no answer is read, the same way for every press: how long
+ * its Retry-After asks for, and whether it says the map is busy or this member is not in the group.
  */
 final class MapWait
 {
@@ -49,6 +53,60 @@ final class MapWait
 
 	private MapWait()
 	{
+	}
+
+	/**
+	 * A Retry-After header as a wait in milliseconds: its seconds, held between five and three
+	 * hundred, and thirty for a reply that names none or names something that is not a number.
+	 */
+	static long retryDelay(@Nullable String header)
+	{
+		try
+		{
+			return Math.max(5_000, Math.min(300_000, Long.parseLong(header) * 1_000));
+		}
+		catch (RuntimeException invalid)
+		{
+			return 30_000;
+		}
+	}
+
+	/** The wait a reply's Retry-After names, as {@link #retryDelay} reads it, or 0 when it names none. */
+	static long named(Response reply)
+	{
+		String wait = reply.header("Retry-After");
+		return wait == null ? 0L : retryDelay(wait);
+	}
+
+	/** A map with no room for the press right now, which says when to ask again. */
+	static boolean busy(int status)
+	{
+		return status == 429 || status == 503;
+	}
+
+	/**
+	 * How long after a reply the next press may go: a busy map's own Retry-After, and otherwise
+	 * {@code gap} or the wait the reply names, whichever is longer.
+	 */
+	static long after(Response reply, long gap)
+	{
+		return busy(reply.code()) ? retryDelay(reply.header("Retry-After")) : Math.max(gap, named(reply));
+	}
+
+	/**
+	 * Why a reply that is no answer is none: the map is busy, this member is not in the group it
+	 * asked as, or {@code otherwise}, the press's own word for anything else.
+	 */
+	static String why(int status, String otherwise)
+	{
+		return busy(status) ? BUSY : status == 403 || status == 410 ? RoutePress.NOT_CONNECTED : otherwise;
+	}
+
+	/** What a press said, as it is drawn {@code waitMs} short of its gate opening: a wait it met counts down. */
+	@Nullable
+	static String words(@Nullable String message, long waitMs)
+	{
+		return waits(message) ? tryAgain(message, waitMs) : message;
 	}
 
 	/** Whether a line is a wait, which counts down after its words; any other line is said as it is. */

@@ -25,7 +25,13 @@
  */
 package com.pbolduc.mapcompanion;
 
+import javax.annotation.Nullable;
 import javax.swing.JButton;
+import okhttp3.MediaType;
+import okhttp3.Protocol;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -60,6 +66,53 @@ public class MapWaitTest
 		assertTrue(MapWait.waits(MapWait.ASKED));
 		assertFalse("any other sentence is said as it is", MapWait.waits(RoutePress.NO_WAY));
 		assertFalse(MapWait.waits(null));
+	}
+
+	/**
+	 * One reading of a reply that is no answer, for every press: Route, Reroute, a run, a meetup
+	 * and the search each had a copy, and this is the rule the copies shared.
+	 */
+	@Test
+	public void aReplyThatIsNoAnswerIsReadTheSameWayForEveryPress()
+	{
+		assertEquals("a busy map is waited on for what it asks", 20_000L, MapWait.after(reply(429, "20"), 30_000L));
+		assertEquals("which may be less than a failure's gap", 20_000L, MapWait.after(reply(503, "20"), 30_000L));
+		assertEquals("and half a minute when it names none", 30_000L, MapWait.after(reply(429, null), 5_000L));
+		assertEquals("any other reply keeps the press's own gap", 5_000L, MapWait.after(reply(404, null), 5_000L));
+		assertEquals("or the wait it names, when that is longer", 60_000L, MapWait.after(reply(500, "60"), 30_000L));
+		assertEquals("and never a shorter one", 30_000L, MapWait.after(reply(500, "7"), 30_000L));
+		assertEquals("an answer may name a wait too", 60_000L, MapWait.after(reply(200, "60"), 5_000L));
+
+		assertEquals(0L, MapWait.named(reply(200, null)));
+		assertEquals("never under five seconds", 5_000L, MapWait.named(reply(200, "1")));
+		assertEquals("nor over five minutes", 300_000L, MapWait.named(reply(200, "86400")));
+		assertEquals("and half a minute for one that is not a number", 30_000L, MapWait.named(reply(200, "soon")));
+
+		assertEquals(MapWait.BUSY, MapWait.why(429, "other"));
+		assertEquals(MapWait.BUSY, MapWait.why(503, "other"));
+		assertEquals(RoutePress.NOT_CONNECTED, MapWait.why(403, "other"));
+		assertEquals(RoutePress.NOT_CONNECTED, MapWait.why(410, "other"));
+		assertEquals("other", MapWait.why(500, "other"));
+		assertEquals("other", MapWait.why(404, "other"));
+
+		assertEquals("The map is busy. Try again in 25s.", MapWait.words(MapWait.BUSY, 25_000L));
+		assertEquals("any other sentence is said as it is", RoutePress.NO_WAY, MapWait.words(RoutePress.NO_WAY, 25_000L));
+		assertEquals(null, MapWait.words(null, 25_000L));
+	}
+
+	private static Response reply(int code, @Nullable String retryAfter)
+	{
+		Response.Builder reply = new Response.Builder()
+			.request(new Request.Builder().url("https://example.invalid/api/companion/route").build())
+			.protocol(Protocol.HTTP_1_1)
+			.code(code)
+			.message("")
+			.body(ResponseBody.create(MediaType.get("application/json"), "{}"));
+		if (retryAfter != null)
+		{
+			reply.header("Retry-After", retryAfter);
+		}
+		return reply.build();
 	}
 
 	/** A press the wait greys says how long in its tooltip; pressable, or with no wait left, its own. */
