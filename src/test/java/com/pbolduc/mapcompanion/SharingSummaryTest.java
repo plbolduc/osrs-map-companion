@@ -54,7 +54,7 @@ public class SharingSummaryTest
 		assertEquals("what the one press after Connect leaves", "Sharing everything", line(config));
 		assertTrue(list(config), list(config).endsWith("<br>Shown as: your character name</body></html>"));
 		config.set("shareDeath", false);
-		assertEquals("what that press left before it ticked the death", "Sharing all but where you died", line(config));
+		assertEquals("what a player who turns the death off reads", "Sharing all but where you died", line(config));
 		config.set(MapCompanionConfig.KEY_SHARE_NAME, false);
 		assertEquals("the name is no switch", "Sharing all but where you died", line(config));
 		assertTrue(list(config), list(config).endsWith("<br>Shown as: Member</body></html>"));

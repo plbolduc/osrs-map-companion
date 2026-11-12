@@ -1273,10 +1273,14 @@ the whole plugin working, and *Not now* still shares nothing. The character name
 the step's first line says the group sees it, the press writes it, and Settings says *Shown as
 your character name* with *Use another name* beside the box for one.
 
-Nothing changes for a player who chose before. RuneLite's list keeps its six switches, the fields
-are the ones they were, and an update writes none of them. A switch only part of which is on
-shows a dash and says the part in the fewer words, so a player who shared all the step used to
-tick reads *Not shared: Where you died* under *Where you are*, and the status card's *Sharing all
-but where you died* as before. Turning the death on for them was considered and left out: the step
-showed it to them unticked, and they left it so. A player who hid their name keeps it hidden, and
-no switch in Settings turns it on.
+One thing changes for a player who chose before. The old step left *Where you died* unticked, so
+everyone who pressed it would open Settings on a dash under *Where you are*. The owner decided
+that a player who shares their position has the death turned on, once, by the first start of this
+version: their group already sees their dot, and the death is the tile that dot was on. Turned off
+afterwards, in RuneLite's list, it stays off, and the release's update line says it was turned on.
+
+Nothing else is written. RuneLite's list keeps its six switches and the fields are the ones they
+were. A player who does not share their position, or who pressed *Not now*, is not changed. A
+switch only part of which is on shows a dash and says the part in the fewer words, *Not shared:
+Where you died* for one. A player who hid their name keeps it hidden, and no switch in Settings
+turns it on.

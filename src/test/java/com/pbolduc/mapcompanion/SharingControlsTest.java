@@ -168,8 +168,8 @@ public class SharingControlsTest
 	 * the fewer words, what is off or what is on; a press then turns all of it on, as a press of any
 	 * switch that is off does, and a second press all of it off. Rewritten when each field lost its own
 	 * box, and again when six switches became three: Where you are is the map presence and where you
-	 * died, so a player who shared all the step used to tick reads "Not shared: Where you died" under
-	 * it, and nothing of theirs changes until they press. A switch never turns the name on.
+	 * died, so a player who turns the death off in RuneLite's list reads "Not shared: Where you died"
+	 * under it, and nothing changes until they press. A switch never turns the name on.
 	 */
 	@Test
 	public void aSwitchWritesAllOfItsFieldsAndNamesAPartlySharedOne() throws Exception
