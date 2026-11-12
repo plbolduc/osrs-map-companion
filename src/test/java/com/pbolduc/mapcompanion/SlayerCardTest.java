@@ -133,7 +133,8 @@ public class SlayerCardTest
 		List<String> waiting = shown(panel);
 		assertTrue(waiting.toString(), waiting.contains("Ranking again for one target at a time…"));
 		assertTrue(waiting.toString(), waiting.contains("1. Slayer Tower (basement)"));
-		assertTrue(waiting.toString(), waiting.contains("3. Slayer Tower (roof)"));
+		/* A place that is not the open one is its name as a link, with the fold's arrow: see onePlaceIsOpenAtATime. */
+		assertTrue(waiting.toString(), waiting.contains("▸ 3. Slayer Tower (roof)"));
 		assertTrue(waiting.toString(), waiting.contains("Hide Wilderness"));
 		JComboBox<?> order = (JComboBox<?>) find(panel, "slayer.order");
 		assertNotNull("the picker stays on the card: " + waiting, order);
@@ -282,6 +283,56 @@ public class SlayerCardTest
 	}
 
 	/**
+	 * Six places each with its facts and a Route and a Pin read as twelve buttons alike. One place is
+	 * open at a time, Best for you to begin with: its kinds, what it asks and its two buttons. Every
+	 * other is its name and labels, and pressing the name opens it in place of the one that was open.
+	 */
+	@Test
+	public void onePlaceIsOpenAtATime() throws Exception
+	{
+		state.local(identity.id(), gargoyles(), "best", true);
+		received(places("best"), 1);
+		refresh();
+		press("▸ All 3 places & options");
+		List<String> list = shown(panel);
+		assertEquals(list.toString(), 1, java.util.Collections.frequency(list, "Route"));
+		assertEquals(list.toString(), 1, java.util.Collections.frequency(list, "✓ 75 Slayer"));
+		assertTrue(list.toString(), list.indexOf("Route") < list.indexOf("▸ 2. Slayer Tower (top floor)"));
+		assertTrue("a closed place keeps its labels: " + list, list.indexOf("Safespot · Aggressive") < list.lastIndexOf("Safespot · Aggressive"));
+
+		press("▸ 3. Slayer Tower (roof)");
+		List<String> roof = shown(panel);
+		assertTrue(roof.toString(), roof.contains("3. Slayer Tower (roof)"));
+		assertTrue("the place that was open closes: " + roof, roof.contains("▸ 1. Slayer Tower (basement)"));
+		assertEquals(roof.toString(), 1, java.util.Collections.frequency(roof, "Route"));
+		assertTrue(roof.toString(), roof.indexOf("Route") > roof.indexOf("3. Slayer Tower (roof)"));
+		press("Pin");
+		assertEquals("the buttons are the open place's", "Slayer Tower (roof)", destinations.getDestination().name);
+
+		/* Folded back to one place, the list shows Best for you again, open: a closed row alone would offer no Route. */
+		press("▾ Show less");
+		List<String> closed = shown(panel);
+		assertTrue(closed.toString(), closed.contains("1. Slayer Tower (basement)"));
+		assertEquals(closed.toString(), 1, java.util.Collections.frequency(closed, "Route"));
+	}
+
+	/**
+	 * A place that still asks for something says so while it is closed, since that is why its name is
+	 * grey; what a place asks and the player has waits for the open one.
+	 */
+	@Test
+	public void aClosedPlaceStillSaysWhatItNeeds() throws Exception
+	{
+		state.local(identity.id(), gargoyles(), "best", true);
+		received(places("/contract/slayer-blocked.json", "best"), 1);
+		refresh();
+		press("▸ All 3 places & options");
+		List<String> list = shown(panel);
+		assertTrue(list.toString(), list.contains("▸ 2. Slayer Tower (top floor)"));
+		assertEquals("on the open place and both closed ones: " + list, 3, java.util.Collections.frequency(list, "Needs 75 Slayer"));
+	}
+
+	/**
 	 * The heading's arrow folds the card to its heading and the task with its count, which is what a
 	 * glance at a folded Slayer card is for, and the choice is kept for the next time the sidebar
 	 * opens. Pressed again, the places are back.
@@ -414,7 +465,8 @@ public class SlayerCardTest
 		{
 			return null;
 		}
-		if (component instanceof AbstractButton && words.equals(((AbstractButton) component).getText()))
+		/* A place's name wraps, so its button's words are markup: read as a player reads them. */
+		if (component instanceof AbstractButton && words.equals(plain(((AbstractButton) component).getText())))
 		{
 			return (AbstractButton) component;
 		}
@@ -430,6 +482,11 @@ public class SlayerCardTest
 			}
 		}
 		return null;
+	}
+
+	private static String plain(String text)
+	{
+		return text == null ? "" : text.replaceAll("<[^>]+>", "").replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&").trim();
 	}
 
 	private static Component find(Component component, String name)
@@ -474,7 +531,7 @@ public class SlayerCardTest
 			: component instanceof AbstractButton ? ((AbstractButton) component).getText() : null;
 		if (text != null && !text.isEmpty())
 		{
-			out.add(text.replaceAll("<[^>]+>", "").replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&").trim());
+			out.add(plain(text));
 		}
 		if (component instanceof Container)
 		{

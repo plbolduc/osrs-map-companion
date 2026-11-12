@@ -165,7 +165,9 @@ final class PortTasksPanel extends JPanel
 			}
 			/* A courier with every crate in is finished, and greyed as a finished stop on a run is. */
 			boolean finished = delivered(slot);
-			body.add(line(title(slot), finished ? ColorScheme.MEDIUM_GRAY_COLOR : Color.WHITE, 12f, 4));
+			/* A hairline between tasks, so two lines of one do not run on into the next one's name. */
+			JLabel name = line(title(slot), finished ? ColorScheme.MEDIUM_GRAY_COLOR : Color.WHITE, 12f, 4);
+			body.add(body.getComponentCount() == 0 ? name : MapCompanionPanel.ruled(name, 5, 3));
 			body.add(line(next(slot), finished ? ColorScheme.MEDIUM_GRAY_COLOR : MUTED, 11f, 0));
 		}
 		body.add(line(footer(slots, hold), MUTED, 11f, running ? 4 : 6));
