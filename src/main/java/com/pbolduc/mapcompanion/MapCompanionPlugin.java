@@ -702,9 +702,10 @@ public class MapCompanionPlugin extends Plugin
 	{
 		xpTracker.reset();
 		clueReader.reset();
-		travelUnlockReader.onSessionEnded();
-		stashReader.onSessionEnded();
-		boatReader.onSessionEnded();
+		for (SettlingReader reader : settling())
+		{
+			reader.onSessionEnded();
+		}
 		if (hop)
 		{
 			portTaskReader.onHop();
@@ -713,12 +714,18 @@ public class MapCompanionPlugin extends Plugin
 		{
 			portTaskReader.onSessionEnded();
 		}
-		birdhouseReader.onSessionEnded();
-		dailyReader.onSessionEnded();
-		seaChartReader.onSessionEnded();
-		mortimerOfferReader.onSessionEnded();
 		questReader.onSessionEnded();
 		assignmentReader.onSessionEnded();
+	}
+
+	/**
+	 * The readers told of a session's start and its end at the same moments, in every way one ends.
+	 * The farming, diary, port task and death readers are not here: each ends at a moment of its own.
+	 */
+	private SettlingReader[] settling()
+	{
+		return new SettlingReader[]{travelUnlockReader, stashReader, boatReader, birdhouseReader, dailyReader,
+			seaChartReader, mortimerOfferReader};
 	}
 
 	/**
@@ -2095,14 +2102,13 @@ public class MapCompanionPlugin extends Plugin
 		 * Ahead of the sharing toggle, because a clock that only runs while a setting is on would
 		 * make turning the setting on mid-session read a fresh set of zeroes.
 		 */
+		for (SettlingReader reader : settling())
+		{
+			reader.onSessionResumed(now);
+		}
 		farmingObserver.onSessionResumed(now);
 		diaryReader.onSessionResumed(now);
-		travelUnlockReader.onSessionResumed(now);
-		stashReader.onSessionResumed(now);
-		boatReader.onSessionResumed(now);
 		portTaskReader.onSessionResumed(now);
-		birdhouseReader.onSessionResumed(now);
-		dailyReader.onSessionResumed(now);
 		questReader.onSessionResumed(now);
 		deathWatcher.onSessionResumed(now);
 		assignmentReader.observe(now);
@@ -2110,8 +2116,6 @@ public class MapCompanionPlugin extends Plugin
 		 * Read every tick while the choice is on, for the sidebar as much as the snapshot: the slots
 		 * are five varbits and a cached row each. Off, nothing is read or shown.
 		 */
-		seaChartReader.onSessionResumed(now);
-		mortimerOfferReader.onSessionResumed(now);
 		if (settings().on("shareSlayer"))
 		{
 			mortimerOfferReader.observe(now);
