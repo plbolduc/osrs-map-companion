@@ -26,6 +26,7 @@
 package com.pbolduc.mapcompanion;
 
 import com.google.gson.Gson;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.io.IOException;
@@ -210,12 +211,37 @@ public class StarsWordsTest
 			panel.refresh();
 			/* The star's own card says it: the picked world's line over the tab, which this read, is gone. */
 			List<String> words = words(panel);
-			assertTrue("the star's card says it plainly: " + words, words.stream().anyMatch(word -> word.endsWith("T3 · W306 · Depleted")));
+			assertTrue("the star's card says it plainly: " + words, words.contains("Depleted"));
 			for (String word : words)
 			{
 				assertFalse(word, word.contains("Depleted left"));
 			}
 		});
+	}
+
+	/**
+	 * A star on the world the player is on needs no hop, so its world is drawn in the Group tab's green
+	 * for one; every other world is white. The world is the game's own, read with the levels.
+	 */
+	@Test
+	public void theWorldThePlayerIsOnIsGreen() throws Exception
+	{
+		scene(fixture(), false);
+		open();
+		until(() -> service.model.feed != null);
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.refresh();
+			assertEquals(Integer.valueOf(302), service.model.playerWorld);
+			assertEquals(StarsPanel.HERE, within(named(panel, "stars.site.tile:2974,3241"), "star.world").getForeground());
+			assertEquals("W302", ((JLabel) within(named(panel, "stars.site.tile:2974,3241"), "star.world")).getText());
+			assertEquals(Color.WHITE, within(named(panel, "stars.site.tile:3296,3298"), "star.world").getForeground());
+		});
+	}
+
+	private static Component within(Component parent, String name)
+	{
+		return named((Container) parent, name);
 	}
 
 	@Test
@@ -330,6 +356,8 @@ public class StarsWordsTest
 						return 72;
 					case "getTotalLevel":
 						return 1620;
+					case "getWorld":
+						return 302;
 					case "getWorldType":
 						return worldTypes;
 					default:

@@ -102,8 +102,13 @@ expected hunting. A bounty's pin opens the creature on the map.
 
 ## Shooting stars
 
-**Stars** lists active stars by site, world, tier and estimated time left. Filter by tier and
-world type, and save favourite sites; your filters and favourites stay on your computer.
+**Stars** lists active stars by site, world, tier and estimated time left. Each star's tier is in
+bold in the tier's colour. Its world is the number in bold beside the world switcher's own star
+for that world, gold for members, silver for free, or the PvP or Deadman star, and the number is
+green when you are already on that world; a
+site with stars on several worlds shows the one with the most time left and how many more there
+are. Filter by tier and world type, and save favourite sites; your filters and favourites stay on
+your computer.
 Press a star to open **Route** and **Pin** under it: Route plans the way there and pins the star,
 and Pin only marks it on the world map. The pinned star stays at the top of the tab with its steps,
 as on Home, so you can stay on Stars while you hop.

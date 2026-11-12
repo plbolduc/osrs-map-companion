@@ -144,7 +144,8 @@ final class StarsClient
 			if (total != null && total < 1) total = null;
 			Integer knownMining = mining, knownTotal = total;
 			String game = allowed ? gameOf(client.getWorldType()) : null;
-			SwingUtilities.invokeLater(() -> update(server, code, profile, allowed, between, knownMining, knownTotal, game));
+			Integer world = allowed ? (Integer) client.getWorld() : null;
+			SwingUtilities.invokeLater(() -> update(server, code, profile, allowed, between, knownMining, knownTotal, game, world));
 		});
 	}
 
@@ -172,7 +173,7 @@ final class StarsClient
 		return StarsModel.MAIN;
 	}
 
-	private void update(String server, String code, String profile, boolean allowed, boolean between, Integer mining, Integer total, String game)
+	private void update(String server, String code, String profile, boolean allowed, boolean between, Integer mining, Integer total, String game, Integer world)
 	{
 		if (!active) return;
 		/* The list is a character's: none until RuneLite names the one logged in. */
@@ -216,6 +217,7 @@ final class StarsClient
 		if (between) return;
 		model.miningLevel = mining;
 		model.skillTotal = total;
+		model.playerWorld = world;
 		if (game != null) model.playerGame = game;
 		if (feedCall == null && System.currentTimeMillis() >= nextFeed) fetchFeed(server);
 	}

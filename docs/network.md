@@ -122,7 +122,8 @@ the latter. **Copy invite**
 makes one request for an expiring invite. While **Stars** is open, logged in and connected,
 the star list is fetched about once a minute without character or group credentials. Its filters,
 favourite sites, Mining level and skill total filter stars locally and are kept in this RuneLite's
-settings for the character; none of them is sent.
+settings for the character; none of them is sent. The world you are on is read to mark a star
+that needs no hop, and is neither kept nor sent.
 
 A place that arrives from the map is said once in the chat box, by this client alone: a game
 message nobody else sees, which sends nothing.

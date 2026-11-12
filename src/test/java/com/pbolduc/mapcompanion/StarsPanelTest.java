@@ -429,9 +429,14 @@ public class StarsPanelTest
 	}
 
 	/**
-	 * A tier is drawn in the map's own colour for it, and a time left warns before the star ends: amber
+	 * A tier is bold letters in the map's own colour for it, and a time left warns before the star ends: amber
 	 * under twenty minutes and red under five, as the website tones them, grey once it is depleted, and
-	 * the line's own ink while there is time. The same on a site card, a world row and the picked line.
+	 * the line's own ink while there is time. The same on a site card, a world row and the pinned line.
+	 *
+	 * <p>This read the facts out of one string of markup. Each is a label of its own now, the tier and
+	 * the world in bold, so a list is scanned by colour down its left edge and by time down its right;
+	 * and a world row says "~34m left" as every line does. The tier is its letters' colour, on no
+	 * ground of its own.
 	 */
 	@Test
 	public void aTierIsTheMapsColourAndATimeLeftWarnsBeforeItEnds() throws Exception
@@ -465,41 +470,113 @@ public class StarsPanelTest
 			service.model.preferences.filters.hideDepleted = false;
 			stars.refresh();
 
-			String rimmington = ((AbstractButton) named(stars, "stars.site.tile:2974,3241")).getText();
-			assertTrue(rimmington, rimmington.contains("<font color='#f472b6'>T7</font>"));
-			assertTrue("time to spare keeps the card's ink: " + rimmington, rimmington.contains("<font color='#b8b8b8'>~46m left</font>"));
-			String alKharid = ((AbstractButton) named(stars, "stars.site.tile:3296,3298")).getText();
-			assertTrue(alKharid, alKharid.contains("<font color='#84cc16'>T3</font>"));
-			assertTrue(alKharid, alKharid.contains("<font color='#ff6568'>~3m left</font>"));
+			Container rimmington = (Container) named(stars, "stars.site.tile:2974,3241");
+			assertEquals("T7", fact(rimmington, "tier").getText());
+			assertEquals(StarsPanel.TIERS[6], fact(rimmington, "tier").getForeground());
+			assertTrue("in bold", fact(rimmington, "tier").getFont().isBold());
+			assertFalse("letters alone, on no ground of their own", fact(rimmington, "tier").isOpaque());
+			assertEquals("W302", fact(rimmington, "world").getText());
+			assertTrue("the world in bold", fact(rimmington, "world").getFont().isBold());
+			assertEquals("~46m left", fact(rimmington, "left").getText());
+			assertEquals("time to spare keeps the card's ink", new Color(184, 184, 184), fact(rimmington, "left").getForeground());
+			Container alKharid = (Container) named(stars, "stars.site.tile:3296,3298");
+			assertEquals(StarsPanel.TIERS[2], fact(alKharid, "tier").getForeground());
+			assertEquals("~3m left", fact(alKharid, "left").getText());
+			assertEquals(StarsPanel.DYING_TONE, fact(alKharid, "left").getForeground());
 
+			assertEquals("the worlds besides the one printed", "+2 ▾", ((AbstractButton) named(stars, "stars.expand.tile:2974,3241")).getText());
 			((AbstractButton) named(stars, "stars.expand.tile:2974,3241")).doClick();
-			assertEquals(StarsPanel.TIERS[6], cell(stars, "302|rimmington mine", 0).getForeground());
-			assertEquals(Color.WHITE, cell(stars, "302|rimmington mine", 3).getForeground());
-			assertEquals(StarsPanel.TIERS[4], cell(stars, "330|rimmington mine", 0).getForeground());
-			assertEquals("~34m", cell(stars, "330|rimmington mine", 3).getText());
-			assertEquals("Depleted", cell(stars, "444|rimmington mine", 3).getText());
-			assertEquals(ColorScheme.MEDIUM_GRAY_COLOR, cell(stars, "444|rimmington mine", 3).getForeground());
+			assertEquals(StarsPanel.TIERS[6], fact(row(stars, "302|rimmington mine"), "tier").getForeground());
+			assertEquals(StarsPanel.TIERS[4], fact(row(stars, "330|rimmington mine"), "tier").getForeground());
+			assertEquals("~34m left", fact(row(stars, "330|rimmington mine"), "left").getText());
+			assertEquals("Depleted", fact(row(stars, "444|rimmington mine"), "left").getText());
+			assertEquals(ColorScheme.MEDIUM_GRAY_COLOR, fact(row(stars, "444|rimmington mine"), "left").getForeground());
 
 			service.model.feed.rows.stream().filter(star -> star.world == 330).findFirst().get().remainingMs = 15 * 60_000L;
 			((AbstractButton) named(stars, "stars.world.330|rimmington mine")).doClick();
-			assertEquals("under twenty minutes", StarsPanel.FADING_TONE, cell(stars, "330|rimmington mine", 3).getForeground());
-			/* The line is the pinned star's now, where it was the picked one's. */
+			assertEquals("under twenty minutes", StarsPanel.FADING_TONE, fact(row(stars, "330|rimmington mine"), "left").getForeground());
 			((AbstractButton) named(stars, "stars.pin")).doClick();
-			String pinned = words(stars).stream().filter(line -> line.startsWith("W330")).findFirst().get();
-			assertEquals("W330 · T5 · ~15m left", pinned);
+			Container head = (Container) stars.getComponent(0);
+			assertTrue(words(head).toString(), words(head).containsAll(Arrays.asList("Pinned destination", "T5", "W330", "~15m left")));
 		});
 	}
 
-	/** Each colour reads on a site card's grey and on the picked world's row, which is darkened for them. */
+	/**
+	 * A world is its number behind the world switcher's own star for its kind, as the game lists a
+	 * world, where it was "W302": the star says members or free, and PvP or Deadman before either,
+	 * which the letter never could. The rule is the website's. A world the map's list did not have
+	 * keeps the W rather than being called free to play, and so does every world while there are no
+	 * pictures to draw.
+	 */
 	@Test
-	public void everyTierAndBothWarningsReadOnACardAndOnThePickedRow()
+	public void aWorldIsItsNumberBehindTheWorldSwitchersStarForItsKind() throws Exception
+	{
+		/* The star asked for, by the label it is to be drawn on. */
+		java.util.Map<Component, Integer> asked = new java.util.IdentityHashMap<>();
+		SwingUtilities.invokeAndWait(() ->
+		{
+			HarnessStore store = new HarnessStore();
+			Pairing pairing = new Pairing(store, new Gson());
+			MemberIdentity identity = new MemberIdentity(store);
+			StarsClient service = new StarsClient(new OkHttpClient(), new Gson(), null, new ClientThread(),
+				new HarnessConfig(store, MapCompanionConfig.DEFAULT_MAP_URL), pairing, identity, store);
+			DestinationState destinations = new DestinationState(new Gson());
+			RoutePress press = new RoutePress(new OkHttpClient(), new Gson(), null, new ClientThread(), pairing, identity,
+				new DestinationRoute(), destinations, new TestDestinationMarker());
+			GameSprites pictures = new GameSprites(null, null, null)
+			{
+				@Override
+				void sprite(JLabel label, int spriteId, int box)
+				{
+					asked.put(label, spriteId);
+				}
+			};
+			StarsPanel stars = new StarsPanel(service, destinations, new ClientThread(), new TestDestinationMarker(), press,
+				() -> MapCompanionConfig.DEFAULT_MAP_URL, new DestinationRoute(), null, null, pictures, rerouting -> null, () -> { });
+			StarsModel.Feed feed = feed();
+			for (StarsModel.Star star : feed.rows)
+			{
+				star.pvp = star.world == 330;
+				star.deadman = star.world == 444;
+				if (star.world == 306)
+				{
+					star.members = null;
+				}
+			}
+			service.model.accept(feed);
+			service.model.miningLevel = 72;
+			stars.refresh();
+			((AbstractButton) named(stars, "stars.expand.tile:2974,3241")).doClick();
+
+			assertEquals("the number alone", "302", fact((Container) named(stars, "stars.site.tile:2974,3241"), "world").getText());
+			assertEquals("the star before the number", "star.kind", fact(row(stars, "302|rimmington mine"), "world").getParent().getComponent(0).getName());
+			assertEquals(Integer.valueOf(net.runelite.api.gameval.SpriteID.WorldswitcherStars.MEMBERS),
+				asked.get(named(row(stars, "302|rimmington mine"), "star.kind")));
+			assertEquals("PvP before members", Integer.valueOf(net.runelite.api.gameval.SpriteID.WorldswitcherStars.PVP),
+				asked.get(named(row(stars, "330|rimmington mine"), "star.kind")));
+			assertEquals("Deadman before both", Integer.valueOf(net.runelite.api.gameval.SpriteID.WorldswitcherStars.DEADMAN),
+				asked.get(named(row(stars, "444|rimmington mine"), "star.kind")));
+			assertEquals("a world of no known kind keeps its letter", "W306", fact((Container) named(stars, "stars.site.tile:3296,3298"), "world").getText());
+			assertNull("and gets no star", named((Container) named(stars, "stars.site.tile:3296,3298"), "star.kind"));
+		});
+		StarsModel.Star free = new StarsModel.Star();
+		free.members = false;
+		assertEquals(Integer.valueOf(net.runelite.api.gameval.SpriteID.WorldswitcherStars.FREE), StarsPanel.worldStar(free));
+	}
+
+	/**
+	 * Each colour reads on a site card's grey and on the picked world's row, which is darkened for
+	 * them: every tier's letters, both warnings, and the world the player is on.
+	 */
+	@Test
+	public void everyTierAndEachColouredWordReadsOnACardAndOnThePickedRow()
 	{
 		for (Color colour : StarsPanel.TIERS)
 		{
 			assertTrue(colour + " on a card", contrast(colour, ColorScheme.DARKER_GRAY_COLOR) >= 5.5);
 			assertTrue(colour + " on the picked row", contrast(colour, StarsPanel.PICKED) >= 4.5);
 		}
-		for (Color colour : new Color[]{StarsPanel.FADING_TONE, StarsPanel.DYING_TONE})
+		for (Color colour : new Color[]{StarsPanel.FADING_TONE, StarsPanel.DYING_TONE, StarsPanel.HERE})
 		{
 			assertTrue(colour + " on a card", contrast(colour, ColorScheme.DARKER_GRAY_COLOR) >= 4.5);
 			assertTrue(colour + " on the picked row", contrast(colour, StarsPanel.PICKED) >= 4.5);
@@ -524,10 +601,16 @@ public class StarsPanelTest
 		return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
 	}
 
-	/** One cell of a world's row: its tier, world, age and time left, left to right. */
-	private static JLabel cell(Container stars, String star, int column)
+	/** One world's row under its site. */
+	private static Container row(Container stars, String star)
 	{
-		return (JLabel) ((Container) named(stars, "stars.world." + star)).getComponent(column);
+		return (Container) named(stars, "stars.world." + star);
+	}
+
+	/** One of a star's facts in a card or a row: its tier, world or time left. */
+	private static JLabel fact(Container in, String which)
+	{
+		return (JLabel) named(in, "star." + which);
 	}
 
 	/**

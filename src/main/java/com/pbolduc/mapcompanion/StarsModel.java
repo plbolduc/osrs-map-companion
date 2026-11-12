@@ -158,6 +158,8 @@ final class StarsModel
 	Feed feed;
 	String selected;
 	Integer miningLevel, skillTotal;
+	/** The world the player is on, so a star there can say it needs no hop; null while unknown. */
+	Integer playerWorld;
 	private long receivedNanos;
 
 	void accept(Feed incoming)
@@ -265,7 +267,7 @@ final class StarsModel
 		return favorites;
 	}
 
-	/** "~46m", or "Depleted": the last column of a world's row, a column too narrow for more. */
+	/** "~46m", or "Depleted": a time left without its sentence. */
 	static String minutes(long remaining)
 	{
 		return remaining <= 0 ? "Depleted" : "~" + shownMinutes(remaining) + "m";

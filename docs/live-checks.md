@@ -82,6 +82,16 @@ often. A clean run is now 443 tests with no failures or skips.
 - [ ] Walk a short distance manually and verify live movement and reconnection.
 - [ ] Open Stars and pick a world, then hop with the world switcher and cross a loading line: the
       list and the pick stay through both, and no line says to log in. Log out: the list clears.
+- [ ] On Stars, each world is its number behind the world switcher's own star: gold on a members
+      world, silver on a free one, and with Safe off, the PvP star on a PvP or high-risk world and
+      the Deadman star on a Deadman world, each the star the game's world switcher shows for that
+      world. This is the first use of `WorldswitcherStars.PVP` and `DEADMAN`, so it settles that
+      they are those two stars and that a high-risk world shows the PvP one. The number does not
+      move when the star appears, and no row says *W* unless the map has no world list.
+- [ ] On Stars, a star on the world you are logged into has its world in green, in its card, in
+      its site's list of worlds and at the head of the tab once pinned; hop, and the green moves to
+      the stars of the new world. Every site name fits one line beside its favourite star, and a
+      press anywhere on a card but its star or its fold opens Route and Pin.
 - [ ] Log in on a Hardcore World: Stars says *Hardcore Worlds* in gold over the list and lists only
       stars on Hardcore Worlds, or says none has been called there yet. Hop to an ordinary world:
       the line goes and the main game's stars are back. This is the first client read of
