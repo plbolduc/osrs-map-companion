@@ -10,3 +10,4 @@ preset:herb-allotment|Herb + allotment + flower
 birdhouses|Birdhouses
 contract|Farming contract
 dailies|Dailies run
+sea-charts|Sea charting run

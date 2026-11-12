@@ -180,7 +180,7 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RoutePress`, `SearchClien
   The rows' icons are the client's own sprites (`SpriteManager`, `ItemManager`); no image is downloaded.
 - **POST /api/companion/run** — one **Start run** or **Reroute** press, from the farm run or Port
   tasks card, with the same three credential headers as Route. Start carries a run kind (a farm
-  run's, or `port-tasks`); Reroute carries its id, done ordinals and
+  run's, `port-tasks`, or `sea-charts` for the sea charting run); Reroute carries its id, done ordinals and
   visited reference ordinals. Both carry the local tile even with position sharing off. Route and
   farm planning share one flight and the server's Retry-After wait. No automatic retry.
   **DELETE /api/companion/run?run=<id>** ends only that run; a pending initial plan has no id yet.
@@ -269,6 +269,9 @@ answering a reviewer. Since 1.7.0:
   interface offers and each one's mortifier, only while it is open or unchanged since, as above.
 - **Sea charts charted:** a new sharing choice under Progress and travel, off until chosen and in
   the one press at Connect, sending the ids of the sea charting tasks charted. No request is added.
+- **Sea charting run:** a new row in the farm run card's picker. Start sends `sea-charts` as the run
+  kind on the existing run request; the map plans it from the sea charts already sent, and ticks a
+  stop when they say its task is charted. No request, poll or field is added.
 - **Dailies collected:** a new sharing choice under Tasks and timers, off until chosen and in the one
   press at Connect, sending which of eight dailies were collected today, as disclosed above. A
   group's switch that was on before this update does not turn it on. No request or poll is added.

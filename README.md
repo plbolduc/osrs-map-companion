@@ -70,6 +70,13 @@ are missing, and ticks a stop off once you have replanted it.
 **Dailies run** visits every daily your diaries and quests allow, leaving out what you have
 collected today when **Dailies collected** is on.
 
+<p>
+  <img src="docs/mockups/sidebar-chart-run.png" width="225" alt="A sea charting run in the sidebar: Charting: Kharidian Sea, 1 of 8 charted, Chartin' Charles's spyglass in the cave struck through as Charted, the spyglass view from the cave entrance next with its 20-tile walk, then each task in the sea with the sail to it">
+</p>
+
+**Sea charting run** sails your boat through the nearest seas you have not charted, docking where a
+task is done on foot, and ticks each task as the game charts it; it needs **Sea charts charted** on.
+
 ## Sailing
 
 <p>

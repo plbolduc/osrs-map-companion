@@ -340,6 +340,30 @@ public class RunCardsTest
 	}
 
 	/**
+	 * The sea charting run is planned from Sea charts charted, which says what is left and ticks each
+	 * stop, so with it off the card says which group to turn on and Start waits; on, Start asks the
+	 * map for the run by its wire name.
+	 */
+	@Test
+	public void theSeaChartingRunWaitsForSeaChartsAndAsksForItself() throws Exception
+	{
+		refresh();
+		choose("Sea charting run");
+		assertTrue(shown(farm).contains(FarmRunPanel.NEEDS_SEA_CHARTS));
+		assertFalse("Start run waits for the choice", enabled(farm, "Start run"));
+		click(farm, "Start run");
+		assertEquals("nothing reaches the map", 0, asked);
+
+		config.set("shareSeaCharts", true);
+		refresh();
+		assertFalse(shown(farm).contains(FarmRunPanel.NEEDS_SEA_CHARTS));
+		assertTrue(enabled(farm, "Start run"));
+		click(farm, "Start run");
+		assertEquals(1, asked);
+		assertEquals(FarmRunWire.SEA_CHARTS, gson.fromJson(sent, JsonObject.class).get("start").getAsString());
+	}
+
+	/**
 	 * Pausing changed one word, on the button, and a search pick or a friend's destination paused the
 	 * run with no word on its card at all. The count says the run is paused now, and while the
 	 * destination that paused it is shown, the card names it and the way back.

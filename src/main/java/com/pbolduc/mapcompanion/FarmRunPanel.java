@@ -54,6 +54,7 @@ final class FarmRunPanel extends JPanel
 	/* Settings names its groups, not their fields: patches and contracts both share under Tasks and timers. */
 	static final String NEEDS_PATCHES = Words.of("farm.needsPatches");
 	static final String NEEDS_CONTRACT = Words.of("farm.needsContract");
+	static final String NEEDS_SEA_CHARTS = Words.of("farm.needsSeaCharts");
 	static final String PICKED = "Run: ";
 	/** The picker's runs, in its order: the kind the map plans, then its name in the list. */
 	private static final List<String> STARTS = Resources.lines("/farm-starts.txt");
@@ -136,6 +137,9 @@ final class FarmRunPanel extends JPanel
 	 * <p>The dailies run says nothing: the map plans it from the account it already reads, and Dailies
 	 * collected only leaves out what was collected today. This line holds Start back, so a choice
 	 * that would only improve a run is not one it names.
+	 *
+	 * <p>The sea charting run does: the map plans it from Sea charts charted alone, which is what says
+	 * which tasks are left and what ticks each stop, so without it the map could only refuse.
 	 */
 	@Nullable
 	static String needs(String kind, ConfigStore settings)
@@ -147,6 +151,10 @@ final class FarmRunPanel extends JPanel
 		if ("contract".equals(kind) && !settings.on("shareFarmingContracts"))
 		{
 			return NEEDS_CONTRACT;
+		}
+		if (FarmRunWire.SEA_CHARTS.equals(kind) && !settings.on("shareSeaCharts"))
+		{
+			return NEEDS_SEA_CHARTS;
 		}
 		return null;
 	}

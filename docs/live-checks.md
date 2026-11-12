@@ -502,6 +502,23 @@ continuously witnessed empty-to-newly-planted transition mints a stable completi
 - [ ] Start the Dailies run with no website open. Its stops are the dailies your diaries and
       quests allow; with Dailies collected on, one bought today is left out. Stand beside Advisor
       Ghrim upstairs in Miscellania castle: his stop says Visited.
+- [ ] Start the Sea charting run with Sea charts charted on and your boat moored, no website
+      open. From Port Sarim its first stop is the task board on the pier, walked to; the next
+      walks back to your boat, boards it and sails out, and every later leg at sea is a sail with
+      its line on the world map. Sail past a stop's task without charting it: the stop stays. Chart
+      one, then chart a later stop's out of order: each says Charted within a snapshot and the run
+      moves on. Note how close the boat had to be for each kind of task, above all one on an islet,
+      a wreck or the shore, which the map waits for at the nearest water. With Sea charts charted
+      off, the picker says to turn on Progress and travel and Start waits.
+- [ ] On a Sea charting run with tasks done on foot — the Kharidian Sea from Port Sarim once the
+      Bay of Sarim and Mudskipper Sound are charted: Chartin' Charles in the Pandemonium Cave, then
+      the spyglass spot at its entrance — This leg moves from the sail to Dock at The Pandemonium
+      once you are ashore there, then walks into the cave; standing by Charles does not tick the
+      stop until it is charted. The next stop walks to the entrance with no sail, and the one after
+      starts with Walk back to your boat at The Pandemonium and moves to the sail once you board.
+      Note whether a spyglass spot on land and a weather reading on land can in fact be done only
+      on foot, and whether Anglers' Retreat's readings (task 105) could have been taken from the
+      deck three tiles off.
 - [ ] Open Before you leave. Known carried travel items are checked locally; unknown supplies
       make no inventory claim. Closed, the fold counts the teleports not on you, and the count
       follows a teleport taken from the bank. Complete a seeded birdhouse and check its weaker

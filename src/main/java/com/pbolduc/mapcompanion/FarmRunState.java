@@ -44,6 +44,9 @@ import net.runelite.api.coords.WorldPoint;
  * birdhouse first observed after that instant is weaker Time Tracking evidence, labelled by the
  * view. Custom stops only move the pointer on: a visit never becomes a confirmed farming job.
  *
+ * <p>A sea charting run's stops are never ticked here: the map marks one visited when this
+ * character's charts say its task is charted, and only that ticks it.
+ *
  * <p>A port-task run's stops are ticked by this client's own task slots alone ({@link #observePorts}):
  * a counter reaching the stop's target, or the slot letting go of a task where that is how the task
  * ends. A slot that comes to hold another task, empties early, or takes a task the run never had
@@ -388,6 +391,8 @@ final class FarmRunState
 		}
 		finishTracked();
 		here.clear();
+		// A charting stop is charted, not reached: the map ticks it from the game's charts.
+		boolean charting = FarmRunWire.SEA_CHARTS.equals(run.kind);
 		if (where != null)
 		{
 			for (RelayResponse.FarmStop stop : run.stops)
@@ -395,7 +400,7 @@ final class FarmRunState
 				if (where.distanceTo(point(stop)) <= HERE)
 				{
 					here.add(stop.n);
-					if (!tracked(stop))
+					if (!tracked(stop) && !charting)
 					{
 						visited.add(stop.n);
 					}

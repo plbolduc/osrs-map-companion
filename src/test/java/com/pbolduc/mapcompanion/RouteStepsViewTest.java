@@ -505,4 +505,22 @@ public class RouteStepsViewTest
 			}
 		}
 	}
+
+	/**
+	 * Shortest Path draws walks only. A sea charting run's legs are sails from end to end, and the
+	 * line under them said it would draw each walk when you reached it, on a leg with none to draw.
+	 */
+	@Test
+	public void saysShortestPathDrawsAWalkOnlyWhereOneIsLeft()
+	{
+		RelayResponse.RouteStep sail = new RelayResponse.RouteStep();
+		sail.slot = "sail";
+		RelayResponse.RouteStep walk = new RelayResponse.RouteStep();
+		walk.slot = "walk";
+		walk.walk = true;
+		assertFalse("a leg that is all sail", RouteStepsView.walkLeft(Arrays.asList(sail, sail), 0));
+		assertTrue("a walk still ahead", RouteStepsView.walkLeft(Arrays.asList(sail, walk), 0));
+		assertTrue("the walk you are on", RouteStepsView.walkLeft(Arrays.asList(sail, walk), 1));
+		assertFalse("a walk already behind you", RouteStepsView.walkLeft(Arrays.asList(walk, sail), 1));
+	}
 }

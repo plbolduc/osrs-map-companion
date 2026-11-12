@@ -1,0 +1,276 @@
+{
+  "id": "sea-chart-run-1",
+  "kind": "sea-charts",
+  "name": "Charting: Kharidian Sea",
+  "startedAtMs": 1762000000000,
+  "bring": [],
+  "stops": [
+    {
+      "n": 1,
+      "name": "Use your spyglass to admire Chartin' Charles McAtless in the cave on the Pandemonium",
+      "tile": {
+        "x": 3051,
+        "y": 9388,
+        "plane": 0
+      },
+      "patchIds": [],
+      "method": "Sail from Port Sarim",
+      "item": null,
+      "costTiles": 512,
+      "steps": [
+        {
+          "slot": "boarding-walk",
+          "title": "Walk 32t south-east",
+          "detail": "To Port Sarim",
+          "walk": true,
+          "at": {
+            "x": 3051,
+            "y": 3192
+          }
+        },
+        {
+          "slot": "board",
+          "title": "Board your boat at Port Sarim",
+          "at": {
+            "x": 3051,
+            "y": 3192
+          }
+        },
+        {
+          "slot": "sail",
+          "title": "Sail to The Pandemonium",
+          "detail": "About 207 tiles",
+          "at": {
+            "x": 3070,
+            "y": 2986
+          }
+        },
+        {
+          "slot": "dock",
+          "title": "Dock at The Pandemonium",
+          "detail": "Your boat stays there",
+          "at": {
+            "x": 3070,
+            "y": 2986
+          }
+        },
+        {
+          "slot": "arrival-walk",
+          "title": "Walk 66t north-west",
+          "detail": "To the entrance",
+          "walk": true,
+          "at": {
+            "x": 3046,
+            "y": 2996
+          }
+        },
+        {
+          "slot": "inside",
+          "title": "Enter Pandemonium Cave by the cave",
+          "detail": "19t inside to Spyglass · Kharidian Sea",
+          "notes": [
+            "Done on foot: your boat waits at The Pandemonium"
+          ],
+          "at": {
+            "x": 3051,
+            "y": 9388
+          }
+        }
+      ],
+      "visited": true,
+      "voyage": {
+        "from": "Port Sarim",
+        "to": "The Pandemonium",
+        "line": [
+          [
+            3051,
+            3192
+          ],
+          [
+            3051,
+            3120
+          ],
+          [
+            3039,
+            3108
+          ],
+          [
+            3039,
+            3045
+          ],
+          [
+            3074,
+            3010
+          ],
+          [
+            3074,
+            2986
+          ],
+          [
+            3072,
+            2984
+          ],
+          [
+            3070,
+            2986
+          ]
+        ],
+        "gates": [
+          {
+            "text": "1 Sailing",
+            "tier": "unknown"
+          }
+        ]
+      },
+      "chart": 357
+    },
+    {
+      "n": 2,
+      "name": "Use your spyglass to get a good view of the Pandemonium from the cave entrance on the island",
+      "tile": {
+        "x": 3045,
+        "y": 2995,
+        "plane": 0
+      },
+      "patchIds": [],
+      "method": "Walk 20 tiles",
+      "item": null,
+      "costTiles": 20,
+      "steps": [
+        {
+          "slot": "arrival-walk",
+          "title": "Walk",
+          "detail": "About 20 tiles to Spyglass · Kharidian Sea",
+          "notes": [
+            "Done on foot: your boat waits at The Pandemonium"
+          ],
+          "walk": true,
+          "at": {
+            "x": 3045,
+            "y": 2995,
+            "plane": 0
+          }
+        }
+      ],
+      "chart": 14
+    },
+    {
+      "n": 3,
+      "name": "Find the wreck of the Pandemonium III west of the Kharidian Bandit Camp",
+      "tile": {
+        "x": 3143,
+        "y": 2978,
+        "plane": 0
+      },
+      "patchIds": [],
+      "method": "Sail 71 tiles",
+      "item": null,
+      "costTiles": 207,
+      "steps": [
+        {
+          "slot": "boarding-walk",
+          "title": "Walk back to your boat at The Pandemonium",
+          "detail": "About 65 tiles",
+          "walk": true,
+          "at": {
+            "x": 3070,
+            "y": 2986,
+            "plane": 0
+          }
+        },
+        {
+          "slot": "board",
+          "title": "Board your boat at The Pandemonium",
+          "at": {
+            "x": 3070,
+            "y": 2986,
+            "plane": 0
+          }
+        },
+        {
+          "slot": "sail",
+          "title": "Sail to Captain's log · Kharidian Sea",
+          "detail": "71 tiles at sea",
+          "at": {
+            "x": 3143,
+            "y": 2978,
+            "plane": 0
+          }
+        }
+      ],
+      "voyage": {
+        "from": "The Pandemonium",
+        "line": [
+          [
+            3070,
+            2986
+          ],
+          [
+            3072,
+            2984
+          ],
+          [
+            3135,
+            2985
+          ],
+          [
+            3143,
+            2978
+          ]
+        ]
+      },
+      "chart": 16
+    },
+    {
+      "n": 4,
+      "name": "Test the currents south west of the Kharidian Bandit Camp",
+      "tile": {
+        "x": 3145,
+        "y": 2963,
+        "plane": 0
+      },
+      "patchIds": [],
+      "method": "Sail 31 tiles",
+      "item": null,
+      "costTiles": 254,
+      "steps": [
+        {
+          "slot": "sail",
+          "title": "Sail to Current duck · Kharidian Sea",
+          "detail": "31 tiles at sea",
+          "at": {
+            "x": 3145,
+            "y": 2963,
+            "plane": 0
+          }
+        }
+      ],
+      "voyage": {
+        "from": "Captain's log · Kharidian Sea",
+        "line": [
+          [
+            3143,
+            2978
+          ],
+          [
+            3137,
+            2978
+          ],
+          [
+            3135,
+            2976
+          ],
+          [
+            3135,
+            2963
+          ],
+          [
+            3145,
+            2963
+          ]
+        ]
+      },
+      "chart": 13
+    }
+  ]
+}
