@@ -15,12 +15,12 @@ route.needsTile=Reroute can't see where you are inside an instance. Press it aga
 route.noWay=The map found no way there from here.
 route.notFound=The map has no way to plan to this place.
 route.failed=The map could not plan a route just now.
-map.redirects=This map address redirects. Check Settings → Advanced → Map address.
+map.redirects=This map address redirects. Check Map address in RuneLite's settings for this plugin.
 route.oneAtATime=The map is still planning the last route.
 
 # RelayClient: why the map refused a snapshot, and a map address it cannot use.
-relay.redirects=This map address redirects. Enter the address it points to under Settings → Advanced → Map address.
-relay.redirectsTo=. Enter that under Settings → Advanced → Map address.
+relay.redirects=This map address redirects. Enter the address it points to as Map address, in RuneLite's settings for this plugin.
+relay.redirectsTo=. Enter that as Map address, in RuneLite's settings for this plugin.
 relay.badAddress=The map address in the settings isn't a valid URL.
 relay.needsInvite=This group needs an invite. Paste one from somebody in it.
 relay.removed=You were removed from this group.
@@ -42,7 +42,7 @@ farm.notPrepared=The map could not prepare that run.
 
 # ConnectCard: Connect, Join, the group's menu, Rename and Copy invite. What Copy invite puts on a
 # clipboard stays in the Java, where the map's contract test reads it.
-connect.settingsTip=Settings: what you share, the map address and Show what's sent
+connect.settingsTip=Settings: what you share, what shows in your game and Show what's sent
 connect.renameTip=Change the name everybody in the group sees
 connect.pasteTip=Read the clipboard. Only ever when you press this.
 connect.joinFieldTip=Paste the invite a friend sent you, or the code from osrs-map.com's Companion panel
@@ -58,7 +58,7 @@ connect.renameLogIn=Log in once while connected, then rename the group.
 connect.removeLogIn=Log in once while connected, then remove them.
 connect.removeFollows=Their dot leaves everyone's map.\nOnly a new invite lets them back.
 connect.makeRoom= to make room, or paste another group's invite here.
-connect.startOver=Paste another group's invite here, or use Leave group in Settings → Advanced to start over.
+connect.startOver=Paste another group's invite here, or use Leave group in Settings to start over.
 connect.openTip= in your browser, already in your group as you
 connect.inviteLogIn=Log in to a character to copy an invite.
 connect.inviteFailed=Couldn't make an invite, so nothing was copied. Try again in a minute.

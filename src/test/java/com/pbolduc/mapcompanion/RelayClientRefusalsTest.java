@@ -86,9 +86,9 @@ public class RelayClientRefusalsTest
 	public void aRedirectNamesTheAddressToUseInstead()
 	{
 		okhttp3.HttpUrl asked = okhttp3.HttpUrl.get("https://www.example.test/api/companion/snapshot");
-		assertEquals("This map address redirects to https://example.test. Enter that under Settings → Advanced → Map address.",
+		assertEquals("This map address redirects to https://example.test. Enter that as Map address, in RuneLite's settings for this plugin.",
 			RelayClient.redirectMessage(asked, "https://example.test/api/companion/snapshot?x=1"));
-		assertEquals("This map address redirects to https://www.example.test:8443. Enter that under Settings → Advanced → Map address.",
+		assertEquals("This map address redirects to https://www.example.test:8443. Enter that as Map address, in RuneLite's settings for this plugin.",
 			RelayClient.redirectMessage(asked, "https://www.example.test:8443/api/companion/snapshot"));
 		assertTrue(RelayClient.redirectMessage(asked, null).startsWith("This map address redirects."));
 	}
