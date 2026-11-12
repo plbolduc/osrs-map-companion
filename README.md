@@ -133,7 +133,7 @@ Any place on the map has its fastest ways there, teleports and rides included, d
 pins. **Send to RuneLite** puts the route in your sidebar.
 
 <p>
-  <img src="docs/mockups/website-slayer.jpg" width="270" alt="The website's Slayer panel for 143 Aberrant spectres: ranked places, monster variants, access requirements and controls for the list">
+  <img src="docs/mockups/website-slayer.jpg" width="270" alt="The website's Slayer panel for 143 Aberrant spectres: ranked places with a picture beside each label, monster variants, access requirements and controls for the list">
   <img src="docs/mockups/website-sailing.jpg" width="270" alt="Port Sarim's task board on the website: courier tasks ranked by XP per sailed tile, then bounty tasks ranked for the whole trip and hunt">
 </p>
 
