@@ -181,4 +181,31 @@ public class RouteWireTest
 		state.accept(gson.fromJson(reply("{\"options\":[{\"id\":\"g\",\"label\":\"G\",\"steps\":[" + STEP + "]}]}"), RelayResponse.class).directive);
 		assertNotNull(state.getDestination().route);
 	}
+
+	/**
+	 * One tidying for every line somebody else typed. A destination's name, a meetup's title, a
+	 * group's name, a search and a route's text each ran their own pair of patterns, compiled on every
+	 * call, and a destination's label is tidied every frame it is drawn. This holds the one rule to
+	 * what the pairs did: control bytes to spaces, then runs of whitespace to one.
+	 */
+	@Test
+	public void aLineIsTidiedAsTheTwoPatternsItReplacedDid()
+	{
+		String[] typed = {"Star at Rimmington", "  Star \t at\n\nRimmington  ", "a\u0000b", "a\u007fb", "\u0001\u0002", "",
+			"a \u0000 b", "tab\tend\r\n", "no\u00a0break", "\u001f lead", "trail \u0000", "x\u000by\fz"};
+		for (String text : typed)
+		{
+			assertEquals(text.replaceAll("\\p{Cntrl}", " ").replaceAll("\\s+", " ").trim(), RouteWire.oneLine(text));
+		}
+		assertEquals("never null", "", RouteWire.oneLine(null));
+		assertEquals("a b", RouteWire.text(" a\u0000\u0000 b ", 10));
+		assertEquals("cut, then trimmed again", "a", RouteWire.text("a b", 2));
+		assertNull(RouteWire.text("\u0000 \t", 10));
+		assertNull(RouteWire.text(null, 10));
+		assertEquals("Sunday raids", Pairing.tidyName(" Sunday\u0007 raids\n"));
+		assertNull(Pairing.tidyName(null));
+		assertEquals("abyssal whip", SearchClient.fold("  abyssal \t whip\u0000"));
+		assertEquals("", SearchClient.fold(null));
+		assertEquals("Lumbridge", DestinationSceneOverlay.name("<col=ff0000>Lumbridge</col>\u0000 ", 40));
+	}
 }

@@ -137,7 +137,7 @@ public class DestinationSceneOverlay extends Overlay
 	@Nullable
 	static String name(@Nullable String typed, int max)
 	{
-		String name = typed == null ? "" : Text.removeTags(typed).replaceAll("\\p{Cntrl}", " ").replaceAll("\\s+", " ").trim();
+		String name = typed == null ? "" : RouteWire.oneLine(Text.removeTags(typed));
 		if (name.isEmpty())
 		{
 			return null;
