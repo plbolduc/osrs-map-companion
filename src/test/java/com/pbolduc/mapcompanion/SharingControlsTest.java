@@ -65,19 +65,35 @@ public class SharingControlsTest
 					expected.add(item.keyName());
 				}
 			}
-			assertEquals(expected, actual);
+			/*
+			 * Every setting RuneLite's list shows is under a box here: its own, or its row's. This
+			 * asserted a box for each of this client's eleven settings; they are seven rows now, since
+			 * eleven boxes in a row were eleven decisions, and a row's box writes every setting in it.
+			 */
+			Set<String> covered = new HashSet<>();
+			for (String key : actual)
+			{
+				covered.add(key);
+				for (java.util.List<SharingFields.Field> row : SharingFields.CLIENT_ROWS)
+				{
+					if (row.get(0).key.equals(key))
+					{
+						for (SharingFields.Field field : row) covered.add(field.key);
+					}
+				}
+			}
+			assertEquals(expected, covered);
 			/*
 			 * Sharing's six switches — the name, the four groups and where you died — and this client's
-			 * eleven: the two that receive from the map, Route here on the world map, which asks the map
-			 * only on a press of its own, as every Route does, the meetup reminder, and the seven that only
-			 * draw on this client: your boats on the world map, Drop luck's chat line, the destination's
-			 * hint arrow, the followed step's box over the game and its teleport outlined where it is
-			 * clicked, a farm run's teleports outlined in the bank, and a followed route's walks handed to
-			 * Shortest Path, which is a plugin
-			 * message inside the client rather than anything sent. It was 34 while each field had a box;
-			 * a group's switch writes those now.
+			 * seven rows: the group in RuneLite, which is the two settings that receive from the map; the
+			 * meetup reminder; the followed step's box over the game, with its teleport outlined where it
+			 * is clicked and a farm run's in the bank; the destination's hint arrow; a followed route's
+			 * walks handed to Shortest Path, which is a plugin message inside the client rather than
+			 * anything sent; your boats and Route here on the world map, the second asking the map only
+			 * on a press of its own, as every Route does; and Drop luck's chat line. It was 34 while each
+			 * field had a box, and 17 while each of this client's settings had one.
 			 */
-			assertEquals(17, actual.size());
+			assertEquals(13, actual.size());
 			for (SharingFields.Section section : SharingFields.GROUPS)
 			{
 				for (SharingFields.Field field : section.fields)
@@ -374,11 +390,64 @@ public class SharingControlsTest
 	}
 
 	/**
+	 * This client's settings were eleven boxes in a row, in no order, under a fold named "In RuneLite"
+	 * that did not say how it differed from the sharing above it. They are seven rows in three groups
+	 * under "In your game", with a line that says nothing there shares anything. A row over several
+	 * settings is on while all of them are and writes them all on a press; partly on, it draws the dash
+	 * a partly shared group does, so nothing changes for anyone until they press. Shortest Path's row
+	 * is drawn only with that plugin installed.
+	 */
+	@Test
+	public void aRowOfThisClientsSettingsWritesAllOfThemAndSaysWhenOnlyPartIsOn() throws Exception
+	{
+		SwingUtilities.invokeAndWait(() ->
+		{
+			HarnessStore store = new HarnessStore();
+			HarnessConfig config = new HarnessConfig(store, MapCompanionConfig.DEFAULT_MAP_URL);
+			followStoredSettings(store, config);
+			boolean[] installed = {false};
+			SharingControls controls = new SharingControls(config, store, () -> installed[0]);
+			JCheckBox group = find(controls, "showDestination");
+			assertNull("no box of its own for a setting under a row", find(controls, "showGroupOnWorldMap"));
+			assertFalse(group.isSelected());
+
+			store.set("showDestination", "true");
+			controls.refresh();
+			assertFalse("partly on is not on", group.isSelected());
+			assertEquals("and says so with the dash", "indeterminate", group.getClientProperty("JButton.selectedState"));
+
+			group.doClick();
+			assertTrue(config.showDestination());
+			assertTrue("a press turns the whole row on", config.showGroupOnWorldMap());
+			assertTrue(group.isSelected());
+			assertNull(group.getClientProperty("JButton.selectedState"));
+
+			JCheckBox step = find(controls, "showStepOnScreen");
+			assertTrue(step.isSelected());
+			step.doClick();
+			assertFalse(config.showStepOnScreen());
+			assertFalse("the step's teleport outlined goes with its box", config.outlineStepTeleport());
+			assertFalse("and a run's in the bank", config.markFarmRunInBank());
+
+			JCheckBox paths = find(controls, MapCompanionConfig.KEY_SHORTEST_PATH);
+			assertFalse("no row for a plugin that is not installed", paths.isVisible());
+			installed[0] = true;
+			controls.refresh();
+			assertTrue(paths.isVisible());
+
+			java.util.List<String> words = SidebarWords.words(controls);
+			assertTrue(words.toString(), words.contains("With your group") && words.contains("Following a route") && words.contains("Extras"));
+			assertTrue(words.contains("Only what you see on your own screen. Nothing here shares anything about you."));
+		});
+	}
+
+	/**
 	 * Replaces per-checkbox modal assertions: a choice must never bypass the Connect disclosure.
 	 *
 	 * <p>Every box the sidebar draws, by the setting it is named after: a group's box writes its
-	 * fields, which are what it stands for, and any other box its own setting. Every box RuneLite's
-	 * list shows has one, and a field under a group has none.
+	 * fields, which are what it stands for, a row's box every setting in its row, and any other box
+	 * its own setting. Every box RuneLite's list shows is under one, and a field under a group has
+	 * none of its own.
 	 */
 	@Test
 	public void everySidebarChoiceSavesWithoutADialogButCannotApproveTheServer() throws Exception
@@ -397,7 +466,7 @@ public class SharingControlsTest
 				ConfigItem item = method.getAnnotation(ConfigItem.class);
 				// The meetup reminder is a notification setting with a box like any other.
 				if (item == null || (method.getReturnType() != boolean.class && method.getReturnType() != Notification.class)) continue;
-				JCheckBox box = find(controls, item.keyName());
+				JCheckBox box = covering(controls, item.keyName());
 				/* Hidden Slayer list preferences are owned by the task card, not sharing controls. */
 				assertEquals(item.keyName(), !item.hidden(), box != null);
 				if (box == null) continue;
@@ -424,7 +493,7 @@ public class SharingControlsTest
 				}
 				assertFalse("choosing data is not permission to connect", pairing.hasServerConsent());
 			}
-			/* Every box above, the step's teleport outlined and your boats on the world map among them. */
+			/* Every setting above, each by the box it is under: a row's box is pressed once for each of its settings. */
 			assertEquals(17, pressed);
 			assertNull(store.get(Pairing.KEY_SERVER_CONSENT));
 		});
@@ -628,6 +697,19 @@ public class SharingControlsTest
 			}
 		}
 		throw new AssertionError("no setting " + key);
+	}
+
+	/** The box a setting is under: its row's, which writes it with the settings it answers with, or its own. */
+	private static JCheckBox covering(Container parent, String key)
+	{
+		for (java.util.List<SharingFields.Field> row : SharingFields.CLIENT_ROWS)
+		{
+			for (SharingFields.Field field : row)
+			{
+				if (field.key.equals(key)) return find(parent, row.get(0).key);
+			}
+		}
+		return find(parent, key);
 	}
 
 	private static JCheckBox find(Container parent, String key)

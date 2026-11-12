@@ -182,7 +182,7 @@ sharing choice off.
 <summary>Full sharing details and settings</summary>
 
 <p>
-  <img src="docs/mockups/sidebar-settings.png" width="300" alt="Settings: six sharing switches, all on but Where you died, as one press at Connect leaves them, then What each one sends, In RuneLite and Advanced, closed">
+  <img src="docs/mockups/sidebar-settings.png" width="300" alt="Settings: six sharing switches, all on but Where you died, as one press at Connect leaves them, then What each one sends, a rule, and In your game with a line saying nothing there shares anything about you, and Advanced, closed">
 </p>
 
 Sharing is six switches, and every one starts off. After your first Connect, one press of
@@ -288,12 +288,13 @@ see, or Member if you leave it empty. **Copy invite** copies a message you can s
 **Switch** remembers up to eight groups, and joins another; the person who made the group can
 rename it there, and remove a friend by right-clicking them under **Group**.
 
-Under **In RuneLite**, **Destinations and meetups**, **Group on the world map** and **Meetup reminder**
-start off; the step after Connect ticks the first two for you to confirm. **Drop luck in chat**,
-**Your boats on the world map**, **Hint arrow to a destination**, **Step on screen**, **Step's
-teleport outlined**, **Draw paths with Shortest Path** and **Farm run teleports in the bank** start
-on; none of them sends anything.
-**Route here on the world map** starts on too, and sends only when you choose it. The keys for
+Under **In your game**, nothing shares anything about you. **Group in RuneLite**, which shows
+destinations, meetups and your friends on the world map, and **Meetup reminder** start off; the
+step after Connect ticks the first for you to confirm. **Step on screen**, which also outlines the
+step's teleport and a farm run's in the bank, **Hint arrow to a destination**, **Draw paths with
+Shortest Path**, **Boats and Route here** and **Drop luck in chat** start on. RuneLite's own
+settings for the plugin keep each of these apart, for turning off half of a row.
+**Route here** sends only when you choose it. The keys for
 Reroute and Follow, and how many minutes before a meetup the reminder comes, are in RuneLite's own
 settings for the plugin.
 

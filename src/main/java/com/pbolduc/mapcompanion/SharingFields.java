@@ -169,4 +169,21 @@ final class SharingFields
 	static final List<Field> CLIENT = Collections.unmodifiableList(Arrays.asList(
 		DESTINATIONS, GROUP_ON_WORLD_MAP, BOATS_ON_WORLD_MAP, HINT_ARROW, STEP_ON_SCREEN, STEP_TELEPORT, SHORTEST_PATH, ROUTE_HERE, NOTIFY_MEETUPS,
 		DROP_LUCK_CHAT, BANK_MARKS));
+
+	/**
+	 * This client's settings as the sidebar's rows: one box over each, or over a few that answer one
+	 * question. Eleven boxes in a row were eleven decisions; these are seven. A box is on while every
+	 * setting under it is, and a press writes them all, so nothing changes for anyone until they press.
+	 * RuneLite's own list keeps each setting apart, for a player who wants half a box.
+	 */
+	static final List<List<Field>> CLIENT_ROWS = Arrays.asList(
+		Arrays.asList(DESTINATIONS, GROUP_ON_WORLD_MAP), Arrays.asList(NOTIFY_MEETUPS), Arrays.asList(STEP_ON_SCREEN, STEP_TELEPORT, BANK_MARKS),
+		Arrays.asList(HINT_ARROW), Arrays.asList(SHORTEST_PATH), Arrays.asList(BOATS_ON_WORLD_MAP, ROUTE_HERE), Arrays.asList(DROP_LUCK_CHAT));
+
+	/** A row's heading and its box's words, by its first setting; null for a setting under its own name with no heading. */
+	@Nullable
+	static String[] row(List<Field> row)
+	{
+		return WORDS.get("row." + row.get(0).key);
+	}
 }

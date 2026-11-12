@@ -281,7 +281,7 @@ public class MapCompanionPanel extends PluginPanel
 		body.add(views);
 
 		settingsPage = new SettingsPage(config, destinationState, lootLog, snapshotBuilder, clientThread, settings,
-			identity, pairing, gson, farmRunState, farmRunClient, connectCard, this::refresh, this::openSettings, this::mapUrl);
+			identity, pairing, gson, farmRunState, farmRunClient, connectCard, this::refresh, this::openSettings, this::mapUrl, shortestPath::installed);
 		pages = new SidebarPages(body, settingsPage);
 
 		add(pages, BorderLayout.NORTH);
