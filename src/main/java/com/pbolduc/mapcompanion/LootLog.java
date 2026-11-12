@@ -434,7 +434,7 @@ public class LootLog
 	 */
 	public synchronized List<Notable> record(ServerNpcLoot event, @Nullable Boolean kourendEasy)
 	{
-		if (!ordinaryWorld(client.getWorldType()) || store.scopeKey() == null || event == null
+		if (!onOrdinaryWorld() || store.scopeKey() == null || event == null
 			|| event.getComposition() == null || event.getItems() == null)
 		{
 			return emptyList();
@@ -746,7 +746,7 @@ public class LootLog
 	@Nullable
 	public synchronized CompanionSnapshot.Loot snapshot()
 	{
-		if (!ordinaryWorld(client.getWorldType()))
+		if (!onOrdinaryWorld())
 		{
 			return null;
 		}
@@ -948,6 +948,21 @@ public class LootLog
 	public void onTick(int tick, int task, int remaining)
 	{
 		tasks.onTick(tick, task, remaining);
+		onOrdinaryWorld();
+	}
+
+	/**
+	 * Whether the world being played is one the drop table describes, as the client thread last
+	 * read it: each game tick, each kill and each snapshot. The sidebar's list and its one-line
+	 * summary are asked for on Swing's thread, where the client is not read, so they go by this.
+	 */
+	private volatile boolean ordinary;
+
+	/** Read the world and keep the answer for Swing's thread. Client thread. */
+	private boolean onOrdinaryWorld()
+	{
+		ordinary = ordinaryWorld(client.getWorldType());
+		return ordinary;
 	}
 
 	/** Whether any of this monster's rated drops is boosted under {@code when}. */
@@ -1017,7 +1032,7 @@ public class LootLog
 	 */
 	public synchronized List<Monster> monsters()
 	{
-		if (!ordinaryWorld(client.getWorldType()))
+		if (!ordinary)
 		{
 			return emptyList();
 		}
@@ -1178,7 +1193,7 @@ public class LootLog
 		{
 			return null;
 		}
-		if (!ordinaryWorld(client.getWorldType()))
+		if (!ordinary)
 		{
 			return PAUSED;
 		}

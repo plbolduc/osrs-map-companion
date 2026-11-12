@@ -255,6 +255,8 @@ public class LootLogHistoryTest
 	public void aDroughtIsSaidInPlayersWords()
 	{
 		store.set(LootLog.STORE_KEY, "{\"Abyssal demon\":{\"kills\":1300,\"obtained\":{\"Abyssal whip\":0},\"killsAtLast\":{},\"trackedSince\":{\"Abyssal whip\":0}}}");
+		/* A game tick has read which world this is; the list goes by that, since Swing's thread asks for it. */
+		log.onTick(1, 0, 0);
 		LootLog.Monster demon = log.monsters().get(0);
 		LootLog.Drop whip = sidebarWhip();
 		assertEquals(1300, whip.sinceLast);
@@ -379,6 +381,48 @@ public class LootLogHistoryTest
 		assertEquals(1, log.snapshot().npcs.get(0).kills);
 		assertEquals(0, whip().obtained);
 	}
+	/**
+	 * The sidebar asks for the list and its one-line summary on Swing's thread, and both read the
+	 * world's type from the client there, against the rule that game state is read on the client
+	 * thread. They now go by what the client thread last read: a tick here, standing in for it.
+	 */
+	@Test
+	public void theSidebarsReadsNeverAskTheClientOffItsThread() throws Exception
+	{
+		java.util.Set<String> asked = java.util.concurrent.ConcurrentHashMap.newKeySet();
+		net.runelite.api.Client watched = (net.runelite.api.Client) java.lang.reflect.Proxy.newProxyInstance(
+			getClass().getClassLoader(), new Class<?>[] {net.runelite.api.Client.class}, (proxy, method, args) ->
+			{
+				asked.add(Thread.currentThread().getName() + " " + method.getName());
+				return method.invoke(game.client(), args);
+			});
+		LootLog sidebar = new LootLog(watched, store, new Gson());
+		store.set(LootLog.STORE_KEY, "{\"Abyssal demon\":{\"kills\":3,\"obtained\":{\"Abyssal whip\":0},\"killsAtLast\":{},\"trackedSince\":{\"Abyssal whip\":0}}}");
+		List<LootLog.Monster> seen = new java.util.ArrayList<>();
+		String[] said = new String[2];
+		Thread swing = new Thread(() ->
+		{
+			seen.addAll(sidebar.monsters());
+			said[0] = sidebar.summary();
+		}, "swing");
+
+		assertTrue("before any tick has read the world there is nothing to draw", sidebar.monsters().isEmpty());
+		sidebar.onTick(1, 0, 0);
+		swing.start();
+		swing.join();
+		assertEquals(1, seen.size());
+		assertEquals("3 observed loot kills", said[0].substring(0, 21));
+		for (String call : asked)
+		{
+			assertFalse(call, call.startsWith("swing "));
+		}
+
+		game.worldTypes(EnumSet.of(WorldType.MEMBERS, WorldType.SEASONAL));
+		sidebar.onTick(2, 0, 0);
+		assertTrue("the tick that reads a special world empties the list", sidebar.monsters().isEmpty());
+		assertEquals(LootLog.PAUSED, sidebar.summary());
+	}
+
 	/**
 	 * The Forget button appears when there is a log, and the delete it runs is scoped to a
 	 * character. At the login screen there is no character, so both had to stop pretending: the
