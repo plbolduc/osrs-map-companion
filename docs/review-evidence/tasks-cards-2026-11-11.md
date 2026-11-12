@@ -54,3 +54,17 @@ level it asks for joined the chips' row; the sizes above are theirs.
 736px in both themes, with no horizontal overflow and every internal link resolved. Its HTML came
 from a local conversion of the README's Markdown (Python-Markdown 3.11) rather than GitHub's
 renderer, so the check made no request.
+
+## The website's Slayer panel, 12 November 2026
+
+`website-slayer.jpg` is captured again: the website now puts the same pictures before a place's
+labels, with the words kept (`osrs-stars-map` at `21dc459`, *Put the game's pictures before a
+Slayer place's labels*). It is that repository's `map-companion-slayer` scene from
+`scripts/shoot-map.mjs`, desktop and dark, run from a copy with the posted task changed from
+Abyssal demons to Aberrant spectres so the picture shows the task it always has. The 1440×900
+shot is cropped to the Slayer block, x 57–419 and y 155–712, the 362×557 of the picture it
+replaces.
+
+The page was the map's own, served by `next dev` with its fixture star feed, the local tile
+mirror, fake sign-in and a temporary companion database; the member and group are the scene's
+synthetic ones. No request left for production, and it is not evidence of what is deployed.
