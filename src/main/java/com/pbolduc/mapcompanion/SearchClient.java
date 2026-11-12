@@ -37,7 +37,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import lombok.AllArgsConstructor;
 import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -390,16 +389,9 @@ final class SearchClient
 		show(new Result(query, result.hits, null, null, true));
 		Call call = http.newCall(request);
 		inFlight = call;
-		call.enqueue(new Callback()
-		{
-			@Override
-			public void onFailure(Call failed, IOException error)
-			{
-				swing.execute(() -> landed(call, asked, query, null, UNREACHABLE, System.currentTimeMillis() + FAILURE_GAP_MS));
-			}
-
-			@Override
-			public void onResponse(Call completed, Response response)
+		CompanionHttp.enqueue(call,
+			(failed, error) -> swing.execute(() -> landed(call, asked, query, null, UNREACHABLE, System.currentTimeMillis() + FAILURE_GAP_MS)),
+			(completed, response) ->
 			{
 				Answer answer = null;
 				String why = null;
@@ -432,8 +424,7 @@ final class SearchClient
 				String said = why;
 				long allowed = next;
 				swing.execute(() -> landed(call, asked, query, read, said, allowed));
-			}
-		});
+			});
 	}
 
 	/** Swing: the answer to {@code query}, or why there is none. */

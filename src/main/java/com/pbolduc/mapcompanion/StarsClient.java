@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.EnumSet;
-import java.util.function.Consumer;
 import javax.swing.SwingUtilities;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
@@ -41,7 +40,6 @@ import net.runelite.api.WorldType;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -255,75 +253,59 @@ final class StarsClient
 		long epoch = generation;
 		nextFeed = System.currentTimeMillis() + 60_000;
 		feedCall = http.newCall(request(server, "/api/companion/stars").get().build());
-		send(feedCall, epoch, response -> {
-			StarsModel.Feed incoming = gson.fromJson(response, StarsModel.Feed.class);
-			model.accept(incoming);
-			nextFeed = System.currentTimeMillis() + Math.max(60_000, Math.min(300_000, incoming.pollIntervalMs));
-			message = null;
-		});
-	}
-
-	private void send(Call call, long epoch, Consumer<String> accept)
-	{
-		call.enqueue(new Callback()
-		{
-			@Override
-			public void onFailure(Call failed, IOException error)
-			{
-				finish(null, "The map is unreachable.", 30_000);
-			}
-
-			@Override public void onResponse(Call completed, Response response)
+		CompanionHttp.enqueue(feedCall,
+			(failed, error) -> finish(epoch, null, "The map is unreachable.", 30_000),
+			(completed, response) ->
 			{
 				try (Response close = response)
 				{
 					long delay = MapWait.retryDelay(close.header("Retry-After"));
 					if (close.isRedirect())
 					{
-						finish(null, Words.of("map.redirects"), 300_000);
-						return;
+						finish(epoch, null, Words.of("map.redirects"), 300_000);
 					}
-					if (!close.isSuccessful())
+					else if (!close.isSuccessful())
 					{
-						finish(null, "Stars unavailable. Retrying shortly.", delay);
-						return;
+						finish(epoch, null, "Stars unavailable. Retrying shortly.", delay);
 					}
-					finish(CompanionHttp.readBounded(close.body()), null, delay);
+					else
+					{
+						finish(epoch, CompanionHttp.readBounded(close.body()), null, delay);
+					}
 				}
 				catch (IOException | RuntimeException error)
 				{
-					finish(null, RoutePress.UNREADABLE, 30_000);
+					finish(epoch, null, RoutePress.UNREADABLE, 30_000);
+				}
+			});
+	}
+
+	/** The feed's text, or why there is none, taken on Swing's thread unless the reader has changed since it was asked. */
+	private void finish(long epoch, String text, String error, long delay)
+	{
+		SwingUtilities.invokeLater(() -> {
+			if (epoch != generation) return;
+			/* Released before the checks below, so a reply that is then ignored cannot hold the slot. */
+			feedCall = null;
+			if (!active || !pairing.hasServerConsent() || scope == null || !scope.equals(store.scopeKey())) return;
+			String said = error;
+			if (said == null)
+			{
+				try
+				{
+					StarsModel.Feed incoming = gson.fromJson(text, StarsModel.Feed.class);
+					model.accept(incoming);
+					nextFeed = System.currentTimeMillis() + Math.max(60_000, Math.min(300_000, incoming.pollIntervalMs));
+					message = null;
+					return;
+				}
+				catch (RuntimeException unreadable)
+				{
+					said = RoutePress.UNREADABLE;
 				}
 			}
-
-			private void finish(String text, String error, long delay)
-			{
-				SwingUtilities.invokeLater(() -> {
-					if (epoch != generation) return;
-					/* Released before the checks below, so a reply that is then ignored cannot hold the slot. */
-					feedCall = null;
-					if (!active || !pairing.hasServerConsent() || scope == null || !scope.equals(store.scopeKey())) return;
-					if (error == null)
-					{
-						try
-						{
-							accept.accept(text);
-							return;
-						}
-						catch (RuntimeException unreadable)
-						{
-							errorResult(RoutePress.UNREADABLE, delay);
-						}
-					}
-					else errorResult(error, delay);
-				});
-			}
-
-			private void errorResult(String error, long delay)
-			{
-				message = error;
-				nextFeed = System.currentTimeMillis() + Math.max(60_000, delay);
-			}
+			message = said;
+			nextFeed = System.currentTimeMillis() + Math.max(60_000, delay);
 		});
 	}
 }
