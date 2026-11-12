@@ -35,9 +35,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.*;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.util.ImageUtil;
-import static com.pbolduc.mapcompanion.MapCompanionPanel.label;
-import static com.pbolduc.mapcompanion.MapCompanionPanel.left;
-import static com.pbolduc.mapcompanion.MapCompanionPanel.wrapped;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.*;
 import static com.pbolduc.mapcompanion.RelayResponse.FarmStop;
 import static net.runelite.client.ui.ColorScheme.LIGHT_GRAY_COLOR;
 

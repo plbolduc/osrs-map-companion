@@ -38,17 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.util.LinkBrowser;
-import static com.pbolduc.mapcompanion.MapCompanionPanel.column;
-import static com.pbolduc.mapcompanion.MapCompanionPanel.fill;
-import static com.pbolduc.mapcompanion.MapCompanionPanel.gap;
-import static com.pbolduc.mapcompanion.MapCompanionPanel.hug;
-import static com.pbolduc.mapcompanion.MapCompanionPanel.left;
-import static com.pbolduc.mapcompanion.MapCompanionPanel.linkButton;
-import static com.pbolduc.mapcompanion.MapCompanionPanel.row;
-import static com.pbolduc.mapcompanion.MapCompanionPanel.sectionHead;
-import static com.pbolduc.mapcompanion.MapCompanionPanel.setWrapped;
-import static com.pbolduc.mapcompanion.MapCompanionPanel.smallButton;
-import static com.pbolduc.mapcompanion.MapCompanionPanel.syncRow;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.*;
 import static net.runelite.client.ui.ColorScheme.DARK_GRAY_COLOR;
 
 /**
