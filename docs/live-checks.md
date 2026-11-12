@@ -179,7 +179,13 @@ steps wait on these readings (`osrs-stars-map/docs/plan-where-to-go-for-a-task.m
       card is still folded, and the *Slayer* card folded keeps *Gargoyles · 143 left* (or whichever
       task). With a task of four places or more, open the list and press a closed place's name: it
       opens in place of the one that was open, with the one **Route** and **Pin**. The renderer's
-      arrows are a Linux fallback font's; note whether ▸ and ▾ draw in the client's own.
+      arrows are a Linux fallback font's; note whether ▸ and ▾ draw in the client's own. On a
+      multi-combat place where a cannon is allowed, the first chip should be the crossed swords
+      the game draws in a multi-combat zone and the second a cannon's barrels, each with no word
+      once drawn and its label as the tip on hover; the renderer drew stand-ins for both. A chip
+      still showing its word a few seconds after the list opens is a picture the client did not
+      give: note which. The level chip at the row's right should read *92 ✓* in green, or
+      *75 ✗* in pink on a place above your level; note whether ✓ and ✗ draw in the client's font.
 - [ ] **Port task slots.** `PortTaskReader` is written from the Hub's Sailing and Port Tasks
       plugins and the game's script, not from a session; these settle it. With *Tasks and timers*
       sharing on:

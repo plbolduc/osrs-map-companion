@@ -54,7 +54,10 @@ With **Tasks and timers** shared, Home lists the website's ranked places for you
 The counter follows kills in this client. Better places you cannot use yet stay visible with their
 requirements; expand the list for other places, ranking choices, the Wilderness filter and the
 kinds that count. One place is open at a time, the best one you can use to begin with: press
-another's name to open it instead. Wilderness places start hidden. **Route** plans from where
+another's name to open it instead. A place's labels are small pictures, and hovering one says it in
+words: crossed swords for multi-combat, a cannon's barrels where a cannon is allowed, a shield
+for a safespot and a sword for monsters that attack on sight. A level a place asks for sits at
+the right of that row, with a green tick when you have it and a red cross when you do not. Wilderness places start hidden. **Route** plans from where
 you stand; **Pin** makes the spot your destination in this client. Press the card's heading to
 fold it down to your task and its count; the Farm run and Port tasks cards fold the same way, and
 each stays as you left it. Locations and rates are from the

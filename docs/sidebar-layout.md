@@ -1051,6 +1051,33 @@ opens Best for you again, so a card never shows a place with no Route.
 The labels stay on a closed place because they are what a player compares places by, *Safespot*
 against *Cannon*. Hiding them made a shorter list that had to be opened row by row to be read.
 
+### Labels as pictures
+
+A place's labels were a sentence joined by dots, *Multi · best with an area attack · Cannon ·
+Aggressive*, two lines of grey that six places repeated. Each label is a chip now, a small picture
+on the lighter grey, all on one row, and its tip says the label in full. The owner asked for the
+pictures without their words, with the tip for whoever wants them.
+
+*Multi* is the game's multi-combat swords (`SpriteID.OVERLAY_MULTIWAY`) and *Cannon* a cannon's
+barrels (`ItemID.TWPART3`). The game has no picture of its own for a safespot or for aggression,
+so those borrow one until something better is drawn: the Defence skill's shield and the Attack
+skill's sword. *Wilderness* stays a word, in the sidebar's pink, as a Wilderness star site is.
+*Unknown*, the wiki not saying whether a place is multi-combat or takes a cannon, has no chip, by
+the owner's choice: it marks nothing a player can use. A place without a chip for something may
+therefore be one the wiki does not know about, and its page is one press away on *OSRS Wiki ↗*.
+
+A chip is its word until its picture arrives, so a picture the client cannot give leaves the word
+and never an empty box. With the picture it keeps only what the picture cannot say, *in part* or
+*maybe*. A reason after a dot, *best with an area attack*, is the tip's to say.
+
+### A level as a chip
+
+*✓ 92 Slayer* was a line of its own under the chips. A level a place asks for is now a chip at the
+right of the same row: the skill's icon, the level, and a tick in green, a cross in the refusal
+pink, or a question mark where the map could not confirm it. The icon names the skill, so the
+word went, and the tip keeps the words the line had, *Needs 75 Slayer*. As before, a closed place
+shows only what it still asks. A quest or an item a place asks for has no icon and keeps its line.
+
 ### Names that break in one place
 
 A card's line fits about four words, and a place's name is the wiki's, often five or six:
@@ -1074,7 +1101,7 @@ card (`farmRunFolded`, `slayerFolded`, `portTasksFolded`, this plugin's own sett
 so a player on a task can put the other two away and find them so tomorrow. A folded card's run
 still answers the route keys. The cards stand eight pixels apart rather than three.
 
-On the scene above, Home is 1,133px tall before and 1,033 after with everything open, and 460 with
+On the scene above, Home is 1,133px tall before and 1,039 after with everything open, and 443 with
 the farm run and the port tasks folded and the Slayer list at its one place
 (`tasks-cards-after.png`, `tasks-cards-folded.png`).
 
@@ -1086,5 +1113,5 @@ the farm run and the port tasks folded and the Slayer list at its one place
 - **The options above the list.** A picker over the places reads as their caption, but it moves the
   open place down as the list opens and puts two controls between the task and its best place.
   They stay under the fold that opens them.
-- **A count beside a folded heading** (*Port tasks · 3*). The source budget has about 3,800
-  characters left after this pass; it was spent on the list instead.
+- **A count beside a folded heading** (*Port tasks · 3*). Not built: the source
+  budget was nearly spent when the list and its chips were drawn.
