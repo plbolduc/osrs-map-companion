@@ -271,13 +271,36 @@ public class SlayerCardTest
 		state.local(identity.id(), finished, "best", true);
 		received(places("best"), 1);
 		refresh();
-		assertEquals(Arrays.asList("Slayer", "Gargoyles · Complete", SlayerPanel.NEXT_TASK), shown(panel));
+		/* The heading's own arrow, which folds any task card, stands beside it; nothing else was added. */
+		assertEquals(Arrays.asList("Slayer", "▾", "Gargoyles · Complete", SlayerPanel.NEXT_TASK), shown(panel));
 
 		state.local(identity.id(), gargoyles(), "best", true);
 		refresh();
 		List<String> next = shown(panel);
 		assertTrue(next.toString(), next.contains("Gargoyles · 143 left"));
 		assertTrue(next.toString(), next.contains("1. Slayer Tower (basement)"));
+	}
+
+	/**
+	 * The heading's arrow folds the card to its heading and the task with its count, which is what a
+	 * glance at a folded Slayer card is for, and the choice is kept for the next time the sidebar
+	 * opens. Pressed again, the places are back.
+	 */
+	@Test
+	public void theHeadingFoldsTheCardToItsTaskAndRemembersIt() throws Exception
+	{
+		state.local(identity.id(), gargoyles(), "best", true);
+		received(places("best"), 1);
+		refresh();
+		press("▾");
+		refresh();
+		assertEquals(Arrays.asList("Slayer", "▸", "Gargoyles · 143 left"), shown(panel));
+		assertTrue(store.on("slayerFolded"));
+
+		press("▸");
+		refresh();
+		assertTrue(shown(panel).toString(), shown(panel).contains("Route"));
+		assertFalse(store.on("slayerFolded"));
 	}
 
 	/**

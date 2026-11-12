@@ -28,6 +28,8 @@ package com.pbolduc.mapcompanion;
 import com.google.gson.Gson;
 import com.google.inject.Inject;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.time.chrono.IsoChronology;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -248,10 +250,10 @@ public class MapCompanionPanel extends PluginPanel
 		 */
 		tasks.add(sectionHead("Tasks"));
 		tasks.add(gap(3, DARK_GRAY_COLOR));
-		tasks.add(slot(farmRunPanel));
-		tasks.add(slot(slayerPanel));
-		tasks.add(slot(portTasksPanel));
-		tasks.add(gap(7, DARK_GRAY_COLOR));
+		tasks.add(slot(farmRunPanel, 8));
+		tasks.add(slot(slayerPanel, 8));
+		tasks.add(slot(portTasksPanel, 8));
+		tasks.add(gap(2, DARK_GRAY_COLOR));
 		overview.add(tasks);
 
 		/* Drop luck works with no pairing code set, so it sits above everything the group needs. */
@@ -361,9 +363,15 @@ public class MapCompanionPanel extends PluginPanel
 	 */
 	static JComponent slot(JPanel card)
 	{
+		return slot(card, 3);
+	}
+
+	/** The same with {@code under} pixels beneath it: the task cards are long, and stand further apart. */
+	static JComponent slot(JPanel card, int under)
+	{
 		JPanel slot = new JPanel(new BorderLayout());
 		slot.setBackground(DARK_GRAY_COLOR);
-		slot.setBorder(new EmptyBorder(0, 0, 3, 0));
+		slot.setBorder(new EmptyBorder(0, 0, under, 0));
 		slot.add(card, BorderLayout.CENTER);
 		return left(slot);
 	}
@@ -464,9 +472,14 @@ public class MapCompanionPanel extends PluginPanel
 
 	/**
 	 * A card under Tasks: the farm run's, Slayer's or the port tasks', each a darker column under a white
-	 * heading in bold with its skill's icon, so the three read as one kind of thing. Returns the heading.
+	 * heading in bold with its skill's icon, so the three read as one kind of thing. Returns the column
+	 * under the heading, which the card fills.
+	 *
+	 * <p>The heading folds the card: pressed, or its arrow, everything in that column hides until it is
+	 * pressed again, so a player on a Slayer task can put the farm run and the port tasks away. The
+	 * choice is kept under the card's name, for the next time the sidebar opens.
 	 */
-	static JLabel taskCard(JPanel card, String name, String title, GameSprites sprites, String skill)
+	static JPanel taskCard(JPanel card, String name, String title, GameSprites sprites, String skill, ConfigStore settings)
 	{
 		column(card, ColorScheme.DARKER_GRAY_COLOR);
 		/* Each card's inset; the gap between cards is the Tasks column's to draw. */
@@ -475,9 +488,38 @@ public class MapCompanionPanel extends PluginPanel
 		JLabel heading = new JLabel(title);
 		heading.setForeground(Color.WHITE);
 		refont(heading, Font.BOLD, 13f);
+		heading.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		sprites.skill(heading, skill, 16);
-		card.add(heading);
-		return heading;
+		JPanel content = column(null);
+		content.setOpaque(false);
+		String key = name + "Folded";
+		JButton fold = linkButton("");
+		fold.setName(key);
+		/* A button is never narrower than the look and feel's least: the arrow sits at its right, on the card's edge. */
+		fold.setHorizontalAlignment(SwingConstants.RIGHT);
+		Runnable draw = () ->
+		{
+			content.setVisible(!settings.on(key));
+			fold.setText(settings.on(key) ? "▸" : "▾");
+			fold.setToolTipText(settings.on(key) ? "Show" : "Hide");
+		};
+		fold.addActionListener(e ->
+		{
+			settings.set(key, Boolean.toString(!settings.on(key)));
+			draw.run();
+		});
+		heading.addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mousePressed(MouseEvent e)
+			{
+				fold.doClick(0);
+			}
+		});
+		draw.run();
+		card.add(left(capped(bar(0, ColorScheme.DARKER_GRAY_COLOR, null, heading, fold))));
+		card.add(content);
+		return content;
 	}
 
 	/** A section's name: bold, small and grey, the way the old join heading was. */
