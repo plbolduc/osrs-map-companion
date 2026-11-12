@@ -486,7 +486,8 @@ public class StarsPanelTest
 
 			assertEquals("the worlds besides the one printed", "+2 ▾", ((AbstractButton) named(stars, "stars.expand.tile:2974,3241")).getText());
 			((AbstractButton) named(stars, "stars.expand.tile:2974,3241")).doClick();
-			assertEquals(StarsPanel.TIERS[6], fact(row(stars, "302|rimmington mine"), "tier").getForeground());
+			/* It listed W302 again under its own card, as the first of three rows; the fold opens the other two. */
+			assertNull("the card is its first world, so the list does not repeat it", named(stars, "stars.world.302|rimmington mine"));
 			assertEquals(StarsPanel.TIERS[4], fact(row(stars, "330|rimmington mine"), "tier").getForeground());
 			assertEquals("~34m left", fact(row(stars, "330|rimmington mine"), "left").getText());
 			assertEquals("Depleted", fact(row(stars, "444|rimmington mine"), "left").getText());
@@ -549,9 +550,9 @@ public class StarsPanelTest
 			((AbstractButton) named(stars, "stars.expand.tile:2974,3241")).doClick();
 
 			assertEquals("the number alone", "302", fact((Container) named(stars, "stars.site.tile:2974,3241"), "world").getText());
-			assertEquals("the star before the number", "star.kind", fact(row(stars, "302|rimmington mine"), "world").getParent().getComponent(0).getName());
+			assertEquals("the star before the number", "star.kind", fact((Container) named(stars, "stars.site.tile:2974,3241"), "world").getParent().getComponent(0).getName());
 			assertEquals(Integer.valueOf(net.runelite.api.gameval.SpriteID.WorldswitcherStars.MEMBERS),
-				asked.get(named(row(stars, "302|rimmington mine"), "star.kind")));
+				asked.get(named((Container) named(stars, "stars.site.tile:2974,3241"), "star.kind")));
 			assertEquals("PvP before members", Integer.valueOf(net.runelite.api.gameval.SpriteID.WorldswitcherStars.PVP),
 				asked.get(named(row(stars, "330|rimmington mine"), "star.kind")));
 			assertEquals("Deadman before both", Integer.valueOf(net.runelite.api.gameval.SpriteID.WorldswitcherStars.DEADMAN),
