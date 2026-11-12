@@ -80,6 +80,29 @@ public class RelayResponsePolicyTest
 		assertTrue("and the plugin must still be holding off", !relay.isReady(System.currentTimeMillis()));
 	}
 
+	/**
+	 * Retry-After had no ceiling on a snapshot's 429, and its seconds were multiplied before anything
+	 * held them: a proxy answering with a day, or with a number large enough to wrap, stopped the
+	 * plugin posting until the player rejoined. It is read with the five minutes every press keeps.
+	 */
+	@Test
+	public void aHugeRetryAfterHoldsPostsForFiveMinutesAtMost() throws IOException
+	{
+		for (String asked : new String[] {"86400", "9223372036854776", Long.toString(Long.MAX_VALUE)})
+		{
+			RelayClient told = new RelayClient(new OkHttpClient(), new Gson());
+			long before = System.currentTimeMillis();
+			told.handle(reply(429, "{}", "Retry-After", asked), null);
+			long wait = told.getNextAllowedPostMs() - before;
+			assertTrue(asked + " held posts for " + wait + "ms", wait >= 300_000L && wait < 305_000L);
+		}
+		RelayClient unsaid = new RelayClient(new OkHttpClient(), new Gson());
+		long before = System.currentTimeMillis();
+		unsaid.handle(reply(429, "{}"), null);
+		long wait = unsaid.getNextAllowedPostMs() - before;
+		assertTrue("a 429 that names no wait keeps half a minute", wait >= 30_000L && wait < 35_000L);
+	}
+
 	@Test
 	public void clearingARefusalStillLetsARefusedMemberTryAgain() throws IOException
 	{

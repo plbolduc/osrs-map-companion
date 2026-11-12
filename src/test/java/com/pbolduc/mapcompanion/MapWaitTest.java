@@ -87,6 +87,10 @@ public class MapWaitTest
 		assertEquals("never under five seconds", 5_000L, MapWait.named(reply(200, "1")));
 		assertEquals("nor over five minutes", 300_000L, MapWait.named(reply(200, "86400")));
 		assertEquals("and half a minute for one that is not a number", 30_000L, MapWait.named(reply(200, "soon")));
+		assertEquals("the largest number there is is still five minutes, not a wrapped five seconds", 300_000L,
+			MapWait.retryDelay(Long.toString(Long.MAX_VALUE)));
+		assertEquals(300_000L, MapWait.retryDelay("9223372036854776"));
+		assertEquals("and a negative one the shortest", 5_000L, MapWait.retryDelay("-9223372036854775808"));
 
 		assertEquals(MapWait.BUSY, MapWait.why(429, "other"));
 		assertEquals(MapWait.BUSY, MapWait.why(503, "other"));
