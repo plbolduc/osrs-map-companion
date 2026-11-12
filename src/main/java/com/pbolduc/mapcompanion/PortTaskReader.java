@@ -30,6 +30,7 @@ import com.google.inject.Singleton;
 import java.util.*;
 import javax.annotation.Nullable;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import net.runelite.api.Client;
 import net.runelite.api.ItemComposition;
 import net.runelite.api.Player;
@@ -104,8 +105,13 @@ public class PortTaskReader extends SettlingReader
 	static final String LOCKED = "locked";
 	static final String UNKNOWN = "unknown";
 
-	/** One slot as the sidebar draws it. Immutable, so the panel can read it off the client thread. */
+	/**
+	 * One slot as the sidebar draws it. Immutable, so the panel can read it off the client thread, and
+	 * equal by what it holds: every tick reads the slots into a new list, and the card is drawn again
+	 * only when a reading differs from the one it shows.
+	 */
 	@AllArgsConstructor
+	@EqualsAndHashCode
 	static final class Slot
 	{
 		final int slot;

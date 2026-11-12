@@ -147,7 +147,7 @@ final class PortTasksPanel extends JPanel
 		}
 		body.setVisible(true);
 		Integer hold = reader.shownHold();
-		if (slots == shown && Objects.equals(hold, shownHold) && running == shownRunning)
+		if (slots.equals(shown) && Objects.equals(hold, shownHold) && running == shownRunning)
 		{
 			return;
 		}

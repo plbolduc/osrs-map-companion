@@ -56,7 +56,9 @@ import okhttp3.ResponseBody;
 import okio.Buffer;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
@@ -886,6 +888,45 @@ public class RunCardsTest
 		});
 		assertEquals(ColorScheme.MEDIUM_GRAY_COLOR, colours[0]);
 		assertEquals("a task still to do stays white", Color.WHITE, colours[1]);
+	}
+
+	/**
+	 * The game is read into a new list of slots on every tick, so a card that asked whether the list
+	 * was the same object drew a held task again each second. It asks whether the reading differs.
+	 */
+	@Test
+	public void theSameTasksReadAgainAreNotDrawnAgain() throws Exception
+	{
+		int[] collected = {0};
+		PortTaskReader ticking = new PortTaskReader(game.client(), new CargoHolds())
+		{
+			@Override
+			List<Slot> latest()
+			{
+				return Arrays.asList(
+					new PortTaskReader.Slot(0, PortTaskReader.COURIER, 6, HONEY, "Catherby", "Port Sarim", 3, collected[0], 0, 0, null),
+					PortTaskReader.Slot.plain(1, PortTaskReader.EMPTY));
+			}
+
+			@Override
+			Integer latestHold()
+			{
+				return 30;
+			}
+		};
+		SwingUtilities.invokeAndWait(() ->
+		{
+			PortTasksPanel card = new PortTasksPanel(ticking, config, store, sprites, state, client, follower, route, shortest);
+			card.refresh(true);
+			JLabel drawn = label(card, HONEY);
+			card.refresh(true);
+			assertSame("a second reading of the same tasks leaves the rows as they are", drawn, label(card, HONEY));
+
+			collected[0] = 1;
+			card.refresh(true);
+			assertNotSame("a crate collected is a different reading, and is drawn", drawn, label(card, HONEY));
+			assertTrue(label(card, "Collect 2 crates at Catherby for Port Sarim") != null);
+		});
 	}
 
 	/** The raw text of the shown label whose words are these, tags and all. */
