@@ -94,7 +94,7 @@ final class RecommendedSharing extends JPanel
 	 */
 	static String stream(String server)
 	{
-		return "While you're logged in, it keeps a connection to " + server + Words.of("share.stream");
+		return Words.of("share.streamLead") + " " + server + Words.of("share.stream");
 	}
 
 	static final String DESTINATIONS_DETAIL = Words.of("share.destinationsDetail");

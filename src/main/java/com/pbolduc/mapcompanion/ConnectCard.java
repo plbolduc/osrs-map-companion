@@ -1506,7 +1506,7 @@ final class ConnectCard extends JPanel
 		if (RelayClient.admitsByCode(status, heldSecret))
 		{
 			return "Join my OSRS map: " + map + "/map?join=" + code + "&task=companion"
-				+ " — then install the \"OSRS Map Companion\" RuneLite plugin and enter code " + code;
+				+ Words.of("connect.inviteByCode") + " " + code;
 		}
 		return null;
 	}

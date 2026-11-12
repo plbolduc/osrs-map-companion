@@ -62,10 +62,12 @@ connect.startOver=Paste another group's invite here, or use Leave group in Setti
 connect.openTip= in your browser, already in your group as you
 connect.inviteLogIn=Log in to a character to copy an invite.
 connect.inviteFailed=Couldn't make an invite, so nothing was copied. Try again in a minute.
+connect.inviteByCode= — then install the "OSRS Map Companion" RuneLite plugin and enter code
 connect.clipboardFailed=Couldn't put the invite on the clipboard.
 
 # RecommendedSharing: the step after a first Connect.
 share.intro=Your group sees your character name and what's ticked. Change it any time in Settings.
+share.streamLead=While you're logged in, it keeps a connection to
 share.stream= open. It brings the places your group sends, meetups and your friends' positions, and carries your group's code, your member id and its key, and nothing about your character.
 share.destinationsDetail=Places your group sends you, and your group's meetups, in the sidebar and on the world map. Nothing is clicked or walked for you.
 share.groupDetail=Your group's dots on the game's world map, from what they already share.
