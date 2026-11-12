@@ -14,7 +14,7 @@
         "plane": 1
       },
       "patchIds": [],
-      "method": "Sail from Port Sarim",
+      "method": "Sail 513 tiles · from Port Sarim",
       "item": null,
       "costTiles": 1230,
       "steps": [
@@ -220,6 +220,11 @@
             "tier": "met"
           }
         ]
+      },
+      "leg": {
+        "by": "sail",
+        "tiles": 513,
+        "more": "from Port Sarim"
       }
     },
     {
@@ -231,7 +236,7 @@
         "plane": 1
       },
       "patchIds": [],
-      "method": "Sail from Port Khazard",
+      "method": "Sail 108 tiles · from Port Khazard",
       "item": null,
       "costTiles": 223,
       "steps": [
@@ -324,6 +329,11 @@
             "tier": "met"
           }
         ]
+      },
+      "leg": {
+        "by": "sail",
+        "tiles": 108,
+        "more": "from Port Khazard"
       }
     },
     {
@@ -335,7 +345,7 @@
         "plane": 0
       },
       "patchIds": [],
-      "method": "Sail from Ardougne",
+      "method": "Sail 90 tiles · from Ardougne",
       "item": null,
       "costTiles": 184,
       "steps": [
@@ -400,6 +410,11 @@
             3173
           ]
         ]
+      },
+      "leg": {
+        "by": "sail",
+        "tiles": 90,
+        "more": "from Ardougne"
       }
     },
     {
@@ -411,7 +426,7 @@
         "plane": 1
       },
       "patchIds": [],
-      "method": "Sail on from the osprey",
+      "method": "Sail 128 tiles · on from the osprey",
       "item": null,
       "costTiles": 263,
       "steps": [
@@ -502,6 +517,11 @@
             3229
           ]
         ]
+      },
+      "leg": {
+        "by": "sail",
+        "tiles": 128,
+        "more": "on from the osprey"
       }
     }
   ]

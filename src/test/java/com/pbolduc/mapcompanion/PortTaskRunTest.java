@@ -270,7 +270,8 @@ public class PortTaskRunTest
 		RelayResponse.Destination leg = destinations.getDestination();
 		assertEquals("1. Port Khazard", leg.name);
 		RelayResponse.RouteOption way = leg.route.options.get(0);
-		assertEquals("Sail from Port Sarim", way.label);
+		/* The map's line for the leg, which now says how far before it says from where. */
+		assertEquals("Sail 513 tiles · from Port Sarim", way.label);
 		// The Sail step says the sailed distance; the leg's run-tile cost would contradict it.
 		assertNull(way.tiles);
 		assertEquals("Port Khazard", way.voyage.to);
@@ -281,7 +282,11 @@ public class PortTaskRunTest
 	public void aPortTaskRunCountsItsStopsRatherThanTrackedPatches() throws Exception
 	{
 		RelayResponse.FarmRun ports = run();
-		assertEquals("0 of 4 stops done", RunView.progressLine(new FarmRunState.View(FarmRunWire.normalize(ports),
+		/*
+		 * This read "0 of 4 stops done". Each of the fixture's legs now says its sail in numbers, 513,
+		 * 108, 90 and 128, so the line adds what is left of them, as a charting run's does.
+		 */
+		assertEquals("0 of 4 stops done · 839 tiles left", RunView.progressLine(new FarmRunState.View(FarmRunWire.normalize(ports),
 			Collections.emptySet(), Collections.emptySet(), Collections.emptySet(), true, 0, 1, null)));
 	}
 }
