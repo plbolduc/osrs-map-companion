@@ -330,7 +330,7 @@ final class RoutePress
 	 */
 	String words(Said said, long now)
 	{
-		return MapWait.waits(said.message) ? MapWait.tryAgain(said.message, waitMs(now)) : said.message;
+		return MapWait.words(said.message, waitMs(now));
 	}
 
 	/**
@@ -453,26 +453,20 @@ final class RoutePress
 		try (Response close = response)
 		{
 			long now = System.currentTimeMillis();
-			String wait = close.header("Retry-After");
-			long waitMs = wait == null ? 0L : StarsClient.retryDelay(wait);
 			int status = close.code();
 			if (close.isRedirect())
 			{
 				landing.land(null, REDIRECTS, now + 300_000L);
 			}
-			else if (status == 429 || status == 503)
-			{
-				landing.land(null, MapWait.BUSY, now + StarsClient.retryDelay(wait));
-			}
 			else if (!close.isSuccessful())
 			{
-				landing.land(null, status == 404 ? notFound(close) : status == 403 || status == 410 ? NOT_CONNECTED : FAILED,
-					now + Math.max(status == 404 ? MIN_GAP_MS : FAILURE_GAP_MS, waitMs));
+				landing.land(null, status == 404 ? notFound(close) : MapWait.why(status, FAILED),
+					now + MapWait.after(close, status == 404 ? MIN_GAP_MS : FAILURE_GAP_MS));
 			}
 			else
 			{
 				landing.land(gson.fromJson(CompanionHttp.readBounded(close.body()), Answer.class),
-					null, now + Math.max(MIN_GAP_MS, waitMs));
+					null, now + MapWait.after(close, MIN_GAP_MS));
 			}
 		}
 		catch (IOException | RuntimeException unreadable)

@@ -406,19 +406,11 @@ final class SearchClient
 				long next;
 				try (Response close = response)
 				{
-					long now = System.currentTimeMillis();
-					String wait = close.header("Retry-After");
-					int status = close.code();
-					if (status == 429 || status == 503)
+					if (!close.isSuccessful())
 					{
-						next = now + StarsClient.retryDelay(wait);
-						/* Nothing is asked again until the player types or presses Enter; the line counts the wait down. */
-						why = MapWait.BUSY;
-					}
-					else if (!close.isSuccessful())
-					{
-						next = now + Math.max(FAILURE_GAP_MS, wait == null ? 0L : StarsClient.retryDelay(wait));
-						why = status == 403 || status == 410 ? RoutePress.NOT_CONNECTED : FAILED;
+						/* A busy map is asked nothing again until the player types or presses Enter; the line counts the wait down. */
+						next = System.currentTimeMillis() + MapWait.after(close, FAILURE_GAP_MS);
+						why = MapWait.why(close.code(), FAILED);
 					}
 					else
 					{

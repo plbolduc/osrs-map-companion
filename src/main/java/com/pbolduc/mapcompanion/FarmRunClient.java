@@ -189,7 +189,7 @@ final class FarmRunClient
 	 */
 	String words(Said said, long now)
 	{
-		return MapWait.waits(said.message) ? MapWait.tryAgain(said.message, gate.pressWait(now)) : said.message;
+		return MapWait.words(said.message, gate.pressWait(now));
 	}
 
 	@Nullable
@@ -327,8 +327,7 @@ final class FarmRunClient
 			(Response close = response)
 		{
 			long now = System.currentTimeMillis();
-			String wait = close.header("Retry-After");
-			long next = now + Math.max(RoutePress.MIN_GAP_MS, wait == null ? 0L : StarsClient.retryDelay(wait));
+			long next = now + Math.max(RoutePress.MIN_GAP_MS, MapWait.named(close));
 			if (close.isRedirect())
 			{
 				refuse(ticket, RoutePress.REDIRECTS, now + 300_000L);
@@ -337,8 +336,7 @@ final class FarmRunClient
 			if (!close.isSuccessful())
 			{
 				int code = close.code();
-				String why = code == 429 || code == 503 ? MapWait.BUSY
-							 : code == 403 || code == 410 ? RoutePress.NOT_CONNECTED : Words.of("farm.notPrepared");
+				String why = MapWait.why(code, Words.of("farm.notPrepared"));
 				String words = CompanionHttp.said(gson, CompanionHttp.readBounded(close.body()), 240);
 				boolean worded = words != null;
 				why = worded ? words : why;
