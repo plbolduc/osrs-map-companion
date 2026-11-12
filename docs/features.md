@@ -53,8 +53,11 @@ Results use the game's map icons and item sprites.
 With **Tasks and timers** shared, Home lists the website's ranked places for your Slayer task.
 The counter follows kills in this client. Better places you cannot use yet stay visible with their
 requirements; expand the list for other places, ranking choices, the Wilderness filter and the
-kinds that count. Wilderness places start hidden. **Route** plans from where you stand; **Pin**
-makes the spot your destination in this client. Locations and rates are from the
+kinds that count. One place is open at a time, the best one you can use to begin with: press
+another's name to open it instead. Wilderness places start hidden. **Route** plans from where
+you stand; **Pin** makes the spot your destination in this client. Press the card's heading to
+fold it down to your task and its count; the Farm run and Port tasks cards fold the same way, and
+each stays as you left it. Locations and rates are from the
 [OSRS Wiki](https://oldschool.runescape.wiki/w/Slayer_training),
 [CC BY-NC-SA 3.0](https://creativecommons.org/licenses/by-nc-sa/3.0/).
 

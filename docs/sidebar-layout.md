@@ -1025,3 +1025,59 @@ the sidebar's own button, so the rule that nothing acts in the game holds.
   keep the map asking Star Miners at hours nobody is watching, against the one condition they set.
   The owner has declined star alerts once already, and on 1 November declined the version that adds
   no request, an alert from the list the open Stars tab already holds.
+
+## The Tasks cards, 11 November 2026
+
+The owner's complaint, over a photograph of Home with a six-place Slayer task open above three port
+tasks: it is hard to follow, hard to know what to press, and Farm run, Slayer and Port tasks run
+together. Measured on that scene (`docs/mockups/tasks-cards-before.png`): fourteen buttons of one
+size, twelve of them six pairs of **Route** and **Pin** that differ only by the name four lines above, the same
+*✓ 92 Slayer* six times, and nothing but seven pixels between one place and the next or between the
+last place and the options.
+
+What was decided before stands: the cards sit under *Tasks*, below *Now*, one card each; an action
+is a button and a fold's opener is a link; the ranking picker and the Wilderness box show with the
+open list and not behind a second opener. Three things changed inside that.
+
+### One place open at a time
+
+A Slayer place is open or closed. The open one is as every place was: its name in bold, *Best for
+you*, its kinds, its labels, what it asks, and **Route** and **Pin**. A closed one is its name as a
+link with the fold's own arrow, its labels, and anything it still asks for, since that is why its
+name is grey; what it asks and the player has waits until it is opened. Best for you starts open,
+pressing a name opens that place in its stead, and a new task or a list folded back to one place
+opens Best for you again, so a card never shows a place with no Route.
+
+The labels stay on a closed place because they are what a player compares places by, *Safespot*
+against *Cannon*. Hiding them made a shorter list that had to be opened row by row to be read.
+
+### Hairlines where one thing ends
+
+A hairline, the run card's own, sits over every place, over the notes and the fold that follow the
+last one, over the kinds and sources after the options, and between two port tasks. *OSRS Wiki ↗*
+and *CC BY-NC-SA 3.0 ↗* share the card's last line. The task's own note, *Only Slayer Tower counts
+for this task.*, is under the list's hairline with the fold rather than under the last place's
+buttons, where it read as that place's.
+
+### A heading that folds its card
+
+Each card's heading is a fold, with its arrow at the card's right edge: pressed, the card is its
+heading alone, and the Slayer card its heading and *Araxytes · 111 left*. The choice is kept per
+card (`farmRunFolded`, `slayerFolded`, `portTasksFolded`, this plugin's own settings, sent nowhere)
+so a player on a task can put the other two away and find them so tomorrow. A folded card's run
+still answers the route keys. The cards stand eight pixels apart rather than three.
+
+On the scene above, Home is 1,133px tall before and 1,033 after with everything open, and 460 with
+the farm run and the port tasks folded and the Slayer list at its one place
+(`tasks-cards-after.png`, `tasks-cards-folded.png`).
+
+### Proposed and not changed
+
+- **A tab or a switch per task** (*Farm · Slayer · Ports*, one card showing). It hides a run being
+  walked behind the task being read, and Home, Group and Stars were settled on 29 October. The
+  fold gives the same short page without choosing for the player.
+- **The options above the list.** A picker over the places reads as their caption, but it moves the
+  open place down as the list opens and puts two controls between the task and its best place.
+  They stay under the fold that opens them.
+- **A count beside a folded heading** (*Port tasks · 3*). The source budget has about 3,800
+  characters left after this pass; it was spent on the list instead.

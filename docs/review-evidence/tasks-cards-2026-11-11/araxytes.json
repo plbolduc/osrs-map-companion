@@ -1,0 +1,171 @@
+{
+  "taskName": "Araxytes",
+  "areaName": null,
+  "order": "best",
+  "hideWilderness": true,
+  "rows": [
+    {
+      "id": "slayer:Araxytes#1:3658,9816,0",
+      "rank": 1,
+      "name": "Morytania Spider Cave main room",
+      "kinds": [],
+      "labels": [
+        "Multi · best with an area attack",
+        "Cannon",
+        "Aggressive"
+      ],
+      "tier": "met",
+      "bestForYou": true,
+      "target": {
+        "x": 3658,
+        "y": 9816,
+        "plane": 0
+      },
+      "asks": [
+        {
+          "text": "92 Slayer",
+          "tier": "met",
+          "skill": "Slayer"
+        }
+      ]
+    },
+    {
+      "id": "slayer:Araxytes#2:3659,9816,0",
+      "rank": 2,
+      "name": "Morytania Spider Cave eastern room",
+      "kinds": [],
+      "labels": [
+        "Multi · best with an area attack",
+        "Cannon",
+        "Aggressive"
+      ],
+      "tier": "met",
+      "bestForYou": false,
+      "target": {
+        "x": 3659,
+        "y": 9816,
+        "plane": 0
+      },
+      "asks": [
+        {
+          "text": "92 Slayer",
+          "tier": "met",
+          "skill": "Slayer"
+        }
+      ]
+    },
+    {
+      "id": "slayer:Araxytes#3:3660,9816,0",
+      "rank": 3,
+      "name": "Morytania Spider Cave south-eastern room",
+      "kinds": [],
+      "labels": [
+        "Cannon",
+        "Safespot",
+        "Aggressive"
+      ],
+      "tier": "met",
+      "bestForYou": false,
+      "target": {
+        "x": 3660,
+        "y": 9816,
+        "plane": 0
+      },
+      "asks": [
+        {
+          "text": "92 Slayer",
+          "tier": "met",
+          "skill": "Slayer"
+        }
+      ]
+    },
+    {
+      "id": "slayer:Araxytes#4:3661,9816,0",
+      "rank": 4,
+      "name": "Morytania Spider Cave northern room",
+      "kinds": [],
+      "labels": [
+        "Cannon",
+        "Safespot",
+        "Aggressive"
+      ],
+      "tier": "met",
+      "bestForYou": false,
+      "target": {
+        "x": 3661,
+        "y": 9816,
+        "plane": 0
+      },
+      "asks": [
+        {
+          "text": "92 Slayer",
+          "tier": "met",
+          "skill": "Slayer"
+        }
+      ]
+    },
+    {
+      "id": "slayer:Araxytes#5:3662,9816,0",
+      "rank": 5,
+      "name": "Morytania Spider Cave",
+      "kinds": [
+        "Acidic Araxyte"
+      ],
+      "labels": [
+        "Aggressive",
+        "Unknown"
+      ],
+      "tier": "met",
+      "bestForYou": false,
+      "target": {
+        "x": 3662,
+        "y": 9816,
+        "plane": 0
+      },
+      "asks": [
+        {
+          "text": "92 Slayer",
+          "tier": "met",
+          "skill": "Slayer"
+        }
+      ]
+    },
+    {
+      "id": "slayer:Araxytes#6:3663,9816,0",
+      "rank": 6,
+      "name": "Araxxor boss lair",
+      "kinds": [],
+      "labels": [
+        "Multi · best with an area attack"
+      ],
+      "tier": "met",
+      "bestForYou": false,
+      "target": {
+        "x": 3663,
+        "y": 9816,
+        "plane": 0
+      },
+      "asks": [
+        {
+          "text": "92 Slayer",
+          "tier": "met",
+          "skill": "Slayer"
+        }
+      ]
+    }
+  ],
+  "ranked": 6,
+  "hiddenWilderness": 0,
+  "kinds": [
+    {
+      "name": "Araxyte",
+      "facts": "lvl 96 · 230 XP · Slayer 92",
+      "best": "Morytania Spider Cave main room"
+    }
+  ],
+  "bosses": [],
+  "rate": "100k Cannon and Venator bow",
+  "page": "Slayer task/Araxytes",
+  "note": null,
+  "notes": []
+}
