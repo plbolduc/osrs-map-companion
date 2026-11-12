@@ -1163,3 +1163,35 @@ The same eight tasks paint 533px.
   says *1 not on you* would send a player to the bank for nothing.
 - **The Sailing level a task asks for.** The run holds only tasks the player's level allows, so
   the number would be printed on every task it is true of.
+
+## Runs and steps to scan, 12 November 2026
+
+The sea charting run's row, bar and column were asked for every run and for the steps under them.
+
+### A picture on every step
+
+A teleport's step had its item or spell beside it; a walk, a boarding, a sail and a docking were
+words alone, so a leg of *walk, board, sail, dock, walk* was five lines to read. A step the map
+names no picture for is drawn by its kind: the minimap's walking boot for a walk, and from the
+Sailing interface a boat for boarding and docking and a ship at sea for the sail. They are the
+game's own sprites, by the client's constants.
+
+Only the list of steps draws them. A stop's picture in a run and the box over the game stay the
+step's own item or spell, so a leg that starts with a walk still leads with its teleport, and a leg
+that is all walking leads with nothing. The picture's column, kept on every step once one has a
+picture, is now on nearly every route.
+
+### The bar on every run
+
+A farm run said *2 of 3 tracked done* and a port-task run *1 of 4 stops done* in words. Both have
+the charting run's bar over that line, counting what the line counts: the stops something can
+witness, or every stop where nothing can.
+
+### A port-task run's legs in a column
+
+A port-task stop said *Sail from Port Khazard* under its name. The map now sends that leg in
+numbers too, so the stop is the charting run's row: its sail at the right edge, *from Port
+Khazard* under the name, and the count adds the tiles left. Its tasks keep their lines.
+
+A port-task stop has no picture of its own yet. A courier's crate and a bounty's part would be the
+ones, and the map keeps no picture of a cargo crate to check a client's against.

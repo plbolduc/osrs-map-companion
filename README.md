@@ -15,12 +15,12 @@ quests, route to them, and plan meetups.
 ## Routes in RuneLite
 
 <p>
-  <img src="docs/mockups/sidebar-route.png" width="300" alt="Home in the plugin sidebar with a route to Lumbridge Castle bank: numbered steps, the current one, casting Lumbridge Home Teleport, with its number in amber beside the spell's icon, a ring of dueling as the other way, and Follow, Reroute and Dismiss; under Tasks, the Farm run and Slayer cards">
+  <img src="docs/mockups/sidebar-route.png" width="300" alt="Home in the plugin sidebar with a route to Lumbridge Castle bank: numbered steps, the current one, casting Lumbridge Home Teleport, with its number in amber beside the spell's icon, a walking boot beside each walk, a ring of dueling as the other way, and Follow, Reroute and Dismiss; under Tasks, the Farm run and Slayer cards">
 </p>
 
 Pick a place, a search result or a task, and the sidebar lists the way there step by step: which
 teleport to use, which ride to take, where to walk. A teleport step shows the item or spell, and
-outlines it in your inventory or spellbook while you follow. Each step gets a numbered pin on the
+outlines it in your inventory or spellbook while you follow; a walk shows a boot and a sail a boat. Each step gets a numbered pin on the
 game's world map, and you can right-click that map and choose **Route here** to go anywhere.
 
 Press **Follow** to keep the step you are on in a small box over the game. **Reroute** plans
@@ -31,7 +31,7 @@ diaries, items and unlocks your account has.
 Shortest Path draws the walks.
 
 <p>
-  <img src="docs/mockups/sidebar-quest-step.png" width="205" alt="The Quest Helper step card on Home after Route: 52 tiles, casting Lumbridge Home Teleport, walking to the castle staircase and climbing to the bank, with Pause, Reroute and Dismiss">
+  <img src="docs/mockups/sidebar-quest-step.png" width="225" alt="The Quest Helper step card on Home after Route: 52 tiles, casting Lumbridge Home Teleport, walking to the castle staircase and climbing to the bank, a boot beside each walk, with Pause, Reroute and Dismiss">
 </p>
 
 **Works with Quest Helper.** With Quest Helper's *Use 'Shortest Path' plugin* setting on, Home shows
@@ -62,7 +62,7 @@ The Farm run, Slayer and Port tasks cards each fold away under their heading.
 ## Farm runs in RuneLite
 
 <p>
-  <img src="docs/mockups/sidebar-farm-run.png" width="300" alt="A farm run's card in the sidebar: Before you leave counting one teleport not on you, Falador done and folded to one line, Catherby next with its number in amber and This leg's steps under it, the birdhouse done and the bank visited, and Pause, Reroute and End run">
+  <img src="docs/mockups/sidebar-farm-run.png" width="300" alt="A farm run's card in the sidebar: a bar two thirds full over 2 of 3 tracked done, Before you leave counting one teleport not on you, Falador done and folded to one line, Catherby next with its number in amber and This leg's steps under it, the birdhouse done and the bank visited, and Pause, Reroute and End run">
 </p>
 
 Start a run from **Ready now**, **Birdhouses** or your farming contract, or build one on the
@@ -82,7 +82,7 @@ Each task shows the tool it takes and how far its sail or walk is, with a bar fo
 ## Sailing
 
 <p>
-  <img src="docs/mockups/sidebar-voyage.png" width="300" alt="A voyage in the plugin sidebar: the walk to Port Sarim and boarding your boat done, Sail to Catherby current with its number in amber and its Sailing level marked unmet, then Dock at Catherby">
+  <img src="docs/mockups/sidebar-voyage.png" width="300" alt="A voyage in the plugin sidebar: the walk to Port Sarim and boarding your boat done, Sail to Catherby current with its number in amber and its Sailing level marked unmet, then Dock at Catherby, each step with a boot or a boat beside it">
 </p>
 
 A voyage in your own boat is its own steps, board, sail and dock, starting where your boat is.
@@ -90,16 +90,17 @@ They tick off as you go, and the sail is drawn on the world map. Each of your bo
 the world map at the port where it is moored, with nothing sent and no Connect needed.
 
 <p>
-  <img src="docs/mockups/sidebar-port-tasks.png" width="225" alt="A port-task run in the RuneLite Port tasks card: Port Khazard done and folded to one line, Ardougne next with its crates to deliver and This leg's steps under it, from the walk to the boat to the ledger table, then the osprey hunt and Brimhaven's task board">
+  <img src="docs/mockups/sidebar-port-tasks.png" width="225" alt="A port-task run in the RuneLite Port tasks card: a bar a quarter full over 1 of 4 stops done and 326 tiles left, Port Khazard done and folded to one line, Ardougne next with its crates to deliver and its sail of 108 tiles at the right, This leg's steps under it each with a boot or a boat, from the walk to the boat to the ledger table, then the osprey hunt and Brimhaven's task board with their sails in the same column">
 </p>
 
 Home lists the port tasks you hold, and **Start run** turns them into one trip: every crate in the
-order your hold allows, then each bounty out to its creature and back.
+order your hold allows, then each bounty out to its creature and back. Each stop shows how far its
+sail is, and a bar how much of the run is done.
 
 ## Shooting stars
 
 <p>
-  <img src="docs/mockups/stars-tab-list.png" width="300" alt="The Stars tab: a star at Rimmington mine pinned at the top, its tier in pink and its world as a gold members star and a number, green because you are on it, with its route under it, a Rimmington tablet and a walk, and Reroute and Unpin; then the tier and world filters, and the stars grouped by site, each with its tier in bold in the tier's colour, the world switcher's star beside its world in bold, and its time left, with Data from Star Miners at the foot">
+  <img src="docs/mockups/stars-tab-list.png" width="300" alt="The Stars tab: a star at Rimmington mine pinned at the top, its tier in pink and its world as a gold members star and a number, green because you are on it, with its route under it, a Rimmington tablet and a walk with its boot, and Reroute and Unpin; then the tier and world filters, and the stars grouped by site, each with its tier in bold in the tier's colour, the world switcher's star beside its world in bold, and its time left, with Data from Star Miners at the foot">
 </p>
 
 **Stars** lists active stars by site, world, tier and time left, with a star on the world you
