@@ -43,7 +43,8 @@ import okhttp3.OkHttpClient;
  * search answering "bank" and "whip", the death and clue cards, a meetup, and Drop luck alone.
  * The README's pictures are route, search-whip-card, farm-count, group, stars-route, dropluck-card,
  * slayer-card, settings-closed and port-run, with VoyageShot's voyage-sail; the card scenes paint the
- * real sections without the panel's surrounding controls.
+ * real sections without the panel's surrounding controls. The tasks scenes are Home with all three
+ * task cards, open and folded; {@code -Dslayer.options=<file>} gives any Slayer scene another list.
  * Synthetic local state and made-up names; no game account and no network — the map address is a
  * port nothing listens on. A paired scene shares what the one press at Connect turns on.
  *
@@ -69,7 +70,7 @@ public class SidebarPolishShot
 	static final List<String> STATES = Arrays.asList("fresh", "fresh-log", "connect", "home", "route", "group", "settings", "settings-closed",
 		"stars", "stars-filters", "stars-route", "stars-pinned", "stars-busy", "stars-busy-picked", "stars-busy-open", "stars-busy-ways", "search", "search-whip", "search-whip-card", "death", "meetup", "dropluck", "dropluck-card", "status",
 		"farm", "farm-card", "farm-bring", "farm-count", "slayer", "slayer-card", "slayer-open", "slayer-expanded", "slayer-blocked",
-		"port-tasks", "port-tasks-card", "port-tasks-unread", "port-run", "port-run-changed");
+		"port-tasks", "port-tasks-card", "port-tasks-unread", "port-run", "port-run-changed", "tasks", "tasks-folded");
 
 	static HarnessGame game;
 
@@ -239,10 +240,10 @@ public class SidebarPolishShot
 			DestinationState destinations = injector.getInstance(DestinationState.class);
 			/* A session long settled, with no Slayer task unless a Slayer scene gives one below. */
 			injector.getInstance(SlayerState.class).local(injector.getInstance(MemberIdentity.class).id(), null, "best", false);
-			if (state.startsWith("slayer"))
+			if (state.startsWith("slayer") || state.startsWith("tasks"))
 			{
 				config.set("shareSlayer", true);
-				RelayResponse.SlayerOptions options = new Gson().fromJson(Files.readString(Paths.get("src/test/resources/contract/" + (state.equals("slayer-blocked") ? "slayer-blocked.json" : "slayer-options.json")), StandardCharsets.UTF_8), RelayResponse.SlayerOptions.class);
+				RelayResponse.SlayerOptions options = new Gson().fromJson(Files.readString(Paths.get(System.getProperty("slayer.options", "src/test/resources/contract/" + (state.equals("slayer-blocked") ? "slayer-blocked.json" : "slayer-options.json"))), StandardCharsets.UTF_8), RelayResponse.SlayerOptions.class);
 				options.note = null;
 				if (options.kinds.size() == 1) for (RelayResponse.SlayerSpot spot : options.rows) spot.kinds.clear();
 				options = SlayerWire.normalize(options);
@@ -255,7 +256,7 @@ public class SidebarPolishShot
 				directive.relayEpoch = "fixture-relay-epoch"; directive.slayerOptions = options; directive.slayerRevision = 1;
 				slayer.accept(member, directive, System.currentTimeMillis());
 			}
-			if (state.startsWith("port-tasks"))
+			if (state.startsWith("port-tasks") || state.startsWith("tasks"))
 			{
 				/*
 				 * The reading is laid in directly: the reader's varbits and tables are PortTaskReaderTest's
@@ -553,8 +554,19 @@ public class SidebarPolishShot
 		}
 		if (state.equals("slayer-open") || state.equals("slayer-expanded"))
 		{
-			expand(panel, "All 3 places & options");
-			expand(panel, "1 kind counts");
+			press(panel, "slayer.expand");
+			press(panel, "slayer.kinds");
+		}
+		/* Home as a player on a task has it: the farm run idle, every Slayer place listed, the port tasks held. */
+		if (state.equals("tasks"))
+		{
+			press(panel, "slayer.expand");
+		}
+		/* The same with the farm run and the port tasks folded away under their headings. */
+		if (state.equals("tasks-folded"))
+		{
+			press(panel, "farmRunFolded");
+			press(panel, "portTasksFolded");
 		}
 		if (state.equals("farm-bring"))
 		{
