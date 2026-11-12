@@ -111,6 +111,12 @@ public class LootLogDropLuckTest
 		return found;
 	}
 
+	/** Whether any of a monster's drops has a rate, which is where odds can be given. */
+	private static boolean rated(LootLog.Monster monster)
+	{
+		return monster.drops.stream().anyMatch(drop -> drop.oneIn != null);
+	}
+
 	@Test
 	public void aMonsterWithNoRateIsCountedAndListed()
 	{
@@ -119,7 +125,7 @@ public class LootLogDropLuckTest
 		LootLog.Monster chicken = monster("Chicken");
 		assertEquals(2, chicken.kills);
 		assertTrue("bones are not notable", chicken.drops.isEmpty());
-		assertFalse(chicken.rated());
+		assertFalse(rated(chicken));
 		assertEquals("and it travels, with no drops and a whole list", 2,
 			DropLuckView.find(log.monsters(), "Chicken").kills);
 	}
@@ -165,7 +171,7 @@ public class LootLogDropLuckTest
 	{
 		kill("Abyssal demon", COINS);
 		LootLog.Monster demon = monster("Abyssal demon");
-		assertTrue(demon.rated());
+		assertTrue(rated(demon));
 		LootLog.Drop head = null;
 		for (LootLog.Drop drop : demon.drops)
 		{
