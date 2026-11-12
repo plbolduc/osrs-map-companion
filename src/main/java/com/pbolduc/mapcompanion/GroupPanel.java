@@ -68,6 +68,18 @@ import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.gameval.SpriteID;
 import net.runelite.client.ui.ColorScheme;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.label;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.column;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.escape;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.left;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.setWrapped;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.smallButton;
+import static com.pbolduc.mapcompanion.MeetupClient.Said;
+import static com.pbolduc.mapcompanion.RelayResponse.Meetup;
+import static com.pbolduc.mapcompanion.RelayResponse.MeetupAnswer;
+import static com.pbolduc.mapcompanion.RelayResponse.RosterRow;
+import static net.runelite.client.ui.ColorScheme.DARKER_GRAY_COLOR;
+import static net.runelite.client.ui.ColorScheme.DARK_GRAY_COLOR;
+import static net.runelite.client.ui.ColorScheme.LIGHT_GRAY_COLOR;
 
 /**
  * The group in the sidebar: each friend's row, the week's meetups, and <i>Meet here</i>.
@@ -151,7 +163,7 @@ final class GroupPanel extends JPanel
 	private final MapCompanionConfig config;
 	private final GameSprites sprites;
 
-	private final JPanel friends = MapCompanionPanel.column(ColorScheme.DARK_GRAY_COLOR);
+	private final JPanel friends = column(DARK_GRAY_COLOR);
 	private final JLabel meetupsHead = MapCompanionPanel.sectionHead("Meetups");
 	/**
 	 * Under the Meetups heading while Destinations and meetups is off. The map's meetups are taken only
@@ -160,16 +172,16 @@ final class GroupPanel extends JPanel
 	 */
 	static final String MEETUPS_OFF = Words.of("group.meetupsOff");
 	private final JLabel meetupsOff = new JLabel();
-	private final JPanel meetupCards = MapCompanionPanel.column(ColorScheme.DARK_GRAY_COLOR);
+	private final JPanel meetupCards = column(DARK_GRAY_COLOR);
 	private final JButton meetHere = MapCompanionPanel.linkButton("Meet here…");
 	private final JLabel meetSaid = new JLabel();
-	private final JPanel form = MapCompanionPanel.column(ColorScheme.DARKER_GRAY_COLOR);
+	private final JPanel form = column(DARKER_GRAY_COLOR);
 	private final JTextField title = new JTextField();
 	private final JComboBox<String> day = new JComboBox<>();
 	private final JComboBox<String> hour = new JComboBox<>();
 	private final JComboBox<String> minute = new JComboBox<>();
 	private final JLabel formSaid = new JLabel();
-	private final JButton make = MapCompanionPanel.smallButton("Make meetup");
+	private final JButton make = smallButton("Make meetup");
 	private boolean formOpen;
 	/**
 	 * Meet here's last word as it stood when the player last opened the form or put it away, which
@@ -177,7 +189,7 @@ final class GroupPanel extends JPanel
 	 * the next one, and a meetup made closes the form once rather than each time it is opened.
 	 */
 	@Nullable
-	private MeetupClient.Said quietMeet;
+	private Said quietMeet;
 	/** The days the form offers, from today, in the player's zone. */
 	private final List<LocalDate> days = new ArrayList<>();
 	@Nullable
@@ -215,7 +227,7 @@ final class GroupPanel extends JPanel
 		this.config = config;
 		this.sprites = sprites;
 		this.invite = invite;
-		MapCompanionPanel.column(this, ColorScheme.DARK_GRAY_COLOR);
+		column(this, DARK_GRAY_COLOR);
 		setName("companionGroup");
 		add(friends);
 		meetHere.setName("group.meetHere");
@@ -223,11 +235,11 @@ final class GroupPanel extends JPanel
 		meetHere.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
 		meetHere.setToolTipText(Words.of("group.meetHereTip"));
 		meetHere.addActionListener(e -> openForm(!formOpen));
-		JPanel head = MapCompanionPanel.bar(0, ColorScheme.DARK_GRAY_COLOR, meetupsHead, null, meetHere);
+		JPanel head = MapCompanionPanel.bar(0, DARK_GRAY_COLOR, meetupsHead, null, meetHere);
 		head.setName("group.meetupsHead");
 		head.setBorder(new EmptyBorder(4, 0, 3, 0));
 		MapCompanionPanel.capped(head);
-		add(MapCompanionPanel.left(head));
+		add(left(head));
 		/*
 		 * The form opens under the link that opened it, above the meetups, and its answer is said there;
 		 * each keeps a card's gap from the meetup under it.
@@ -240,7 +252,7 @@ final class GroupPanel extends JPanel
 		form.setVisible(false);
 		meetupsOff.setName("group.meetupsOff");
 		add(line(meetupsOff));
-		MapCompanionPanel.setWrapped(meetupsOff, MEETUPS_OFF, WIDTH + 16);
+		setWrapped(meetupsOff, MEETUPS_OFF, WIDTH + 16);
 		add(meetupCards);
 	}
 
@@ -248,8 +260,8 @@ final class GroupPanel extends JPanel
 	private void buildForm()
 	{
 		form.setBorder(javax.swing.BorderFactory.createCompoundBorder(
-			new javax.swing.border.MatteBorder(0, 0, 3, 0, ColorScheme.DARK_GRAY_COLOR), new EmptyBorder(6, 8, 6, 8)));
-		JLabel heading = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
+			new javax.swing.border.MatteBorder(0, 0, 3, 0, DARK_GRAY_COLOR), new EmptyBorder(6, 8, 6, 8)));
+		JLabel heading = label(11f, LIGHT_GRAY_COLOR);
 		heading.setText("A meetup where you stand");
 		form.add(heading);
 		title.setName("group.meetTitle");
@@ -260,9 +272,9 @@ final class GroupPanel extends JPanel
 		day.setName("group.meetDay");
 		hour.setName("group.meetHour");
 		minute.setName("group.meetMinute");
-		day.setFont(day.getFont().deriveFont(11f));
-		hour.setFont(hour.getFont().deriveFont(11f));
-		minute.setFont(minute.getFont().deriveFont(11f));
+		MapCompanionPanel.refont(day, 11f);
+		MapCompanionPanel.refont(hour, 11f);
+		MapCompanionPanel.refont(minute, 11f);
 		form.add(fill(day));
 		form.add(gap(4));
 		form.add(fill(actions(hour, minute)));
@@ -270,7 +282,7 @@ final class GroupPanel extends JPanel
 		make.setName("group.meetMake");
 		make.setToolTipText(Words.of("group.makeTip"));
 		make.addActionListener(e -> makeMeetup());
-		JButton cancel = MapCompanionPanel.smallButton("Cancel");
+		JButton cancel = smallButton("Cancel");
 		cancel.addActionListener(e -> openForm(false));
 		form.add(fill(actions(make, cancel)));
 		form.add(line(formSaid));
@@ -404,13 +416,13 @@ final class GroupPanel extends JPanel
 			press.refuse(GroupState.source(waited), RoutePress.LOG_IN);
 		}
 		here = group.world();
-		List<RelayResponse.RosterRow> roster = destinations.getRoster();
-		List<RelayResponse.Meetup> events = destinations.getEvents();
+		List<RosterRow> roster = destinations.getRoster();
+		List<Meetup> events = destinations.getEvents();
 		String destinationKey = DestinationRoute.keyOf(destinations.getDestination());
 
-		MeetupClient.Said meet = meetups.said("meet");
+		Said meet = meetups.said("meet");
 		/* Meet here's answer to a press made since the form was last opened or put away. */
-		MeetupClient.Said fresh = meet == null || meet == quietMeet || meet.sending ? null : meet;
+		Said fresh = meet == null || meet == quietMeet || meet.sending ? null : meet;
 		if (formOpen && fresh != null && fresh.confirms())
 		{
 			/* Made: the form has done its work, and the heading says so for a moment. */
@@ -424,7 +436,7 @@ final class GroupPanel extends JPanel
 		meetSaid.setVisible(showMeet);
 		if (showMeet)
 		{
-			MapCompanionPanel.setWrapped(meetSaid, fresh.message, WIDTH + 16);
+			setWrapped(meetSaid, fresh.message, WIDTH + 16);
 			MapCompanionPanel.tone(meetSaid, fresh.refused());
 		}
 		make.setEnabled(asks && meetups.ready() && (meet == null || !meet.sending));
@@ -448,7 +460,7 @@ final class GroupPanel extends JPanel
 		holdsInvite = roster != null && roster.isEmpty();
 		if (roster != null)
 		{
-			for (RelayResponse.RosterRow row : roster)
+			for (RosterRow row : roster)
 			{
 				friends.add(friend(row, destinationKey, now));
 			}
@@ -467,7 +479,7 @@ final class GroupPanel extends JPanel
 			 */
 			for (int i = 0; i < events.size(); i++)
 			{
-				RelayResponse.Meetup meetup = events.get(i);
+				Meetup meetup = events.get(i);
 				boolean open = i == 0 || openMeetups.contains(meetup.id);
 				if (i > 0)
 				{
@@ -495,7 +507,7 @@ final class GroupPanel extends JPanel
 	}
 
 	/** Everything a row says, so they are rebuilt only when that changes. */
-	private String signature(@Nullable List<RelayResponse.RosterRow> roster, @Nullable List<RelayResponse.Meetup> events,
+	private String signature(@Nullable List<RosterRow> roster, @Nullable List<Meetup> events,
 		@Nullable String destinationKey, long now)
 	{
 		StringBuilder sb = new StringBuilder().append(ready).append(loggedIn).append(press.ready()).append(meetups.ready())
@@ -504,7 +516,7 @@ final class GroupPanel extends JPanel
 		sb.append('|').append(roster == null ? "none" : Integer.toString(roster.size()));
 		if (roster != null)
 		{
-			for (RelayResponse.RosterRow row : roster)
+			for (RosterRow row : roster)
 			{
 				sb.append(row.id).append(row.name).append(row.colour).append(row.presence).append(row.near)
 					.append(row.nearYou).append(row.routable).append(row.news == null ? "" : row.news.title + row.news.atMs)
@@ -516,16 +528,16 @@ final class GroupPanel extends JPanel
 		sb.append(';').append(openMeetups).append(here);
 		if (events != null)
 		{
-			for (RelayResponse.Meetup meetup : events)
+			for (Meetup meetup : events)
 			{
 				sb.append(meetup.id).append(meetup.title).append(meetup.startsAtMs).append(meetup.near).append(meetup.world)
 					.append(group.mine(meetup, now));
-				for (RelayResponse.MeetupAnswer face : meetup.who)
+				for (MeetupAnswer face : meetup.who)
 				{
 					sb.append(face.name).append(face.colour).append(face.answer);
 				}
 				appendSaid(sb, press.said(source(meetup)));
-				MeetupClient.Said answer = meetups.said("answer:" + meetup.id);
+				Said answer = meetups.said("answer:" + meetup.id);
 				sb.append(answer == null ? "" : answer.sending + "|" + answer.message);
 			}
 		}
@@ -551,9 +563,9 @@ final class GroupPanel extends JPanel
 	{
 		JPanel card = card();
 		card.setName("group.alone");
-		card.add(MapCompanionPanel.wrapped(ALONE, 11f, ColorScheme.LIGHT_GRAY_COLOR, WIDTH));
+		card.add(MapCompanionPanel.wrapped(ALONE, 11f, LIGHT_GRAY_COLOR, WIDTH));
 		card.add(gap(5));
-		card.add(MapCompanionPanel.left(actions(invite)));
+		card.add(left(actions(invite)));
 		return slot(card);
 	}
 
@@ -581,7 +593,7 @@ final class GroupPanel extends JPanel
 	 * at the click rather than when the card was drawn, because the rows are rebuilt only when what they
 	 * say changes, and whether this RuneLite runs the group is not part of that.
 	 */
-	private void offerRemove(Component part, RelayResponse.RosterRow row)
+	private void offerRemove(Component part, RosterRow row)
 	{
 		part.addMouseListener(new MouseAdapter()
 		{
@@ -617,7 +629,7 @@ final class GroupPanel extends JPanel
 
 	/** A friend card's right-click menu, or null for a RuneLite the map has not said runs the group. */
 	@Nullable
-	JPopupMenu friendMenu(RelayResponse.RosterRow row)
+	JPopupMenu friendMenu(RosterRow row)
 	{
 		Remover asked = remover;
 		if (asked == null || !asked.offered())
@@ -633,14 +645,14 @@ final class GroupPanel extends JPanel
 	}
 
 	/** One friend: their disc and name, where they are, Route and World map beside both, then their news. */
-	private JPanel friend(RelayResponse.RosterRow row, @Nullable String destinationKey, long now)
+	private JPanel friend(RosterRow row, @Nullable String destinationKey, long now)
 	{
 		JPanel card = friendCard(row, destinationKey, now);
 		offerRemove(card, row);
 		return card;
 	}
 
-	private JPanel friendCard(RelayResponse.RosterRow row, @Nullable String destinationKey, long now)
+	private JPanel friendCard(RosterRow row, @Nullable String destinationKey, long now)
 	{
 		JPanel card = card();
 		card.setName("group.friend." + row.id);
@@ -652,7 +664,7 @@ final class GroupPanel extends JPanel
 			boolean planning = said != null && said.planning;
 			boolean finding = group.finding(row.id, now);
 			boolean routedHere = said != null && said.key != null && said.key.equals(destinationKey);
-			route = MapCompanionPanel.smallButton(planning ? "Planning…" : finding ? "Finding…"
+			route = smallButton(planning ? "Planning…" : finding ? "Finding…"
 				: routedHere ? "Reroute" : "Route");
 			route.setName("group.route." + row.id);
 			route.setEnabled(ready && loggedIn && !planning && !finding && press.ready());
@@ -674,19 +686,19 @@ final class GroupPanel extends JPanel
 		JLabel name = label(12f, Color.WHITE);
 		name.setIcon(new Disc(colour(row.colour), MapPin.initials(row.name), presenceColour(row.presence)));
 		name.setIconTextGap(6);
-		MapCompanionPanel.setWrapped(name, row.name, room - name.getIcon().getIconWidth() - name.getIconTextGap());
+		setWrapped(name, row.name, room - name.getIcon().getIconWidth() - name.getIconTextGap());
 		name.setToolTipText(presenceWord(row.presence));
-		JPanel top = MapCompanionPanel.column(ColorScheme.DARKER_GRAY_COLOR);
-		top.add(MapCompanionPanel.left(name));
+		JPanel top = column(DARKER_GRAY_COLOR);
+		top.add(left(name));
 		String where = whereLine(row);
 		if (where != null)
 		{
-			top.add(MapCompanionPanel.left(MapCompanionPanel.wrapped(where, 11f, ColorScheme.LIGHT_GRAY_COLOR, room)));
+			top.add(left(MapCompanionPanel.wrapped(where, 11f, LIGHT_GRAY_COLOR, room)));
 		}
-		card.add(MapCompanionPanel.left(buttons.length == 0 ? top : beside(top, buttons)));
+		card.add(left(buttons.length == 0 ? top : beside(top, buttons)));
 		if (row.news != null)
 		{
-			JLabel news = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
+			JLabel news = label(11f, LIGHT_GRAY_COLOR);
 			news.setName("group.news." + row.id);
 			/*
 			 * The news's own picture, as the website's friend rows draw it: the item a drop or reward
@@ -695,7 +707,7 @@ final class GroupPanel extends JPanel
 			 */
 			int progress = progressSprite(row.news.kind);
 			boolean pictured = row.news.itemId != null || row.news.skill != null || progress > 0;
-			MapCompanionPanel.setWrapped(news, row.news.title + " · " + ago(now - row.news.atMs),
+			setWrapped(news, row.news.title + " · " + ago(now - row.news.atMs),
 				pictured ? WIDTH - NEWS_PICTURE - 5 : WIDTH);
 			news.setIconTextGap(5);
 			/*
@@ -737,7 +749,7 @@ final class GroupPanel extends JPanel
 			card.add(line);
 			if (pressed)
 			{
-				ticking.add(at -> MapCompanionPanel.setWrapped(line, press.words(said, at), WIDTH));
+				ticking.add(at -> setWrapped(line, press.words(said, at), WIDTH));
 			}
 		}
 		return slot(card);
@@ -748,11 +760,11 @@ final class GroupPanel extends JPanel
 	 * the map it draws on. "Show on map" meant the game's world map here and the website on the death
 	 * card; the website's buttons say Open website, and this one says which map.
 	 */
-	private JButton worldMapButton(RelayResponse.RosterRow row)
+	private JButton worldMapButton(RosterRow row)
 	{
 		boolean layer = config.showGroupOnWorldMap();
 		boolean shown = group.shown(row.id);
-		JButton map = MapCompanionPanel.smallButton(layer ? "On world map" : shown ? "Hide on map" : WORLD_MAP);
+		JButton map = smallButton(layer ? "On world map" : shown ? "Hide on map" : WORLD_MAP);
 		map.setName("group.show." + row.id);
 		map.setEnabled(!layer && ready);
 		map.setToolTipText(layer ? Words.of("group.allOnMapTip") : "Draw " + row.name + Words.of("group.drawOneTip"));
@@ -787,14 +799,14 @@ final class GroupPanel extends JPanel
 	}
 
 	/** One meetup: what, when, where, who, then Route and the answers. */
-	private JPanel meetup(RelayResponse.Meetup meetup, @Nullable String destinationKey, long now)
+	private JPanel meetup(Meetup meetup, @Nullable String destinationKey, long now)
 	{
 		JPanel card = card();
 		card.setName("group.meetup." + meetup.id);
 		String source = source(meetup);
 		RoutePress.Said said = press.said(source);
 		boolean planning = said != null && said.planning;
-		JButton route = MapCompanionPanel.smallButton(planning ? "Planning…" : "Route");
+		JButton route = smallButton(planning ? "Planning…" : "Route");
 		route.setName("group.meetupRoute." + meetup.id);
 		route.setEnabled(ready && loggedIn && !planning && press.ready());
 		String own = loggedIn ? MEETUP_ROUTE_TIP : RoutePress.LOG_IN;
@@ -812,16 +824,16 @@ final class GroupPanel extends JPanel
 		 * rows of buttons, and the title's line had room for one.
 		 */
 		JLabel name = label(12f, Color.WHITE);
-		MapCompanionPanel.setWrapped(name, meetup.title, WIDTH - route.getPreferredSize().width - 4);
-		card.add(MapCompanionPanel.left(beside(name, route)));
-		JLabel when = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
+		setWrapped(name, meetup.title, WIDTH - route.getPreferredSize().width - 4);
+		card.add(left(beside(name, route)));
+		JLabel when = label(11f, LIGHT_GRAY_COLOR);
 		setWhen(when, when(meetup.startsAtMs, now, ZoneId.systemDefault(),
 			Locale.getDefault(Locale.Category.FORMAT)), meetup.startsAtMs, now, WIDTH);
 		card.add(when);
 		String where = meetupWhere(meetup);
 		if (!where.isEmpty())
 		{
-			JLabel line = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
+			JLabel line = label(11f, LIGHT_GRAY_COLOR);
 			setMarkup(line, markup(where, onItsWorld(meetup) ? "W" + meetup.world : null, HERE, WIDTH));
 			card.add(line);
 		}
@@ -830,10 +842,10 @@ final class GroupPanel extends JPanel
 			RollUp who = new RollUp(meetup.who, WIDTH);
 			who.setName("group.who." + meetup.id);
 			card.add(gap(3));
-			card.add(MapCompanionPanel.left(who));
+			card.add(left(who));
 		}
 		String mine = group.mine(meetup, now);
-		MeetupClient.Said answer = meetups.said("answer:" + meetup.id);
+		Said answer = meetups.said("answer:" + meetup.id);
 		boolean sending = answer != null && answer.sending;
 		/*
 		 * The pick is the answer pressed while it is on its way, else the one given, and it keeps its
@@ -844,10 +856,10 @@ final class GroupPanel extends JPanel
 		boolean pressable = ready && loggedIn && !sending && meetups.ready();
 		card.add(gap(5));
 		JPanel answers = new JPanel(new GridLayout(2, 2, 4, 4));
-		answers.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		answers.setBackground(DARKER_GRAY_COLOR);
 		for (String option : SocialWire.ANSWERS)
 		{
-			JButton button = MapCompanionPanel.smallButton(answerWord(option));
+			JButton button = smallButton(answerWord(option));
 			button.setName("group.answer." + meetup.id + "." + option);
 			boolean chosen = option.equals(pick);
 			if (chosen)
@@ -866,7 +878,7 @@ final class GroupPanel extends JPanel
 			answers.add(button);
 		}
 		MapCompanionPanel.capped(answers);
-		card.add(MapCompanionPanel.left(answers));
+		card.add(left(answers));
 		boolean routed = said != null && said.message != null;
 		String message = routed ? said.message : answer != null ? answer.message : null;
 		if (message != null)
@@ -876,7 +888,7 @@ final class GroupPanel extends JPanel
 			refuse(line, message);
 			card.add(line);
 			/* Each wait from its own gate: a Route's is the routes' wait, an answer's the meetups'. */
-			ticking.add(at -> MapCompanionPanel.setWrapped(line, routed ? press.words(said, at) : meetups.words(answer, at), WIDTH));
+			ticking.add(at -> setWrapped(line, routed ? press.words(said, at) : meetups.words(answer, at), WIDTH));
 		}
 		return slot(card);
 	}
@@ -892,7 +904,7 @@ final class GroupPanel extends JPanel
 	 * A meetup after the next, as one line: its title, day, clock and world, which opens to its card in
 	 * place and reads ▾ while open. Its answers are in the card, not on the line, as on the website.
 	 */
-	private JButton fold(RelayResponse.Meetup meetup, boolean open, long now)
+	private JButton fold(Meetup meetup, boolean open, long now)
 	{
 		String words = (open ? "▾ " : "▸ ") + meetup.title + " · " + dayAndClock(meetup.startsAtMs, now, ZoneId.systemDefault(),
 			Locale.getDefault(Locale.Category.FORMAT)) + (meetup.world == null ? "" : " · W" + meetup.world);
@@ -913,19 +925,19 @@ final class GroupPanel extends JPanel
 	}
 
 	/** Whether this client is on the meetup's world now, so its world is drawn green. */
-	private boolean onItsWorld(RelayResponse.Meetup meetup)
+	private boolean onItsWorld(Meetup meetup)
 	{
 		return meetup.world != null && here > 0 && meetup.world == here;
 	}
 
-	static String source(RelayResponse.Meetup meetup)
+	static String source(Meetup meetup)
 	{
 		return "meetup:" + meetup.id;
 	}
 
 	/** "near Lumbridge Castle · Near you", or null for a friend who shares no position. */
 	@Nullable
-	static String whereLine(RelayResponse.RosterRow row)
+	static String whereLine(RosterRow row)
 	{
 		boolean nearYou = Boolean.TRUE.equals(row.nearYou);
 		return row.near == null && !nearYou ? null : dotted(row.near, nearYou ? "Near you" : null);
@@ -938,7 +950,7 @@ final class GroupPanel extends JPanel
 	}
 
 	/** "near Lumbridge Castle · W302": where in words, and the world to be on. */
-	static String meetupWhere(RelayResponse.Meetup meetup)
+	static String meetupWhere(Meetup meetup)
 	{
 		return dotted(meetup.near, meetup.world == null ? null : "W" + meetup.world);
 	}
@@ -950,12 +962,12 @@ final class GroupPanel extends JPanel
 	 * Who answered what, in the roll-up's order and by the word it is said with, Here for those already
 	 * there: only the answers somebody gave, each with its people in the map's order.
 	 */
-	static Map<String, List<RelayResponse.MeetupAnswer>> rollUp(List<RelayResponse.MeetupAnswer> who)
+	static Map<String, List<MeetupAnswer>> rollUp(List<MeetupAnswer> who)
 	{
-		Map<String, List<RelayResponse.MeetupAnswer>> answers = new LinkedHashMap<>();
+		Map<String, List<MeetupAnswer>> answers = new LinkedHashMap<>();
 		for (String answer : ROLL_UP)
 		{
-			List<RelayResponse.MeetupAnswer> people = who.stream().filter(face -> answer.equals(face.answer))
+			List<MeetupAnswer> people = who.stream().filter(face -> answer.equals(face.answer))
 				.collect(Collectors.toList());
 			if (!people.isEmpty())
 			{
@@ -966,13 +978,13 @@ final class GroupPanel extends JPanel
 	}
 
 	/** "Going: Rob, Dax · Maybe: Sunday (you) · Here: Cara": the roll-up in words, for a screen reader. */
-	static String rollUpWords(List<RelayResponse.MeetupAnswer> who)
+	static String rollUpWords(List<MeetupAnswer> who)
 	{
 		return rollUp(who).entrySet().stream().map(answer -> answer.getKey() + ": " + names(answer.getValue()))
 			.collect(Collectors.joining(" · "));
 	}
 
-	private static String names(List<RelayResponse.MeetupAnswer> people)
+	private static String names(List<MeetupAnswer> people)
 	{
 		return people.stream().map(GroupPanel::name).collect(Collectors.joining(", "));
 	}
@@ -981,7 +993,7 @@ final class GroupPanel extends JPanel
 	 * A member's name for a tooltip, with any tag taken out: Swing reads a tooltip that starts with
 	 * {@code <html>} as markup, and a disc's tooltip starts with whatever name the member typed.
 	 */
-	private static String name(RelayResponse.MeetupAnswer face)
+	private static String name(MeetupAnswer face)
 	{
 		return MapPin.plain(face.name) + (Boolean.TRUE.equals(face.you) ? " (you)" : "");
 	}
@@ -1074,9 +1086,9 @@ final class GroupPanel extends JPanel
 	static String markup(String line, @Nullable String part, String colour, int width)
 	{
 		int at = part == null ? -1 : line.lastIndexOf(part);
-		String words = at < 0 ? MapCompanionPanel.escape(line)
-			: MapCompanionPanel.escape(line.substring(0, at)) + "<font color='" + colour + "'>" + MapCompanionPanel.escape(part)
-				+ "</font>" + MapCompanionPanel.escape(line.substring(at + part.length()));
+		String words = at < 0 ? escape(line)
+			: escape(line.substring(0, at)) + "<font color='" + colour + "'>" + escape(part)
+				+ "</font>" + escape(line.substring(at + part.length()));
 		return "<html><body width='" + width + "'>" + words + "</body></html>";
 	}
 
@@ -1129,7 +1141,7 @@ final class GroupPanel extends JPanel
 	private void say(JLabel line, String message)
 	{
 		line.setVisible(true);
-		MapCompanionPanel.setWrapped(line, message, WIDTH);
+		setWrapped(line, message, WIDTH);
 		MapCompanionPanel.tone(line, false);
 	}
 
@@ -1142,7 +1154,7 @@ final class GroupPanel extends JPanel
 
 	private static JPanel card()
 	{
-		JPanel card = MapCompanionPanel.column(ColorScheme.DARKER_GRAY_COLOR);
+		JPanel card = column(DARKER_GRAY_COLOR);
 		card.setBorder(new EmptyBorder(6, 8, 6, 8));
 		return card;
 	}
@@ -1150,10 +1162,10 @@ final class GroupPanel extends JPanel
 	private static JPanel slot(JPanel card)
 	{
 		JPanel slot = new Slot();
-		slot.setBackground(ColorScheme.DARK_GRAY_COLOR);
+		slot.setBackground(DARK_GRAY_COLOR);
 		slot.setBorder(new EmptyBorder(0, 0, 3, 0));
 		slot.add(card);
-		return MapCompanionPanel.left(slot);
+		return left(slot);
 	}
 
 	/**
@@ -1177,7 +1189,7 @@ final class GroupPanel extends JPanel
 
 	private static JPanel actions(JComponent... items)
 	{
-		return MapCompanionPanel.row(ColorScheme.DARKER_GRAY_COLOR, items);
+		return MapCompanionPanel.row(DARKER_GRAY_COLOR, items);
 	}
 
 	/**
@@ -1187,15 +1199,15 @@ final class GroupPanel extends JPanel
 	private static JPanel beside(JComponent words, JButton... buttons)
 	{
 		JPanel stack = new JPanel(new java.awt.GridLayout(buttons.length, 1, 0, 4));
-		stack.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		stack.setBackground(DARKER_GRAY_COLOR);
 		for (JButton button : buttons)
 		{
 			stack.add(button);
 		}
 		JPanel hug = new JPanel(new java.awt.BorderLayout());
-		hug.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		hug.setBackground(DARKER_GRAY_COLOR);
 		hug.add(stack, java.awt.BorderLayout.NORTH);
-		return MapCompanionPanel.capped(MapCompanionPanel.bar(4, ColorScheme.DARKER_GRAY_COLOR, null, words, hug));
+		return MapCompanionPanel.capped(MapCompanionPanel.bar(4, DARKER_GRAY_COLOR, null, words, hug));
 	}
 
 	/** The buttons a card has, in order, leaving out the ones it does not. */
@@ -1216,13 +1228,13 @@ final class GroupPanel extends JPanel
 
 	private static JPanel fill(JComponent component)
 	{
-		return MapCompanionPanel.fill(component, ColorScheme.DARKER_GRAY_COLOR);
+		return MapCompanionPanel.fill(component, DARKER_GRAY_COLOR);
 	}
 
 	/** In the cards' grey: every gap here is inside a card or the meetup form, and both are that grey. */
 	private static JPanel gap(int height)
 	{
-		return MapCompanionPanel.gap(height, ColorScheme.DARKER_GRAY_COLOR);
+		return MapCompanionPanel.gap(height, DARKER_GRAY_COLOR);
 	}
 
 	private static JLabel line(JLabel line)
@@ -1263,7 +1275,7 @@ final class GroupPanel extends JPanel
 			g2.drawImage(disc, x, y, null);
 			int dx = x + DOT_AT;
 			int dy = y + DOT_AT;
-			g2.setColor(ColorScheme.DARKER_GRAY_COLOR);
+			g2.setColor(DARKER_GRAY_COLOR);
 			g2.fillOval(dx - 2, dy - 2, DOT + 4, DOT + 4);
 			g2.setColor(presence);
 			g2.fillOval(dx, dy, DOT, DOT);
@@ -1300,15 +1312,15 @@ final class GroupPanel extends JPanel
 		private static final int BETWEEN = 10;
 		private static final int LINE = STEP + 2;
 
-		RollUp(List<RelayResponse.MeetupAnswer> who, int width)
+		RollUp(List<MeetupAnswer> who, int width)
 		{
 			super(null);
 			setOpaque(false);
 			int x = 0;
 			int y = 0;
-			for (Map.Entry<String, List<RelayResponse.MeetupAnswer>> answer : rollUp(who).entrySet())
+			for (Map.Entry<String, List<MeetupAnswer>> answer : rollUp(who).entrySet())
 			{
-				JLabel word = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
+				JLabel word = label(11f, LIGHT_GRAY_COLOR);
 				word.setText(answer.getKey());
 				word.setToolTipText(answer.getKey() + ": " + names(answer.getValue()));
 				java.awt.Dimension size = word.getPreferredSize();
@@ -1320,7 +1332,7 @@ final class GroupPanel extends JPanel
 				word.setBounds(x, y + (STEP - size.height) / 2, size.width, size.height);
 				add(word);
 				x += size.width + AFTER_WORD;
-				for (RelayResponse.MeetupAnswer face : answer.getValue())
+				for (MeetupAnswer face : answer.getValue())
 				{
 					/* More people than one line holds carry on under it, word or no word. */
 					if (x + STEP > width)

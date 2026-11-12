@@ -38,7 +38,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import net.runelite.api.Client;
 import net.runelite.api.MenuAction;
@@ -247,7 +246,7 @@ class RouteStepOverlay extends OverlayPanel
 	}
 
 	/** What the box says. */
-	@AllArgsConstructor(access = AccessLevel.PACKAGE)
+	@AllArgsConstructor
 	static final class Box
 	{
 		final String title;

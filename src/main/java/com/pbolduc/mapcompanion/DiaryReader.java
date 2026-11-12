@@ -32,7 +32,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import net.runelite.api.Client;
 
@@ -102,7 +101,7 @@ public class DiaryReader extends SettlingReader
 	 * there is no translation layer, so "Kourend &amp; Kebos" being spelled "Kourend" here would
 	 * simply never match and would fail silently forever.
 	 */
-	@AllArgsConstructor(access = AccessLevel.PACKAGE)
+	@AllArgsConstructor
 	private static final class Region
 	{
 		final String name;

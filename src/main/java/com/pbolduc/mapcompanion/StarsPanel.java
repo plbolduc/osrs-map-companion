@@ -41,6 +41,9 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import javax.annotation.Nullable;
+import javax.swing.border.LineBorder;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.Border;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -57,6 +60,8 @@ import net.runelite.api.gameval.SpriteID;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.refont;
+import static com.pbolduc.mapcompanion.StarsModel.Star;
 
 /**
  * One native, narrow list of landing sites, with their worlds underneath and favourites first.
@@ -202,7 +207,7 @@ final class StarsPanel extends JPanel
 		JPanel controls = new JPanel(new GridBagLayout());
 		controls.setBackground(getBackground());
 		tier.setName("stars.tier");
-		tier.setFont(tier.getFont().deriveFont(11f));
+		refont(tier, 11f);
 		tier.setPrototypeDisplayValue("T9+");
 		tier.setToolTipText("Lowest tier shown");
 		GridBagConstraints c = new GridBagConstraints();
@@ -231,7 +236,7 @@ final class StarsPanel extends JPanel
 		 * The levels the list is filtered by are read once, so they sit with the filters set once
 		 * rather than above the list as daily controls.
 		 */
-		more.setBorder(BorderFactory.createEmptyBorder(6, 0, 0, 0));
+		more.setBorder(new EmptyBorder(6, 0, 0, 0));
 		more.add(levels);
 		more.add(gap(6));
 		more.add(heading("Hide"));
@@ -244,11 +249,11 @@ final class StarsPanel extends JPanel
 
 		add(gap(6));
 		game.setForeground(GOLD);
-		game.setFont(game.getFont().deriveFont(11f));
+		refont(game, 11f);
 		game.setVisible(false);
 		add(fill(game));
 		count.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
-		count.setFont(count.getFont().deriveFont(Font.BOLD, 11f));
+		refont(count, Font.BOLD, 11f);
 		add(fill(MapCompanionPanel.bar(0, getBackground(), order, null, count)));
 		add(status);
 		add(gap(2));
@@ -339,7 +344,7 @@ final class StarsPanel extends JPanel
 			stars += site.worlds.size();
 			if (!site.worlds.isEmpty()) locations++;
 			signature.append(site.key).append(site.name).append(site.favorite).append(site.hiddenByFilters).append(expanded.contains(site.key));
-			for (StarsModel.Star star : site.worlds) signature.append(star.id).append(star.tier(elapsed)).append(StarsModel.minutes(star.left(elapsed))).append((star.ageMs + elapsed) / 60_000);
+			for (Star star : site.worlds) signature.append(star.id).append(star.tier(elapsed)).append(StarsModel.minutes(star.left(elapsed))).append((star.ageMs + elapsed) / 60_000);
 		}
 		/* Nothing is counted, and no age given, until the map has answered once: there is no list yet. */
 		count.setText(model.feed == null ? "" : locations + (locations == 1 ? " site · " : " sites · ") + stars + (stars == 1 ? " star" : " stars"));
@@ -368,7 +373,7 @@ final class StarsPanel extends JPanel
 		 * being shown: for a tick after a change the two can differ, as on Home's card. The view says
 		 * itself on every refresh, as Home's does, and rebuilds only when its words change.
 		 */
-		StarsModel.Star picked = model.find(model.selected);
+		Star picked = model.find(model.selected);
 		DestinationRoute.View way = route.view();
 		boolean routed = picked != null && model.passes(picked, elapsed) && pins(destination, picked)
 			&& way != null && way.hasRoute() && way.key.equals(DestinationRoute.keyOf(destination));
@@ -453,7 +458,7 @@ final class StarsPanel extends JPanel
 	}
 
 	/** Whether the destination is this star: its tile and its world, which a name cannot tell apart. */
-	private static boolean pins(@Nullable RelayResponse.Destination destination, StarsModel.Star star)
+	private static boolean pins(@Nullable RelayResponse.Destination destination, Star star)
 	{
 		return destination != null && destination.world != null && destination.world == star.world
 			&& destination.x == star.x && destination.y == star.y;
@@ -469,12 +474,12 @@ final class StarsPanel extends JPanel
 	private JComponent site(StarsModel.Site site, long elapsed)
 	{
 		boolean open = expanded.contains(site.key);
-		StarsModel.Star primary = site.worlds.isEmpty() ? null : site.worlds.get(0);
+		Star primary = site.worlds.isEmpty() ? null : site.worlds.get(0);
 		boolean holdsSelection = site.worlds.stream().anyMatch(star -> star.id.equals(service.model.selected));
 		JPanel box = column();
 		box.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-		box.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(holdsSelection ? GOLD.darker() : EDGE),
-			BorderFactory.createEmptyBorder(5, 6, 5, 4)));
+		box.setBorder(new CompoundBorder(new LineBorder(holdsSelection ? GOLD.darker() : EDGE),
+			new EmptyBorder(5, 6, 5, 4)));
 		JPanel head = new JPanel(new BorderLayout(2, 0));
 		head.setBackground(box.getBackground());
 		String name = "<font color='" + (primary == null ? "#a0a0a0" : primary.wilderness ? WILDERNESS : "#ffffff") + "'>" + escape(site.name) + "</font>";
@@ -486,7 +491,7 @@ final class StarsPanel extends JPanel
 		if (primary == null)
 		{
 			JLabel idle = label(text);
-			idle.setBorder(BorderFactory.createEmptyBorder(1, 0, 1, 0));
+			idle.setBorder(new EmptyBorder(1, 0, 1, 0));
 			head.add(idle, BorderLayout.CENTER);
 		}
 		else
@@ -531,8 +536,8 @@ final class StarsPanel extends JPanel
 		{
 			JPanel list = column();
 			list.setBackground(box.getBackground());
-			list.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, EDGE), BorderFactory.createEmptyBorder(3, 0, 0, 0)));
-			for (StarsModel.Star star : site.worlds) list.add(fill(world(site, star, elapsed, box.getBackground())));
+			list.setBorder(new CompoundBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, EDGE), new EmptyBorder(3, 0, 0, 0)));
+			for (Star star : site.worlds) list.add(fill(world(site, star, elapsed, box.getBackground())));
 			box.add(MapCompanionPanel.gap(4, box.getBackground()));
 			box.add(fill(list));
 		}
@@ -540,7 +545,7 @@ final class StarsPanel extends JPanel
 	}
 
 	/** One world under its site: tier, world, age and time left, in columns that line up. */
-	private JButton world(StarsModel.Site site, StarsModel.Star star, long elapsed, Color background)
+	private JButton world(StarsModel.Site site, Star star, long elapsed, Color background)
 	{
 		boolean picked = star.id.equals(service.model.selected);
 		JButton world = new JButton();
@@ -558,7 +563,7 @@ final class StarsPanel extends JPanel
 		world.add(cell(StarsModel.minutes(star.left(elapsed)), lifeColour(star.left(elapsed), Color.WHITE), 0), c);
 		world.setName("stars.world." + star.id);
 		world.setBackground(picked ? PICKED : background);
-		world.setBorder(picked ? BorderFactory.createLineBorder(GOLD.darker()) : BorderFactory.createEmptyBorder(1, 1, 1, 1));
+		world.setBorder(picked ? new LineBorder(GOLD.darker()) : new EmptyBorder(1, 1, 1, 1));
 		world.setContentAreaFilled(picked);
 		world.setOpaque(picked);
 		world.setFocusPainted(false);
@@ -572,7 +577,7 @@ final class StarsPanel extends JPanel
 		return world;
 	}
 
-	private void select(StarsModel.Star star)
+	private void select(Star star)
 	{
 		service.model.selected = star.id;
 		redraw();
@@ -580,17 +585,17 @@ final class StarsPanel extends JPanel
 		SwingUtilities.invokeLater(() -> selection.scrollRectToVisible(new Rectangle(0, 0, selection.getWidth(), selection.getHeight())));
 	}
 
-	private void selection(StarsModel.Star star, long elapsed, @Nullable RelayResponse.Destination destination, boolean routed)
+	private void selection(Star star, long elapsed, @Nullable RelayResponse.Destination destination, boolean routed)
 	{
 		boolean pinned = pins(destination, star);
-		selection.setBorder(BorderFactory.createCompoundBorder(
-			BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(0, 0, 8, 0), BorderFactory.createMatteBorder(0, 0, 1, 0, EDGE)),
-			BorderFactory.createEmptyBorder(0, 0, 8, 0)));
+		selection.setBorder(new CompoundBorder(
+			new CompoundBorder(new EmptyBorder(0, 0, 8, 0), BorderFactory.createMatteBorder(0, 0, 1, 0, EDGE)),
+			new EmptyBorder(0, 0, 8, 0)));
 		selection.add(heading(pinned ? "Pinned destination" : "Selected world"));
 		JLabel name = label("");
 		wrap(name, star.name, TEXT);
 		name.setForeground(GOLD);
-		name.setFont(name.getFont().deriveFont(12f));
+		refont(name, 12f);
 		selection.add(name);
 		selection.add(label("<html>W" + star.world + " · " + font(tierColour(star.tier(elapsed)), "T" + star.tier(elapsed)) + " · "
 			+ font(lifeColour(star.left(elapsed), ColorScheme.LIGHT_GRAY_COLOR), StarsModel.timeLeft(star.left(elapsed))) + "</html>"));
@@ -603,7 +608,7 @@ final class StarsPanel extends JPanel
 			 * here it opens the card, so the card's own is the smaller.
 			 */
 			JPanel way = MapCompanionPanel.card();
-			way.setBorder(BorderFactory.createEmptyBorder(2, 8, 7, 8));
+			way.setBorder(new EmptyBorder(2, 8, 7, 8));
 			way.add(steps);
 			selection.add(fill(way));
 			selection.add(gap(5));
@@ -862,7 +867,7 @@ final class StarsPanel extends JPanel
 	private static JLabel cell(String text, Color color, int width)
 	{
 		JLabel cell = new JLabel(text);
-		cell.setFont(cell.getFont().deriveFont(11f));
+		refont(cell, 11f);
 		cell.setForeground(color);
 		if (width > 0) cell.setPreferredSize(new Dimension(width, cell.getPreferredSize().height));
 		return cell;
@@ -876,8 +881,8 @@ final class StarsPanel extends JPanel
 	private static JComponent heading(String text)
 	{
 		JLabel label = label(text);
-		label.setFont(label.getFont().deriveFont(Font.BOLD, 11f));
-		label.setBorder(BorderFactory.createEmptyBorder(6, 0, 4, 0));
+		refont(label, Font.BOLD, 11f);
+		label.setBorder(new EmptyBorder(6, 0, 4, 0));
 		return label;
 	}
 
@@ -885,7 +890,7 @@ final class StarsPanel extends JPanel
 	private static JButton flat(String text)
 	{
 		JButton button = new JButton(text);
-		button.setFont(button.getFont().deriveFont(11f));
+		refont(button, 11f);
 		button.setFocusPainted(false);
 		button.setHorizontalAlignment(SwingConstants.LEFT);
 		return MapCompanionPanel.bare(button, 1, 0, 1);
@@ -895,7 +900,7 @@ final class StarsPanel extends JPanel
 	private static JButton button(String text)
 	{
 		JButton button = new JButton(text);
-		button.setFont(button.getFont().deriveFont(11f));
+		refont(button, 11f);
 		button.setMargin(new Insets(4, 4, 4, 4));
 		return button;
 	}
@@ -927,8 +932,8 @@ final class StarsPanel extends JPanel
 		Border off = chip.getBorder();
 		Insets inside = off.getBorderInsets(chip);
 		chip.putClientProperty(CHIP_OFF, off);
-		chip.putClientProperty(CHIP_ON, BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(ColorScheme.BRAND_ORANGE),
-			BorderFactory.createEmptyBorder(Math.max(0, inside.top - 1), Math.max(0, inside.left - 1),
+		chip.putClientProperty(CHIP_ON, new CompoundBorder(new LineBorder(ColorScheme.BRAND_ORANGE),
+			new EmptyBorder(Math.max(0, inside.top - 1), Math.max(0, inside.left - 1),
 				Math.max(0, inside.bottom - 1), Math.max(0, inside.right - 1))));
 		return chip;
 	}
@@ -946,7 +951,7 @@ final class StarsPanel extends JPanel
 	private static JToggleButton toggle(String text)
 	{
 		JToggleButton button = new JToggleButton(text);
-		button.setFont(button.getFont().deriveFont(11f));
+		refont(button, 11f);
 		button.setMargin(new Insets(3, 2, 3, 2));
 		return button;
 	}
@@ -955,7 +960,7 @@ final class StarsPanel extends JPanel
 	private JCheckBox check(String text, BiConsumer<StarsModel.Filters, Boolean> set)
 	{
 		JCheckBox check = new JCheckBox(text);
-		check.setFont(check.getFont().deriveFont(11f));
+		refont(check, 11f);
 		check.setBackground(ColorScheme.DARK_GRAY_COLOR);
 		check.addActionListener(e -> change(() -> set.accept(service.model.preferences.filters, check.isSelected())));
 		return check;

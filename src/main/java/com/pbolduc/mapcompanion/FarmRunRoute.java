@@ -32,6 +32,7 @@ import javax.annotation.Nullable;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import net.runelite.client.callback.ClientThread;
+import static com.pbolduc.mapcompanion.DestinationRoute.keyOf;
 
 /**
  * Give the run's current leg to the existing destination follower and Shortest Path bridge.
@@ -138,7 +139,7 @@ final class FarmRunRoute
 			return;
 		}
 		RelayResponse.Destination destination = destination(view, next);
-		String key = DestinationRoute.keyOf(destination);
+		String key = keyOf(destination);
 		if (key.equals(selectedKey) && selectedRevision == view.revision)
 		{
 			return;
@@ -170,7 +171,7 @@ final class FarmRunRoute
 	boolean owns(@Nullable RelayResponse.Destination destination)
 	{
 		return selectedKey != null && selectedLifetime == destinations.generation()
-			   && selectedKey.equals(DestinationRoute.keyOf(destination));
+			   && selectedKey.equals(keyOf(destination));
 	}
 
 	boolean ownsDestinationRoute(@Nullable DestinationRoute.View route)
@@ -193,8 +194,8 @@ final class FarmRunRoute
 		{
 			return null;
 		}
-		String shown = DestinationRoute.keyOf(destinations.getDestination());
-		return shown != null && shown.equals(DestinationRoute.keyOf(other)) ? other.name : null;
+		String shown = keyOf(destinations.getDestination());
+		return shown != null && shown.equals(keyOf(other)) ? other.name : null;
 	}
 
 	@Nullable

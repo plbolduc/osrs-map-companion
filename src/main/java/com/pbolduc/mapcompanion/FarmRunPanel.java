@@ -96,7 +96,7 @@ final class FarmRunPanel extends JPanel
 		{
 			kind.addItem(choice.split("\\|")[1]);
 		}
-		kind.setFont(kind.getFont().deriveFont(11f));
+		MapCompanionPanel.refont(kind, 11f);
 		kind.setToolTipText(Words.of("farm.kindTip"));
 		/* Closed, the picker names what it picks: "Ready now" alone reads as a status. The list stays plain. */
 		ListCellRenderer<? super String> rows = kind.getRenderer();

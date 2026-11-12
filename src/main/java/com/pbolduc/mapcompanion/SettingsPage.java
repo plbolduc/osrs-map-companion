@@ -56,6 +56,7 @@ import static com.pbolduc.mapcompanion.MapCompanionPanel.sectionHead;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.setWrapped;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.smallButton;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.syncRow;
+import static net.runelite.client.ui.ColorScheme.DARK_GRAY_COLOR;
 
 /**
  * Settings, the page behind the gear: What's new, every sharing choice ({@link SharingControls}),
@@ -106,7 +107,7 @@ final class SettingsPage extends JPanel
 	/*
 	 * The reset actions live in Advanced: neither is a thing a player does every session.
 	 */
-	private final JPanel foot = row(ColorScheme.DARK_GRAY_COLOR);
+	private final JPanel foot = row(DARK_GRAY_COLOR);
 	private List<JButton> shownFoot = new ArrayList<>();
 	private final JButton leaveButton = smallButton("Leave group");
 	/** Only ever present once there is a log to forget. A log you cannot clear is one you cannot trust. */
@@ -132,7 +133,7 @@ final class SettingsPage extends JPanel
 		this.refresh = refresh;
 		this.settingsOpen = settingsOpen;
 		this.sharingControls = new SharingControls(config, settings);
-		column(this, ColorScheme.DARK_GRAY_COLOR);
+		column(this, DARK_GRAY_COLOR);
 
 		/*
 		 * Where an update's changes are written down, the same page the once-per-version chat line
@@ -144,10 +145,10 @@ final class SettingsPage extends JPanel
 		whatsNew.setToolTipText(Words.of("settings.whatsNewTip"));
 		whatsNew.addActionListener(e -> LinkBrowser.browse(mapUrl.get() + "/whats-new"));
 		add(whatsNew);
-		add(gap(4, ColorScheme.DARK_GRAY_COLOR));
+		add(gap(4, DARK_GRAY_COLOR));
 		add(sectionHead("What you share"));
 		add(sharingControls);
-		add(gap(4, ColorScheme.DARK_GRAY_COLOR));
+		add(gap(4, DARK_GRAY_COLOR));
 		add(buildAdvanced());
 
 		previewButton.setToolTipText(Words.of("settings.previewTip"));
@@ -163,19 +164,19 @@ final class SettingsPage extends JPanel
 	/** The actual address is editable here; there is no second default or explanatory footnote. */
 	private JPanel buildAdvanced()
 	{
-		JPanel contents = column(ColorScheme.DARK_GRAY_COLOR);
+		JPanel contents = column(DARK_GRAY_COLOR);
 		contents.add(sectionHead("Map address"));
 		mapAddress.setText(config.relayUrl());
 		mapAddress.addActionListener(e -> applyMapAddress(true));
-		contents.add(fill(mapAddress, ColorScheme.DARK_GRAY_COLOR));
+		contents.add(fill(mapAddress, DARK_GRAY_COLOR));
 		JButton apply = smallButton("Apply");
 		apply.addActionListener(e -> applyMapAddress(true));
-		contents.add(hug(apply, ColorScheme.DARK_GRAY_COLOR));
+		contents.add(hug(apply, DARK_GRAY_COLOR));
 		addressSaid.setVisible(false);
 		contents.add(addressSaid);
-		contents.add(gap(8, ColorScheme.DARK_GRAY_COLOR));
-		contents.add(hug(previewButton, ColorScheme.DARK_GRAY_COLOR));
-		contents.add(gap(8, ColorScheme.DARK_GRAY_COLOR));
+		contents.add(gap(8, DARK_GRAY_COLOR));
+		contents.add(hug(previewButton, DARK_GRAY_COLOR));
+		contents.add(gap(8, DARK_GRAY_COLOR));
 		contents.add(left(foot));
 		return SharingControls.fold("Advanced", contents);
 	}

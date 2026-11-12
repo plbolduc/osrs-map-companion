@@ -271,7 +271,7 @@ public class DestinationMarker
 	}
 
 	/** One step's pin, as plain values, so which pins a route gets is pinned by a test. */
-	@AllArgsConstructor(access = AccessLevel.PACKAGE)
+	@AllArgsConstructor
 	static final class StepPin
 	{
 		final int number;

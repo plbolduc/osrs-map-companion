@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
-import javax.swing.BorderFactory;
+import javax.swing.border.EmptyBorder;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
@@ -47,6 +47,10 @@ import javax.swing.UIManager;
 import net.runelite.client.ui.ColorScheme;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.label;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.wrapped;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.refont;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.setWrapped;
+import static com.pbolduc.mapcompanion.SharingFields.Field;
+import static net.runelite.client.ui.ColorScheme.LIGHT_GRAY_COLOR;
 
 /**
  * The step after a first Connect: what the map uses, ticked, and one press to share it.
@@ -121,11 +125,11 @@ final class RecommendedSharing extends JPanel
 	private final ConfigStore store;
 	private final Runnable closed;
 	/** Each row's box, in the order drawn, and the fields a tick of it writes: one, or a group's all. */
-	private final Map<JCheckBox, List<SharingFields.Field>> rows = new LinkedHashMap<>();
+	private final Map<JCheckBox, List<Field>> rows = new LinkedHashMap<>();
 	private final List<Group> groups = new ArrayList<>();
-	private final JLabel where = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
+	private final JLabel where = label(11f, LIGHT_GRAY_COLOR);
 	/** The connection under the drawing choices, and in full in the fold under its own heading. */
-	private final JLabel opens = indented(label(11f, ColorScheme.LIGHT_GRAY_COLOR));
+	private final JLabel opens = indented(label(11f, LIGHT_GRAY_COLOR));
 	private final JLabel connection = heading("The connection");
 	private final JLabel streamLine = detailLine("recommended.stream", "");
 
@@ -138,16 +142,16 @@ final class RecommendedSharing extends JPanel
 		/* A card on the sidebar's own grey, with the gap under it that keeps it off the tabs. */
 		setLayout(new java.awt.BorderLayout());
 		setBackground(ColorScheme.DARK_GRAY_COLOR);
-		setBorder(BorderFactory.createEmptyBorder(4, 0, 8, 0));
+		setBorder(new EmptyBorder(4, 0, 8, 0));
 		setAlignmentX(Component.LEFT_ALIGNMENT);
 		JPanel card = column();
-		card.setBorder(BorderFactory.createEmptyBorder(7, 8, 8, 8));
+		card.setBorder(new EmptyBorder(7, 8, 8, 8));
 		add(card, java.awt.BorderLayout.CENTER);
 
 		JLabel title = wrapped("Choose what to share", 12f, Color.WHITE, TEXT);
-		title.setFont(title.getFont().deriveFont(Font.BOLD));
+		refont(title, Font.BOLD);
 		card.add(title);
-		card.add(wrapped(INTRO, 11f, ColorScheme.LIGHT_GRAY_COLOR, TEXT));
+		card.add(wrapped(INTRO, 11f, LIGHT_GRAY_COLOR, TEXT));
 		card.add(gap(6));
 
 		/*
@@ -167,8 +171,8 @@ final class RecommendedSharing extends JPanel
 		card.add(single(SharingFields.DEATH, DEATH_DETAIL, details));
 		card.add(gap(4));
 
-		JLabel drawn = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
-		drawn.setFont(drawn.getFont().deriveFont(Font.BOLD));
+		JLabel drawn = label(11f, LIGHT_GRAY_COLOR);
+		refont(drawn, Font.BOLD);
 		drawn.setText(SharingControls.CLIENT_TITLE);
 		card.add(drawn);
 		card.add(single(SharingFields.DESTINATIONS, DESTINATIONS_DETAIL, details));
@@ -187,7 +191,7 @@ final class RecommendedSharing extends JPanel
 		card.add(gap(6));
 		JButton share = new JButton("Share what's ticked");
 		share.setName("recommended.share");
-		share.setFont(share.getFont().deriveFont(12f));
+		refont(share, 12f);
 		orange(share, true);
 		share.setToolTipText(Words.of("share.shareTip"));
 		share.addActionListener(e -> share());
@@ -238,9 +242,9 @@ final class RecommendedSharing extends JPanel
 	}
 
 	/** Every field the step names, in the order it draws them. */
-	static List<SharingFields.Field> all()
+	static List<Field> all()
 	{
-		List<SharingFields.Field> all = new ArrayList<>();
+		List<Field> all = new ArrayList<>();
 		all.add(SharingFields.NAME);
 		for (SharingFields.Section section : SharingFields.GROUPS)
 		{
@@ -255,20 +259,20 @@ final class RecommendedSharing extends JPanel
 	/** Show the step with the recommended set ticked, naming the map the fields will go to. */
 	void offer(String server)
 	{
-		for (Map.Entry<JCheckBox, List<SharingFields.Field>> row : rows.entrySet())
+		for (Map.Entry<JCheckBox, List<Field>> row : rows.entrySet())
 		{
 			boolean recommended = true;
-			for (SharingFields.Field field : row.getValue())
+			for (Field field : row.getValue())
 			{
 				recommended &= KEYS.contains(field.key);
 			}
 			row.getKey().setSelected(recommended);
 		}
 		/* Who sees it is the intro's first sentence, so the line over the press says only where it goes. */
-		MapCompanionPanel.setWrapped(where, "Sent to " + server + " while you're logged in.", TEXT);
-		MapCompanionPanel.setWrapped(opens, streamShort(server), TEXT - INDENT);
-		MapCompanionPanel.setWrapped(connection, "The connection to " + server, TEXT);
-		MapCompanionPanel.setWrapped(streamLine, stream(server), TEXT);
+		setWrapped(where, "Sent to " + server + " while you're logged in.", TEXT);
+		setWrapped(opens, streamShort(server), TEXT - INDENT);
+		setWrapped(connection, "The connection to " + server, TEXT);
+		setWrapped(streamLine, stream(server), TEXT);
 		refreshGroups();
 		setVisible(true);
 		revalidate();
@@ -298,17 +302,17 @@ final class RecommendedSharing extends JPanel
 	Set<String> ticked()
 	{
 		Set<String> ticked = new LinkedHashSet<>();
-		for (SharingFields.Field field : tickedFields())
+		for (Field field : tickedFields())
 		{
 			ticked.add(field.key);
 		}
 		return ticked;
 	}
 
-	private List<SharingFields.Field> tickedFields()
+	private List<Field> tickedFields()
 	{
-		List<SharingFields.Field> ticked = new ArrayList<>();
-		for (Map.Entry<JCheckBox, List<SharingFields.Field>> row : rows.entrySet())
+		List<Field> ticked = new ArrayList<>();
+		for (Map.Entry<JCheckBox, List<Field>> row : rows.entrySet())
 		{
 			if (row.getKey().isSelected())
 			{
@@ -321,7 +325,7 @@ final class RecommendedSharing extends JPanel
 	/** Write the ticked settings that are off, the way a switch in Settings writes its fields, and nothing else. */
 	private void share()
 	{
-		for (SharingFields.Field field : tickedFields())
+		for (Field field : tickedFields())
 		{
 			if (!field.on(config, store))
 			{
@@ -343,12 +347,12 @@ final class RecommendedSharing extends JPanel
 	}
 
 	/** A choice of its own: a row in the group's weight, and what it sends in the fold. */
-	private JPanel single(SharingFields.Field field, String detail, JPanel details)
+	private JPanel single(Field field, String detail, JPanel details)
 	{
 		JPanel panel = column();
-		panel.setBorder(BorderFactory.createEmptyBorder(1, 0, 1, 0));
+		panel.setBorder(new EmptyBorder(1, 0, 1, 0));
 		JCheckBox box = box(field, 12f);
-		box.setFont(box.getFont().deriveFont(Font.BOLD));
+		refont(box, Font.BOLD);
 		panel.add(box);
 		details.add(heading(field.label));
 		details.add(detailLine("recommended.detail." + field.key, detail));
@@ -361,7 +365,7 @@ final class RecommendedSharing extends JPanel
 		JPanel panel = column();
 		JButton toggle = MapCompanionPanel.linkButton("▸ What each one sends");
 		toggle.setName("recommended.detailsToggle");
-		details.setBorder(BorderFactory.createEmptyBorder(0, 0, 4, 0));
+		details.setBorder(new EmptyBorder(0, 0, 4, 0));
 		details.setVisible(false);
 		toggle.addActionListener(e ->
 		{
@@ -379,25 +383,25 @@ final class RecommendedSharing extends JPanel
 	private static JLabel heading(String text)
 	{
 		JLabel heading = wrapped(text, 11f, Color.WHITE, TEXT);
-		heading.setFont(heading.getFont().deriveFont(Font.BOLD));
-		heading.setBorder(BorderFactory.createEmptyBorder(4, 0, 0, 0));
+		refont(heading, Font.BOLD);
+		heading.setBorder(new EmptyBorder(4, 0, 0, 0));
 		return heading;
 	}
 
 	private static JLabel detailLine(String name, String text)
 	{
-		JLabel line = wrapped(text, 11f, ColorScheme.LIGHT_GRAY_COLOR, TEXT);
+		JLabel line = wrapped(text, 11f, LIGHT_GRAY_COLOR, TEXT);
 		line.setName(name);
 		return line;
 	}
 
-	private JCheckBox box(SharingFields.Field field, float size)
+	private JCheckBox box(Field field, float size)
 	{
 		JCheckBox box = new JCheckBox("<html><body width='" + (TEXT - INDENT - 10) + "'>"
 			+ field.label.replace("&", "&amp;") + "</body></html>");
 		box.setName("recommended." + field.key);
 		box.setBackground(BACK);
-		box.setFont(box.getFont().deriveFont(size));
+		refont(box, size);
 		box.setToolTipText(field.detail);
 		rows.put(box, Collections.singletonList(field));
 		return box;
@@ -410,7 +414,7 @@ final class RecommendedSharing extends JPanel
 
 	private static <T extends JComponent> T indented(T component)
 	{
-		component.setBorder(BorderFactory.createEmptyBorder(0, INDENT, 0, 0));
+		component.setBorder(new EmptyBorder(0, INDENT, 0, 0));
 		return component;
 	}
 
@@ -429,19 +433,19 @@ final class RecommendedSharing extends JPanel
 		final SharingFields.Section section;
 		final JPanel panel = column();
 		final JCheckBox master;
-		final JLabel summary = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
+		final JLabel summary = label(11f, LIGHT_GRAY_COLOR);
 
 		Group(SharingFields.Section section, JPanel details)
 		{
 			this.section = section;
-			panel.setBorder(BorderFactory.createEmptyBorder(1, 0, 1, 0));
+			panel.setBorder(new EmptyBorder(1, 0, 1, 0));
 			/* The loot row's reminder wraps under its title in the grey of a note, rather than being cut. */
 			master = new JCheckBox(section != SharingFields.LOOT ? section.title
 				: "<html><body width='" + (TEXT - 30) + "'>" + SharingFields.LOOT.title
 				+ " <font color='#a5a5a5'>· kept two weeks</font></body></html>");
 			master.setName("recommended.group." + section.id);
 			master.setBackground(BACK);
-			master.setFont(master.getFont().deriveFont(Font.BOLD, 12f));
+			refont(master, Font.BOLD, 12f);
 			master.getAccessibleContext().setAccessibleDescription("Tick or untick every " + section.title + " field");
 			master.addActionListener(e -> refresh());
 			rows.put(master, section.fields);
@@ -452,8 +456,8 @@ final class RecommendedSharing extends JPanel
 			if (section == SharingFields.LOOT)
 			{
 				/* In full beside the loot fields; the row itself says "kept two weeks". */
-				JLabel kept = wrapped(MapCompanionConfig.FEED_KEPT, 11f, ColorScheme.LIGHT_GRAY_COLOR, TEXT);
-				kept.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
+				JLabel kept = wrapped(MapCompanionConfig.FEED_KEPT, 11f, LIGHT_GRAY_COLOR, TEXT);
+				kept.setBorder(new EmptyBorder(0, 0, 2, 0));
 				kept.setName("recommended.kept");
 				details.add(kept);
 			}
@@ -461,7 +465,7 @@ final class RecommendedSharing extends JPanel
 
 		void refresh()
 		{
-			MapCompanionPanel.setWrapped(summary, master.isSelected() ? SharingControls.labels(section.fields, " · ")
+			setWrapped(summary, master.isSelected() ? SharingControls.labels(section.fields, " · ")
 				: "Nothing from this group", TEXT);
 		}
 	}

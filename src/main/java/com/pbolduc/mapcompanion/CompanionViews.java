@@ -108,7 +108,7 @@ final class CompanionViews extends JPanel
 		JToggleButton button = new JToggleButton(text);
 		button.setName("companionView." + view.name().toLowerCase(Locale.ROOT));
 		button.addActionListener(e -> select(view));
-		button.setFont(button.getFont().deriveFont(12f));
+		MapCompanionPanel.refont(button, 12f);
 		button.setMargin(new Insets(4, 4, 4, 4));
 		button.putClientProperty("JButton.buttonType", "tab");
 		return button;

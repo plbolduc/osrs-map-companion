@@ -37,6 +37,7 @@ import javax.annotation.Nullable;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.ui.overlay.worldmap.WorldMapPointManager;
+import static com.pbolduc.mapcompanion.CompanionSnapshot.Boat;
 
 /**
  * The player's own boats on the game's world map, a pin at each mooring one is at.
@@ -89,16 +90,16 @@ public class BoatPins
 	 * Draw these boats, or none for null. Called on the client thread, each game tick; returns at
 	 * once when the reading has not changed.
 	 */
-	void sync(@Nullable List<CompanionSnapshot.Boat> boats)
+	void sync(@Nullable List<Boat> boats)
 	{
-		Map<String, List<CompanionSnapshot.Boat>> byPort = byMooring(boats);
+		Map<String, List<Boat>> byPort = byMooring(boats);
 		String key = key(byPort);
 		if (key.equals(drawnKey))
 		{
 			return;
 		}
 		removeNow();
-		for (Map.Entry<String, List<CompanionSnapshot.Boat>> entry : byPort.entrySet())
+		for (Map.Entry<String, List<Boat>> entry : byPort.entrySet())
 		{
 			String tooltip = tooltip(entry.getKey(), entry.getValue());
 			MapPin pin = MapPin.boat(MOORINGS.get(entry.getKey()), () -> tooltip);
@@ -137,14 +138,14 @@ public class BoatPins
 	}
 
 	/** The boats the table can place, by mooring, in the order the slots list them. */
-	static Map<String, List<CompanionSnapshot.Boat>> byMooring(@Nullable List<CompanionSnapshot.Boat> boats)
+	static Map<String, List<Boat>> byMooring(@Nullable List<Boat> boats)
 	{
-		Map<String, List<CompanionSnapshot.Boat>> byPort = new LinkedHashMap<>();
+		Map<String, List<Boat>> byPort = new LinkedHashMap<>();
 		if (boats == null)
 		{
 			return byPort;
 		}
-		for (CompanionSnapshot.Boat boat : boats)
+		for (Boat boat : boats)
 		{
 			if (boat.port != null && MOORINGS.containsKey(boat.port))
 			{
@@ -155,13 +156,13 @@ public class BoatPins
 	}
 
 	/** Everything a pin is drawn from, so {@link #sync} redraws exactly when one would differ. */
-	static String key(Map<String, List<CompanionSnapshot.Boat>> byPort)
+	static String key(Map<String, List<Boat>> byPort)
 	{
 		StringBuilder out = new StringBuilder();
-		for (Map.Entry<String, List<CompanionSnapshot.Boat>> entry : byPort.entrySet())
+		for (Map.Entry<String, List<Boat>> entry : byPort.entrySet())
 		{
 			out.append(entry.getKey());
-			for (CompanionSnapshot.Boat boat : entry.getValue())
+			for (Boat boat : entry.getValue())
 			{
 				out.append('|').append(boat.slot).append(':').append(boat.focus);
 			}
@@ -175,10 +176,10 @@ public class BoatPins
 	 * "Your boat · Catherby · greater teleport focus". Names are read only as evidence that a slot
 	 * holds a boat, so a boat is "your boat" here as it is there.
 	 */
-	static String tooltip(String port, List<CompanionSnapshot.Boat> boats)
+	static String tooltip(String port, List<Boat> boats)
 	{
 		int focused = 0;
-		for (CompanionSnapshot.Boat boat : boats)
+		for (Boat boat : boats)
 		{
 			if ("greater".equals(boat.focus))
 			{

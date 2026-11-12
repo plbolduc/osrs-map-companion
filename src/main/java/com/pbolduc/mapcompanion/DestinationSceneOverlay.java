@@ -46,6 +46,7 @@ import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.OverlayUtil;
 import net.runelite.client.util.Text;
+import static com.pbolduc.mapcompanion.RelayResponse.Destination;
 
 /**
  * The destination, drawn where the player is actually looking.
@@ -81,7 +82,7 @@ public class DestinationSceneOverlay extends Overlay
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
-		RelayResponse.Destination destination = shown(config, state);
+		Destination destination = shown(config, state);
 		if (destination == null)
 		{
 			return null;
@@ -113,7 +114,7 @@ public class DestinationSceneOverlay extends Overlay
 
 	/** The destination to draw, or null when there is none or it is not to be shown. */
 	@Nullable
-	static RelayResponse.Destination shown(MapCompanionConfig config, DestinationState state)
+	static Destination shown(MapCompanionConfig config, DestinationState state)
 	{
 		if (!config.showDestination() && !state.hasLocalDestination())
 		{
@@ -126,7 +127,7 @@ public class DestinationSceneOverlay extends Overlay
 	 * The name as drawn in the game scene, cut to a label's length: one line over the scene, where a
 	 * long one would crowd a friend's screen.
 	 */
-	static String label(RelayResponse.Destination destination)
+	static String label(Destination destination)
 	{
 		String name = name(destination.name, 40);
 		return name == null ? "Destination" : name;
@@ -153,7 +154,7 @@ public class DestinationSceneOverlay extends Overlay
 	 * The destination's world, as the label and the step box add it: only while the player is on
 	 * another world, where it says which to hop to. On that world it is one more thing to read.
 	 */
-	static String elsewhere(RelayResponse.Destination destination, int currentWorld)
+	static String elsewhere(Destination destination, int currentWorld)
 	{
 		return destination.world == null || destination.world == currentWorld ? "" : " (W" + destination.world + ")";
 	}
@@ -167,7 +168,7 @@ public class DestinationSceneOverlay extends Overlay
 	 * than the client's deprecated plane and instance helpers, which assume there is only one view
 	 * and are on their way out of the API.
 	 */
-	static List<LocalPoint> localPoints(Client client, RelayResponse.Destination destination)
+	static List<LocalPoint> localPoints(Client client, Destination destination)
 	{
 		WorldView view = client.getTopLevelWorldView();
 		if (view == null)

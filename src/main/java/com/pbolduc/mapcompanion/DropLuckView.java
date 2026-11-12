@@ -30,8 +30,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import javax.annotation.Nullable;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import static com.pbolduc.mapcompanion.DropOdds.count;
+import static com.pbolduc.mapcompanion.LootLog.Drop;
+import static com.pbolduc.mapcompanion.LootLog.Monster;
 
 /**
  * What the Drop luck card and list say, decided without Swing.
@@ -71,20 +73,20 @@ final class DropLuckView
 
 	/** The monster the card shows when the reader has not chosen one. */
 	@Nullable
-	static LootLog.Monster defaultMonster(List<LootLog.Monster> monsters, @Nullable String current, @Nullable String[] pin)
+	static Monster defaultMonster(List<Monster> monsters, @Nullable String current, @Nullable String[] pin)
 	{
-		LootLog.Monster now = find(monsters, current);
+		Monster now = find(monsters, current);
 		if (now != null)
 		{
 			return now;
 		}
-		LootLog.Monster pinned = pin == null ? null : find(monsters, pin[0]);
+		Monster pinned = pin == null ? null : find(monsters, pin[0]);
 		if (pinned != null)
 		{
 			return pinned;
 		}
-		LootLog.Monster recent = null;
-		for (LootLog.Monster monster : monsters)
+		Monster recent = null;
+		for (Monster monster : monsters)
 		{
 			if (recent == null || monster.lastKillMs > recent.lastKillMs)
 			{
@@ -95,13 +97,13 @@ final class DropLuckView
 	}
 
 	@Nullable
-	static LootLog.Monster find(List<LootLog.Monster> monsters, @Nullable String npc)
+	static Monster find(List<Monster> monsters, @Nullable String npc)
 	{
 		if (npc == null)
 		{
 			return null;
 		}
-		for (LootLog.Monster monster : monsters)
+		for (Monster monster : monsters)
 		{
 			if (monster.npc.equalsIgnoreCase(npc))
 			{
@@ -113,9 +115,9 @@ final class DropLuckView
 
 	/** The row the details open on: the reader's, else the pinned one here, else the first. */
 	@Nullable
-	static LootLog.Drop selected(LootLog.Monster monster, @Nullable String chosen, @Nullable String[] pin)
+	static Drop selected(Monster monster, @Nullable String chosen, @Nullable String[] pin)
 	{
-		for (LootLog.Drop drop : monster.drops)
+		for (Drop drop : monster.drops)
 		{
 			if (drop.item.equalsIgnoreCase(chosen))
 			{
@@ -124,7 +126,7 @@ final class DropLuckView
 		}
 		if (pin != null && monster.npc.equalsIgnoreCase(pin[0]))
 		{
-			for (LootLog.Drop drop : monster.drops)
+			for (Drop drop : monster.drops)
 			{
 				if (drop.item.equalsIgnoreCase(pin[1]))
 				{
@@ -153,12 +155,12 @@ final class DropLuckView
 	}
 
 	/** "Slayer task · 143 left · 1,024 recorded kills", or the last kill's age. */
-	static String context(LootLog.Monster monster, boolean isNow, @Nullable Integer taskLeft, long now)
+	static String context(Monster monster, boolean isNow, @Nullable Integer taskLeft, long now)
 	{
-		String kills = DropOdds.count(monster.kills) + " recorded " + (monster.kills == 1 ? "kill" : "kills");
+		String kills = count(monster.kills) + " recorded " + (monster.kills == 1 ? "kill" : "kills");
 		if (isNow && taskLeft != null)
 		{
-			return "Slayer task · " + DropOdds.count(taskLeft) + " left · " + kills;
+			return "Slayer task · " + count(taskLeft) + " left · " + kills;
 		}
 		if (isNow)
 		{
@@ -171,24 +173,24 @@ final class DropLuckView
 	 * A drop row's second line: the average, or the rate where the average would be a fraction,
 	 * knowing whether the next kill gets the drop's better rate.
 	 */
-	static String rowDetail(LootLog.Monster monster, LootLog.Drop drop, boolean boostedNow)
+	static String rowDetail(Monster monster, Drop drop, boolean boostedNow)
 	{
 		if (drop.oneIn == null)
 		{
-			return drop.obtained == 0 ? "Not had yet" : DropOdds.count(drop.sinceLast) + " kills since the last";
+			return drop.obtained == 0 ? "Not had yet" : count(drop.sinceLast) + " kills since the last";
 		}
 		return DropOdds.expectation(drop.watchedKills(), drop.rate(), boostedNow);
 	}
 
 	/** The chip beside a drop's count, or NONE where there is no rate or nothing to say yet. */
-	static DropOdds.Luck rowLuck(LootLog.Monster monster, LootLog.Drop drop)
+	static DropOdds.Luck rowLuck(Monster monster, Drop drop)
 	{
 		/* Over the kills this drop was watched for, never every kill: see LootLog.Drop#watched. */
 		return drop.oneIn == null ? DropOdds.Luck.NONE : DropOdds.luck(drop.obtained, drop.watchedKills(), drop.rate());
 	}
 
 	/** The details under the rows, for one drop. */
-	@AllArgsConstructor(access = AccessLevel.PACKAGE)
+	@AllArgsConstructor
 	static final class Detail
 	{
 		final String verdict;
@@ -214,7 +216,7 @@ final class DropLuckView
 	 * reader decides "keep going or not" by — and the next hundred kills otherwise, which is a size
 	 * of session rather than a promise.
 	 */
-	static Detail detail(LootLog.Monster monster, LootLog.Drop drop, @Nullable Integer taskLeft)
+	static Detail detail(Monster monster, Drop drop, @Nullable Integer taskLeft)
 	{
 		return detail(monster, drop, taskLeft, false);
 	}
@@ -223,14 +225,14 @@ final class DropLuckView
 	 * The same, knowing whether the drop's better rate applies to the next kill — on the task, with
 	 * the diary — which is the rate the forward line and the median are priced at.
 	 */
-	static Detail detail(LootLog.Monster monster, LootLog.Drop drop, @Nullable Integer taskLeft, boolean boostedNow)
+	static Detail detail(Monster monster, Drop drop, @Nullable Integer taskLeft, boolean boostedNow)
 	{
 		String sinceLabel = drop.obtained > 0 ? "Since last drop" : "No drop recorded yet";
-		String sinceValue = DropOdds.count(drop.sinceLast) + (drop.sinceLast == 1 ? " kill" : " kills");
+		String sinceValue = count(drop.sinceLast) + (drop.sinceLast == 1 ? " kill" : " kills");
 		if (drop.oneIn == null)
 		{
 			return new Detail(drop.obtained > 0
-				? DropOdds.count(drop.obtained) + Words.of("luck.recordedNoRate")
+				? count(drop.obtained) + Words.of("luck.recordedNoRate")
 				: "No drop rate on file, so no odds.", sinceLabel, sinceValue, null, -1, null, null, null);
 		}
 		DropOdds.Rate rate = drop.rate();
@@ -241,7 +243,7 @@ final class DropLuckView
 		double drierThan = DropOdds.within(rate, drop.sinceKills());
 		String another = drop.obtained > 0 ? "another" : "one";
 		String boost = ahead != rate.oneIn ? " " + rate.boostLabel : "";
-		String aheadLabel = taskAhead ? "Rest of this Slayer task (" + DropOdds.count(taskLeft) + " kills)"
+		String aheadLabel = taskAhead ? "Rest of this Slayer task (" + count(taskLeft) + " kills)"
 			: "Next 100 kills" + boost;
 		String aheadValue = DropOdds.percent(DropOdds.within(ahead, taskAhead ? taskLeft : 100)) + "% chance of " + another;
 		return new Detail(
@@ -249,40 +251,40 @@ final class DropLuckView
 			sinceLabel, sinceValue,
 			DropOdds.waitSoFar(drop.sinceKills(), rate),
 			drierThan, aheadLabel, aheadValue,
-			"Half of players get one within " + DropOdds.count(DropOdds.killsFor(0.5, ahead)) + " kills" + boost + ".");
+			"Half of players get one within " + count(DropOdds.killsFor(0.5, ahead)) + " kills" + boost + ".");
 	}
 
 	/** The list, filtered by a query on a monster's name or any of its drops, in the chosen order. */
-	static List<LootLog.Monster> list(List<LootLog.Monster> monsters, String query, Sort sort)
+	static List<Monster> list(List<Monster> monsters, String query, Sort sort)
 	{
 		String q = query == null ? "" : query.trim().toLowerCase(Locale.ROOT);
-		List<LootLog.Monster> out = new ArrayList<>();
-		for (LootLog.Monster monster : monsters)
+		List<Monster> out = new ArrayList<>();
+		for (Monster monster : monsters)
 		{
 			if (q.isEmpty() || monster.npc.toLowerCase(Locale.ROOT).contains(q) || anyDrop(monster, q))
 			{
 				out.add(monster);
 			}
 		}
-		Comparator<LootLog.Monster> order;
+		Comparator<Monster> order;
 		switch (sort)
 		{
 			case KILLS:
-				order = Comparator.comparingInt((LootLog.Monster m) -> m.kills).reversed();
+				order = Comparator.comparingInt((Monster m) -> m.kills).reversed();
 				break;
 			case DRIEST:
 				order = Comparator.comparingDouble(DropLuckView::driest).reversed();
 				break;
 			default:
-				order = Comparator.comparingLong((LootLog.Monster m) -> m.lastKillMs).reversed();
+				order = Comparator.comparingLong((Monster m) -> m.lastKillMs).reversed();
 		}
 		out.sort(order.thenComparing(m -> m.npc));
 		return out;
 	}
 
-	private static boolean anyDrop(LootLog.Monster monster, String q)
+	private static boolean anyDrop(Monster monster, String q)
 	{
-		for (LootLog.Drop drop : monster.drops)
+		for (Drop drop : monster.drops)
 		{
 			if (drop.item.toLowerCase(Locale.ROOT).contains(q))
 			{
@@ -293,10 +295,10 @@ final class DropLuckView
 	}
 
 	/** The monster's most unusual current wait, as a share of players it is drier than; 0 with no rate. */
-	static double driest(LootLog.Monster monster)
+	static double driest(Monster monster)
 	{
 		double worst = 0;
-		for (LootLog.Drop drop : monster.drops)
+		for (Drop drop : monster.drops)
 		{
 			if (drop.oneIn != null)
 			{
@@ -307,16 +309,16 @@ final class DropLuckView
 	}
 
 	/** The list row's chip: "Dry" or "Very dry" when the monster's worst wait earns it. */
-	static DropOdds.Luck dryNow(LootLog.Monster monster)
+	static DropOdds.Luck dryNow(Monster monster)
 	{
 		int shown = DropOdds.shown(driest(monster));
 		return shown >= DropOdds.VERY ? DropOdds.Luck.VERY_DRY : shown >= DropOdds.NOTABLE ? DropOdds.Luck.DRY : DropOdds.Luck.NONE;
 	}
 
 	/** "1,024 kills · 2 h ago". */
-	static String listMeta(LootLog.Monster monster, long now)
+	static String listMeta(Monster monster, long now)
 	{
-		String kills = DropOdds.count(monster.kills) + (monster.kills == 1 ? " kill" : " kills");
+		String kills = count(monster.kills) + (monster.kills == 1 ? " kill" : " kills");
 		return monster.lastKillMs > 0 ? kills + " · " + ago(now - monster.lastKillMs) : kills;
 	}
 
@@ -366,7 +368,7 @@ final class DropLuckView
 		{
 			return null;
 		}
-		return drop.item + " after " + DropOdds.count(drop.wait) + (drop.wait == 1 ? " kill" : " kills")
+		return drop.item + " after " + count(drop.wait) + (drop.wait == 1 ? " kill" : " kills")
 			+ " — " + DropOdds.waitComparison(new DropOdds.Kills(drop.wait - drop.waitBoosted, drop.waitBoosted), drop.rate()) + ".";
 	}
 }

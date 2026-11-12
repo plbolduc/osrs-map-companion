@@ -37,6 +37,7 @@ import javax.inject.Inject;
 import net.runelite.api.widgets.WidgetItem;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.overlay.WidgetItemOverlay;
+import static com.pbolduc.mapcompanion.CapabilityEvaluator.ItemTest;
 
 /**
  * A farm run's teleports, outlined in the bank: the ones its Before you leave list names that the
@@ -54,7 +55,7 @@ class FarmBankOverlay extends WidgetItemOverlay
 	private final MapCompanionConfig config;
 	private final FarmRunState state;
 	private final ItemManager items;
-	private List<CapabilityEvaluator.ItemTest> wanted = Collections.emptyList();
+	private List<ItemTest> wanted = Collections.emptyList();
 	private final Map<Integer, Boolean> marked = new HashMap<>();
 
 	@Inject
@@ -95,20 +96,20 @@ class FarmBankOverlay extends WidgetItemOverlay
 	}
 
 	/** The tests for the teleports the farm run going now needs and the sidebar can see are not carried. */
-	static List<CapabilityEvaluator.ItemTest> wanted(@Nullable FarmRunState.View view)
+	static List<ItemTest> wanted(@Nullable FarmRunState.View view)
 	{
 		if (view == null || FarmRunWire.PORT_TASKS.equals(view.run.kind) || view.run.bring == null)
 		{
 			return Collections.emptyList();
 		}
-		List<CapabilityEvaluator.ItemTest> tests = new ArrayList<>();
+		List<ItemTest> tests = new ArrayList<>();
 		for (RelayResponse.FarmBring line : view.run.bring)
 		{
 			if (!"teleport".equals(line.kind) || !Boolean.FALSE.equals(CapabilityEvaluator.carrying(line.name, view.carried)))
 			{
 				continue;
 			}
-			CapabilityEvaluator.ItemTest test = CapabilityEvaluator.itemTest(line.name);
+			ItemTest test = CapabilityEvaluator.itemTest(line.name);
 			if (test != null)
 			{
 				tests.add(test);
@@ -117,7 +118,7 @@ class FarmBankOverlay extends WidgetItemOverlay
 		return tests;
 	}
 
-	static boolean grants(List<CapabilityEvaluator.ItemTest> tests, int itemId, @Nullable String name)
+	static boolean grants(List<ItemTest> tests, int itemId, @Nullable String name)
 	{
 		return tests.stream().anyMatch(test -> test.grants(itemId, name));
 	}

@@ -39,6 +39,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nullable;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
 import javax.swing.BoxLayout;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
@@ -49,6 +51,10 @@ import javax.swing.JPanel;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.util.ImageUtil;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.label;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.left;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.wrapped;
+import static com.pbolduc.mapcompanion.RelayResponse.FarmStop;
+import static net.runelite.client.ui.ColorScheme.LIGHT_GRAY_COLOR;
 
 /**
  * One received run as the sidebar follows it: its stops, the current leg's steps, and Follow,
@@ -85,7 +91,7 @@ final class RunView extends JPanel
 	/** True on the Port tasks card: it shows port-task runs, and the farm run card every other. */
 	private final boolean port;
 	private final JLabel title = label(12f, Color.WHITE);
-	private final JLabel progress = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
+	private final JLabel progress = label(11f, LIGHT_GRAY_COLOR);
 	private final JLabel changed = label(11f, MapPin.AMBER);
 	private final JButton before = MapCompanionPanel.linkButton("▸ Before you leave");
 	private final JPanel bring = column();
@@ -109,7 +115,7 @@ final class RunView extends JPanel
 	 * The heading says the leg's length, which the steps' way line said under it in the words of the
 	 * stop's own line just above.
 	 */
-	private final JLabel legHead = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
+	private final JLabel legHead = label(11f, LIGHT_GRAY_COLOR);
 	private final RouteStepsView steps;
 	/* And one under them, so the leg's last numbered step does not run on into the next stop's number. */
 	private final JLabel legEnd = new JLabel();
@@ -119,7 +125,7 @@ final class RunView extends JPanel
 	 * this card offers Follow.
 	 */
 	private final JLabel paused = label(11f, MapPin.AMBER);
-	private final JLabel message = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
+	private final JLabel message = label(11f, LIGHT_GRAY_COLOR);
 	private boolean bringOpen;
 	/** The checklist's teleports the client can see are not carried, as of its last rebuild. */
 	private int missing;
@@ -140,7 +146,7 @@ final class RunView extends JPanel
 		this.config = config;
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		setOpaque(false);
-		MapCompanionPanel.left(this);
+		left(this);
 		setName(port ? "portTaskRun" : "farmRunView");
 		add(title);
 		add(progress);
@@ -149,25 +155,25 @@ final class RunView extends JPanel
 		add(bring);
 		add(stops);
 		/* The paused line, This leg and its steps go under the next stop's row: see showStops. */
-		paused.setBorder(BorderFactory.createEmptyBorder(6, 0, 0, 0));
+		paused.setBorder(new EmptyBorder(6, 0, 0, 0));
 		paused.setVisible(false);
 		legHead.setText(legHeading(null));
-		legHead.setFont(legHead.getFont().deriveFont(Font.BOLD));
-		legHead.setBorder(BorderFactory.createCompoundBorder(
-			BorderFactory.createEmptyBorder(6, 0, 0, 0),
-			BorderFactory.createCompoundBorder(
+		MapCompanionPanel.refont(legHead, Font.BOLD);
+		legHead.setBorder(new CompoundBorder(
+			new EmptyBorder(6, 0, 0, 0),
+			new CompoundBorder(
 				BorderFactory.createMatteBorder(1, 0, 0, 0, ColorScheme.MEDIUM_GRAY_COLOR),
-				BorderFactory.createEmptyBorder(5, 0, 1, 0))));
+				new EmptyBorder(5, 0, 1, 0))));
 		MapCompanionPanel.capped(legHead);
 		legHead.setVisible(false);
-		legEnd.setBorder(BorderFactory.createCompoundBorder(
-			BorderFactory.createEmptyBorder(6, 0, 0, 0),
+		legEnd.setBorder(new CompoundBorder(
+			new EmptyBorder(6, 0, 0, 0),
 			BorderFactory.createMatteBorder(1, 0, 0, 0, ColorScheme.MEDIUM_GRAY_COLOR)));
 		MapCompanionPanel.capped(legEnd);
 		legEnd.setVisible(false);
 		actions.setOpaque(false);
-		actions.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
-		add(MapCompanionPanel.left(actions));
+		actions.setBorder(new EmptyBorder(5, 0, 0, 0));
+		add(left(actions));
 		add(message);
 
 		reroute.addActionListener(e -> client.reroute());
@@ -298,7 +304,7 @@ final class RunView extends JPanel
 			shownRun = view.run.id;
 			MapCompanionPanel.setWrapped(title, view.run.name, WIDTH);
 			MapCompanionPanel.setWrapped(progress, progressLine(view), WIDTH);
-			progress.setForeground(left ? ColorScheme.LIGHT_GRAY_COLOR : Color.WHITE);
+			progress.setForeground(left ? LIGHT_GRAY_COLOR : Color.WHITE);
 			MapCompanionPanel.setWrapped(changed, CHANGED, WIDTH);
 			follow.setText(view.following ? "Pause" : "Follow");
 			follow.setToolTipText(view.following ? Words.of("run.unfollowTip") : null);
@@ -352,7 +358,7 @@ final class RunView extends JPanel
 		{
 			int done = 0;
 			int visited = 0;
-			for (RelayResponse.FarmStop stop : view.run.stops)
+			for (FarmStop stop : view.run.stops)
 			{
 				done += view.done.contains(stop.n) ? 1 : 0;
 				visited += view.visited.contains(stop.n) ? 1 : 0;
@@ -406,7 +412,7 @@ final class RunView extends JPanel
 	 * What a stop says it is at: done, visited, or under the player. The next stop says it by its
 	 * number, amber as its pin is on the world map, rather than by a line of its own.
 	 */
-	static String status(FarmRunState.View view, RelayResponse.FarmStop stop)
+	static String status(FarmRunState.View view, FarmStop stop)
 	{
 		if (view.done.contains(stop.n))
 		{
@@ -418,7 +424,7 @@ final class RunView extends JPanel
 	}
 
 	/** The stop's name, its number bold and amber when it is the next stop, as the world map draws its pin. */
-	static String stopName(RelayResponse.FarmStop stop, boolean next)
+	static String stopName(FarmStop stop, boolean next)
 	{
 		String name = MapCompanionPanel.escape(stop.name);
 		String number = stop.n + ".";
@@ -448,14 +454,14 @@ final class RunView extends JPanel
 			bringPicture(picture, line, view.run);
 			JPanel row = new JPanel(new BorderLayout(4, 0));
 			row.setOpaque(false);
-			row.setBorder(BorderFactory.createEmptyBorder(1, 0, 1, 0));
+			row.setBorder(new EmptyBorder(1, 0, 1, 0));
 			JPanel top = new JPanel(new BorderLayout());
 			top.setOpaque(false);
 			top.add(picture, BorderLayout.NORTH);
 			row.add(top, BorderLayout.WEST);
-			row.add(MapCompanionPanel.wrapped(words, 11f, absent ? MapPin.AMBER : ColorScheme.LIGHT_GRAY_COLOR,
+			row.add(wrapped(words, 11f, absent ? MapPin.AMBER : LIGHT_GRAY_COLOR,
 				WIDTH - PICTURE - 4), BorderLayout.CENTER);
-			bring.add(MapCompanionPanel.left(row));
+			bring.add(left(row));
 		}
 	}
 
@@ -471,7 +477,7 @@ final class RunView extends JPanel
 			sprites.itemNamed(picture, line.name, PICTURE);
 			return;
 		}
-		for (RelayResponse.FarmStop stop : run.stops)
+		for (FarmStop stop : run.stops)
 		{
 			if (line.name.equalsIgnoreCase(stop.item) && RouteStepsView.firstPictured(stop.steps) != null)
 			{
@@ -485,15 +491,15 @@ final class RunView extends JPanel
 	private void showStops(FarmRunState.View view)
 	{
 		stops.removeAll();
-		RelayResponse.FarmStop next = view.next();
+		FarmStop next = view.next();
 		/* A picture's place on every stop when any has one, so the ways line up; none on a run with none. */
 		boolean pictures = view.run.stops.stream().anyMatch(RunView::pictured);
-		for (RelayResponse.FarmStop stop : view.run.stops)
+		for (FarmStop stop : view.run.stops)
 		{
 			boolean done = view.done.contains(stop.n);
 			String at = status(view, stop);
 			JPanel row = column();
-			row.setBorder(BorderFactory.createEmptyBorder(6, 0, 0, 0));
+			row.setBorder(new EmptyBorder(6, 0, 0, 0));
 			/*
 			 * A stop behind the player is one line that keeps its status word: its way there and its
 			 * tasks are spent, and the rows left are the ones still to walk. Done and visited are drawn
@@ -506,7 +512,7 @@ final class RunView extends JPanel
 				line.setText("<html><body width='" + WIDTH + "'><strike>" + named + "</strike>"
 					+ MapCompanionPanel.escape(" · " + at) + "</body></html>");
 				row.add(line);
-				stops.add(MapCompanionPanel.left(row));
+				stops.add(left(row));
 				continue;
 			}
 			JLabel name = label(12f, Color.WHITE);
@@ -524,25 +530,25 @@ final class RunView extends JPanel
 				picture(icon, stop);
 				method.add(icon, BorderLayout.WEST);
 			}
-			method.add(MapCompanionPanel.wrapped(stop.method == null ? "Walk" : stop.method, 11f, ColorScheme.LIGHT_GRAY_COLOR,
+			method.add(wrapped(stop.method == null ? "Walk" : stop.method, 11f, LIGHT_GRAY_COLOR,
 				pictures ? WIDTH - PICTURE - 4 : WIDTH), BorderLayout.CENTER);
-			row.add(MapCompanionPanel.left(method));
+			row.add(left(method));
 			if (stop.tasks != null)
 			{
 				for (RelayResponse.RunTask task : stop.tasks)
 				{
-					row.add(MapCompanionPanel.wrapped(task.text, 11f, ColorScheme.LIGHT_GRAY_COLOR, WIDTH));
+					row.add(wrapped(task.text, 11f, LIGHT_GRAY_COLOR, WIDTH));
 				}
 			}
 			if (!at.isEmpty())
 			{
-				row.add(MapCompanionPanel.wrapped(at, 11f, MapPin.AMBER, WIDTH));
+				row.add(wrapped(at, 11f, MapPin.AMBER, WIDTH));
 			}
 			if (stop.birdhouseId != null)
 			{
-				row.add(MapCompanionPanel.wrapped(BIRDHOUSE_PENDING, 11f, ColorScheme.LIGHT_GRAY_COLOR, WIDTH));
+				row.add(wrapped(BIRDHOUSE_PENDING, 11f, LIGHT_GRAY_COLOR, WIDTH));
 			}
-			stops.add(MapCompanionPanel.left(row));
+			stops.add(left(row));
 			if (next != null && stop.n == next.n)
 			{
 				/*
@@ -559,7 +565,7 @@ final class RunView extends JPanel
 	}
 
 	/** Whether a stop has a picture to show: a step the map gave an item or spell id, or an item it names. */
-	private static boolean pictured(RelayResponse.FarmStop stop)
+	private static boolean pictured(FarmStop stop)
 	{
 		return stop.item != null || RouteStepsView.firstPictured(stop.steps) != null;
 	}
@@ -568,7 +574,7 @@ final class RunView extends JPanel
 	 * The stop's picture, by the id its own step carries, the one This leg draws, so a teleport the
 	 * map names no item for (a spell) still has one. The item's name is only the fallback.
 	 */
-	private void picture(JLabel icon, RelayResponse.FarmStop stop)
+	private void picture(JLabel icon, FarmStop stop)
 	{
 		RelayResponse.RouteStep step = RouteStepsView.firstPictured(stop.steps);
 		if (step != null)
@@ -591,7 +597,7 @@ final class RunView extends JPanel
 	{
 		boolean counts = !bringOpen && missing > 0;
 		before.setText((bringOpen ? "▾ " : "▸ ") + "Before you leave" + (counts ? " · " + missing + " not on you" : ""));
-		before.setForeground(counts ? MapPin.AMBER : ColorScheme.LIGHT_GRAY_COLOR);
+		before.setForeground(counts ? MapPin.AMBER : LIGHT_GRAY_COLOR);
 		bring.setVisible(before.isVisible() && bringOpen);
 	}
 

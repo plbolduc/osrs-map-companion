@@ -32,11 +32,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import javax.annotation.Nullable;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import net.runelite.api.Client;
 import net.runelite.api.Player;
 import net.runelite.api.coords.WorldPoint;
+import static com.pbolduc.mapcompanion.RelayResponse.Destination;
+import static com.pbolduc.mapcompanion.RelayResponse.Route;
+import static com.pbolduc.mapcompanion.RelayResponse.RouteOption;
+import static com.pbolduc.mapcompanion.RelayResponse.RouteStep;
 
 /**
  * The way to the current destination, and how far along it the player is.
@@ -124,7 +127,7 @@ public class DestinationRoute
 	@Nullable
 	private WorldPoint target;
 	@Nullable
-	private RelayResponse.Route route;
+	private Route route;
 	private String received;
 	private boolean rerouted;
 	private int chosen;
@@ -164,14 +167,14 @@ public class DestinationRoute
 	private String boatAway;
 
 	/** One moment of the route, for the sidebar and the pins. Never changes after it is made. */
-	@AllArgsConstructor(access = AccessLevel.PACKAGE)
+	@AllArgsConstructor
 	static final class View
 	{
 		/** The destination it belongs to; see {@link #keyOf}. */
 		final String key;
 		/** That destination's own tile, where its own pin already stands. */
 		final WorldPoint target;
-		final List<RelayResponse.RouteOption> ways;
+		final List<RouteOption> ways;
 		final int chosen;
 		/** The current step of the chosen way; its step count once arrived. */
 		final int step;
@@ -199,14 +202,14 @@ public class DestinationRoute
 		}
 
 		@Nullable
-		RelayResponse.RouteOption way()
+		RouteOption way()
 		{
 			return ways.isEmpty() ? null : ways.get(chosen);
 		}
 
-		List<RelayResponse.RouteStep> steps()
+		List<RouteStep> steps()
 		{
-			RelayResponse.RouteOption way = way();
+			RouteOption way = way();
 			return way == null ? Collections.emptyList() : way.steps;
 		}
 
@@ -216,9 +219,9 @@ public class DestinationRoute
 		}
 
 		@Nullable
-		RelayResponse.RouteStep current()
+		RouteStep current()
 		{
-			List<RelayResponse.RouteStep> steps = steps();
+			List<RouteStep> steps = steps();
 			return step < steps.size() ? steps.get(step) : null;
 		}
 
@@ -229,7 +232,7 @@ public class DestinationRoute
 		@Nullable
 		WorldPoint next()
 		{
-			List<RelayResponse.RouteStep> steps = steps();
+			List<RouteStep> steps = steps();
 			for (int i = step; i < steps.size(); i++)
 			{
 				if (steps.get(i).at != null)
@@ -242,7 +245,7 @@ public class DestinationRoute
 	}
 
 	/** What a Reroute press asked about, so an answer for a place since replaced is thrown away. */
-	@AllArgsConstructor(access = AccessLevel.PACKAGE)
+	@AllArgsConstructor
 	static final class Ticket
 	{
 		final long generation;
@@ -251,7 +254,7 @@ public class DestinationRoute
 
 	/** A place as {@link DestinationState} tells places apart: everything but its route. */
 	@Nullable
-	static String keyOf(@Nullable RelayResponse.Destination destination)
+	static String keyOf(@Nullable Destination destination)
 	{
 		if (destination == null)
 		{
@@ -262,7 +265,7 @@ public class DestinationRoute
 	}
 
 	/** Bring the route in line with the destination being shown, or none, knowing no member. */
-	synchronized void sync(@Nullable RelayResponse.Destination destination)
+	synchronized void sync(@Nullable Destination destination)
 	{
 		sync(destination, null);
 	}
@@ -276,7 +279,7 @@ public class DestinationRoute
 	 * its route came with it, or the moment its route arrives, which can be a few seconds after the
 	 * place. Every other destination arrives unfollowed; see {@link #following}.
 	 */
-	synchronized void sync(@Nullable RelayResponse.Destination destination, @Nullable String memberId)
+	synchronized void sync(@Nullable Destination destination, @Nullable String memberId)
 	{
 		String incoming = keyOf(destination);
 		if (!Objects.equals(incoming, key))
@@ -296,7 +299,7 @@ public class DestinationRoute
 	}
 
 	/** Whether a destination was sent to this member alone. */
-	static boolean sentHere(@Nullable RelayResponse.Destination destination, @Nullable String memberId)
+	static boolean sentHere(@Nullable Destination destination, @Nullable String memberId)
 	{
 		return destination != null && memberId != null && memberId.equals(destination.targetMemberId);
 	}
@@ -315,7 +318,7 @@ public class DestinationRoute
 	 * Another destination, or none: its key and tile, a new generation that no reroute in flight
 	 * belongs to, nothing said, and the route it came with. Whether it is followed is the caller's.
 	 */
-	private void retarget(@Nullable RelayResponse.Destination destination)
+	private void retarget(@Nullable Destination destination)
 	{
 		key = keyOf(destination);
 		target = destination == null ? null : new WorldPoint(destination.x, destination.y, destination.plane);
@@ -327,7 +330,7 @@ public class DestinationRoute
 		adopt(destination == null ? null : destination.route);
 	}
 
-	private void adopt(@Nullable RelayResponse.Route incoming)
+	private void adopt(@Nullable Route incoming)
 	{
 		revision++;
 		route = incoming;
@@ -360,7 +363,7 @@ public class DestinationRoute
 		{
 			return false;
 		}
-		RelayResponse.RouteOption way = route.options.get(chosen);
+		RouteOption way = route.options.get(chosen);
 		int next = where == null && !sailing.aboard ? step : next(way.steps, step, where, sailing, ashore, way.voyage);
 		int dock = firstSlot(way.steps, RouteWire.DOCK);
 		/* Kept only before the boat docks, and after the step is judged, so a landing compares with the boarding. */
@@ -383,7 +386,7 @@ public class DestinationRoute
 	 * voyage boards no known boat, which has no {@code board} row.
 	 */
 	@Nullable
-	static String boatAway(RelayResponse.RouteOption way, int step, Sailing sailing)
+	static String boatAway(RouteOption way, int step, Sailing sailing)
 	{
 		int board = firstSlot(way.steps, RouteWire.BOARD);
 		if (board < 0 || step > board || way.voyage == null || sailing.aboard || sailing.moored == null)
@@ -393,7 +396,7 @@ public class DestinationRoute
 		return sailing.moored.containsValue(way.voyage.from) ? null : way.voyage.from;
 	}
 
-	private static int firstSlot(List<RelayResponse.RouteStep> steps, String slot)
+	private static int firstSlot(List<RouteStep> steps, String slot)
 	{
 		for (int i = 0; i < steps.size(); i++)
 		{
@@ -477,7 +480,7 @@ public class DestinationRoute
 	 * The answer to a Reroute: the new ways, or null with a sentence. The wait the map asked for is
 	 * kept even when the destination has changed since, because it is the member's and not the place's.
 	 */
-	synchronized void finishReroute(Ticket ticket, @Nullable RelayResponse.Route answer, @Nullable String why, long nextAllowedMs)
+	synchronized void finishReroute(Ticket ticket, @Nullable Route answer, @Nullable String why, long nextAllowedMs)
 	{
 		nextRerouteMs = Math.max(nextRerouteMs, nextAllowedMs);
 		if (ticket.generation != generation)
@@ -550,7 +553,7 @@ public class DestinationRoute
 	 * the following. Following is on because the press was the player's own, as Follow and Reroute
 	 * are; a destination that merely arrives still never draws in Shortest Path.
 	 */
-	synchronized void adoptPressed(RelayResponse.Destination destination)
+	synchronized void adoptPressed(Destination destination)
 	{
 		retarget(destination);
 		followWhenRouted = false;
@@ -590,8 +593,8 @@ public class DestinationRoute
 		{
 			return null;
 		}
-		List<RelayResponse.RouteOption> ways = route == null
-			? Collections.<RelayResponse.RouteOption>emptyList()
+		List<RouteOption> ways = route == null
+			? Collections.<RouteOption>emptyList()
 			: Collections.unmodifiableList(route.options);
 		return new View(key, target, ways, chosen, step, route == null ? null : route.origin, rerouted, rerouting,
 			message, refused, nextRerouteMs, following, revision, boatAway);
@@ -601,7 +604,7 @@ public class DestinationRoute
 	 * The step after {@code current} that the player standing at {@code where} has made current.
 	 * Static and plain so the rule is pinned by a test without a client.
 	 */
-	static int next(List<RelayResponse.RouteStep> steps, int current, WorldPoint where)
+	static int next(List<RouteStep> steps, int current, WorldPoint where)
 	{
 		return next(steps, current, where, Sailing.ASHORE_UNKNOWN, null, null);
 	}
@@ -613,7 +616,7 @@ public class DestinationRoute
 	 * @param where where the player stands, or null where that cannot be known
 	 * @param ashore the boats' ports read before boarding, or null
 	 */
-	static int next(List<RelayResponse.RouteStep> steps, int current, @Nullable WorldPoint where, Sailing sailing,
+	static int next(List<RouteStep> steps, int current, @Nullable WorldPoint where, Sailing sailing,
 		@Nullable Map<Integer, String> ashore, @Nullable RelayResponse.Voyage voyage)
 	{
 		if (current >= steps.size())
@@ -639,7 +642,7 @@ public class DestinationRoute
 		}
 		for (int i = current; i < last; i++)
 		{
-			RelayResponse.RouteStep step = steps.get(i);
+			RouteStep step = steps.get(i);
 			boolean voyageRow = RouteWire.voyageSlot(step.slot);
 			if (step.at == null && !voyageRow)
 			{
@@ -665,7 +668,7 @@ public class DestinationRoute
 	 * Whether one row is done: by its tile for every row but a voyage's, which the game says; see the
 	 * class comment. Static and plain so each rule is pinned by a test without a client.
 	 */
-	static boolean done(RelayResponse.RouteStep step, @Nullable WorldPoint where, Sailing sailing,
+	static boolean done(RouteStep step, @Nullable WorldPoint where, Sailing sailing,
 		@Nullable Map<Integer, String> ashore, @Nullable RelayResponse.Voyage voyage)
 	{
 		if (RouteWire.BOARD.equals(step.slot))
@@ -748,7 +751,7 @@ public class DestinationRoute
 		return WorldTiles.of(client, player);
 	}
 
-	private static int best(@Nullable RelayResponse.Route route)
+	private static int best(@Nullable Route route)
 	{
 		if (route == null)
 		{
@@ -765,13 +768,13 @@ public class DestinationRoute
 	}
 
 	/** Enough of a route to tell a different answer from the same one arriving again. */
-	private static String signature(RelayResponse.Route route)
+	private static String signature(Route route)
 	{
 		StringBuilder sb = new StringBuilder();
-		for (RelayResponse.RouteOption option : route.options)
+		for (RouteOption option : route.options)
 		{
 			sb.append(option.id).append('|').append(option.label).append('|');
-			for (RelayResponse.RouteStep step : option.steps)
+			for (RouteStep step : option.steps)
 			{
 				sb.append(step.title).append('|');
 				if (step.at != null)

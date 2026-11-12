@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
+import static com.pbolduc.mapcompanion.RouteWire.text;
 
 /**
  * Reading the group's friends and meetups from the map without letting a bad row cost the reply.
@@ -215,24 +216,24 @@ final class SocialWire
 		}
 		RelayResponse.RosterRow clean = new RelayResponse.RosterRow();
 		clean.id = id;
-		String name = RouteWire.text(row.name, MAX_NAME);
+		String name = text(row.name, MAX_NAME);
 		clean.name = name == null ? "Member" : name;
 		clean.colour = colour(row.colour);
 		clean.presence = row.presence != null && PRESENCES.contains(row.presence) ? row.presence : null;
 		clean.world = row.world != null && row.world > 0 && row.world <= 2500 ? row.world : null;
-		clean.near = RouteWire.text(row.near, MAX_NEAR);
+		clean.near = text(row.near, MAX_NEAR);
 		clean.nearYou = Boolean.TRUE.equals(row.nearYou) ? Boolean.TRUE : null;
 		clean.routable = row.routable;
 		if (row.news != null)
 		{
-			String title = RouteWire.text(row.news.title, MAX_NEWS);
+			String title = text(row.news.title, MAX_NEWS);
 			if (title != null && row.news.atMs > 0)
 			{
 				RelayResponse.News news = new RelayResponse.News();
-				news.kind = RouteWire.text(row.news.kind, 20);
+				news.kind = text(row.news.kind, 20);
 				news.title = title;
 				news.atMs = row.news.atMs;
-				news.skill = RouteWire.text(row.news.skill, 20);
+				news.skill = text(row.news.skill, 20);
 				news.itemId = row.news.itemId != null && row.news.itemId > 0 ? row.news.itemId : null;
 				clean.news = news;
 			}
@@ -248,7 +249,7 @@ final class SocialWire
 			return null;
 		}
 		String id = id(meetup.id);
-		String title = RouteWire.text(meetup.title, MAX_TITLE);
+		String title = text(meetup.title, MAX_TITLE);
 		if (id == null || title == null || meetup.startsAtMs <= 0
 			|| meetup.x <= 0 || meetup.y <= 0 || meetup.x > MAX_COORDINATE || meetup.y > MAX_COORDINATE
 			|| meetup.plane < 0 || meetup.plane > 3)
@@ -263,7 +264,7 @@ final class SocialWire
 		clean.plane = meetup.plane;
 		clean.world = meetup.world != null && meetup.world > 0 && meetup.world <= 2500 ? meetup.world : null;
 		clean.startsAtMs = meetup.startsAtMs;
-		clean.near = RouteWire.text(meetup.near, MAX_NEAR);
+		clean.near = text(meetup.near, MAX_NEAR);
 		clean.mine = meetup.mine != null && ANSWERS.contains(meetup.mine) ? meetup.mine : null;
 		List<RelayResponse.MeetupAnswer> who = new ArrayList<>();
 		if (meetup.who != null)
@@ -275,7 +276,7 @@ final class SocialWire
 					continue;
 				}
 				RelayResponse.MeetupAnswer kept = new RelayResponse.MeetupAnswer();
-				String name = RouteWire.text(face.name, MAX_NAME);
+				String name = text(face.name, MAX_NAME);
 				kept.name = name == null ? "Member" : name;
 				kept.colour = colour(face.colour);
 				kept.answer = face.answer;

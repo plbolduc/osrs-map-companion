@@ -28,7 +28,6 @@ package com.pbolduc.mapcompanion;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
@@ -79,7 +78,7 @@ public class DeathWatcher extends SettlingReader
 	static final long TICK_MS = 600L;
 
 	/** A gravestone standing, as the game last gave its timer. Never changes after it is made. */
-	@AllArgsConstructor(access = AccessLevel.PACKAGE)
+	@AllArgsConstructor
 	static final class Stone
 	{
 		/** Game ticks left, by the game's own timer. */

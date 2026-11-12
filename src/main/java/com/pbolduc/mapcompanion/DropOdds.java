@@ -29,7 +29,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Locale;
 import javax.annotation.Nullable;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 
 /**
@@ -73,7 +72,7 @@ final class DropOdds
 	}
 
 	/** A drop's rate, and the better one that applies to some kills — on a task, with a diary. */
-	@AllArgsConstructor(access = AccessLevel.PACKAGE)
+	@AllArgsConstructor
 	static final class Rate
 	{
 		final double oneIn;

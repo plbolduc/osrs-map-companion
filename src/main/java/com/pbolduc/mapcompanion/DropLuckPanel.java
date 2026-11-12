@@ -47,6 +47,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
+import javax.swing.border.CompoundBorder;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -64,6 +65,14 @@ import net.runelite.client.util.ImageUtil;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.column;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.gap;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.left;
+import static com.pbolduc.mapcompanion.DropOdds.Luck;
+import static com.pbolduc.mapcompanion.LootLog.Drop;
+import static com.pbolduc.mapcompanion.LootLog.Monster;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.refont;
+import static net.runelite.client.ui.ColorScheme.BRAND_ORANGE;
+import static net.runelite.client.ui.ColorScheme.DARKER_GRAY_COLOR;
+import static net.runelite.client.ui.ColorScheme.DARK_GRAY_COLOR;
+import static net.runelite.client.ui.ColorScheme.LIGHT_GRAY_COLOR;
 
 /**
  * Drop luck in the sidebar: one monster's card, or the list of every monster tracked.
@@ -137,16 +146,16 @@ final class DropLuckPanel extends JPanel
 	private DropLuckView.Sort sort = DropLuckView.Sort.RECENT;
 	/** Kept across rebuilds so typing is never interrupted; only the results under it are rebuilt. */
 	private final IconTextField search = new IconTextField();
-	private final JPanel results = column(ColorScheme.DARK_GRAY_COLOR);
+	private final JPanel results = column(DARK_GRAY_COLOR);
 	private String drawn = "";
 
 	DropLuckPanel(LootLog log, @Nullable Pictures pictures)
 	{
 		this.log = log;
 		this.pictures = pictures;
-		column(this, ColorScheme.DARK_GRAY_COLOR);
+		column(this, DARK_GRAY_COLOR);
 		search.setIcon(IconTextField.Icon.SEARCH);
-		search.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		search.setBackground(DARKER_GRAY_COLOR);
 		search.setHoverBackgroundColor(ColorScheme.DARKER_GRAY_HOVER_COLOR);
 		search.setPreferredSize(new Dimension(WIDTH, 28));
 		search.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28));
@@ -180,17 +189,17 @@ final class DropLuckPanel extends JPanel
 	void refresh()
 	{
 		long now = System.currentTimeMillis();
-		List<LootLog.Monster> monsters = log.monsters();
+		List<Monster> monsters = log.monsters();
 		String current = log.current();
 		String[] pin = log.pin();
 		StringBuilder print = new StringBuilder().append(view).append('|').append(opened).append('|')
 			.append(sort).append('|').append(current).append('|').append(pin == null ? "" : pin[0] + "/" + pin[1])
 			.append('|').append(chosen);
-		for (LootLog.Monster monster : monsters)
+		for (Monster monster : monsters)
 		{
 			print.append('|').append(monster.npc).append(':').append(monster.kills).append(':')
 				.append(DropLuckView.ago(now - monster.lastKillMs)).append(':').append(log.taskRemaining(monster.npc));
-			for (LootLog.Drop drop : monster.drops)
+			for (Drop drop : monster.drops)
 			{
 				print.append(',').append(drop.item).append(drop.obtained).append('/').append(drop.sinceLast);
 			}
@@ -209,7 +218,7 @@ final class DropLuckPanel extends JPanel
 		refresh();
 	}
 
-	private void rebuild(List<LootLog.Monster> monsters, @Nullable String current, @Nullable String[] pin, long now)
+	private void rebuild(List<Monster> monsters, @Nullable String current, @Nullable String[] pin, long now)
 	{
 		/*
 		 * A kill while the list is open redraws it, and removing the focused search field sends the
@@ -250,7 +259,7 @@ final class DropLuckPanel extends JPanel
 		return false;
 	}
 
-	private void build(List<LootLog.Monster> monsters, @Nullable String current, @Nullable String[] pin, long now)
+	private void build(List<Monster> monsters, @Nullable String current, @Nullable String[] pin, long now)
 	{
 		namesItself = false;
 		if (monsters.isEmpty())
@@ -259,8 +268,8 @@ final class DropLuckPanel extends JPanel
 			repaint();
 			return;
 		}
-		LootLog.Monster now0 = DropLuckView.find(monsters, current);
-		LootLog.Monster shown = view == View.CARD
+		Monster now0 = DropLuckView.find(monsters, current);
+		Monster shown = view == View.CARD
 			? (opened != null ? DropLuckView.find(monsters, opened) : DropLuckView.defaultMonster(monsters, current, pin))
 			: null;
 		if (view == View.CARD && opened != null && shown == null)
@@ -287,29 +296,29 @@ final class DropLuckPanel extends JPanel
 		repaint();
 	}
 
-	private JComponent nowBar(LootLog.Monster monster)
+	private JComponent nowBar(Monster monster)
 	{
 		JPanel bar = MapCompanionPanel.bar(6, new Color(0x3a2e1a), null, small("<html>Now killing <font color='#ffffff'>"
-			+ MapCompanionPanel.escape(monster.npc) + "</font></html>", ColorScheme.LIGHT_GRAY_COLOR),
-			small("Back ›", ColorScheme.BRAND_ORANGE));
-		bar.setBorder(BorderFactory.createCompoundBorder(
+			+ MapCompanionPanel.escape(monster.npc) + "</font></html>", LIGHT_GRAY_COLOR),
+			small("Back ›", BRAND_ORANGE));
+		bar.setBorder(new CompoundBorder(
 			BorderFactory.createLineBorder(new Color(0x7a5410)), new EmptyBorder(3, 6, 3, 6)));
 		clickable(bar, () -> open(null, null));
 		return fill(bar);
 	}
 
-	private void buildCard(LootLog.Monster monster, boolean isNow, @Nullable String[] pin, long now, boolean first)
+	private void buildCard(Monster monster, boolean isNow, @Nullable String[] pin, long now, boolean first)
 	{
 		boolean pinnedHere = pin != null && monster.npc.equalsIgnoreCase(pin[0]);
 		String eyebrow = DropLuckView.eyebrow(opened != null, isNow, pinnedHere);
 		/* Only as the first row: under the Now killing bar it would name the section halfway down it. */
 		namesItself = first && eyebrow.isEmpty();
-		JLabel left = small(namesItself ? HEADING : eyebrow, ColorScheme.LIGHT_GRAY_COLOR);
+		JLabel left = small(namesItself ? HEADING : eyebrow, LIGHT_GRAY_COLOR);
 		if (namesItself)
 		{
-			left.setFont(left.getFont().deriveFont(Font.BOLD, 11f));
+			refont(left, Font.BOLD, 11f);
 		}
-		add(fill(MapCompanionPanel.bar(0, ColorScheme.DARK_GRAY_COLOR, left, null,
+		add(fill(MapCompanionPanel.bar(0, DARK_GRAY_COLOR, left, null,
 			link(opened != null ? "‹ All monsters" : "All monsters ›", () ->
 		{
 			view = View.LIST;
@@ -325,7 +334,7 @@ final class DropLuckPanel extends JPanel
 		card.add(wrapped(monster.npc, TEXT_WIDTH, 15f, Color.WHITE));
 		Integer taskLeft = isNow ? log.taskRemaining(monster.npc) : null;
 		card.add(wrapped(DropLuckView.context(monster, isNow, taskLeft, now), TEXT_WIDTH, 11f,
-			taskLeft != null ? ColorScheme.BRAND_ORANGE : ColorScheme.LIGHT_GRAY_COLOR));
+			taskLeft != null ? BRAND_ORANGE : LIGHT_GRAY_COLOR));
 		card.add(inset(6));
 
 		if (monster.drops.isEmpty())
@@ -334,8 +343,8 @@ final class DropLuckPanel extends JPanel
 			add(card);
 			return;
 		}
-		LootLog.Drop selected = DropLuckView.selected(monster, chosen.get(monster.npc), pin);
-		for (LootLog.Drop drop : monster.drops)
+		Drop selected = DropLuckView.selected(monster, chosen.get(monster.npc), pin);
+		for (Drop drop : monster.drops)
 		{
 			boolean pinned = pinnedHere && drop.item.equalsIgnoreCase(pin[1]);
 			card.add(dropRow(monster, drop, drop == selected, pinned));
@@ -351,22 +360,22 @@ final class DropLuckPanel extends JPanel
 		add(card);
 	}
 
-	private JComponent dropRow(LootLog.Monster monster, LootLog.Drop drop, boolean selected, boolean pinned)
+	private JComponent dropRow(Monster monster, Drop drop, boolean selected, boolean pinned)
 	{
-		Color background = selected ? ColorScheme.DARKER_GRAY_HOVER_COLOR : ColorScheme.DARKER_GRAY_COLOR;
+		Color background = selected ? ColorScheme.DARKER_GRAY_HOVER_COLOR : DARKER_GRAY_COLOR;
 		JPanel words = column(background);
 		/* The pinned drop's name is orange, the sidebar's own accent: an emoji pin is not in RuneLite's font. */
-		words.add(wrapped(drop.item, ROW_TEXT_WIDTH, 12f, pinned ? ColorScheme.BRAND_ORANGE : Color.WHITE));
+		words.add(wrapped(drop.item, ROW_TEXT_WIDTH, 12f, pinned ? BRAND_ORANGE : Color.WHITE));
 		words.add(wrapped(DropLuckView.rowDetail(monster, drop, log.boostedNow(monster.npc, drop.boostWhen)),
-			ROW_TEXT_WIDTH, 11f, ColorScheme.LIGHT_GRAY_COLOR));
+			ROW_TEXT_WIDTH, 11f, LIGHT_GRAY_COLOR));
 
 		JPanel count = column(background);
 		JLabel n = new JLabel(DropOdds.count(drop.obtained), SwingConstants.RIGHT);
-		n.setFont(n.getFont().deriveFont(16f));
-		n.setForeground(drop.obtained > 0 ? Color.WHITE : ColorScheme.LIGHT_GRAY_COLOR);
+		refont(n, 16f);
+		n.setForeground(drop.obtained > 0 ? Color.WHITE : LIGHT_GRAY_COLOR);
 		n.setAlignmentX(Component.RIGHT_ALIGNMENT);
 		count.add(n);
-		DropOdds.Luck luck = DropLuckView.rowLuck(monster, drop);
+		Luck luck = DropLuckView.rowLuck(monster, drop);
 		if (luck.word != null)
 		{
 			JLabel chip = chip(luck);
@@ -375,8 +384,8 @@ final class DropLuckPanel extends JPanel
 		}
 		JPanel row = MapCompanionPanel.bar(6, background,
 			new Picture(drop.itemId, 32, drop.obtained > 0 || drop.oneIn != null, -1), words, count);
-		row.setBorder(BorderFactory.createCompoundBorder(
-			new MatteBorder(0, 2, 0, 0, selected ? ColorScheme.BRAND_ORANGE : background),
+		row.setBorder(new CompoundBorder(
+			new MatteBorder(0, 2, 0, 0, selected ? BRAND_ORANGE : background),
 			new EmptyBorder(3, 4, 3, 2)));
 		left(MapCompanionPanel.capped(row));
 		clickable(row, () ->
@@ -387,14 +396,14 @@ final class DropLuckPanel extends JPanel
 		return row;
 	}
 
-	private void buildDetail(JPanel card, LootLog.Monster monster, LootLog.Drop drop, boolean pinned, @Nullable Integer taskLeft)
+	private void buildDetail(JPanel card, Monster monster, Drop drop, boolean pinned, @Nullable Integer taskLeft)
 	{
 		DropLuckView.Detail detail = DropLuckView.detail(monster, drop, taskLeft, log.boostedNow(monster.npc, drop.boostWhen));
 		JButton pin = MapCompanionPanel.smallButton(pinned ? "Pinned" : "Pin");
 		pin.setFocusable(false);
 		if (pinned)
 		{
-			pin.setForeground(ColorScheme.BRAND_ORANGE);
+			pin.setForeground(BRAND_ORANGE);
 		}
 		pin.setToolTipText(pinned ? Words.of("luck.unpinTip") : Words.of("luck.pinTip"));
 		pin.addActionListener(e ->
@@ -414,11 +423,11 @@ final class DropLuckPanel extends JPanel
 		 * the orange edge, so a heading naming it again under the rule was the same words twice.
 		 */
 		JPanel pinAtTop = new JPanel(new BorderLayout());
-		pinAtTop.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		pinAtTop.setBackground(DARKER_GRAY_COLOR);
 		pinAtTop.add(pin, BorderLayout.NORTH);
-		card.add(MapCompanionPanel.fill(MapCompanionPanel.bar(6, ColorScheme.DARKER_GRAY_COLOR, null,
+		card.add(MapCompanionPanel.fill(MapCompanionPanel.bar(6, DARKER_GRAY_COLOR, null,
 			wrapped(detail.verdict, TEXT_WIDTH - pin.getPreferredSize().width - 6, 13f, Color.WHITE), pinAtTop),
-			ColorScheme.DARKER_GRAY_COLOR));
+			DARKER_GRAY_COLOR));
 		card.add(inset(5));
 		card.add(note(detail.sinceLabel));
 		/* Two labels, not one with a <font size>: a size change in markup leaves RuneLite's font and its "·". */
@@ -432,15 +441,15 @@ final class DropLuckPanel extends JPanel
 			card.add(inset(3));
 			card.add(new Strip(detail.drierThan));
 			JPanel ends = new JPanel(new GridLayout(1, 3));
-			ends.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-			ends.add(small("Lucky", ColorScheme.LIGHT_GRAY_COLOR));
-			JLabel typical = small("Typical", ColorScheme.LIGHT_GRAY_COLOR);
+			ends.setBackground(DARKER_GRAY_COLOR);
+			ends.add(small("Lucky", LIGHT_GRAY_COLOR));
+			JLabel typical = small("Typical", LIGHT_GRAY_COLOR);
 			typical.setHorizontalAlignment(SwingConstants.CENTER);
 			ends.add(typical);
-			JLabel dry = small("Dry", ColorScheme.LIGHT_GRAY_COLOR);
+			JLabel dry = small("Dry", LIGHT_GRAY_COLOR);
 			dry.setHorizontalAlignment(SwingConstants.RIGHT);
 			ends.add(dry);
-			card.add(MapCompanionPanel.fill(ends, ColorScheme.DARKER_GRAY_COLOR));
+			card.add(MapCompanionPanel.fill(ends, DARKER_GRAY_COLOR));
 		}
 		if (detail.aheadLabel != null)
 		{
@@ -455,25 +464,25 @@ final class DropLuckPanel extends JPanel
 		}
 	}
 
-	private void buildList(List<LootLog.Monster> monsters, @Nullable String[] pin, long now)
+	private void buildList(List<Monster> monsters, @Nullable String[] pin, long now)
 	{
-		add(fill(MapCompanionPanel.bar(0, ColorScheme.DARK_GRAY_COLOR, small("Drop luck · your monsters", ColorScheme.LIGHT_GRAY_COLOR),
+		add(fill(MapCompanionPanel.bar(0, DARK_GRAY_COLOR, small("Drop luck · your monsters", LIGHT_GRAY_COLOR),
 			null, link("Close", () -> open(null, null)))));
 		add(space(4));
 		add(search);
 		add(space(4));
 		JPanel sorts = new JPanel(new GridLayout(1, 3, 2, 0));
-		sorts.setBackground(ColorScheme.DARK_GRAY_COLOR);
+		sorts.setBackground(DARK_GRAY_COLOR);
 		for (DropLuckView.Sort option : DropLuckView.Sort.values())
 		{
 			JButton button = new JButton(option.label);
-			button.setFont(button.getFont().deriveFont(11f));
+			refont(button, 11f);
 			button.setMargin(new Insets(1, 2, 1, 2));
 			button.setFocusable(false);
-			button.setForeground(option == sort ? Color.WHITE : ColorScheme.LIGHT_GRAY_COLOR);
+			button.setForeground(option == sort ? Color.WHITE : LIGHT_GRAY_COLOR);
 			if (option == sort)
 			{
-				button.setBorder(BorderFactory.createLineBorder(ColorScheme.BRAND_ORANGE));
+				button.setBorder(BorderFactory.createLineBorder(BRAND_ORANGE));
 			}
 			button.addActionListener(e ->
 			{
@@ -499,15 +508,15 @@ final class DropLuckPanel extends JPanel
 		results.repaint();
 	}
 
-	private void fillResults(List<LootLog.Monster> monsters, @Nullable String[] pin, long now)
+	private void fillResults(List<Monster> monsters, @Nullable String[] pin, long now)
 	{
 		results.removeAll();
 		String query = search.getText();
 		boolean searching = query != null && !query.trim().isEmpty();
-		LootLog.Monster pinnedMonster = pin == null ? null : DropLuckView.find(monsters, pin[0]);
+		Monster pinnedMonster = pin == null ? null : DropLuckView.find(monsters, pin[0]);
 		if (!searching && pinnedMonster != null)
 		{
-			for (LootLog.Drop drop : pinnedMonster.drops)
+			for (Drop drop : pinnedMonster.drops)
 			{
 				if (drop.item.equalsIgnoreCase(pin[1]))
 				{
@@ -517,35 +526,35 @@ final class DropLuckPanel extends JPanel
 				}
 			}
 		}
-		List<LootLog.Monster> shown = DropLuckView.list(monsters, query, sort);
+		List<Monster> shown = DropLuckView.list(monsters, query, sort);
 		results.add(section(searching ? shown.size() + " found"
 			: monsters.size() + (monsters.size() == 1 ? " monster tracked" : " monsters tracked")));
 		if (shown.isEmpty())
 		{
-			results.add(wrapped("Nothing tracked matches “" + query.trim() + "”.", WIDTH, 11f, ColorScheme.LIGHT_GRAY_COLOR));
+			results.add(wrapped("Nothing tracked matches “" + query.trim() + "”.", WIDTH, 11f, LIGHT_GRAY_COLOR));
 		}
-		for (LootLog.Monster monster : shown)
+		for (Monster monster : shown)
 		{
 			results.add(monsterRow(monster, now));
 		}
 	}
 
-	private JComponent pinnedRow(LootLog.Monster monster, LootLog.Drop drop)
+	private JComponent pinnedRow(Monster monster, Drop drop)
 	{
 		JPanel row = new JPanel(new BorderLayout(6, 0));
 		row.setBackground(ColorScheme.DARKER_GRAY_HOVER_COLOR);
-		row.setBorder(BorderFactory.createCompoundBorder(
-			new MatteBorder(0, 2, 0, 0, ColorScheme.BRAND_ORANGE), new EmptyBorder(3, 4, 3, 4)));
+		row.setBorder(new CompoundBorder(
+			new MatteBorder(0, 2, 0, 0, BRAND_ORANGE), new EmptyBorder(3, 4, 3, 4)));
 		row.add(new Picture(drop.itemId, 26, true, -1), BorderLayout.WEST);
 		JPanel words = column(ColorScheme.DARKER_GRAY_HOVER_COLOR);
-		words.add(wrapped(drop.item, ROW_TEXT_WIDTH, 12f, ColorScheme.BRAND_ORANGE));
+		words.add(wrapped(drop.item, ROW_TEXT_WIDTH, 12f, BRAND_ORANGE));
 		words.add(wrapped(monster.npc + " · " + DropOdds.count(drop.sinceLast) + " kills since last",
-			ROW_TEXT_WIDTH, 11f, ColorScheme.LIGHT_GRAY_COLOR));
+			ROW_TEXT_WIDTH, 11f, LIGHT_GRAY_COLOR));
 		row.add(words, BorderLayout.CENTER);
 		if (drop.oneIn != null)
 		{
 			int shown = DropOdds.shown(DropOdds.within(drop.rate(), drop.sinceKills()));
-			DropOdds.Luck luck = shown >= DropOdds.VERY ? DropOdds.Luck.VERY_DRY : shown >= DropOdds.NOTABLE ? DropOdds.Luck.DRY : DropOdds.Luck.NORMAL;
+			Luck luck = shown >= DropOdds.VERY ? Luck.VERY_DRY : shown >= DropOdds.NOTABLE ? Luck.DRY : Luck.NORMAL;
 			/* In a column of its own, so the chip keeps its height rather than filling the row's. */
 			JPanel side = column(ColorScheme.DARKER_GRAY_HOVER_COLOR);
 			JLabel chip = chip(luck);
@@ -558,18 +567,18 @@ final class DropLuckPanel extends JPanel
 		return row;
 	}
 
-	private JComponent monsterRow(LootLog.Monster monster, long now)
+	private JComponent monsterRow(Monster monster, long now)
 	{
-		JPanel row = column(ColorScheme.DARK_GRAY_COLOR);
-		row.setBorder(BorderFactory.createCompoundBorder(
-			new MatteBorder(1, 0, 0, 0, ColorScheme.DARKER_GRAY_COLOR), new EmptyBorder(5, 2, 5, 2)));
-		row.add(MapCompanionPanel.fill(MapCompanionPanel.bar(4, ColorScheme.DARK_GRAY_COLOR, null,
-			label(monster.npc, 12f, Color.WHITE), small(DropLuckView.listMeta(monster, now), ColorScheme.LIGHT_GRAY_COLOR)),
-			ColorScheme.DARK_GRAY_COLOR));
+		JPanel row = column(DARK_GRAY_COLOR);
+		row.setBorder(new CompoundBorder(
+			new MatteBorder(1, 0, 0, 0, DARKER_GRAY_COLOR), new EmptyBorder(5, 2, 5, 2)));
+		row.add(MapCompanionPanel.fill(MapCompanionPanel.bar(4, DARK_GRAY_COLOR, null,
+			label(monster.npc, 12f, Color.WHITE), small(DropLuckView.listMeta(monster, now), LIGHT_GRAY_COLOR)),
+			DARK_GRAY_COLOR));
 		JPanel icons = new JPanel(new FlowLayout(FlowLayout.LEFT, 3, 3));
-		icons.setBackground(ColorScheme.DARK_GRAY_COLOR);
+		icons.setBackground(DARK_GRAY_COLOR);
 		int shown = 0;
-		for (LootLog.Drop drop : monster.drops)
+		for (Drop drop : monster.drops)
 		{
 			if (shown++ >= 6)
 			{
@@ -579,16 +588,16 @@ final class DropLuckPanel extends JPanel
 			tile.setToolTipText(drop.item + ": " + DropOdds.count(drop.obtained));
 			icons.add(tile);
 		}
-		DropOdds.Luck dry = DropLuckView.dryNow(monster);
-		if (dry != DropOdds.Luck.NONE)
+		Luck dry = DropLuckView.dryNow(monster);
+		if (dry != Luck.NONE)
 		{
 			icons.add(chip(dry));
 		}
 		if (monster.drops.isEmpty())
 		{
-			icons.add(small("No notable drops yet", ColorScheme.LIGHT_GRAY_COLOR));
+			icons.add(small("No notable drops yet", LIGHT_GRAY_COLOR));
 		}
-		row.add(MapCompanionPanel.fill(icons, ColorScheme.DARK_GRAY_COLOR));
+		row.add(MapCompanionPanel.fill(icons, DARK_GRAY_COLOR));
 		MapCompanionPanel.capped(row);
 		clickable(row, () -> open(monster.npc, null));
 		return row;
@@ -597,13 +606,13 @@ final class DropLuckPanel extends JPanel
 	/** A card's grey line of small print. */
 	private static JLabel note(String text)
 	{
-		return wrapped(text, TEXT_WIDTH, 11f, ColorScheme.LIGHT_GRAY_COLOR);
+		return wrapped(text, TEXT_WIDTH, 11f, LIGHT_GRAY_COLOR);
 	}
 
 	/** Space between a card's lines, in the card's own grey. */
 	private static JPanel inset(int height)
 	{
-		return gap(height, ColorScheme.DARKER_GRAY_COLOR);
+		return gap(height, DARKER_GRAY_COLOR);
 	}
 
 	private void open(@Nullable String npc, @Nullable String item)
@@ -725,7 +734,7 @@ final class DropLuckPanel extends JPanel
 			g2.setColor(new Color(0x9ca3af));
 			g2.fillRect(x0 + half, y - 3, 1, 12);
 			int cx = x0 + (int) Math.round(w * at);
-			g2.setColor(ColorScheme.DARKER_GRAY_COLOR);
+			g2.setColor(DARKER_GRAY_COLOR);
 			g2.fillOval(cx - 7, y - 4, 14, 14);
 			g2.setColor(Color.WHITE);
 			g2.fillOval(cx - 5, y - 2, 10, 10);
@@ -733,13 +742,13 @@ final class DropLuckPanel extends JPanel
 		}
 	}
 
-	private static JLabel chip(DropOdds.Luck luck)
+	private static JLabel chip(Luck luck)
 	{
 		JLabel chip = new JLabel(luck.word == null ? "" : luck.word);
 		chip.setOpaque(true);
-		chip.setFont(chip.getFont().deriveFont(10f));
+		refont(chip, 10f);
 		chip.setBorder(new EmptyBorder(0, 4, 0, 4));
-		Color background = luck.lucky() ? LUCKY : luck == DropOdds.Luck.VERY_DRY ? VERY_DRY : luck.dry() ? DRY : NORMAL;
+		Color background = luck.lucky() ? LUCKY : luck == Luck.VERY_DRY ? VERY_DRY : luck.dry() ? DRY : NORMAL;
 		chip.setBackground(background);
 		chip.setForeground(new Color(0x18181b));
 		return chip;
@@ -779,14 +788,14 @@ final class DropLuckPanel extends JPanel
 
 	private JComponent link(String text, Runnable action)
 	{
-		JLabel link = small(text, ColorScheme.BRAND_ORANGE);
+		JLabel link = small(text, BRAND_ORANGE);
 		clickable(link, action);
 		return link;
 	}
 
 	private static JLabel section(String text)
 	{
-		JLabel label = small(text, ColorScheme.LIGHT_GRAY_COLOR);
+		JLabel label = small(text, LIGHT_GRAY_COLOR);
 		label.setBorder(new EmptyBorder(4, 0, 2, 0));
 		return label;
 	}
@@ -799,7 +808,7 @@ final class DropLuckPanel extends JPanel
 	private static JLabel label(String text, float size, Color color)
 	{
 		JLabel label = new JLabel(text);
-		label.setFont(label.getFont().deriveFont(size));
+		refont(label, size);
 		label.setForeground(color);
 		return label;
 	}
@@ -812,7 +821,7 @@ final class DropLuckPanel extends JPanel
 
 	private static JPanel card()
 	{
-		JPanel card = column(ColorScheme.DARKER_GRAY_COLOR);
+		JPanel card = column(DARKER_GRAY_COLOR);
 		card.setBorder(new EmptyBorder(7, 8, 8, 8));
 		return card;
 	}
@@ -820,11 +829,11 @@ final class DropLuckPanel extends JPanel
 	/** A gap in the page's colour, where the panel's own gap takes the colour it sits on. */
 	private static JPanel space(int height)
 	{
-		return gap(height, ColorScheme.DARK_GRAY_COLOR);
+		return gap(height, DARK_GRAY_COLOR);
 	}
 
 	private static JComponent fill(JComponent component)
 	{
-		return MapCompanionPanel.fill(component, ColorScheme.DARK_GRAY_COLOR);
+		return MapCompanionPanel.fill(component, DARK_GRAY_COLOR);
 	}
 }

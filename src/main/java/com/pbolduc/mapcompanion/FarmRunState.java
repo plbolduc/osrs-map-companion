@@ -36,6 +36,9 @@ import java.util.Objects;
 import java.util.Set;
 import javax.annotation.Nullable;
 import net.runelite.api.coords.WorldPoint;
+import static com.pbolduc.mapcompanion.PortTaskReader.Slot;
+import static com.pbolduc.mapcompanion.RelayResponse.FarmRun;
+import static com.pbolduc.mapcompanion.RelayResponse.FarmStop;
 
 /**
  * Progress through one received run, from local evidence rather than being near a patch.
@@ -64,7 +67,7 @@ final class FarmRunState
 	static final long RETENTION_MS = 3 * 60 * 60_000L;
 	static final int HERE = 8;
 
-	private RelayResponse.FarmRun run;
+	private FarmRun run;
 	private String member;
 	private long revision;
 	private long generation;
@@ -85,12 +88,12 @@ final class FarmRunState
 	/** The task each slot held when this run's slots were first read; null until then. */
 	private Map<Integer, Integer> heldAtStart;
 	/** Each slot's last reading while it held a task, by slot; see {@link #tick(RelayResponse.RunTask, List, PortTaskReader.Slot)}. */
-	private final Map<Integer, PortTaskReader.Slot> lastHeld = new HashMap<>();
+	private final Map<Integer, Slot> lastHeld = new HashMap<>();
 	private boolean changed;
 
 	static final class View
 	{
-		final RelayResponse.FarmRun run;
+		final FarmRun run;
 		final Set<Integer> done;
 		final Set<Integer> visited;
 		final Set<Integer> here;
@@ -101,13 +104,13 @@ final class FarmRunState
 		/** A port-task run whose task slots no longer match what it was planned from. */
 		final boolean changed;
 
-		View(RelayResponse.FarmRun run, Set<Integer> done, Set<Integer> visited, Set<Integer> here,
+		View(FarmRun run, Set<Integer> done, Set<Integer> visited, Set<Integer> here,
 			 boolean following, long generation, long revision, @Nullable List<String> carried)
 		{
 			this(run, done, visited, here, following, generation, revision, carried, false);
 		}
 
-		View(RelayResponse.FarmRun run, Set<Integer> done, Set<Integer> visited, Set<Integer> here,
+		View(FarmRun run, Set<Integer> done, Set<Integer> visited, Set<Integer> here,
 			 boolean following, long generation, long revision, @Nullable List<String> carried, boolean changed)
 		{
 			this.changed = changed;
@@ -122,9 +125,9 @@ final class FarmRunState
 		}
 
 		@Nullable
-		RelayResponse.FarmStop next()
+		FarmStop next()
 		{
-			for (RelayResponse.FarmStop stop : run.stops)
+			for (FarmStop stop : run.stops)
 				if (!done.contains(stop.n) && !visited.contains(stop.n))
 				{
 					return stop;
@@ -135,7 +138,7 @@ final class FarmRunState
 		int tracked()
 		{
 			int count = 0;
-			for (RelayResponse.FarmStop stop : run.stops)
+			for (FarmStop stop : run.stops)
 				if (FarmRunState.tracked(stop))
 				{
 					count++;
@@ -146,7 +149,7 @@ final class FarmRunState
 		int trackedDone()
 		{
 			int count = 0;
-			for (RelayResponse.FarmStop stop : run.stops)
+			for (FarmStop stop : run.stops)
 				if (FarmRunState.tracked(stop) && done.contains(stop.n))
 				{
 					count++;
@@ -156,13 +159,13 @@ final class FarmRunState
 	}
 
 	/** True only for a stop with evidence to wait for; other stops are route references. */
-	static boolean tracked(RelayResponse.FarmStop stop)
+	static boolean tracked(FarmStop stop)
 	{
 		return !stop.patchIds.isEmpty() || stop.birdhouseId != null || ported(stop);
 	}
 
 	/** A port-task stop: ticked by task slots, never by patches or by position. */
-	static boolean ported(RelayResponse.FarmStop stop)
+	static boolean ported(FarmStop stop)
 	{
 		return stop.tasks != null && !stop.tasks.isEmpty();
 	}
@@ -179,12 +182,12 @@ final class FarmRunState
 	 *             task was last seen with nothing left to do but hand it over: every crate loaded, or
 	 *             every part collected. Otherwise it was abandoned, and the run has changed.
 	 */
-	static Tick tick(RelayResponse.RunTask tick, @Nullable List<PortTaskReader.Slot> slots, @Nullable PortTaskReader.Slot last)
+	static Tick tick(RelayResponse.RunTask tick, @Nullable List<Slot> slots, @Nullable Slot last)
 	{
-		PortTaskReader.Slot slot = null;
+		Slot slot = null;
 		if (slots != null)
 		{
-			for (PortTaskReader.Slot candidate : slots)
+			for (Slot candidate : slots)
 				if (candidate.slot == tick.slot)
 				{
 					slot = candidate;
@@ -237,7 +240,7 @@ final class FarmRunState
 		}
 	}
 
-	synchronized boolean acceptFor(String incomingMember, @Nullable String incomingEpoch, @Nullable RelayResponse.FarmRun incoming, long incomingRevision, long now)
+	synchronized boolean acceptFor(String incomingMember, @Nullable String incomingEpoch, @Nullable FarmRun incoming, long incomingRevision, long now)
 	{
 		if (!scope(incomingMember, incomingEpoch))
 		{
@@ -268,7 +271,7 @@ final class FarmRunState
 	}
 
 	/** An explicit new plan's reply can replace a cancelled initial plan even after a failed End. */
-	synchronized boolean acceptPlannedFor(String incomingMember, @Nullable String incomingEpoch, RelayResponse.FarmRun incoming, long incomingRevision, long now)
+	synchronized boolean acceptPlannedFor(String incomingMember, @Nullable String incomingEpoch, FarmRun incoming, long incomingRevision, long now)
 	{
 		if (!scope(incomingMember, incomingEpoch))
 		{
@@ -282,7 +285,7 @@ final class FarmRunState
 		return true;
 	}
 
-	synchronized void accept(@Nullable RelayResponse.FarmRun incoming, long incomingRevision, long now)
+	synchronized void accept(@Nullable FarmRun incoming, long incomingRevision, long now)
 	{
 		if (incomingRevision <= revision || incomingRevision <= 0)
 		{
@@ -293,7 +296,7 @@ final class FarmRunState
 			return;
 		}
 		revision = incomingRevision;
-		RelayResponse.FarmRun clean = FarmRunWire.normalize(incoming);
+		FarmRun clean = FarmRunWire.normalize(incoming);
 		if (clean == null)
 		{
 			endingUnknown = false;
@@ -316,8 +319,8 @@ final class FarmRunState
 			// Reroute can give an unfinished stop another ordinal. Only the same stop keeps a visit.
 			Set<Integer> keepDone = new HashSet<>();
 			Set<Integer> keepVisited = new HashSet<>();
-			for (RelayResponse.FarmStop stop : clean.stops)
-				for (RelayResponse.FarmStop old : run.stops)
+			for (FarmStop stop : clean.stops)
+				for (FarmStop old : run.stops)
 					if (stop.n == old.n && identity(stop).equals(identity(old)))
 					{
 						if (done.contains(stop.n))
@@ -335,7 +338,7 @@ final class FarmRunState
 		}
 		run = clean;
 		changedAt = now;
-		for (RelayResponse.FarmStop stop : clean.stops)
+		for (FarmStop stop : clean.stops)
 		{
 			if (stop.done)
 			{
@@ -395,7 +398,7 @@ final class FarmRunState
 		boolean charting = FarmRunWire.SEA_CHARTS.equals(run.kind);
 		if (where != null)
 		{
-			for (RelayResponse.FarmStop stop : run.stops)
+			for (FarmStop stop : run.stops)
 			{
 				if (where.distanceTo(point(stop)) <= HERE)
 				{
@@ -419,7 +422,7 @@ final class FarmRunState
 	 * now; nothing is ticked or changed by a missing reading. A later stop whose ticks are all met
 	 * ticks too, so a counter that jumped past a stop does not hold the run on it.
 	 */
-	synchronized void observePorts(@Nullable List<PortTaskReader.Slot> slots)
+	synchronized void observePorts(@Nullable List<Slot> slots)
 	{
 		if (run == null || slots == null || run.stops.stream().noneMatch(FarmRunState::ported))
 		{
@@ -428,14 +431,14 @@ final class FarmRunState
 		if (heldAtStart == null)
 		{
 			heldAtStart = new HashMap<>();
-			for (PortTaskReader.Slot slot : slots)
+			for (Slot slot : slots)
 			{
 				heldAtStart.put(slot.slot, slot.held() ? slot.taskId : null);
 			}
 		}
 		boolean now = false;
 		Set<Integer> named = new HashSet<>();
-		for (RelayResponse.FarmStop stop : run.stops)
+		for (FarmStop stop : run.stops)
 		{
 			if (!ported(stop))
 			{
@@ -445,7 +448,7 @@ final class FarmRunState
 			for (RelayResponse.RunTask task : stop.tasks)
 			{
 				named.add(task.taskId);
-				PortTaskReader.Slot last = lastHeld.get(task.slot);
+				Slot last = lastHeld.get(task.slot);
 				Tick at = tick(task, slots, last != null && last.taskId != null && last.taskId == task.taskId ? last : null);
 				all &= at == Tick.REACHED;
 				now |= at == Tick.GONE && !done.contains(stop.n);
@@ -455,14 +458,14 @@ final class FarmRunState
 				done.add(stop.n);
 			}
 		}
-		for (PortTaskReader.Slot slot : slots)
+		for (Slot slot : slots)
 		{
 			if (slot.held())
 			{
 				lastHeld.put(slot.slot, slot);
 			}
 		}
-		for (PortTaskReader.Slot slot : slots)
+		for (Slot slot : slots)
 		{
 			// A task taken since the run was read, that the run has no stop for.
 			if (slot.held() && slot.taskId != null && !named.contains(slot.taskId)
@@ -480,7 +483,7 @@ final class FarmRunState
 		{
 			return;
 		}
-		for (RelayResponse.FarmStop stop : run.stops)
+		for (FarmStop stop : run.stops)
 			if (tracked(stop) && !ported(stop) && (stop.patchIds.isEmpty() || patches.containsAll(stop.patchIds))
 				&& (stop.birdhouseId == null || birdhouses.contains(stop.birdhouseId)))
 			{
@@ -567,12 +570,12 @@ final class FarmRunState
 		here.clear();
 	}
 
-	static WorldPoint point(RelayResponse.FarmStop stop)
+	static WorldPoint point(FarmStop stop)
 	{
 		return new WorldPoint(stop.tile.x, stop.tile.y, stop.tile.plane == null ? 0 : stop.tile.plane);
 	}
 
-	private static String identity(RelayResponse.FarmStop stop)
+	private static String identity(FarmStop stop)
 	{
 		StringBuilder ticks = new StringBuilder();
 		if (stop.tasks != null)

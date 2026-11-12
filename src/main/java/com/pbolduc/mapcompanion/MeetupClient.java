@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
@@ -130,7 +129,7 @@ final class MeetupClient
 		}
 	}
 
-	@AllArgsConstructor(access = AccessLevel.PACKAGE)
+	@AllArgsConstructor
 	static final class Answer
 	{
 		final String eventId;

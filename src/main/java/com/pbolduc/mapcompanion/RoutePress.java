@@ -173,7 +173,7 @@ final class RoutePress
 	}
 
 	/** The picture of the destination the last answered press made, by that destination's key. */
-	@AllArgsConstructor(access = AccessLevel.PACKAGE)
+	@AllArgsConstructor
 	private static final class Shown
 	{
 		final String key;
@@ -182,7 +182,7 @@ final class RoutePress
 	}
 
 	/** What the last press said, for the sidebar. Never changes after it is made. */
-	@AllArgsConstructor(access = AccessLevel.PACKAGE)
+	@AllArgsConstructor
 	static final class Said
 	{
 		final String source;
@@ -244,14 +244,14 @@ final class RoutePress
 	}
 
 	/** A clue step by its words or its scroll, which the map turns into a place with its own clue table. */
-	@AllArgsConstructor(access = AccessLevel.PACKAGE)
+	@AllArgsConstructor
 	static final class ClueTarget
 	{
 		final CompanionSnapshot.Clue clue;
 	}
 
 	/** A public place, by the id the map's own search gave it. */
-	@AllArgsConstructor(access = AccessLevel.PACKAGE)
+	@AllArgsConstructor
 	static final class PlaceId
 	{
 		final String id;

@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
+import static com.pbolduc.mapcompanion.RouteWire.text;
 
 /** The site's ranked answer, bounded and cleaned independently of the surrounding reply. */
 final class SlayerWire
@@ -54,13 +55,13 @@ final class SlayerWire
 	@Nullable
 	static RelayResponse.SlayerOptions normalize(@Nullable RelayResponse.SlayerOptions value)
 	{
-		if (value == null || RouteWire.text(value.taskName, 100) == null || value.rows == null
+		if (value == null || text(value.taskName, 100) == null || value.rows == null
 			|| !Arrays.asList("best", "single").contains(value.order))
 		{
 			return null;
 		}
-		value.taskName = RouteWire.text(value.taskName, 100);
-		value.areaName = RouteWire.text(value.areaName, 100);
+		value.taskName = text(value.taskName, 100);
+		value.areaName = text(value.areaName, 100);
 		List<RelayResponse.SlayerSpot> rows = new ArrayList<>();
 		Set<String> ids = new HashSet<>();
 		for (RelayResponse.SlayerSpot row : RouteWire.first(value.rows, MAX_SPOTS))
@@ -71,7 +72,7 @@ final class SlayerWire
 			{
 				continue;
 			}
-			row.name = RouteWire.text(row.name, 120);
+			row.name = text(row.name, 120);
 			row.target = RouteWire.tile(row.target);
 			if (row.name == null || row.target == null)
 			{
@@ -87,12 +88,12 @@ final class SlayerWire
 			List<RelayResponse.SlayerAsk> asks = new ArrayList<>();
 			for (RelayResponse.SlayerAsk ask : RouteWire.first(row.asks, 24))
 			{
-				if (ask == null || (ask.text = RouteWire.text(ask.text, 200)) == null)
+				if (ask == null || (ask.text = text(ask.text, 200)) == null)
 				{
 					continue;
 				}
 				ask.tier = tier(ask.tier);
-				ask.skill = RouteWire.text(ask.skill, 24);
+				ask.skill = text(ask.skill, 24);
 				asks.add(ask);
 			}
 			row.asks = asks;
@@ -101,30 +102,30 @@ final class SlayerWire
 		value.rows = rows;
 		value.ranked = Math.max(0, Math.min(10_000, value.ranked));
 		value.hiddenWilderness = Math.max(0, Math.min(10_000, value.hiddenWilderness));
-		value.rate = RouteWire.text(value.rate, 300);
-		value.page = RouteWire.text(value.page, 160);
-		value.note = RouteWire.text(value.note, 300);
+		value.rate = text(value.rate, 300);
+		value.page = text(value.page, 160);
+		value.note = text(value.note, 300);
 		value.notes = words(value.notes, 12, 300);
 		List<RelayResponse.SlayerKind> kinds = new ArrayList<>();
 		for (RelayResponse.SlayerKind kind : RouteWire.first(value.kinds, MAX_KINDS))
 		{
-			if (kind == null || (kind.name = RouteWire.text(kind.name, 100)) == null)
+			if (kind == null || (kind.name = text(kind.name, 100)) == null)
 			{
 				continue;
 			}
-			kind.facts = RouteWire.text(kind.facts, 200);
-			kind.best = RouteWire.text(kind.best, 160);
+			kind.facts = text(kind.facts, 200);
+			kind.best = text(kind.best, 160);
 			kinds.add(kind);
 		}
 		value.kinds = kinds;
 		List<RelayResponse.SlayerBoss> bosses = new ArrayList<>();
 		for (RelayResponse.SlayerBoss boss : RouteWire.first(value.bosses, 32))
 		{
-			if (boss == null || (boss.name = RouteWire.text(boss.name, 100)) == null)
+			if (boss == null || (boss.name = text(boss.name, 100)) == null)
 			{
 				continue;
 			}
-			boss.where = RouteWire.text(boss.where, 160);
+			boss.where = text(boss.where, 160);
 			boss.entrance = RouteWire.tile(boss.entrance);
 			if (boss.entrance != null && boss.entrance.plane == null)
 			{
@@ -145,7 +146,7 @@ final class SlayerWire
 		List<String> result = new ArrayList<>();
 		for (String value : RouteWire.first(values, count))
 		{
-			String clean = RouteWire.text(value, length);
+			String clean = text(value, length);
 			if (clean != null)
 			{
 				result.add(clean);

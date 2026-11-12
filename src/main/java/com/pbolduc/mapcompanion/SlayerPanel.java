@@ -46,6 +46,8 @@ import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.util.LinkBrowser;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.linkButton;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.refont;
 
 /**
  * The website's ranked places in the sidebar, with one local remaining count.
@@ -221,7 +223,7 @@ final class SlayerPanel extends JPanel
 			{
 				body.add(line(note, MUTED));
 			}
-			JButton more = MapCompanionPanel.linkButton(expanded ? "▾ Show less" : "▸ " + (shown.rows.size() > visible ? "All " + shown.rows.size() + " places & options" : "Options & what counts"));
+			JButton more = linkButton(expanded ? "▾ Show less" : "▸ " + (shown.rows.size() > visible ? "All " + shown.rows.size() + " places & options" : "Options & what counts"));
 			more.setName("slayer.expand");
 			more.addActionListener(e -> { expanded = !expanded; render(); refresh(connected); });
 			body.add(more);
@@ -233,7 +235,7 @@ final class SlayerPanel extends JPanel
 				order.setRenderer((list, value, index, selected, focused) -> names.getListCellRendererComponent(list,
 					index < 0 && value != null ? "Order: " + value : value, index, selected, focused));
 				order.setSelectedIndex("single".equals(shownOrder) ? 1 : 0);
-				order.setFont(order.getFont().deriveFont(11f));
+				refont(order, 11f);
 				order.setPreferredSize(new java.awt.Dimension(WIDTH, order.getPreferredSize().height));
 				order.setName("slayer.order");
 				order.setToolTipText(Words.of("slayer.orderTip"));
@@ -242,10 +244,10 @@ final class SlayerPanel extends JPanel
 				JCheckBox wilderness = new JCheckBox("Hide Wilderness", shownHide);
 				wilderness.setName("slayer.hideWilderness");
 				wilderness.setOpaque(false);
-				wilderness.setFont(wilderness.getFont().deriveFont(11f));
+				refont(wilderness, 11f);
 				wilderness.addActionListener(e -> choose(config.slayerOrder(), wilderness.isSelected()));
 				body.add(wilderness);
-				JButton kinds = MapCompanionPanel.linkButton((kindsOpen ? "▾ " : "▸ ") + shown.kinds.size() + (shown.kinds.size() == 1 ? " kind counts" : " kinds count"));
+				JButton kinds = linkButton((kindsOpen ? "▾ " : "▸ ") + shown.kinds.size() + (shown.kinds.size() == 1 ? " kind counts" : " kinds count"));
 				kinds.setName("slayer.kinds");
 				kinds.addActionListener(e -> { kindsOpen = !kindsOpen; render(); refresh(connected); });
 				body.add(kinds);
@@ -281,7 +283,7 @@ final class SlayerPanel extends JPanel
 					body.add(line("Wiki XP/h: " + shown.rate, MUTED));
 				}
 			}
-			JButton wiki = MapCompanionPanel.linkButton("OSRS Wiki ↗");
+			JButton wiki = linkButton("OSRS Wiki ↗");
 			wiki.setToolTipText(Words.of("slayer.wikiTip"));
 			wiki.addActionListener(e -> LinkBrowser.browse(wikiUrl(shown.page)));
 			body.add(wiki);
@@ -291,8 +293,8 @@ final class SlayerPanel extends JPanel
 			 */
 			if (expanded)
 			{
-				JButton license = MapCompanionPanel.linkButton("CC BY-NC-SA 3.0 ↗");
-				license.setFont(license.getFont().deriveFont(10f));
+				JButton license = linkButton("CC BY-NC-SA 3.0 ↗");
+				refont(license, 10f);
 				license.setToolTipText(Words.of("slayer.licenceTip"));
 				license.addActionListener(e -> LinkBrowser.browse("https://creativecommons.org/licenses/by-nc-sa/3.0/"));
 				body.add(license);
@@ -306,7 +308,7 @@ final class SlayerPanel extends JPanel
 	{
 		boolean blocked = "unmet".equals(spot.tier);
 		JLabel title = line(spot.rank + ". " + spot.name, blocked ? MUTED : Color.WHITE);
-		title.setFont(title.getFont().deriveFont(Font.BOLD));
+		refont(title, Font.BOLD);
 		title.setBorder(BorderFactory.createEmptyBorder(7, 0, 0, 0));
 		body.add(title);
 		if (spot.bestForYou)

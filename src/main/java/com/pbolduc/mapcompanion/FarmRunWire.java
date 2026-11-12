@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
+import static com.pbolduc.mapcompanion.RouteWire.text;
 
 /**
  * The map's ordered run, bounded independently of the envelope it arrived in.
@@ -143,7 +144,7 @@ final class FarmRunWire
 		{
 			return null;
 		}
-		String name = RouteWire.text(run.name, 60);
+		String name = text(run.name, 60);
 		if (name == null)
 		{
 			return null;
@@ -178,7 +179,7 @@ final class FarmRunWire
 				{
 					continue;
 				}
-				String item = RouteWire.text(line.name, 80);
+				String item = text(line.name, 80);
 				if (item == null)
 				{
 					continue;
@@ -186,7 +187,7 @@ final class FarmRunWire
 				RelayResponse.FarmBring kept = new RelayResponse.FarmBring();
 				kept.kind = line.kind;
 				kept.name = item;
-				kept.note = RouteWire.text(line.note, 120);
+				kept.note = text(line.note, 120);
 				kept.uses = line.uses != null && line.uses >= 1 && line.uses <= MAX_STOPS ? line.uses : null;
 				clean.bring.add(kept);
 			}
@@ -201,7 +202,7 @@ final class FarmRunWire
 		{
 			return null;
 		}
-		String name = RouteWire.text(stop.name, MAX_STOP_NAME);
+		String name = text(stop.name, MAX_STOP_NAME);
 		RelayResponse.RouteTile tile = RouteWire.tile(stop.tile);
 		if (name == null || tile == null)
 		{
@@ -225,8 +226,8 @@ final class FarmRunWire
 		}
 		clean.birdhouseId = stop.birdhouseId != null && stop.birdhouseId.length() <= 40
 							&& PATCH.matcher(stop.birdhouseId).matches() ? stop.birdhouseId : null;
-		clean.method = RouteWire.text(stop.method, 120);
-		clean.item = RouteWire.text(stop.item, 80);
+		clean.method = text(stop.method, 120);
+		clean.item = text(stop.item, 80);
 		clean.costTiles = Math.max(0, stop.costTiles);
 		clean.tasks = RouteWire.cleaned(stop.tasks, MAX_TICKS, FarmRunWire::tick);
 		clean.voyage = RouteWire.voyage(stop.voyage);
@@ -240,7 +241,7 @@ final class FarmRunWire
 	@Nullable
 	private static RelayResponse.RunTask tick(@Nullable RelayResponse.RunTask tick)
 	{
-		String text = tick == null ? null : RouteWire.text(tick.text, 120);
+		String text = tick == null ? null : text(tick.text, 120);
 		if (text == null || tick.slot < 0 || tick.slot >= PortTaskReader.SLOT_IDS.length || tick.taskId <= 0 || tick.taskId > 100_000
 			|| !COUNTERS.contains(tick.counter) || tick.n < 0 || tick.n > 255)
 		{

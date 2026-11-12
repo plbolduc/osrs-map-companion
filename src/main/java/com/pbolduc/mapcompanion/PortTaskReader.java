@@ -33,7 +33,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import net.runelite.api.Client;
 import net.runelite.api.ItemComposition;
@@ -110,7 +109,7 @@ public class PortTaskReader extends SettlingReader
 	static final String UNKNOWN = "unknown";
 
 	/** One slot as the sidebar draws it. Immutable, so the panel can read it off the client thread. */
-	@AllArgsConstructor(access = AccessLevel.PACKAGE)
+	@AllArgsConstructor
 	static final class Slot
 	{
 		final int slot;
@@ -152,7 +151,7 @@ public class PortTaskReader extends SettlingReader
 	}
 
 	/** What the client's tables say about one task id; read once a session and kept. */
-	@AllArgsConstructor(access = AccessLevel.PACKAGE)
+	@AllArgsConstructor
 	private static final class Task
 	{
 		final int row;

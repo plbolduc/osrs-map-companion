@@ -41,6 +41,7 @@ import lombok.EqualsAndHashCode;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.ui.overlay.worldmap.WorldMapPointManager;
+import static com.pbolduc.mapcompanion.RelayResponse.MemberDot;
 
 /**
  * The other members of your group, on the game's own world map.
@@ -96,13 +97,13 @@ public class GroupMarkers
 	}
 
 	/** Replace what is drawn with these members. Null is "not asked", which changes nothing. */
-	synchronized void show(@Nullable List<RelayResponse.MemberDot> members)
+	synchronized void show(@Nullable List<MemberDot> members)
 	{
 		if (members == null)
 		{
 			return;
 		}
-		List<RelayResponse.MemberDot> copy = new ArrayList<>(members);
+		List<MemberDot> copy = new ArrayList<>(members);
 		long frameRevision = ++revision;
 		clientThread.invoke(() ->
 		{
@@ -141,10 +142,10 @@ public class GroupMarkers
 		return drawn.size();
 	}
 
-	private void showNow(List<RelayResponse.MemberDot> members)
+	private void showNow(List<MemberDot> members)
 	{
 		Set<String> seen = new HashSet<>();
-		for (RelayResponse.MemberDot dot : members)
+		for (MemberDot dot : members)
 		{
 			if (seen.size() >= MAX_MEMBERS)
 			{
@@ -209,7 +210,7 @@ public class GroupMarkers
 		final boolean stale;
 		final String tooltip;
 
-		static Look of(RelayResponse.MemberDot dot)
+		static Look of(MemberDot dot)
 		{
 			String name = MapPin.safe(dot.name);
 			if (name.isEmpty())
@@ -220,7 +221,7 @@ public class GroupMarkers
 		}
 
 		/** "Zezima · W302", then what the dot cannot say on its own. */
-		static String tooltip(String name, RelayResponse.MemberDot dot)
+		static String tooltip(String name, MemberDot dot)
 		{
 			StringBuilder text = new StringBuilder(name);
 			if (dot.world != null)
@@ -243,7 +244,7 @@ public class GroupMarkers
 		}
 	}
 
-	@AllArgsConstructor(access = AccessLevel.PACKAGE)
+	@AllArgsConstructor
 	private static final class Drawn
 	{
 		final MapPin pin;

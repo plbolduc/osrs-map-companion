@@ -40,6 +40,11 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import net.runelite.client.ui.ColorScheme;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.label;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.column;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.setWrapped;
+import static com.pbolduc.mapcompanion.RelayResponse.RouteOption;
+import static com.pbolduc.mapcompanion.RelayResponse.RouteStep;
+import static net.runelite.client.ui.ColorScheme.DARKER_GRAY_COLOR;
 
 /**
  * The way to a destination, step by step, inside the destination's card.
@@ -97,10 +102,10 @@ final class RouteStepsView extends JPanel
 	private final GameSprites sprites;
 	private final JLabel way = label(11f, AHEAD);
 	private final JLabel origin = label(11f, AHEAD);
-	private final JPanel steps = MapCompanionPanel.column(ColorScheme.DARKER_GRAY_COLOR);
+	private final JPanel steps = column(DARKER_GRAY_COLOR);
 	private final JLabel arrived = label(11f, MapPin.AMBER);
 	private final JButton others = MapCompanionPanel.linkButton("");
-	private final JPanel otherWays = MapCompanionPanel.column(ColorScheme.DARKER_GRAY_COLOR);
+	private final JPanel otherWays = column(DARKER_GRAY_COLOR);
 	private final JLabel message = label(11f, AHEAD);
 	private final JLabel boat = label(11f, UNMET);
 	private final JLabel drawn = label(11f, AHEAD);
@@ -126,7 +131,7 @@ final class RouteStepsView extends JPanel
 	{
 		this.choose = choose;
 		this.sprites = sprites;
-		MapCompanionPanel.column(this, ColorScheme.DARKER_GRAY_COLOR);
+		column(this, DARKER_GRAY_COLOR);
 		add(way);
 		add(origin);
 		add(steps);
@@ -175,7 +180,7 @@ final class RouteStepsView extends JPanel
 	@Nullable
 	Integer tiles()
 	{
-		RelayResponse.RouteOption current = shown == null ? null : shown.way();
+		RouteOption current = shown == null ? null : shown.way();
 		return current == null ? null : current.tiles;
 	}
 
@@ -197,24 +202,24 @@ final class RouteStepsView extends JPanel
 		{
 			return;
 		}
-		RelayResponse.RouteOption current = view.way();
+		RouteOption current = view.way();
 		/* Arrived: the route has done its work, and one line in the way's place says so. */
 		boolean there = view.arrived();
 		String line = currentWayLine(current, view.steps());
 		way.setVisible(!there && !line.isEmpty());
-		MapCompanionPanel.setWrapped(way, line, WIDTH);
+		setWrapped(way, line, WIDTH);
 
 		boolean nowhere = view.origin == null && !view.rerouted;
 		origin.setVisible(nowhere && !there);
-		MapCompanionPanel.setWrapped(origin, Words.of("steps.noOrigin"), WIDTH);
+		setWrapped(origin, Words.of("steps.noOrigin"), WIDTH);
 
 		steps.setVisible(!there);
 		steps.removeAll();
-		List<RelayResponse.RouteStep> list = view.steps();
+		List<RouteStep> list = view.steps();
 		int sails = sailingRow(current);
 		/* The picture's place is kept on every step once one has a picture, so the words start at one x. */
 		boolean slot = false;
-		for (RelayResponse.RouteStep step : list)
+		for (RouteStep step : list)
 		{
 			slot |= sprites != null && (step.itemId != null || step.spriteId != null);
 		}
@@ -227,7 +232,7 @@ final class RouteStepsView extends JPanel
 		MapCompanionPanel.show(boat, view.boatAway == null ? null : boatAwayLine(view.boatAway), WIDTH);
 
 		arrived.setVisible(there);
-		MapCompanionPanel.setWrapped(arrived, "Arrived", WIDTH);
+		setWrapped(arrived, "Arrived", WIDTH);
 
 		int more = view.ways.size() - 1;
 		others.setVisible(more > 0 && !there);
@@ -249,7 +254,7 @@ final class RouteStepsView extends JPanel
 				continue;
 			}
 			int index = i;
-			RelayResponse.RouteOption option = view.ways.get(i);
+			RouteOption option = view.ways.get(i);
 			JButton pick = MapCompanionPanel.linkButton(otherLine(option));
 			pick.setForeground(option.blocked ? DONE : Color.WHITE);
 			pick.setToolTipText("Show this way's steps instead");
@@ -289,7 +294,7 @@ final class RouteStepsView extends JPanel
 	 * @param slot whether every step of the way keeps a picture's place
 	 * @param gates a voyage's docking gates, under the row that sails, or null
 	 */
-	private static JComponent step(int index, RelayResponse.RouteStep step, int place, boolean slot,
+	private static JComponent step(int index, RouteStep step, int place, boolean slot,
 		@Nullable GameSprites sprites, @Nullable List<RelayResponse.Gate> gates)
 	{
 		/* The digit alone, in the amber of the current step's pin on the world map. */
@@ -300,8 +305,8 @@ final class RouteStepsView extends JPanel
 		JLabel title = label(12f, place == 0 ? Color.WHITE : place < 0 ? DONE : AHEAD);
 		if (place == 0)
 		{
-			number.setFont(number.getFont().deriveFont(Font.BOLD));
-			title.setFont(title.getFont().deriveFont(Font.BOLD));
+			MapCompanionPanel.refont(number, Font.BOLD);
+			MapCompanionPanel.refont(title, Font.BOLD);
 			title.setToolTipText("The step you are on");
 		}
 		Dimension column = new Dimension(NUMBER, number.getPreferredSize().height);
@@ -319,11 +324,11 @@ final class RouteStepsView extends JPanel
 			}
 			/* Faded behind the current step, as the world map fades the pins of steps done. */
 			picture.setEnabled(place >= 0);
-			lead = MapCompanionPanel.bar(PICTURE_GAP, ColorScheme.DARKER_GRAY_COLOR, number, picture, null);
+			lead = MapCompanionPanel.bar(PICTURE_GAP, DARKER_GRAY_COLOR, number, picture, null);
 		}
 		int width = WIDTH - NUMBER - PICTURE_GAP - (slot ? PICTURE + PICTURE_GAP : 0);
-		JPanel words = MapCompanionPanel.column(ColorScheme.DARKER_GRAY_COLOR);
-		MapCompanionPanel.setWrapped(title, step.title, width);
+		JPanel words = column(DARKER_GRAY_COLOR);
+		setWrapped(title, step.title, width);
 		words.add(title);
 		if (place >= 0 && step.detail != null)
 		{
@@ -348,7 +353,7 @@ final class RouteStepsView extends JPanel
 				words.add(said);
 			}
 		}
-		JPanel row = MapCompanionPanel.bar(PICTURE_GAP, ColorScheme.DARKER_GRAY_COLOR, lead, words, null);
+		JPanel row = MapCompanionPanel.bar(PICTURE_GAP, DARKER_GRAY_COLOR, lead, words, null);
 		row.setBorder(new EmptyBorder(3, 0, 0, 0));
 		return MapCompanionPanel.left(row);
 	}
@@ -364,24 +369,24 @@ final class RouteStepsView extends JPanel
 	 * whether or not it does. A way not open yet has its picture drawn disabled, which the look and
 	 * feel greys and dims as it does any control that cannot be used; its words are already grey.
 	 */
-	private static JComponent led(RelayResponse.RouteOption option, JButton pick, GameSprites sprites)
+	private static JComponent led(RouteOption option, JButton pick, GameSprites sprites)
 	{
 		JLabel picture = pictureSlot();
 		picture.setName("route.way.picture");
-		RelayResponse.RouteStep shows = firstPictured(option.steps);
+		RouteStep shows = firstPictured(option.steps);
 		if (shows != null)
 		{
 			draw(picture, shows, sprites);
 		}
 		picture.setEnabled(!option.blocked);
-		return MapCompanionPanel.left(MapCompanionPanel.bar(PICTURE_GAP, ColorScheme.DARKER_GRAY_COLOR, picture, pick, null));
+		return MapCompanionPanel.left(MapCompanionPanel.bar(PICTURE_GAP, DARKER_GRAY_COLOR, picture, pick, null));
 	}
 
 	/** The first step with the game's picture of what to click, or null when none has one: a way's or a run stop's. */
 	@Nullable
-	static RelayResponse.RouteStep firstPictured(List<RelayResponse.RouteStep> steps)
+	static RouteStep firstPictured(List<RouteStep> steps)
 	{
-		for (RelayResponse.RouteStep step : steps)
+		for (RouteStep step : steps)
 		{
 			if (step.itemId != null || step.spriteId != null)
 			{
@@ -408,7 +413,7 @@ final class RouteStepsView extends JPanel
 	}
 
 	/** A step's own picture: its item's sprite, or its spell's icon. */
-	static void draw(JLabel slot, RelayResponse.RouteStep step, GameSprites sprites)
+	static void draw(JLabel slot, RouteStep step, GameSprites sprites)
 	{
 		if (step.itemId != null)
 		{
@@ -424,7 +429,7 @@ final class RouteStepsView extends JPanel
 	 * The row a way's voyage is sailed on, which its gates hang under: the {@code sail} row of a boat
 	 * the map knew, or the one ride before {@code dock} for a boat it did not. Minus one without one.
 	 */
-	static int sailingRow(@Nullable RelayResponse.RouteOption way)
+	static int sailingRow(@Nullable RouteOption way)
 	{
 		if (way == null || way.voyage == null)
 		{
@@ -462,7 +467,7 @@ final class RouteStepsView extends JPanel
 	 * "2. Walk 12 tiles to the bank": the website's number and the step, on one line, where the step
 	 * is said outside this view's own number column — the box over the game.
 	 */
-	static String stepLine(int index, RelayResponse.RouteStep step)
+	static String stepLine(int index, RouteStep step)
 	{
 		return (index + 1) + ". " + step.title;
 	}
@@ -473,7 +478,7 @@ final class RouteStepsView extends JPanel
 	 * Teleport", the same words twice in two lines; a way named for something its first step does not
 	 * mention, such as a voyage's "Docking point", keeps its name. Empty when there is nothing to add.
 	 */
-	static String currentWayLine(@Nullable RelayResponse.RouteOption way, @Nullable List<RelayResponse.RouteStep> steps)
+	static String currentWayLine(@Nullable RouteOption way, @Nullable List<RouteStep> steps)
 	{
 		if (way == null)
 		{
@@ -489,7 +494,7 @@ final class RouteStepsView extends JPanel
 	}
 
 	/** A way, with its length where the map priced one. */
-	static String wayLine(@Nullable RelayResponse.RouteOption way)
+	static String wayLine(@Nullable RouteOption way)
 	{
 		if (way == null)
 		{
@@ -499,7 +504,7 @@ final class RouteStepsView extends JPanel
 	}
 
 	/** Another way, as a line to press: its name, its length, and whether it is the best or out of reach. */
-	static String otherLine(RelayResponse.RouteOption way)
+	static String otherLine(RouteOption way)
 	{
 		return wayLine(way) + (way.best ? " · best" : "") + (way.blocked ? " · not yet" : "");
 	}
@@ -525,7 +530,7 @@ final class RouteStepsView extends JPanel
 	}
 
 	/** Whether a step from {@code from} on is one Shortest Path draws. */
-	static boolean walkLeft(List<RelayResponse.RouteStep> steps, int from)
+	static boolean walkLeft(List<RouteStep> steps, int from)
 	{
 		for (int i = Math.max(0, from); i < steps.size(); i++)
 		{
@@ -544,10 +549,10 @@ final class RouteStepsView extends JPanel
 			.append('|').append(view.origin).append('|').append(view.rerouted).append('|').append(view.rerouting)
 			.append('|').append(view.message).append('|').append(view.refused).append('|').append(open).append('|').append(view.boatAway)
 			.append('|');
-		for (RelayResponse.RouteOption option : view.ways)
+		for (RouteOption option : view.ways)
 		{
 			sb.append(option.id).append(';').append(option.label).append(';').append(option.steps.size()).append(';');
-			for (RelayResponse.RouteStep step : option.steps)
+			for (RouteStep step : option.steps)
 			{
 				sb.append(step.title).append(';').append(step.itemId).append(';').append(step.spriteId).append(';');
 			}

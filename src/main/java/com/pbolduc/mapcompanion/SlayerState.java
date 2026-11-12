@@ -28,8 +28,8 @@ package com.pbolduc.mapcompanion;
 import com.google.inject.Singleton;
 import java.util.Objects;
 import javax.annotation.Nullable;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import static com.pbolduc.mapcompanion.RelayResponse.SlayerOptions;
 
 /**
  * One character's local counter and the server's ranked places. Counts never invalidate the list.
@@ -59,9 +59,9 @@ final class SlayerState
 	private Integer remaining;
 	private long revision;
 	private long seenRevision;
-	private RelayResponse.SlayerOptions options;
+	private SlayerOptions options;
 	/** The places the last choice change or hop hid, for the task the card shows; display only. */
-	private RelayResponse.SlayerOptions previous;
+	private SlayerOptions previous;
 	private long receivedAt;
 	/** Whether the reading in task, area and remaining was taken after the session settled. */
 	private boolean settled;
@@ -69,7 +69,7 @@ final class SlayerState
 	private Reading kept;
 
 	/** One reading of the assignment, as the card shows it. */
-	@AllArgsConstructor(access = AccessLevel.PACKAGE)
+	@AllArgsConstructor
 	static final class Reading
 	{
 		@Nullable
@@ -82,16 +82,16 @@ final class SlayerState
 		final boolean settled;
 	}
 
-	@AllArgsConstructor(access = AccessLevel.PACKAGE)
+	@AllArgsConstructor
 	static final class View
 	{
 		final String task;
 		final String area;
 		final Integer remaining;
-		final RelayResponse.SlayerOptions options;
+		final SlayerOptions options;
 		final boolean stale;
 		/** Display only: the places kept from before a choice change or a hop, while {@link #options} waits. */
-		final RelayResponse.SlayerOptions previous;
+		final SlayerOptions previous;
 		/** The choice the places are ranked, or being ranked, for. */
 		final String order;
 		final boolean hideWilderness;
@@ -234,7 +234,7 @@ final class SlayerState
 		{
 			return;
 		}
-		RelayResponse.SlayerOptions incoming = directive.slayerOptions;
+		SlayerOptions incoming = directive.slayerOptions;
 		if (incoming != null && (!Objects.equals(task, incoming.taskName) || !Objects.equals(area, incoming.areaName)
 								 || !Objects.equals(order, incoming.order) || hideWilderness != incoming.hideWilderness))
 		{
