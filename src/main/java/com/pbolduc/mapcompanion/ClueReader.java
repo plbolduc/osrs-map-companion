@@ -27,13 +27,14 @@ package com.pbolduc.mapcompanion;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import net.runelite.api.Client;
 import net.runelite.api.gameval.InventoryID;
 import net.runelite.api.Item;
-import net.runelite.api.ItemComposition;
 import net.runelite.api.ItemContainer;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.coords.WorldPoint;
@@ -345,6 +346,13 @@ public class ClueReader
 	}
 
 	/**
+	 * Each item's tier once the client has named it, and "" for one that is no scroll. The whole
+	 * inventory is asked on every tick, and an item's name does not change. An item the client could
+	 * not name is not kept, so it is asked again. Client thread, as every caller of {@link #tierOf} is.
+	 */
+	private final Map<Integer, String> tiers = new HashMap<>();
+
+	/**
 	 * The tier this item is a clue scroll of, or null if it is not one.
 	 *
 	 * <p>Guarded, because an item composition lookup for an id the client has not cached can throw,
@@ -354,16 +362,17 @@ public class ClueReader
 	@Nullable
 	private String tierOf(int itemId)
 	{
+		String tier = tiers.get(itemId);
 		try
 		{
-			ItemComposition composition = client.getItemDefinition(itemId);
-			String name = composition == null ? null : composition.getName();
-			if (name == null)
+			if (tier == null)
 			{
-				return null;
+				/* No composition, or one with no name, throws here: unanswered, and not kept. */
+				Matcher m = SCROLL_NAME.matcher(client.getItemDefinition(itemId).getName().toLowerCase().trim());
+				tier = m.matches() ? m.group(1) : "";
+				tiers.put(itemId, tier);
 			}
-			Matcher m = SCROLL_NAME.matcher(name.toLowerCase().trim());
-			return m.matches() ? m.group(1) : null;
+			return tier.isEmpty() ? null : tier;
 		}
 		catch (RuntimeException e)
 		{

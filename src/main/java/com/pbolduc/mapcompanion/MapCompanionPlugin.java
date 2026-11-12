@@ -1520,8 +1520,6 @@ public class MapCompanionPlugin extends Plugin
 		}
 		groupState.stream(positions && directiveStream.isConnected(), directiveStream.lastReadAtMs());
 
-		destinationMarker.sync();
-
 		maybeNotifyMeetup(now);
 
 		/**
