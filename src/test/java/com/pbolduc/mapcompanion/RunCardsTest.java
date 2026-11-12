@@ -629,6 +629,57 @@ public class RunCardsTest
 	}
 
 	/**
+	 * The charting run's bar was shown or hidden only while a run was held, and a bar is visible
+	 * until told otherwise: a card with no run drew an empty one under Start run, and a farm run
+	 * that replaced a charting run kept it. It is drawn for a charting run and for nothing else.
+	 */
+	@Test
+	public void theBarIsDrawnForAChartingRunAndNeverOnACardWithNone() throws Exception
+	{
+		FarmRunPanel[] card = new FarmRunPanel[1];
+		SwingUtilities.invokeAndWait(() ->
+		{
+			card[0] = new FarmRunPanel(state, client, follower, route, shortest, sprites, config, store);
+			card[0].refresh(true);
+		});
+		assertFalse("no run, no bar", drawn(bar(card[0])));
+
+		state.acceptFor(identity.id(), EPOCH, run("/contract/sea-chart-run.json"), 1, System.currentTimeMillis());
+		SwingUtilities.invokeAndWait(() -> card[0].refresh(true));
+		assertTrue("a charting run's", drawn(bar(card[0])));
+
+		state.acceptFor(identity.id(), EPOCH, run("/contract/farm-run.json"), 2, System.currentTimeMillis());
+		SwingUtilities.invokeAndWait(() -> card[0].refresh(true));
+		assertFalse("and not the farm run that replaced it", drawn(bar(card[0])));
+	}
+
+	private static Component bar(Container parent)
+	{
+		for (Component child : parent.getComponents())
+		{
+			Component found = child instanceof javax.swing.JProgressBar ? child : child instanceof Container ? bar((Container) child) : null;
+			if (found != null)
+			{
+				return found;
+			}
+		}
+		return null;
+	}
+
+	/** Whether a component and everything it sits in is visible. */
+	private static boolean drawn(Component component)
+	{
+		for (Component at = component; at != null; at = at.getParent())
+		{
+			if (!at.isVisible())
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
 	 * A sea charting run was eight sentences at one weight, each with "Sail 71 tiles" in grey under
 	 * it, and a charted task stayed three struck lines. A stop the map gives a tool and a leg in
 	 * numbers is one row to scan: the tool's picture, the task, and the leg's length at the right

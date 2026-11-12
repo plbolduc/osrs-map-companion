@@ -276,6 +276,8 @@ final class RunView extends JPanel
 		// The Port tasks card's own heading already names its one kind of run.
 		title.setVisible(active && !port);
 		progress.setVisible(active);
+		/* With the count it sits over, and never on a card that holds no run: a bar is visible until told otherwise. */
+		bar.setVisible(active && FarmRunWire.SEA_CHARTS.equals(view.run.kind));
 		changed.setVisible(active && view.changed);
 		before.setVisible(active && !view.run.bring.isEmpty());
 		actions.setVisible(active || planning || ending);
@@ -294,7 +296,6 @@ final class RunView extends JPanel
 			shownRun = view.run.id;
 			MapCompanionPanel.setWrapped(title, view.run.name, WIDTH);
 			MapCompanionPanel.setWrapped(progress, progressLine(view), WIDTH);
-			bar.setVisible(FarmRunWire.SEA_CHARTS.equals(view.run.kind));
 			bar.setMaximum(view.run.stops.size());
 			bar.setValue(view.visited.size());
 			progress.setForeground(left ? LIGHT_GRAY_COLOR : Color.WHITE);
