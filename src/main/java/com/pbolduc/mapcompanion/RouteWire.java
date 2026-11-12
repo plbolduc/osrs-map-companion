@@ -193,6 +193,7 @@ final class RouteWire
 		RelayResponse.RouteOption clean = new RelayResponse.RouteOption();
 		clean.id = id;
 		clean.label = label;
+		clean.face = text(option.face, MAX_LABEL);
 		clean.best = option.best;
 		clean.blocked = option.blocked;
 		clean.tiles = option.tiles != null && option.tiles >= 0 ? option.tiles : null;

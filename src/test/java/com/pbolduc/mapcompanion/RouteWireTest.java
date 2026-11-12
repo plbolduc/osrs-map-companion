@@ -96,7 +96,7 @@ public class RouteWireTest
 		String route = "{\"options\":["
 			/* A way with no steps it can print is not a way. */
 			+ "{\"id\":\"empty\",\"label\":\"Nothing\",\"best\":true,\"steps\":[{\"slot\":\"Method!\",\"title\":\"Bad kind\"},{\"slot\":\"method\"}]},"
-			+ "{\"id\":\"ring\",\"label\":\"Ring <col=ff0000>of</col>\\u0007 dueling\",\"tiles\":-3,\"steps\":["
+			+ "{\"id\":\"ring\",\"label\":\"Ring <col=ff0000>of</col>\\u0007 dueling\",\"face\":\"  Al   Kharid \",\"tiles\":-3,\"steps\":["
 			+ "{\"slot\":\"method\",\"title\":\"Ring of dueling\",\"notes\":[\"\",\"  Wilderness  \"],\"at\":{\"x\":3315,\"y\":3235,\"plane\":7}},"
 			+ "{\"slot\":\"later-kind\",\"title\":\"Something the map adds tomorrow\",\"walk\":true,\"at\":{\"x\":3300,\"y\":3230,\"plane\":1}}]}]}";
 		RelayResponse.Route read = gson.fromJson(reply(route), RelayResponse.class).directive.destination.route;
@@ -105,6 +105,7 @@ public class RouteWireTest
 		assertTrue("the one way left is the best one", ring.best);
 		assertNull("a negative price is no price", ring.tiles);
 		assertEquals("control bytes folded; tags are escaped where they are drawn", "Ring <col=ff0000>of</col> dueling", ring.label);
+		assertEquals("and the name its chip wears is tidied the same way", "Al Kharid", ring.face);
 		assertNull("a fifth floor is no floor: the pin goes", ring.steps.get(0).at);
 		assertEquals("Ring of dueling", ring.steps.get(0).title);
 		assertEquals(java.util.Collections.singletonList("Wilderness"), ring.steps.get(0).notes);

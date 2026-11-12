@@ -31,7 +31,9 @@ import java.util.Locale;
 import java.util.function.IntConsumer;
 import javax.annotation.Nullable;
 import javax.swing.*;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import net.runelite.api.gameval.SpriteID;
 import net.runelite.client.ui.ColorScheme;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.*;
@@ -47,26 +49,33 @@ import static net.runelite.client.ui.ColorScheme.DARKER_GRAY_COLOR;
  * as the website's journey row puts them, and the words of every step start at one x, wrapped lines
  * and details under the title's first letter. The step you are on has its number in amber, the
  * colour its pin has on the world map, and its title bright; a step behind it is its title alone, in
- * grey; the ones ahead stay as they are. A ▸ or ▾ is only ever a fold. The way being followed is
- * named above its steps, and the others the map offered fold behind one line, as the card's closed
- * row folds them — a press on one shows its steps instead.
+ * grey; the ones ahead stay as they are. A ▸ or ▾ is only ever a fold.
  *
- * <p>Arriving changes the shape rather than greying a route still drawn: the way, its steps and the
- * other ways go, and one amber line, <i>Arrived</i>, takes the way line's place, in the colour a run
+ * <p>When the map offered more than one way, a strip of chips comes first, one for every way and the
+ * one being followed among them, so the ways are compared in one place and picked in one place. A
+ * chip is drawn as the website draws its own: the picture of its first step that has one, as the
+ * website's route chip leads with its teleport, or else a boat for a voyage and its first step's
+ * kind for any other, a boot for a walk; then the name the website's chip wears, where the teleport
+ * lands. The chosen chip is filled with the website's orange, and a press on another shows that
+ * way's steps instead. The order never follows the choice: the ways the account can take in the
+ * map's order, then the ones it cannot yet, their pictures faded and their lines grey, which still
+ * show their steps when pressed. A chip that moved when it was pressed would put another way under
+ * the pointer. The strip starts a new row before a chip would pass the card's edge.
+ *
+ * <p>The chips name the ways, so the line under them is the chosen way's length and how many tiles
+ * more than the best it is; that a way is the best is in its chip's tip, beside its whole label. A
+ * way the account cannot take yet says so on a line of its own, in the refusal pink. A route with
+ * one way has no strip, and its line leaves the name out where the first step already says it.
+ *
+ * <p>Arriving changes the shape rather than greying a route still drawn: the strip, the way and its
+ * steps go, and one amber line, <i>Arrived</i>, takes the way line's place, in the colour a run
  * gives a stop's own status. On a run's leg the whole view goes, because the stop it led to already
  * says <i>You're here</i>.
  *
  * <p>A teleport step carries the game's own picture of what to click, as the website's card hangs its
  * sprite on the same row: the item's sprite from {@link GameSprites#item}, the spell's icon from
  * {@link GameSprites#sprite}, by the id the map sent. Both come from this client's cache, never from
- * the map; a step the map names no id for is words alone, as it always was. Each of the other ways
- * starts with the picture of its first step that has one, as the website's route chip leads with its
- * teleport, so ways are told apart by what they make you use.
- *
- * <p>The other ways are a small table: a way's name on as many lines as it needs, and its length in
- * a column of its own at the far end, so lengths are compared down one edge and a long name never
- * pushes the length off the row. The ways the account can take come first; the ones it cannot yet
- * follow under one line saying so, their pictures faded, and still show their steps when pressed.
+ * the map; a step the map names no id for is drawn by its kind, see {@link #way}.
  *
  * <p>When Shortest Path is drawing a step's walk for this route, a line under the steps says so, so
  * the line on the ground is never taken for this plugin's own drawing.
@@ -89,6 +98,9 @@ final class RouteStepsView extends JPanel
 	/** A step's picture: the size the website's chips draw a sprite, and the friends list's news. */
 	static final int PICTURE = 16;
 	private static final int PICTURE_GAP = 5;
+	/** Between two chips of the strip, and under each of its rows. */
+	private static final int CHIP_GAP = 4;
+	private static final String BEST = " · best";
 	private static final Color DONE = ColorScheme.MEDIUM_GRAY_COLOR;
 	private static final Color AHEAD = ColorScheme.LIGHT_GRAY_COLOR;
 	/** An unmet gate, in the Slayer list's colour for one: the sidebar's refusal pink. */
@@ -97,18 +109,15 @@ final class RouteStepsView extends JPanel
 	private final IntConsumer choose;
 	@Nullable
 	private final GameSprites sprites;
+	private final JPanel strip = column(DARKER_GRAY_COLOR);
 	private final JLabel way = label(11f, AHEAD);
+	private final JLabel cannot = label(11f, UNMET);
 	private final JLabel origin = label(11f, AHEAD);
 	private final JPanel steps = column(DARKER_GRAY_COLOR);
 	private final JLabel arrived = label(11f, MapPin.AMBER);
-	private final JButton others = MapCompanionPanel.linkButton("");
-	private final JPanel otherWays = column(DARKER_GRAY_COLOR);
 	private final JLabel message = label(11f, AHEAD);
 	private final JLabel boat = label(11f, UNMET);
 	private final JLabel drawn = label(11f, AHEAD);
-	@Nullable
-	private String drawnLine;
-	private boolean open;
 	@Nullable
 	private String said;
 	@Nullable
@@ -129,24 +138,17 @@ final class RouteStepsView extends JPanel
 		this.choose = choose;
 		this.sprites = sprites;
 		column(this, DARKER_GRAY_COLOR);
+		add(strip);
 		add(way);
+		add(cannot);
 		add(origin);
 		add(steps);
 		/* Under the steps it contradicts, whose board step names the mooring the boat has left. */
 		add(boat);
 		add(arrived);
-		add(others);
-		add(otherWays);
 		add(drawn);
 		add(message);
 		setBorder(new EmptyBorder(5, 0, 0, 0));
-		others.addActionListener(e ->
-		{
-			open = !open;
-			DestinationRoute.View view = shown;
-			said = null;
-			show(view, drawnLine);
-		});
 		setVisible(false);
 	}
 
@@ -166,6 +168,9 @@ final class RouteStepsView extends JPanel
 		show(view, shortestPath);
 		origin.setVisible(false);
 		way.setVisible(false);
+		/* Nothing here picks a leg's way: the run planned it, and the stop above names it. */
+		strip.setVisible(false);
+		cannot.setVisible(false);
 		/* Arrived, the stop the leg led to says You're here, and the leg has nothing left to say. */
 		if (view != null && view.arrived())
 		{
@@ -184,7 +189,6 @@ final class RouteStepsView extends JPanel
 	/** @param shortestPath what Shortest Path is drawing for it, in words, or null */
 	void show(@Nullable DestinationRoute.View view, @Nullable String shortestPath)
 	{
-		drawnLine = shortestPath;
 		String words = view == null ? null : words(view) + "|" + shortestPath;
 		if (words != null && words.equals(said))
 		{
@@ -202,9 +206,17 @@ final class RouteStepsView extends JPanel
 		RouteOption current = view.way();
 		/* Arrived: the route has done its work, and one line in the way's place says so. */
 		boolean there = view.arrived();
-		String line = currentWayLine(current, view.steps());
+		boolean many = view.ways.size() > 1 && !there;
+		strip.setVisible(many);
+		strip.removeAll();
+		if (many)
+		{
+			chips(view);
+		}
+		String line = many ? chosenWayLine(view.ways, current) : currentWayLine(current, view.steps());
 		way.setVisible(!there && !line.isEmpty());
 		setWrapped(way, line, WIDTH);
+		MapCompanionPanel.show(cannot, many && current.blocked ? Words.of("steps.blocked") : null, WIDTH);
 
 		boolean nowhere = view.origin == null && !view.rerouted;
 		origin.setVisible(nowhere && !there);
@@ -230,50 +242,6 @@ final class RouteStepsView extends JPanel
 
 		arrived.setVisible(there);
 		setWrapped(arrived, "Arrived", WIDTH);
-
-		int more = view.ways.size() - 1;
-		others.setVisible(more > 0 && !there);
-		others.setText((open ? "▾ " : "▸ ") + more + (more == 1 ? " other way" : " other ways"));
-		otherWays.removeAll();
-		/* Built only while open, so a folded list asks the client's cache for no pictures. */
-		boolean listed = open && more > 0 && !there;
-		otherWays.setVisible(listed);
-		/*
-		 * The picture's place is kept on every way once one has a picture, and the lengths' column is
-		 * as wide as the longest of them, so the names start at one x and wrap at one width.
-		 */
-		boolean pictured = false;
-		int priced = 0;
-		for (int i = 0; listed && i < view.ways.size(); i++)
-		{
-			if (i != view.chosen)
-			{
-				pictured |= sprites != null && firstPictured(view.ways.get(i).steps) != null;
-				JLabel length = length(view.ways.get(i));
-				priced = Math.max(priced, length == null ? 0 : length.getPreferredSize().width + PICTURE_GAP);
-			}
-		}
-		/* The ways the account can take, then the ones it cannot yet, each in the map's own order. */
-		for (int pass = 0; listed && pass < 2; pass++)
-		{
-			boolean headed = pass == 0;
-			for (int i = 0; i < view.ways.size(); i++)
-			{
-				RouteOption option = view.ways.get(i);
-				if (i == view.chosen || option.blocked == (pass == 0))
-				{
-					continue;
-				}
-				if (!headed)
-				{
-					headed = true;
-					JLabel cannot = under(Words.of("steps.notYet"), WIDTH);
-					cannot.setBorder(new EmptyBorder(4, 0, 0, 0));
-					otherWays.add(cannot);
-				}
-				otherWays.add(other(i, option, pictured, priced));
-			}
-		}
 
 		MapCompanionPanel.show(drawn, shortestPath, WIDTH);
 
@@ -381,51 +349,103 @@ final class RouteStepsView extends JPanel
 	}
 
 	/**
-	 * Another way, as a row to press: the picture of the first of its steps that has one, in a place
-	 * kept for it whether or not it does; its name, wrapped; and its length at the far end. A way not
-	 * open yet has its picture drawn disabled, which the look and feel greys and dims as it does any
-	 * control that cannot be used, and its name in the grey of a step ahead, which still reads.
-	 *
-	 * @param priced the lengths' column, or 0 when no other way has a length
+	 * The strip: a chip for every way, left to right, a new row started before a chip would pass the
+	 * card's edge. Measured here because a row that wraps by itself does not tell the column above
+	 * how tall it has become. The ways the account can take, then the ones it cannot yet, each in the
+	 * map's own order, whichever is chosen.
 	 */
-	private JComponent other(int index, RouteOption option, boolean pictured, int priced)
+	private void chips(DestinationRoute.View view)
 	{
-		JLabel picture = null;
-		if (pictured)
+		JPanel row = null;
+		int used = 0;
+		for (int pass = 0; pass < 2; pass++)
 		{
-			picture = pictureSlot();
-			picture.setName("route.way.picture");
-			picture.setVerticalAlignment(SwingConstants.TOP);
-			picture.setBorder(new EmptyBorder(2, 0, 0, 0));
-			RouteStep shows = firstPictured(option.steps);
+			for (int i = 0; i < view.ways.size(); i++)
+			{
+				RouteOption option = view.ways.get(i);
+				if (option.blocked != (pass == 1))
+				{
+					continue;
+				}
+				JButton chip = chip(i, option, i == view.chosen);
+				used += CHIP_GAP + chip.getPreferredSize().width;
+				if (row == null || used > WIDTH)
+				{
+					row = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+					row.setBackground(DARKER_GRAY_COLOR);
+					row.setBorder(new EmptyBorder(0, 0, CHIP_GAP, 0));
+					strip.add(left(row));
+					used = chip.getPreferredSize().width;
+				}
+				else
+				{
+					row.add(Box.createHorizontalStrut(CHIP_GAP));
+				}
+				row.add(chip);
+			}
+		}
+	}
+
+	/**
+	 * One way, as a chip to press: the picture of the first of its steps that has one, or a voyage's
+	 * boat, or its first step's kind, in a place whose size is fixed, then the name the website's chip
+	 * for this way wears: the map's {@code face}, which is where a teleport lands or what a ride is
+	 * dialled to, and the whole label from a map that sends none. A length alone would
+	 * be a number that does not say what it counts. The way being followed is filled with the
+	 * website's orange; the others are the card's own ground inside a line. A way not open yet has its
+	 * picture drawn disabled, which the look and feel greys and dims as it does any control that
+	 * cannot be used, and its line is the card's own dark grey, so it reads as no button though it can
+	 * still be pressed. Its name keeps the grey of any way not chosen, because the fainter grey could
+	 * not be read. Its size is its parts' and is the same chosen or not, so a press moves nothing; a
+	 * name wider than the card is cut to it, and the tip says it whole.
+	 */
+	private JButton chip(int index, RouteOption option, boolean on)
+	{
+		JButton chip = new JButton();
+		chip.setLayout(new FlowLayout(FlowLayout.CENTER, 3, 0));
+		chip.setContentAreaFilled(on);
+		chip.setBackground(ColorScheme.BRAND_ORANGE);
+		chip.setBorder(new CompoundBorder(new LineBorder(on ? ColorScheme.BRAND_ORANGE : option.blocked ? ColorScheme.DARK_GRAY_COLOR : DONE), new EmptyBorder(2, 1, 2, 2)));
+		RouteStep shows = firstPictured(option.steps);
+		/* A voyage is its boat, though it starts with the walk to it: a boot would say it is a walk. */
+		int kind = shows != null || option.steps.isEmpty() ? 0
+			: option.voyage != null ? SpriteID.IconSailingBoats35x35._1 : way(option.steps.get(0));
+		if (sprites != null && (shows != null || kind != 0))
+		{
+			JLabel picture = pictureSlot();
 			if (shows != null)
 			{
 				draw(picture, shows, sprites);
 			}
+			else
+			{
+				sprites.sprite(picture, kind, PICTURE);
+			}
 			picture.setEnabled(!option.blocked);
+			chip.add(picture);
 		}
-		int width = WIDTH - priced - (pictured ? PICTURE + PICTURE_GAP : 0);
-		JButton pick = MapCompanionPanel.linkButton("<html><body width='" + width + "'>"
-			+ MapCompanionPanel.escape(option.label + (option.best ? " · best" : "")) + "</body></html>");
-		pick.setForeground(option.blocked ? AHEAD : Color.WHITE);
-		pick.setToolTipText("Show this way's steps instead");
-		pick.addActionListener(e -> choose.accept(index));
-		return MapCompanionPanel.left(MapCompanionPanel.bar(PICTURE_GAP, DARKER_GRAY_COLOR, picture, pick, length(option)));
-	}
-
-	/** A way's length for the far end of its row, level with its name's first line; null where the map priced none. */
-	@Nullable
-	private static JLabel length(RouteOption way)
-	{
-		if (way.tiles == null)
+		JLabel words = label(11f, on ? Color.WHITE : AHEAD);
+		/* A name the map sent is drawn as it was typed, never read as markup. */
+		words.putClientProperty("html.disable", true);
+		words.setText(option.face == null ? option.label : option.face);
+		chip.add(words);
+		Dimension size = chip.getLayout().preferredLayoutSize(chip);
+		if (size.width > WIDTH)
 		{
-			return null;
+			Dimension name = words.getPreferredSize();
+			words.setPreferredSize(new Dimension(name.width - size.width + WIDTH, name.height));
+			size.width = WIDTH;
 		}
-		JLabel length = label(11f, AHEAD);
-		length.setText(way.tiles + " tiles");
-		length.setVerticalAlignment(SwingConstants.TOP);
-		length.setBorder(new EmptyBorder(3, 0, 0, 0));
-		return length;
+		chip.setPreferredSize(size);
+		String tip = wayLine(option) + (option.best ? BEST : "");
+		chip.setToolTipText("<html>" + escape(option.blocked ? tip + ". " + Words.of("steps.blockedTip") : tip));
+		/* The way being followed is already shown, so its chip is no press. */
+		if (!on)
+		{
+			chip.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+			chip.addActionListener(e -> choose.accept(index));
+		}
+		return chip;
 	}
 
 	/** The first step with the game's picture of what to click, or null when none has one: a way's or a run stop's. */
@@ -552,6 +572,25 @@ final class RouteStepsView extends JPanel
 		return way.tiles == null ? "" : way.tiles + " tiles";
 	}
 
+	/**
+	 * The line under the chips: the chosen way's length, then how it compares, "80 tiles · 28 more
+	 * than best". Its chip names it, so the line does not. A longer way says by how much where the map
+	 * priced both; the best way's line has nothing to compare, and its chip's tip says it is the best.
+	 * Empty for a way the map priced no length for.
+	 */
+	static String chosenWayLine(List<RouteOption> ways, RouteOption way)
+	{
+		String line = way.tiles == null ? "" : way.tiles + " tiles";
+		for (RouteOption best : ways)
+		{
+			if (best.best && !way.best && best.tiles != null && way.tiles != null && way.tiles > best.tiles)
+			{
+				line += " · " + (way.tiles - best.tiles) + " more than best";
+			}
+		}
+		return line;
+	}
+
 	/** A way, with its length where the map priced one. */
 	static String wayLine(@Nullable RouteOption way)
 	{
@@ -600,11 +639,12 @@ final class RouteStepsView extends JPanel
 	{
 		StringBuilder sb = new StringBuilder(view.key).append('|').append(view.chosen).append('|').append(view.step)
 			.append('|').append(view.origin).append('|').append(view.rerouted).append('|').append(view.rerouting)
-			.append('|').append(view.message).append('|').append(view.refused).append('|').append(open).append('|').append(view.boatAway)
+			.append('|').append(view.message).append('|').append(view.refused).append('|').append(view.boatAway)
 			.append('|');
 		for (RouteOption option : view.ways)
 		{
-			sb.append(option.id).append(';').append(option.label).append(';').append(option.steps.size()).append(';');
+			sb.append(option.id).append(';').append(option.label).append(';').append(option.face).append(option.tiles).append(option.best)
+				.append(option.blocked).append(option.steps.size()).append(';');
 			for (RouteStep step : option.steps)
 			{
 				sb.append(step.title).append(';').append(step.itemId).append(';').append(step.spriteId).append(';');

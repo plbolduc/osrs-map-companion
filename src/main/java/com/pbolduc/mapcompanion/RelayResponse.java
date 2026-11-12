@@ -411,6 +411,8 @@ public class RelayResponse
 		/** The transport's id: stable, and what a later press could name. */
 		public String id;
 		public String label;
+		/** The name on the website's chip for this way, sent where it is not the label: where a teleport lands, or a dial. */
+		public String face;
 		public boolean best;
 		/** A way the account cannot take yet, kept in its place as the card keeps it. */
 		public boolean blocked;

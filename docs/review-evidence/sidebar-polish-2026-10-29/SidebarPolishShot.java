@@ -547,7 +547,9 @@ public class SidebarPolishShot
 			step("walk-leg", "Climb to the bank", "2nd floor", true, 3208, 3220, 2)));
 		RelayResponse.RouteOption ring = new RelayResponse.RouteOption();
 		ring.id = "ring-of-dueling";
-		ring.label = "Ring of dueling";
+		ring.label = "Ring of dueling: Ferox Enclave";
+		/* The name the website's chip wears: where the ring lands. */
+		ring.face = "Ferox Enclave";
 		ring.tiles = 80;
 		ring.steps = new ArrayList<>(Collections.singletonList(
 			Steps.picture(step("method", "Rub a ring of dueling", "Ferox Enclave", false, 3150, 3635, null), "itemId", 2552)));
@@ -608,11 +610,6 @@ public class SidebarPolishShot
 		{
 			questRouted(panel);
 			refresh(panel);
-		}
-		if (state.equals("route"))
-		{
-			/* Each other way opens with its teleport's picture. */
-			expand(panel, "1 other way");
 		}
 		if (state.equals("slayer-open") || state.equals("slayer-expanded"))
 		{
@@ -723,7 +720,7 @@ public class SidebarPolishShot
 				refresh(panel);
 				stars.refresh();
 			}
-			/* A star routed with three other ways, two of them not open to the account, and the fold opened. */
+			/* A star routed with four ways, two of them not open to the account: the strip's chips, the blocked ones last. */
 			if (state.equals("stars-busy-ways"))
 			{
 				StarsModel.Star star = client.model.find(client.model.selected);
@@ -733,13 +730,6 @@ public class SidebarPolishShot
 				((DestinationRoute) get(get(panel, "nowCards"), "destinationRoute")).adoptPressed(answer);
 				refresh(panel);
 				stars.refresh();
-				for (Component c : all(stars))
-				{
-					if (c instanceof javax.swing.JButton && ((javax.swing.JButton) c).getText() != null && ((javax.swing.JButton) c).getText().contains("other way"))
-					{
-						((javax.swing.JButton) c).doClick();
-					}
-				}
 			}
 			if (state.equals("stars-filters"))
 			{
@@ -889,6 +879,9 @@ public class SidebarPolishShot
 				way("teleport_item:d", "Quetzal whistle: Cam Torum", false, true, 78,
 					Steps.picture(step("method", "Blow Quetzal whistle: Cam Torum", null, false, 1446, 3108, null), "itemId", 29271),
 					step("arrival-walk", "Walk 70t east", "To the destination", true, 1533, 3077, 0))));
+			/* The names the website's chips wear for these two: the landing, with its dial spelled with a colon. */
+			route.options.get(2).face = "3: Ralos' Rise";
+			route.options.get(3).face = "Cam Torum";
 			return route;
 		}
 
