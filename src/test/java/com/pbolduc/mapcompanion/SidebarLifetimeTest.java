@@ -29,6 +29,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import javax.swing.SwingUtilities;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -75,5 +76,26 @@ public class SidebarLifetimeTest
 		SwingUtilities.invokeAndWait(() -> sidebar.panel.act(MapCompanionPanel.Act.FOLLOW));
 
 		assertTrue("the Follow key follows it, as the card's button would have", route.view().following);
+	}
+
+	/**
+	 * A search waits before it is asked: a moment after the last key, or as long as the map said to,
+	 * which can be minutes. Turned off inside that wait, the plugin still sent it when the wait ended.
+	 */
+	@Test
+	public void aSearchStillWaitingIsNeverAskedOnceThePluginStops() throws Exception
+	{
+		SearchClient search = sidebar.injector.getInstance(SearchClient.class);
+		SwingUtilities.invokeAndWait(() -> search.typed("lumbridge"));
+		assertEquals("the search waits for the typing to stop", 1, sidebar.waiting.size());
+		Runnable timer = sidebar.waiting.get(0);
+
+		SwingUtilities.invokeAndWait(sidebar.panel::stopRefreshing);
+
+		assertTrue("its timer is cancelled with the plugin", sidebar.waiting.isEmpty());
+		/* And one that had fired already, queued behind the shutdown, finds nothing left to ask for. */
+		SwingUtilities.invokeAndWait(timer);
+		assertEquals("no question is left to ask", "", search.result().query);
+		assertTrue("nothing was sent: " + sidebar.asked, sidebar.asked.isEmpty());
 	}
 }

@@ -310,10 +310,16 @@ public class MapCompanionPanel extends PluginPanel
 		timer.stop();
 	}
 
-	/** Also called when the plugin shuts down, in case the sidebar was never opened or closed. */
+	/**
+	 * The plugin shutting down. The timer stops here in case the sidebar was never opened or closed.
+	 * The search is forgotten because it keeps a timer of its own, for the pause after typing or the
+	 * wait the map asked for, and that one would still fire and ask the map as this member with the
+	 * plugin off. EDT, which is where the search's state lives.
+	 */
 	void stopRefreshing()
 	{
 		onDeactivate();
+		searchPanel.search.clear();
 	}
 
 	/**

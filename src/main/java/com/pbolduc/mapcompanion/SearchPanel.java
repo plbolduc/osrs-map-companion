@@ -79,7 +79,8 @@ final class SearchPanel extends JPanel
 	static final int PICTURE = 24;
 	static final String PLACEHOLDER = "Search places, people, items";
 
-	private final SearchClient search;
+	/** The sidebar reaches it to cancel what is waiting when the plugin stops. */
+	final SearchClient search;
 	private final RoutePress press;
 	@Nullable
 	private final GameSprites sprites;
