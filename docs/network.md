@@ -107,10 +107,10 @@ voyage's steps; that sends nothing.
 
 **The step after a first Connect.** Every sharing setting, **Destinations and meetups** and
 **Group on the world map** start off. After the first Connect to a map, the sidebar shows a row each for the
-character name, the four sharing groups and those two drawing choices, all ticked, and *Where you
-died* unticked, with a line saying the drawing choices open one connection. A group's row is all of
-its fields or none, as its switch in Settings is. *What each one sends*,
-a fold under the rows, names every field and describes the receive stream in full. **Share what's ticked** writes exactly the ticked fields, as the switches in Settings
+three sharing switches and one for those two drawing choices, all ticked, with a line saying the
+drawing opens one connection. The words over the rows say the group sees the character name and
+what is ticked. A row is all of its fields or none, as its switch in Settings is. *What each one sends*,
+a fold under the rows, names every field and describes the receive stream in full. **Share what's ticked** writes exactly the ticked fields and the character name, as the switches in Settings
 do, and is the only thing in the step that changes anything: ticking and
 **Not now** write nothing, and nothing in the step makes a request. It follows only the Connect that
 approved its map, which happens once per map, and only while every choice it could turn on is still
@@ -148,7 +148,7 @@ draws and sends nothing.
 **Quest and diary announcements.** With *Notable drops and levels* on, a quest or achievement diary tier
 finished while logged in rides the next snapshot as an announcement: the quest's name, or the
 diary's region and tier, with a random id, retried until the map names it, like a drop. Each kind
-also needs its own field, all three under **Progress and travel**: *Full quest progress* for any
+also needs its own field, all three under **Your account**: *Full quest progress* for any
 quest, *Travel quest completion* for the 49 travel quests, *Achievement diaries* for a tier.
 Announcements are built from those fields'
 existing readings, so watching adds no client reads beyond them and no requests. Only a change

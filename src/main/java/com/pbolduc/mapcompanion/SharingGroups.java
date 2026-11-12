@@ -102,11 +102,11 @@ final class SharingGroups
 		return true;
 	}
 
-	/** The group's fields that are on, in its own order: what a partly shared group names. */
-	static List<Field> shared(Section section, MapCompanionConfig config, ConfigStore store)
+	/** The fields that are on, in their own order: what a partly shared switch names. */
+	static List<Field> shared(List<Field> fields, MapCompanionConfig config, ConfigStore store)
 	{
 		List<Field> on = new ArrayList<>();
-		for (Field field : section.fields)
+		for (Field field : fields)
 		{
 			if (field.on(config, store))
 			{
@@ -116,10 +116,10 @@ final class SharingGroups
 		return on;
 	}
 
-	/** Every field of the group to {@code on}, writing only those that differ, as a press of its switch does. */
-	static void choose(Section section, boolean on, MapCompanionConfig config, ConfigStore store)
+	/** Every one of the fields to {@code on}, writing only those that differ, as a press of their switch does. */
+	static void choose(List<Field> fields, boolean on, MapCompanionConfig config, ConfigStore store)
 	{
-		for (Field field : section.fields)
+		for (Field field : fields)
 		{
 			if (field.on(config, store) != on)
 			{
@@ -194,7 +194,7 @@ final class SharingGroups
 			{
 				if (value != null && store.get(KEY_SETTLED) != null && Boolean.parseBoolean(value) != on(section, config, store))
 				{
-					choose(section, Boolean.parseBoolean(value), config, store);
+					choose(section.fields, Boolean.parseBoolean(value), config, store);
 				}
 				return;
 			}

@@ -35,7 +35,7 @@ you press Route, and each new step Quest Helper names replaces it. Or right-clic
 A voyage in your own boat is its own steps: board your boat, sail, and dock, where the boat then
 stays. They tick when you step on deck, reach the far mooring and step ashore, the sail is drawn
 as a line on the world map, and the docking mooring's Sailing level and quests show under it.
-Shortest Path draws only the walks. With **Progress and travel** shared, which includes your boats
+Shortest Path draws only the walks. With **Your account** shared, which includes your boats
 and moorings, voyages start where your boats are.
 
 Each of your boats is pinned on the game's world map at the port where it is moored, read from
@@ -50,7 +50,7 @@ Results use the game's map icons and item sprites.
 
 ## Slayer in RuneLite
 
-With **Tasks and timers** shared, Home lists the website's ranked places for your Slayer task.
+With **Your account** shared, Home lists the website's ranked places for your Slayer task.
 The counter follows kills in this client. Better places you cannot use yet stay visible with their
 requirements; expand the list for other places, ranking choices, the Wilderness filter and the
 kinds that count. One place is open at a time, the best one you can use to begin with: press
@@ -96,9 +96,9 @@ can make a new one in the same client session.
 
 ## Port tasks in RuneLite
 
-With **Tasks and timers** shared, Home lists the port tasks you hold: the crates still to collect
-and where they go, or the bounty parts still owed and the board to hand them in at. With
-**Progress and travel** shared too, for your boats, **Start run** turns them into one run: every
+With **Your account** shared, Home lists the port tasks you hold: the crates still to collect
+and where they go, or the bounty parts still owed and the board to hand them in at. **Start run**
+turns them into one run, from where your boats are: every
 pickup and drop-off in the order that fits your boat's hold, then each bounty out to its creature
 and back to its board. Each stop's voyage starts where your boat docked last, draws on the world
 map, and ticks off from the task's own counters. The website's **You → Port tasks** shows the

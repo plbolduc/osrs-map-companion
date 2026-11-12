@@ -107,7 +107,7 @@ public class SharingGroupsTest
 		assertEquals("only the switch that disagreed, and the marker",
 			Arrays.asList(MapCompanionConfig.KEY_SHARE_MAP_PRESENCE + "=true", SharingGroups.KEY_SETTLED + "=" + SharingGroups.GENERATION), fixture.written);
 		assertEquals(Arrays.asList(SharingFields.PROGRESS.fields.get(0), SharingFields.PROGRESS.fields.get(7)),
-			SharingGroups.shared(SharingFields.PROGRESS, fixture.config, fixture.store));
+			SharingGroups.shared(SharingFields.PROGRESS.fields, fixture.config, fixture.store));
 		assertEquals("Skill levels", SharingFields.PROGRESS.fields.get(0).label);
 		assertEquals("Boats and moorings", SharingFields.PROGRESS.fields.get(7).label);
 
@@ -189,7 +189,7 @@ public class SharingGroupsTest
 		fixture.written.clear();
 		fixture.store.set(MapCompanionConfig.KEY_SHARE_TASKS, "false");
 		assertEquals(1 + SharingFields.TASKS.fields.size(), fixture.written.size());
-		assertTrue(SharingGroups.shared(SharingFields.TASKS, fixture.config, fixture.store).isEmpty());
+		assertTrue(SharingGroups.shared(SharingFields.TASKS.fields, fixture.config, fixture.store).isEmpty());
 		assertEquals("false", fixture.store.get(MapCompanionConfig.KEY_SHARE_TASKS));
 	}
 
@@ -238,10 +238,10 @@ public class SharingGroupsTest
 
 		SharingGroups.settle(fixture.config, fixture.store);
 
-		assertTrue("switched off there, so no longer shared", SharingGroups.shared(SharingFields.LOOT, fixture.config, fixture.store).isEmpty());
+		assertTrue("switched off there, so no longer shared", SharingGroups.shared(SharingFields.LOOT.fields, fixture.config, fixture.store).isEmpty());
 		assertTrue("switched on there, so all of it", SharingGroups.on(SharingFields.PROGRESS, fixture.config, fixture.store));
 		assertEquals("off over a partly shared group agrees with it, and keeps it",
-			Arrays.asList(SharingFields.TASKS.fields.get(3)), SharingGroups.shared(SharingFields.TASKS, fixture.config, fixture.store));
+			Arrays.asList(SharingFields.TASKS.fields.get(3)), SharingGroups.shared(SharingFields.TASKS.fields, fixture.config, fixture.store));
 	}
 
 	/**
@@ -308,7 +308,7 @@ public class SharingGroupsTest
 
 		fixture.store.set(MapCompanionConfig.KEY_SHARE_MAP_PRESENCE, "false");
 		assertTrue("the press in RuneLite's list reached every field",
-			SharingGroups.shared(SharingFields.PRESENCE, fixture.config, fixture.store).isEmpty());
+			SharingGroups.shared(SharingFields.PRESENCE.fields, fixture.config, fixture.store).isEmpty());
 		fixture.store.set(MapCompanionConfig.KEY_SHARE_MAP_PRESENCE, "true");
 		assertTrue(SharingGroups.on(SharingFields.PRESENCE, fixture.config, fixture.store));
 		fixture.store.set("shareActivity", "false");

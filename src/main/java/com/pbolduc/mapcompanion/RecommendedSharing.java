@@ -43,13 +43,13 @@ import static net.runelite.client.ui.ColorScheme.LIGHT_GRAY_COLOR;
  * The step after a first Connect: what the map uses, ticked, and one press to share it.
  *
  * <p>Every sharing setting still starts off. What this adds is the press: on the first Connect to a
- * map, a new player is shown the six sharing switches Settings has — their character name, the four
- * groups and where they died — and the two things this client draws from the map, all but where they
- * died ticked, one short row each so the press is in reach without scrolling. A group is all of its
- * fields or none, as its switch in Settings is; every field and the one stream they open are named in
+ * map, a new player is shown the three sharing switches Settings has and the group drawn in their
+ * game, all ticked, so one press leaves everything the plugin does working. A switch is all of its
+ * fields or none, as it is in Settings; every field and the one stream they open are named in
  * <i>What each one sends</i>, one tap below the rows. Pressing <i>Share what's ticked</i> writes those
- * fields exactly as the switches in Settings write them. Until then nothing is stored: ticking and
- * unticking change this step and nothing else, and <i>Not now</i> leaves every setting as it was.
+ * fields exactly as the switches in Settings write them, and the character name with them, which
+ * the words over the rows say. Until then nothing is stored: ticking and unticking change this step
+ * and nothing else, and <i>Not now</i> leaves every setting as it was.
  *
  * <p><b>Who sees it.</b> Only the first Connect to a map — the one that approves it, asking nothing
  * of osrs-map.com and a question of any other — and only while every choice it offers is still off.
@@ -61,15 +61,14 @@ import static net.runelite.client.ui.ColorScheme.LIGHT_GRAY_COLOR;
  *
  * <p><b>What it may share.</b> {@link #KEYS} is a list written out rather than read from the
  * groups, so a field added to a group later joins the press only when somebody adds it here, in the
- * same commit as its line in the disclosure documents. <i>Where you died</i> is offered and left
- * unticked, because Route back sends the tile in its own request when it is asked for. Meetup
- * notifications are not offered: a sound or a pop-up is the player's to ask for.
+ * same commit as its line in the disclosure documents. Meetup notifications are not offered: a
+ * sound or a pop-up is the player's to ask for.
  */
 final class RecommendedSharing extends JPanel
 {
-	/** What one press shares: the four groups' fields, the character name, and the client's drawing. */
+	/** What one press shares: the three switches' fields, the character name, and the client's drawing. */
 	static final List<String> KEYS = Collections.unmodifiableList(Arrays.asList(
-		"sharePosition", "shareActivity", "shareAccountType",
+		"sharePosition", "shareActivity", "shareAccountType", "shareDeath",
 		"shareSkills", "shareQuests", "shareQuestLog", "shareDiaries", "sharePermanentTravel", "shareCapabilities", "shareStash", "shareBoats", "shareSeaCharts",
 		"shareSlayer", "shareClue", "shareFarming", "shareBirdhouses", "shareHunterRumours", "shareMahoganyHomes", "shareFarmingContracts",
 		"sharePortTasks", "shareDailies",
@@ -83,10 +82,10 @@ final class RecommendedSharing extends JPanel
 	 */
 	static final String INTRO = Words.of("share.intro");
 
-	/** The connection the two drawing choices keep, in one line under them, to the map it goes to. */
+	/** The connection the drawing choice keeps, in one line under it, to the map it goes to. */
 	static String streamShort(String server)
 	{
-		return "Either keeps a connection to " + server + " open while you're logged in.";
+		return "It keeps a connection to " + server + " open while you're logged in.";
 	}
 
 	/**
@@ -95,23 +94,20 @@ final class RecommendedSharing extends JPanel
 	 */
 	static String stream(String server)
 	{
-		return "While you're logged in, either one keeps a connection to " + server + Words.of("share.stream");
+		return "While you're logged in, it keeps a connection to " + server + Words.of("share.stream");
 	}
 
-	static final String DEATH_DETAIL = Words.of("share.deathDetail");
 	static final String DESTINATIONS_DETAIL = Words.of("share.destinationsDetail");
 	static final String GROUP_DETAIL = Words.of("share.groupDetail");
 
 	private static final int TEXT = MapCompanionPanel.CARD_TEXT_WIDTH;
 	private static final int INDENT = 20;
 	private static final Color BACK = ColorScheme.DARKER_GRAY_COLOR;
-	/** The loot row's own reminder, short enough to sit on the row; the fold says it in full. */
-	static final String LOOT_ROW = SharingFields.LOOT.title + " · kept two weeks";
 
 	private final MapCompanionConfig config;
 	private final ConfigStore store;
 	private final Runnable closed;
-	/** Each row's box, in the order drawn, and the fields a tick of it writes: one, or a group's all. */
+	/** Each row's box, in the order drawn, and the fields a tick of it writes. */
 	private final Map<JCheckBox, List<Field>> rows = new LinkedHashMap<>();
 	private final List<Group> groups = new ArrayList<>();
 	private final JLabel where = label(11f, LIGHT_GRAY_COLOR);
@@ -147,23 +143,22 @@ final class RecommendedSharing extends JPanel
 		 */
 		JPanel details = column();
 		details.setName("recommended.details");
-		/* The six switches, in the order Settings and RuneLite's list give them. */
-		card.add(single(SharingFields.NAME, SharingFields.NAME.detail, details));
-		for (SharingFields.Section section : SharingFields.GROUPS)
+		/* The name goes with the press, so it is said first in the fold; then the three switches, as Settings gives them. */
+		details.add(heading(SharingFields.NAME.label));
+		details.add(detailLine("recommended.detail.shareName", SharingFields.NAME.detail));
+		for (SharingFields.Toggle toggle : SharingFields.TOGGLES)
 		{
-			Group group = new Group(section, details);
-			groups.add(group);
-			card.add(group.panel);
+			card.add(new Group(toggle, details).panel);
 		}
-		card.add(single(SharingFields.DEATH, DEATH_DETAIL, details));
 		card.add(gap(4));
 
 		JLabel drawn = label(11f, LIGHT_GRAY_COLOR);
 		refont(drawn, Font.BOLD);
 		drawn.setText(SharingControls.CLIENT_TITLE);
 		card.add(drawn);
-		card.add(single(SharingFields.DESTINATIONS, DESTINATIONS_DETAIL, details));
-		card.add(single(SharingFields.GROUP_ON_WORLD_MAP, GROUP_DETAIL, details));
+		card.add(new Group(SharingFields.IN_GAME, details).panel);
+		details.add(detailLine("recommended.detail.showDestination", DESTINATIONS_DETAIL));
+		details.add(detailLine("recommended.detail.showGroupOnWorldMap", GROUP_DETAIL));
 		/* Their words name the map, so offer() writes them. */
 		opens.setName("recommended.opens");
 		card.add(opens);
@@ -228,18 +223,16 @@ final class RecommendedSharing extends JPanel
 		return connected;
 	}
 
-	/** Every field the step names, in the order it draws them. */
+	/** Every field the step names, in the order it names them. */
 	static List<Field> all()
 	{
 		List<Field> all = new ArrayList<>();
 		all.add(SharingFields.NAME);
-		for (SharingFields.Section section : SharingFields.GROUPS)
+		for (SharingFields.Toggle toggle : SharingFields.TOGGLES)
 		{
-			all.addAll(section.fields);
+			all.addAll(toggle.fields);
 		}
-		all.add(SharingFields.DEATH);
-		all.add(SharingFields.DESTINATIONS);
-		all.add(SharingFields.GROUP_ON_WORLD_MAP);
+		all.addAll(SharingFields.IN_GAME.fields);
 		return all;
 	}
 
@@ -285,7 +278,7 @@ final class RecommendedSharing extends JPanel
 		setVisible(false);
 	}
 
-	/** The keys a press would turn on now: what is ticked, a group's every field, in the step's order. */
+	/** The keys a press would turn on now: the name, and every field of what is ticked, in the step's order. */
 	Set<String> ticked()
 	{
 		Set<String> ticked = new LinkedHashSet<>();
@@ -298,7 +291,9 @@ final class RecommendedSharing extends JPanel
 
 	private List<Field> tickedFields()
 	{
+		/* The name goes with the press, as the words over the rows say: a dot the group sees is somebody's. */
 		List<Field> ticked = new ArrayList<>();
+		ticked.add(SharingFields.NAME);
 		for (Map.Entry<JCheckBox, List<Field>> row : rows.entrySet())
 		{
 			if (row.getKey().isSelected())
@@ -331,19 +326,6 @@ final class RecommendedSharing extends JPanel
 	private void refreshGroups()
 	{
 		for (Group group : groups) group.refresh();
-	}
-
-	/** A choice of its own: a row in the group's weight, and what it sends in the fold. */
-	private JPanel single(Field field, String detail, JPanel details)
-	{
-		JPanel panel = column();
-		panel.setBorder(new EmptyBorder(1, 0, 1, 0));
-		JCheckBox box = box(field, 12f);
-		refont(box, Font.BOLD);
-		panel.add(box);
-		details.add(heading(field.label));
-		details.add(detailLine("recommended.detail." + field.key, detail));
-		return panel;
 	}
 
 	/** The fold under the rows: what each one sends, and the stream in full. */
@@ -382,18 +364,6 @@ final class RecommendedSharing extends JPanel
 		return line;
 	}
 
-	private JCheckBox box(Field field, float size)
-	{
-		JCheckBox box = new JCheckBox("<html><body width='" + (TEXT - INDENT - 10) + "'>"
-			+ field.label.replace("&", "&amp;") + "</body></html>");
-		box.setName("recommended." + field.key);
-		box.setBackground(BACK);
-		refont(box, size);
-		box.setToolTipText(field.detail);
-		rows.put(box, Collections.singletonList(field));
-		return box;
-	}
-
 	private static JPanel column()
 	{
 		return MapCompanionPanel.column(BACK);
@@ -411,36 +381,36 @@ final class RecommendedSharing extends JPanel
 	}
 
 	/**
-	 * One sharing group: its row, which stands for every field in it as its switch in Settings does,
-	 * and in the fold the fields a press would share, named in a line. The line follows the tick, so
-	 * it always says exactly what the press will send.
+	 * One switch: its row, which stands for every field under it as it does in Settings, what it
+	 * covers in grey under it, and in the fold the fields a press would share, named in a line. The
+	 * line follows the tick, so it always says exactly what the press will send.
 	 */
 	private final class Group
 	{
-		final SharingFields.Section section;
+		final SharingFields.Toggle section;
 		final JPanel panel = column();
 		final JCheckBox master;
 		final JLabel summary = label(11f, LIGHT_GRAY_COLOR);
 
-		Group(SharingFields.Section section, JPanel details)
+		Group(SharingFields.Toggle section, JPanel details)
 		{
 			this.section = section;
+			groups.add(this);
 			panel.setBorder(new EmptyBorder(1, 0, 1, 0));
-			/* The loot row's reminder wraps under its title in the grey of a note, rather than being cut. */
-			master = new JCheckBox(section != SharingFields.LOOT ? section.title
-				: "<html><body width='" + (TEXT - 30) + "'>" + SharingFields.LOOT.title
-				+ " <font color='#a5a5a5'>· kept two weeks</font></body></html>");
+			master = new JCheckBox(section.title);
 			master.setName("recommended.group." + section.id);
 			master.setBackground(BACK);
 			refont(master, Font.BOLD, 12f);
+			master.setToolTipText(SharingControls.tip(section.fields));
 			master.getAccessibleContext().setAccessibleDescription("Tick or untick every " + section.title + " field");
 			master.addActionListener(e -> refresh());
 			rows.put(master, section.fields);
 			panel.add(master);
+			panel.add(indented(wrapped(section.note, 11f, LIGHT_GRAY_COLOR, TEXT - INDENT)));
 			summary.setName("recommended.summary." + section.id);
 			details.add(heading(section.title));
 			details.add(summary);
-			if (section == SharingFields.LOOT)
+			if (section.fields.containsAll(SharingFields.LOOT.fields))
 			{
 				/* In full beside the loot fields; the row itself says "kept two weeks". */
 				JLabel kept = wrapped(MapCompanionConfig.FEED_KEPT, 11f, LIGHT_GRAY_COLOR, TEXT);

@@ -73,13 +73,13 @@ rule asks for it "either on the plugin, or on the configuration option", so no s
 an "Are you sure?" any more. The first Connect to osrs-map.com is that press and asks nothing more; a
 changed **Map address** is asked about once, naming the server, before any request goes there.
 After the first Connect to a map, and only then, the sidebar shows one step: a row each for the
-character name, the four sharing groups, and destinations and group markers, all ticked, with a line
-saying those two open one connection. *What each one sends*, one tap below the rows and before the
+three sharing switches and one for destinations and group markers, all ticked, with a line
+saying that one opens one connection. *What each one sends*, one tap below the rows and before the
 press, names every field in the sidebar's own words and the receive stream in full (one held
 connection to the named map, carrying the group code, member id and member key). The step's first
-line says the group sees what is ticked. *Where you died* is offered unticked; meetup
+line says the group sees the character name and what is ticked. Meetup
 notifications are not offered. One press, **Share what's ticked**, writes exactly those existing
-settings, as the switches in Settings do: the press is the opt-in, and nothing turns on
+settings and the character name, as the switches in Settings do: the press is the opt-in, and nothing turns on
 without it. Ticking and **Not now** write nothing. The step follows only the Connect
 that approved its map and only while every choice it offers is still off, so an update changes no
 existing player's settings and opens no stream for them. `RecommendedSharing` is the step;
@@ -90,8 +90,10 @@ existing player's settings and opens no stream for them. `RecommendedSharing` is
 settings under the groups keep their keys and stay what `SnapshotBuilder` reads; none is in the list.
 *Position and world* is declared `hidden`, and the other 22 are not declared at all: they are read
 by key (`ConfigStore.on`), and **Reset** turns them off in `MapCompanionPlugin.resetConfiguration`,
-since RuneLite resets only what is declared. Settings in the sidebar draws the same six switches,
-with *What each one sends* naming every field. `SharingGroups` writes a group's fields when its switch is pressed and moves the
+since RuneLite resets only what is declared. Settings in the sidebar draws three switches over
+them: *Where you are* is Map presence and Where you died, *Your account* is Progress and travel and
+Tasks and timers, and *Loot and milestones* is itself. The character name is a line and a link under
+them, and *What each one sends* names every field. `SharingGroups` writes a group's fields when its switch is pressed and moves the
 switch when they are written, so a switch shows on only while every field in it is; a group a player
 chose part of before the update shows off, and Settings names the fields that are on. Every switch
 starts off.
@@ -275,6 +277,14 @@ answering a reviewer. Since 1.7.0:
 - **Dailies collected:** a new sharing choice under Tasks and timers, off until chosen and in the one
   press at Connect, sending which of eight dailies were collected today, as disclosed above. A
   group's switch that was on before this update does not turn it on. No request or poll is added.
+- **Three sharing switches in the sidebar:** Settings and the step after Connect draw *Where you
+  are*, *Your account* and *Loot and milestones* where they drew six switches. RuneLite's list is
+  unchanged, and so is every field. An update changes nobody's settings: a switch only part of
+  which is on shows a dash and names the part, and nothing is written until it is pressed.
+- **The step after Connect ticks everything:** *Where you died*, offered unticked before, is under
+  *Where you are* and ticked, and the character name is written with the press, which the step's
+  first line says. Nothing is on until the press, and a player who connected before this update
+  is never shown the step.
 
 ## Before submission
 

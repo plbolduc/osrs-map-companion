@@ -46,7 +46,7 @@ import net.runelite.client.ui.ColorScheme;
 final class FarmRunPanel extends JPanel
 {
 	static final String AFTER_PORT_RUN = Words.of("farm.afterPortRun");
-	/* Settings names its groups, not their fields: patches and contracts both share under Tasks and timers. */
+	/* Settings names its switches, not their fields: patches, contracts and sea charts all share under Your account. */
 	static final String NEEDS_PATCHES = Words.of("farm.needsPatches");
 	static final String NEEDS_CONTRACT = Words.of("farm.needsContract");
 	static final String NEEDS_SEA_CHARTS = Words.of("farm.needsSeaCharts");

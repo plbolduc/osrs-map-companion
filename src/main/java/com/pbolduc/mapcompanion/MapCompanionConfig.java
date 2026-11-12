@@ -52,9 +52,10 @@ import net.runelite.client.config.Units;
  * <p>A nickname can label the member without naming an account. Saved choices keep their existing
  * keys so an update does not reset them.
  *
- * <p><b>Six switches, and the fields under them.</b> RuneLite's list shows sharing as the sidebar
- * does: the character name and where you died, and a switch for each of the four groups in
- * {@link SharingFields}. The 23 fields under those groups are still settings of their own, under the
+ * <p><b>Six switches, and the fields under them.</b> RuneLite's list shows sharing as six
+ * switches: the character name and where you died, and a switch for each of the four groups in
+ * {@link SharingFields}. The sidebar draws three over them, for a player who wants one answer, and
+ * this list is where half of one is chosen. The 23 fields under those groups are still settings of their own, under the
  * keys they have always had, and still what {@link SnapshotBuilder} and the readers read; a group's
  * switch is stored only because RuneLite draws a box from a stored value. {@link SharingGroups}
  * keeps each switch in step with its fields, and says which wins when they disagree.

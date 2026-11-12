@@ -36,6 +36,12 @@ import org.junit.Test;
  */
 public class SharingSummaryTest
 {
+	/**
+	 * The press after Connect left where you died off, so its line was "Sharing all but where you
+	 * died". It ticks everything now, so a new player reads "Sharing everything"; one who pressed
+	 * before reads what they always have, the one field that is off by its own name. The name was a
+	 * switch on this line; it has none now, and the tooltip says how the group sees the player.
+	 */
 	@Test
 	public void theLineNamesWhatIsOffWhenThatIsShorter()
 	{
@@ -45,27 +51,42 @@ public class SharingSummaryTest
 		{
 			config.set(key, true);
 		}
-		assertEquals("what the one press after Connect leaves", "Sharing all but where you died", line(config));
+		assertEquals("what the one press after Connect leaves", "Sharing everything", line(config));
+		assertTrue(list(config), list(config).endsWith("<br>Shown as: your character name</body></html>"));
+		config.set("shareDeath", false);
+		assertEquals("what that press left before it ticked the death", "Sharing all but where you died", line(config));
 		config.set(MapCompanionConfig.KEY_SHARE_NAME, false);
-		assertEquals("Sharing all but character name, where you died", line(config));
-		config.set(MapCompanionConfig.KEY_SHARE_NAME, true);
-		config.set("shareDeath", true);
-		assertEquals("Sharing everything", line(config));
+		assertEquals("the name is no switch", "Sharing all but where you died", line(config));
+		assertTrue(list(config), list(config).endsWith("<br>Shown as: Member</body></html>"));
+		on(config, SharingFields.LOOT, false);
+		assertEquals("Sharing all but where you died, loot and milestones", line(config));
 	}
 
+	/**
+	 * Rewritten for three switches where there were six: the one or two that are on are named while
+	 * no more is on than off, a switch missing fields is part of itself, and the count is left for
+	 * the profile where every switch is partly on.
+	 */
 	@Test
 	public void theLineNamesWhatIsOnWhenThatIsShorterAndCountsOtherwise()
 	{
 		HarnessConfig config = config();
-		on(config, SharingFields.PRESENCE);
-		assertEquals("Sharing map presence", line(config));
-		on(config, SharingFields.LOOT);
-		assertEquals("Sharing map presence, loot and milestones", line(config));
+		on(config, SharingFields.PRESENCE, true);
+		assertEquals("the death is under the same switch, and off", "Sharing part of where you are", line(config));
 		config.set("shareDeath", true);
-		assertEquals("three of six is neither few on nor few off", "Sharing 3 of 6 choices", line(config));
+		assertEquals("Sharing where you are", line(config));
+		on(config, SharingFields.LOOT, true);
+		assertEquals("Sharing all but your account", line(config));
+		on(config, SharingFields.PRESENCE, false);
+		config.set("shareDeath", false);
+		assertEquals("Sharing loot and milestones", line(config));
+		config.set("sharePosition", true);
+		config.set("shareSkills", true);
+		config.set(MapCompanionConfig.KEY_SHARE_PETS, false);
+		assertEquals("every switch partly on is neither few on nor few off", "Sharing 0 of 3 choices, 3 in part", line(config));
 	}
 
-	/** A group a player chose part of before the switches is said as part of it, on the line and in the tooltip. */
+	/** A switch a player chose part of is said as part of it, or by the one field that is off, on the line and in the tooltip. */
 	@Test
 	public void aPartlySharedGroupIsSaidAsPartOfIt()
 	{
@@ -75,15 +96,18 @@ public class SharingSummaryTest
 			config.set(key, true);
 		}
 		config.set("shareFarming", false);
-		assertEquals("Sharing all but part of tasks and timers, where you died", line(config));
+		assertEquals("Sharing all but farming patches", line(config));
+		assertTrue(list(config), list(config).contains("Your account: all but Farming patches<br>"));
+		config.set("shareClue", false);
+		assertEquals("Sharing all but part of your account", line(config));
 
 		HarnessConfig few = config();
 		few.set("shareSlayer", true);
 		few.set("shareClue", true);
-		assertEquals("Sharing part of tasks and timers", line(few));
+		assertEquals("Sharing part of your account", line(few));
 		String list = list(few);
-		assertTrue(list, list.contains("Tasks and timers: Slayer task, Clue step"));
-		assertTrue(list, list.contains("Map presence: off"));
+		assertTrue(list, list.contains("Your account: Slayer task, Clue step"));
+		assertTrue(list, list.contains("Where you are: off"));
 	}
 
 	/** Pet rewards and collection additions go out only with Notable drops and levels, so they count only with it. */
@@ -94,7 +118,7 @@ public class SharingSummaryTest
 		config.set(MapCompanionConfig.KEY_SHARE_PETS, true);
 		config.set(MapCompanionConfig.KEY_SHARE_COLLECTION, true);
 		assertEquals("nothing goes out, so nothing is said", "Character sharing off", line(config));
-		on(config, SharingFields.LOOT);
+		on(config, SharingFields.LOOT, true);
 		assertEquals("Sharing loot and milestones", line(config));
 	}
 
@@ -106,18 +130,19 @@ public class SharingSummaryTest
 	public void theTooltipGivesEachSwitchALineAndWraps()
 	{
 		HarnessConfig config = config();
-		on(config, SharingFields.PRESENCE);
+		on(config, SharingFields.PRESENCE, true);
 		String list = list(config);
 		assertTrue(list, list.startsWith("<html><body width='"));
-		assertEquals(list, "Character name: off<br>Map presence: on<br>Progress and travel: off<br>Tasks and timers: off"
-			+ "<br>Loot and milestones: off<br>Where you died: off", list.replaceAll("^<html><body width='\\d+'>|</body></html>$", ""));
+		/* Six lines, one a switch, before; three now, a partly shared one in the fewer words, and the name's. */
+		assertEquals(list, "Where you are: all but Where you died<br>Your account: off<br>Loot and milestones: off<br>Shown as: Member",
+			list.replaceAll("^<html><body width='\\d+'>|</body></html>$", ""));
 	}
 
-	private static void on(HarnessConfig config, SharingFields.Section section)
+	private static void on(HarnessConfig config, SharingFields.Section section, boolean on)
 	{
 		for (SharingFields.Field field : section.fields)
 		{
-			config.set(field.key, true);
+			config.set(field.key, on);
 		}
 	}
 
