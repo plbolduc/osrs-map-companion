@@ -134,7 +134,8 @@ on RuneLite's world map in the same colours. **Route** plans the way to a friend
 If you made the group or own it, right-click a friend and choose **Remove from group…** to take them out;
 only a new invite lets them back. Co-owners are removed on the website.
 
-Create a meetup with **Meet here…**, see who is coming, and answer **Going**, **Maybe**, **Can't**
+Create a meetup with **Meet here…**, where you stand or from a right-click anywhere on the game's
+world map, see who is coming, and answer **Going**, **Maybe**, **Can't**
 or **On my way**. You can turn on a reminder before it starts.
 
 ## Your character on the website

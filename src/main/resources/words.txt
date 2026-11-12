@@ -93,6 +93,8 @@ settings.leaveOthers= other groups will need a new invite too, so they leave you
 settings.forgetLoot=Forget every kill and drop counted for this character?\n\nDrop luck starts again from zero, and your pinned drop goes with it.\nThis cannot be undone.
 
 # SharingControls: What you share in Settings.
+group.meetStand=A meetup where you stand
+group.meetSpot=A meetup at the spot you picked
 settings.shareSub=Sent to the map and shown to your group.
 client.sub=Only what you see on your own screen. Nothing here shares anything about you.
 settings.keysElsewhere=Keys for Reroute and Follow, and the reminder's minutes, are in RuneLite's own settings for this plugin.

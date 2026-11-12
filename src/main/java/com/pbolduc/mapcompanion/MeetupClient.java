@@ -227,13 +227,16 @@ final class MeetupClient
 			() -> group.answered(eventId, answer, System.currentTimeMillis())));
 	}
 
-	/** Meet here, at this title and time, on the tile and world the player is on. A press. */
-	void create(String title, long startsAtMs)
+	/**
+	 * Meet here, at this title and time, on the player's world: at {@code spot}, picked on the game's
+	 * world map, or on the tile the player is on when there is none. A press.
+	 */
+	void create(String title, long startsAtMs, @Nullable WorldPoint spot)
 	{
 		clientThread.invokeLater(() ->
 		{
 			boolean playing = client.getGameState() == GameState.LOGGED_IN;
-			WorldPoint here = !playing || WorldTiles.isInstance(client) ? null : DestinationRoute.standing(client);
+			WorldPoint here = !playing ? null : spot != null ? spot : WorldTiles.isInstance(client) ? null : DestinationRoute.standing(client);
 			if (here == null)
 			{
 				said = new Said("meet", false, playing ? NEEDS_TILE : LOG_IN, destinations.generation());

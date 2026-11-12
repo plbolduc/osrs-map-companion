@@ -36,7 +36,7 @@ destinationHintArrow|Hint arrow to a destination|Point the game's own arrow at a
 showStepOnScreen|Step on screen|While you follow a route, the step you are on in a small box over the game. Nothing leaves this computer.
 outlineStepTeleport|Step's teleport outlined|While you follow a route, the item or spell a teleport step uses, outlined where you click it. Nothing leaves this computer.
 drawWithShortestPath|Draw paths with Shortest Path|When you follow a route, the Shortest Path plugin draws each walking step. Nothing leaves this computer.
-routeHereOnWorldMap|Route here on the world map|Right-click the world map for the way to that spot. A press sends that spot and where you stand, as Route does.
+routeHereOnWorldMap|Route here on the world map|Right-click the world map for the way to that spot, or for a meetup there. A press sends that spot and where you stand, as Route does.
 dropLuckChat|Drop luck in chat|One chat line when a drop with a known rate lands. Nothing leaves this computer.
 markFarmRunInBank|Farm run teleports in the bank|Outline in the bank the teleports a farm run needs that you are not carrying. Nothing leaves this computer.
 shareMapPresence|Map presence|

@@ -756,6 +756,14 @@ public class MapCompanionPanel extends PluginPanel
 		nowCards.scrollRectToVisible(new Rectangle(0, 0, nowCards.getWidth(), height));
 	}
 
+	/** Meet here from the game's world map: the Group tab, with its form open for that spot. */
+	void meetAt(net.runelite.api.coords.WorldPoint spot)
+	{
+		openSettings(false);
+		views.select(CompanionViews.View.GROUP);
+		groupPanel.meetAt(spot);
+	}
+
 	/** What a route key or the step box's menu presses: Follow or Pause, Reroute, and Dismiss or End run. */
 	enum Act
 	{

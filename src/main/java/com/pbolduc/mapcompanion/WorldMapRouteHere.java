@@ -70,6 +70,13 @@ import static com.pbolduc.mapcompanion.RoutePress.Said;
 class WorldMapRouteHere
 {
 	static final String OPTION = "Route here";
+	/**
+	 * Beside it: a meetup at the spot, where the sidebar's own Meet here is where the player stands.
+	 * The plugin hands the spot to the Group tab's form, which asks for the title and the time.
+	 */
+	static final String MEET = "Meet here…";
+	@Nullable
+	java.util.function.Consumer<WorldPoint> meet;
 	/** The press's source, which {@link RoutePress#said} answers by. */
 	static final String SOURCE = "worldmap";
 	/** The route's name when the map's answer names no landmark near the spot. */
@@ -115,21 +122,29 @@ class WorldMapRouteHere
 				return;
 			}
 		}
-		client.getMenu().createMenuEntry(0)
-			.setOption(OPTION)
-			.setTarget("")
-			.setType(MenuAction.RUNELITE)
-			.onClick(chosen -> press());
+		/* Meetups are drawn only with the group's destinations on, so one is offered only then. */
+		if (meet != null && config.showDestination())
+		{
+			entry(MEET, meet);
+		}
+		entry(OPTION, this::press);
 	}
 
-	private void press()
+	/** One entry at the foot of the menu, handed the spot the menu opened on. */
+	private void entry(String option, java.util.function.Consumer<WorldPoint> pressed)
 	{
-		WorldPoint spot = spotAt(opened != null ? opened : client.getMouseCanvasPosition());
-		if (spot == null)
-		{
-			return;
-		}
-		press(spot);
+		client.getMenu().createMenuEntry(0)
+			.setOption(option)
+			.setTarget("")
+			.setType(MenuAction.RUNELITE)
+			.onClick(chosen ->
+			{
+				WorldPoint spot = spotAt(opened != null ? opened : client.getMouseCanvasPosition());
+				if (spot != null)
+				{
+					pressed.accept(spot);
+				}
+			});
 	}
 
 	/** Ask for the way to a spot, marked on the world map until the answer is in. */
