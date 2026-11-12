@@ -543,15 +543,6 @@ final class RouteStepsView extends JPanel
 	}
 
 	/**
-	 * "2. Walk 12 tiles to the bank": the website's number and the step, on one line, where the step
-	 * is said outside this view's own number column — the box over the game.
-	 */
-	static String stepLine(int index, RouteStep step)
-	{
-		return (index + 1) + ". " + step.title;
-	}
-
-	/**
 	 * The line over the steps of the way being followed: its length, and its name only when the first
 	 * step does not already say it. "Lumbridge Home Teleport · 52 tiles" sat over "Cast Lumbridge Home
 	 * Teleport", the same words twice in two lines; a way named for something its first step does not

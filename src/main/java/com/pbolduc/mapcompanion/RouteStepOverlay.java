@@ -64,9 +64,11 @@ import net.runelite.client.util.Text;
  * another. A destination's name was typed by somebody in the group, and an overlay draws colour
  * tags, so every line has its tags taken out first.
  *
- * <p>A step keeps the number its pin carries on the world map. A run's leg has no step pins, and its
- * stop's number heads the box as it heads the stop's pin, so on a leg the step is its words alone:
- * a second number under the first would point at nothing on the map.
+ * <p>The step is its words, and at the right of their line how far through the way it is, "2/3", in
+ * the map's amber: the step's number, the one its pin carries on the world map, of the steps in the
+ * way followed. A run's leg has no step pins, and its stop's number heads the box as it heads the
+ * stop's pin; its count says how far through the leg. RuneLite's line keeps a third of the box for
+ * a right-hand text once the two do not fit on one line, so a long step wraps in the other two.
  *
  * <p>A teleport step has the game's picture of what to click before its words, as the sidebar's
  * row does: the item's sprite or the spell's icon, by the id the map sent, from this client's own
@@ -167,7 +169,7 @@ class RouteStepOverlay extends OverlayPanel
 		RelayResponse.Destination destination = destinations.getDestination();
 		DestinationRoute.View steps = route.view();
 		boolean leg = run.ownsDestinationRoute(steps);
-		Box box = box(steps, destination == null ? null : destination.name, leg);
+		Box box = box(steps, destination == null ? null : destination.name);
 		if (box == null)
 		{
 			return null;
@@ -186,7 +188,7 @@ class RouteStepOverlay extends OverlayPanel
 			.leftFont(FontManager.getRunescapeBoldFont())
 			.build());
 		List<LineComponent> words = new ArrayList<>();
-		words.add(LineComponent.builder().left(box.step).build());
+		words.add(LineComponent.builder().left(box.step).right(box.count).rightColor(MapPin.AMBER).build());
 		if (box.detail != null)
 		{
 			words.add(LineComponent.builder().left(box.detail).leftColor(Color.LIGHT_GRAY).build());
@@ -245,6 +247,8 @@ class RouteStepOverlay extends OverlayPanel
 	{
 		final String title;
 		final String step;
+		/** "2/3": the step's number, of the steps in the way followed. */
+		final String count;
 		@Nullable
 		final String detail;
 		/** What the sidebar prints under the step: a Wilderness warning, a ride's asks, a note. */
@@ -256,28 +260,9 @@ class RouteStepOverlay extends OverlayPanel
 		final Integer spriteId;
 	}
 
-	/** The box as {@link #render} draws it: the route followed now, a run's leg read as one. */
-	@Nullable
-	Box box(@Nullable RelayResponse.Destination destination)
-	{
-		DestinationRoute.View view = route.view();
-		return box(view, destination == null ? null : destination.name, run.ownsDestinationRoute(view));
-	}
-
-	/** The box for a destination's route as it stands, or null when nothing is being followed to a step. */
+	/** The box for a route as it stands, a run's leg included, or null when nothing is being followed to a step. */
 	@Nullable
 	static Box box(@Nullable DestinationRoute.View view, @Nullable String name)
-	{
-		return box(view, name, false);
-	}
-
-	/**
-	 * The box for a route as it stands, or null when nothing is being followed to a step.
-	 *
-	 * @param leg whether the route is a run's leg, whose steps have no pins to share a number with
-	 */
-	@Nullable
-	static Box box(@Nullable DestinationRoute.View view, @Nullable String name, boolean leg)
 	{
 		RelayResponse.RouteStep step = followed(view);
 		if (step == null)
@@ -286,7 +271,6 @@ class RouteStepOverlay extends OverlayPanel
 		}
 		String named = DestinationSceneOverlay.name(name, NAME_MAX);
 		String title = named == null ? "Route" : named;
-		String line = leg ? step.title : RouteStepsView.stepLine(view.step, step);
 		List<String> notes = new ArrayList<>();
 		for (String note : step.notes == null ? Collections.<String>emptyList() : step.notes)
 		{
@@ -296,7 +280,8 @@ class RouteStepOverlay extends OverlayPanel
 				notes.add(said);
 			}
 		}
-		return new Box(title, Text.removeTags(line), said(step.detail), notes, step.itemId, step.spriteId);
+		return new Box(title, Text.removeTags(step.title), (view.step + 1) + "/" + view.steps().size(), said(step.detail),
+			notes, step.itemId, step.spriteId);
 	}
 
 	/** The step a followed route is on, the one the box says; null when none is followed or it has arrived. */
