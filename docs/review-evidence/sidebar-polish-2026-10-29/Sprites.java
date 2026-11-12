@@ -98,10 +98,16 @@ final class Sprites
 				 * The combat tab's crossed swords is the one sprite the website keeps under a name of its own.
 				 * It also stands in for the multi-combat zone's swords, which the website has no copy of.
 				 */
-				show(label, read(root, spriteId == net.runelite.api.gameval.SpriteID.SideIcons.COMBAT
+				BufferedImage kept = read(root, spriteId == net.runelite.api.gameval.SpriteID.SideIcons.COMBAT
 					|| spriteId == net.runelite.api.gameval.SpriteID.OVERLAY_MULTIWAY
 					? "osrs-icons/1x/skill-combat.png" : SPELLS.containsKey(spriteId)
-					? "osrs-icons/1x/" + SPELLS.get(spriteId) + ".png" : "osrs-icons/cache/" + spriteId + ".png"), box);
+					? "osrs-icons/1x/" + SPELLS.get(spriteId) + ".png" : "osrs-icons/cache/" + spriteId + ".png");
+				/*
+				 * The walking boot and the two Sailing boats a step is drawn by: sprites the website keeps
+				 * no copy of, so they are kept beside this file, as the game cache holds them.
+				 */
+				show(label, kept != null ? kept
+					: read("docs/review-evidence/sidebar-polish-2026-10-29", "sprites/" + spriteId + ".png"), box);
 			}
 
 			@Override

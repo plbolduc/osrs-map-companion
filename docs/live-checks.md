@@ -547,6 +547,12 @@ continuously witnessed empty-to-newly-planted transition mints a stable completi
       moves on. Note how close the boat had to be for each kind of task, above all one on an islet,
       a wreck or the shore, which the map waits for at the nearest water. With Sea charts charted
       off, the picker says to turn on Progress and travel and Start waits.
+- [ ] On any route, a walk step has the minimap's walking boot beside it, and on a voyage Board
+      and Dock have a small boat and Sail a ship at sea. This is the first time a client draws
+      those three sprites here, so say if any comes up empty or as something else. A stop's own
+      picture in a run, and the box over the game, are still a teleport's and never a boot.
+- [ ] On a farm run and a port-task run a bar under the run's name fills as stops are done, and
+      a port-task run's stops have their sail at the right with the tiles left in the count.
 - [ ] On a Sea charting run, each task still ahead has its tool's picture beside it: a spyglass,
       a captain's log, a crowbar, a current duck, a fishbowl helmet or a portable weather station.
       This is the first time a client draws those six items by their ids, so say which, if any,

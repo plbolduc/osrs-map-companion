@@ -58,27 +58,46 @@ public class VoyageShot
 		Map<Integer, String> moored = new HashMap<>();
 		moored.put(1, "Port Sarim");
 		String out = args[0];
+		/* Built first and painted after: a sprite lands on its label a turn of the event queue later. */
+		Map<String, RouteStepsView> shots = new java.util.LinkedHashMap<>();
 		SwingUtilities.invokeAndWait(() ->
 		{
 			try
 			{
-				RouteStepsView view = new RouteStepsView(route::choose);
+				/* With the renderer's sprites, as the sidebar's own card has the client's: a step is drawn by its kind. */
+				GameSprites sprites = com.google.inject.Guice.createInjector(Sprites::bind).getInstance(GameSprites.class);
+				RouteStepsView view = new RouteStepsView(route::choose, sprites);
 				route.advance(new WorldPoint(3051, 3192, 0), new DestinationRoute.Sailing(false, moored));
 				view.show(route.view(), "Shortest Path draws each walk when you reach it.");
-				SidebarPolishShot.shoot(view, out + "/voyage-board.png");
+				shots.put(out + "/voyage-board.png", view);
 				route.advance(new WorldPoint(3051, 3192, 0), new DestinationRoute.Sailing(true, null));
-				view = new RouteStepsView(route::choose);
+				view = new RouteStepsView(route::choose, sprites);
 				view.show(route.view(), "Shortest Path draws each walk when you reach it.");
-				SidebarPolishShot.shoot(view, out + "/voyage-sail.png");
+				shots.put(out + "/voyage-sail.png", view);
 				DestinationRoute moved = new DestinationRoute();
 				moved.sync(destination);
 				moved.choose(3);
 				Map<Integer, String> elsewhere = new HashMap<>();
 				elsewhere.put(1, "Rimmington");
 				moved.advance(new WorldPoint(3100, 3200, 0), new DestinationRoute.Sailing(false, elsewhere));
-				view = new RouteStepsView(moved::choose);
+				view = new RouteStepsView(moved::choose, sprites);
 				view.show(moved.view());
-				SidebarPolishShot.shoot(view, out + "/voyage-moved.png");
+				shots.put(out + "/voyage-moved.png", view);
+			}
+			catch (Exception e)
+			{
+				throw new RuntimeException(e);
+			}
+		});
+		SwingUtilities.invokeAndWait(() -> { });
+		SwingUtilities.invokeAndWait(() ->
+		{
+			try
+			{
+				for (Map.Entry<String, RouteStepsView> shot : shots.entrySet())
+				{
+					SidebarPolishShot.shoot(shot.getValue(), shot.getKey());
+				}
 			}
 			catch (Exception e)
 			{

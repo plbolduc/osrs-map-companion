@@ -71,7 +71,7 @@ public class SidebarPolishShot
 	static final List<String> STATES = Arrays.asList("fresh", "fresh-log", "connect", "home", "route", "group", "settings", "settings-closed",
 		"stars", "stars-filters", "stars-route", "stars-pinned", "stars-busy", "stars-busy-picked", "stars-busy-open", "stars-busy-ways", "search", "search-whip", "search-whip-card", "death", "meetup", "dropluck", "dropluck-card", "status",
 		"farm", "farm-card", "farm-bring", "farm-count", "slayer", "slayer-card", "slayer-open", "slayer-expanded", "slayer-blocked",
-		"port-tasks", "port-tasks-card", "port-tasks-unread", "port-run", "port-run-changed", "chart-run", "tasks", "tasks-folded");
+		"port-tasks", "port-tasks-card", "port-tasks-unread", "port-run", "port-run-changed", "chart-run", "quest-route", "tasks", "tasks-folded");
 
 	static HarnessGame game;
 
@@ -92,7 +92,8 @@ public class SidebarPolishShot
 				? (JComponent) get(panel[0], "searchPanel") : state.equals("farm-card") || state.equals("farm-bring") || state.equals("farm-count")
 				|| state.equals("chart-run")
 				? (JComponent) get(panel[0], "farmRunPanel") : state.equals("slayer-card") || state.equals("slayer-open")
-				? (JComponent) get(panel[0], "slayerPanel") : state.equals("slayer-blocked")
+				? (JComponent) get(panel[0], "slayerPanel") : state.equals("quest-route")
+				? (JComponent) get(get(panel[0], "nowCards"), "destinationSlot") : state.equals("slayer-blocked")
 				? (JComponent) get(panel[0], "slayerPanel") : state.equals("port-tasks-card") || state.equals("port-tasks-unread") || state.startsWith("port-run")
 				? (JComponent) get(panel[0], "portTasksPanel") : panel[0], args[0] + "/" + state + ".png")));
 		}
@@ -564,6 +565,11 @@ public class SidebarPolishShot
 
 	static void after(String state, MapCompanionPanel panel) throws Exception
 	{
+		if (state.equals("quest-route"))
+		{
+			questRouted(panel);
+			refresh(panel);
+		}
 		if (state.equals("route"))
 		{
 			/* Each other way opens with its teleport's picture. */
@@ -718,6 +724,29 @@ public class SidebarPolishShot
 	 * The picked star's Route, answered, by RoutePress's own steps for an answer: the star pinned as this
 	 * client's destination with its way, followed from the press, as a pressed Route always is.
 	 */
+	/**
+	 * Home after Route on Quest Helper's step, as the press's answer leaves it: the step pinned at
+	 * Lumbridge Castle's bank, the contract's own route for the way there, and the quest-start star
+	 * the press draws beside the card's name. Quest Helper has moved on by the time of the picture,
+	 * so Reroute waits. The press itself asks the map, which a renderer has none of.
+	 */
+	static void questRouted(MapCompanionPanel panel) throws Exception
+	{
+		Object cards = get(panel, "nowCards");
+		GameSprites sprites = (GameSprites) get(cards, "sprites");
+		RoutePress press = (RoutePress) get(cards, "routePress");
+		WorldPoint step = new WorldPoint(3208, 3220, 2);
+		RoutePress.Target target = RoutePress.Target.tile("quest" + step, step, Words.of("now.questStep"), null, null)
+			.showing((label, box) -> sprites.sprite(label, net.runelite.api.gameval.SpriteID.Mapfunction.QUEST_START, 15));
+		RelayResponse.Destination answer = RoutePress.destination(target, null, route());
+		DestinationState destinations = (DestinationState) get(panel, "destinationState");
+		destinations.selectLocal(answer);
+		((DestinationRoute) get(cards, "destinationRoute")).adoptPressed(answer);
+		java.lang.reflect.Constructor<?> shown = Class.forName("com.pbolduc.mapcompanion.RoutePress$Shown").getDeclaredConstructors()[0];
+		shown.setAccessible(true);
+		set(press, "shown", shown.newInstance(DestinationRoute.keyOf(answer), get(target, "picture"), destinations.generation()));
+	}
+
 	static void starRouted(MapCompanionPanel panel, StarsClient client) throws Exception
 	{
 		StarsModel.Star star = client.model.find(client.model.selected);
