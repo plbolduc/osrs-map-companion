@@ -218,6 +218,7 @@ public class MapCompanionPanel extends PluginPanel
 		});
 		this.nowCards = new NowCards(config, destinationState, deathWatcher, destinationMarker, destinationRoute,
 			shortestPath, routePress, clueReader, farmRunRoute, sprites, this::refresh, this::mapUrl);
+		nowCards.world(groupState::world);
 		this.dropLuck = new DropLuckPanel(lootLog, DropLuckPanel.Pictures.of(itemManager));
 		this.starsPanel = new StarsPanel(starsClient, destinationState, clientThread, destinationMarker, routePress, this::mapUrl,
 			destinationRoute, shortestPath, config, sprites,

@@ -369,6 +369,39 @@ public class DestinationCardTest
 		assertNull("words have no tile to hover for", named(cards, "now.clue.detail").getToolTipText());
 	}
 
+	/**
+	 * The destination's world was the line's grey whatever world the player was on. It is green while
+	 * they are on it, as a friend's and a meetup's is under Group, and only the world: the note after
+	 * it keeps the grey. On another world, or on none, nothing is green, and a hop recolours it at the
+	 * next refresh.
+	 */
+	@Test
+	public void theDestinationsWorldIsGreenWhileYouAreOnIt() throws Exception
+	{
+		int[] world = {444};
+		SwingUtilities.invokeAndWait(() -> cards.world(() -> world[0]));
+		destinations.selectLocal(mine());
+		refresh();
+		JLabel line = named(cards, "now.destination.detail");
+		assertTrue("on another world the line is as it was: " + line.getText(),
+			line.getText().contains(">W302 · T7 · 16m left<") && !line.getText().contains("<font"));
+		world[0] = 302;
+		refresh();
+		assertTrue(line.getText(), line.getText().contains("<font color='#34d399'>W302</font> · T7 · 16m left<"));
+		world[0] = 0;
+		refresh();
+		assertFalse("on no world, none is green", line.getText().contains("<font"));
+
+		RelayResponse.Destination typed = mine();
+		typed.world = 302;
+		typed.note = "<b>W302</b> & co";
+		destinations.selectLocal(typed);
+		world[0] = 302;
+		refresh();
+		assertTrue("what the map sent is still escaped beside the green: " + line.getText(),
+			line.getText().contains("<font color='#34d399'>W302</font> · &lt;b&gt;W302&lt;/b&gt; &amp; co<"));
+	}
+
 	/** A search pick draws its row's own picture: here a bank's world-map icon. */
 	@Test
 	public void aSearchPickShowsItsRowsPicture() throws Exception

@@ -27,6 +27,7 @@ package com.pbolduc.mapcompanion;
 
 import java.awt.Dimension;
 import java.util.ArrayList;
+import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -84,6 +85,8 @@ final class NowCards extends JPanel
 	@Nullable
 	private RoutePress.Picture shownPicture;
 	private final JLabel destinationDetail = detail();
+	/** The world this client is on, or zero: the sidebar's, once it has one to give. See {@link #world}. */
+	private IntSupplier world = () -> 0;
 	private final JPanel destinationActions = row(DARKER_GRAY_COLOR);
 	private List<JButton> shownDestinationActions = new ArrayList<>();
 	/*
@@ -251,6 +254,7 @@ final class NowCards extends JPanel
 		deathSaid.setName("now.death.said");
 		clueRouteButton.setName("now.clue.route");
 		clueDetail.setName("now.clue.detail");
+		destinationDetail.setName("now.destination.detail");
 		clueRouteButton.setToolTipText(CLUE_ROUTE_TIP);
 		rerouteButton.setToolTipText(REROUTE_TIP);
 		rerouteButton.addActionListener(e ->
@@ -568,7 +572,10 @@ final class NowCards extends JPanel
 				picture != null ? CARD_TEXT_WIDTH - DESTINATION_PICTURE - DESTINATION_PICTURE_GAP : CARD_TEXT_WIDTH);
 			String detail = destinationDetail(destination);
 			destinationDetail.setVisible(!detail.isEmpty());
-			setWrapped(destinationDetail, detail, CARD_TEXT_WIDTH);
+			/* The world green while the player is on it, as a friend's and a meetup's is under Group. */
+			boolean here = destination.world != null && destination.world == world.getAsInt();
+			GroupPanel.setMarkup(destinationDetail,
+				GroupPanel.markup(detail, here ? "W" + destination.world : null, GroupPanel.HERE, CARD_TEXT_WIDTH));
 		}
 		/* Only the route of the destination on the card: for a tick after a change they can differ. */
 		DestinationRoute.View route = destinationRoute.view();
@@ -689,6 +696,12 @@ final class NowCards extends JPanel
 		}
 		/** The heading goes with the last card under it, rather than naming nothing. */
 		setVisible((destination != null && !farmDestination) || death != null || (clue != null && paired) || questSlot.isVisible());
+	}
+
+	/** Where the card reads the world the player is on, so the destination's world is green while it is that one. */
+	void world(IntSupplier world)
+	{
+		this.world = world;
 	}
 
 	/**

@@ -105,7 +105,7 @@ final class GroupPanel extends JPanel
 	 * gives the player's own world, after the game's own friends list. On any other world it keeps the
 	 * line's grey.
 	 */
-	private static final String HERE = "#34d399";
+	static final String HERE = "#34d399";
 	/** A friend's button for the game's own world map; "Show on world map" does not fit beside Route. */
 	static final String WORLD_MAP = "World map";
 	private static final String MEETUP_ROUTE_TIP = Words.of("meetup.routeTip");
@@ -1079,7 +1079,7 @@ final class GroupPanel extends JPanel
 	}
 
 	/** Set a label's markup only when it changed: the same text set again still repaints it. */
-	private static void setMarkup(JLabel label, String html)
+	static void setMarkup(JLabel label, String html)
 	{
 		if (!html.equals(label.getText()))
 		{
