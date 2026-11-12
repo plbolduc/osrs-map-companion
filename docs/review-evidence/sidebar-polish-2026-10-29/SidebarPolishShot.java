@@ -67,7 +67,7 @@ import okhttp3.OkHttpClient;
 public class SidebarPolishShot
 {
 	static final List<String> STATES = Arrays.asList("fresh", "fresh-log", "connect", "home", "route", "group", "settings", "settings-closed",
-		"stars", "stars-filters", "stars-route", "search", "search-whip", "search-whip-card", "death", "meetup", "dropluck", "dropluck-card", "status",
+		"stars", "stars-filters", "stars-route", "stars-pinned", "stars-busy", "stars-busy-picked", "stars-busy-open", "stars-busy-ways", "search", "search-whip", "search-whip-card", "death", "meetup", "dropluck", "dropluck-card", "status",
 		"farm", "farm-card", "farm-bring", "farm-count", "slayer", "slayer-card", "slayer-open", "slayer-expanded", "slayer-blocked",
 		"port-tasks", "port-tasks-card", "port-tasks-unread", "port-run", "port-run-changed");
 
@@ -172,6 +172,8 @@ public class SidebarPolishShot
 					}
 				});
 				bind(Gson.class).toInstance(gson);
+				/* Shortest Path as not installed: its own constructor asks RuneLite's plugin manager, which a renderer has none of. */
+				bind(ShortestPath.class).toInstance(new ShortestPath(message -> { }));
 				bind(OkHttpClient.class).toInstance(new OkHttpClient());
 				bind(MapCompanionConfig.class).toInstance(config);
 				bind(ConfigStore.class).toInstance(store);
@@ -602,18 +604,67 @@ public class SidebarPolishShot
 			StarsPanel stars = (StarsPanel) get(panel, "starsPanel");
 			StarsClient client = (StarsClient) get(stars, "service");
 			String feed = new String(Files.readAllBytes(Paths.get("src/test/resources/companion-stars.sample.json")), StandardCharsets.UTF_8);
-			client.model.accept(new Gson().fromJson(feed, StarsModel.Feed.class));
+			/* The website's four-site fixture, or an evening's worth of sites for the scenes that measure a long list. */
+			boolean busy = state.contains("busy");
+			client.model.accept(busy ? Busy.feed() : new Gson().fromJson(feed, StarsModel.Feed.class));
 			client.message = null;
-			client.model.miningLevel = 72;
-			client.model.skillTotal = 1620;
+			client.model.miningLevel = busy ? 99 : 72;
+			/* The world the scene logs into, which the tab reads on the client thread a renderer never drains. */
+			client.model.playerWorld = 302;
+			client.model.skillTotal = busy ? 2100 : 1620;
+			if (busy)
+			{
+				client.model.preferences.filters.hideWilderness = false;
+			}
 			press(panel, "companionView.stars");
 			stars.refresh();
 			for (StarsModel.Site site : client.model.sites())
 			{
-				if (site.name.equals("Rimmington mine"))
+				if (site.name.equals("Rimmington mine") && !busy)
+				{
+					/* Its first world picked, by a press on the card, and the fold opened on the others. */
+					press(panel, "stars.site." + site.key);
+					press(panel, "stars.expand." + site.key);
+				}
+				if (site.name.equals("Mine north-west of hunter guild") && (state.equals("stars-busy-picked") || state.equals("stars-busy-ways")))
+				{
+					press(panel, "stars.site." + site.key);
+				}
+				if (site.name.equals("Varrock east bank") && state.equals("stars-busy-open"))
 				{
 					press(panel, "stars.expand." + site.key);
-					press(panel, "stars.world." + site.worlds.get(0).id);
+				}
+			}
+			/* Pin, by the steps its press takes: the press itself needs the marker a renderer has none of. */
+			if (state.equals("stars-pinned"))
+			{
+				StarsModel.Star star = client.model.find(client.model.selected);
+				RelayResponse.Destination next = new RelayResponse.Destination();
+				next.x = star.x;
+				next.y = star.y;
+				next.plane = star.plane;
+				next.name = star.name;
+				next.world = star.world;
+				((DestinationState) get(panel, "destinationState")).selectLocal(next);
+				refresh(panel);
+				stars.refresh();
+			}
+			/* A star routed with three other ways, two of them not open to the account, and the fold opened. */
+			if (state.equals("stars-busy-ways"))
+			{
+				StarsModel.Star star = client.model.find(client.model.selected);
+				RelayResponse.Destination answer = RoutePress.destination(RoutePress.Target.tile(StarsPanel.SOURCE,
+					new WorldPoint(star.x, star.y, star.plane), star.name, star.world, null), null, Busy.route());
+				((DestinationState) get(panel, "destinationState")).selectLocal(answer);
+				((DestinationRoute) get(get(panel, "nowCards"), "destinationRoute")).adoptPressed(answer);
+				refresh(panel);
+				stars.refresh();
+				for (Component c : all(stars))
+				{
+					if (c instanceof javax.swing.JButton && ((javax.swing.JButton) c).getText() != null && ((javax.swing.JButton) c).getText().contains("other way"))
+					{
+						((javax.swing.JButton) c).doClick();
+					}
 				}
 			}
 			if (state.equals("stars-filters"))
@@ -645,6 +696,116 @@ public class SidebarPolishShot
 			new WorldPoint(star.x, star.y, star.plane), star.name, star.world, null), null, starRoute());
 		((DestinationState) get(panel, "destinationState")).selectLocal(answer);
 		((DestinationRoute) get(get(panel, "nowCards"), "destinationRoute")).adoptPressed(answer);
+	}
+
+	static List<Component> all(java.awt.Container root)
+	{
+		List<Component> found = new ArrayList<>();
+		for (Component c : root.getComponents())
+		{
+			found.add(c);
+			if (c instanceof java.awt.Container)
+			{
+				found.addAll(all((java.awt.Container) c));
+			}
+		}
+		return found;
+	}
+
+	/**
+	 * A long list, as an evening's feed is: made-up worlds, tiers and times at real sites, the longest
+	 * names the map gives a site among them, and a route with three other ways. Written for measuring
+	 * the tab, and planned by no map.
+	 */
+	static final class Busy
+	{
+		static StarsModel.Feed feed()
+		{
+			Object[][] rows = {
+				{"Port Piscarilius mine in Kourend", 472, 9, 60, 1762, 3715},
+				{"West Lumbridge Swamp mine", 510, 8, 52, 3148, 3150},
+				{"Mine north-west of hunter guild", 501, 8, 51, 1533, 3077},
+				{"Gnome Stronghold spirit tree", 476, 7, 48, 2449, 3490},
+				{"Gnome Stronghold spirit tree", 331, 5, 30, 2449, 3490},
+				{"Gnome Stronghold spirit tree", 389, 3, 14, 2449, 3490},
+				{"Varrock east bank", 545, 7, 45, 3258, 3408},
+				{"Varrock east bank", 536, 7, 44, 3258, 3408},
+				{"Varrock east bank", 302, 6, 40, 3258, 3408},
+				{"Varrock east bank", 466, 4, 22, 3258, 3408},
+				{"Varrock east bank", 420, 2, 4, 3258, 3408},
+				{"Ardougne Monastery", 302, 6, 42, 2608, 3233},
+				{"Ardougne Monastery", 487, 6, 39, 2608, 3233},
+				{"Al Kharid bank", 325, 6, 42, 3276, 3164},
+				{"Brimhaven northwest gold mine", 421, 6, 41, 2732, 3225},
+				{"Brimhaven northwest gold mine", 444, 3, 18, 2732, 3225},
+				{"Lava Maze runite mine", 493, 6, 41, 3059, 3884},
+				{"Lletya", 493, 6, 41, 2318, 3269},
+				{"East Falador bank", 542, 6, 40, 3030, 3348},
+				{"Salvager Overlook in Varlamore", 582, 6, 40, 1614, 3300},
+				{"Rimmington mine", 543, 6, 39, 2974, 3241},
+				{"Corsair Cove bank", 558, 6, 38, 2567, 2858},
+				{"Prifddinas Zalcano entrance", 353, 6, 37, 3273, 6023},
+			};
+			StarsModel.Feed feed = new StarsModel.Feed();
+			feed.version = 1;
+			feed.worldsAvailable = true;
+			feed.rows = new ArrayList<>();
+			int rank = 0;
+			for (Object[] row : rows)
+			{
+				StarsModel.Star star = new StarsModel.Star();
+				star.name = (String) row[0];
+				star.world = (Integer) row[1];
+				star.id = star.world + "|" + star.name.toLowerCase();
+				star.siteKey = "tile:" + row[4] + "," + row[5];
+				star.favoriteKey = star.name.toLowerCase();
+				star.rank = rank++;
+				star.calledTier = (Integer) row[2];
+				star.ageMs = 120_000L + rank * 37_000L % 600_000L;
+				star.calledTier = Math.min(9, star.calledTier + (int) (star.ageMs / StarsModel.TIER_MS));
+				star.remainingMs = (Integer) row[3] * 60_000L - 20_000L;
+				star.precise = true;
+				star.x = (Integer) row[4];
+				star.y = (Integer) row[5];
+				star.members = true;
+				star.wilderness = star.name.startsWith("Lava Maze");
+				star.game = "main";
+				feed.rows.add(star);
+			}
+			return feed;
+		}
+
+		static RelayResponse.Route route()
+		{
+			RelayResponse.Route route = new RelayResponse.Route();
+			route.origin = "shared";
+			route.options = new ArrayList<>(Arrays.asList(
+				way("teleport_item:a", "Colossal wyrm teleport scroll", true, false, 192,
+					Steps.picture(step("method", "Use Colossal wyrm teleport scroll", null, false, 1647, 2931, null), "itemId", 30040),
+					step("arrival-walk", "Walk 192t north-west", "To the destination", true, 1533, 3077, 0)),
+				way("walk:b", "Sunset Coast", false, false, 361,
+					step("method", "Sail to Sunset Coast", null, false, 1511, 2975, null),
+					step("arrival-walk", "Walk 120t north", "To the destination", true, 1533, 3077, 0)),
+				way("teleport_item:c", "Pendant of ates: 3. Ralos' Rise", false, true, 65,
+					Steps.picture(step("method", "Rub Pendant of ates: 3. Ralos' Rise", null, false, 1480, 3090, null), "itemId", 29892),
+					step("arrival-walk", "Walk 55t east", "To the destination", true, 1533, 3077, 0)),
+				way("teleport_item:d", "Quetzal whistle: Cam Torum", false, true, 78,
+					Steps.picture(step("method", "Blow Quetzal whistle: Cam Torum", null, false, 1446, 3108, null), "itemId", 29271),
+					step("arrival-walk", "Walk 70t east", "To the destination", true, 1533, 3077, 0))));
+			return route;
+		}
+
+		static RelayResponse.RouteOption way(String id, String label, boolean best, boolean blocked, int tiles, RelayResponse.RouteStep... steps)
+		{
+			RelayResponse.RouteOption way = new RelayResponse.RouteOption();
+			way.id = id;
+			way.label = label;
+			way.best = best;
+			way.blocked = blocked;
+			way.tiles = tiles;
+			way.steps = new ArrayList<>(Arrays.asList(steps));
+			return way;
+		}
 	}
 
 	static void search(MapCompanionPanel panel, String query) throws Exception
