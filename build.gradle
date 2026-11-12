@@ -95,6 +95,13 @@ test {
     }
 
     /*
+     * Swing under test is given RuneLite's sidebar font, not the machine's. Cards break and scroll by
+     * measuring text, so with nothing set the suite's answer depended on which fonts were installed.
+     * SidebarLookAndFeel has the reasoning; Swing reads this property before it makes a component.
+     */
+    systemProperty 'swing.defaultlaf', 'com.pbolduc.mapcompanion.SidebarLookAndFeel'
+
+    /*
      * The disclosure tests read README.md, docs/network.md and this plugin's own .java files as *text*, and Gradle
      * cannot see that. With only prose changed nothing it declares has moved, so the task is
      * skipped as up to date and the one check that guards the network disclosure passes by not
