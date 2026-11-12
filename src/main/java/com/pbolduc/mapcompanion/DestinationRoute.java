@@ -67,6 +67,13 @@ import static com.pbolduc.mapcompanion.RelayResponse.RouteStep;
  * player has rerouted, the route that keeps riding in with the destination is the old answer and is
  * not put back.
  *
+ * <p><b>A pick outlasts a Reroute until the player sets off.</b> A route that takes a shown one's
+ * place, a Reroute's answer or the map's newer route for the same place, starts on its best way,
+ * with one exception: a way the player picked over the best and has not yet started is kept, by its
+ * id, where the new route still offers it and the account can take it. A player who picked the ring
+ * because the home teleport is cooling down, and rerouted before leaving, keeps the ring; one who
+ * has already travelled gets the best way from where they now stand. See {@link #kept}.
+ *
  * <p><b>Reaching the place takes it down.</b> {@link #reaches} says when the player has come to the
  * destination itself, route or no route, and the game tick then dismisses it as the player's own
  * Dismiss would: a pin, an arrow and a card that go on saying where to go after the player is there
@@ -325,6 +332,8 @@ public class DestinationRoute
 		message = null;
 		refused = false;
 		away = false;
+		/* A pick was made for the place it was made at: another place starts on its best way. */
+		route = null;
 		adopt(destination == null ? null : destination.route);
 	}
 
@@ -355,9 +364,9 @@ public class DestinationRoute
 	private void adopt(@Nullable Route incoming)
 	{
 		revision++;
+		chosen = kept(incoming);
 		route = incoming;
 		received = incoming == null ? "" : signature(incoming);
-		chosen = best(incoming);
 		step = 0;
 		ashore = null;
 		boatAway = null;
@@ -506,12 +515,12 @@ public class DestinationRoute
 		if (answer != null)
 		{
 			revision++;
+			chosen = kept(answer);
 			route = answer;
 			rerouted = true;
 			/* Reroute is a press of the player's own, as Follow is. */
 			followWhenRouted = false;
 			following = true;
-			chosen = best(answer);
 			step = 0;
 			ashore = null;
 			boatAway = null;
@@ -754,6 +763,29 @@ public class DestinationRoute
 			return null;
 		}
 		return WorldTiles.of(client, player);
+	}
+
+	/**
+	 * The way to show of a route about to take the shown one's place: the way the player picked, when
+	 * they picked one over the best and have not started it, and the incoming route offers a way of
+	 * the same id that the account can take; its best way otherwise. Asked before the shown route is
+	 * replaced, since it is the shown one's pick and step that decide.
+	 */
+	private int kept(@Nullable Route incoming)
+	{
+		if (route != null && incoming != null && step == 0 && chosen != best(route))
+		{
+			String id = route.options.get(chosen).id;
+			for (int i = 0; i < incoming.options.size(); i++)
+			{
+				RouteOption option = incoming.options.get(i);
+				if (!option.blocked && id != null && id.equals(option.id))
+				{
+					return i;
+				}
+			}
+		}
+		return best(incoming);
 	}
 
 	private static int best(@Nullable Route route)
