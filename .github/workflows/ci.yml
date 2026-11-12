@@ -1,0 +1,64 @@
+# Copyright (c) 2026, pbolduc. All rights reserved.
+# SPDX-License-Identifier: BSD-2-Clause
+#
+# The build CONTRIBUTING asks for before a change is pushed, run on the change itself.
+#
+# Two of its tests guard promises nothing else checks. SourceSizeTest holds src/main/java under
+# the size the Plugin Hub reviews by itself, and NetworkDisclosureTest holds the README's "What
+# you share" to what a snapshot carries. Until this file, both ran only when somebody ran Gradle.
+#
+# It builds what a local build builds: RuneLite pinned to 1.13.4, compiled and tested with the
+# Java 11 toolchain build.gradle asks for. The Plugin Hub builds with its own template and its
+# own client version; this does not stand in for that, see docs/plugin-hub-submission.md.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+# A branch pushed three times in a minute is built once.
+concurrency:
+  group: ci-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Reads the repository and nothing else: no token here can write, comment or release.
+permissions:
+  contents: read
+
+jobs:
+  build:
+    # A push builds every branch of this repository, so a pull request from one of them would be
+    # the same commit built twice. Only a pull request from a fork, whose pushes do not run
+    # here, is built as a pull request.
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
+    runs-on: ubuntu-latest
+    # Far longer than a build takes. Without a ceiling a hung test holds a runner for six hours.
+    timeout-minutes: 20
+    steps:
+      # Versions as the map's own workflows pin these three; they move together with those.
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-java@v6.1.0
+        with:
+          distribution: temurin
+          # Two JDKs. Java 11 is what RuneLite targets and what the build's toolchain compiles and
+          # tests with; installed here, Gradle finds it and need not download one. The last one
+          # listed runs Gradle itself: 9.7.1 will not start on 11, and runs on Java through 25.
+          java-version: |
+            11
+            25.0.4+7.0.LTS
+
+      # Gradle's distribution, the RuneLite client and the toolchain, keyed on what names them.
+      - uses: actions/cache@v6.1.0
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ~/.gradle/jdks
+          key: ${{ runner.os }}-gradle-${{ hashFiles('build.gradle', 'settings.gradle', 'gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: ${{ runner.os }}-gradle-
+
+      - name: Build and test
+        run: ./gradlew clean build -PruneLiteVersion=1.13.4
