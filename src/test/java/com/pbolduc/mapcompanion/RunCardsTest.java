@@ -1002,7 +1002,57 @@ public class RunCardsTest
 			collected[0] = 1;
 			card.refresh(true);
 			assertNotSame("a crate collected is a different reading, and is drawn", drawn, label(card, HONEY));
-			assertTrue(label(card, "Collect 2 crates at Catherby for Port Sarim") != null);
+			assertTrue(label(card, "1/3") != null);
+		});
+	}
+
+	/**
+	 * An idle task said how far along it was inside a sentence under its name. It is a count at the
+	 * right edge of the name's row now, top-aligned, so the tasks' counts are read down one edge; the
+	 * name gives up the count's width, the line under it keeps the card's, and a finished courier's
+	 * count is greyed with its name.
+	 */
+	@Test
+	public void anIdleTasksProgressIsACountAtTheRightOfItsName() throws Exception
+	{
+		PortTaskReader held = new PortTaskReader(game.client(), new CargoHolds())
+		{
+			@Override
+			List<Slot> latest()
+			{
+				return Arrays.asList(
+					new PortTaskReader.Slot(0, PortTaskReader.COURIER, 6, HONEY, "Catherby", "Port Sarim", 3, 3, 3, 0, null),
+					new PortTaskReader.Slot(1, PortTaskReader.COURIER, 7, "Port Khazard fruit delivery", "Brimhaven", "Port Khazard", 3, 1, 0, 0, null),
+					new PortTaskReader.Slot(2, PortTaskReader.BOUNTY, 438, "Port Sarim tern bounty", null, "Port Sarim", 15, 0, 0, 9, "Tern feather"));
+			}
+
+			@Override
+			Integer latestHold()
+			{
+				return 30;
+			}
+		};
+		SwingUtilities.invokeAndWait(() ->
+		{
+			PortTasksPanel card = new PortTasksPanel(held, config, store, sprites, state, client, follower, route, shortest);
+			card.refresh(true);
+			List<String> words = shown(card);
+			assertEquals("each count follows its task's name, before the line under it: " + words,
+				Arrays.asList(HONEY, "3/3", "Delivered", "Port Khazard fruit delivery", "1/3", "Collect at Brimhaven for Port Khazard",
+					"Port Sarim tern bounty", "6/15", "Tern feather · hand in at Port Sarim"),
+				words.subList(words.indexOf(HONEY), words.indexOf(HONEY) + 9));
+			JLabel count = label(card, "1/3");
+			JLabel name = label(card, "Port Khazard fruit delivery");
+			assertSame("on the name's row", name.getParent(), count.getParent());
+			assertEquals("at its right edge", BorderLayout.EAST, ((BorderLayout) count.getParent().getLayout()).getConstraints(count));
+			assertEquals("on its first line", JLabel.TOP, count.getVerticalAlignment());
+			assertTrue("the name gives up the count's width: " + name.getText(),
+				name.getText().contains("width='" + (MapCompanionPanel.CARD_TEXT_WIDTH - count.getPreferredSize().width - 4) + "'"));
+			assertTrue("the line under it keeps the card's", label(card, "Collect at Brimhaven for Port Khazard").getText()
+				.contains("width='" + MapCompanionPanel.CARD_TEXT_WIDTH + "'"));
+			assertEquals("a finished courier's count is greyed with its name", ColorScheme.MEDIUM_GRAY_COLOR,
+				label(card, "3/3").getForeground());
+			assertEquals(ColorScheme.LIGHT_GRAY_COLOR, count.getForeground());
 		});
 	}
 
