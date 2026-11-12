@@ -581,11 +581,7 @@ final class SearchClient
 	/** The box's text as the map reads a query: whitespace folded, trimmed, and no longer than it takes. */
 	static String fold(@Nullable String text)
 	{
-		if (text == null)
-		{
-			return "";
-		}
-		String folded = text.replaceAll("[\\p{Cntrl}\\s]+", " ").trim();
+		String folded = RouteWire.oneLine(text);
 		return folded.length() > MAX_QUERY ? folded.substring(0, MAX_QUERY).trim() : folded;
 	}
 }

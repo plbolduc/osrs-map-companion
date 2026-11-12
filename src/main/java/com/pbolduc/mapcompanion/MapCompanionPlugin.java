@@ -2075,7 +2075,7 @@ public class MapCompanionPlugin extends Plugin
 		{
 			return "somewhere";
 		}
-		String cleaned = title.replaceAll("[\\p{Cntrl}]", " ").replaceAll("\\s+", " ").trim();
+		String cleaned = RouteWire.oneLine(title);
 		return cleaned.length() <= 60 ? cleaned : cleaned.substring(0, 57) + "…";
 	}
 

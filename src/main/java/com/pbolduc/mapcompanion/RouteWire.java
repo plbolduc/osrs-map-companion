@@ -310,22 +310,24 @@ final class RouteWire
 	@Nullable
 	static String text(@Nullable String value, int max)
 	{
-		if (value == null)
-		{
-			return null;
-		}
-		StringBuilder folded = new StringBuilder(value.length());
-		for (int i = 0; i < value.length(); i++)
-		{
-			char c = value.charAt(i);
-			folded.append(control(c) ? ' ' : c);
-		}
-		String kept = folded.toString().replaceAll("\\s+", " ").trim();
+		String kept = oneLine(value);
 		if (kept.length() > max)
 		{
 			kept = kept.substring(0, max).trim();
 		}
 		return kept.isEmpty() ? null : kept;
+	}
+
+	/** A run of control bytes and whitespace, as {@link #oneLine} closes it up. Compiled once: a label is tidied every frame. */
+	private static final Pattern BLANK = Pattern.compile("[\\p{Cntrl}\\s]+");
+
+	/**
+	 * Text somebody else typed, as one line: each run of control bytes and whitespace a single space,
+	 * and none at either end. Never null. A name, a title and a search are all tidied by this.
+	 */
+	static String oneLine(@Nullable String value)
+	{
+		return value == null ? "" : BLANK.matcher(value).replaceAll(" ").trim();
 	}
 
 	private static boolean control(int c)

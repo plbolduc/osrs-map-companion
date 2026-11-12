@@ -556,11 +556,7 @@ public class Pairing
 	@Nullable
 	static String tidyName(@Nullable String name)
 	{
-		if (name == null)
-		{
-			return null;
-		}
-		String tidy = name.replaceAll("[\\u0000-\\u001f\\u007f]", " ").replaceAll("\\s+", " ").trim();
+		String tidy = RouteWire.oneLine(name);
 		return tidy.isEmpty() || tidy.length() > MAX_GROUP_NAME ? null : tidy;
 	}
 
