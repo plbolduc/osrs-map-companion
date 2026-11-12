@@ -427,6 +427,12 @@ The website plan's second session, once the routes in the game are built: a memb
       on the website; On my way is one of the four. Meet here on W302 makes a
       meetup at your tile whose copied link opens on the map; inside an instance it refuses and says
       to step outside first.
+- [ ] **Meet here on the world map.** With *Group in RuneLite* on, right-click the game's world map:
+      *Meet here…* is under *Route here*. Choose it: the sidebar comes forward on Group with the form
+      open and *A meetup at the spot you picked* over it. Make it: the meetup is at that spot, not
+      where you stand, and works from inside an instance. Cancel, then press the sidebar's own
+      *Meet here…*: the form says *A meetup where you stand*. With *Group in RuneLite* off, the
+      right-click offers *Route here* alone.
 - [ ] **The one press at Connect.** On a fresh RuneLite profile, the first Connect to osrs-map.com
       asks nothing and shows the step, with every group, the name and both drawing choices ticked
       and *Where you died* not; it fits 225px with no cut word. Untick a group, then Not

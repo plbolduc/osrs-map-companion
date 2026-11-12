@@ -1236,3 +1236,15 @@ notifications turns off and nothing else.
 The same pass proposed three sharing switches where there are six, with the character name
 included, and Advanced without the map address and *Show what's sent*. Those change what the step
 after Connect says and what a switch stands for, so they are a change of their own.
+
+## A meetup anywhere, 12 November 2026
+
+*Meet here…* made a meetup where the player stood, so planning one meant walking to it first. The
+website has always taken one at any card, a bare spot on the map included.
+
+A right-click on the game's world map now offers *Meet here…* beside *Route here*, while *Group in
+RuneLite* is on, since a meetup is drawn only then. Choosing it brings the sidebar forward on the
+Group tab with the form open, and the form says *A meetup at the spot you picked* where its own
+link's says *A meetup where you stand*. The request is the one it always was, with that tile in
+the place of the player's. Put away and opened again from its link, the form is back to where the
+player stands, so a spot picked once is never the place of a later meetup.

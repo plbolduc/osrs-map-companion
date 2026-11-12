@@ -570,6 +570,12 @@ public class MapCompanionPlugin extends Plugin
 					.build();
 		clientToolbar.addNavigation(navButton);
 		routeStepOverlay.pressWith(this::act);
+		/* Meet here on the world map: the sidebar comes forward with the Group tab's form open for the spot. */
+		routeHere.meet = spot -> SwingUtilities.invokeLater(() ->
+		{
+			clientToolbar.openPanel(navButton);
+			panel.meetAt(spot);
+		});
 		for (Overlay overlay : overlays())
 		{
 			overlayManager.add(overlay);
@@ -624,6 +630,7 @@ public class MapCompanionPlugin extends Plugin
 		{
 			panel.stopRefreshing();
 		}
+		routeHere.meet = null;
 		clientToolbar.removeNavigation(navButton);
 		for (Overlay overlay : overlays())
 		{

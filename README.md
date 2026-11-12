@@ -116,7 +116,7 @@ Hardcore or League world it lists that game's stars instead.
 
 **Group** shows where your friends are and their latest levels, drops, quests and diaries.
 **Route** takes you to a friend. **Meet here…** sets a meetup everyone can answer: Going, Maybe,
-Can't or On my way.
+Can't or On my way. It is where you stand, or anywhere you right-click on the game's world map.
 
 ## On osrs-map.com
 
@@ -262,8 +262,8 @@ put readings in snapshots. The bank checklist's local item check sends nothing.
 Enabling **Destinations and meetups** also tells the website this build can receive a
 farm run, so it offers **Send run** only to a compatible live client of your own.
 
-**Meet here** sends the title and time you choose, the tile you are standing on and your world,
-once per press, to make a meetup your group can see. Answering a meetup (**Going**, **Maybe**,
+**Meet here** sends the title and time you choose, your world, and the tile you are standing on
+or the one you right-clicked on the world map, once per press, to make a meetup your group can see. Answering a meetup (**Going**, **Maybe**,
 **Can't** or **On my way**) sends that answer, once per press. Nothing answers for
 you: Route to a meetup tells nobody you are coming.
 

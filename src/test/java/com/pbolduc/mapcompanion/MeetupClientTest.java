@@ -171,7 +171,7 @@ public class MeetupClientTest
 	{
 		connect();
 		MeetupClient client = client(200, "{\"path\":\"/map?event=abc123&task=companion\"}", null, false);
-		client.create("Barrows run", System.currentTimeMillis() + 3_600_000L);
+		client.create("Barrows run", System.currentTimeMillis() + 3_600_000L, null);
 		settle(client, "meet");
 		MeetupClient.Said made = client.said("meet");
 		assertTrue(made.confirms());
@@ -179,7 +179,7 @@ public class MeetupClientTest
 		assertFalse(made.shown(made.atMs + FarmRunClient.Said.CONFIRMATION_MS));
 
 		MeetupClient refused = client(400, "{\"reason\":\"invalid\"}", null, false);
-		refused.create("Barrows run", System.currentTimeMillis() + 3_600_000L);
+		refused.create("Barrows run", System.currentTimeMillis() + 3_600_000L, null);
 		settle(refused, "meet");
 		MeetupClient.Said said = refused.said("meet");
 		assertEquals(MeetupClient.REFUSED, said.message);
@@ -211,7 +211,7 @@ public class MeetupClientTest
 		}, pairing, identity, destinations, group, copied::add);
 		client.answer("star-hunt", "going");
 		assertEquals("Log in to answer or make a meetup.", client.said("answer:star-hunt").message);
-		client.create("Barrows run", System.currentTimeMillis() + 3_600_000L);
+		client.create("Barrows run", System.currentTimeMillis() + 3_600_000L, null);
 		assertEquals("Log in to answer or make a meetup.", client.said("meet").message);
 		assertTrue(sent.isEmpty());
 	}
@@ -232,7 +232,7 @@ public class MeetupClientTest
 		connect();
 		MeetupClient client = client(200, "{\"path\":\"/map?event=abc123&task=companion\"}", null, false);
 		long start = System.currentTimeMillis() + 3_600_000L;
-		client.create("  Barrows\trun  ", start);
+		client.create("  Barrows\trun  ", start, null);
 		settle(client, "meet");
 
 		Request request = sent.get(0);
@@ -251,6 +251,27 @@ public class MeetupClientTest
 		assertEquals("[" + pairing.serverUrl() + "/map?event=abc123&task=companion]", copied.toString());
 	}
 
+	/**
+	 * Meet here on the game's world map makes the meetup at the spot the menu opened on, where the
+	 * sidebar's own makes it where the player stands. The request is the same one, with that tile
+	 * in the place of the player's and still the player's world.
+	 */
+	@Test
+	public void meetHereOnTheWorldMapMakesTheMeetupAtTheSpotPicked() throws Exception
+	{
+		connect();
+		MeetupClient client = client(200, "{\"path\":\"/map?event=abc123&task=companion\"}", null, false);
+		client.create("Barrows run", System.currentTimeMillis() + 3_600_000L, new net.runelite.api.coords.WorldPoint(3565, 3288, 0));
+		settle(client, "meet");
+
+		JsonObject meetup = body(sent.get(0));
+		assertEquals(3565, meetup.get("x").getAsInt());
+		assertEquals(3288, meetup.get("y").getAsInt());
+		assertEquals(0, meetup.get("plane").getAsInt());
+		assertEquals("the world is the player's own", 302, meetup.get("world").getAsInt());
+		assertEquals("and nothing more is sent than where the player stands sends", 6, meetup.size());
+	}
+
 	@Test
 	public void aLinkIsOnlyEverAPathOnTheApprovedMap()
 	{
@@ -267,7 +288,7 @@ public class MeetupClientTest
 	{
 		connect();
 		MeetupClient client = client(200, "{\"path\":\"/map\"}", null, true);
-		client.create("Vorkath", System.currentTimeMillis() + 3_600_000L);
+		client.create("Vorkath", System.currentTimeMillis() + 3_600_000L, null);
 		assertTrue(sent.isEmpty());
 		assertEquals(MeetupClient.NEEDS_TILE, client.said("meet").message);
 		/* The cause and the one step that fixes it, where the line used to give the cause alone. */

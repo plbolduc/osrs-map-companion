@@ -172,7 +172,7 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RoutePress`, `SearchClien
   **Can't**, **On my way**). JSON is the meetup's id and the answer. Headers:
   `X-Companion-Code`, `X-Companion-Member`, `X-Companion-Member-Secret`.
 - **PUT /api/companion/event** — one **Meet here** press. JSON is a title, a start time, the player's
-  tile and world; the same headers. The path the map answers with is checked and copied to the
+  world and a tile, the player's own or one right-clicked on the game's world map; the same headers. The path the map answers with is checked and copied to the
   clipboard. One meetup write at a time, and none before `Retry-After` has passed.
 - **GET /api/companion/search** — the sidebar's search box, while connected: about 350ms after the
   last key or on Enter, two to sixty-four characters, one in flight, and nothing before a

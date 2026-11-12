@@ -671,6 +671,30 @@ public class GroupPanelTest
 	}
 
 	/**
+	 * The form says where its meetup will be. Opened from the game's world map it is for the spot
+	 * picked there; put away and opened again from its own link, it is back to where the player
+	 * stands, so a spot picked once is never the place of a later meetup made from the sidebar.
+	 */
+	@Test
+	public void theFormSaysWhetherItsMeetupIsWhereYouStandOrAtTheSpotPicked() throws Exception
+	{
+		AtomicReference<GroupPanel> panel = new AtomicReference<>();
+		SwingUtilities.invokeAndWait(() -> panel.set(panel()));
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.get().refresh(true);
+			panel.get().meetAt(new net.runelite.api.coords.WorldPoint(3565, 3288, 0));
+			assertTrue(SidebarWords.words(panel.get()).contains("A meetup at the spot you picked"));
+			assertFalse(SidebarWords.words(panel.get()).contains("A meetup where you stand"));
+
+			named(panel.get(), "group.meetHere").doClick();
+			named(panel.get(), "group.meetHere").doClick();
+			assertTrue("its own link is where the player stands", SidebarWords.words(panel.get()).contains("A meetup where you stand"));
+			assertFalse(SidebarWords.words(panel.get()).contains("A meetup at the spot you picked"));
+		});
+	}
+
+	/**
 	 * "Meetup made. Its link is copied." closed the form and then stayed under the heading for good,
 	 * and kept closing the form: opened again for a second meetup, it shut on the next refresh. The
 	 * confirmation is news for ten seconds, as a run's "Run ended." is, and closes the form once.

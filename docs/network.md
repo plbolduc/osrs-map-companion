@@ -257,7 +257,7 @@ tile in their dot, under Reroute's rules, and never into an instance.
 
 The meetup answers are `PUT /api/companion/event/answer` with the meetup's id and one of `going`,
 `maybe`, `no` and `on_my_way`; **Meet here** is `PUT /api/companion/event` with a title, the start
-time, the tile you stand on and your world, and copies the link the map answers with after checking
+time, your world and a tile, the one you stand on or the one right-clicked on the world map, and copies the link the map answers with after checking
 it is a path on the map address. Both carry the group code, member id and member secret, one at a
 time, and none before a `Retry-After` has passed. Neither is ever sent without a press.
 **Meetup reminder** (off) raises one RuneLite notification per meetup, the chosen number of

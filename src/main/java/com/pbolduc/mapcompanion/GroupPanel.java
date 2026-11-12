@@ -161,6 +161,10 @@ final class GroupPanel extends JPanel
 	private final JComboBox<String> minute = new JComboBox<>();
 	private final JLabel formSaid = new JLabel();
 	private final JButton make = smallButton("Make meetup");
+	/** Says where the meetup will be: where the player stands, or the spot picked on the world map. */
+	private final JLabel heading = label(11f, LIGHT_GRAY_COLOR);
+	@Nullable
+	private WorldPoint spot;
 	private boolean formOpen;
 	/**
 	 * Meet here's last word as it stood when the player last opened the form or put it away, which
@@ -232,8 +236,6 @@ final class GroupPanel extends JPanel
 	{
 		form.setBorder(javax.swing.BorderFactory.createCompoundBorder(
 			new javax.swing.border.MatteBorder(0, 0, 3, 0, DARK_GRAY_COLOR), new EmptyBorder(6, 8, 6, 8)));
-		JLabel heading = label(11f, LIGHT_GRAY_COLOR);
-		heading.setText("A meetup where you stand");
 		form.add(heading);
 		title.setName("group.meetTitle");
 		title.putClientProperty("JTextField.placeholderText", "What for");
@@ -266,10 +268,20 @@ final class GroupPanel extends JPanel
 		showForm(open);
 	}
 
+	/** The form for a spot picked on the game's world map, where the link's own form is where the player stands. */
+	void meetAt(WorldPoint picked)
+	{
+		openForm(true);
+		spot = picked;
+		heading.setText(Words.of("group.meetSpot"));
+	}
+
 	/** Open the form at the next five minutes past half an hour from now, or close it. */
 	private void showForm(boolean open)
 	{
 		formOpen = open;
+		spot = null;
+		heading.setText(Words.of("group.meetStand"));
 		formSaid.setVisible(false);
 		if (open)
 		{
@@ -341,7 +353,7 @@ final class GroupPanel extends JPanel
 			refuse(formSaid, "Pick a time still to come.");
 			return;
 		}
-		meetups.create(name, start);
+		meetups.create(name, start, spot);
 		say(formSaid, "Making the meetup…");
 	}
 

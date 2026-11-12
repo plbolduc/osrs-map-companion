@@ -369,8 +369,9 @@ public interface MapCompanionConfig extends Config
 		keyName = "routeHereOnWorldMap",
 		name = "Route here on the world map",
 		description =
-			"Add Route here to a right-click of the game's world map, below Cancel. Choosing it asks the map "
-			+ "for the way to that spot and sends that spot and where you stand, as Route does.",
+			"Add Route here to a right-click of the game's world map, below Cancel, and Meet here beside it while "
+			+ "the group shows in RuneLite. Route here asks the map for the way to that spot and sends that spot and "
+			+ "where you stand, as Route does; Meet here opens the sidebar's form for a meetup at that spot.",
 		position = 38,
 		section = clientSection
 	)
