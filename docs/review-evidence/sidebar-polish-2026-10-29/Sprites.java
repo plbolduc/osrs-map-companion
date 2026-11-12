@@ -42,6 +42,12 @@ final class Sprites
 		ITEMS.put(net.runelite.api.gameval.ItemID.LUNAR_TABLET_CATHERBY_TELEPORT, "catherby-teleport-tablet");
 		ITEMS.put(net.runelite.api.gameval.ItemID.MYSTIC_ROBE_BOTTOM_DARK, "mystic-robe-bottom-dark");
 		ITEMS.put(net.runelite.api.gameval.ItemID.TWPART3, "cannon-barrels");
+		CHIPS.put(net.runelite.api.gameval.ItemID.SAILING_LOG, "captains-log");
+		CHIPS.put(net.runelite.api.gameval.ItemID.SAILING_CHARTING_SPYGLASS, "spyglass");
+		CHIPS.put(net.runelite.api.gameval.ItemID.SAILING_CHARTING_CROWBAR, "crowbar");
+		CHIPS.put(net.runelite.api.gameval.ItemID.SAILING_CHARTING_CURRENT_DUCK, "current-duck");
+		CHIPS.put(net.runelite.api.gameval.ItemID.HUNDRED_PIRATE_DIVING_HELMET, "fishbowl-helmet");
+		CHIPS.put(net.runelite.api.gameval.ItemID.SAILING_CHARTING_WEATHER_STATION_EMPTY, "portable-weather-station");
 		SPELLS.put(net.runelite.api.gameval.SpriteID.Magicon2.LUMBRIDGE_HOME_TELEPORT, "home-teleport");
 		SPELLS.put(net.runelite.api.gameval.SpriteID.MagicNecroOn.DRAYNOR_MANOR_TELEPORT, "draynor-manor-teleport");
 		CHIPS.put(net.runelite.api.gameval.ItemID.NZONE_TELETAB_RIMMINGTON, "teleport-tab-rimmington");

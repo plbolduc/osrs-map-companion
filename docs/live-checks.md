@@ -547,6 +547,11 @@ continuously witnessed empty-to-newly-planted transition mints a stable completi
       moves on. Note how close the boat had to be for each kind of task, above all one on an islet,
       a wreck or the shore, which the map waits for at the nearest water. With Sea charts charted
       off, the picker says to turn on Progress and travel and Start waits.
+- [ ] On a Sea charting run, each task still ahead has its tool's picture beside it: a spyglass,
+      a captain's log, a crowbar, a current duck, a fishbowl helmet or a portable weather station.
+      This is the first time a client draws those six items by their ids, so say which, if any,
+      comes up empty or as another item. The length of each leg is in a column at the right, the
+      bar fills a step for each task charted, and a charted task is one cut line.
 - [ ] On a Sea charting run with tasks done on foot — the Kharidian Sea from Port Sarim once the
       Bay of Sarim and Mudskipper Sound are charted: Chartin' Charles in the Pandemonium Cave, then
       the spyglass spot at its entrance — This leg moves from the sail to Dock at The Pandemonium

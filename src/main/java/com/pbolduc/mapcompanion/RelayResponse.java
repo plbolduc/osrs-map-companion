@@ -353,6 +353,21 @@ public class RelayResponse
 		public List<RunTask> tasks;
 		/** The voyage this stop's leg sails, drawn and ticked as a destination's voyage is; null otherwise. */
 		public Voyage voyage;
+		/**
+		 * The tool a sea charting stop's task takes, by its item's name, for the stop's picture: the
+		 * kind of task at a glance. Never a thing to bring, since a boat's cargo hold hands it out.
+		 */
+		public String tool;
+		/** A sea charting stop's leg in numbers, for a column of them; null where the map sent only its words. */
+		public FarmLeg leg;
+	}
+
+	/** The map's {@code FarmRunLeg}: how far a leg goes, by sail or on foot, and what its line says besides. */
+	public static class FarmLeg
+	{
+		public String by;
+		public int tiles;
+		public String more;
 	}
 
 	/**

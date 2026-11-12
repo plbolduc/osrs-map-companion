@@ -428,6 +428,9 @@ public class WireContractTest
 		assertEquals(FarmRunWire.PORT_TASKS, ports.kind);
 		List<RelayResponse.FarmStop> stops = new ArrayList<>(run.stops);
 		stops.addAll(ports.stops);
+		/* And the sea charting fixture's, which vouch for a stop's tool and its leg in numbers. */
+		Path charting = PORT_TASK_RUN.resolveSibling("sea-chart-run.json");
+		stops.addAll(new Gson().fromJson(new String(Files.readAllBytes(charting), StandardCharsets.UTF_8), RelayResponse.FarmRun.class).stops);
 		run.stops = stops;
 	}
 

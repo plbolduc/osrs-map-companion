@@ -161,6 +161,19 @@ class GameSprites
 				return ItemID.LUMBRIDGE_RING_ELITE;
 			case "catherby tablet":
 				return ItemID.LUNAR_TABLET_CATHERBY_TELEPORT;
+			/* The six sea charting tools, by the names the map's task table gives them; none is tradeable. */
+			case "captain's log":
+				return ItemID.SAILING_LOG;
+			case "spyglass":
+				return ItemID.SAILING_CHARTING_SPYGLASS;
+			case "crowbar":
+				return ItemID.SAILING_CHARTING_CROWBAR;
+			case "current duck":
+				return ItemID.SAILING_CHARTING_CURRENT_DUCK;
+			case "fishbowl helmet":
+				return ItemID.HUNDRED_PIRATE_DIVING_HELMET;
+			case "portable weather station":
+				return ItemID.SAILING_CHARTING_WEATHER_STATION_EMPTY;
 			default:
 				return 0;
 		}
