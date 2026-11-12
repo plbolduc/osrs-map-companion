@@ -184,22 +184,10 @@ public class DirectiveStream
 	 * connection that was refused would sit on its back-off — growing to five minutes — holding a
 	 * credential that would have been accepted. The key is compared and never logged, here or
 	 * anywhere else in this class.
-	 */
-	public synchronized void start(
-		String baseUrl,
-		String code,
-		String memberId,
-		@Nullable String memberSecret,
-		Consumer<? super StreamDirective> onDirective)
-	{
-		start(baseUrl, code, memberId, memberSecret, false, onDirective);
-	}
-
-	/**
-	 * The same, and asking for the other members' dots as well when {@code withMembers}.
 	 *
-	 * <p>Part of the key, so turning <i>Group on the world map</i> on or off reopens the
-	 * connection with the question changed rather than waiting for the next drop to ask it.
+	 * <p>{@code withMembers} asks for the other members' dots as well. It is part of the key too,
+	 * so turning <i>Group on the world map</i> on or off reopens the connection with the question
+	 * changed rather than waiting for the next drop to ask it.
 	 */
 	public synchronized void start(
 		String baseUrl,

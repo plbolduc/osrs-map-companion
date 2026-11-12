@@ -267,15 +267,9 @@ public class DestinationRoute
 			+ "|" + destination.name + "|" + destination.note;
 	}
 
-	/** Bring the route in line with the destination being shown, or none, knowing no member. */
-	synchronized void sync(@Nullable Destination destination)
-	{
-		sync(destination, null);
-	}
-
 	/**
 	 * Bring the route in line with the destination being shown, or none. Called on the game tick
-	 * with this client's member id.
+	 * with this client's member id, or null where no member is known.
 	 *
 	 * <p>A destination sent to this member alone is the player's own Send to RuneLite, from the map
 	 * beside the game, and is followed from the start as a place picked in the sidebar is: at once if
@@ -370,18 +364,9 @@ public class DestinationRoute
 	}
 
 	/**
-	 * Move on if the current step is done. Called on the game tick with {@link #standing}; null — an
-	 * instance whose tiles cannot be trusted, or no player — moves nothing.
-	 *
-	 * @return whether the current step changed
-	 */
-	synchronized boolean advance(@Nullable WorldPoint where)
-	{
-		return advance(where, Sailing.ASHORE_UNKNOWN);
-	}
-
-	/**
-	 * Move on if the current step is done, asking the game about a voyage's rows.
+	 * Move on if the current step is done, asking the game about a voyage's rows. Called on the game
+	 * tick with {@link #standing}; null — an instance whose tiles cannot be trusted, or no player —
+	 * moves nothing unless the player is aboard.
 	 *
 	 * @return whether the current step changed
 	 */
@@ -630,16 +615,8 @@ public class DestinationRoute
 
 	/**
 	 * The step after {@code current} that the player standing at {@code where} has made current.
-	 * Static and plain so the rule is pinned by a test without a client.
-	 */
-	static int next(List<RouteStep> steps, int current, WorldPoint where)
-	{
-		return next(steps, current, where, Sailing.ASHORE_UNKNOWN, null, null);
-	}
-
-	/**
-	 * The same rule with a voyage's evidence: a row of a voyage is done by {@link #done}, and one not
-	 * yet done is passed by a later row of the same voyage that is.
+	 * Static and plain so the rule is pinned by a test without a client. A row of a voyage is done by
+	 * {@link #done}, and one not yet done is passed by a later row of the same voyage that is.
 	 *
 	 * @param where where the player stands, or null where that cannot be known
 	 * @param ashore the boats' ports read before boarding, or null

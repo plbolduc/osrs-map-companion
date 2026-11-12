@@ -102,7 +102,7 @@ public class VoyageStepsTest
 	private static DestinationRoute following(int dockPlane)
 	{
 		DestinationRoute route = new DestinationRoute();
-		route.sync(destination(steps(dockPlane), voyage("Catherby")));
+		route.sync(destination(steps(dockPlane), voyage("Catherby")), null);
 		return route;
 	}
 
@@ -228,7 +228,7 @@ public class VoyageStepsTest
 			DestinationRouteTest.step("method", "Take your ship", false, 2797, 3412, 0),
 			DestinationRouteTest.step("dock", "Dock at Catherby", false, 2797, 3412, 0));
 		DestinationRoute route = new DestinationRoute();
-		route.sync(destination(steps, voyage("Catherby")));
+		route.sync(destination(steps, voyage("Catherby")), null);
 		route.advance(new WorldPoint(3100, 3200, 0), ashore("Rimmington"));
 		assertNull(route.view().boatAway);
 		route.advance(PORT_SARIM_PIER, ashore("Rimmington"));
@@ -332,7 +332,7 @@ public class VoyageStepsTest
 	{
 		RelayResponse.Destination shown = destination(steps(0), voyage("Catherby"));
 		DestinationRoute route = new DestinationRoute();
-		route.sync(shown);
+		route.sync(shown, null);
 		String key = DestinationRoute.keyOf(shown);
 		assertEquals(3, VoyageMapOverlay.line(route.view(), key).length);
 		assertNull("another destination's route draws nothing", VoyageMapOverlay.line(route.view(), "elsewhere"));

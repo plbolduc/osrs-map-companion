@@ -99,7 +99,7 @@ public class MemberSecretTest
 		Doorman door = new Doorman(200, "{\"pollIntervalMs\":2000}");
 		RelayClient relay = new RelayClient(door.client(), gson);
 
-		assertTrue(relay.post(MAP, "ABC234", null, SECRET, new CompanionSnapshot(), r ->
+		assertTrue(relay.post(MAP, "ABC234", null, SECRET, null, new CompanionSnapshot(), r ->
 		{
 		}));
 
@@ -120,7 +120,7 @@ public class MemberSecretTest
 		Doorman door = new Doorman(200, "{}");
 		RelayClient relay = new RelayClient(door.client(), gson);
 
-		assertTrue(relay.post(MAP, "ABC234", null, null, new CompanionSnapshot(), r ->
+		assertTrue(relay.post(MAP, "ABC234", null, null, null, new CompanionSnapshot(), r ->
 		{
 		}));
 
@@ -134,7 +134,7 @@ public class MemberSecretTest
 		Doorman door = new Doorman(200, "{}");
 		RelayClient relay = new RelayClient(door.client(), gson);
 
-		relay.post(MAP, "ABC234", null, "K7PQ2M3X", new CompanionSnapshot(), r ->
+		relay.post(MAP, "ABC234", null, "K7PQ2M3X", null, new CompanionSnapshot(), r ->
 		{
 		});
 
@@ -164,7 +164,7 @@ public class MemberSecretTest
 			(action, delay) -> new java.util.concurrent.FutureTask<>(action, null));
 		try
 		{
-			stream.start(MAP, "ABC234", "member-1", SECRET, directive ->
+			stream.start(MAP, "ABC234", "member-1", SECRET, false, directive ->
 			{
 			});
 
@@ -198,7 +198,7 @@ public class MemberSecretTest
 			(action, delay) -> new java.util.concurrent.FutureTask<>(action, null));
 		try
 		{
-			stream.start(MAP, "ABC234", "member-1", null, directive ->
+			stream.start(MAP, "ABC234", "member-1", null, false, directive ->
 			{
 			});
 
@@ -237,14 +237,14 @@ public class MemberSecretTest
 		RelayResponse issued = gson.fromJson(
 								   "{\"pollIntervalMs\":2000,\"memberSecret\":\"" + SECRET + "\"}", RelayResponse.class);
 
-		plugin.noteIssuedSecret("ABC234", MEMBER, issued.memberSecret);
+		plugin.noteIssuedSecret(plugin.pairing.serverUrl(), "ABC234", MEMBER, issued.memberSecret);
 		plugin.storeIssuedSecret();
 
 		assertEquals(SECRET, plugin.pairing.secret(MEMBER));
 
 		Doorman door = new Doorman(200, "{}");
 		RelayClient relay = new RelayClient(door.client(), gson);
-		relay.post(MAP, "ABC234", null, plugin.pairing.secret(MEMBER), new CompanionSnapshot(), r ->
+		relay.post(MAP, "ABC234", null, plugin.pairing.secret(MEMBER), null, new CompanionSnapshot(), r ->
 		{
 		});
 
@@ -261,12 +261,12 @@ public class MemberSecretTest
 		 * never send another.
 		 */
 		MapCompanionPlugin plugin = pluginJoinedTo("ABC234");
-		plugin.noteIssuedSecret("ABC234", MEMBER, SECRET);
+		plugin.noteIssuedSecret(plugin.pairing.serverUrl(), "ABC234", MEMBER, SECRET);
 		plugin.storeIssuedSecret();
 
 		RelayResponse quiet = gson.fromJson("{\"pollIntervalMs\":2000}", RelayResponse.class);
 		assertNull(quiet.memberSecret);
-		plugin.noteIssuedSecret("ABC234", MEMBER, quiet.memberSecret);
+		plugin.noteIssuedSecret(plugin.pairing.serverUrl(), "ABC234", MEMBER, quiet.memberSecret);
 		plugin.storeIssuedSecret();
 
 		assertEquals(SECRET, plugin.pairing.secret(MEMBER));
@@ -281,7 +281,7 @@ public class MemberSecretTest
 		 * offer one group's credential to another group on every request it ever made.
 		 */
 		MapCompanionPlugin plugin = pluginJoinedTo("ABC234");
-		plugin.noteIssuedSecret("ABC234", MEMBER, SECRET);
+		plugin.noteIssuedSecret(plugin.pairing.serverUrl(), "ABC234", MEMBER, SECRET);
 
 		plugin.pairing.join(JoinCode.parse("DEF567"));
 		plugin.onGroupChanged();
@@ -298,10 +298,10 @@ public class MemberSecretTest
 		/** The member id goes at the same moment, and a secret says which member of a group this
 		 * installation is — so an id that no longer exists leaves nothing for any of them to prove. */
 		MapCompanionPlugin plugin = pluginJoinedTo("ABC234");
-		plugin.noteIssuedSecret("ABC234", MEMBER, SECRET);
+		plugin.noteIssuedSecret(plugin.pairing.serverUrl(), "ABC234", MEMBER, SECRET);
 		plugin.storeIssuedSecret();
 		plugin.pairing.join(JoinCode.parse("DEF567"));
-		plugin.noteIssuedSecret("DEF567", MEMBER, SECRET);
+		plugin.noteIssuedSecret(plugin.pairing.serverUrl(), "DEF567", MEMBER, SECRET);
 		plugin.storeIssuedSecret();
 
 		plugin.pairing.leave();

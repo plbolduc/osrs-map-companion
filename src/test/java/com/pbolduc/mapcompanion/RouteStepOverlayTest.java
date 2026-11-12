@@ -60,7 +60,7 @@ public class RouteStepOverlayTest
 	{
 		String reply = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "contract", "reply.json")), StandardCharsets.UTF_8);
 		RelayResponse.Destination destination = new Gson().fromJson(reply, RelayResponse.class).directive.destination;
-		route.sync(destination);
+		route.sync(destination, null);
 		return destination;
 	}
 
@@ -77,12 +77,12 @@ public class RouteStepOverlayTest
 		assertEquals("1. Lumbridge Home Teleport", box.step);
 		assertEquals("Standard spellbook", box.detail);
 
-		route.advance(new WorldPoint(3222, 3218, 0));
+		route.advance(new WorldPoint(3222, 3218, 0), DestinationRoute.Sailing.ASHORE_UNKNOWN);
 		box = RouteStepOverlay.box(route.view(), destination.name);
 		assertEquals("2. Walk 12 tiles to the bank", box.step);
 		assertNull("a walk with no detail has no second line", box.detail);
 
-		route.advance(new WorldPoint(3208, 3220, 2));
+		route.advance(new WorldPoint(3208, 3220, 2), DestinationRoute.Sailing.ASHORE_UNKNOWN);
 		assertNull("gone once arrived", RouteStepOverlay.box(route.view(), destination.name));
 	}
 
@@ -209,7 +209,7 @@ public class RouteStepOverlayTest
 		assertTrue("before the words", pictureRight < wordsLeft);
 		assertEquals("the box keeps its size when the picture comes", waiting, shown);
 
-		route.advance(new WorldPoint(3222, 3218, 0));
+		route.advance(new WorldPoint(3222, 3218, 0), DestinationRoute.Sailing.ASHORE_UNKNOWN);
 		Dimension walk = drawn(overlay);
 		assertEquals("a walk is words alone", 0, picturePixels);
 		assertEquals("in a box narrower by the picture and its gap", shown.width - 20, walk.width);
@@ -271,7 +271,7 @@ public class RouteStepOverlayTest
 		amulet.notes = Arrays.asList("<col=00ff00>Lands in the Wilderness</col>", " ");
 		RelayResponse.Destination maze = DestinationRouteTest.destination("Lava Maze",
 			DestinationRouteTest.route("Burning amulet", Collections.singletonList(amulet)));
-		route.sync(maze);
+		route.sync(maze, null);
 		route.follow(true);
 		assertEquals(Collections.singletonList("Lands in the Wilderness"), RouteStepOverlay.box(route.view(), maze.name).notes);
 		drawn(maze);

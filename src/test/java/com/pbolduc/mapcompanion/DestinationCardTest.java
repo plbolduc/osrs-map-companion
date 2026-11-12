@@ -243,8 +243,8 @@ public class DestinationCardTest
 	public void followGoesOnArrival() throws Exception
 	{
 		received();
-		route.advance(new WorldPoint(3222, 3218, 0));
-		route.advance(new WorldPoint(3208, 3220, 2));
+		route.advance(new WorldPoint(3222, 3218, 0), DestinationRoute.Sailing.ASHORE_UNKNOWN);
+		route.advance(new WorldPoint(3208, 3220, 2), DestinationRoute.Sailing.ASHORE_UNKNOWN);
 		refresh();
 		assertTrue(route.view().arrived());
 		assertEquals(Arrays.asList("Reroute", "Dismiss"), actions());
@@ -259,7 +259,7 @@ public class DestinationCardTest
 	public void aDestinationWithNoWayYetOffersRouteToItsOwnTile() throws Exception
 	{
 		destinations.selectLocal(mine());
-		route.sync(destinations.getDestination());
+		route.sync(destinations.getDestination(), null);
 		refresh();
 		assertEquals(Arrays.asList("Route", "Dismiss"), actions());
 
@@ -286,7 +286,7 @@ public class DestinationCardTest
 	public void aRefusedRouteIsSaidUnderTheCard() throws Exception
 	{
 		destinations.selectLocal(mine());
-		route.sync(destinations.getDestination());
+		route.sync(destinations.getDestination(), null);
 		refresh();
 		status = 404;
 		press("Route");
@@ -301,7 +301,7 @@ public class DestinationCardTest
 	public void noRouteUntilConnected() throws Exception
 	{
 		destinations.selectLocal(mine());
-		route.sync(destinations.getDestination());
+		route.sync(destinations.getDestination(), null);
 		SwingUtilities.invokeAndWait(() -> cards.refresh(true, false));
 		assertEquals(Arrays.asList("Dismiss"), actions());
 	}
@@ -468,7 +468,7 @@ public class DestinationCardTest
 		String reply = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "contract", "reply.json")),
 			StandardCharsets.UTF_8);
 		destinations.accept(gson.fromJson(reply, RelayResponse.class).directive);
-		route.sync(destinations.getDestination());
+		route.sync(destinations.getDestination(), null);
 	}
 
 	/** The card as the sidebar's one-second refresh draws it, connected. */

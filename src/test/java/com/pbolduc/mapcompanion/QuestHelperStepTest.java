@@ -206,7 +206,7 @@ public class QuestHelperStepTest
 		bus[0] = shortestPath;
 		DestinationRoute route = new DestinationRoute();
 		route.sync(DestinationRouteTest.destination("Al Kharid bank",
-			DestinationRouteTest.route("item:ring-of-dueling", DestinationRouteTest.alKharid())));
+			DestinationRouteTest.route("item:ring-of-dueling", DestinationRouteTest.alKharid())), null);
 		WorldPoint lumbridge = new WorldPoint(3222, 3218, 0);
 		WorldPoint landing = new WorldPoint(3293, 3184, 0);
 		WorldPoint[] drawn = new WorldPoint[1];
@@ -239,12 +239,12 @@ public class QuestHelperStepTest
 			}
 		};
 		int tick = 0;
-		route.advance(lumbridge);
+		route.advance(lumbridge, DestinationRoute.Sailing.ASHORE_UNKNOWN);
 		shortestPath.tick(++tick, route.view(), true, lumbridge, () -> { });
 		frame.run();
 		shortestPath.onPluginMessage(questHelperPath(STEP));
 		route.follow(true);
-		route.advance(landing);
+		route.advance(landing, DestinationRoute.Sailing.ASHORE_UNKNOWN);
 		shortestPath.tick(++tick, route.view(), true, landing, () -> { });
 		frame.run();
 		assertEquals("this plugin drew its walk", 1, sent.stream().filter(m -> m.getName().equals("path")).count());

@@ -384,17 +384,6 @@ public class RelayClient
 		String code,
 		@Nullable String suffix,
 		@Nullable String memberSecret,
-		CompanionSnapshot snapshot,
-		Consumer<RelayResponse> onDirective)
-	{
-		return post(baseUrl, code, suffix, memberSecret, null, snapshot, onDirective);
-	}
-
-	public synchronized boolean post(
-		String baseUrl,
-		String code,
-		@Nullable String suffix,
-		@Nullable String memberSecret,
 		@Nullable String installationKey,
 		CompanionSnapshot snapshot,
 		Consumer<RelayResponse> onDirective)

@@ -817,13 +817,13 @@ public final class HarnessMain
 		}
 		farmRunRoute.sync();
 		RelayResponse.Destination shown = DestinationSceneOverlay.shown(config, destinationState);
-		destinationRoute.sync(shown);
-		destinationRoute.advance(DestinationRoute.standing(game.client()));
+		destinationRoute.sync(shown, null);
+		destinationRoute.advance(DestinationRoute.standing(game.client()), DestinationRoute.Sailing.ASHORE_UNKNOWN);
 		if (shown != null && !farmRunRoute.owns(shown) && destinationRoute.reaches(DestinationRoute.standing(game.client()),
 			shown.world == null || shown.world == game.client().getWorld()))
 		{
 			destinationState.dismiss();
-			destinationRoute.sync(null);
+			destinationRoute.sync(null, null);
 		}
 
 		if (suffixClaimed)

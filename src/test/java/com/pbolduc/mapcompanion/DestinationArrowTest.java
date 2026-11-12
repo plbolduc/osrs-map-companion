@@ -158,7 +158,7 @@ public class DestinationArrowTest
 		d.y = 3250;
 		d.plane = 0;
 		state.selectLocal(d);
-		route.sync(state.getDestination());
+		route.sync(state.getDestination(), null);
 	}
 
 	@Test
@@ -167,13 +167,13 @@ public class DestinationArrowTest
 		routed();
 		arrows.sync();
 		assertEquals("the first step's end, not the destination beyond it", new WorldPoint(3230, 3230, 0), arrow);
-		route.advance(new WorldPoint(3231, 3229, 0));
+		route.advance(new WorldPoint(3231, 3229, 0), DestinationRoute.Sailing.ASHORE_UNKNOWN);
 		arrows.sync();
 		assertEquals("its own arrow moves on with the step", new WorldPoint(3250, 3240, 0), arrow);
-		route.advance(new WorldPoint(3250, 3240, 0));
+		route.advance(new WorldPoint(3250, 3240, 0), DestinationRoute.Sailing.ASHORE_UNKNOWN);
 		arrows.sync();
 		assertEquals(new WorldPoint(3260, 3250, 0), arrow);
-		route.advance(new WorldPoint(3260, 3250, 0));
+		route.advance(new WorldPoint(3260, 3250, 0), DestinationRoute.Sailing.ASHORE_UNKNOWN);
 		arrows.sync();
 		assertEquals("arrived: the destination", new WorldPoint(3260, 3250, 0), arrow);
 	}
@@ -182,7 +182,7 @@ public class DestinationArrowTest
 	public void aStepOutsideTheLoadedSceneIsNoReasonToPointAtTheDestination()
 	{
 		routed();
-		route.sync(null);
+		route.sync(null, null);
 		RelayResponse.Destination d = DestinationRouteTest.destination("Bank", DestinationRouteTest.route("item:glory", Arrays.asList(
 			DestinationRouteTest.step("method", "Amulet of glory", false, 3087, 3496, null),
 			DestinationRouteTest.step("arrival-walk", "Walk to the bank", true, 3260, 3250, 0))));
@@ -190,7 +190,7 @@ public class DestinationArrowTest
 		d.y = 3250;
 		d.plane = 0;
 		state.selectLocal(d);
-		route.sync(state.getDestination());
+		route.sync(state.getDestination(), null);
 		arrows.sync();
 		assertNull("Edgeville is not loaded, and the bank in the scene is not the way to go", arrow);
 	}
@@ -202,7 +202,7 @@ public class DestinationArrowTest
 		WorldPoint quest = new WorldPoint(3210, 3210, 0);
 		arrow = quest;
 		arrows.sync();
-		route.advance(new WorldPoint(3230, 3230, 0));
+		route.advance(new WorldPoint(3230, 3230, 0), DestinationRoute.Sailing.ASHORE_UNKNOWN);
 		arrows.sync();
 		assertEquals(quest, arrow);
 	}

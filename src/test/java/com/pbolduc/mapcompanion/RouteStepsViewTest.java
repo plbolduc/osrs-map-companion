@@ -80,7 +80,7 @@ public class RouteStepsViewTest
 	private void receive() throws IOException
 	{
 		String reply = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "contract", "reply.json")), StandardCharsets.UTF_8);
-		route.sync(new Gson().fromJson(reply, RelayResponse.class).directive.destination);
+		route.sync(new Gson().fromJson(reply, RelayResponse.class).directive.destination, null);
 		view.show(route.view());
 	}
 
@@ -120,7 +120,7 @@ public class RouteStepsViewTest
 	public void movesTheMarkOnAndSaysWhenYouAreThere() throws IOException
 	{
 		receive();
-		route.advance(new WorldPoint(3222, 3218, 0));
+		route.advance(new WorldPoint(3222, 3218, 0), DestinationRoute.Sailing.ASHORE_UNKNOWN);
 		view.show(route.view());
 		/* A step behind is its title alone, so the step being walked is the first bright line. */
 		assertEquals("52 tiles | 1 | Lumbridge Home Teleport | 2 | Walk 12 tiles to the bank"
@@ -130,7 +130,7 @@ public class RouteStepsViewTest
 		List<JLabel> places = named("route.step.picture");
 		assertFalse("the passed teleport's picture fades, as its pin does", places.get(0).isEnabled());
 		assertTrue(places.get(1).isEnabled());
-		route.advance(new WorldPoint(3208, 3220, 2));
+		route.advance(new WorldPoint(3208, 3220, 2), DestinationRoute.Sailing.ASHORE_UNKNOWN);
 		view.show(route.view());
 		assertEquals("the way, its steps and the other ways go", "Arrived", shown());
 		assertEquals("in the colour a run gives a stop's own status", MapPin.AMBER, label("Arrived").getForeground());
@@ -143,8 +143,8 @@ public class RouteStepsViewTest
 		receive();
 		view.showRunLeg(route.view(), null);
 		assertTrue(view.isVisible());
-		route.advance(new WorldPoint(3222, 3218, 0));
-		route.advance(new WorldPoint(3208, 3220, 2));
+		route.advance(new WorldPoint(3222, 3218, 0), DestinationRoute.Sailing.ASHORE_UNKNOWN);
+		route.advance(new WorldPoint(3208, 3220, 2), DestinationRoute.Sailing.ASHORE_UNKNOWN);
 		view.showRunLeg(route.view(), null);
 		assertFalse("and This leg's heading, which follows it, with it", view.isVisible());
 	}
@@ -295,7 +295,7 @@ public class RouteStepsViewTest
 		String reply = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "contract", "reply.json")), StandardCharsets.UTF_8);
 		RelayResponse.Destination fixture = new Gson().fromJson(reply, RelayResponse.class).directive.destination;
 		fixture.route.options.get(2).blocked = true;
-		route.sync(fixture);
+		route.sync(fixture, null);
 		view.show(route.view());
 		asked.clear();
 		assertTrue(SidebarWords.press(view, "▸ 3 other ways"));
@@ -390,7 +390,7 @@ public class RouteStepsViewTest
 	{
 		RouteStepsView bare = new RouteStepsView(route::choose);
 		String reply = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "contract", "reply.json")), StandardCharsets.UTF_8);
-		route.sync(new Gson().fromJson(reply, RelayResponse.class).directive.destination);
+		route.sync(new Gson().fromJson(reply, RelayResponse.class).directive.destination, null);
 		bare.show(route.view());
 		List<JLabel> labels = new ArrayList<>();
 		collectLabels(bare, labels);
@@ -458,7 +458,7 @@ public class RouteStepsViewTest
 	{
 		RelayResponse.Route nowhere = DestinationRouteTest.route("walk", DestinationRouteTest.alKharid());
 		nowhere.origin = null;
-		route.sync(DestinationRouteTest.destination("Al Kharid bank", nowhere));
+		route.sync(DestinationRouteTest.destination("Al Kharid bank", nowhere), null);
 		view.show(route.view());
 		assertTrue(shown(), shown().contains("Planned without your position. Reroute plans from where you stand."));
 	}

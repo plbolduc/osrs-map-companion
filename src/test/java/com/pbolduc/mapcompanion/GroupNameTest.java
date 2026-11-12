@@ -57,7 +57,7 @@ public class GroupNameTest
 		RelayResponse reply = gson.fromJson(
 								  "{\"pollIntervalMs\":2000,\"groupName\":\"Sunday raids\"}", RelayResponse.class);
 
-		plugin.noteGroupName("KQX482", reply.groupName);
+		plugin.noteGroupName(plugin.pairing.serverUrl(), "KQX482", reply.groupName);
 		plugin.storeToldName();
 
 		assertEquals("Sunday raids", plugin.pairing.name("KQX482"));
@@ -72,12 +72,12 @@ public class GroupNameTest
 		 * turn every name in the menu back into a code.
 		 */
 		MapCompanionPlugin plugin = pluginJoinedTo("KQX482");
-		plugin.noteGroupName("KQX482", "Sunday raids");
+		plugin.noteGroupName(plugin.pairing.serverUrl(), "KQX482", "Sunday raids");
 		plugin.storeToldName();
 
 		RelayResponse quiet = gson.fromJson("{\"pollIntervalMs\":2000}", RelayResponse.class);
 		assertNull(quiet.groupName);
-		plugin.noteGroupName("KQX482", quiet.groupName);
+		plugin.noteGroupName(plugin.pairing.serverUrl(), "KQX482", quiet.groupName);
 		plugin.storeToldName();
 
 		assertEquals("Sunday raids", plugin.pairing.name("KQX482"));
@@ -88,7 +88,7 @@ public class GroupNameTest
 	{
 		/** The same race as the secret's: the reply is about the post, not about whoever is current. */
 		MapCompanionPlugin plugin = pluginJoinedTo("KQX482");
-		plugin.noteGroupName("KQX482", "Sunday raids");
+		plugin.noteGroupName(plugin.pairing.serverUrl(), "KQX482", "Sunday raids");
 
 		plugin.pairing.join(JoinCode.parse("PMN934"));
 		plugin.onGroupChanged();

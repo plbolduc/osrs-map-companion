@@ -80,7 +80,7 @@ public class FarmRunRouteTest
 		assertEquals("1. Falador farm", destinations.getDestination().name);
 		assertTrue(route.view().following);
 		assertTrue(follower.owns(destinations.getDestination()));
-		route.advance(FarmRunState.point(run.stops.get(0)));
+		route.advance(FarmRunState.point(run.stops.get(0)), DestinationRoute.Sailing.ASHORE_UNKNOWN);
 		follower.sync();
 		assertEquals("arriving at a patch is not completing it", 1, state.view().next().n);
 		replant();
