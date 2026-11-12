@@ -310,16 +310,38 @@ public class ClueReader
 		return true;
 	}
 
-	/** Beginner pictures share an item id; only the opened interface identifies the destination. */
+	/**
+	 * Beginner pictures share an item id; only the opened interface identifies the destination.
+	 *
+	 * <p>Called for every interface that loads, and the table it asks is RuneLite's clue plugin's
+	 * own class, not its API. Were that class to change, the call would fail to link, an Error that
+	 * no ordinary catch stops, on every bank, shop and dialogue a player opens. So that one failure
+	 * is caught here and reads as no picture.
+	 */
 	public void onMapWidget(int groupId)
 	{
-		BeginnerMapClue picture = BeginnerMapClue.forWidgetID(groupId);
-		if (picture == null || !adoptOpening()) return;
+		WorldPoint point;
+		try
+		{
+			point = beginnerMap(groupId);
+		}
+		catch (LinkageError changed)
+		{
+			return;
+		}
+		if (point == null || !adoptOpening()) return;
 		if (!"beginner".equals(tierOf(lastScrollItemId))) return;
-		// This implementation returns its stored world point; it does not use a clue-plugin instance.
-		WorldPoint point = picture.getLocation(null);
 		lastStepText = null;
 		mapTile = new CompanionSnapshot.Tile(point.getX(), point.getY(), point.getPlane());
+	}
+
+	/** Where the beginner picture this interface shows is dug, or null for any other interface. Its own method for a test. */
+	@Nullable
+	WorldPoint beginnerMap(int groupId)
+	{
+		BeginnerMapClue picture = BeginnerMapClue.forWidgetID(groupId);
+		// This implementation returns its stored world point; it does not use a clue-plugin instance.
+		return picture == null ? null : picture.getLocation(null);
 	}
 
 	/**

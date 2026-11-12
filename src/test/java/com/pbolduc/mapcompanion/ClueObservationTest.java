@@ -121,6 +121,32 @@ public class ClueObservationTest
 		game.carry(1);
 		assertNull(reader.read().text);
 	}
+	/**
+	 * The beginner pictures are told apart by a class of RuneLite's own clue plugin, asked on every
+	 * interface that loads. A RuneLite that changed it would fail the call with a linkage error, which
+	 * is not an exception and was not caught: every bank and dialogue would have thrown on the client
+	 * thread. It reads as no picture, and a scroll already read keeps its step.
+	 */
+	@Test
+	public void aCluePluginClassThatNoLongerLinksCostsOnlyThePicture()
+	{
+		ClueReader unlinked = new ClueReader(game.client)
+		{
+			@Override
+			net.runelite.api.coords.WorldPoint beginnerMap(int groupId)
+			{
+				throw new NoSuchMethodError("BeginnerMapClue.forWidgetID");
+			}
+		};
+		game.define(1, "Clue scroll (beginner)", false);
+		game.carry(1);
+		unlinked.read();
+		unlinked.onClueWidget(ItemReadingsTestClient.widget("A text step"));
+		unlinked.onMapWidget(net.runelite.api.gameval.InterfaceID.TRAIL_MAP01);
+		assertNull(unlinked.read().mapTile);
+		assertEquals("A text step", unlinked.read().text);
+	}
+
 	@Test
 	public void beginnerPicturesUseTheOpenedWindowAndCannotSurviveAnotherStep()
 	{
