@@ -114,7 +114,9 @@ a fold under the rows, names every field and describes the receive stream in ful
 do, and is the only thing in the step that changes anything: ticking and
 **Not now** write nothing, and nothing in the step makes a request. It follows only the Connect that
 approved its map, which happens once per map, and only while every choice it could turn on is still
-off, so a player who connected before, or chose first, is never offered it. The meetup reminder
+off, so a player who connected before, or chose first, is never offered it. The version that
+put *Where you died* under *Where you are* turns that one setting on, once, at its first start,
+for a player who already shares their position; it writes no other sharing setting. The meetup reminder
 is not in it.
 
 Enabling either drawing choice opens a receive stream; group positions are requested only with

@@ -76,6 +76,11 @@ public class SharingGroupsTest
 	 * <p>The start keeps every one of those choices — the snapshot is the same JSON, field for field —
 	 * and writes only the switches: on for the whole group, off for the two partly shared and the one
 	 * not shared at all. A second start changes nothing.
+	 *
+	 * <p>This asserted that no field at all was written. One is now, by the owner's decision: this
+	 * player shares their position, so where they died, which moved under the same sidebar switch,
+	 * is turned on for them once. Every other field is still exactly as it was, and with no death
+	 * to tell of the snapshot is still the same JSON.
 	 */
 	@Test
 	public void anUpdateKeepsEveryChoiceAMixedGroupIncluded()
@@ -98,14 +103,16 @@ public class SharingGroupsTest
 
 		SharingGroups.settle(fixture.config, fixture.store);
 
-		assertEquals("every field exactly as it was", fields, fixture.fields());
+		assertEquals("false", fields.put(SharingFields.DEATH.key, "true"));
+		assertEquals("every field exactly as it was, but where they died", fields, fixture.fields());
 		assertEquals("so the snapshot carries exactly what it did", sent, fixture.sent());
 		assertEquals("true", fixture.store.get(MapCompanionConfig.KEY_SHARE_MAP_PRESENCE));
 		assertEquals("false", fixture.store.get(MapCompanionConfig.KEY_SHARE_PROGRESS));
 		assertEquals("false", fixture.store.get(MapCompanionConfig.KEY_SHARE_TASKS));
 		assertEquals("false", fixture.store.get(MapCompanionConfig.KEY_SHARE_LOOT_GROUP));
-		assertEquals("only the switch that disagreed, and the marker",
-			Arrays.asList(MapCompanionConfig.KEY_SHARE_MAP_PRESENCE + "=true", SharingGroups.KEY_SETTLED + "=" + SharingGroups.GENERATION), fixture.written);
+		assertEquals("only the switch that disagreed, where they died, and the marker",
+			Arrays.asList(MapCompanionConfig.KEY_SHARE_MAP_PRESENCE + "=true", SharingFields.DEATH.key + "=true",
+				SharingGroups.KEY_SETTLED + "=" + SharingGroups.GENERATION), fixture.written);
 		assertEquals(Arrays.asList(SharingFields.PROGRESS.fields.get(0), SharingFields.PROGRESS.fields.get(7)),
 			SharingGroups.shared(SharingFields.PROGRESS.fields, fixture.config, fixture.store));
 		assertEquals("Skill levels", SharingFields.PROGRESS.fields.get(0).label);
@@ -115,6 +122,70 @@ public class SharingGroupsTest
 		SharingGroups.settle(fixture.config, fixture.store);
 		assertTrue("a second start agrees with everything and writes nothing", fixture.written.isEmpty());
 		assertEquals(sent, fixture.sent());
+	}
+
+	/**
+	 * Where you died moved under the sidebar's switch for where you are, which the step after Connect
+	 * now ticks. A player who pressed that step before it did shares their position and not the
+	 * death, so the first start of this version turns the death on for them, once: the owner's
+	 * decision, since their group already sees the dot whose tile it is. It is the one setting an
+	 * update turns on. Turned off afterwards it stays off, and nothing else of theirs is written.
+	 */
+	@Test
+	public void whereYouDiedJoinsThePositionOnceForAPlayerWhoSharesIt()
+	{
+		Fixture fixture = new Fixture();
+		for (String key : RecommendedSharing.KEYS)
+		{
+			fixture.store.set(key, Boolean.toString(!key.equals(SharingFields.DEATH.key)));
+		}
+		for (SharingFields.Section section : SharingFields.GROUPS)
+		{
+			fixture.store.set(section.key, "true");
+		}
+		fixture.store.set(SharingGroups.KEY_SETTLED, "2");
+		fixture.written.clear();
+
+		SharingGroups.settle(fixture.config, fixture.store);
+		assertEquals(Arrays.asList(SharingFields.DEATH.key + "=true", SharingGroups.KEY_SETTLED + "=3"), fixture.written);
+		assertEquals(3, SharingGroups.GENERATION);
+
+		fixture.store.set(SharingFields.DEATH.key, "false");
+		fixture.written.clear();
+		SharingGroups.settle(fixture.config, fixture.store);
+		assertTrue("turned off after the update, it stays off", fixture.written.isEmpty());
+		assertFalse(fixture.config.shareDeath());
+	}
+
+	/**
+	 * Only the position brings the death with it. A player who shares everything else and not where
+	 * they are, one who pressed Not now, and one who hid their name are written nothing but the marker.
+	 */
+	@Test
+	public void nobodyWhoDoesNotShareTheirPositionIsChangedByTheUpdate()
+	{
+		Fixture others = new Fixture();
+		for (String key : RecommendedSharing.KEYS)
+		{
+			others.store.set(key, Boolean.toString(!key.equals(SharingFields.DEATH.key) && !key.equals("sharePosition")
+				&& !key.equals(SharingFields.NAME.key)));
+		}
+		for (SharingFields.Section section : SharingFields.GROUPS)
+		{
+			others.store.set(section.key, Boolean.toString(section != SharingFields.PRESENCE));
+		}
+		others.store.set(SharingGroups.KEY_SETTLED, "2");
+		others.written.clear();
+		SharingGroups.settle(others.config, others.store);
+		assertEquals(Arrays.asList(SharingGroups.KEY_SETTLED + "=3"), others.written);
+		assertFalse(others.config.shareDeath());
+		assertFalse("a hidden name stays hidden", others.config.shareName());
+
+		Fixture nothing = new Fixture();
+		nothing.store.set(SharingGroups.KEY_SETTLED, "2");
+		nothing.written.clear();
+		SharingGroups.settle(nothing.config, nothing.store);
+		assertEquals("Not now is still nothing", Arrays.asList(SharingGroups.KEY_SETTLED + "=3"), nothing.written);
 	}
 
 	/** RuneLite's settings have never been written for a profile that has no switches yet either. */

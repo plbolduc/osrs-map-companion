@@ -279,8 +279,15 @@ answering a reviewer. Since 1.7.0:
   group's switch that was on before this update does not turn it on. No request or poll is added.
 - **Three sharing switches in the sidebar:** Settings and the step after Connect draw *Where you
   are*, *Your account* and *Loot and milestones* where they drew six switches. RuneLite's list is
-  unchanged, and so is every field. An update changes nobody's settings: a switch only part of
-  which is on shows a dash and names the part, and nothing is written until it is pressed.
+  unchanged, and so is every field. A switch only part of which is on shows a dash and names the
+  part, and nothing is written until it is pressed.
+- **Where you died, for a player who shares their position:** the one setting this update turns
+  on. It moved under *Where you are*, so the first start of this version turns it on, once, for a
+  player whose *Position and world* is on, and for nobody else. It sends the tile of their most
+  recent death and its age to the group that already sees their position, as disclosed above.
+  Turned off afterwards it stays off (`SharingGroups.settle`, generation 3;
+  `SharingGroupsTest` holds both halves). The update's chat line says it was turned on and where
+  to turn it off.
 - **The step after Connect ticks everything:** *Where you died*, offered unticked before, is under
   *Where you are* and ticked, and the character name is written with the press, which the step's
   first line says. Nothing is on until the press, and a player who connected before this update

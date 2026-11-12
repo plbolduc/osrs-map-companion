@@ -36,8 +36,7 @@ import static com.pbolduc.mapcompanion.SharingFields.Field;
  * <i>Sharing everything</i>, <i>Sharing all but loot and milestones</i> when no more is off than on,
  * the one or two that are on when only those are, and a count otherwise. A switch a player chose
  * part of is <i>part of your account</i>, or the one field of it that is off, so a player who
- * shared all the step offered before it ticked the death reads <i>Sharing all but where you died</i>
- * as they always have. The tooltip gives each switch a line, wrapped to fit the screen: on, off, or
+ * turns the death off reads <i>Sharing all but where you died</i>. The tooltip gives each switch a line, wrapped to fit the screen: on, off, or
  * its fields that are on or off, whichever are fewer; and the name the group sees.
  *
  * <p>It speaks of what goes out, so pet rewards and collection additions count only with Notable drops

@@ -55,6 +55,14 @@ import static com.pbolduc.mapcompanion.SharingFields.Section;
  * holds the {@link #GENERATION}), and a start that finds a field newer than that leaves the field
  * as it is, off unless chosen, and moves the switch to what its fields now share instead.
  *
+ * <p><b>The one setting an update turns on.</b> Where you died had a switch of its own, which the
+ * step after Connect showed unticked; it is now under the sidebar's switch for where you are. A
+ * player who shares their position would be shown that switch with a dash for the one field the old
+ * step left off, so the start that first settles a profile with generation 3 turns the death on for
+ * them, once. It is the owner's decision, made knowing the rule above: the group of such a player
+ * already sees their dot, and the death is the tile that dot was on. Nobody who does not share
+ * their position is changed, and turned off afterwards it stays off.
+ *
  * <p>Nothing loops. A switch writes only the fields that differ from it; a field going on never turns
  * its switch off, which is what lets a switch's fan-out finish; and a switch moved because of a field
  * agrees with its fields, so its own event writes nothing.
@@ -70,9 +78,9 @@ final class SharingGroups
 
 	/**
 	 * Which release's field list {@link #KEY_SETTLED} was written with: 1 for the groups as they first
-	 * shipped, one more each release that adds a field to a group. Never lowered.
+	 * shipped, one more each release that adds a field to a group or, as 3 did, moves one. Never lowered.
 	 */
-	static final int GENERATION = 2;
+	static final int GENERATION = 3;
 
 	/** Each field added to a group after the first generation, with the generation that added it. */
 	static final Map<String, Integer> ADDED = Collections.unmodifiableMap(added());
@@ -172,6 +180,12 @@ final class SharingGroups
 			{
 				store.set(section.key, Boolean.toString(fields));
 			}
+		}
+		/* Where you died joins the position it is a tile of: once, for a player who shares that position. */
+		if (settledWith < 3 && generation >= 3 && SharingFields.PRESENCE.fields.get(0).on(config, store)
+			&& !SharingFields.DEATH.on(config, store))
+		{
+			store.set(SharingFields.DEATH.key, "true");
 		}
 		if (!read || settledWith < generation)
 		{

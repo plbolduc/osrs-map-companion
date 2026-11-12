@@ -445,11 +445,13 @@ The website plan's second session, once the routes in the game are built: a memb
       *Group on the world map* in RuneLite's own settings and the row shows a dash. Restart RuneLite and reconnect: no step. In RuneLite's
       own config panel, ticking a sharing setting asks no "Are you sure?".
 - [ ] **Three switches after an update.** On a RuneLite profile that pressed *Share what's ticked*
-      on 1.8.0, start this version: Settings shows *Your account* and *Loot and milestones* on and
-      *Where you are* with a dash and *Not shared: Where you died* under it, the status card still
-      says *Sharing all but where you died*, and Show what's sent carries the same fields as before.
-      Press the dashed switch: it is on, and the death's tile is sent after the next death. On a
-      profile that had hidden its name, the name box is open and no switch turns the name on.
+      on 1.8.0, start this version: Settings shows all three switches on, the status card says
+      *Sharing everything*, RuneLite's list shows *Where you died* ticked, and the profile's settings
+      file holds `mapcompanion.sharingGroups=3`. Die: the tile is sent. Untick *Where you died* in
+      RuneLite's list and restart: it stays off, *Where you are* shows a dash with *Not shared:
+      Where you died*, and the status card says *Sharing all but where you died*. On a 1.8.0 profile
+      that shared everything but its position, or pressed *Not now*, the update turns nothing on.
+      On a profile that had hidden its name, the name box is open and no switch turns the name on.
 - [ ] **RuneLite's six switches after an update.** On a RuneLite profile that ran 1.3.0 with all of
       Map presence and two fields of Tasks and timers ticked, start this version. RuneLite's list
       shows *What you share* with Map presence on and Tasks and timers off, the sidebar's Settings
