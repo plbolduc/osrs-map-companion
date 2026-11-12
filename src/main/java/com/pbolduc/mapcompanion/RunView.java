@@ -380,15 +380,17 @@ final class RunView extends JPanel
 				: view.visited.size() + " of " + view.run.stops.size() + " " + reached(view);
 		}
 		/*
-		 * How far is left, where every stop ahead says its leg in numbers: a charting run past its
-		 * first leg. One leg in words alone and there is no total to give, so none is given.
+		 * How far is left, where every stop ahead says its length in numbers: a charting run past its
+		 * first leg, a farm run whose stops the map priced. One stop in words alone and there is no
+		 * total to give, so none is given.
 		 */
 		int left = 0;
 		for (FarmStop stop : view.run.stops)
 		{
 			if (!view.done.contains(stop.n) && !view.visited.contains(stop.n))
 			{
-				left = stop.leg == null || left < 0 ? -1 : left + stop.leg.tiles;
+				int tiles = tiles(stop);
+				left = tiles < 0 || left < 0 ? -1 : left + tiles;
 			}
 		}
 		if (left > 0)
@@ -396,6 +398,18 @@ final class RunView extends JPanel
 			count += " · " + left + " tiles left";
 		}
 		return view.following ? count : "Paused · " + count;
+	}
+
+	/**
+	 * A stop's length in tiles, for the column at the rows' right edge and for what is left: its leg's
+	 * where the map sent one in numbers, else what the map priced a farm stop's way at, the number
+	 * This leg's heading says. Less than zero where it gave neither, a voyage's stop included, since
+	 * its Sail step says the distance sailed. Bounded as a leg's is, so no number can widen the card.
+	 */
+	static int tiles(FarmStop stop)
+	{
+		return stop.leg != null ? stop.leg.tiles
+			: stop.voyage == null && stop.costTiles > 0 && stop.costTiles <= 100_000 ? stop.costTiles : -1;
 	}
 
 	/** What a stop ticked without a replant came to: charted on a sea charting run, else visited. */
@@ -547,12 +561,21 @@ final class RunView extends JPanel
 			/*
 			 * A stop whose leg is numbers is one row to scan: its picture, its name, and how far at the
 			 * right edge, so the lengths make a column. The length sits in the margin the card's text
-			 * leaves at its right. Any other stop keeps its way in words under its name.
+			 * leaves at its right. Any other stop keeps its way in words under its name, and a farm
+			 * stop the map priced has its length in the same column, beside its name, with no word
+			 * under it: its way is the line below. Its name gives up the length's width, so the two
+			 * fit the card however long the name is.
 			 */
 			boolean far = stop.leg != null;
+			int tiles = tiles(stop);
+			JLabel length = label(11f, LIGHT_GRAY_COLOR);
+			length.setText("<html><div align='right'>" + tiles + "t"
+				+ (far ? "<br><font color='#7d7d7d'>" + stop.leg.by + "</font>" : "") + "</div></html>");
+			length.setVerticalAlignment(JLabel.TOP);
 			int beside = pictures ? WIDTH - PICTURE - 4 : WIDTH;
 			JLabel name = label(12f, Color.WHITE);
-			name.setText(stopName(stop, next != null && stop.n == next.n, far ? beside : WIDTH));
+			name.setText(stopName(stop, next != null && stop.n == next.n,
+				far ? beside : tiles < 0 ? WIDTH : WIDTH - length.getPreferredSize().width - 4));
 			JPanel method = new JPanel(new BorderLayout(4, 0));
 			method.setOpaque(false);
 			if (pictures)
@@ -570,14 +593,11 @@ final class RunView extends JPanel
 			if (far)
 			{
 				method.add(name, BorderLayout.CENTER);
-				JLabel length = label(11f, LIGHT_GRAY_COLOR);
-				length.setText("<html><div align='right'>" + stop.leg.tiles + "t<br><font color='#7d7d7d'>" + stop.leg.by + "</font></div></html>");
-				length.setVerticalAlignment(JLabel.TOP);
 				method.add(length, BorderLayout.EAST);
 			}
 			else
 			{
-				row.add(name);
+				row.add(tiles < 0 ? name : left(MapCompanionPanel.bar(4, ColorScheme.DARKER_GRAY_COLOR, null, name, length)));
 				method.add(wrapped(stop.method == null ? "Walk" : stop.method, 11f, LIGHT_GRAY_COLOR, beside), BorderLayout.CENTER);
 			}
 			row.add(left(method));
