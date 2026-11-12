@@ -81,39 +81,26 @@ final class Sprites
 			@Override
 			void sprite(JLabel label, int spriteId, int box)
 			{
+				BufferedImage star = worldStar(spriteId);
+				if (star != null)
+				{
+					show(label, star, box);
+					return;
+				}
 				/* The combat tab's crossed swords is the one sprite the website keeps under a name of its own. */
 				show(label, read(root, spriteId == net.runelite.api.gameval.SpriteID.SideIcons.COMBAT
 					? "osrs-icons/1x/skill-combat.png" : SPELLS.containsKey(spriteId)
 					? "osrs-icons/1x/" + SPELLS.get(spriteId) + ".png" : "osrs-icons/cache/" + spriteId + ".png"), box);
 			}
 
-			/**
-			 * The world switcher's two stars are not among the website's files, so the renderer paints
-			 * a stand-in of their colour and size. The client draws the game's own sprite.
-			 */
 			@Override
 			void sprite(javax.swing.AbstractButton button, int spriteId, int box)
 			{
-				boolean members = spriteId == net.runelite.api.gameval.SpriteID.WorldswitcherStars.MEMBERS;
-				boolean free = spriteId == net.runelite.api.gameval.SpriteID.WorldswitcherStars.FREE;
-				if (!members && !free)
+				BufferedImage star = worldStar(spriteId);
+				if (star != null)
 				{
-					return;
+					show(button, star, box);
 				}
-				BufferedImage star = new BufferedImage(13, 13, BufferedImage.TYPE_INT_ARGB);
-				java.awt.Graphics2D g = star.createGraphics();
-				g.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
-				java.awt.Polygon shape = new java.awt.Polygon();
-				for (int i = 0; i < 10; i++)
-				{
-					double r = i % 2 == 0 ? 6.4 : 2.7;
-					double a = Math.PI / 2 + i * Math.PI / 5;
-					shape.addPoint((int) Math.round(6.5 + r * Math.cos(a)), (int) Math.round(6.5 - r * Math.sin(a)));
-				}
-				g.setColor(members ? new java.awt.Color(0xF5C542) : new java.awt.Color(0xC9CDD3));
-				g.fillPolygon(shape);
-				g.dispose();
-				show(button, star, box);
 			}
 
 			@Override
@@ -122,6 +109,45 @@ final class Sprites
 				show(label, read(root, "osrs-icons/1x/skill-" + name.toLowerCase() + ".png"), box);
 			}
 		});
+	}
+
+	/**
+	 * The world switcher's stars are not among the website's files, so the renderer paints a stand-in
+	 * of each one's colour and size, in the website's own colours for them: gold for members, grey
+	 * for free, solid red for PvP and a red outline for Deadman. The client draws the game's own
+	 * sprite. Null for any other sprite.
+	 */
+	static BufferedImage worldStar(int spriteId)
+	{
+		boolean members = spriteId == net.runelite.api.gameval.SpriteID.WorldswitcherStars.MEMBERS;
+		boolean free = spriteId == net.runelite.api.gameval.SpriteID.WorldswitcherStars.FREE;
+		boolean pvp = spriteId == net.runelite.api.gameval.SpriteID.WorldswitcherStars.PVP;
+		boolean deadman = spriteId == net.runelite.api.gameval.SpriteID.WorldswitcherStars.DEADMAN;
+		if (!members && !free && !pvp && !deadman)
+		{
+			return null;
+		}
+		BufferedImage star = new BufferedImage(13, 13, BufferedImage.TYPE_INT_ARGB);
+		java.awt.Graphics2D g = star.createGraphics();
+		g.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
+		java.awt.Polygon shape = new java.awt.Polygon();
+		for (int i = 0; i < 10; i++)
+		{
+			double r = i % 2 == 0 ? 6.4 : 2.7;
+			double a = Math.PI / 2 + i * Math.PI / 5;
+			shape.addPoint((int) Math.round(6.5 + r * Math.cos(a)), (int) Math.round(6.5 - r * Math.sin(a)));
+		}
+		g.setColor(members ? new java.awt.Color(0xF5C542) : free ? new java.awt.Color(0xC9CDD3) : new java.awt.Color(0xE02020));
+		if (deadman)
+		{
+			g.drawPolygon(shape);
+		}
+		else
+		{
+			g.fillPolygon(shape);
+		}
+		g.dispose();
+		return star;
 	}
 
 	static BufferedImage read(String root, String path)

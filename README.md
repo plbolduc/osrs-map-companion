@@ -97,12 +97,13 @@ order your hold allows, then each bounty out to its creature and back.
 ## Shooting stars
 
 <p>
-  <img src="docs/mockups/stars-tab-list.png" width="300" alt="The Stars tab: a star at Rimmington mine pinned with its route under it, a Rimmington tablet and a walk, with Pause, Reroute and Unpin; then the tier and world filters, and the stars grouped by site, each tier in its own colour, with Data from Star Miners at the foot">
+  <img src="docs/mockups/stars-tab-list.png" width="300" alt="The Stars tab: a star at Rimmington mine pinned at the top, its tier in pink and its world as a gold members star and a number, green because you are on it, with its route under it, a Rimmington tablet and a walk, and Reroute and Unpin; then the tier and world filters, and the stars grouped by site, each with its tier in bold in the tier's colour, the world switcher's star beside its world in bold, and its time left, with Data from Star Miners at the foot">
 </p>
 
-**Stars** lists active stars by site, world, tier and time left. Filter them, save favourite
-sites, and route to one; its steps stay under the star while you hop. On a Hardcore or League
-world it lists that game's stars instead.
+**Stars** lists active stars by site, world, tier and time left, with a star on the world you
+are on marked in green. Filter them, save favourite sites, and press one to route to it; its steps
+stay at the top of the tab while you hop, and the pin clears itself when you get there. On a
+Hardcore or League world it lists that game's stars instead.
 
 ## Friends and meetups
 
