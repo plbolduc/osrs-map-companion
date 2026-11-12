@@ -52,11 +52,12 @@ it and the shops that sell it; pick one to plan the way there.
 ## Slayer in RuneLite
 
 <p>
-  <img src="docs/mockups/sidebar-slayer.png" width="225" alt="The RuneLite Slayer card: remaining task count, best usable place, requirements and Route or Pin actions">
+  <img src="docs/mockups/sidebar-slayer.png" width="225" alt="The RuneLite Slayer card: remaining task count, the best usable place open with its requirements and Route or Pin actions, and the link to every place">
 </p>
 
 Home ranks the places to do your Slayer task, keeps the ones you cannot use yet with what they
-need, and counts your kills. **Route** takes you to the one you pick.
+need, and counts your kills. Press a place's name to open it, and **Route** takes you there.
+The Farm run, Slayer and Port tasks cards each fold away under their heading.
 
 ## Farm runs in RuneLite
 

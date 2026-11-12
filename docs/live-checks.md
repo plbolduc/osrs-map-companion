@@ -175,6 +175,11 @@ steps wait on these readings (`osrs-stars-map/docs/plan-where-to-go-for-a-task.m
       Slayer task* and to get one from a master; note what it reads after a task is finished. If
       the task stays with 0 left, the card folds to *Gargoyles · Complete* (or whichever task) and
       *Get your next task from a Slayer master.* until the next task is read.
+- [ ] **The Tasks cards.** Fold *Farm run* by its heading, close RuneLite and open it again: the
+      card is still folded, and the *Slayer* card folded keeps *Gargoyles · 143 left* (or whichever
+      task). With a task of four places or more, open the list and press a closed place's name: it
+      opens in place of the one that was open, with the one **Route** and **Pin**. The renderer's
+      arrows are a Linux fallback font's; note whether ▸ and ▾ draw in the client's own.
 - [ ] **Port task slots.** `PortTaskReader` is written from the Hub's Sailing and Port Tasks
       plugins and the game's script, not from a session; these settle it. With *Tasks and timers*
       sharing on:
