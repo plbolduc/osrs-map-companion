@@ -41,6 +41,7 @@ final class Sprites
 		ITEMS.put(4151, "abyssal-whip");
 		ITEMS.put(net.runelite.api.gameval.ItemID.LUNAR_TABLET_CATHERBY_TELEPORT, "catherby-teleport-tablet");
 		ITEMS.put(net.runelite.api.gameval.ItemID.MYSTIC_ROBE_BOTTOM_DARK, "mystic-robe-bottom-dark");
+		ITEMS.put(net.runelite.api.gameval.ItemID.TWPART3, "cannon-barrels");
 		SPELLS.put(net.runelite.api.gameval.SpriteID.Magicon2.LUMBRIDGE_HOME_TELEPORT, "home-teleport");
 		SPELLS.put(net.runelite.api.gameval.SpriteID.MagicNecroOn.DRAYNOR_MANOR_TELEPORT, "draynor-manor-teleport");
 		CHIPS.put(net.runelite.api.gameval.ItemID.NZONE_TELETAB_RIMMINGTON, "teleport-tab-rimmington");
@@ -87,8 +88,12 @@ final class Sprites
 					show(label, star, box);
 					return;
 				}
-				/* The combat tab's crossed swords is the one sprite the website keeps under a name of its own. */
+				/*
+				 * The combat tab's crossed swords is the one sprite the website keeps under a name of its own.
+				 * It also stands in for the multi-combat zone's swords, which the website has no copy of.
+				 */
 				show(label, read(root, spriteId == net.runelite.api.gameval.SpriteID.SideIcons.COMBAT
+					|| spriteId == net.runelite.api.gameval.SpriteID.OVERLAY_MULTIWAY
 					? "osrs-icons/1x/skill-combat.png" : SPELLS.containsKey(spriteId)
 					? "osrs-icons/1x/" + SPELLS.get(spriteId) + ".png" : "osrs-icons/cache/" + spriteId + ".png"), box);
 			}

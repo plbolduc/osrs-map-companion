@@ -52,7 +52,7 @@ it and the shops that sell it; pick one to plan the way there.
 ## Slayer in RuneLite
 
 <p>
-  <img src="docs/mockups/sidebar-slayer.png" width="225" alt="The RuneLite Slayer card: remaining task count, the best usable place open with its requirements and Route or Pin actions, and the link to every place">
+  <img src="docs/mockups/sidebar-slayer.png" width="225" alt="The RuneLite Slayer card: remaining task count, the best usable place open with a small picture for each of its labels, the Slayer level it asks with a green tick, and Route or Pin actions, and the link to every place">
 </p>
 
 Home ranks the places to do your Slayer task, keeps the ones you cannot use yet with what they

@@ -33,6 +33,8 @@ import java.util.*;
 import java.util.List;
 import javax.swing.*;
 import net.runelite.api.coords.WorldPoint;
+import net.runelite.api.gameval.ItemID;
+import net.runelite.api.gameval.SpriteID;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.util.LinkBrowser;
@@ -348,31 +350,100 @@ final class SlayerPanel extends JPanel
 		{
 			body.add(line(String.join(" · ", spot.kinds), MUTED));
 		}
-		if (!spot.labels.isEmpty())
-		{
-			body.add(line(String.join(" · ", spot.labels), MUTED));
-		}
+		Box row = chips(spot.labels);
+		/*
+		 * A level a place asks for is a chip at the row's right: the skill's icon, the level, and a
+		 * tick in green, a cross in the refusal pink or a question mark; the icon names the skill, and
+		 * the tip says it in words. What a place still asks is why it is grey, so a closed one says
+		 * it; what is met waits for the open one. A quest or an item has no icon, and keeps its line.
+		 */
+		row.add(Box.createHorizontalGlue());
+		List<JLabel> lines = new ArrayList<>();
 		for (RelayResponse.SlayerAsk ask : spot.asks)
 		{
-			/* What a place still asks is why it is grey, so a closed one says it; what is met waits for the open one. */
-			if (!opened && !"unmet".equals(ask.tier))
+			boolean unmet = "unmet".equals(ask.tier);
+			boolean unknown = "unknown".equals(ask.tier);
+			if (!opened && !unmet)
 			{
 				continue;
 			}
-			String words = ("unmet".equals(ask.tier) ? "Needs " : "unknown".equals(ask.tier) ? "Unconfirmed: " : "✓ ") + ask.text;
-			JLabel requirement = line(words,
-									  "unmet".equals(ask.tier) ? MapCompanionPanel.REFUSED : MUTED);
-			if (ask.skill != null)
+			String words = (unmet ? "Needs " : unknown ? "Unconfirmed: " : "✓ ") + ask.text;
+			if (ask.skill == null)
 			{
-				MapCompanionPanel.setWrapped(requirement, words, WIDTH - 16);
-				sprites.skill(requirement, ask.skill, 12);
+				lines.add(line(words, unmet ? MapCompanionPanel.REFUSED : MUTED));
+				continue;
 			}
-			body.add(requirement);
+			JLabel chip = pill(ask.text.replace(" " + ask.skill, "") + (unmet ? " ✗" : unknown ? " ?" : " ✓"),
+				unmet ? MapCompanionPanel.REFUSED : unknown ? MUTED : ColorScheme.PROGRESS_COMPLETE_COLOR, words);
+			sprites.skill(chip, ask.skill, 14);
+			row.add(Box.createHorizontalStrut(3));
+			row.add(chip);
 		}
+		if (row.getComponentCount() > 1)
+		{
+			body.add(MapCompanionPanel.left(row));
+		}
+		lines.forEach(body::add);
 		if (opened)
 		{
 			actions(spot.id, spot.id, spot.target, spot.name);
 		}
+	}
+
+	/**
+	 * A place's labels as chips, so six places are compared at a glance and not by reading six
+	 * sentences: one small picture each on a row, its label in full as its tip. Multi is the game's
+	 * multi-combat swords and Cannon a cannon's barrels. The game has no picture of its own for a
+	 * safespot or for aggression, so those borrow one: the Defence skill's shield and the Attack
+	 * skill's sword. Wilderness is its word in the sidebar's pink, as a Wilderness star site is.
+	 * Unknown, the wiki not saying whether a place is multi-combat or takes a cannon, has no chip: it
+	 * marks nothing a player can use, and the place's other chips say what is known.
+	 *
+	 * <p>A chip is its word until its picture arrives, so a picture the client cannot give leaves
+	 * the word and never an empty box. Then it keeps only what the picture cannot say, "in part" or
+	 * "maybe"; a reason after a dot, "best with an area attack", is left to the tip.
+	 */
+	private Box chips(List<String> labels)
+	{
+		Box row = Box.createHorizontalBox();
+		row.setBorder(BorderFactory.createEmptyBorder(2, 0, 1, 0));
+		for (String label : labels)
+		{
+			String word = label.split(" ")[0];
+			if ("Unknown".equals(word))
+			{
+				continue;
+			}
+			JLabel chip = pill(word, "Wilderness".equals(word) ? MapCompanionPanel.REFUSED : MUTED, label);
+			chip.addPropertyChangeListener("icon", e -> chip.setText(label.contains(" · ") ? "" : label.substring(word.length()).trim()));
+			if ("Multi".equals(word))
+			{
+				sprites.sprite(chip, SpriteID.OVERLAY_MULTIWAY, 14);
+			}
+			else if ("Cannon".equals(word))
+			{
+				sprites.item(chip, ItemID.TWPART3, 14);
+			}
+			else if ("Safespot".equals(word) || "Aggressive".equals(word))
+			{
+				sprites.skill(chip, "Safespot".equals(word) ? "Defence" : "Attack", 14);
+			}
+			row.add(chip);
+			row.add(Box.createHorizontalStrut(3));
+		}
+		return row;
+	}
+
+	/** A chip: a few words or a picture on the lighter grey, with what it means as its tip. */
+	private static JLabel pill(String text, Color ink, String tip)
+	{
+		JLabel chip = MapCompanionPanel.label(11f, ink);
+		chip.setText(text);
+		chip.setToolTipText(tip);
+		chip.setOpaque(true);
+		chip.setBackground(ColorScheme.DARK_GRAY_COLOR);
+		chip.setBorder(BorderFactory.createEmptyBorder(1, 3, 1, 3));
+		return chip;
 	}
 
 	/**

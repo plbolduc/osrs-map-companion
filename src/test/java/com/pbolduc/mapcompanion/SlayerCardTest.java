@@ -296,9 +296,13 @@ public class SlayerCardTest
 		press("▸ All 3 places & options");
 		List<String> list = shown(panel);
 		assertEquals(list.toString(), 1, java.util.Collections.frequency(list, "Route"));
-		assertEquals(list.toString(), 1, java.util.Collections.frequency(list, "✓ 75 Slayer"));
+		/* The level it asks is a chip on the labels' row: the level and a tick, the skill left to its icon. */
+		assertEquals(list.toString(), 1, java.util.Collections.frequency(list, "75 ✓"));
+		assertEquals("✓ 75 Slayer", chip("75 ✓").getToolTipText());
+		assertEquals(net.runelite.client.ui.ColorScheme.PROGRESS_COMPLETE_COLOR, chip("75 ✓").getForeground());
+		assertTrue("after the labels, on their row: " + list, list.indexOf("75 ✓") == list.indexOf("Aggressive") + 1);
 		assertTrue(list.toString(), list.indexOf("Route") < list.indexOf("▸ 2. Slayer Tower (top floor)"));
-		assertTrue("a closed place keeps its labels: " + list, list.indexOf("Safespot · Aggressive") < list.lastIndexOf("Safespot · Aggressive"));
+		assertEquals("a closed place keeps its labels: " + list, 2, java.util.Collections.frequency(list, "Safespot"));
 
 		press("▸ 3. Slayer Tower (roof)");
 		List<String> roof = shown(panel);
@@ -317,6 +321,54 @@ public class SlayerCardTest
 	}
 
 	/**
+	 * A place's labels are chips, one each, rather than a sentence joined by dots, and a chip's tip
+	 * says its label in full. A chip is its word until its picture arrives, so a picture the client
+	 * cannot give leaves the word; with the picture it keeps no word, and a reason after a dot, "the
+	 * wiki's rate names no area attack", is the tip's to say on the open place as on a closed one.
+	 */
+	@Test
+	public void aPlacesLabelsAreChipsThatGiveTheirWordUpForAPicture() throws Exception
+	{
+		state.local(identity.id(), gargoyles(), "best", true);
+		received(places("best"), 1);
+		refresh();
+		press("▸ All 3 places & options");
+		press("▸ 3. Slayer Tower (roof)");
+		List<String> list = shown(panel);
+		assertTrue("no picture here, so every chip is its word: " + list, list.containsAll(Arrays.asList("Safespot", "Aggressive", "Multi")));
+		assertFalse("no dotted sentence is left: " + list, list.contains("Safespot · Aggressive"));
+		assertFalse(list.toString(), list.contains("The wiki's rate names no area attack"));
+		JLabel multi = chip("Multi");
+		assertEquals("Multi · the wiki's rate names no area attack", multi.getToolTipText());
+
+		SwingUtilities.invokeAndWait(() -> multi.setIcon(new javax.swing.ImageIcon(new java.awt.image.BufferedImage(1, 1, 2))));
+		assertEquals("the picture says it", "", multi.getText());
+		assertEquals("Multi · the wiki's rate names no area attack", multi.getToolTipText());
+	}
+
+	/**
+	 * "Unknown" is the wiki not saying whether a place is multi-combat, takes a cannon or has a
+	 * safespot. It marks nothing a player can use, so it gets no chip, and a place with no other
+	 * label gets no row of chips at all.
+	 */
+	@Test
+	public void anUnknownLabelGetsNoChip() throws Exception
+	{
+		RelayResponse.SlayerOptions places = places("best");
+		places.rows.get(0).labels = Arrays.asList("Aggressive", "Unknown");
+		places.rows.get(1).labels = Arrays.asList("Unknown");
+		state.local(identity.id(), gargoyles(), "best", true);
+		received(places, 1);
+		refresh();
+		press("▸ All 3 places & options");
+		List<String> list = shown(panel);
+		assertFalse(list.toString(), list.contains("Unknown"));
+		assertTrue(list.toString(), list.contains("Aggressive"));
+		assertEquals("the second place goes straight on to the third: " + list,
+			list.indexOf("▸ 2. Slayer Tower (top floor)") + 1, list.indexOf("▸ 3. Slayer Tower (roof)"));
+	}
+
+	/**
 	 * A name too long for the card's one line breaks before its last two words, which are what tell
 	 * one room of a cave from the next; left to wrap, one row ended "room" and its neighbour
 	 * "eastern room". A name that fits is left whole.
@@ -332,6 +384,32 @@ public class SlayerCardTest
 		assertTrue("still escaped", SlayerPanel.named("1. <b>x</b> y", metrics).contains("&lt;b&gt;"));
 	}
 
+	/** The chip that reads {@code word}, among what is shown. */
+	private JLabel chip(String word)
+	{
+		return chip(panel, word);
+	}
+
+	private static JLabel chip(Component component, String word)
+	{
+		if (component instanceof JLabel && word.equals(((JLabel) component).getText()) && component.isVisible())
+		{
+			return (JLabel) component;
+		}
+		if (component instanceof Container)
+		{
+			for (Component child : ((Container) component).getComponents())
+			{
+				JLabel found = chip(child, word);
+				if (found != null)
+				{
+					return found;
+				}
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * A place that still asks for something says so while it is closed, since that is why its name is
 	 * grey; what a place asks and the player has waits for the open one.
@@ -345,7 +423,10 @@ public class SlayerCardTest
 		press("▸ All 3 places & options");
 		List<String> list = shown(panel);
 		assertTrue(list.toString(), list.contains("▸ 2. Slayer Tower (top floor)"));
-		assertEquals("on the open place and both closed ones: " + list, 3, java.util.Collections.frequency(list, "Needs 75 Slayer"));
+		/* A cross in the refusal pink beside the level, and the words it replaced as the tip. */
+		assertEquals("on the open place and both closed ones: " + list, 3, java.util.Collections.frequency(list, "75 ✗"));
+		assertEquals("Needs 75 Slayer", chip("75 ✗").getToolTipText());
+		assertEquals(MapCompanionPanel.REFUSED, chip("75 ✗").getForeground());
 	}
 
 	/**
