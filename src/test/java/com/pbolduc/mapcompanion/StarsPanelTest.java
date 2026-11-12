@@ -716,6 +716,66 @@ public class StarsPanelTest
 		return null;
 	}
 
+	/**
+	 * A site's name is whatever the feed says, and a label that starts with a tag is drawn as HTML,
+	 * which can fetch a picture. This asserted the Stars tab's own escape, a copy of the sidebar's
+	 * that also wrote a quote as an entity; the tab now wraps its lines with the sidebar's, so the
+	 * name is followed to the labels that print it. A quote is kept as typed: between tags it opens
+	 * nothing.
+	 */
+	@Test
+	public void aSiteNamedLikeMarkupIsPrintedAsWords() throws Exception
+	{
+		SwingUtilities.invokeAndWait(() ->
+		{
+			HarnessStore store = new HarnessStore();
+			Pairing pairing = new Pairing(store, new Gson());
+			MemberIdentity identity = new MemberIdentity(store);
+			StarsClient service = new StarsClient(new OkHttpClient(), new Gson(), null, new ClientThread(),
+				new HarnessConfig(store, MapCompanionConfig.DEFAULT_MAP_URL), pairing, identity, store);
+			DestinationState destinations = new DestinationState(new Gson());
+			RoutePress press = new RoutePress(new OkHttpClient(), new Gson(), null, new ClientThread(), pairing, identity,
+				new DestinationRoute(), destinations, new TestDestinationMarker());
+			StarsPanel stars = new StarsPanel(service, destinations, new ClientThread(), new TestDestinationMarker(), press,
+				() -> MapCompanionConfig.DEFAULT_MAP_URL, new DestinationRoute(), null, null, null, rerouting -> null, () -> { });
+			StarsModel.Feed feed = feed();
+			feed.rows.get(0).name = "<img src=\"http://example\">&";
+			service.model.accept(feed);
+			service.model.miningLevel = 72;
+			stars.refresh();
+			List<String> printed = new ArrayList<>();
+			for (String text : texts(stars))
+			{
+				assertFalse("a name is never a tag: " + text, text.contains("<img"));
+				if (text.contains("&lt;img src=\"http://example\"&gt;&amp;"))
+				{
+					printed.add(text);
+				}
+			}
+			assertFalse("the name is printed, as the words it is", printed.isEmpty());
+		});
+	}
+
+	/** Every label's and button's text as it was set, markup and all. */
+	private static List<String> texts(Container root)
+	{
+		List<String> found = new ArrayList<>();
+		for (Component child : root.getComponents())
+		{
+			String text = child instanceof JLabel ? ((JLabel) child).getText()
+				: child instanceof AbstractButton ? ((AbstractButton) child).getText() : null;
+			if (text != null)
+			{
+				found.add(text);
+			}
+			if (child instanceof Container)
+			{
+				found.addAll(texts((Container) child));
+			}
+		}
+		return found;
+	}
+
 	/** The words showing, as a player reads them: label and button text without its markup. */
 	private static List<String> words(Container root)
 	{

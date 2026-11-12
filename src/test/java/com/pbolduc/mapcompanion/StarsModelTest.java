@@ -165,8 +165,4 @@ public class StarsModelTest
 		assertEquals(StarsModel.Life.DEPLETED, StarsModel.life(0));
 		assertEquals(StarsModel.Life.DEPLETED, StarsModel.life(-30_000L));
 	}
-	@Test public void nativeLabelsCannotInterpretNamesAsRemoteImages()
-	{
-		assertEquals("&lt;html&gt;&lt;img src=&quot;http://example&quot;&gt;&amp;", StarsPanel.escape("<html><img src=\"http://example\">&"));
-	}
 }

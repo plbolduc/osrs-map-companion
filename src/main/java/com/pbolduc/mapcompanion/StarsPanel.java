@@ -41,6 +41,7 @@ import net.runelite.client.callback.ClientThread;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.refont;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.setWrapped;
 import static com.pbolduc.mapcompanion.StarsModel.Star;
 
 /**
@@ -329,7 +330,7 @@ final class StarsPanel extends JPanel
 		String gameName = gameName(model.playerGame);
 		game.setText(gameName == null ? "" : gameName);
 		game.setVisible(gameName != null && model.feed != null);
-		wrap(levels, levelsLine(model.miningLevel, model.skillTotal), TEXT);
+		setWrapped(levels, levelsLine(model.miningLevel, model.skillTotal), TEXT);
 		List<StarsModel.Site> sites = model.sites();
 		long elapsed = model.elapsed();
 		int stars = 0, locations = 0;
@@ -359,7 +360,7 @@ final class StarsPanel extends JPanel
 		status.setVisible(notice != null);
 		if (notice != null)
 		{
-			wrap(status, notice, TEXT);
+			setWrapped(status, notice, TEXT);
 		}
 		/* Pink only for why there is no list: a held list, and how old it is, is not a refusal. */
 		MapCompanionPanel.tone(status, !loggedOut && model.feed == null && service.message != null);
@@ -445,7 +446,7 @@ final class StarsPanel extends JPanel
 		{
 			/* Wrapped, because the game's sentence is longer than the column the other two fit in. */
 			JLabel none = label("");
-			wrap(none, empty ? "No stars reported right now."
+			setWrapped(none, empty ? "No stars reported right now."
 				: model.noneInGame() ? noneInGame(model.playerGame) : "No stars match these filters.", TEXT);
 			rows.add(none);
 		}
@@ -472,7 +473,7 @@ final class StarsPanel extends JPanel
 		}
 		if (starSaid != null && said != null && said.message != null)
 		{
-			wrap(starSaid, press.words(said, now), CARD_WIDE);
+			setWrapped(starSaid, press.words(said, now), CARD_WIDE);
 		}
 	}
 
@@ -503,7 +504,7 @@ final class StarsPanel extends JPanel
 			new EmptyBorder(4, 6, 4, 4)));
 		Color ground = box.getBackground();
 		JLabel name = label("");
-		wrap(name, site.name, CARD_WIDE - 22);
+		setWrapped(name, site.name, CARD_WIDE - 22);
 		refont(name, 12f);
 		name.setForeground(primary == null ? MUTED : primary.wilderness ? MapCompanionPanel.REFUSED : Color.WHITE);
 		JButton favorite = flat(site.favorite ? "★" : "☆");
@@ -760,7 +761,7 @@ final class StarsPanel extends JPanel
 		if (!star.precise)
 		{
 			JLabel note = label("");
-			wrap(note, Words.of("stars.approximate"), CARD_WIDE);
+			setWrapped(note, Words.of("stars.approximate"), CARD_WIDE);
 			box.add(note);
 		}
 		said(box, star);
@@ -797,7 +798,7 @@ final class StarsPanel extends JPanel
 		if (said != null && said.message != null && star.id.equals(asked))
 		{
 			JLabel line = label("");
-			wrap(line, said.message, CARD_WIDE);
+			setWrapped(line, said.message, CARD_WIDE);
 			MapCompanionPanel.tone(line, said.refused());
 			into.add(line);
 			starSaid = line;
@@ -812,7 +813,7 @@ final class StarsPanel extends JPanel
 			new EmptyBorder(0, 0, 8, 0)));
 		selection.add(heading("Pinned destination"));
 		JLabel name = label("");
-		wrap(name, star.name, TEXT);
+		setWrapped(name, star.name, TEXT);
 		name.setForeground(GOLD);
 		refont(name, 12f);
 		selection.add(name);
@@ -951,18 +952,6 @@ final class StarsPanel extends JPanel
 	private static String age(long ms)
 	{
 		return ms < 60_000 ? "just now" : ms / 60_000 + "m ago";
-	}
-
-	static String escape(String text)
-	{
-		return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
-	}
-
-	/** The width is an HTML attribute, not CSS: the CSS form does not constrain a JLabel and clips. */
-	private static void wrap(JLabel label, String text, int width)
-	{
-		String html = "<html><body width='" + width + "'>" + escape(text) + "</body></html>";
-		if (!html.equals(label.getText())) label.setText(html);
 	}
 
 	private static JPanel column()
