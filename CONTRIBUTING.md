@@ -47,6 +47,7 @@ that separate build and the release order. The map repository's contract tests a
 exercise the real plugin against a local map. They complement the [logged-in checks](docs/live-checks.md).
 The build compiles with a Java 11 toolchain that Gradle downloads. Do not compile with a newer JDK
 yourself: Lombok fails on it with an error about javac internals rather than the version.
+`.github/workflows/ci.yml` runs the same command on every push, and on a pull request from a fork.
 
 ## Rules a change must keep
 
