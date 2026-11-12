@@ -798,6 +798,14 @@ public class RunCardsTest
 		assertTrue("a leg's length over its way: " + words, words.contains("71tsail") && words.contains("20twalk"));
 		assertFalse("and not the line it replaced", words.contains("Sail 71 tiles"));
 		assertTrue("the charted stop is cut to one line with its word", words.contains("… · Charted"));
+		/* The card's margin is narrower than a length, so a name wrapped at the card's width was cut by it. */
+		SwingUtilities.invokeAndWait(() ->
+		{
+			JLabel length = label(card[0], "71tsail");
+			JLabel name = (JLabel) ((BorderLayout) length.getParent().getLayout()).getLayoutComponent(BorderLayout.CENTER);
+			assertTrue("the task gives up its picture's and its length's width, so it wraps beside them: " + name.getText(),
+				name.getText().contains("width='" + (MapCompanionPanel.CARD_TEXT_WIDTH - 20 - length.getPreferredSize().width - 4) + "'"));
+		});
 	}
 
 	/**

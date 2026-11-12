@@ -560,11 +560,11 @@ final class RunView extends JPanel
 			}
 			/*
 			 * A stop whose leg is numbers is one row to scan: its picture, its name, and how far at the
-			 * right edge, so the lengths make a column. The length sits in the margin the card's text
-			 * leaves at its right. Any other stop keeps its way in words under its name, and a farm
-			 * stop the map priced has its length in the same column, beside its name, with no word
-			 * under it: its way is the line below. Its name gives up the length's width, so the two
-			 * fit the card however long the name is.
+			 * right edge, so the lengths make a column. Any other stop keeps its way in words under its
+			 * name, and a farm stop the map priced has its length in the same column, beside its name,
+			 * with no word under it: its way is the line below. A name gives up the length's width
+			 * either way, so the two fit the card however long the name is: the card's own margin is
+			 * narrower than a length, and a name wrapped at the card's full width was cut by it.
 			 */
 			boolean far = stop.leg != null;
 			int tiles = tiles(stop);
@@ -575,7 +575,7 @@ final class RunView extends JPanel
 			int beside = pictures ? WIDTH - PICTURE - 4 : WIDTH;
 			JLabel name = label(12f, Color.WHITE);
 			name.setText(stopName(stop, next != null && stop.n == next.n,
-				far ? beside : tiles < 0 ? WIDTH : WIDTH - length.getPreferredSize().width - 4));
+				tiles < 0 ? WIDTH : (far ? beside : WIDTH) - length.getPreferredSize().width - 4));
 			JPanel method = new JPanel(new BorderLayout(4, 0));
 			method.setOpaque(false);
 			if (pictures)
