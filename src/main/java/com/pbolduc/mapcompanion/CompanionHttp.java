@@ -90,15 +90,25 @@ final class CompanionHttp
 	/**
 	 * A request to the map with the plugin's User-Agent. Every client builds from here, so what
 	 * identifies the plugin is written once.
+	 *
+	 * <p>And so is {@code no-store}. RuneLite's HTTP client keeps a cache on disk, and a search's
+	 * words and the stream's group code and member id are in the address of a GET. The map answers
+	 * each with no-store itself; a map address of the player's own might not, and said on the request
+	 * the reply is never written there whatever the server says.
 	 */
 	static Request.Builder request(String url)
 	{
-		return new Request.Builder().header("User-Agent", CompanionVersion.USER_AGENT).url(url);
+		return request().url(url);
 	}
 
 	static Request.Builder request(HttpUrl url)
 	{
-		return new Request.Builder().header("User-Agent", CompanionVersion.USER_AGENT).url(url);
+		return request().url(url);
+	}
+
+	private static Request.Builder request()
+	{
+		return new Request.Builder().header("User-Agent", CompanionVersion.USER_AGENT).header("Cache-Control", "no-store");
 	}
 
 	/** The same, signed as a member of the group: its code, the member id and its secret. */
