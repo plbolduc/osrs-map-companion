@@ -122,6 +122,13 @@ public class DestinationCardTest
 			return shortestPathRunning;
 		}
 	};
+	/**
+	 * The walking boot the list of steps draws on the answer's one step, a walk. A step with no
+	 * picture of its own was words alone, so these tests saw only the card's picture asked for; the
+	 * card's is still asked first, and the boot after it.
+	 */
+	private static final String WALK = "sprite " + net.runelite.api.gameval.SpriteID.OrbIcon._2 + " at " + RouteStepsView.PICTURE;
+
 	/** What the cards asked the client's cache for, in order; each answers at once with a blank picture. */
 	private final List<String> asked = new ArrayList<>();
 	private final GameSprites sprites = new GameSprites(null, null, null)
@@ -329,12 +336,12 @@ public class DestinationCardTest
 		press("Route");
 		refresh();
 		assertEquals("Bartender, the Rusty Anchor", destinations.getDestination().name);
-		assertEquals(Arrays.asList("item 2801 at " + RouteStepsView.PICTURE), asked);
+		assertEquals(Arrays.asList("item 2801 at " + RouteStepsView.PICTURE, WALK), asked);
 		assertNotNull(picture().getIcon());
 		assertTrue(picture().isVisible());
 
 		refresh();
-		assertEquals("asked once, not every second", 1, asked.size());
+		assertEquals("each asked once, not every second", 2, asked.size());
 	}
 
 	/** A search pick draws its row's own picture: here a bank's world-map icon. */
@@ -349,7 +356,7 @@ public class DestinationCardTest
 				new int[]{3208, 3220, 2}, "bank", null));
 		});
 		refresh();
-		assertEquals(Arrays.asList("sprite " + SearchPanel.spriteFor("bank", null) + " at " + RouteStepsView.PICTURE), asked);
+		assertEquals(Arrays.asList("sprite " + SearchPanel.spriteFor("bank", null) + " at " + RouteStepsView.PICTURE, WALK), asked);
 		assertNotNull(picture().getIcon());
 	}
 

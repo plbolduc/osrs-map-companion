@@ -226,15 +226,19 @@ public class RouteStepsViewTest
 	}
 
 	/**
-	 * The spell's icon on its step, the tablet's sprite on its own, and a walk's row left as words.
+	 * The spell's icon on its step, the tablet's sprite on its own, and the walking boot on a walk.
 	 * Every step keeps the picture's place once one has a picture, so the words start at one x; the
 	 * place was the teleport row's alone, and its words began 21 pixels right of the walk's.
+	 *
+	 * <p>A walk's row was left as words, and this asserted that only the teleport's picture was asked
+	 * for. A step the map names no picture for now gets one by its kind, so the boot is asked too.
 	 */
 	@Test
 	public void drawsTheGamesPictureOfWhatToClick() throws IOException
 	{
 		receive();
-		assertEquals(java.util.Collections.singletonList("sprite 356 at " + RouteStepsView.PICTURE), asked);
+		String boot = "sprite " + net.runelite.api.gameval.SpriteID.OrbIcon._2 + " at " + RouteStepsView.PICTURE;
+		assertEquals(java.util.Arrays.asList("sprite 356 at " + RouteStepsView.PICTURE, boot), asked);
 		List<JLabel> places = named("route.step.picture");
 		assertEquals("a place for the picture on the teleport's row and on the walk's", 2, places.size());
 
@@ -242,9 +246,37 @@ public class RouteStepsViewTest
 		asked.clear();
 		assertTrue(SidebarWords.press(view, "Lumbridge tablet"));
 		view.show(route.view());
-		/* The tablet's own step, then the home teleport's icon leading its way in the open fold. */
-		assertEquals(java.util.Arrays.asList("item 8008 at " + RouteStepsView.PICTURE, "sprite 356 at " + RouteStepsView.PICTURE),
+		/* The tablet's own step, its walk's boot, then the home teleport's icon leading its way in the open fold. */
+		assertEquals(java.util.Arrays.asList("item 8008 at " + RouteStepsView.PICTURE, boot, "sprite 356 at " + RouteStepsView.PICTURE),
 			asked);
+	}
+
+	/**
+	 * A step the map names no item or spell for is drawn by its kind: a boot for a walk, a boat for
+	 * boarding and docking, a ship at sea for the sail, and nothing for a step that is none of
+	 * these. Only the list draws them, so a stop's picture and a way's lead stay a teleport's own:
+	 * a leg that is all walking has no picture to lead with.
+	 */
+	@Test
+	public void aStepWithNoPictureIsDrawnByItsKind()
+	{
+		RelayResponse.RouteStep walk = new RelayResponse.RouteStep();
+		walk.slot = "arrival-walk";
+		walk.walk = true;
+		assertEquals(net.runelite.api.gameval.SpriteID.OrbIcon._2, RouteStepsView.way(walk));
+		RelayResponse.RouteStep sail = new RelayResponse.RouteStep();
+		sail.slot = RouteWire.SAIL;
+		assertEquals(net.runelite.api.gameval.SpriteID.IconSailingStatus18x18._0, RouteStepsView.way(sail));
+		RelayResponse.RouteStep board = new RelayResponse.RouteStep();
+		board.slot = RouteWire.BOARD;
+		RelayResponse.RouteStep dock = new RelayResponse.RouteStep();
+		dock.slot = RouteWire.DOCK;
+		assertEquals(net.runelite.api.gameval.SpriteID.IconSailingBoats35x35._1, RouteStepsView.way(board));
+		assertEquals(RouteStepsView.way(board), RouteStepsView.way(dock));
+		RelayResponse.RouteStep ride = new RelayResponse.RouteStep();
+		ride.slot = "method";
+		assertEquals("a ride the map drew no picture for stays words", 0, RouteStepsView.way(ride));
+		org.junit.Assert.assertNull(RouteStepsView.firstPictured(java.util.Arrays.asList(walk, board, sail, dock)));
 	}
 
 	/**
