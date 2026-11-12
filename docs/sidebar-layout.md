@@ -1051,6 +1051,13 @@ opens Best for you again, so a card never shows a place with no Route.
 The labels stay on a closed place because they are what a player compares places by, *Safespot*
 against *Cannon*. Hiding them made a shorter list that had to be opened row by row to be read.
 
+### Names that break in one place
+
+A card's line fits about four words, and a place's name is the wiki's, often five or six:
+*Morytania Spider Cave eastern room*. Left to wrap where it ran out, one row ended *room* and its
+neighbour *eastern room*. A name that does not fit one line now breaks before its last two words,
+which are what tell one room of a cave from the next; a name that fits is left whole.
+
 ### Hairlines where one thing ends
 
 A hairline, the run card's own, sits over every place, over the notes and the fold that follow the

@@ -317,6 +317,22 @@ public class SlayerCardTest
 	}
 
 	/**
+	 * A name too long for the card's one line breaks before its last two words, which are what tell
+	 * one room of a cave from the next; left to wrap, one row ended "room" and its neighbour
+	 * "eastern room". A name that fits is left whole.
+	 */
+	@Test
+	public void aLongNameBreaksBeforeItsLastTwoWords()
+	{
+		JLabel label = new JLabel();
+		java.awt.FontMetrics metrics = label.getFontMetrics(label.getFont().deriveFont(11f));
+		String wrapped = SlayerPanel.named("▸ 2. Morytania Spider Cave eastern room and a great deal more of it", metrics);
+		assertTrue(wrapped, wrapped.contains("more<br>of it"));
+		assertFalse(SlayerPanel.named("1. Slayer Tower (roof)", metrics).contains("<br>"));
+		assertTrue("still escaped", SlayerPanel.named("1. <b>x</b> y", metrics).contains("&lt;b&gt;"));
+	}
+
+	/**
 	 * A place that still asks for something says so while it is closed, since that is why its name is
 	 * grey; what a place asks and the player has waits for the open one.
 	 */

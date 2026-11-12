@@ -325,14 +325,16 @@ final class SlayerPanel extends JPanel
 		body.add(rule());
 		if (opened)
 		{
-			JLabel title = line(name, blocked ? MUTED : Color.WHITE);
+			JLabel title = line("", blocked ? MUTED : Color.WHITE);
 			refont(title, Font.BOLD);
+			title.setText(named(name, title.getFontMetrics(title.getFont())));
 			body.add(title);
 		}
 		else
 		{
 			/* A closed place is its name as a link, the fold's own arrow before it: a press opens it. */
-			JButton title = linkButton(MapCompanionPanel.html("▸ " + name, WIDTH));
+			JButton title = linkButton("");
+			title.setText(named("▸ " + name, title.getFontMetrics(title.getFont())));
 			title.setForeground(blocked ? MUTED : Color.WHITE);
 			title.setBorder(BorderFactory.createEmptyBorder());
 			title.addActionListener(e -> { open = spot.id; render(); refresh(connected); });
@@ -371,6 +373,23 @@ final class SlayerPanel extends JPanel
 		{
 			actions(spot.id, spot.id, spot.target, spot.name);
 		}
+	}
+
+	/**
+	 * A place's name as {@code metrics} draws it: on one line where it fits the card, and otherwise
+	 * broken before its last two words. Left to wrap where it ran out, "Morytania Spider Cave eastern
+	 * room" broke before "room" and its neighbour before "eastern room"; each now breaks before what
+	 * tells it from the others.
+	 */
+	static String named(String name, FontMetrics metrics)
+	{
+		int cut = name.lastIndexOf(' ', name.lastIndexOf(' ') - 1);
+		if (cut < 0 || metrics.stringWidth(name) < WIDTH)
+		{
+			return MapCompanionPanel.html(name, WIDTH);
+		}
+		return "<html><body width='" + WIDTH + "'>" + MapCompanionPanel.escape(name.substring(0, cut))
+			+ "<br>" + MapCompanionPanel.escape(name.substring(cut + 1)) + "</body></html>";
 	}
 
 	/** A hairline between two places, and between the places, the options and the sources. */
