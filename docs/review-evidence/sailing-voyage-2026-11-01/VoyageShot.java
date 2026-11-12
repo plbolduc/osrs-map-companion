@@ -53,7 +53,7 @@ public class VoyageShot
 		destination.route.options.get(3).voyage.gates.get(0).tier = "unmet";
 		destination.route.options.get(3).voyage.gates.get(0).text = "76 Sailing";
 		DestinationRoute route = new DestinationRoute();
-		route.sync(destination);
+		route.sync(destination, null);
 		route.choose(3);
 		Map<Integer, String> moored = new HashMap<>();
 		moored.put(1, "Port Sarim");
@@ -75,7 +75,7 @@ public class VoyageShot
 				view.show(route.view(), "Shortest Path draws each walk when you reach it.");
 				shots.put(out + "/voyage-sail.png", view);
 				DestinationRoute moved = new DestinationRoute();
-				moved.sync(destination);
+				moved.sync(destination, null);
 				moved.choose(3);
 				Map<Integer, String> elsewhere = new HashMap<>();
 				elsewhere.put(1, "Rimmington");
