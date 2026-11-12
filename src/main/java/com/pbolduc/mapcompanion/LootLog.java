@@ -776,16 +776,26 @@ public class LootLog
 		for (Map.Entry<String, Tally> entry : ordered(pinnedNpc))
 		{
 			Tally tally = entry.getValue();
+			List<Rate> watched = tracked.getOrDefault(key(entry.getKey()), emptyList());
+			/* For every monster, since it repairs the tally it is given; the row is what can be spared. */
+			ensureTracked(tally, watched);
+			/*
+			 * One row past the cap and no more. The trimmer keeps the first forty in this order and
+			 * says the list was cut when there are more, which one more row tells it as well as all
+			 * of them would; a long log has hundreds.
+			 */
+			if (loot.npcs.size() > SnapshotTrimmer.MAX_LOOT_NPCS)
+			{
+				continue;
+			}
 			CompanionSnapshot.Npc npc = new CompanionSnapshot.Npc();
 			npc.npc = entry.getKey();
 			npc.kills = tally.kills;
 			npc.lastKillMsAgo = tally.lastKillMs > 0 ? Math.max(0L, now - tally.lastKillMs) : null;
 			npc.dropsComplete = true;
 			npc.drops = new ArrayList<>();
-			List<Rate> watched = tracked.getOrDefault(key(entry.getKey()), emptyList());
 			/* Sent even for no rated drops: a map whose table has some must learn this one had none. */
 			npc.ratedKey = ratedKey(watched);
-			ensureTracked(tally, watched);
 			for (String item : dropOrder(tally, watched, true))
 			{
 				int obtained = tally.obtained.getOrDefault(item, 0);
