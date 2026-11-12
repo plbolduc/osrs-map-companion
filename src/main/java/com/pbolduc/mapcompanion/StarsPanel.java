@@ -30,6 +30,7 @@ import java.util.*;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.LongConsumer;
 import javax.annotation.Nullable;
 import javax.swing.border.LineBorder;
 import javax.swing.border.CompoundBorder;
@@ -142,11 +143,19 @@ final class StarsPanel extends JPanel
 	private final Set<String> expanded = new HashSet<>();
 	private boolean selected, active, updating;
 	private String rendered;
+	/** The feed the rows were drawn from: its stars are the ones the rows and their {@link #clocks} hold. */
+	private StarsModel.Feed drawn;
 	/**
 	 * Each Route drawn and the line the last press left, while they are drawn: a wait counts down in
 	 * them on every refresh, where rebuilding the list each second would eat a press.
 	 */
 	private final List<JButton> starRoutes = new java.util.ArrayList<>();
+	/**
+	 * The words drawn that age by the minute, a time left, an age and a row's tooltip, each as the way
+	 * to say it again as of a time since the feed. A refresh that finds nothing else changed runs
+	 * these, where a rebuild for each star's turning minute would be one most seconds.
+	 */
+	private final List<LongConsumer> clocks = new java.util.ArrayList<>();
 	@Nullable
 	private JLabel starSaid;
 	/** The star Route was last pressed for, which is where what the press said is drawn. */
@@ -286,6 +295,11 @@ final class StarsPanel extends JPanel
 	{
 		selected = on;
 		service.active(active && selected);
+		if (on)
+		{
+			/* Nothing was drawn while another tab showed, so the list is drawn at the turn to this one. */
+			refresh();
+		}
 	}
 
 	void active(boolean on)
@@ -313,6 +327,36 @@ final class StarsPanel extends JPanel
 	{
 		if (active && selected) service.tick();
 		StarsModel model = service.model;
+		RelayResponse.Destination destination = destinations.getDestination();
+		Star pinned = null;
+		for (Star star : model.feed == null ? List.<Star>of() : model.feed.rows)
+		{
+			if (pinned == null && pins(destination, star))
+			{
+				pinned = star;
+			}
+		}
+		/*
+		 * A pick ends with its pin: reached, unpinned or replaced, the star goes back to a plain row
+		 * rather than opening on Route and Pin for the place the player has just left or let go.
+		 */
+		String pinnedNow = pinned == null ? null : pinned.id;
+		if (wasPinned != null && !wasPinned.equals(pinnedNow) && wasPinned.equals(model.selected))
+		{
+			model.selected = null;
+		}
+		/* A star pinned from far down the list brings its way, at the head of the tab, into view. */
+		boolean headed = selected && pinnedNow != null && !pinnedNow.equals(wasPinned);
+		wasPinned = pinnedNow;
+		/*
+		 * The sidebar refreshes every card each second whichever tab shows. Open on another tab, only
+		 * the pin above is followed, so a pick still ends with its pin; the list is drawn by
+		 * {@link #selected} at the turn back. Closed, a refresh is a press's and draws as before.
+		 */
+		if (active && !selected)
+		{
+			return;
+		}
 		StarsModel.Filters f = model.preferences.filters;
 		updating = true;
 		tier.setSelectedIndex(Math.max(0, Math.min(8, f.minTier - 1)));
@@ -343,7 +387,7 @@ final class StarsPanel extends JPanel
 			stars += site.worlds.size();
 			if (!site.worlds.isEmpty()) locations++;
 			signature.append(site.key).append(site.name).append(site.favorite).append(site.hiddenByFilters).append(expanded.contains(site.key));
-			for (Star star : site.worlds) signature.append(star.id).append(star.tier(elapsed)).append(StarsModel.minutes(star.left(elapsed))).append((star.ageMs + elapsed) / 60_000);
+			for (Star star : site.worlds) signature.append(star.id).append(star.tier(elapsed)).append(star.left(elapsed) > 0);
 		}
 		/* Nothing is counted, and no age given, until the map has answered once: there is no list yet. */
 		count.setText(model.feed == null ? "" : locations + (locations == 1 ? " site · " : " sites · ") + stars + (stars == 1 ? " star" : " stars"));
@@ -366,27 +410,6 @@ final class StarsPanel extends JPanel
 		MapCompanionPanel.tone(status, !loggedOut && model.feed == null && service.message != null);
 		/* Why the refresh failed is a hover away, so the line over the list stays short. */
 		status.setToolTipText(model.feed != null && service.message != null ? service.message : null);
-		RelayResponse.Destination destination = destinations.getDestination();
-		Star pinned = null;
-		for (Star star : model.feed == null ? List.<Star>of() : model.feed.rows)
-		{
-			if (pinned == null && pins(destination, star))
-			{
-				pinned = star;
-			}
-		}
-		/*
-		 * A pick ends with its pin: reached, unpinned or replaced, the star goes back to a plain row
-		 * rather than opening on Route and Pin for the place the player has just left or let go.
-		 */
-		String pinnedNow = pinned == null ? null : pinned.id;
-		if (wasPinned != null && !wasPinned.equals(pinnedNow) && wasPinned.equals(model.selected))
-		{
-			model.selected = null;
-		}
-		/* A star pinned from far down the list brings its way, at the head of the tab, into view. */
-		boolean headed = selected && pinnedNow != null && !pinnedNow.equals(wasPinned);
-		wasPinned = pinnedNow;
 		signature.append(model.selected).append(destination == null ? "" : destination.name + destination.world + destination.x + destination.y);
 		RoutePress.Said said = press.said(SOURCE);
 		signature.append(press.ready()).append(said == null ? "" : said.planning + "|" + said.message).append(asked);
@@ -401,15 +424,21 @@ final class StarsPanel extends JPanel
 			&& shortestPath.installed() && !way.arrived();
 		steps.show(routed ? way : null, routed ? RouteStepsView.shortestPathLine(way, drawable, drawable ? shortestPath.drawing() : 0) : null);
 		signature.append(routed).append(routed && way.following).append(offered(routed, false)).append(offered(routed, true));
-		if (signature.toString().equals(rendered))
+		if (model.feed == drawn && signature.toString().equals(rendered))
 		{
+			for (LongConsumer clock : clocks)
+			{
+				clock.accept(elapsed);
+			}
 			countDown(said);
 			return;
 		}
 		rendered = signature.toString();
+		drawn = model.feed;
 		rows.removeAll();
 		selection.removeAll();
 		starRoutes.clear();
+		clocks.clear();
 		starSaid = null;
 		pickedCard = null;
 		selection.setBorder(null);
@@ -475,6 +504,13 @@ final class StarsPanel extends JPanel
 		{
 			setWrapped(starSaid, press.words(said, now), CARD_WIDE);
 		}
+	}
+
+	/** Says one of the {@link #clocks} now, and keeps it to be said again while its row stands. */
+	private void clock(LongConsumer say, long elapsed)
+	{
+		clocks.add(say);
+		say.accept(elapsed);
 	}
 
 	/** Whether the destination is this star: its tile and its world, which a name cannot tell apart. */
@@ -555,8 +591,11 @@ final class StarsPanel extends JPanel
 			pick.setFocusPainted(false);
 			pick.setLayout(new BorderLayout(0, 2));
 			pick.setName("stars.site." + site.key);
-			pick.setToolTipText("W" + primary.world + " at " + site.name + ", reported " + age(primary.ageMs + elapsed) + ": press for Route and Pin");
-			pick.getAccessibleContext().setAccessibleName(pick.getToolTipText());
+			clock(now ->
+			{
+				pick.setToolTipText("W" + primary.world + " at " + site.name + ", reported " + age(primary.ageMs + now) + ": press for Route and Pin");
+				pick.getAccessibleContext().setAccessibleName(pick.getToolTipText());
+			}, elapsed);
 			pick.addActionListener(e -> select(primary));
 			pick.add(top, BorderLayout.CENTER);
 			pick.add(facts(primary, elapsed, ground, expand, primary.wilderness ? cell("Wilderness", MapCompanionPanel.REFUSED, 0) : null), BorderLayout.SOUTH);
@@ -592,7 +631,9 @@ final class StarsPanel extends JPanel
 		Color ground = picked ? PICKED : background;
 		JButton world = new Whole();
 		world.setLayout(new BorderLayout());
-		world.add(facts(star, elapsed, ground, null, cell(age(star.ageMs + elapsed), MUTED, 0)));
+		JLabel aged = cell("", MUTED, 0);
+		clock(now -> aged.setText(age(star.ageMs + now)), elapsed);
+		world.add(facts(star, elapsed, ground, null, aged));
 		world.setName("stars.world." + star.id);
 		world.setBackground(ground);
 		world.setBorder(new CompoundBorder(
@@ -649,8 +690,13 @@ final class StarsPanel extends JPanel
 			at = MapCompanionPanel.bar(3, ground, mark, world, null);
 			at.setOpaque(false);
 		}
-		JLabel left = cell(StarsModel.timeLeft(star.left(elapsed)), lifeColour(star.left(elapsed), CARD_INK), 0);
+		JLabel left = cell("", CARD_INK, 0);
 		left.setName("star.left");
+		clock(now ->
+		{
+			left.setText(StarsModel.timeLeft(star.left(now)));
+			left.setForeground(lifeColour(star.left(now), CARD_INK));
+		}, elapsed);
 		JPanel lead = MapCompanionPanel.bar(6, ground, tier, at, after);
 		JPanel line = MapCompanionPanel.bar(6, ground, lead, between, left);
 		line.setOpaque(false);

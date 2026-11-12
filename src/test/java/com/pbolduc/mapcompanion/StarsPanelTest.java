@@ -48,6 +48,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
@@ -220,6 +221,94 @@ public class StarsPanelTest
 			assertNull(tab.service.model.selected);
 			assertNull(named(tab.stars, "stars.pin"));
 		});
+	}
+
+	/**
+	 * The sidebar refreshes every card once a second whichever tab is showing. Open on Home or Group,
+	 * the list is not drawn at all, since nobody can see it; the turn back to Stars draws it.
+	 */
+	@Test
+	public void openOnAnotherTabTheListIsNotDrawnUntilTheTurnBack() throws Exception
+	{
+		SwingUtilities.invokeAndWait(() ->
+		{
+			Tab tab = new Tab();
+			Component row = named(tab.stars, RIMMINGTON);
+			tab.stars.active(true);
+
+			/* A pick is the cheapest thing that makes the list draw again: it opens Route and Pin in the row. */
+			tab.service.model.selected = "302|rimmington mine";
+			tab.stars.refresh();
+			assertSame("no row is built while another tab shows", row, named(tab.stars, RIMMINGTON));
+			assertNull(named(tab.stars, "stars.pin"));
+
+			tab.stars.selected(true);
+			assertNotNull("the turn to Stars draws the list as it is now", named(tab.stars, "stars.pin"));
+		});
+	}
+
+	/** The one thing followed on another tab: a pick still ends with its pin, as it does on this one. */
+	@Test
+	public void aPickEndsWithItsPinOnAnotherTabToo() throws Exception
+	{
+		SwingUtilities.invokeAndWait(() ->
+		{
+			Tab tab = new Tab();
+			tab.pick();
+			tab.routeTo(302);
+			tab.stars.refresh();
+			tab.stars.active(true);
+
+			tab.destinations.dismiss();
+			tab.stars.refresh();
+			assertNull("reached or dismissed from Home, the star is let go", tab.service.model.selected);
+		});
+	}
+
+	/**
+	 * Every star's time left turns over a minute at a second of its own, so a list drawn again for
+	 * each was drawn again most seconds. The rows stand, and the minute is written into them.
+	 */
+	@Test
+	public void aMinuteTurningOverIsWrittenIntoTheRowsThatStand() throws Exception
+	{
+		SwingUtilities.invokeAndWait(() ->
+		{
+			Tab tab = new Tab();
+			/* Half a minute over 46, so the 45 seconds below turn its minute and no star's tier. */
+			tab.accept(30_000L);
+			Component row = named(tab.stars, RIMMINGTON);
+			assertEquals("~47m left", left(tab));
+
+			tab.later(45_000L);
+			tab.stars.refresh();
+			assertSame("the row is the one already drawn", row, named(tab.stars, RIMMINGTON));
+			assertEquals("~46m left", left(tab));
+		});
+	}
+
+	/** A new list has its own stars and its own clock, so the rows are drawn from it rather than kept. */
+	@Test
+	public void aNewListIsDrawnEvenWhenItsStarsLookTheSame() throws Exception
+	{
+		SwingUtilities.invokeAndWait(() ->
+		{
+			Tab tab = new Tab();
+			tab.accept(30_000L);
+			assertEquals("~47m left", left(tab));
+
+			/* The same nine stars at the same tiers, ten minutes on as the map counts them. */
+			tab.accept(30_000L - 600_000L);
+			assertEquals("~37m left", left(tab));
+		});
+	}
+
+	private static final String RIMMINGTON = "stars.site.tile:2974,3241";
+
+	/** The time left on Rimmington mine's card, which is its first world's, W302. */
+	private static String left(Tab tab)
+	{
+		return ((JLabel) named((Container) named(tab.stars, RIMMINGTON), "star.left")).getText();
 	}
 
 	/**
@@ -686,6 +775,30 @@ public class StarsPanelTest
 		{
 			offered.clear();
 			offered.addAll(Arrays.asList(home));
+		}
+
+		/** The feed again as a new answer from the map, with W302 at Rimmington mine given {@code more} to live. */
+		void accept(long more)
+		{
+			StarsModel.Feed next = feed();
+			next.rows.get(0).remainingMs += more;
+			service.model.accept(next);
+			stars.refresh();
+		}
+
+		/** As if the list had been received {@code ms} earlier than it was, which is how a model tells the time. */
+		void later(long ms)
+		{
+			try
+			{
+				java.lang.reflect.Field received = StarsModel.class.getDeclaredField("receivedNanos");
+				received.setAccessible(true);
+				received.setLong(service.model, received.getLong(service.model) - ms * 1_000_000L);
+			}
+			catch (ReflectiveOperationException e)
+			{
+				throw new AssertionError(e);
+			}
 		}
 	}
 
