@@ -32,10 +32,7 @@ import java.util.function.BooleanSupplier;
 import javax.swing.border.EmptyBorder;
 import javax.swing.*;
 import net.runelite.client.ui.ColorScheme;
-import static com.pbolduc.mapcompanion.MapCompanionPanel.label;
-import static com.pbolduc.mapcompanion.MapCompanionPanel.wrapped;
-import static com.pbolduc.mapcompanion.MapCompanionPanel.refont;
-import static com.pbolduc.mapcompanion.MapCompanionPanel.setWrapped;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.*;
 import static com.pbolduc.mapcompanion.SharingFields.Field;
 import static net.runelite.client.ui.ColorScheme.LIGHT_GRAY_COLOR;
 

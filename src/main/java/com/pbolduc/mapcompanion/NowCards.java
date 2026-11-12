@@ -38,17 +38,7 @@ import net.runelite.client.config.Keybind;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.components.ThinProgressBar;
 import net.runelite.client.util.LinkBrowser;
-import static com.pbolduc.mapcompanion.MapCompanionPanel.card;
-import static com.pbolduc.mapcompanion.MapCompanionPanel.CARD_TEXT_WIDTH;
-import static com.pbolduc.mapcompanion.MapCompanionPanel.gap;
-import static com.pbolduc.mapcompanion.MapCompanionPanel.left;
-import static com.pbolduc.mapcompanion.MapCompanionPanel.OPEN_WEBSITE;
-import static com.pbolduc.mapcompanion.MapCompanionPanel.row;
-import static com.pbolduc.mapcompanion.MapCompanionPanel.sectionHead;
-import static com.pbolduc.mapcompanion.MapCompanionPanel.setWrapped;
-import static com.pbolduc.mapcompanion.MapCompanionPanel.slot;
-import static com.pbolduc.mapcompanion.MapCompanionPanel.smallButton;
-import static com.pbolduc.mapcompanion.MapCompanionPanel.syncRow;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.*;
 import static com.pbolduc.mapcompanion.CompanionSnapshot.Clue;
 import static net.runelite.client.ui.ColorScheme.DARKER_GRAY_COLOR;
 
