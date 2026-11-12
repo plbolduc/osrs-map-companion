@@ -167,6 +167,8 @@ public final class HarnessMain
 
 	private volatile boolean dirty = true;
 	private long lastPostAtMs = 0L;
+	/** As the plugin's: when a snapshot was last built, posted or not. */
+	private long lastBuildAtMs = 0L;
 	private WorldPoint lastPosition = null;
 	private String lastSentFingerprint = null;
 	private volatile boolean suffixClaimed = false;
@@ -922,12 +924,13 @@ public final class HarnessMain
 		{
 			return;
 		}
-		if (now - lastPostAtMs < MIN_POST_INTERVAL_MS || !relay.isReady(now))
+		if (now - lastBuildAtMs < MIN_POST_INTERVAL_MS || !relay.isReady(now))
 		{
 			return;
 		}
 
 		dirty = false;
+		lastBuildAtMs = now;
 		CompanionSnapshot snapshot = snapshotBuilder.build(now);
 		if (snapshot == null)
 		{

@@ -122,7 +122,10 @@ import static com.pbolduc.mapcompanion.DestinationRoute.standing;
 )
 public class MapCompanionPlugin extends Plugin
 {
-	/** The floor between posts. The relay enforces its own; this keeps us under it regardless. */
+	/**
+	 * The floor between posts, and between the builds that decide whether there is one to make. The
+	 * relay enforces its own; this keeps us under it regardless.
+	 */
 	private static final long MIN_POST_INTERVAL_MS = 2_000L;
 	/**
 	 * Sent even when nothing has changed, so a pairing does not look dead while somebody idles —
@@ -406,6 +409,8 @@ public class MapCompanionPlugin extends Plugin
 	/** Set when anything worth reporting has happened since the last post. */
 	private volatile boolean dirty = true;
 	private long lastPostAtMs = 0L;
+	/** When a snapshot was last built, posted or not: what {@link #MIN_POST_INTERVAL_MS} is measured from. */
+	private long lastBuildAtMs = 0L;
 	private WorldPoint lastPosition = null;
 	/**
 	 * Gson of the last snapshot that was actually handed to OkHttp, clocks zeroed.
@@ -1521,14 +1526,28 @@ public class MapCompanionPlugin extends Plugin
 		 * every tick.
 		 */
 		publishHealth();
+		postIfDue(now, server, code);
+	}
 
+	/**
+	 * The tick's last step: build a snapshot when one is due, and post it when it says something
+	 * the map has not heard or the heartbeat is due. Client thread; package-private for its test.
+	 */
+	void postIfDue(long now, String server, String code)
+	{
 		long heartbeat = directiveStream.isConnected() ? STREAMED_HEARTBEAT_MS : HEARTBEAT_MS;
 		boolean heartbeatDue = now - lastPostAtMs >= heartbeat;
 		if (!dirty && !heartbeatDue)
 		{
 			return;
 		}
-		if (now - lastPostAtMs < MIN_POST_INTERVAL_MS || !relay.isReady(now))
+		/*
+		 * The floor is from the last build, which is also the last post when it was sent. A build
+		 * whose snapshot said nothing new posts nothing, and in combat every tick marks the plugin
+		 * dirty with a varbit or a hitpoint; from the last post alone, each of those ticks built and
+		 * serialised a whole snapshot to find that out again.
+		 */
+		if (now - lastBuildAtMs < MIN_POST_INTERVAL_MS || !relay.isReady(now))
 		{
 			return;
 		}
@@ -1539,6 +1558,7 @@ public class MapCompanionPlugin extends Plugin
 		 * until the heartbeat.
 		 */
 		dirty = false;
+		lastBuildAtMs = now;
 		CompanionSnapshot snapshot = snapshotBuilder.build(now);
 		if (snapshot == null)
 		{
