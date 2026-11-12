@@ -548,7 +548,7 @@ final class StarsPanel extends JPanel
 				expand = flat("+" + (site.worlds.size() - 1) + (open ? " ▴" : " ▾"));
 				expand.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
 				expand.setName("stars.expand." + site.key);
-				expand.setToolTipText((open ? "Collapse " : "Show ") + site.worlds.size() + " worlds at " + site.name);
+				expand.setToolTipText((open ? "Hide the other " : "Show the other ") + (site.worlds.size() - 1) + " at " + site.name);
 				expand.getAccessibleContext().setAccessibleName(expand.getToolTipText());
 				expand.addActionListener(e ->
 				{
@@ -572,7 +572,7 @@ final class StarsPanel extends JPanel
 			pick.setFocusPainted(false);
 			pick.setLayout(new BorderLayout(0, 2));
 			pick.setName("stars.site." + site.key);
-			pick.setToolTipText("W" + primary.world + " at " + site.name + ": press for Route and Pin");
+			pick.setToolTipText("W" + primary.world + " at " + site.name + ", reported " + age(primary.ageMs + elapsed) + ": press for Route and Pin");
 			pick.getAccessibleContext().setAccessibleName(pick.getToolTipText());
 			pick.addActionListener(e -> select(primary));
 			pick.add(top, BorderLayout.CENTER);
@@ -585,7 +585,11 @@ final class StarsPanel extends JPanel
 			JPanel list = column();
 			list.setBackground(box.getBackground());
 			list.setBorder(new CompoundBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, EDGE), new EmptyBorder(3, 0, 0, 0)));
-			for (Star star : site.worlds) list.add(fill(world(site, star, elapsed, box.getBackground())));
+			/* The worlds besides the first, which the card itself is: the fold's count is the rows it opens. */
+			for (Star star : site.worlds.subList(1, site.worlds.size()))
+			{
+				list.add(fill(world(site, star, elapsed, box.getBackground())));
+			}
 			box.add(MapCompanionPanel.gap(4, box.getBackground()));
 			box.add(fill(list));
 		}

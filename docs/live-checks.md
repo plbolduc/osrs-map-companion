@@ -88,6 +88,9 @@ often. A clean run is now 443 tests with no failures or skips.
       world. This is the first use of `WorldswitcherStars.PVP` and `DEADMAN`, so it settles that
       they are those two stars and that a high-risk world shows the PvP one. The number does not
       move when the star appears, and no row says *W* unless the map has no world list.
+- [ ] On Stars, a site with stars on several worlds says how many besides the one on its card,
+      *+2*, and the fold opens exactly that many rows: the card's own world is not listed again
+      under it. Hovering the card says how long ago its star was reported.
 - [ ] On Stars, a star on the world you are logged into has its world in green, in its card, in
       its site's list of worlds and at the head of the tab once pinned; hop, and the green moves to
       the stars of the new world. Every site name fits one line beside its favourite star, and a
