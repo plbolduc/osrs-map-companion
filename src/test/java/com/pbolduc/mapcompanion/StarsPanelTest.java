@@ -583,8 +583,10 @@ public class StarsPanelTest
 			assertEquals("~3m left", fact(alKharid, "left").getText());
 			assertEquals(StarsPanel.DYING_TONE, fact(alKharid, "left").getForeground());
 
-			assertEquals("the worlds besides the one printed", "+2 ▾", ((AbstractButton) named(stars, "stars.expand.tile:2974,3241")).getText());
+			/* Closed points right and open points down, as every other fold's arrow does: this read ▾ closed and ▴ open. */
+			assertEquals("the worlds besides the one printed", "+2 ▸", ((AbstractButton) named(stars, "stars.expand.tile:2974,3241")).getText());
 			((AbstractButton) named(stars, "stars.expand.tile:2974,3241")).doClick();
+			assertEquals("open, the arrow points at what it opened", "+2 ▾", ((AbstractButton) named(stars, "stars.expand.tile:2974,3241")).getText());
 			/* It listed W302 again under its own card, as the first of three rows; the fold opens the other two. */
 			assertNull("the card is its first world, so the list does not repeat it", named(stars, "stars.world.302|rimmington mine"));
 			assertEquals(StarsPanel.TIERS[4], fact(row(stars, "330|rimmington mine"), "tier").getForeground());

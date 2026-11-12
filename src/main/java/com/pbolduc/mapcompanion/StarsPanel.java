@@ -563,8 +563,8 @@ final class StarsPanel extends JPanel
 			JButton expand = null;
 			if (site.worlds.size() > 1)
 			{
-				/* How many more worlds than the one printed beside it. */
-				expand = flat("+" + (site.worlds.size() - 1) + (open ? " ▴" : " ▾"));
+				/* How many more worlds than the one printed beside it; the arrow is every fold's, down while open. */
+				expand = flat("+" + (site.worlds.size() - 1) + (open ? " ▾" : " ▸"));
 				expand.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
 				expand.setName("stars.expand." + site.key);
 				expand.setToolTipText((open ? "Hide the other " : "Show the other ") + (site.worlds.size() - 1) + " at " + site.name);
