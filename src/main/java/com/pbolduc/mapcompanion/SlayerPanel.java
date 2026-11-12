@@ -75,6 +75,8 @@ final class SlayerPanel extends JPanel
 	private boolean shownHide;
 	private String shownTask;
 	private boolean expanded;
+	/* The place open to its facts and buttons, by id; null opens Best for you, or the first with none. */
+	private String open;
 	private boolean kindsOpen;
 	private boolean connected;
 	/** Whether a character is logged in, as of the last refresh: Route asks the map as one, and Pin does not. */
@@ -144,6 +146,7 @@ final class SlayerPanel extends JPanel
 		{
 			expanded = false;
 			kindsOpen = false;
+			open = null;
 			shownTask = reading.task;
 		}
 		if (shown != places || shownWaiting != waiting || !Objects.equals(shownOrder, view.order) || shownHide != view.hideWilderness)
@@ -202,10 +205,25 @@ final class SlayerPanel extends JPanel
 				body.add(line(NONE_OPEN, MUTED));
 			}
 			int visible = expanded ? shown.rows.size() : Math.min(count, shown.rows.size());
+			/*
+			 * One place open at a time, Best for you to begin with: its facts, what it asks and its two
+			 * buttons. The others are a name and their labels, and a press opens one in its place, so
+			 * six places are a list to read down and not twelve buttons alike.
+			 */
+			String chosen = open;
+			if (shown.rows.subList(0, visible).stream().noneMatch(row -> row.id.equals(chosen)))
+			{
+				open = visible == 0 ? null : shown.rows.get(count - 1).id;
+			}
 			for (int i = 0; i < visible; i++)
 			{
 				spot(shown.rows.get(i));
 			}
+			/*
+			 * Under a hairline of their own: what the list leaves out, the task's notes, the fold and the
+			 * options it opens are about the whole list, not its last place.
+			 */
+			body.add(rule());
 			if (shown.hiddenWilderness > 0)
 			{
 				body.add(line(shown.hiddenWilderness + (shown.hiddenWilderness == 1 ? " Wilderness place hidden" : " Wilderness places hidden"), MUTED));
@@ -238,6 +256,7 @@ final class SlayerPanel extends JPanel
 				refont(wilderness, 11f);
 				wilderness.addActionListener(e -> choose(config.slayerOrder(), wilderness.isSelected()));
 				body.add(wilderness);
+				body.add(rule());
 				JButton kinds = linkButton((kindsOpen ? "▾ " : "▸ ") + shown.kinds.size() + (shown.kinds.size() == 1 ? " kind counts" : " kinds count"));
 				kinds.setName("slayer.kinds");
 				kinds.addActionListener(e -> { kindsOpen = !kindsOpen; render(); refresh(connected); });
@@ -277,19 +296,22 @@ final class SlayerPanel extends JPanel
 			JButton wiki = linkButton("OSRS Wiki ↗");
 			wiki.setToolTipText(Words.of("slayer.wikiTip"));
 			wiki.addActionListener(e -> LinkBrowser.browse(wikiUrl(shown.page)));
-			body.add(wiki);
 			/*
 			 * The source on every card, the licence with the open list, where the website's Slayer block
 			 * has it too: the closed card ends on its last useful row, and the terms are one press away.
+			 * They share the card's last line, the source on the left and its terms on the right.
 			 */
+			JButton license = null;
 			if (expanded)
 			{
-				JButton license = linkButton("CC BY-NC-SA 3.0 ↗");
+				license = linkButton("CC BY-NC-SA 3.0 ↗");
 				refont(license, 10f);
 				license.setToolTipText(Words.of("slayer.licenceTip"));
 				license.addActionListener(e -> LinkBrowser.browse("https://creativecommons.org/licenses/by-nc-sa/3.0/"));
-				body.add(license);
 			}
+			JPanel source = MapCompanionPanel.bar(0, null, wiki, null, license);
+			source.setOpaque(false);
+			body.add(MapCompanionPanel.left(MapCompanionPanel.capped(source)));
 		}
 		body.revalidate();
 		body.repaint();
@@ -298,15 +320,29 @@ final class SlayerPanel extends JPanel
 	private void spot(RelayResponse.SlayerSpot spot)
 	{
 		boolean blocked = "unmet".equals(spot.tier);
-		JLabel title = line(spot.rank + ". " + spot.name, blocked ? MUTED : Color.WHITE);
-		refont(title, Font.BOLD);
-		title.setBorder(BorderFactory.createEmptyBorder(7, 0, 0, 0));
-		body.add(title);
+		boolean opened = spot.id.equals(open);
+		String name = spot.rank + ". " + spot.name;
+		body.add(rule());
+		if (opened)
+		{
+			JLabel title = line(name, blocked ? MUTED : Color.WHITE);
+			refont(title, Font.BOLD);
+			body.add(title);
+		}
+		else
+		{
+			/* A closed place is its name as a link, the fold's own arrow before it: a press opens it. */
+			JButton title = linkButton(MapCompanionPanel.html("▸ " + name, WIDTH));
+			title.setForeground(blocked ? MUTED : Color.WHITE);
+			title.setBorder(BorderFactory.createEmptyBorder());
+			title.addActionListener(e -> { open = spot.id; render(); refresh(connected); });
+			body.add(title);
+		}
 		if (spot.bestForYou)
 		{
 			body.add(line("Best for you", GOLD));
 		}
-		if (!spot.kinds.isEmpty())
+		if (opened && !spot.kinds.isEmpty())
 		{
 			body.add(line(String.join(" · ", spot.kinds), MUTED));
 		}
@@ -316,6 +352,11 @@ final class SlayerPanel extends JPanel
 		}
 		for (RelayResponse.SlayerAsk ask : spot.asks)
 		{
+			/* What a place still asks is why it is grey, so a closed one says it; what is met waits for the open one. */
+			if (!opened && !"unmet".equals(ask.tier))
+			{
+				continue;
+			}
 			String words = ("unmet".equals(ask.tier) ? "Needs " : "unknown".equals(ask.tier) ? "Unconfirmed: " : "✓ ") + ask.text;
 			JLabel requirement = line(words,
 									  "unmet".equals(ask.tier) ? MapCompanionPanel.REFUSED : MUTED);
@@ -326,7 +367,16 @@ final class SlayerPanel extends JPanel
 			}
 			body.add(requirement);
 		}
-		actions(spot.id, spot.id, spot.target, spot.name);
+		if (opened)
+		{
+			actions(spot.id, spot.id, spot.target, spot.name);
+		}
+	}
+
+	/** A hairline between two places, and between the places, the options and the sources. */
+	private static JLabel rule()
+	{
+		return MapCompanionPanel.capped(MapCompanionPanel.ruled(new JLabel(), 6, 4));
 	}
 
 	private void actions(String source, String id, RelayResponse.RouteTile tile, String name)

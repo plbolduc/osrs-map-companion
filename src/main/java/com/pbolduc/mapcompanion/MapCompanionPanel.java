@@ -522,6 +522,15 @@ public class MapCompanionPanel extends PluginPanel
 		return content;
 	}
 
+	/** A hairline over a row, with {@code above} clear pixels over the line and {@code below} under it. */
+	static <T extends JComponent> T ruled(T row, int above, int below)
+	{
+		row.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(above, 0, 0, 0),
+			BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, ColorScheme.MEDIUM_GRAY_COLOR),
+				BorderFactory.createEmptyBorder(below, 0, 0, 0))));
+		return row;
+	}
+
 	/** A section's name: bold, small and grey, the way the old join heading was. */
 	static JLabel sectionHead(String text)
 	{
@@ -863,11 +872,17 @@ public class MapCompanionPanel extends PluginPanel
 	/** The same, for a label narrower than the column — inside a card, beside the dot. */
 	static void setWrapped(JLabel label, String text, int width)
 	{
-		String html = "<html><body width='" + width + "'>" + escape(text) + "</body></html>";
+		String html = html(text, width);
 		if (!html.equals(label.getText()))
 		{
 			label.setText(html);
 		}
+	}
+
+	/** The markup that wraps {@code text} at {@code width}, escaped: a button's words wrap by it too. */
+	static String html(@Nullable String text, int width)
+	{
+		return "<html><body width='" + width + "'>" + escape(text) + "</body></html>";
 	}
 
 	/**
