@@ -42,9 +42,10 @@ import okhttp3.OkHttpClient;
  * Connect, a busy Home, the Group tab, Settings with Advanced open, Stars with a world picked, the
  * search answering "bank" and "whip", the death and clue cards, a meetup, and Drop luck alone.
  * The README's pictures are route, search-whip-card, farm-count, group, stars-route, dropluck-card,
- * slayer-card, settings-closed and port-run, with VoyageShot's voyage-sail; the card scenes paint the
- * real sections without the panel's surrounding controls. The tasks scenes are Home with all three
- * task cards, open and folded; {@code -Dslayer.options=<file>} gives any Slayer scene another list.
+ * slayer-card, settings-closed, port-run and chart-run, with VoyageShot's voyage-sail; the card scenes
+ * paint the real sections without the panel's surrounding controls. The tasks scenes are Home with
+ * all three task cards, open and folded; {@code -Dslayer.options=<file>} gives any Slayer scene
+ * another list, and {@code -Dchart.run=<file>} gives chart-run another run.
  * Synthetic local state and made-up names; no game account and no network — the map address is a
  * port nothing listens on. A paired scene shares what the one press at Connect turns on.
  *
@@ -70,7 +71,7 @@ public class SidebarPolishShot
 	static final List<String> STATES = Arrays.asList("fresh", "fresh-log", "connect", "home", "route", "group", "settings", "settings-closed",
 		"stars", "stars-filters", "stars-route", "stars-pinned", "stars-busy", "stars-busy-picked", "stars-busy-open", "stars-busy-ways", "search", "search-whip", "search-whip-card", "death", "meetup", "dropluck", "dropluck-card", "status",
 		"farm", "farm-card", "farm-bring", "farm-count", "slayer", "slayer-card", "slayer-open", "slayer-expanded", "slayer-blocked",
-		"port-tasks", "port-tasks-card", "port-tasks-unread", "port-run", "port-run-changed", "tasks", "tasks-folded");
+		"port-tasks", "port-tasks-card", "port-tasks-unread", "port-run", "port-run-changed", "chart-run", "tasks", "tasks-folded");
 
 	static HarnessGame game;
 
@@ -89,6 +90,7 @@ public class SidebarPolishShot
 			SwingUtilities.invokeAndWait(() -> call(() -> shoot(state.equals("dropluck-card")
 				? (JComponent) get(panel[0], "drySection") : state.equals("search-whip-card")
 				? (JComponent) get(panel[0], "searchPanel") : state.equals("farm-card") || state.equals("farm-bring") || state.equals("farm-count")
+				|| state.equals("chart-run")
 				? (JComponent) get(panel[0], "farmRunPanel") : state.equals("slayer-card") || state.equals("slayer-open")
 				? (JComponent) get(panel[0], "slayerPanel") : state.equals("slayer-blocked")
 				? (JComponent) get(panel[0], "slayerPanel") : state.equals("port-tasks-card") || state.equals("port-tasks-unread") || state.startsWith("port-run")
@@ -319,6 +321,21 @@ public class SidebarPolishShot
 					? Arrays.asList(now.get(0), new PortTaskReader.Slot(1, PortTaskReader.COURIER, 84, "Port Khazard fruit delivery", "Brimhaven", "Port Khazard", 3, 3, 3, 0, null),
 						now.get(2), now.get(3), now.get(4))
 					: now);
+				injector.getInstance(FarmRunRoute.class).sync();
+				set(injector.getInstance(ShortestPath.class), "installed", true);
+			}
+			if (state.equals("chart-run"))
+			{
+				/*
+				 * A sea charting run as the map sends it: the contract's own, the Kharidian Sea's first four
+				 * stops, or with -Dchart.run the whole run the map's planner made for the same boat. Its
+				 * first task arrives ticked, since the map ticks a charting stop from the game's charts.
+				 */
+				String json = Files.readString(Paths.get(System.getProperty("chart.run", "src/test/resources/contract/sea-chart-run.json")),
+					StandardCharsets.UTF_8);
+				FarmRunState farm = injector.getInstance(FarmRunState.class);
+				farm.bind(injector.getInstance(MemberIdentity.class).id());
+				farm.accept(new Gson().fromJson(json, RelayResponse.FarmRun.class), 1, System.currentTimeMillis() - 1_000);
 				injector.getInstance(FarmRunRoute.class).sync();
 				set(injector.getInstance(ShortestPath.class), "installed", true);
 			}
