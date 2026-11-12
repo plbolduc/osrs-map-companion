@@ -77,7 +77,7 @@ final class RunView extends JPanel
 	private final boolean port;
 	private final JLabel title = label(12f, Color.WHITE);
 	private final JLabel progress = label(11f, LIGHT_GRAY_COLOR);
-	/** How much of a charting run is charted, as a bar over the count: eight sentences do not show it. */
+	/** How much of a run is done, as a bar over the count that says it in words. */
 	private final JProgressBar bar = new JProgressBar();
 	private final JLabel changed = label(11f, MapPin.AMBER);
 	private final JButton before = MapCompanionPanel.linkButton("▸ Before you leave");
@@ -277,7 +277,7 @@ final class RunView extends JPanel
 		title.setVisible(active && !port);
 		progress.setVisible(active);
 		/* With the count it sits over, and never on a card that holds no run: a bar is visible until told otherwise. */
-		bar.setVisible(active && FarmRunWire.SEA_CHARTS.equals(view.run.kind));
+		bar.setVisible(active);
 		changed.setVisible(active && view.changed);
 		before.setVisible(active && !view.run.bring.isEmpty());
 		actions.setVisible(active || planning || ending);
@@ -296,8 +296,10 @@ final class RunView extends JPanel
 			shownRun = view.run.id;
 			MapCompanionPanel.setWrapped(title, view.run.name, WIDTH);
 			MapCompanionPanel.setWrapped(progress, progressLine(view), WIDTH);
-			bar.setMaximum(view.run.stops.size());
-			bar.setValue(view.visited.size());
+			/* It counts what the line under it counts: the stops something can witness, or every stop where nothing can. */
+			boolean witnessed = view.tracked() > 0;
+			bar.setMaximum(witnessed ? view.tracked() : view.run.stops.size());
+			bar.setValue(witnessed ? view.trackedDone() : view.visited.size());
 			progress.setForeground(left ? LIGHT_GRAY_COLOR : Color.WHITE);
 			MapCompanionPanel.setWrapped(changed, CHANGED, WIDTH);
 			follow.setText(view.following ? "Pause" : "Follow");

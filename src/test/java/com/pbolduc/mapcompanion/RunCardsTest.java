@@ -629,12 +629,15 @@ public class RunCardsTest
 	}
 
 	/**
-	 * The charting run's bar was shown or hidden only while a run was held, and a bar is visible
-	 * until told otherwise: a card with no run drew an empty one under Start run, and a farm run
-	 * that replaced a charting run kept it. It is drawn for a charting run and for nothing else.
+	 * The bar is drawn while a run is held and never on a card with none: a bar is visible until
+	 * told otherwise, and a card with no run once drew an empty one under Start run.
+	 *
+	 * <p>This asserted that a farm run had no bar, when the bar was the charting run's alone. Every
+	 * run says its count in words, so every run now has the bar over them, counting what they count:
+	 * a charting run's tasks charted, and a farm run's stops that something can witness.
 	 */
 	@Test
-	public void theBarIsDrawnForAChartingRunAndNeverOnACardWithNone() throws Exception
+	public void theBarIsDrawnForARunAndNeverOnACardWithNone() throws Exception
 	{
 		FarmRunPanel[] card = new FarmRunPanel[1];
 		SwingUtilities.invokeAndWait(() ->
@@ -647,10 +650,16 @@ public class RunCardsTest
 		state.acceptFor(identity.id(), EPOCH, run("/contract/sea-chart-run.json"), 1, System.currentTimeMillis());
 		SwingUtilities.invokeAndWait(() -> card[0].refresh(true));
 		assertTrue("a charting run's", drawn(bar(card[0])));
+		javax.swing.JProgressBar charting = (javax.swing.JProgressBar) bar(card[0]);
+		assertEquals("one of its four tasks charted", "1 of 4", charting.getValue() + " of " + charting.getMaximum());
 
 		state.acceptFor(identity.id(), EPOCH, run("/contract/farm-run.json"), 2, System.currentTimeMillis());
 		SwingUtilities.invokeAndWait(() -> card[0].refresh(true));
-		assertFalse("and not the farm run that replaced it", drawn(bar(card[0])));
+		assertTrue("and the farm run's that replaced it", drawn(bar(card[0])));
+		javax.swing.JProgressBar farm = (javax.swing.JProgressBar) bar(card[0]);
+		assertEquals("counting the stops the line under it counts", state.view().trackedDone() + " of " + state.view().tracked(),
+			farm.getValue() + " of " + farm.getMaximum());
+		assertTrue(state.view().tracked() > 0);
 	}
 
 	private static Component bar(Container parent)
