@@ -863,6 +863,40 @@ public class GroupPanelTest
 	}
 
 	/**
+	 * With nobody logged in and no roster held, the tab drew only the Meetups heading and a greyed Meet
+	 * here, as if the group were empty. It says to log in at its top, as Stars does. Logged in with the
+	 * roster still on its way it says nothing, and a roster held through a logout is shown instead.
+	 */
+	@Test
+	public void withNobodyLoggedInTheTabSaysToLogIn() throws Exception
+	{
+		AtomicReference<GroupPanel> panel = new AtomicReference<>();
+		SwingUtilities.invokeAndWait(() -> panel.set(panel()));
+		long now = System.currentTimeMillis();
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.get().refresh(true, false, now);
+			javax.swing.JLabel line = (javax.swing.JLabel) namedComponent(panel.get(), "group.logIn");
+			assertTrue(line.isVisible());
+			assertEquals("Log in to see your group.", line.getText().replaceAll("<[^>]+>", ""));
+			assertEquals(ColorScheme.LIGHT_GRAY_COLOR, line.getForeground());
+			assertSame("the tab's first line: only the friends' column is over it", line, panel.get().getComponent(1));
+			assertEquals("and that is empty", 0, ((Container) panel.get().getComponent(0)).getComponentCount());
+
+			panel.get().refresh(true, true, now);
+			assertFalse("logged in, the roster is on its way: nothing is said", line.isVisible());
+		});
+		social();
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.get().refresh(true, false, now);
+			assertFalse("a roster held through the logout is shown, not asked for",
+				namedComponent(panel.get(), "group.logIn").isVisible());
+			assertNotNull(namedComponent(panel.get(), "group.friend.cara"));
+		});
+	}
+
+	/**
 	 * A friend's Route pressed just before a logout waited on the stream the logout closed, then half
 	 * a minute later said the friend shares no position. At the login screen it stops waiting and says
 	 * to log in, as a press made there does, and the friend is not blamed.

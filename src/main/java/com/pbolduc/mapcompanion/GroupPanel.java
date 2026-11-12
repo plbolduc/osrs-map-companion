@@ -139,6 +139,12 @@ final class GroupPanel extends JPanel
 	private final GameSprites sprites;
 
 	private final JPanel friends = column(DARK_GRAY_COLOR);
+	/**
+	 * Where the friends would be while nobody is logged in and no roster is held: the friends come
+	 * with a character, so the tab says what it waits for, as Stars does, where it drew only the
+	 * Meetups heading. Logged in with no roster yet it stays hidden, since the roster is on its way.
+	 */
+	private final JLabel logIn = new JLabel();
 	private final JLabel meetupsHead = MapCompanionPanel.sectionHead("Meetups");
 	/**
 	 * Under the Meetups heading while Destinations and meetups is off. The map's meetups are taken only
@@ -201,6 +207,10 @@ final class GroupPanel extends JPanel
 		column(this, DARK_GRAY_COLOR);
 		setName("companionGroup");
 		add(friends);
+		/* Under the friends' column, which is empty whenever this shows, so it is the tab's first line. */
+		logIn.setName("group.logIn");
+		add(line(logIn));
+		setWrapped(logIn, Words.of("group.logIn"), WIDTH + 16);
 		meetHere.setName("group.meetHere");
 		meetHere.setForeground(ColorScheme.BRAND_ORANGE);
 		meetHere.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
@@ -398,6 +408,7 @@ final class GroupPanel extends JPanel
 		List<RosterRow> roster = destinations.getRoster();
 		List<Meetup> events = destinations.getEvents();
 		String destinationKey = DestinationRoute.keyOf(destinations.getDestination());
+		logIn.setVisible(roster == null && !loggedIn);
 
 		Said meet = meetups.said("meet");
 		/* Meet here's answer to a press made since the form was last opened or put away. */

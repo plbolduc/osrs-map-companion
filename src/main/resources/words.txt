@@ -129,6 +129,7 @@ group.meetHereTip=Make a meetup where you stand, on this world, and copy its lin
 group.titleTip=The meetup's title, up to sixty characters. Everybody in the group sees it.
 group.makeTip=Make the meetup at the tile and world you are on, and copy its link
 group.alone=Just you so far. Send a friend an invite.
+group.logIn=Log in to see your group.
 group.routeFriendTip= stands now. Nothing follows them; press again to ask again.
 group.allOnMapTip=Your whole group is on the world map already
 group.drawOneTip='s dot on the game's world map, without the rest of the group
