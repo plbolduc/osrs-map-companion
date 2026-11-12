@@ -40,8 +40,10 @@ import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.widgets.Widget;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 /** The teleport the step being followed uses is outlined where it is clicked, and nowhere else. */
@@ -51,6 +53,9 @@ public class TeleportOutlineOverlayTest
 	private final HarnessConfig config = new HarnessConfig(new HarnessStore(), MapCompanionConfig.DEFAULT_MAP_URL);
 	private boolean instance;
 	private Widget spellbook;
+	/** The game tick the fake client is on, and how many times a widget was asked for its children. */
+	private int tick;
+	private static int walked;
 
 	private final Client client = (Client) Proxy.newProxyInstance(
 		Client.class.getClassLoader(), new Class<?>[]{Client.class}, (proxy, method, args) ->
@@ -62,6 +67,8 @@ public class TeleportOutlineOverlayTest
 						(view, asked, none) -> asked.getName().equals("isInstance") ? instance : null);
 				case "getWidget":
 					return InterfaceID.MagicSpellbook.UNIVERSE == (Integer) args[0] ? spellbook : null;
+				case "getTickCount":
+					return tick;
 				default:
 					throw new UnsupportedOperationException(method.getName());
 			}
@@ -123,6 +130,64 @@ public class TeleportOutlineOverlayTest
 		assertEquals(0, image.getRGB(36, 42));
 	}
 
+	/**
+	 * The overlay draws every frame, and the spellbook is hundreds of widgets. The icon is looked for
+	 * once a game tick; between ticks the widget found says where it is and whether it still shows.
+	 */
+	@Test
+	public void theSpellbookIsWalkedOnceAGameTick()
+	{
+		boolean[] filtered = {false};
+		Widget spell = (Widget) Proxy.newProxyInstance(Widget.class.getClassLoader(), new Class<?>[]{Widget.class}, (proxy, method, args) ->
+		{
+			switch (method.getName())
+			{
+				case "getSpriteId":
+					return 356;
+				case "isHidden":
+					return filtered[0];
+				case "getBounds":
+					return new Rectangle(40, 30, 24, 24);
+				default:
+					return new Widget[0];
+			}
+		});
+		spellbook = widget(-1, false, new Rectangle(0, 0, 200, 260), widget(-1, false, new Rectangle(0, 0, 200, 260), spell));
+		walked = 0;
+		assertTrue("the first frame finds the spell", outlined());
+		int once = walked;
+		assertTrue(once > 0);
+		assertTrue(outlined());
+		assertTrue(outlined());
+		assertEquals("later frames of the same tick ask the book nothing", once, walked);
+
+		/* A widget says it is hidden when anything above it is, so this is a closed book as much as a filtered spell. */
+		filtered[0] = true;
+		assertFalse("hidden inside the tick, the spell loses its outline that frame", outlined());
+		filtered[0] = false;
+
+		tick++;
+		assertTrue(outlined());
+		assertEquals("the next tick looks again", 2 * once, walked);
+
+		Widget open = spellbook;
+		spellbook = null;
+		tick++;
+		assertFalse("no book loaded, as on a tick with the tab closed", outlined());
+		spellbook = open;
+		assertTrue("and one opened inside the same tick is read the frame it opens", outlined());
+	}
+
+	/** Whether a frame drawn now edges the spell at (40, 30). */
+	private boolean outlined()
+	{
+		BufferedImage image = new BufferedImage(200, 100, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D graphics = image.createGraphics();
+		overlay.drawSpell(graphics, 356);
+		graphics.dispose();
+		return image.getRGB(40, 42) == MapPin.AMBER.getRGB();
+	}
+
 	private static Widget widget(int sprite, boolean hidden, Rectangle bounds, Widget... children)
 	{
 		return (Widget) Proxy.newProxyInstance(Widget.class.getClassLoader(), new Class<?>[]{Widget.class}, (proxy, method, args) ->
@@ -136,6 +201,7 @@ public class TeleportOutlineOverlayTest
 				case "getBounds":
 					return bounds;
 				case "getStaticChildren":
+					walked++;
 					return children;
 				case "getDynamicChildren":
 				case "getNestedChildren":
