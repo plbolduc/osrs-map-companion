@@ -1122,3 +1122,44 @@ the farm run and the port tasks folded and the Slayer list at its one place
   They stay under the fold that opens them.
 - **A count beside a folded heading** (*Port tasks · 3*). Not built: the source
   budget was nearly spent when the list and its chips were drawn.
+
+## The sea charting run, 12 November 2026
+
+A charting run's stops are named by their tasks, and a task is a sentence: *Use your spyglass to
+get a good view of the Pandemonium from the cave entrance on the island*. Eight of them were eight
+sentences at one weight, each with *Sail 71 tiles* in grey under it, and the card painted 597px
+tall. Nothing in it could be found without reading it.
+
+### A row to scan
+
+A stop the map gives a tool and a leg in numbers is one row: the tool's picture, the task, and the
+leg's length at the right edge with *sail* or *walk* under it. The picture says the kind of task,
+which the sentence takes a line to say, and the lengths make a column where they were the last
+words of eight lines. What a leg says besides its length, *ashore at The Onyx Crest*, goes under
+the task in grey. A stop the map sends only words for keeps its line of words: a first leg that
+boards somewhere other than the run's own mooring, which the map has no one length for.
+
+The length is printed in the margin the card's text leaves at its right, so the task keeps the
+width it had beside a picture.
+
+### How far through
+
+Under the run's name is a bar, one step a task charted, and the count adds the tiles still to
+cover, *1 of 8 charted · 270 tiles left*, while every stop ahead says its leg in numbers. With
+one leg in words alone there is no total to give, and the count stands by itself.
+
+### A charted task is one line
+
+A stop behind the player was its whole name struck through, three lines of a sentence already
+done. A name too long for the card is now cut to share one line with its word, *1. Use your
+spyglass to ad… · Charted*. A farm stop's name fits and is as it was.
+
+The same eight tasks paint 533px.
+
+### Proposed and not built
+
+- **A row of the tools to bring**, with those not carried outlined. A boat's cargo hold hands out
+  any tool the player has not got, so nothing is missing on a run sailed by boat, and a row that
+  says *1 not on you* would send a player to the bank for nothing.
+- **The Sailing level a task asks for.** The run holds only tasks the player's level allows, so
+  the number would be printed on every task it is true of.

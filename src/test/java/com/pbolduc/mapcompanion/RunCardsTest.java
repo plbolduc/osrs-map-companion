@@ -629,6 +629,39 @@ public class RunCardsTest
 	}
 
 	/**
+	 * A sea charting run was eight sentences at one weight, each with "Sail 71 tiles" in grey under
+	 * it, and a charted task stayed three struck lines. A stop the map gives a tool and a leg in
+	 * numbers is one row to scan: the tool's picture, the task, and the leg's length at the right
+	 * edge. The count says how far is left, and a charted stop is one cut line with its word.
+	 */
+	@Test
+	public void aChartingStopIsItsToolsPictureItsTaskAndItsLength() throws Exception
+	{
+		List<String> asked = new ArrayList<>();
+		GameSprites recording = new GameSprites(null, null, null)
+		{
+			@Override
+			void farmTravelItem(JLabel label, String name, int box)
+			{
+				asked.add(name);
+			}
+		};
+		state.acceptFor(identity.id(), EPOCH, run("/contract/sea-chart-run.json"), 1, System.currentTimeMillis());
+		FarmRunPanel[] card = new FarmRunPanel[1];
+		SwingUtilities.invokeAndWait(() ->
+		{
+			card[0] = new FarmRunPanel(state, client, follower, route, shortest, recording, config, store);
+			card[0].refresh(true);
+		});
+		assertEquals("the stops still ahead, each by its task's tool", Arrays.asList("Spyglass", "Captain's log", "Current duck"), asked);
+		String words = String.join("\n", SidebarWords.words(card[0]));
+		assertTrue(words, words.contains("1 of 4 charted · 122 tiles left"));
+		assertTrue("a leg's length over its way: " + words, words.contains("71tsail") && words.contains("20twalk"));
+		assertFalse("and not the line it replaced", words.contains("Sail 71 tiles"));
+		assertTrue("the charted stop is cut to one line with its word", words.contains("… · Charted"));
+	}
+
+	/**
 	 * Before you leave was closed with no count, and open it was grey words alone, "not on you" at
 	 * the end of one line in the same ink as the seeds. Closed, it now says how many teleports are not
 	 * on you; open, each line has its picture, and a teleport not on you is amber beside its greyed

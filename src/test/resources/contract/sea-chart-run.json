@@ -14,7 +14,7 @@
         "plane": 0
       },
       "patchIds": [],
-      "method": "Sail from Port Sarim",
+      "method": "Sail 207 tiles · from Port Sarim",
       "item": null,
       "costTiles": 512,
       "steps": [
@@ -122,7 +122,13 @@
           }
         ]
       },
-      "chart": 357
+      "chart": 357,
+      "tool": "Spyglass",
+      "leg": {
+        "by": "sail",
+        "tiles": 207,
+        "more": "from Port Sarim"
+      }
     },
     {
       "n": 2,
@@ -152,7 +158,12 @@
           }
         }
       ],
-      "chart": 14
+      "chart": 14,
+      "tool": "Spyglass",
+      "leg": {
+        "by": "walk",
+        "tiles": 20
+      }
     },
     {
       "n": 3,
@@ -219,7 +230,12 @@
           ]
         ]
       },
-      "chart": 16
+      "chart": 16,
+      "tool": "Captain's log",
+      "leg": {
+        "by": "sail",
+        "tiles": 71
+      }
     },
     {
       "n": 4,
@@ -270,7 +286,12 @@
           ]
         ]
       },
-      "chart": 13
+      "chart": 13,
+      "tool": "Current duck",
+      "leg": {
+        "by": "sail",
+        "tiles": 31
+      }
     }
   ]
 }

@@ -71,6 +71,8 @@ final class FarmRunWire
 	static final List<String> KINDS = Arrays.asList("sent", "ready-now", "preset", "birdhouses", "contract", PORT_TASKS, SEA_CHARTS);
 	/** The slot counters a port-task stop is ticked by; see {@link RelayResponse.RunTask}. */
 	static final List<String> COUNTERS = Arrays.asList("taken", "delivered", "remaining", "held");
+	/** The ways a charting leg goes, the map's {@code FARM_RUN_LEG_WAYS}; a leg by any other is dropped, and its stop says its method. */
+	static final List<String> LEGS = Arrays.asList("sail", "walk");
 	/** Five task slots, each served at most twice at one port: a pickup and a drop-off. */
 	static final int MAX_TICKS = 10;
 	/**
@@ -226,6 +228,12 @@ final class FarmRunWire
 		clean.costTiles = Math.max(0, stop.costTiles);
 		clean.tasks = RouteWire.cleaned(stop.tasks, MAX_TICKS, FarmRunWire::tick);
 		clean.voyage = RouteWire.voyage(stop.voyage);
+		clean.tool = text(stop.tool, 80);
+		if (stop.leg != null && LEGS.contains(stop.leg.by) && stop.leg.tiles >= 0 && stop.leg.tiles <= 100_000)
+		{
+			clean.leg = stop.leg;
+			clean.leg.more = text(stop.leg.more, 120);
+		}
 		boolean tracked = !clean.patchIds.isEmpty() || clean.birdhouseId != null || !clean.tasks.isEmpty();
 		clean.done = stop.done && tracked;
 		clean.visited = stop.visited && !tracked;

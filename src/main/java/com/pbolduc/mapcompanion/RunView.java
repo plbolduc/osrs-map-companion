@@ -77,6 +77,8 @@ final class RunView extends JPanel
 	private final boolean port;
 	private final JLabel title = label(12f, Color.WHITE);
 	private final JLabel progress = label(11f, LIGHT_GRAY_COLOR);
+	/** How much of a charting run is charted, as a bar over the count: eight sentences do not show it. */
+	private final JProgressBar bar = new JProgressBar();
 	private final JLabel changed = label(11f, MapPin.AMBER);
 	private final JButton before = MapCompanionPanel.linkButton("▸ Before you leave");
 	private final JPanel bring = column();
@@ -134,6 +136,9 @@ final class RunView extends JPanel
 		left(this);
 		setName(port ? "portTaskRun" : "farmRunView");
 		add(title);
+		bar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 4));
+		bar.setBorder(new EmptyBorder(3, 0, 0, 0));
+		add(left(bar));
 		add(progress);
 		add(changed);
 		add(before);
@@ -289,6 +294,9 @@ final class RunView extends JPanel
 			shownRun = view.run.id;
 			MapCompanionPanel.setWrapped(title, view.run.name, WIDTH);
 			MapCompanionPanel.setWrapped(progress, progressLine(view), WIDTH);
+			bar.setVisible(FarmRunWire.SEA_CHARTS.equals(view.run.kind));
+			bar.setMaximum(view.run.stops.size());
+			bar.setValue(view.visited.size());
 			progress.setForeground(left ? LIGHT_GRAY_COLOR : Color.WHITE);
 			MapCompanionPanel.setWrapped(changed, CHANGED, WIDTH);
 			follow.setText(view.following ? "Pause" : "Follow");
@@ -369,6 +377,22 @@ final class RunView extends JPanel
 			count = view.tracked() > 0 ? view.trackedDone() + " of " + view.tracked() + " tracked done"
 				: view.visited.size() + " of " + view.run.stops.size() + " " + reached(view);
 		}
+		/*
+		 * How far is left, where every stop ahead says its leg in numbers: a charting run past its
+		 * first leg. One leg in words alone and there is no total to give, so none is given.
+		 */
+		int left = 0;
+		for (FarmStop stop : view.run.stops)
+		{
+			if (!view.done.contains(stop.n) && !view.visited.contains(stop.n))
+			{
+				left = stop.leg == null || left < 0 ? -1 : left + stop.leg.tiles;
+			}
+		}
+		if (left > 0)
+		{
+			count += " · " + left + " tiles left";
+		}
 		return view.following ? count : "Paused · " + count;
 	}
 
@@ -409,12 +433,15 @@ final class RunView extends JPanel
 	}
 
 	/** The stop's name, its number bold and amber when it is the next stop, as the world map draws its pin. */
-	static String stopName(FarmStop stop, boolean next)
+	static String stopName(FarmStop stop, boolean next, int width)
 	{
 		String name = MapCompanionPanel.escape(stop.name);
 		String number = stop.n + ".";
-		return "<html><body width='" + WIDTH + "'>" + (next ? "<b><font color='" + MapPin.AMBER_FONT + "'>" + number + "</font></b>" : number)
-			+ " " + name + "</body></html>";
+		/* What a leg says besides its length, "ashore at The Onyx Crest", in grey under the name it belongs to. */
+		String more = stop.leg == null || stop.leg.more == null ? ""
+			: "<br><font color='#c6c6c6'>" + MapCompanionPanel.escape(stop.leg.more) + "</font>";
+		return "<html><body width='" + width + "'>" + (next ? "<b><font color='" + MapPin.AMBER_FONT + "'>" + number + "</font></b>" : number)
+			+ " " + name + more + "</body></html>";
 	}
 
 	/**
@@ -492,17 +519,38 @@ final class RunView extends JPanel
 			 */
 			if (done || view.visited.contains(stop.n))
 			{
-				String named = MapCompanionPanel.escape(stop.n + ". " + stop.name);
 				JLabel line = label(12f, ColorScheme.MEDIUM_GRAY_COLOR);
+				String name = stop.n + ". " + stop.name;
+				/*
+				 * A name too long for the card, a charting task's sentence, is cut to share one line with
+				 * its word: behind the player its number and "Charted" are what is read, not three struck lines.
+				 */
+				FontMetrics fm = line.getFontMetrics(line.getFont());
+				if (fm.stringWidth(name) > WIDTH)
+				{
+					int room = WIDTH - fm.stringWidth("… · " + at);
+					while (name.length() > 1 && fm.stringWidth(name) > room)
+					{
+						name = name.substring(0, name.length() - 1);
+					}
+					name = name.trim() + "…";
+				}
+				String named = MapCompanionPanel.escape(name);
 				line.setText("<html><body width='" + WIDTH + "'><strike>" + named + "</strike>"
 					+ MapCompanionPanel.escape(" · " + at) + "</body></html>");
 				row.add(line);
 				stops.add(left(row));
 				continue;
 			}
+			/*
+			 * A stop whose leg is numbers is one row to scan: its picture, its name, and how far at the
+			 * right edge, so the lengths make a column. The length sits in the margin the card's text
+			 * leaves at its right. Any other stop keeps its way in words under its name.
+			 */
+			boolean far = stop.leg != null;
+			int beside = pictures ? WIDTH - PICTURE - 4 : WIDTH;
 			JLabel name = label(12f, Color.WHITE);
-			name.setText(stopName(stop, next != null && stop.n == next.n));
-			row.add(name);
+			name.setText(stopName(stop, next != null && stop.n == next.n, far ? beside : WIDTH));
 			JPanel method = new JPanel(new BorderLayout(4, 0));
 			method.setOpaque(false);
 			if (pictures)
@@ -512,11 +560,24 @@ final class RunView extends JPanel
 				icon.setPreferredSize(slot);
 				icon.setMinimumSize(slot);
 				icon.setMaximumSize(slot);
+				icon.setVerticalAlignment(JLabel.TOP);
+				icon.setToolTipText(stop.tool);
 				picture(icon, stop);
 				method.add(icon, BorderLayout.WEST);
 			}
-			method.add(wrapped(stop.method == null ? "Walk" : stop.method, 11f, LIGHT_GRAY_COLOR,
-				pictures ? WIDTH - PICTURE - 4 : WIDTH), BorderLayout.CENTER);
+			if (far)
+			{
+				method.add(name, BorderLayout.CENTER);
+				JLabel length = label(11f, LIGHT_GRAY_COLOR);
+				length.setText("<html><div align='right'>" + stop.leg.tiles + "t<br><font color='#7d7d7d'>" + stop.leg.by + "</font></div></html>");
+				length.setVerticalAlignment(JLabel.TOP);
+				method.add(length, BorderLayout.EAST);
+			}
+			else
+			{
+				row.add(name);
+				method.add(wrapped(stop.method == null ? "Walk" : stop.method, 11f, LIGHT_GRAY_COLOR, beside), BorderLayout.CENTER);
+			}
 			row.add(left(method));
 			if (stop.tasks != null)
 			{
@@ -552,7 +613,7 @@ final class RunView extends JPanel
 	/** Whether a stop has a picture to show: a step the map gave an item or spell id, or an item it names. */
 	private static boolean pictured(FarmStop stop)
 	{
-		return stop.item != null || RouteStepsView.firstPictured(stop.steps) != null;
+		return stop.item != null || stop.tool != null || RouteStepsView.firstPictured(stop.steps) != null;
 	}
 
 	/**
@@ -562,7 +623,12 @@ final class RunView extends JPanel
 	private void picture(JLabel icon, FarmStop stop)
 	{
 		RelayResponse.RouteStep step = RouteStepsView.firstPictured(stop.steps);
-		if (step != null)
+		/* A charting stop's picture is its task's tool, whatever its leg rides: the task is what the row is about. */
+		if (stop.tool != null)
+		{
+			sprites.farmTravelItem(icon, stop.tool, PICTURE);
+		}
+		else if (step != null)
 		{
 			RouteStepsView.draw(icon, step, sprites);
 		}

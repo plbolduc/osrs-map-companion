@@ -77,7 +77,9 @@ Build a run on the website and press **Send run to RuneLite**, or choose a prese
 **Farm run** on Home and press **Start run**;
 the choice steps aside while the run is going, so a stray press cannot replace it.
 The sidebar lists your stops and how to reach each one, with the steps to the next stop under it
-as **This leg**; a finished stop folds to one line. **Before you leave** is a bank checklist:
+as **This leg**; a finished stop folds to one line. On a Sea charting run each task shows the
+tool it takes, with the length of its sail or walk at the right, and a bar and the tiles left
+under the run's name. **Before you leave** is a bank checklist:
 closed, it counts the teleports it can tell you are not carrying, and in the bank it outlines them.
 Numbered pins mark the stops on the game's world map.
 
