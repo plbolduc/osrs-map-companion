@@ -30,6 +30,7 @@ import java.awt.Component;
 import java.awt.Container;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -116,20 +117,54 @@ public class RecommendedSharingTest
 		});
 	}
 
+	/**
+	 * This asserted that where you died was offered on a row of its own, left unticked, and stayed off
+	 * after the press. It is under Where you are now, the switch for the position it is a tile of, and
+	 * every switch is ticked so that one press leaves the whole plugin working: the press shares it.
+	 * Meetup notifications are still never the press's, a sound or a pop-up being the player's to ask for.
+	 */
 	@Test
-	public void whereYouDiedAndMeetupNotificationsStayOffAfterThePress() throws Exception
+	public void whereYouDiedGoesWithThePositionAndMeetupNotificationsStayOff() throws Exception
 	{
 		SwingUtilities.invokeAndWait(() ->
 		{
 			Fixture fixture = new Fixture();
 			fixture.step.offer("osrs-map.com");
-			assertFalse("offered, and left unticked", box(fixture.step, "recommended.shareDeath").isSelected());
+			assertNull("no row of its own", named(fixture.step, "recommended.shareDeath"));
+			assertTrue(box(fixture.step, "recommended.group.where").isSelected());
 			click(fixture.step, "recommended.share");
-			assertFalse(fixture.config.shareDeath());
+			assertTrue(fixture.config.shareDeath());
 			assertFalse(fixture.config.notifyMeetups().isEnabled());
-			assertNull(fixture.store.get("shareDeath"));
 			assertNull(fixture.store.get("notifyMeetups"));
 			assertNull("the press approves no server", fixture.store.get(Pairing.KEY_SERVER_CONSENT));
+		});
+	}
+
+	/**
+	 * The character name has no row: the words over the rows say the group sees it, and the press
+	 * writes it with whatever is ticked, with nothing ticked too. Not now is the way to share nothing.
+	 */
+	@Test
+	public void theNameGoesWithThePressWhateverIsTicked() throws Exception
+	{
+		SwingUtilities.invokeAndWait(() ->
+		{
+			Fixture fixture = new Fixture();
+			fixture.step.offer("osrs-map.com");
+			assertNull("no row of its own", named(fixture.step, "recommended.shareName"));
+			assertTrue(visibleText(fixture.step).contains("Your group sees your character name and what's ticked."));
+			for (String row : new String[]{"where", "account", "loot", "group"})
+			{
+				box(fixture.step, "recommended.group." + row).doClick();
+			}
+			assertEquals(new LinkedHashSet<>(Arrays.asList("shareName")), fixture.step.ticked());
+			click(fixture.step, "recommended.share");
+			assertEquals(new LinkedHashSet<>(Arrays.asList("shareName")), fixture.written);
+
+			Fixture later = new Fixture();
+			later.step.offer("osrs-map.com");
+			click(later.step, "recommended.skip");
+			assertTrue("Not now shares nothing, the name included", later.written.isEmpty());
 		});
 	}
 
@@ -151,9 +186,9 @@ public class RecommendedSharingTest
 
 	/**
 	 * Ticking and unticking rows changes nothing until the press, which then writes each ticked
-	 * group's every field and nothing of an unticked one. Rewritten when the step lost Customise: a
-	 * group is all of its fields or none, as its switch in Settings is, so a field is no longer
-	 * unticked on its own.
+	 * switch's every field and nothing of an unticked one. Rewritten when the step went from six
+	 * rows and two to three and one: a switch is all of its fields or none, as it is in Settings, and
+	 * Your account is the progress and the tasks together.
 	 */
 	@Test
 	public void untickingChangesNothingUntilTheShareIsPressed() throws Exception
@@ -162,33 +197,29 @@ public class RecommendedSharingTest
 		{
 			Fixture fixture = new Fixture();
 			fixture.step.offer("osrs-map.com");
-			box(fixture.step, "recommended.group.progress").doClick();
-			box(fixture.step, "recommended.group.tasks").doClick();
-			box(fixture.step, "recommended.shareDeath").doClick();
-			box(fixture.step, "recommended.showGroupOnWorldMap").doClick();
+			box(fixture.step, "recommended.group.account").doClick();
+			box(fixture.step, "recommended.group.group").doClick();
 			assertTrue("ticking and unticking in the step writes nothing", fixture.written.isEmpty());
-			assertFalse(box(fixture.step, "recommended.group.progress").isSelected());
-			assertFalse(box(fixture.step, "recommended.group.tasks").isSelected());
+			assertFalse(box(fixture.step, "recommended.group.account").isSelected());
 
 			click(fixture.step, "recommended.skip");
 			assertTrue("Not now writes nothing", fixture.written.isEmpty());
 			assertEquals(1, fixture.closed.get());
 
 			fixture.step.offer("osrs-map.com");
-			assertTrue("a second offer starts from the recommended set", box(fixture.step, "recommended.group.progress").isSelected());
-			assertFalse(box(fixture.step, "recommended.shareDeath").isSelected());
-			box(fixture.step, "recommended.group.tasks").doClick();
-			box(fixture.step, "recommended.shareDeath").doClick();
+			assertTrue("a second offer starts from the recommended set", box(fixture.step, "recommended.group.account").isSelected());
+			assertTrue(box(fixture.step, "recommended.group.group").isSelected());
+			box(fixture.step, "recommended.group.account").doClick();
 			assertTrue(fixture.written.isEmpty());
 			click(fixture.step, "recommended.share");
+			Set<String> unticked = keys(SharingFields.PROGRESS);
+			unticked.addAll(keys(SharingFields.TASKS));
 			Set<String> expected = new LinkedHashSet<>(RecommendedSharing.KEYS);
-			expected.removeAll(keys(SharingFields.TASKS));
-			expected.add("shareDeath");
+			expected.removeAll(unticked);
 			assertEquals(expected, new LinkedHashSet<>(fixture.written));
-			assertEquals("true", fixture.store.get("shareDeath"));
-			for (String task : keys(SharingFields.TASKS))
+			for (String key : unticked)
 			{
-				assertNull("nothing of an unticked group: " + task, fixture.store.get(task));
+				assertNull("nothing of an unticked switch: " + key, fixture.store.get(key));
 			}
 		});
 	}
@@ -271,24 +302,29 @@ public class RecommendedSharingTest
 			Fixture fixture = new Fixture();
 			fixture.step.offer("osrs-map.com");
 			String closed = visibleText(fixture.step);
-			for (SharingFields.Section section : SharingFields.GROUPS)
+			/*
+			 * Four rows, where there were eight: the three switches Settings has and the group drawn in
+			 * the game, each with what it covers in grey under it, so the fold need not be opened to choose.
+			 */
+			List<SharingFields.Toggle> rows = new ArrayList<>(SharingFields.TOGGLES);
+			rows.add(SharingFields.IN_GAME);
+			for (SharingFields.Toggle row : rows)
 			{
-				assertTrue("the card has a row for " + section.title, closed.contains(section.title));
+				assertTrue("the card has a row for " + row.title, closed.contains(row.title));
+				assertTrue("and says what it covers: " + row.note, closed.contains(row.note));
 			}
-			for (SharingFields.Field field : new SharingFields.Field[]{SharingFields.NAME, SharingFields.DEATH,
-				SharingFields.DESTINATIONS, SharingFields.GROUP_ON_WORLD_MAP})
-			{
-				assertTrue("the card has a row for " + field.key, closed.contains(field.label));
-			}
-			assertTrue(closed.contains(RecommendedSharing.LOOT_ROW));
+			assertEquals(Arrays.asList("Where you are", "Your account", "Loot and milestones", "Group in RuneLite"),
+				Arrays.asList(rows.get(0).title, rows.get(1).title, rows.get(2).title, rows.get(3).title));
+			assertTrue("how long the feed is kept is on the loot row", SharingFields.TOGGLES.get(2).note.contains("kept two weeks"));
 			assertTrue("the connection is said on the card", closed.contains(RecommendedSharing.streamShort("osrs-map.com")));
 			assertTrue("What each one sends is on the card", closed.contains("What each one sends"));
 			assertTrue("and where to change it later", closed.contains(RecommendedSharing.INTRO));
 			/*
 			 * Rewritten when the step was reworded: who sees what is ticked is the intro's first sentence,
 			 * the fact a player weighs before sharing, so the line over the press says only where it goes.
+			 * It names the character name since the name lost its row and goes with the press.
 			 */
-			assertTrue(RecommendedSharing.INTRO.startsWith("Your group sees what's ticked."));
+			assertTrue(RecommendedSharing.INTRO.startsWith("Your group sees your character name and what's ticked."));
 			assertTrue(RecommendedSharing.INTRO.endsWith("in Settings."));
 			assertTrue("the map it goes to", closed.contains("Sent to osrs-map.com while you're logged in."));
 			assertFalse("said once, in the intro", closed.contains("your group sees it"));
@@ -333,17 +369,17 @@ public class RecommendedSharingTest
 			assertTrue(open.contains("your group's code, your member id and its key, and nothing about your character"));
 			assertFalse(open.contains("receive stream"));
 			assertTrue("beside Notable drops and levels", open.contains(MapCompanionConfig.FEED_KEPT));
-			assertTrue(open.contains(RecommendedSharing.DEATH_DETAIL));
+			assertTrue("the name goes with the press, so the fold says what it is", open.contains(SharingFields.NAME.detail));
 			assertTrue(open.contains(RecommendedSharing.DESTINATIONS_DETAIL));
 			assertTrue(open.contains(RecommendedSharing.GROUP_DETAIL));
 			assertTrue("opening the fold writes nothing", fixture.written.isEmpty());
 
 			/*
-			 * Customise drew a box per field under each row; a group is all of its fields or none now,
-			 * as its switch in Settings is, so there is no box for a field of a group, and no Customise.
+			 * Customise drew a box per field under each row; a switch is all of its fields or none now,
+			 * as it is in Settings, so there is no box for a field of one, and no Customise.
 			 */
 			assertNull(named(fixture.step, "recommended.customise"));
-			for (SharingFields.Section section : SharingFields.GROUPS)
+			for (SharingFields.Toggle section : SharingFields.TOGGLES)
 			{
 				assertNotNull(named(fixture.step, "recommended.group." + section.id));
 				for (SharingFields.Field field : section.fields)
@@ -364,15 +400,20 @@ public class RecommendedSharingTest
 	 * reviewer notes, in the same commit.
 	 */
 	@Test
-	public void theRecommendedSetIsTheGroupsTheNameAndTheDrawingAndNothingElse()
+	public void theRecommendedSetIsTheSwitchesTheNameAndTheDrawingAndNothingElse()
 	{
 		Set<String> expected = new LinkedHashSet<>();
 		for (SharingFields.Section section : SharingFields.GROUPS) expected.addAll(keys(section));
+		/* Where you died was held out of the set while it had a row left unticked; it is under Where you are now. */
+		expected.add(SharingFields.DEATH.key);
 		expected.add(SharingFields.NAME.key);
 		expected.add(SharingFields.DESTINATIONS.key);
 		expected.add(SharingFields.GROUP_ON_WORLD_MAP.key);
 		assertEquals(expected, new LinkedHashSet<>(RecommendedSharing.KEYS));
-		assertEquals(28, RecommendedSharing.KEYS.size());
+		assertEquals(29, RecommendedSharing.KEYS.size());
+		Set<String> drawn = new LinkedHashSet<>();
+		for (SharingFields.Field field : RecommendedSharing.all()) drawn.add(field.key);
+		assertEquals("and the step names every one of them, and nothing it does not share", expected, drawn);
 		Set<String> configKeys = new HashSet<>();
 		for (Method method : MapCompanionConfig.class.getDeclaredMethods())
 		{
@@ -382,7 +423,6 @@ public class RecommendedSharingTest
 		/* The fields under the groups are settings RuneLite does not declare, read by key; see SharingGroupsTest. */
 		for (SharingFields.Section section : SharingFields.GROUPS) configKeys.addAll(keys(section));
 		assertTrue("every key is an existing setting", configKeys.containsAll(RecommendedSharing.KEYS));
-		assertFalse(RecommendedSharing.KEYS.contains("shareDeath"));
 		assertFalse(RecommendedSharing.KEYS.contains("notifyMeetups"));
 	}
 

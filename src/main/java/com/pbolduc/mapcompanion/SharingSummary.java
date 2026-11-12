@@ -30,14 +30,15 @@ import lombok.AllArgsConstructor;
 import static com.pbolduc.mapcompanion.SharingFields.Field;
 
 /**
- * What the status card's second line says is shared, in the six switches Settings has.
+ * What the status card's second line says is shared, in the three switches Settings has.
  *
- * <p>A count of fields named nothing, and the one choice the press after Connect leaves off was in the
- * line's tooltip alone. So the line names what a player might want to check: <i>Sharing everything</i>,
- * <i>Sharing all but where you died</i> when one or two switches are off, the one or two that are on
- * when only those are, and a count of the six otherwise. A group a player chose part of before
- * switches is <i>part of tasks and timers</i>. The tooltip gives each switch a line, wrapped to fit the
- * screen: on, off, or the fields that are on.
+ * <p>A count of fields named nothing. So the line names what a player might want to check:
+ * <i>Sharing everything</i>, <i>Sharing all but loot and milestones</i> when no more is off than on,
+ * the one or two that are on when only those are, and a count otherwise. A switch a player chose
+ * part of is <i>part of your account</i>, or the one field of it that is off, so a player who
+ * shared all the step offered before it ticked the death reads <i>Sharing all but where you died</i>
+ * as they always have. The tooltip gives each switch a line, wrapped to fit the screen: on, off, or
+ * its fields that are on or off, whichever are fewer; and the name the group sees.
  *
  * <p>It speaks of what goes out, so pet rewards and collection additions count only with Notable drops
  * and levels, which is what the snapshot does. It never claims that membership sends nothing: the
@@ -72,6 +73,14 @@ final class SharingSummary
 			String name = title.toLowerCase(Locale.ROOT);
 			return whole() || none() ? name : "part of " + name;
 		}
+
+		/** Among what is not shared: the one field of it that is off by its own name, as "where you died" is. */
+		String missing()
+		{
+			List<Field> off = new ArrayList<>(fields);
+			off.removeAll(sent);
+			return off.size() == 1 && !none() ? off.get(0).label.toLowerCase(Locale.ROOT) : inLine();
+		}
 	}
 
 	/** The line under the group's name: never more than two names, and never a count of fields. */
@@ -90,7 +99,7 @@ final class SharingSummary
 			}
 			if (!one.whole())
 			{
-				notOn.add(one.inLine());
+				notOn.add(one.missing());
 			}
 			whole += one.whole() ? 1 : 0;
 			part += !one.whole() && !one.none() ? 1 : 0;
@@ -103,7 +112,7 @@ final class SharingSummary
 		{
 			return "Sharing everything";
 		}
-		if (notOn.size() <= 2)
+		if (notOn.size() <= 2 && notOn.size() <= on.size())
 		{
 			return "Sharing all but " + String.join(", ", notOn);
 		}
@@ -122,36 +131,30 @@ final class SharingSummary
 		for (Switch one : switches(config, store))
 		{
 			list.append(first ? "" : "<br>").append(MapCompanionPanel.escape(one.title)).append(": ")
-				.append(one.whole() ? "on" : one.none() ? "off" : MapCompanionPanel.escape(SharingControls.labels(one.sent, ", ")));
+				.append(one.whole() ? "on" : one.none() ? "off" : MapCompanionPanel.escape(SharingControls.partly(one.fields, one.sent, "all but ", "")));
 			first = false;
 		}
+		String alias = SnapshotBuilder.alias(config);
+		list.append("<br>Shown as: ").append(config.shareName() ? "your character name" : alias.isEmpty() ? "Member" : MapCompanionPanel.escape(alias));
 		return list.append("</body></html>").toString();
 	}
 
 	private static List<Switch> switches(MapCompanionConfig config, ConfigStore store)
 	{
 		List<Switch> switches = new ArrayList<>();
-		switches.add(single(SharingFields.NAME, config, store));
-		for (SharingFields.Section section : SharingFields.GROUPS)
+		for (SharingFields.Toggle toggle : SharingFields.TOGGLES)
 		{
 			List<Field> sent = new ArrayList<>();
-			for (Field field : SharingGroups.shared(section, config, store))
+			for (Field field : SharingGroups.shared(toggle.fields, config, store))
 			{
 				if (goesOut(field, store))
 				{
 					sent.add(field);
 				}
 			}
-			switches.add(new Switch(section.title, section.fields, sent));
+			switches.add(new Switch(toggle.title, toggle.fields, sent));
 		}
-		switches.add(single(SharingFields.DEATH, config, store));
 		return switches;
-	}
-
-	private static Switch single(Field field, MapCompanionConfig config, ConfigStore store)
-	{
-		List<Field> sent = field.on(config, store) ? Arrays.asList(field) : new ArrayList<>();
-		return new Switch(field.label, Arrays.asList(field), sent);
 	}
 
 	/** Pets and collection additions ride on Notable drops and levels: with it off, neither is sent. */

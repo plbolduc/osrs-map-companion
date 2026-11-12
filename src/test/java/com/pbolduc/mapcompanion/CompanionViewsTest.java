@@ -154,7 +154,7 @@ public class CompanionViewsTest
 			assertTrue(pages.settingsOpen());
 			assertTrue(pages.getPreferredSize().height > quiet);
 			/* A switch and an open fold, which were a field's box and its group's Customise before sharing went by group. */
-			((JCheckBox) named(sharing, MapCompanionConfig.KEY_SHARE_MAP_PRESENCE)).doClick();
+			((JCheckBox) named(sharing, "share.where")).doClick();
 			assertTrue(SidebarWords.press(sharing, "▸ What each one sends"));
 
 			((JButton) named(pages, "settings.back")).doClick();
@@ -168,7 +168,7 @@ public class CompanionViewsTest
 			assertTrue(store.on("shareActivity"));
 			assertFalse(config.shareName());
 			assertTrue(named(sharing, "sharing.details").isVisible());
-			assertTrue(((JCheckBox) named(sharing, MapCompanionConfig.KEY_SHARE_MAP_PRESENCE)).isSelected());
+			assertTrue(((JCheckBox) named(sharing, "share.where")).isSelected());
 			assertNull(store.get(Pairing.KEY_SERVER_CONSENT));
 		});
 	}

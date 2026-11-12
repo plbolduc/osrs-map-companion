@@ -1257,3 +1257,26 @@ address, and RuneLite's own list has held the setting all along, so the field an
 gone from the sidebar and the fold with them. *Show what's sent* and the two buttons are the page's
 foot. *Show what's sent* stays because it is how a player, and every live check here, sees what
 would be sent rather than being told.
+
+## Three sharing switches, 12 November 2026
+
+Settings opened on six sharing switches: Character name, Map presence, Progress and travel, Tasks
+and timers, Loot and milestones, Where you died. The step after Connect drew the same six and two
+more for the game. A new player answered eight questions before anything worked, and most of what
+the plugin does needs most of them on. Group Ironmen Tracker, Wise Old Man and Party ask none;
+XP Updater and RuneProfile ask three.
+
+The sidebar now draws three, each with what it covers in grey under it: *Where you are* (Map
+presence and where you died), *Your account* (Progress and travel, Tasks and timers) and *Loot and
+milestones*. The step draws those three and *Group in RuneLite*, all ticked, so one press leaves
+the whole plugin working, and *Not now* still shares nothing. The character name has no switch:
+the step's first line says the group sees it, the press writes it, and Settings says *Shown as
+your character name* with *Use another name* beside the box for one.
+
+Nothing changes for a player who chose before. RuneLite's list keeps its six switches, the fields
+are the ones they were, and an update writes none of them. A switch only part of which is on
+shows a dash and says the part in the fewer words, so a player who shared all the step used to
+tick reads *Not shared: Where you died* under *Where you are*, and the status card's *Sharing all
+but where you died* as before. Turning the death on for them was considered and left out: the step
+showed it to them unticked, and they left it so. A player who hid their name keeps it hidden, and
+no switch in Settings turns it on.

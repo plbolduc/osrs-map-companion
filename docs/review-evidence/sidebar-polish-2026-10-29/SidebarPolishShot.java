@@ -219,7 +219,7 @@ public class SidebarPolishShot
 			set(plugin, "status", "Connected to 127.0.0.1:9");
 			set(plugin, "health", Health.LIVE);
 			/*
-			 * What the one press at Connect turns on: every field it names, so Where you died stays off.
+			 * What the one press at Connect turns on: every field it names, where you died among them.
 			 * Of its two drawing choices the destinations are on and the whole group's dots are not, so a
 			 * friend's row still offers World map.
 			 */

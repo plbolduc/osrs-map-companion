@@ -1,5 +1,6 @@
 # The sidebar's words for every sharing choice, by setting key: the title of a group's switch, or
-# a field's label and the line that says what it sends. SharingFields reads them; Settings and the
+# a field's label and the line that says what it sends. A switch.* line is one of the sidebar's own
+# switches: its title, and the note under it. SharingFields reads them; Settings and the
 # step after Connect draw them, and SharingGroupsTest holds each label to RuneLite's own list.
 # {FEED_KEPT} is MapCompanionConfig.FEED_KEPT.
 sharePosition|Position and world|Your tile, world and instance type. Shows your dot where its location is known.
@@ -43,6 +44,10 @@ shareMapPresence|Map presence|
 shareProgressAndTravel|Progress and travel|
 shareTasksAndTimers|Tasks and timers|
 shareLootAndMilestones|Loot and milestones|
+switch.where|Where you are|your dot, training, death spot
+switch.account|Your account|levels, quests, tasks, timers
+switch.loot|Loot and milestones|drops and levels, kept two weeks
+switch.group|Group in RuneLite|destinations, meetups, friends
 notifyMeetups|Meetup reminder|A RuneLite notification before a meetup starts. Ticked here, it comes while you play too; how it arrives follows RuneLite's own notification settings.
 row.showDestination|With your group|Group in RuneLite<br><font color='#7d7d7d'>destinations, meetups, friends</font>
 row.showStepOnScreen|Following a route|Step on screen<br><font color='#7d7d7d'>with its teleport outlined</font>

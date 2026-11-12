@@ -24,7 +24,7 @@ outlines it in your inventory or spellbook while you follow; a walk shows a boot
 game's world map, and you can right-click that map and choose **Route here** to go anywhere.
 
 Press **Follow** to keep the step you are on in a small box over the game. **Reroute** plans
-again from where you stand. Share **Progress and travel** and routes use only the quests,
+again from where you stand. Share **Your account** and routes use only the quests,
 diaries, items and unlocks your account has.
 
 **Works with Shortest Path.** Map Companion tells you where to go and which teleport to use;
@@ -182,27 +182,27 @@ sharing choice off.
 <summary>Full sharing details and settings</summary>
 
 <p>
-  <img src="docs/mockups/sidebar-settings.png" width="300" alt="Settings: six sharing switches, all on but Where you died, as one press at Connect leaves them, then What each one sends, a rule, and In your game, closed, with a line saying nothing there shares anything about you, then Show what's sent and Leave group">
+  <img src="docs/mockups/sidebar-settings.png" width="300" alt="Settings: three sharing switches, all on, as one press at Connect leaves them, each with what it covers under it, then how your group sees your name, What each one sends, a rule, and In your game, closed, with a line saying nothing there shares anything about you, then Show what's sent and Leave group">
 </p>
 
-Sharing is six switches, and every one starts off. After your first Connect, one press of
-**Share what's ticked** turns on all of them except **Where you died**, and draws destinations,
+Sharing is three switches, and every one starts off. After your first Connect, one press of
+**Share what's ticked** turns on all three with your character name, and draws destinations,
 meetups and your group on the world map, which keeps one connection open to the map while you are
 logged in. Nothing is turned on until you press, and you can untick any of them first. A switch
 turns on, or off, everything it can send:
 
-- **Character name:** the display name of the character you are logged in as.
-- **Map presence:** your position, your world and what kind of world it is; whether you are inside
+- **Where you are:** your position, your world and what kind of world it is; whether you are inside
   an instance and whether that instance is one place or rooms put together; which skill you are
-  currently training, recent experience and how long since you last moved; your account type.
-- **Progress and travel:** skill levels; started, finished, or neither for the 49 quests that unlock
+  currently training, recent experience and how long since you last moved; your account type; and
+  the tile where you most recently died and its age.
+- **Your account:** skill levels; started, finished, or neither for the 49 quests that unlock
   travel; optionally the full quest and miniquest log; which achievement diary tier you have finished
   and which of those rewards you have collected; derived travel unlocks from carried/equipped items
   as yes/no flags; verified permanent transport unlocks, your house town and which STASH units you
   have built; where each of your boats is moored and whether it carries a teleport focus, so the
   map's voyages start at your boat; and which Sailing sea charting tasks you have charted. STASH
   contents are not read, and boat names are not sent.
-- **Tasks and timers:** your current slayer task and remaining count; with no task, the tasks Mortimer offers while you choose, each with its mortifier; your active clue step
+  Also your current slayer task and remaining count; with no task, the tasks Mortimer offers while you choose, each with its mortifier; your active clue step
   (tier, item id, observed clue text and resolved tile); your observed hunter rumour;
   your Mahogany Homes customer and tier; the crop requested by your farming contract and whether
   it is ready to hand in;
@@ -221,9 +221,15 @@ turns on, or off, everything it can send:
   omitted history. It also sends an announcement of a notable reward, a real level gained, or a quest or
   achievement diary tier finished while the plugin watched, with observed item name/id, quantity,
   NPC/activity source and optional pet/collection badge, or the quest's name or the diary's region
-  and tier. A quest or diary is announced only when **Progress and travel** is shared too, and never
+  and tier. A quest or diary is announced only when **Your account** is shared too, and never
   for what was done before the plugin was watching. Unknown reward details remain absent.
-- **Where you died:** the tile where you most recently died and its age.
+
+Your character name, the display name of the character you are logged in as, goes with whatever
+you share, unless you choose **Use another name** in Settings.
+
+RuneLite's own settings for the plugin keep finer switches, for sharing half of one: *Character
+name*, *Map presence*, *Progress and travel*, *Tasks and timers*, *Loot and milestones* and *Where
+you died*. The sidebar says which part is on.
 
 Large snapshots include a flag saying some of it was left out.
 
@@ -283,8 +289,8 @@ Shooting star data comes from Star Miners by way of osrs-map.com. The plugin nev
 Miners, who do not endorse it.
 
 Nothing is shared until you choose it, and joining a group does not turn anything on. With
-**Character name** ticked your group sees it; untick it and **Name to show instead** sets what they
-see, or Member if you leave it empty. **Copy invite** copies a message you can send a friend.
+your character name shared your group sees it; choose **Use another name** in Settings and **Name
+to show instead** sets what they see, or Member if you leave it empty. **Copy invite** copies a message you can send a friend.
 **Switch** remembers up to eight groups, and joins another; the person who made the group can
 rename it there, and remove a friend by right-clicking them under **Group**.
 

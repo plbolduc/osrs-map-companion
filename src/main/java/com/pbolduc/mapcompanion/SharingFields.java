@@ -33,10 +33,10 @@ import javax.annotation.Nullable;
  * Every sharing choice the sidebar offers, by its setting key and in the words the sidebar uses.
  *
  * <p>Two places draw these: Settings, and the step after a first Connect, which lists what one
- * press will share. Both draw a switch for the name, each group and the death, in that order, and
- * name every field of a group under <i>What each one sends</i>. Both read this list, so the step
- * cannot name a field differently from the switch that later turns it off, and a field cannot be
- * added to a group in one without the other. RuneLite's list names them the same way, which
+ * press will share. Both draw the three {@link #TOGGLES}, and name every field of one under
+ * <i>What each one sends</i>. Both read this list, so the step cannot name a field differently from
+ * the switch that later turns it off, and a field cannot be added to one without the other.
+ * RuneLite's list keeps the four groups, the name and the death apart, named the same way, which
  * {@code SharingGroupsTest} holds it to. The keys are the existing settings; nothing here is stored.
  * The fields under the groups but the position are read by key, as {@link MapCompanionConfig} says why.
  */
@@ -150,6 +150,37 @@ final class SharingFields
 	static final Field NAME = field(MapCompanionConfig.KEY_SHARE_NAME, MapCompanionConfig::shareName);
 	static final Field DEATH = field("shareDeath", MapCompanionConfig::shareDeath);
 
+	/**
+	 * One of the sidebar's switches: a question a player can answer at a glance, over the fields of
+	 * one or two of RuneLite's groups. Six switches were six decisions before anything worked; these
+	 * are three. One is on while every field under it is, and a press writes them all, so nothing
+	 * changes for anyone until they press. RuneLite's list keeps the groups apart, for half a switch.
+	 */
+	static final class Toggle
+	{
+		final String id;
+		final String title;
+		/** Under the title, in grey: what the switch covers, in a few words. */
+		final String note;
+		final List<Field> fields = new ArrayList<>();
+
+		@SafeVarargs
+		private Toggle(String id, List<Field>... parts)
+		{
+			this.id = id;
+			title = WORDS.get("switch." + id)[1];
+			note = WORDS.get("switch." + id)[2];
+			for (List<Field> part : parts)
+			{
+				fields.addAll(part);
+			}
+		}
+	}
+
+	/** Sharing, as Settings and the step after Connect draw it. Where you died is with the position it is a tile of. */
+	static final List<Toggle> TOGGLES = Arrays.asList(new Toggle("where", PRESENCE.fields, Arrays.asList(DEATH)),
+		new Toggle("account", PROGRESS.fields, TASKS.fields), new Toggle("loot", LOOT.fields));
+
 	/*
 	 * What this client draws or does. The first two open the receive stream, and Route here asks the map
 	 * on a press, as every Route does; the rest stay here.
@@ -179,6 +210,9 @@ final class SharingFields
 	static final List<List<Field>> CLIENT_ROWS = Arrays.asList(
 		Arrays.asList(DESTINATIONS, GROUP_ON_WORLD_MAP), Arrays.asList(NOTIFY_MEETUPS), Arrays.asList(STEP_ON_SCREEN, STEP_TELEPORT, BANK_MARKS),
 		Arrays.asList(HINT_ARROW), Arrays.asList(SHORTEST_PATH), Arrays.asList(BOATS_ON_WORLD_MAP, ROUTE_HERE), Arrays.asList(DROP_LUCK_CHAT));
+
+	/** The step after Connect's one row for this client: the group's places and friends, drawn in the game. */
+	static final Toggle IN_GAME = new Toggle("group", CLIENT_ROWS.get(0));
 
 	/** A row's heading and its box's words, by its first setting; null for a setting under its own name with no heading. */
 	@Nullable

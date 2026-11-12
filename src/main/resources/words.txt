@@ -65,9 +65,8 @@ connect.inviteFailed=Couldn't make an invite, so nothing was copied. Try again i
 connect.clipboardFailed=Couldn't put the invite on the clipboard.
 
 # RecommendedSharing: the step after a first Connect.
-share.intro=Your group sees what's ticked. Change it any time in Settings.
+share.intro=Your group sees your character name and what's ticked. Change it any time in Settings.
 share.stream= open. It brings the places your group sends, meetups and your friends' positions, and carries your group's code, your member id and its key, and nothing about your character.
-share.deathDetail=Your last death's tile, kept for an hour. Route back works without it.
 share.destinationsDetail=Places your group sends you, and your group's meetups, in the sidebar and on the world map. Nothing is clicked or walked for you.
 share.groupDetail=Your group's dots on the game's world map, from what they already share.
 share.shareTip=Turn on the ticked settings, as the switches in Settings do. Nothing else changes.
@@ -167,11 +166,11 @@ luck.paused=Not counted on this world: drop luck counts normal members worlds on
 
 # FarmRunPanel, PortTasksPanel and RunView: farm and port-task runs.
 farm.afterPortRun=Start a farm run after the port run ends.
-farm.needsPatches=Ready now reads your patches. Turn on Tasks and timers in Settings.
-farm.needsContract=Turn on Tasks and timers in Settings to plan your contract.
-farm.needsSeaCharts=A charting run plans what you have not charted. Turn on Sea charts charted under Progress and travel in Settings.
+farm.needsPatches=Ready now reads your patches. Turn on Your account in Settings.
+farm.needsContract=Turn on Your account in Settings to plan your contract.
+farm.needsSeaCharts=A charting run plans what you have not charted. Turn on Your account in Settings.
 farm.kindTip=Choose a run the map can build from your character's shared readings
-port.needsBoats=Turn on Progress and travel, which shares your boats, to plan these as one run.
+port.needsBoats=Turn on Your account in Settings, which shares your boats, to plan these as one run.
 port.boardOnce=Board your boat once so the run knows its hold.
 port.startTip=Ask the map for one run over every task you hold, starting from your boat
 run.changed=Your port tasks have changed since this run was planned. Reroute plans from what you hold now.
