@@ -558,7 +558,7 @@ public class MapCompanionPlugin extends Plugin
 	protected void startUp()
 	{
 		/* First, so no snapshot is built from a group whose switch was pressed while this was off. */
-		SharingGroups.settle(config, settings());
+		settleSharing();
 		lifetime++;
 		panel = injector.getInstance(MapCompanionPanel.class);
 		BufferedImage icon = ImageUtil.loadImageResource(getClass(), "/icon.png");
@@ -999,8 +999,14 @@ public class MapCompanionPlugin extends Plugin
 		/*
 		 * A sharing switch and its fields, kept in step before anything below reads a field. A switch's
 		 * fan-out raises each field's own event, so what follows still runs once per field that moved.
+		 *
+		 * Only for a write on the profile last settled. When RuneLite changes profile it loads the
+		 * new one, then raises this for every setting that differs from the old, and only then says
+		 * the profile changed. Those are not presses: read as presses, a switch that is on in the new
+		 * profile would turn on every field under it, one an update added and the player never chose
+		 * among them. They are left for the settle that follows, which knows which fields are new.
 		 */
-		if (event.getProfile() == null)
+		if (event.getProfile() == null && settledProfile == settings().profile())
 		{
 			SharingGroups.changed(key, event.getNewValue(), config, settings());
 		}
@@ -1055,9 +1061,19 @@ public class MapCompanionPlugin extends Plugin
 	@Subscribe
 	public void onProfileChanged(ProfileChanged event)
 	{
-		SharingGroups.settle(config, settings());
+		settleSharing();
 		dirty = true;
 	}
+
+	/** Read the open RuneLite profile's switches as a start does, and remember it is the one read. */
+	private void settleSharing()
+	{
+		SharingGroups.settle(config, settings());
+		settledProfile = settings().profile();
+	}
+
+	/** The RuneLite profile {@link #settleSharing} last read; see {@link #onConfigChanged}. Written and read on any thread. */
+	private volatile long settledProfile;
 
 	/** RuneLite's settings, as {@link SharingGroups} and the sharing fields read them; a test gives its own. */
 	ConfigStore settings()

@@ -80,6 +80,16 @@ interface ConfigStore
 		set(key, Boolean.toString(on));
 	}
 
+	/**
+	 * Which RuneLite profile's settings these are: RuneLite's own number for the profile that is
+	 * open, and one number for a store that has no profiles. {@link SharingGroups} is only told of a
+	 * write on the profile it last read, which is how a change of profile is told from a press.
+	 */
+	default long profile()
+	{
+		return 0;
+	}
+
 	/** Null means no character is selected; the empty string is the ordinary settings store. */
 	@Nullable
 	default String scopeKey()
@@ -191,6 +201,12 @@ interface ConfigStore
 			public void chooseNotification(String key, boolean on)
 			{
 				NotificationChoice.choose(configManager, key, on);
+			}
+
+			@Override
+			public long profile()
+			{
+				return configManager.getProfile().getId();
 			}
 		};
 	}

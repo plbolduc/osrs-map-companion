@@ -58,6 +58,15 @@ final class HarnessStore implements ConfigStore
 		this.onChanged = listener;
 	}
 
+	/** Which RuneLite profile these settings stand for; a test that changes profile names another. */
+	volatile long profile;
+
+	@Override
+	public long profile()
+	{
+		return profile;
+	}
+
 	@Nullable
 	@Override
 	public synchronized String get(String key)
