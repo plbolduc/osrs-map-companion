@@ -8,7 +8,7 @@ requests carry it, what identifies a member, and what is kept. The
 
 ## Requests
 
-Requests go to **Settings → Advanced → Map address**, default `https://osrs-map.com`; it must be https
+Requests go to **Map address**, under Advanced in RuneLite's own settings for the plugin, default `https://osrs-map.com`; it must be https
 unless the map runs on this machine, and redirects are not followed. With no pairing code or no
 approval of the selected server, the plugin makes no requests. The warning RuneLite requires is the
 Hub manifest's, shown when the plugin is installed; no setting repeats it. The first **Connect** to
@@ -299,7 +299,7 @@ identity; your local kill log remains. A remembered group that issued one keeps 
 admits the new identity only by invite, so it leaves **Switch ▾** with the group left; a group that
 never issued one still admits by its code, and stays.
 
-Local game messages provide bounded reward and assignment facts only. **Settings → Advanced → Show what's
+Local game messages provide bounded reward and assignment facts only. **Settings → Show what's
 sent** previews the current snapshot; credentials are named without displaying standing secrets.
 
 ## Storage

@@ -103,7 +103,6 @@ final class ConnectCard extends JPanel
 	/** Settings in place of the daily page, or the daily page back. See {@link SidebarPages}. */
 	private final Consumer<Boolean> settingsOpen;
 	/** The address typed in Settings, applied before Connect or Join asks; false when it is not one. */
-	private final BooleanSupplier applyMapAddress;
 	private final Supplier<String> mapUrl;
 
 	/* The status card: connection, group and a short summary; the snapshot preview is in Advanced. */
@@ -235,7 +234,7 @@ final class ConnectCard extends JPanel
 	ConnectCard(Component sidebar, MapCompanionConfig config, ConfigStore settings, MapCompanionPlugin plugin, MemberIdentity identity,
 		Pairing pairing, RelayClient relay, DirectiveStream directiveStream, ConnectClient connectClient,
 		RecommendedSharing recommendedSharing, Runnable refresh, Consumer<Boolean> settingsOpen,
-		BooleanSupplier applyMapAddress, Supplier<String> mapUrl)
+		Supplier<String> mapUrl)
 	{
 		this.sidebar = sidebar;
 		this.config = config;
@@ -249,7 +248,6 @@ final class ConnectCard extends JPanel
 		this.recommendedSharing = recommendedSharing;
 		this.refresh = refresh;
 		this.settingsOpen = settingsOpen;
-		this.applyMapAddress = applyMapAddress;
 		this.mapUrl = mapUrl;
 		column(this, DARK_GRAY_COLOR);
 
@@ -475,7 +473,7 @@ final class ConnectCard extends JPanel
 	 */
 	private void startGroup()
 	{
-		if (asking || !applyMapAddress.getAsBoolean())
+		if (asking)
 		{
 			return;
 		}
@@ -701,10 +699,6 @@ final class ConnectCard extends JPanel
 	 */
 	private void joinFromField()
 	{
-		if (!applyMapAddress.getAsBoolean())
-		{
-			return;
-		}
 		connectFailed = null;
 		String entered = joinField.getText().trim();
 		JoinCode joined = JoinCode.parse(entered.isEmpty() ? pairingCode() : entered);

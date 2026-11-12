@@ -77,7 +77,6 @@ share.skipTip=Share nothing yet. Every choice stays off until you turn it on in 
 # into a server, a code or a count, the Java puts that after it.
 settings.whatsNewTip=osrs-map.com's What's new page, where every update is written down
 settings.previewTip=Print the exact snapshot this plugin would send right now
-settings.badAddress=Enter an https:// map address without a login, query or fragment.
 settings.loggedOut=Nothing goes out while you're logged out. Log in to see what would.
 settings.notGrouped=You're not in a group, so nothing goes out. Connect would start sending this to
 settings.notConnected=, so nothing goes out. Connect would start sending this:\n\n

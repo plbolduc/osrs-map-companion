@@ -472,8 +472,8 @@ The website plan's second session, once the routes in the game are built: a memb
       it says nothing was copied, and that stays, and pasting gives what the clipboard held before.
 - [ ] **Answered where pressed.** Switch ▾ → Join another group… opens the field under Copy invite ·
       Switch ▾, and an expired invite is refused under its Paste and Join; Hide the code field folds
-      it. In Settings → Advanced, Apply with `osrs-map.com` writes `https://osrs-map.com` into the
-      field, and with `http://example.com` says why under Apply, with Settings still open.
+      it. In RuneLite's own settings for the plugin, a Map address that is not https, or not this
+      machine, leaves the status card saying the address is invalid and no request goes anywhere.
 - [ ] **Remove from group.** In a group Connect made, the maker right-clicks a friend's card, on the
       name, on where they are and on Route: each offers *Remove from group…*, and the friend's own
       right-click offers nothing. The dialog names the friend and the group, and Cancel is the
