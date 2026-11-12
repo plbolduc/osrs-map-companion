@@ -107,17 +107,15 @@ final class StarsPanel extends JPanel
 	 */
 	static final Color FADING_TONE = new Color(252, 187, 0);
 	static final Color DYING_TONE = new Color(255, 101, 104);
-	/** The rest of a site card's second line. */
+	/** A time left with time to spare, and the rest of a card's small print. */
 	private static final Color CARD_INK = new Color(184, 184, 184);
+	/** The world the player is on: the Group tab's green for a meetup's. */
+	static final Color HERE = new Color(0x34d399);
 	private static final Color EDGE = new Color(65, 65, 65);
 	private static final Color MUTED = new Color(160, 160, 160);
-	/** A site in the Wilderness has its name in the sidebar's pink for what cannot be done safely. */
-	private static final String WILDERNESS = String.format("#%06x", MapCompanionPanel.REFUSED.getRGB() & 0xffffff);
 	/** The column inside the sidebar's 10px border, and the text width that fits it. */
 	private static final int COLUMN = PluginPanel.PANEL_WIDTH - 20;
 	private static final int TEXT = COLUMN - 10;
-	/** A site card's text, beside the favourite and world-count buttons. */
-	private static final int CARD_TEXT = COLUMN - 62;
 	/** A line the width of a site card's inside. */
 	private static final int CARD_WIDE = COLUMN - 14;
 	private final StarsClient service;
@@ -139,6 +137,9 @@ final class StarsPanel extends JPanel
 	private final Function<Boolean, JButton> homeButton;
 	/** The sidebar's own refresh, so a way chosen here is the way Home's card shows at once. */
 	private final Runnable sidebar;
+	/** The client's pictures, for the star beside a world; null draws a W there. */
+	@Nullable
+	private final GameSprites sprites;
 	/** The way to the picked star, kept across rebuilds of the block it sits in; see {@link #selection}. */
 	private final RouteStepsView steps;
 	private final JComboBox<String> tier = new JComboBox<>(new String[]{"T1+", "T2+", "T3+", "T4+", "T5+", "T6+", "T7+", "T8+", "T9+"});
@@ -199,6 +200,7 @@ final class StarsPanel extends JPanel
 		this.config = config;
 		this.homeButton = homeButton;
 		this.sidebar = sidebar;
+		this.sprites = sprites;
 		this.steps = new RouteStepsView(way ->
 		{
 			route.choose(way);
@@ -350,7 +352,7 @@ final class StarsPanel extends JPanel
 		boolean loggedOut = !service.eligible() && active;
 		boolean empty = model.feed != null && model.feed.rows.isEmpty();
 		StringBuilder signature = new StringBuilder().append(model.feed != null).append(loggedOut).append(empty).append(service.message)
-			.append(model.playerGame);
+			.append(model.playerGame).append(model.playerWorld);
 		for (StarsModel.Site site : sites)
 		{
 			stars += site.worlds.size();
@@ -511,60 +513,67 @@ final class StarsPanel extends JPanel
 		box.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		box.setBorder(new CompoundBorder(
 			new LineBorder(picked != null || site.worlds.contains(pinned) ? GOLD.darker() : EDGE),
-			new EmptyBorder(5, 6, 5, 4)));
-		JPanel head = new JPanel(new BorderLayout(2, 0));
-		head.setBackground(box.getBackground());
-		String name = "<font color='" + (primary == null ? "#a0a0a0" : primary.wilderness ? WILDERNESS : "#ffffff") + "'>" + escape(site.name) + "</font>";
-		String detail = primary == null ? "<font color='#a0a0a0'>" + (site.hiddenByFilters ? "Hidden by filters" : "No star right now") + "</font>"
-			: font(tierColour(primary.tier(elapsed)), "T" + primary.tier(elapsed)) + font(CARD_INK, " · W" + primary.world + " · ")
-				+ font(lifeColour(primary.left(elapsed), CARD_INK), StarsModel.timeLeft(primary.left(elapsed)))
-				+ (primary.wilderness ? font(CARD_INK, " · Wilderness") : "");
-		String text = "<html><body width='" + CARD_TEXT + "'>" + name + "<br>" + detail + "</body></html>";
-		if (primary == null)
-		{
-			JLabel idle = label(text);
-			idle.setBorder(new EmptyBorder(1, 0, 1, 0));
-			head.add(idle, BorderLayout.CENTER);
-		}
-		else
-		{
-			JButton pick = flat(text);
-			pick.setName("stars.site." + site.key);
-			pick.setToolTipText("Select W" + primary.world + " at " + site.name);
-			pick.addActionListener(e -> select(primary));
-			head.add(pick, BorderLayout.CENTER);
-		}
-		JPanel actions = new JPanel(new GridBagLayout());
-		actions.setBackground(box.getBackground());
-		GridBagConstraints c = new GridBagConstraints();
-		c.anchor = GridBagConstraints.NORTH;
+			new EmptyBorder(4, 6, 4, 4)));
+		Color ground = box.getBackground();
+		JLabel name = label("");
+		wrap(name, site.name, CARD_WIDE - 22);
+		refont(name, 12f);
+		name.setForeground(primary == null ? MUTED : primary.wilderness ? MapCompanionPanel.REFUSED : Color.WHITE);
 		JButton favorite = flat(site.favorite ? "★" : "☆");
 		favorite.setForeground(site.favorite ? GOLD : MUTED);
 		favorite.setToolTipText((site.favorite ? "Unfavourite " : "Favourite ") + site.name);
 		favorite.setName("stars.favorite." + site.key);
 		favorite.getAccessibleContext().setAccessibleName(favorite.getToolTipText());
-		favorite.setPreferredSize(new Dimension(20, 20));
+		favorite.setPreferredSize(new Dimension(20, 16));
 		favorite.addActionListener(e -> change(() -> service.model.toggleFavorite(primary == null ? site.key.substring("favorite:".length()) : primary.favoriteKey, site.name, primary == null ? null : primary.siteKey)));
-		actions.add(favorite, c);
-		if (site.worlds.size() > 1)
+		JPanel top = MapCompanionPanel.bar(2, ground, null, name, MapCompanionPanel.hug(favorite, ground));
+		JComponent head;
+		if (primary == null)
 		{
-			JButton expand = flat(site.worlds.size() + (open ? " ▴" : " ▾"));
-			expand.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
-			expand.setName("stars.expand." + site.key);
-			expand.setToolTipText((open ? "Collapse " : "Show ") + site.worlds.size() + " worlds at " + site.name);
-			expand.getAccessibleContext().setAccessibleName(expand.getToolTipText());
-			expand.setPreferredSize(new Dimension(30, 20));
-			expand.addActionListener(e ->
-			{
-				if (!expanded.remove(site.key)) expanded.add(site.key);
-				/* Folded, the card names its first world alone, so a pick of another lets go. */
-				else if (picked != primary) service.model.selected = null;
-				redraw();
-			});
-			actions.add(expand, c);
+			JLabel idle = cell(site.hiddenByFilters ? "Hidden by filters" : "No star right now", MUTED, 0);
+			head = MapCompanionPanel.bar(0, ground, null, top, null);
+			head.add(idle, BorderLayout.SOUTH);
 		}
-		else actions.add(spacer(30, 20), c);
-		head.add(actions, BorderLayout.EAST);
+		else
+		{
+			JButton expand = null;
+			if (site.worlds.size() > 1)
+			{
+				/* How many more worlds than the one printed beside it. */
+				expand = flat("+" + (site.worlds.size() - 1) + (open ? " ▴" : " ▾"));
+				expand.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+				expand.setName("stars.expand." + site.key);
+				expand.setToolTipText((open ? "Collapse " : "Show ") + site.worlds.size() + " worlds at " + site.name);
+				expand.getAccessibleContext().setAccessibleName(expand.getToolTipText());
+				expand.addActionListener(e ->
+				{
+					if (!expanded.remove(site.key))
+					{
+						expanded.add(site.key);
+					}
+					else if (picked != primary)
+					{
+						/* Folded, the card names its first world alone, so a pick of another lets go. */
+						service.model.selected = null;
+					}
+					redraw();
+				});
+			}
+			/*
+			 * The whole card is the press, with the favourite and the fold inside it as buttons of
+			 * their own: the name alone was a target two lines tall beside two more.
+			 */
+			JButton pick = MapCompanionPanel.bare(new Whole(), 0, 0, 0);
+			pick.setFocusPainted(false);
+			pick.setLayout(new BorderLayout(0, 2));
+			pick.setName("stars.site." + site.key);
+			pick.setToolTipText("W" + primary.world + " at " + site.name + ": press for Route and Pin");
+			pick.getAccessibleContext().setAccessibleName(pick.getToolTipText());
+			pick.addActionListener(e -> select(primary));
+			pick.add(top, BorderLayout.CENTER);
+			pick.add(facts(primary, elapsed, ground, expand, primary.wilderness ? cell("Wilderness", MapCompanionPanel.REFUSED, 0) : null), BorderLayout.SOUTH);
+			head = pick;
+		}
 		box.add(fill(head));
 		if (site.worlds.size() > 1 && open)
 		{
@@ -584,37 +593,117 @@ final class StarsPanel extends JPanel
 		return fill(box);
 	}
 
-	/** One world under its site: tier, world, age and time left, in columns that line up. */
+	/** One world under its site: the card's own line for it, with its age where a card says Wilderness. */
 	private JButton world(StarsModel.Site site, Star star, long elapsed, Color background)
 	{
 		boolean picked = star.id.equals(service.model.selected);
-		JButton world = new JButton();
-		world.setLayout(new GridBagLayout());
-		GridBagConstraints c = new GridBagConstraints();
-		c.anchor = GridBagConstraints.WEST;
-		c.insets = new Insets(0, 4, 0, 0);
-		c.ipadx = 0;
-		world.add(cell("T" + star.tier(elapsed), tierColour(star.tier(elapsed)), 22), c);
-		world.add(cell("W" + star.world, Color.WHITE, 40), c);
-		world.add(cell(age(star.ageMs + elapsed), MUTED, 60), c);
-		c.weightx = 1;
-		c.anchor = GridBagConstraints.EAST;
-		c.insets = new Insets(0, 0, 0, 4);
-		world.add(cell(StarsModel.minutes(star.left(elapsed)), lifeColour(star.left(elapsed), Color.WHITE), 0), c);
+		Color ground = picked ? PICKED : background;
+		JButton world = new Whole();
+		world.setLayout(new BorderLayout());
+		world.add(facts(star, elapsed, ground, null, cell(age(star.ageMs + elapsed), MUTED, 0)));
 		world.setName("stars.world." + star.id);
-		world.setBackground(picked ? PICKED : background);
-		world.setBorder(picked ? new LineBorder(GOLD.darker()) : new EmptyBorder(1, 1, 1, 1));
+		world.setBackground(ground);
+		world.setBorder(new CompoundBorder(
+			picked ? new LineBorder(GOLD.darker()) : new EmptyBorder(1, 1, 1, 1),
+			new EmptyBorder(2, 3, 2, 3)));
 		world.setContentAreaFilled(picked);
 		world.setOpaque(picked);
 		world.setFocusPainted(false);
 		world.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		world.setPreferredSize(new Dimension(1, 22));
-		world.setMaximumSize(new Dimension(Integer.MAX_VALUE, 22));
 		world.setToolTipText(site.name + " · W" + star.world + (star.requiredTotal > 0 ? " · " + star.requiredTotal + "+ skill total" : "")
 			+ (Boolean.FALSE.equals(star.members) ? " · Free to play" : "") + (star.pvp ? " · PvP / high-risk" : "") + (star.deadman ? " · Deadman" : ""));
 		world.getAccessibleContext().setAccessibleName(world.getToolTipText());
 		world.addActionListener(e -> select(star));
 		return world;
+	}
+
+	/**
+	 * A star's three facts on one line, the same wherever a star is printed: its tier in bold in the
+	 * tier's own colour, its world in bold, and its time left at the far end. The tier and the world
+	 * are what a list of stars is scanned for, so they are the two things set in bold; the tiers line
+	 * up down the list's left edge and the times down its right. The tier is letters alone, on no
+	 * ground of its own: beside the world's star, a filled block of colour on every row would be
+	 * the loudest thing in the list.
+	 *
+	 * <p>The world is its number behind the world switcher's own star for its kind, as the game lists
+	 * a world, and green while the player is on it, as the Group tab draws a meetup's: a star that
+	 * needs no hop. A world of no known kind keeps a W in the star's place. Labels only, so a press
+	 * anywhere on the line is a press on the row it is in.
+	 *
+	 * @param after the fold beside the world, or null
+	 * @param between what sits between the world and the time, cut short before either is: a site's
+	 *     Wilderness, a world's age, or null
+	 */
+	private JComponent facts(Star star, long elapsed, Color ground, @Nullable JComponent after, @Nullable JLabel between)
+	{
+		int level = star.tier(elapsed);
+		JLabel tier = cell("T" + level, tierColour(level), 0);
+		tier.setName("star.tier");
+		refont(tier, Font.BOLD, 12f);
+		tier.setPreferredSize(new Dimension(15, 16));
+		Integer here = service.model.playerWorld;
+		Integer kind = sprites == null ? null : worldStar(star);
+		JLabel world = cell((kind == null ? "W" : "") + star.world, here != null && here == star.world ? HERE : Color.WHITE, 0);
+		world.setName("star.world");
+		refont(world, Font.BOLD, 12f);
+		JComponent at = world;
+		if (kind != null)
+		{
+			/* Its place is kept at the star's size, so the number does not move when the cache answers. */
+			JLabel mark = new JLabel();
+			mark.setName("star.kind");
+			mark.setPreferredSize(new Dimension(WORLD_STAR, WORLD_STAR));
+			sprites.sprite(mark, kind, WORLD_STAR);
+			at = MapCompanionPanel.bar(3, ground, mark, world, null);
+			at.setOpaque(false);
+		}
+		JLabel left = cell(StarsModel.timeLeft(star.left(elapsed)), lifeColour(star.left(elapsed), CARD_INK), 0);
+		left.setName("star.left");
+		JPanel lead = MapCompanionPanel.bar(6, ground, tier, at, after);
+		JPanel line = MapCompanionPanel.bar(6, ground, lead, between, left);
+		line.setOpaque(false);
+		lead.setOpaque(false);
+		return line;
+	}
+
+	/**
+	 * The world switcher's star for a star's world, or null where the map's world list did not have the
+	 * world. The website's rule, lib/world-badges.ts: Deadman before PvP and high-risk before members,
+	 * because the most particular kind is the one that matters, and no star rather than the free one
+	 * for a world nobody has described.
+	 */
+	@Nullable
+	static Integer worldStar(Star star)
+	{
+		if (star.deadman)
+		{
+			return SpriteID.WorldswitcherStars.DEADMAN;
+		}
+		if (star.pvp)
+		{
+			return SpriteID.WorldswitcherStars.PVP;
+		}
+		if (star.members == null)
+		{
+			return null;
+		}
+		return star.members ? SpriteID.WorldswitcherStars.MEMBERS : SpriteID.WorldswitcherStars.FREE;
+	}
+
+	/** A button that is the components laid out in it, and as big as they are; a button's own size is its text's. */
+	private static final class Whole extends JButton
+	{
+		@Override
+		public Dimension getPreferredSize()
+		{
+			return getLayout().preferredLayoutSize(this);
+		}
+
+		@Override
+		public Dimension getMaximumSize()
+		{
+			return new Dimension(Integer.MAX_VALUE, getPreferredSize().height);
+		}
 	}
 
 	/** A press on a star picks it, and a second press lets it go. */
@@ -736,9 +825,9 @@ final class StarsPanel extends JPanel
 		name.setForeground(GOLD);
 		refont(name, 12f);
 		selection.add(name);
-		selection.add(label("<html>W" + star.world + " · " + font(tierColour(star.tier(elapsed)), "T" + star.tier(elapsed)) + " · "
-			+ font(lifeColour(star.left(elapsed), ColorScheme.LIGHT_GRAY_COLOR), StarsModel.timeLeft(star.left(elapsed))) + "</html>"));
-		selection.add(gap(5));
+		selection.add(gap(3));
+		selection.add(fill(facts(star, elapsed, getBackground(), null, null)));
+		selection.add(gap(6));
 		JPanel actions = MapCompanionPanel.row(getBackground());
 		if (routed)
 		{
@@ -860,12 +949,6 @@ final class StarsPanel extends JPanel
 		}
 	}
 
-	/** Words in one colour, inside a label that is already HTML. */
-	private static String font(Color colour, String words)
-	{
-		return "<font color='" + String.format("#%06x", colour.getRGB() & 0xffffff) + "'>" + escape(words) + "</font>";
-	}
-
 	private static String age(long ms)
 	{
 		return ms < 60_000 ? "just now" : ms / 60_000 + "m ago";
@@ -919,14 +1002,6 @@ final class StarsPanel extends JPanel
 	private static JComponent gap(int height)
 	{
 		return MapCompanionPanel.gap(height, ColorScheme.DARK_GRAY_COLOR);
-	}
-
-	private static JComponent spacer(int width, int height)
-	{
-		JPanel box = new JPanel();
-		box.setOpaque(false);
-		box.setPreferredSize(new Dimension(width, height));
-		return box;
 	}
 
 	private static JLabel cell(String text, Color color, int width)

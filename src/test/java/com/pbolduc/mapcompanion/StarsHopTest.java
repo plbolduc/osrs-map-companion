@@ -170,6 +170,8 @@ public class StarsHopTest
 						return 72;
 					case "getTotalLevel":
 						return 1620;
+					case "getWorld":
+						return 302;
 					case "getWorldType":
 						return EnumSet.of(WorldType.MEMBERS);
 					default:
