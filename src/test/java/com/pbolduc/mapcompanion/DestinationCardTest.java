@@ -344,6 +344,31 @@ public class DestinationCardTest
 		assertEquals("each asked once, not every second", 2, asked.size());
 	}
 
+	/**
+	 * A coordinate clue's card printed its dig spot as a pair of numbers. The line says Route finds
+	 * it, and the tile is in the line's tooltip, as the death card keeps its own; a step that names
+	 * no tile has no tooltip left over from one that did.
+	 */
+	@Test
+	public void aCoordinateCluesTileIsInItsLinesTooltip() throws Exception
+	{
+		carried = new CompanionSnapshot.Clue();
+		carried.tier = "hard";
+		carried.text = "01 degrees 18 minutes south 14 degrees 15 minutes east";
+		carried.coordTile = ClueReader.parseCoordinate(carried.text);
+		refresh();
+		JLabel line = named(cards, "now.clue.detail");
+		assertTrue(line.getText(), line.getText().contains(">Coordinate · Route finds the dig spot<"));
+		assertFalse("no raw tile on the card: " + words(), String.join("|", words()).contains("2896"));
+		assertEquals("2896, 3119", line.getToolTipText());
+
+		carried = new CompanionSnapshot.Clue();
+		carried.tier = "medium";
+		carried.text = "Speak to the bartender of the Rusty Anchor in Port Sarim.";
+		refresh();
+		assertNull("words have no tile to hover for", named(cards, "now.clue.detail").getToolTipText());
+	}
+
 	/** A search pick draws its row's own picture: here a bank's world-map icon. */
 	@Test
 	public void aSearchPickShowsItsRowsPicture() throws Exception

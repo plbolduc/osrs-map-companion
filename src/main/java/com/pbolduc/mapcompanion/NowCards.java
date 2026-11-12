@@ -250,6 +250,7 @@ final class NowCards extends JPanel
 		deathRouteButton.setName("now.death.route");
 		deathSaid.setName("now.death.said");
 		clueRouteButton.setName("now.clue.route");
+		clueDetail.setName("now.clue.detail");
 		clueRouteButton.setToolTipText(CLUE_ROUTE_TIP);
 		rerouteButton.setToolTipText(REROUTE_TIP);
 		rerouteButton.addActionListener(e ->
@@ -425,13 +426,14 @@ final class NowCards extends JPanel
 	 * The step in a few words: where a Route goes, or the scroll's own words cut to two lines. A step
 	 * that is words is routed by those words, so the card shows them and Route under them. A map
 	 * above beginner is known by its scroll before and after it is opened, so the card says Route
-	 * finds the place rather than asking for a scroll the player has just read.
+	 * finds the place rather than asking for a scroll the player has just read. A coordinate says the
+	 * same of its dig spot: the tile is two numbers nobody can act on, kept for the line's tooltip.
 	 */
 	static String clueDetail(Clue clue)
 	{
 		if (clue.coordTile != null)
 		{
-			return "Coordinate · dig at " + clue.coordTile.x + ", " + clue.coordTile.y;
+			return "Coordinate · Route finds the dig spot";
 		}
 		if (clue.mapTile != null)
 		{
@@ -662,6 +664,9 @@ final class NowCards extends JPanel
 			}
 			setWrapped(clueTitle, clueTitle(clue.tier), scroll != null ? CARD_TEXT_WIDTH - CLUE_PICTURE - 6 : CARD_TEXT_WIDTH);
 			setWrapped(clueDetail, clueDetail(clue), CARD_TEXT_WIDTH);
+			/* A coordinate's dig spot, a hover away as the death's tile is. */
+			clueDetail.setToolTipText(clue.coordTile == null ? null
+				: deathTile(clue.coordTile.x, clue.coordTile.y, clue.coordTile.plane));
 			boolean routable = ClueReader.routeTile(clue) != null || ClueReader.routesByClue(clue);
 			clueActions.setVisible(routable);
 			routeState(clueRouteButton, clueSaid, "clue", "Route", asks && routable, loggedIn ? CLUE_ROUTE_TIP : RoutePress.LOG_IN, now);
