@@ -75,9 +75,11 @@ import static com.pbolduc.mapcompanion.StarsModel.Star;
  *
  * <p>The pinned star heads the tab, whatever is picked and whatever the filters hide, because what
  * is pinned is being walked to. Its way is drawn under it once the map has answered, the same steps
- * and buttons Home's destination card shows, because a star hunter lives on this tab while they hop
- * and sending them to Home for the steps lost their place in the list. It is one route seen twice:
- * the steps are read from {@link DestinationRoute}, and Follow and Reroute are Home's own buttons.
+ * Home's destination card shows, because a star hunter lives on this tab while they hop and sending
+ * them to Home for the steps lost their place in the list. It is one route seen twice: the steps
+ * are read from {@link DestinationRoute}, and Reroute is Home's own button. Under them are Reroute
+ * and Unpin alone. Home's Pause is not copied here, since a way asked for on this tab is already
+ * followed; its Follow is, only while the way has been paused somewhere else.
  *
  * <p>Every child of a vertical stack here is left-aligned and as wide as the column. BoxLayout
  * lines children up by their alignment point, so one centred child among left-aligned ones
@@ -417,7 +419,7 @@ final class StarsPanel extends JPanel
 		boolean drawable = routed && config != null && shortestPath != null && config.drawWithShortestPath()
 			&& shortestPath.installed() && !way.arrived();
 		steps.show(routed ? way : null, routed ? RouteStepsView.shortestPathLine(way, drawable, drawable ? shortestPath.drawing() : 0) : null);
-		signature.append(routed).append(offered(routed, false)).append(offered(routed, true));
+		signature.append(routed).append(routed && way.following).append(offered(routed, false)).append(offered(routed, true));
 		if (signature.toString().equals(rendered))
 		{
 			countDown(said);
@@ -469,7 +471,7 @@ final class StarsPanel extends JPanel
 		}
 		if (pinned != null)
 		{
-			pinned(pinned, elapsed, routed);
+			pinned(pinned, elapsed, routed, routed && !way.following);
 		}
 		countDown(said);
 		revalidate();
@@ -823,7 +825,7 @@ final class StarsPanel extends JPanel
 	}
 
 	/** The pinned star at the head of the tab: its live line, then its way, or Route while it has none. */
-	private void pinned(Star star, long elapsed, boolean routed)
+	private void pinned(Star star, long elapsed, boolean routed, boolean paused)
 	{
 		selection.setBorder(new CompoundBorder(
 			new CompoundBorder(new EmptyBorder(0, 0, 8, 0), BorderFactory.createMatteBorder(0, 0, 1, 0, EDGE)),
@@ -850,7 +852,15 @@ final class StarsPanel extends JPanel
 			way.add(steps);
 			selection.add(fill(way));
 			selection.add(gap(5));
-			home(actions, false, "stars.follow");
+			/*
+			 * A way asked for here is followed from the press, so there is nothing to start, and
+			 * stopping is Home's, the box over the game's and a key's. Paused from one of those, the
+			 * way back is offered here; otherwise the star has two buttons.
+			 */
+			if (paused)
+			{
+				home(actions, false, "stars.follow");
+			}
 			home(actions, true, "stars.reroute");
 		}
 		else if (star.precise)
