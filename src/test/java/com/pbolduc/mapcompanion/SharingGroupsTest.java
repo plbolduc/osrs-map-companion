@@ -387,6 +387,143 @@ public class SharingGroupsTest
 	}
 
 	/**
+	 * A change of RuneLite profile, in the order RuneLite 1.13.4's {@code ConfigManager.switchProfile}
+	 * raises it: the new profile is loaded first, then a {@code ConfigChanged} is posted for every
+	 * setting whose value differs from the old profile's, in the order a hash set gives them, and only
+	 * after the last of them {@code ProfileChanged}. The test above called {@code onProfileChanged}
+	 * alone, so it never met the events that come before it.
+	 *
+	 * <p>The profile left has shared nothing. The one arrived at was last settled by the release
+	 * before Sea charts charted and Dailies collected existed, with Progress and travel and Tasks and
+	 * timers switched on, so every field those two switches then named is on and the two new ones have
+	 * never been written. Read as a press, the switch's event turned on every field under it, the two
+	 * the player never chose among them. Whichever order the events come in, the fields are as the
+	 * profile had them, and each switch moves to what its fields share.
+	 */
+	@Test
+	public void changingRuneLiteProfileTurnsOnNothingThePlayerNeverTicked() throws Exception
+	{
+		for (boolean switchesFirst : new boolean[] {true, false})
+		{
+			Fixture fixture = new Fixture();
+			MapCompanionPlugin plugin = new MapCompanionPlugin()
+			{
+				@Override
+				ConfigStore settings()
+				{
+					return fixture.store;
+				}
+			};
+			set(plugin, "config", fixture.config);
+			set(plugin, "clientThread", new net.runelite.client.callback.ClientThread()
+			{
+				@Override
+				public void invoke(Runnable action)
+				{
+				}
+			});
+			fixture.store.onChanged(key ->
+			{
+				fixture.follow(key);
+				plugin.onConfigChanged(changed(key, null, fixture.store.get(key)));
+			});
+			List<String> keys = new ArrayList<>();
+			for (SharingFields.Section section : SharingFields.GROUPS)
+			{
+				keys.add(section.key);
+			}
+			keys.addAll(fieldKeys());
+			keys.add(SharingGroups.KEY_SETTLED);
+			if (!switchesFirst)
+			{
+				java.util.Collections.reverse(keys);
+			}
+
+			/* The profile that is open: nothing shared, and settled by this release. */
+			fixture.store.profile = 1;
+			for (String key : keys)
+			{
+				fixture.config.set(key, false);
+				fixture.store.put(key, "false");
+			}
+			fixture.store.put(SharingGroups.KEY_SETTLED, Integer.toString(SharingGroups.GENERATION));
+			plugin.onProfileChanged(new ProfileChanged());
+			assertEquals(Integer.toString(SharingGroups.GENERATION), fixture.store.get(SharingGroups.KEY_SETTLED));
+
+			Map<String, String> arriving = new LinkedHashMap<>();
+			for (String key : keys)
+			{
+				arriving.put(key, "false");
+			}
+			for (SharingFields.Section section : Arrays.asList(SharingFields.PROGRESS, SharingFields.TASKS))
+			{
+				arriving.put(section.key, "true");
+				for (SharingFields.Field field : section.fields)
+				{
+					arriving.put(field.key, "true");
+				}
+			}
+			arriving.put("shareSeaCharts", null);
+			arriving.put("shareDailies", null);
+			arriving.put(SharingGroups.KEY_SETTLED, "1");
+
+			/* RuneLite's order: the new profile is loaded, every difference is announced, then the change. */
+			Map<String, String> leaving = new LinkedHashMap<>();
+			for (String key : keys)
+			{
+				leaving.put(key, fixture.store.get(key));
+			}
+			fixture.store.profile = 2;
+			for (String key : keys)
+			{
+				fixture.config.set(key, Boolean.parseBoolean(arriving.get(key)));
+				fixture.store.put(key, arriving.get(key));
+			}
+			Map<String, String> fields = fixture.fields();
+			assertNull("the fixture's new profile has never written the field an update added", fields.get("shareSeaCharts"));
+			fixture.written.clear();
+			for (String key : keys)
+			{
+				if (!java.util.Objects.equals(leaving.get(key), arriving.get(key)))
+				{
+					plugin.onConfigChanged(changed(key, leaving.get(key), arriving.get(key)));
+				}
+			}
+			plugin.onProfileChanged(new ProfileChanged());
+
+			String order = switchesFirst ? "switches announced first" : "fields announced first";
+			assertEquals(order + ": every field as the profile had it", fields, fixture.fields());
+			assertFalse(order, fixture.store.on("shareSeaCharts"));
+			assertFalse(order, fixture.store.on("shareDailies"));
+			assertEquals(order + ": only the two switches, moved to what their fields share, and the marker",
+				new HashSet<>(Arrays.asList(MapCompanionConfig.KEY_SHARE_PROGRESS + "=false", MapCompanionConfig.KEY_SHARE_TASKS + "=false",
+					SharingGroups.KEY_SETTLED + "=" + SharingGroups.GENERATION)),
+				new HashSet<>(fixture.written));
+
+			/* And a press on the profile arrived at is still a press. */
+			fixture.store.set(MapCompanionConfig.KEY_SHARE_PROGRESS, "true");
+			assertTrue(order + ": the switch pressed now names the new field too", fixture.store.on("shareSeaCharts"));
+		}
+	}
+
+	private static ConfigChanged changed(String key, String from, String to)
+	{
+		ConfigChanged changed = new ConfigChanged();
+		changed.setGroup(MapCompanionConfig.GROUP);
+		changed.setKey(key);
+		changed.setOldValue(from);
+		changed.setNewValue(to);
+		return changed;
+	}
+
+	private static void set(MapCompanionPlugin plugin, String name, Object value) throws Exception
+	{
+		Field field = MapCompanionPlugin.class.getDeclaredField(name);
+		field.setAccessible(true);
+		field.set(plugin, value);
+	}
+
+	/**
 	 * One name for each setting: RuneLite's list names each switch as the sidebar does, and says every
 	 * field it shares in the sidebar's words, in order; a field it hides is named as the sidebar names it.
 	 * A field it does not declare at all is in no list of its own, and its one name is the sidebar's.

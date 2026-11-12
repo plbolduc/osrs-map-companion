@@ -63,6 +63,11 @@ import static com.pbolduc.mapcompanion.SharingFields.Section;
  * already sees their dot, and the death is the tile that dot was on. Nobody who does not share
  * their position is changed, and turned off afterwards it stays off.
  *
+ * <p><b>A change of RuneLite profile is settled, never followed.</b> RuneLite loads the new profile
+ * and raises a {@code ConfigChanged} for every setting that differs before it says the profile
+ * changed, so the plugin hands {@link #changed} only the writes made on the profile it last settled,
+ * and {@link #settle} reads the new one when the change is announced.
+ *
  * <p>Nothing loops. A switch writes only the fields that differ from it; a field going on never turns
  * its switch off, which is what lets a switch's fan-out finish; and a switch moved because of a field
  * agrees with its fields, so its own event writes nothing.

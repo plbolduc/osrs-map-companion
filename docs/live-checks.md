@@ -65,6 +65,17 @@ often. A clean run is now 443 tests with no failures or skips.
       keeps the member it had; the other gains one. **Leave group** on A gives A a new member on its
       next Connect and leaves B's alone.
 
+- [ ] **A profile switch turns on no sharing (`SharingGroups`, the event order read from RuneLite
+      1.13.4's `ConfigManager.switchProfile` and driven in `SharingGroupsTest`, not yet seen live).**
+      Needs a profile last opened with a release before 1.8.0 that has *Progress and travel* or
+      *Tasks and timers* switched on: its `sharingGroups` marker reads `1` or `true`, and it has
+      never written `shareSeaCharts` or `shareDailies`. From a profile with those groups off, switch
+      to it with the plugin on in both. Before the fix, **Show what's sent** then listed sea charts
+      or dailies and Settings showed *Sea charts charted* or *Dailies collected* ticked. Now both stay
+      unticked, the group's switch in RuneLite's list reads off with its other fields still ticked,
+      and the preview carries neither. Then press the switch on: both new fields tick, as a press
+      names them. Switch back and forth twice more and confirm nothing else moves on either profile.
+
 - [ ] **Mortimer's offer (`MortimerOfferReader`, from the game's task choice script, not yet seen
       live).** With *Slayer task* shared and no task, talk to Mortimer and open the choice: the map's
       Mortimer picker fills with the same two or three tasks, mortifiers and amounts, and says it was
