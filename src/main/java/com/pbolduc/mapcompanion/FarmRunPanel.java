@@ -190,7 +190,5 @@ final class FarmRunPanel extends JPanel
 		/* Choosing asks the map nothing, so the wait between presses holds Start run and not the picker. */
 		kind.setEnabled(connected && loggedIn);
 		offer();
-		revalidate();
-		repaint();
 	}
 }

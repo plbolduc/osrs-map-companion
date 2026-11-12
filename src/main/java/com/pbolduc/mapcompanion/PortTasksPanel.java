@@ -143,8 +143,6 @@ final class PortTasksPanel extends JPanel
 		{
 			shown = null;
 			body.setVisible(false);
-			revalidate();
-			repaint();
 			return;
 		}
 		body.setVisible(true);

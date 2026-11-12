@@ -754,6 +754,16 @@ public class MapCompanionPanel extends PluginPanel
 		}
 
 		settingsPage.refresh(paired);
+		/*
+		 * The cards above hide and show their parts, and hiding one marks the layout stale without
+		 * asking for a new one. So it is asked for here, once for all of them, and only when
+		 * something was marked: a second in which nothing changed lays out and paints nothing.
+		 */
+		if (!isValid())
+		{
+			revalidate();
+			repaint();
+		}
 	}
 
 	/**

@@ -311,8 +311,9 @@ final class RunView extends JPanel
 				showStops(view);
 			}
 		}
-		else
+		else if (shown != null)
 		{
+			/* Only after a run was drawn: emptying a list marks the sidebar's layout stale, even an empty one. */
 			shown = null;
 			shownRun = null;
 			stops.removeAll();
