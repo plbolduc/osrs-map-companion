@@ -198,7 +198,7 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RoutePress`, `SearchClien
   carried-item check also sends nothing. Reroute explicitly shares only the progress ordinals.
   A port-task run's stops are ticked from the task slots read locally; that ticking sends nothing.
 
-Requests carry the versioned User-Agent. The address must be https (plain http only on loopback),
+Requests carry the versioned User-Agent and `Cache-Control: no-store`, so no reply is written to RuneLite's HTTP cache. The address must be https (plain http only on loopback),
 redirects are not followed, and reply bodies are capped at 1 MB. Snapshot and stream failures back
 off; the Stars, Reroute, route-press, farm-run, search and meetup clients also honour Retry-After. Nothing requests the upstream star feed directly.
 The README's [What you share](../README.md#what-you-share) names every transmitted category, and

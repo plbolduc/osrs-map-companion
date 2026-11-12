@@ -14,7 +14,9 @@ approval of the selected server, the plugin makes no requests. The warning RuneL
 Hub manifest's, shown when the plugin is installed; no setting repeats it. The first **Connect** to
 osrs-map.com approves it with that press. A changed map address asks once, naming the server, before
 anything is sent there, and changing the address pauses requests until you connect there. An address
-typed without its scheme is taken as https, or as http on this machine.
+typed without its scheme is taken as https, or as http on this machine. Every request carries the
+plugin's versioned User-Agent and `Cache-Control: no-store`, so no reply, and no address with a
+search's words or a group code in it, is kept in RuneLite's HTTP cache on disk.
 
 **Connect and Join.** With no group, **Connect** makes one `POST /api/companion/connect` per press,
 carrying this RuneLite's random installation key and nothing else. The map makes a group called
