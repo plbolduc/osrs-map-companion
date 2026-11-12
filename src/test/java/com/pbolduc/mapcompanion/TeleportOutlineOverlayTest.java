@@ -73,7 +73,7 @@ public class TeleportOutlineOverlayTest
 	private void received() throws IOException
 	{
 		String reply = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "contract", "reply.json")), StandardCharsets.UTF_8);
-		route.sync(new Gson().fromJson(reply, RelayResponse.class).directive.destination);
+		route.sync(new Gson().fromJson(reply, RelayResponse.class).directive.destination, null);
 	}
 
 	/**
@@ -93,7 +93,7 @@ public class TeleportOutlineOverlayTest
 		config.set("outlineStepTeleport", false);
 		assertNull(overlay.shown());
 		config.set("outlineStepTeleport", true);
-		route.advance(new WorldPoint(3222, 3218, 0));
+		route.advance(new WorldPoint(3222, 3218, 0), DestinationRoute.Sailing.ASHORE_UNKNOWN);
 		assertNull("a walk is the second step", overlay.shown().spriteId);
 	}
 

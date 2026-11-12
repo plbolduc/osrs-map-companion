@@ -77,7 +77,7 @@ public class RouteStepPinsTest
 	{
 		state.selectLocal(DestinationRouteTest.destination("Al Kharid bank",
 			DestinationRouteTest.route("item:ring-of-dueling", DestinationRouteTest.alKharid())));
-		route.sync(state.getDestination());
+		route.sync(state.getDestination(), null);
 	}
 
 	@Test
@@ -92,11 +92,11 @@ public class RouteStepPinsTest
 	public void theStepsBehindFadeAndNoneAreLeftOnceThere()
 	{
 		routed();
-		route.advance(new WorldPoint(3293, 3184, 0));
-		route.advance(new WorldPoint(3300, 3190, 0));
+		route.advance(new WorldPoint(3293, 3184, 0), DestinationRoute.Sailing.ASHORE_UNKNOWN);
+		route.advance(new WorldPoint(3300, 3190, 0), DestinationRoute.Sailing.ASHORE_UNKNOWN);
 		assertEquals("[1@3293,3184,0-, 2@3300,3190,0-, 3@3300,3191,1*]",
 			DestinationMarker.stepPins(route.view()).toString());
-		route.advance(new WorldPoint(3310, 3200, 1));
+		route.advance(new WorldPoint(3310, 3200, 1), DestinationRoute.Sailing.ASHORE_UNKNOWN);
 		assertTrue(DestinationMarker.stepPins(route.view()).isEmpty());
 	}
 
@@ -117,7 +117,7 @@ public class RouteStepPinsTest
 		assertEquals("an unchanged route draws nothing new", before, drawn);
 
 		state.dismiss();
-		route.sync(state.getDestination());
+		route.sync(state.getDestination(), null);
 		markers.sync();
 		assertTrue(drawn.isEmpty());
 	}
@@ -133,17 +133,17 @@ public class RouteStepPinsTest
 		routed();
 		markers.sync();
 		assertEquals("[1. Ring of dueling]", edge());
-		route.advance(new WorldPoint(3293, 3184, 0));
-		route.advance(new WorldPoint(3300, 3190, 0));
+		route.advance(new WorldPoint(3293, 3184, 0), DestinationRoute.Sailing.ASHORE_UNKNOWN);
+		route.advance(new WorldPoint(3300, 3190, 0), DestinationRoute.Sailing.ASHORE_UNKNOWN);
 		markers.sync();
 		assertEquals("[3. Climb the staircase]", edge());
 
-		route.advance(new WorldPoint(3300, 3191, 1));
+		route.advance(new WorldPoint(3300, 3191, 1), DestinationRoute.Sailing.ASHORE_UNKNOWN);
 		markers.sync();
 		assertEquals("the last step's pin is the destination's", "[Al Kharid bank]", edge());
 
 		state.selectLocal(DestinationRouteTest.destination("Al Kharid counter", null));
-		route.sync(state.getDestination());
+		route.sync(state.getDestination(), null);
 		markers.sync();
 		assertEquals("a destination with no route", "[Al Kharid counter]", edge());
 	}

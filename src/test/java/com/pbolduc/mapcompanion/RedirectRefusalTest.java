@@ -96,7 +96,7 @@ public class RedirectRefusalTest
 		RelayClient relay = new RelayClient(new OkHttpClient(), new Gson());
 		String server = "http://127.0.0.1:" + approved.getAddress().getPort();
 		CountDownLatch answered = new CountDownLatch(1);
-		assertTrue(relay.post(server, "ABC234", null, "K7PQ2M3XABCDEFGHJKMNPQRSTVWXYZ23",
+		assertTrue(relay.post(server, "ABC234", null, "K7PQ2M3XABCDEFGHJKMNPQRSTVWXYZ23", null,
 			new CompanionSnapshot(), reply -> answered.countDown()));
 
 		assertTrue("the approved server was never asked", askedApproved.await(5, TimeUnit.SECONDS));

@@ -69,13 +69,13 @@ public class ShortestPathTest
 	private void receive()
 	{
 		route.sync(DestinationRouteTest.destination("Al Kharid bank",
-			DestinationRouteTest.route("item:ring-of-dueling", DestinationRouteTest.alKharid())));
+			DestinationRouteTest.route("item:ring-of-dueling", DestinationRouteTest.alKharid())), null);
 	}
 
 	/** One game tick standing at {@code where}, then Shortest Path's answers, as the client delivers them. */
 	private void tick(WorldPoint where)
 	{
-		route.advance(where);
+		route.advance(where, DestinationRoute.Sailing.ASHORE_UNKNOWN);
 		shortestPath.tick(++tick, route.view(), true, where, () -> route.stopFollowing(ShortestPath.TAKEN_OVER));
 		answer();
 	}
@@ -235,7 +235,7 @@ public class ShortestPathTest
 		route.follow(true);
 		/* The player's own target was showing when the question went; the answer lands after our path. */
 		WorldPoint own = new WorldPoint(3165, 3487, 0);
-		route.advance(LANDING);
+		route.advance(LANDING, DestinationRoute.Sailing.ASHORE_UNKNOWN);
 		shortestPath.tick(++tick, route.view(), true, LANDING, () -> route.stopFollowing(ShortestPath.TAKEN_OVER));
 		PluginMessage question = sent.get(0);
 		shortestPath.onPluginMessage(currentTarget(question.getData().get("id"), own));
@@ -289,7 +289,7 @@ public class ShortestPathTest
 	{
 		route.sync(DestinationRouteTest.destination("Al Kharid bank", DestinationRouteTest.route("walk", Arrays.asList(
 			DestinationRouteTest.step("walk-leg", "Walk to the stairs", true, 3300, 3190, 0),
-			DestinationRouteTest.step("climb", "Climb", false, 3310, 3200, 1)))));
+			DestinationRouteTest.step("climb", "Climb", false, 3310, 3200, 1)))), null);
 		tick(LUMBRIDGE);
 		route.follow(true);
 		tick(LANDING);
@@ -349,7 +349,7 @@ public class ShortestPathTest
 		real.tick(1, route.view(), true, LUMBRIDGE, () -> { });
 		bus.post(currentTarget(questions.get(0).getData().get("id"), null));
 		route.follow(true);
-		route.advance(LANDING);
+		route.advance(LANDING, DestinationRoute.Sailing.ASHORE_UNKNOWN);
 		real.tick(2, route.view(), true, LANDING, () -> { });
 		bus.unregister(forwarding);
 		real.shutDown();

@@ -231,7 +231,7 @@ public class DirectiveStreamLifetimeTest
 
 	private static void start(DirectiveStream stream, java.util.function.Consumer<RelayResponse.Directive> callback)
 	{
-		stream.start("https://example.invalid", "ABC234", "member", null, callback);
+		stream.start("https://example.invalid", "ABC234", "member", null, false, callback);
 	}
 
 	private static ResponseBody body(Pipe pipe)

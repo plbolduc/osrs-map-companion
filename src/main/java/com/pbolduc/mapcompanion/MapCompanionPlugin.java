@@ -1366,7 +1366,7 @@ public class MapCompanionPlugin extends Plugin
 			shown.world == null || shown.world == client.getWorld()))
 		{
 			destinationState.dismiss();
-			destinationRoute.sync(null);
+			destinationRoute.sync(null, null);
 		}
 		/* The step pins follow the step; unchanged, this compares one string and returns. */
 		destinationMarker.sync();
@@ -1783,17 +1783,11 @@ public class MapCompanionPlugin extends Plugin
 	 * stops repeating a secret once it has seen the plugin present one, so reading silence as a
 	 * revocation would delete the credential on the first reply after it started working.
 	 *
+	 * <p>The member is the one the post was made as, not whoever is logged in when the tick files
+	 * it: a reply can land after a switch to another account, and filing the main's secret under
+	 * the alt would present it on the alt's doors, where the map refuses it.
+	 *
 	 * <p>Package-private so both halves of the handoff can be driven without a client or a socket.
-	 */
-	void noteIssuedSecret(String code, @Nullable String memberId, @Nullable String secret)
-	{
-		noteIssuedSecret(pairing.serverUrl(), code, memberId, secret);
-	}
-
-	/**
-	 * The member is the one the post was made as, not whoever is logged in when the tick files it:
-	 * a reply can land after a switch to another account, and filing the main's secret under the
-	 * alt would present it on the alt's doors, where the map refuses it.
 	 */
 	void noteIssuedSecret(String server, String code, @Nullable String memberId, @Nullable String secret)
 	{
@@ -1828,11 +1822,6 @@ public class MapCompanionPlugin extends Plugin
 	 * stored one alone: a legacy group and an older map send none, and that means "keep what you
 	 * have" here as it does for the secret.
 	 */
-	void noteGroupName(String code, @Nullable String name)
-	{
-		noteGroupName(pairing.serverUrl(), code, name);
-	}
-
 	void noteGroupName(String server, String code, @Nullable String name)
 	{
 		if (name != null && !name.isEmpty())

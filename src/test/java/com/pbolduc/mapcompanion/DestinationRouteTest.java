@@ -103,7 +103,7 @@ public class DestinationRouteTest
 
 	private static int at(int current, int x, int y, int plane)
 	{
-		return DestinationRoute.next(alKharid(), current, new WorldPoint(x, y, plane));
+		return DestinationRoute.next(alKharid(), current, new WorldPoint(x, y, plane), DestinationRoute.Sailing.ASHORE_UNKNOWN, null, null);
 	}
 
 	@Test
@@ -146,23 +146,23 @@ public class DestinationRouteTest
 			step("method", "Use the spirit tree", false, null, 0, null),
 			step("arrival-walk", "Walk to the patch", true, 2490, 3180, 0),
 			step("walk-leg", "Walk 30 tiles", true, 2520, 3180, 0));
-		assertEquals(0, DestinationRoute.next(steps, 0, new WorldPoint(3222, 3218, 0)));
-		assertEquals(2, DestinationRoute.next(steps, 0, new WorldPoint(2490, 3181, 0)));
+		assertEquals(0, DestinationRoute.next(steps, 0, new WorldPoint(3222, 3218, 0), DestinationRoute.Sailing.ASHORE_UNKNOWN, null, null));
+		assertEquals(2, DestinationRoute.next(steps, 0, new WorldPoint(2490, 3181, 0), DestinationRoute.Sailing.ASHORE_UNKNOWN, null, null));
 	}
 
 	@Test
 	public void aPlaceGainingItsRouteKeepsItsPlaceAndANewPlaceStartsOver()
 	{
 		DestinationRoute route = new DestinationRoute();
-		route.sync(destination("Al Kharid bank", null));
+		route.sync(destination("Al Kharid bank", null), null);
 		assertFalse(route.view().hasRoute());
-		route.sync(destination("Al Kharid bank", route("item:ring-of-dueling", alKharid())));
-		assertTrue(route.advance(new WorldPoint(3293, 3184, 0)));
-		route.sync(destination("Al Kharid bank", route("item:ring-of-dueling", alKharid())));
+		route.sync(destination("Al Kharid bank", route("item:ring-of-dueling", alKharid())), null);
+		assertTrue(route.advance(new WorldPoint(3293, 3184, 0), DestinationRoute.Sailing.ASHORE_UNKNOWN));
+		route.sync(destination("Al Kharid bank", route("item:ring-of-dueling", alKharid())), null);
 		assertEquals("the same route arriving again is not a new one", 1, route.view().step);
-		route.sync(destination("Varrock west bank", route("item:ring-of-dueling", alKharid())));
+		route.sync(destination("Varrock west bank", route("item:ring-of-dueling", alKharid())), null);
 		assertEquals(0, route.view().step);
-		route.sync(null);
+		route.sync(null, null);
 		assertNull(route.view());
 	}
 
@@ -175,14 +175,14 @@ public class DestinationRouteTest
 	public void comingToThePlaceOnItsFloorAndWorldReachesIt()
 	{
 		DestinationRoute route = new DestinationRoute();
-		route.sync(destination("Al Kharid bank", null));
+		route.sync(destination("Al Kharid bank", null), null);
 		assertFalse("still in Lumbridge", route.reaches(new WorldPoint(3222, 3218, 0), true));
 		assertFalse("under it, on the floor below", route.reaches(new WorldPoint(3310, 3200, 0), true));
 		assertFalse("five tiles off", route.reaches(new WorldPoint(3315, 3200, 1), true));
 		assertFalse("at its tile on another world", route.reaches(new WorldPoint(3311, 3199, 1), false));
 		assertTrue("and there, once on its world", route.reaches(new WorldPoint(3311, 3199, 1), true));
 		assertFalse("where the tile cannot be trusted nothing is said", route.reaches(null, true));
-		route.sync(null);
+		route.sync(null, null);
 		assertFalse("no destination, nothing to reach", route.reaches(new WorldPoint(3311, 3199, 1), true));
 	}
 
@@ -194,12 +194,12 @@ public class DestinationRouteTest
 	public void aPlacePinnedWhereThePlayerStandsIsKeptUntilTheyLeaveAndComeBack()
 	{
 		DestinationRoute route = new DestinationRoute();
-		route.sync(destination("Al Kharid bank", null));
+		route.sync(destination("Al Kharid bank", null), null);
 		assertFalse(route.reaches(new WorldPoint(3310, 3200, 1), true));
 		assertFalse("and stays while they stand there", route.reaches(new WorldPoint(3309, 3201, 1), true));
 		assertFalse(route.reaches(new WorldPoint(3293, 3184, 0), true));
 		assertTrue(route.reaches(new WorldPoint(3310, 3200, 1), true));
-		route.sync(destination("Varrock west bank", null));
+		route.sync(destination("Varrock west bank", null), null);
 		assertFalse("another place starts over", route.reaches(new WorldPoint(3310, 3200, 1), true));
 	}
 
@@ -210,9 +210,9 @@ public class DestinationRouteTest
 		DestinationRoute route = new DestinationRoute();
 		RelayResponse.Destination far = destination("Al Kharid bank", route("item:ring-of-dueling", alKharid()));
 		far.x = 3330;
-		route.sync(far);
+		route.sync(far, null);
 		assertFalse(route.reaches(new WorldPoint(3293, 3184, 0), true));
-		assertTrue(route.advance(new WorldPoint(3310, 3200, 1)));
+		assertTrue(route.advance(new WorldPoint(3310, 3200, 1), DestinationRoute.Sailing.ASHORE_UNKNOWN));
 		assertTrue(route.view().arrived());
 		assertTrue(route.reaches(new WorldPoint(3310, 3200, 1), true));
 	}
@@ -270,8 +270,8 @@ public class DestinationRouteTest
 	public void nothingMovesWhereTheTileCannotBeTrusted()
 	{
 		DestinationRoute route = new DestinationRoute();
-		route.sync(destination("Al Kharid bank", route("item:ring-of-dueling", alKharid())));
-		assertFalse(route.advance(null));
+		route.sync(destination("Al Kharid bank", route("item:ring-of-dueling", alKharid())), null);
+		assertFalse(route.advance(null, DestinationRoute.Sailing.ASHORE_UNKNOWN));
 		assertEquals(0, route.view().step);
 	}
 
@@ -279,14 +279,14 @@ public class DestinationRouteTest
 	public void aRerouteReplacesTheStepsAndTheOldRouteIsNotPutBack()
 	{
 		DestinationRoute route = new DestinationRoute();
-		route.sync(destination("Al Kharid bank", route("item:ring-of-dueling", alKharid())));
+		route.sync(destination("Al Kharid bank", route("item:ring-of-dueling", alKharid())), null);
 		DestinationRoute.Ticket ticket = route.beginReroute(0L);
 		assertNotNull(ticket);
 		assertNull("one at a time", route.beginReroute(0L));
 		route.finishReroute(ticket, route("walk", Arrays.asList(step("walk-leg", "Walk 140 tiles", true, 3310, 3200, 1))), null, 5_000L);
 		assertEquals("walk", route.view().way().id);
 		assertTrue(route.view().rerouted);
-		route.sync(destination("Al Kharid bank", route("item:ring-of-dueling", alKharid())));
+		route.sync(destination("Al Kharid bank", route("item:ring-of-dueling", alKharid())), null);
 		assertEquals("the destination's own route is the old answer", "walk", route.view().way().id);
 	}
 
@@ -294,9 +294,9 @@ public class DestinationRouteTest
 	public void anAnswerForAPlaceSinceReplacedIsThrownAwayButItsWaitIsKept()
 	{
 		DestinationRoute route = new DestinationRoute();
-		route.sync(destination("Al Kharid bank", route("item:ring-of-dueling", alKharid())));
+		route.sync(destination("Al Kharid bank", route("item:ring-of-dueling", alKharid())), null);
 		DestinationRoute.Ticket ticket = route.beginReroute(0L);
-		route.sync(destination("Varrock west bank", route("item:varrock-teleport", alKharid())));
+		route.sync(destination("Varrock west bank", route("item:varrock-teleport", alKharid())), null);
 		route.finishReroute(ticket, route("walk", alKharid()), null, 20_000L);
 		assertEquals("item:varrock-teleport", route.view().way().id);
 		assertNull("the map's wait is the member's, not the place's", route.beginReroute(10_000L));

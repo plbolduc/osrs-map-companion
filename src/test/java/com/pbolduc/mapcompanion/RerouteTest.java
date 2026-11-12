@@ -124,7 +124,7 @@ public class RerouteTest
 	private void destination()
 	{
 		route.sync(DestinationRouteTest.destination("Al Kharid bank",
-			DestinationRouteTest.route("item:ring-of-dueling", DestinationRouteTest.alKharid())));
+			DestinationRouteTest.route("item:ring-of-dueling", DestinationRouteTest.alKharid())), null);
 	}
 
 	private void settle() throws InterruptedException
@@ -264,7 +264,7 @@ public class RerouteTest
 		{
 			DestinationRoute fresh = new DestinationRoute();
 			fresh.sync(DestinationRouteTest.destination("Al Kharid bank",
-				DestinationRouteTest.route("item:ring-of-dueling", DestinationRouteTest.alKharid())));
+				DestinationRouteTest.route("item:ring-of-dueling", DestinationRouteTest.alKharid())), null);
 			DestinationRoute.Ticket ticket = fresh.beginReroute(0L);
 			assertNotNull(ticket);
 			RoutePress reader = new RoutePress(new OkHttpClient(), new Gson(), game(), new ClientThread(), pairing, identity, fresh,

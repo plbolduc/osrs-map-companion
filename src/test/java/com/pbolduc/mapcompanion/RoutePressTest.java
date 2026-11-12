@@ -164,7 +164,7 @@ public class RoutePressTest
 		assertEquals(1, synced.get());
 
 		/* The next tick's sync with the same destination keeps the route and the following. */
-		route.sync(shown);
+		route.sync(shown, null);
 		assertTrue(route.view().following);
 		assertEquals("walk", route.view().way().id);
 	}
@@ -259,7 +259,7 @@ public class RoutePressTest
 		directive.destination = DestinationRouteTest.destination("Al Kharid bank",
 			DestinationRouteTest.route("item:ring-of-dueling", DestinationRouteTest.alKharid()));
 		destinations.accept(directive);
-		route.sync(destinations.getDestination());
+		route.sync(destinations.getDestination(), null);
 		assertFalse(route.view().following);
 	}
 
@@ -319,7 +319,7 @@ public class RoutePressTest
 		assertTrue(busy.said("search").message.startsWith("The map asked to wait."));
 
 		route.sync(DestinationRouteTest.destination("Al Kharid bank",
-			DestinationRouteTest.route("item:ring-of-dueling", DestinationRouteTest.alKharid())));
+			DestinationRouteTest.route("item:ring-of-dueling", DestinationRouteTest.alKharid())), null);
 		assertNull("nor does Reroute", route.beginReroute(System.currentTimeMillis()));
 	}
 

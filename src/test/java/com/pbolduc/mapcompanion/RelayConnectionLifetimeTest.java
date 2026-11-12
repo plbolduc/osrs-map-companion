@@ -105,7 +105,7 @@ public class RelayConnectionLifetimeTest
 
 	private static boolean post(RelayClient relay, String code, java.util.function.Consumer<RelayResponse> callback)
 	{
-		return relay.post("https://example.invalid", code, null, null, new CompanionSnapshot(), callback);
+		return relay.post("https://example.invalid", code, null, null, null, new CompanionSnapshot(), callback);
 	}
 
 	private static final class HeldClient extends OkHttpClient
