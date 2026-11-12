@@ -33,17 +33,19 @@ import java.awt.event.FocusEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BooleanSupplier;
-import javax.swing.BorderFactory;
+import javax.swing.border.EmptyBorder;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.refont;
+import static com.pbolduc.mapcompanion.SharingFields.Field;
+import static net.runelite.client.ui.ColorScheme.LIGHT_GRAY_COLOR;
 
 /**
  * Sharing as six switches, in RuneLite's narrow sidebar: Character name with the name shown instead
@@ -78,7 +80,7 @@ final class SharingControls extends JPanel
 	private final List<Group> groups = new ArrayList<>();
 	private final JTextField nickname = new JTextField();
 	private final JLabel nicknameLabel = new JLabel("Name to show instead");
-	private final JLabel nicknameHint = MapCompanionPanel.label(11f, ColorScheme.LIGHT_GRAY_COLOR);
+	private final JLabel nicknameHint = MapCompanionPanel.label(11f, LIGHT_GRAY_COLOR);
 	private String displayedNickname;
 
 	SharingControls(MapCompanionConfig config, ConfigStore store)
@@ -92,9 +94,9 @@ final class SharingControls extends JPanel
 		/* Under the switch's words, as a partly shared group's line is: it is what the switch leaves the group. */
 		JPanel nameBox = column();
 		nameBox.setName("sharing.nameBox");
-		nameBox.setBorder(BorderFactory.createEmptyBorder(0, TEXT_INSET, 0, 0));
+		nameBox.setBorder(new EmptyBorder(0, TEXT_INSET, 0, 0));
 		add(nameBox);
-		nicknameLabel.setFont(nicknameLabel.getFont().deriveFont(11f));
+		refont(nicknameLabel, 11f);
 		nameBox.add(nicknameLabel);
 		nickname.setName("nickname");
 		MapCompanionPanel.capped(nickname);
@@ -122,12 +124,12 @@ final class SharingControls extends JPanel
 		add(fold("What each one sends", whatEachOneSends()));
 
 		JPanel client = column();
-		for (SharingFields.Field field : SharingFields.CLIENT)
+		for (Field field : SharingFields.CLIENT)
 		{
 			client.add(choice(field, false));
 		}
 		/* The settings a box cannot hold live only in RuneLite's list, and the README sends players to them. */
-		JLabel elsewhere = line(KEYS_ELSEWHERE, ColorScheme.LIGHT_GRAY_COLOR, 2);
+		JLabel elsewhere = line(KEYS_ELSEWHERE, LIGHT_GRAY_COLOR, 2);
 		elsewhere.setName("sharing.keysElsewhere");
 		client.add(elsewhere);
 		add(fold(CLIENT_TITLE, client));
@@ -135,7 +137,7 @@ final class SharingControls extends JPanel
 	}
 
 	/** A choice of its own: a switch drawn as the groups' are, or one of this client's in a smaller hand. */
-	private JCheckBox choice(SharingFields.Field field, boolean sharing)
+	private JCheckBox choice(Field field, boolean sharing)
 	{
 		String key = field.key;
 		BooleanSupplier read = () -> field.on(config, store);
@@ -201,14 +203,14 @@ final class SharingControls extends JPanel
 	{
 		JPanel details = column();
 		details.setName("sharing.details");
-		details.setBorder(BorderFactory.createEmptyBorder(0, 0, 4, 0));
+		details.setBorder(new EmptyBorder(0, 0, 4, 0));
 		sends(details, SharingFields.NAME.label, SharingFields.NAME.detail);
 		for (SharingFields.Section section : SharingFields.GROUPS)
 		{
 			sends(details, section.title, labels(section.fields, " · "));
 			if (section == SharingFields.LOOT)
 			{
-				details.add(line(MapCompanionConfig.FEED_KEPT, ColorScheme.LIGHT_GRAY_COLOR, 0));
+				details.add(line(MapCompanionConfig.FEED_KEPT, LIGHT_GRAY_COLOR, 0));
 			}
 		}
 		sends(details, SharingFields.DEATH.label, SharingFields.DEATH.detail);
@@ -218,22 +220,22 @@ final class SharingControls extends JPanel
 	private static void sends(JPanel details, String name, String what)
 	{
 		JLabel heading = line(name, Color.WHITE, 4);
-		heading.setFont(heading.getFont().deriveFont(Font.BOLD));
+		refont(heading, Font.BOLD);
 		details.add(heading);
-		details.add(line(what, ColorScheme.LIGHT_GRAY_COLOR, 0));
+		details.add(line(what, LIGHT_GRAY_COLOR, 0));
 	}
 
 	private static JLabel line(String text, Color colour, int above)
 	{
 		JLabel line = MapCompanionPanel.wrapped(text, 11f, colour, TEXT);
-		line.setBorder(BorderFactory.createEmptyBorder(above, 0, 0, 0));
+		line.setBorder(new EmptyBorder(above, 0, 0, 0));
 		return line;
 	}
 
-	static String labels(List<SharingFields.Field> fields, String between)
+	static String labels(List<Field> fields, String between)
 	{
 		List<String> labels = new ArrayList<>();
-		for (SharingFields.Field field : fields)
+		for (Field field : fields)
 		{
 			labels.add(field.label);
 		}
@@ -244,7 +246,7 @@ final class SharingControls extends JPanel
 	private static JPanel row(JCheckBox box)
 	{
 		JPanel row = column();
-		row.setBorder(BorderFactory.createEmptyBorder(2, 0, 2, 0));
+		row.setBorder(new EmptyBorder(2, 0, 2, 0));
 		row.add(box);
 		return row;
 	}
@@ -259,11 +261,11 @@ final class SharingControls extends JPanel
 	{
 		JPanel panel = column();
 		JButton header = new JButton("▸ " + title);
-		header.setFont(header.getFont().deriveFont(12f));
+		refont(header, 12f);
 		header.setHorizontalAlignment(SwingConstants.LEFT);
-		header.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
+		header.setBorder(new EmptyBorder(5, 0, 5, 0));
 		header.setContentAreaFilled(false);
-		header.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+		header.setForeground(LIGHT_GRAY_COLOR);
 		header.setMargin(new Insets(0, 0, 0, 0));
 		MapCompanionPanel.capped(header);
 		contents.setVisible(false);
@@ -279,7 +281,7 @@ final class SharingControls extends JPanel
 		return panel;
 	}
 
-	@AllArgsConstructor(access = AccessLevel.PACKAGE)
+	@AllArgsConstructor
 	private static final class Choice
 	{
 		final JCheckBox box;
@@ -295,21 +297,21 @@ final class SharingControls extends JPanel
 		final SharingFields.Section section;
 		final JPanel panel = column();
 		final JCheckBox box;
-		final JLabel partly = MapCompanionPanel.label(11f, ColorScheme.LIGHT_GRAY_COLOR);
+		final JLabel partly = MapCompanionPanel.label(11f, LIGHT_GRAY_COLOR);
 
 		Group(SharingFields.Section section)
 		{
 			this.section = section;
 			panel.setName("sharingGroup." + section.id);
-			panel.setBorder(BorderFactory.createEmptyBorder(2, 0, 2, 0));
+			panel.setBorder(new EmptyBorder(2, 0, 2, 0));
 			/* The loot row's reminder wraps under its title in the grey of a note, as the step's does. */
 			box = new JCheckBox(section != SharingFields.LOOT ? section.title
 				: "<html><body width='150'>" + section.title + " <font color='#a5a5a5'>· kept two weeks</font></body></html>");
 			box.setName(section.key);
 			box.setBackground(ColorScheme.DARK_GRAY_COLOR);
-			box.setFont(box.getFont().deriveFont(Font.BOLD, 12f));
+			refont(box, Font.BOLD, 12f);
 			StringBuilder tip = new StringBuilder("<html><body width='220'>On shares all of these, and off stops them:");
-			for (SharingFields.Field field : section.fields)
+			for (Field field : section.fields)
 			{
 				tip.append("<br><b>").append(MapCompanionPanel.escape(field.label)).append("</b>: ")
 					.append(MapCompanionPanel.escape(field.detail));
@@ -323,13 +325,13 @@ final class SharingControls extends JPanel
 			});
 			panel.add(box);
 			partly.setName("sharingPartly." + section.id);
-			partly.setBorder(BorderFactory.createEmptyBorder(0, TEXT_INSET, 2, 0));
+			partly.setBorder(new EmptyBorder(0, TEXT_INSET, 2, 0));
 			panel.add(partly);
 		}
 
 		void refresh()
 		{
-			List<SharingFields.Field> on = SharingGroups.shared(section, config, store);
+			List<Field> on = SharingGroups.shared(section, config, store);
 			boolean whole = on.size() == section.fields.size();
 			boolean part = !on.isEmpty() && !whole;
 			box.setSelected(whole);

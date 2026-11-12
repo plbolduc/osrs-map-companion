@@ -53,6 +53,8 @@ import static com.pbolduc.mapcompanion.MapCompanionPanel.setWrapped;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.slot;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.smallButton;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.syncRow;
+import static com.pbolduc.mapcompanion.CompanionSnapshot.Clue;
+import static net.runelite.client.ui.ColorScheme.DARKER_GRAY_COLOR;
 
 /**
  * Now, on Home: the destination the map sent, with its route steps and Follow, Reroute and
@@ -96,7 +98,7 @@ final class NowCards extends JPanel
 	@Nullable
 	private RoutePress.Picture shownPicture;
 	private final JLabel destinationDetail = detail();
-	private final JPanel destinationActions = row(ColorScheme.DARKER_GRAY_COLOR);
+	private final JPanel destinationActions = row(DARKER_GRAY_COLOR);
 	private List<JButton> shownDestinationActions = new ArrayList<>();
 	/*
 	 * The death in the same ink and size as the destination above it, with its own
@@ -111,7 +113,7 @@ final class NowCards extends JPanel
 	 */
 	private final JLabel graveLabel = detail();
 	private final ThinProgressBar graveBar = new ThinProgressBar();
-	private final JPanel grave = MapCompanionPanel.column(ColorScheme.DARKER_GRAY_COLOR);
+	private final JPanel grave = MapCompanionPanel.column(DARKER_GRAY_COLOR);
 	/**
 	 * The map at the tile where you died, which is the question the line above it raises.
 	 *
@@ -127,9 +129,9 @@ final class NowCards extends JPanel
 	private final JButton deathRouteButton = smallButton("Route back");
 	private final JLabel deathSaid = new JLabel();
 	/* The card's width, as Dismiss is in the card above: the same shape for "act on this card". */
-	private final JPanel deathActions = row(ColorScheme.DARKER_GRAY_COLOR, deathMapButton);
+	private final JPanel deathActions = row(DARKER_GRAY_COLOR, deathMapButton);
 	private List<JButton> shownDeathActions = new ArrayList<>();
-	private final JPanel clueActions = row(ColorScheme.DARKER_GRAY_COLOR);
+	private final JPanel clueActions = row(DARKER_GRAY_COLOR);
 	/*
 	 * The clue being carried: its tier, its step in a few words, and Route when the map can place the
 	 * step — a coordinate's dig spot, a map's picture, or words. RuneLite's clue plugin draws the tile
@@ -229,10 +231,10 @@ final class NowCards extends JPanel
 		destinationPicture.setMinimumSize(square);
 		destinationPicture.setVisible(false);
 		destinationSlot = nowCard(destinationActions, destinationSaid, MapCompanionPanel.bar(DESTINATION_PICTURE_GAP,
-			ColorScheme.DARKER_GRAY_COLOR, destinationPicture, destinationName, null), destinationDetail, routeSteps);
+			DARKER_GRAY_COLOR, destinationPicture, destinationName, null), destinationDetail, routeSteps);
 		graveLabel.setName("now.death.grave");
 		grave.add(graveLabel);
-		grave.add(gap(3, ColorScheme.DARKER_GRAY_COLOR));
+		grave.add(gap(3, DARKER_GRAY_COLOR));
 		graveBar.setForeground(ColorScheme.PROGRESS_INPROGRESS_COLOR);
 		grave.add(left(graveBar));
 		grave.setVisible(false);
@@ -241,7 +243,7 @@ final class NowCards extends JPanel
 		clueSlot = nowCard(clueActions, clueSaid, clueTitle, clueDetail);
 		questTitle.setText(Words.of("now.questStep"));
 		questTitle.setIconTextGap(6);
-		questSlot = nowCard(row(ColorScheme.DARKER_GRAY_COLOR, questRouteButton), questSaid, questTitle);
+		questSlot = nowCard(row(DARKER_GRAY_COLOR, questRouteButton), questSaid, questTitle);
 		questRouteButton.setName("now.quest.route");
 		questRouteButton.addActionListener(e ->
 		{
@@ -389,7 +391,7 @@ final class NowCards extends JPanel
 		{
 			card.add(left(part));
 		}
-		card.add(gap(5, ColorScheme.DARKER_GRAY_COLOR));
+		card.add(gap(5, DARKER_GRAY_COLOR));
 		card.add(left(actions));
 		card.add(said(said));
 		JComponent slot = slot(card);
@@ -401,7 +403,7 @@ final class NowCards extends JPanel
 	private static JLabel sized(float size)
 	{
 		JLabel label = new JLabel();
-		label.setFont(label.getFont().deriveFont(size));
+		MapCompanionPanel.refont(label, size);
 		return label;
 	}
 
@@ -416,7 +418,7 @@ final class NowCards extends JPanel
 	/** The line a press's refusal is said in, under the buttons it came from, in the refusal pink. */
 	static JLabel said(JLabel line)
 	{
-		line.setFont(line.getFont().deriveFont(11f));
+		MapCompanionPanel.refont(line, 11f);
 		line.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
 		line.setBorder(new EmptyBorder(4, 0, 0, 0));
 		line.setVisible(false);
@@ -439,7 +441,7 @@ final class NowCards extends JPanel
 	 * above beginner is known by its scroll before and after it is opened, so the card says Route
 	 * finds the place rather than asking for a scroll the player has just read.
 	 */
-	static String clueDetail(CompanionSnapshot.Clue clue)
+	static String clueDetail(Clue clue)
 	{
 		if (clue.coordTile != null)
 		{
@@ -467,7 +469,7 @@ final class NowCards extends JPanel
 	 */
 	private void routeToClue()
 	{
-		CompanionSnapshot.Clue clue = clueReader.current();
+		Clue clue = clueReader.current();
 		CompanionSnapshot.Tile tile = ClueReader.routeTile(clue);
 		if (tile != null)
 		{
@@ -484,7 +486,7 @@ final class NowCards extends JPanel
 
 	/** The clue's scroll, as its own card draws it, for the destination's card beside the answer. */
 	@Nullable
-	private RoutePress.Picture scroll(CompanionSnapshot.Clue clue)
+	private RoutePress.Picture scroll(Clue clue)
 	{
 		Integer itemId = clue.itemId != null && clue.itemId > 0 ? clue.itemId : null;
 		return itemId == null ? null : (label, box) -> sprites.item(label, itemId, box);
@@ -656,7 +658,7 @@ final class NowCards extends JPanel
 			routeState(deathRouteButton, deathSaid, "death", "Route back", asks, loggedIn ? routeBackTip : RoutePress.LOG_IN, now);
 		}
 
-		CompanionSnapshot.Clue clue = clueReader.current();
+		Clue clue = clueReader.current();
 		clueSlot.setVisible(clue != null && paired);
 		if (clue != null && paired)
 		{

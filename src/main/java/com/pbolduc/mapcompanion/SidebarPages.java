@@ -54,7 +54,7 @@ final class SidebarPages extends JPanel
 		JButton back = new JButton("Settings", SidebarIcons.back());
 		back.setName("settings.back");
 		back.setToolTipText("Back");
-		back.setFont(back.getFont().deriveFont(14f));
+		MapCompanionPanel.refont(back, 14f);
 		back.setForeground(Color.WHITE);
 		back.setIconTextGap(6);
 		back.setHorizontalAlignment(SwingConstants.LEFT);

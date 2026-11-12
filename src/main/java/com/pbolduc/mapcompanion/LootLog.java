@@ -57,6 +57,7 @@ import net.runelite.api.WorldType;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.events.ServerNpcLoot;
 import net.runelite.client.game.ItemStack;
+import static java.util.Collections.emptyList;
 
 /**
  * Kill counts and notable drops, kept on this machine.
@@ -447,16 +448,16 @@ public class LootLog
 		if (!ordinaryWorld(client.getWorldType()) || store.scopeKey() == null || event == null
 			|| event.getComposition() == null || event.getItems() == null)
 		{
-			return Collections.emptyList();
+			return emptyList();
 		}
 		String name = event.getComposition().getName();
 		if (name == null || name.trim().isEmpty() || "null".equalsIgnoreCase(name.trim()))
 		{
-			return Collections.emptyList();
+			return emptyList();
 		}
 		ensureLoaded();
 		tasks.onKill(name, client.getTickCount());
-		List<Rate> watched = tracked.getOrDefault(key(name), Collections.emptyList());
+		List<Rate> watched = tracked.getOrDefault(key(name), emptyList());
 
 		Tally tally = tallies.get(name);
 		if (tally == null)
@@ -469,7 +470,7 @@ public class LootLog
 		ensureTracked(tally, watched);
 		if (tally.kills >= MAX_COUNT)
 		{
-			return Collections.emptyList();
+			return emptyList();
 		}
 		tally.kills++;
 		tally.lastKillMs = clock.getAsLong();
@@ -786,7 +787,7 @@ public class LootLog
 			npc.lastKillMsAgo = tally.lastKillMs > 0 ? Math.max(0L, now - tally.lastKillMs) : null;
 			npc.dropsComplete = true;
 			npc.drops = new ArrayList<>();
-			List<Rate> watched = tracked.getOrDefault(key(entry.getKey()), Collections.emptyList());
+			List<Rate> watched = tracked.getOrDefault(key(entry.getKey()), emptyList());
 			/* Sent even for no rated drops: a map whose table has some must learn this one had none. */
 			npc.ratedKey = ratedKey(watched);
 			ensureTracked(tally, watched);
@@ -963,7 +964,7 @@ public class LootLog
 	/** Whether any of this monster's rated drops is boosted under {@code when}. */
 	public boolean boosts(String npc, String when)
 	{
-		return conditions(tracked.getOrDefault(key(npc), Collections.emptyList())).contains(when);
+		return conditions(tracked.getOrDefault(key(npc), emptyList())).contains(when);
 	}
 
 	/** Whether a drop's boost applies to the next kill of this monster, as far as is known now. */
@@ -1029,14 +1030,14 @@ public class LootLog
 	{
 		if (!ordinaryWorld(client.getWorldType()))
 		{
-			return Collections.emptyList();
+			return emptyList();
 		}
 		ensureLoaded();
 		List<Monster> out = new ArrayList<>();
 		for (Map.Entry<String, Tally> entry : ordered(pinnedNpc()))
 		{
 			Tally tally = entry.getValue();
-			List<Rate> watched = tracked.getOrDefault(key(entry.getKey()), Collections.emptyList());
+			List<Rate> watched = tracked.getOrDefault(key(entry.getKey()), emptyList());
 			ensureTracked(tally, watched);
 			List<Drop> drops = new ArrayList<>();
 			for (String item : dropOrder(tally, watched, false))
@@ -1334,7 +1335,7 @@ public class LootLog
 						{
 							tally.collectionSince = tally.kills;
 						}
-						ensureTracked(tally, tracked.getOrDefault(key(name), Collections.emptyList()));
+						ensureTracked(tally, tracked.getOrDefault(key(name), emptyList()));
 						tallies.put(name, tally);
 					}
 				});

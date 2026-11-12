@@ -49,7 +49,6 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
@@ -70,6 +69,8 @@ import static com.pbolduc.mapcompanion.MapCompanionPanel.sectionHead;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.setWrapped;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.smallButton;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.syncRow;
+import static javax.swing.SwingUtilities.invokeLater;
+import static net.runelite.client.ui.ColorScheme.DARK_GRAY_COLOR;
 
 /**
  * The connection, at the top of the daily page: the status card with its dot and the gear, the one
@@ -164,8 +165,8 @@ final class ConnectCard extends JPanel
 	 * field while the menu's Join another group… has it open. Each press is answered under itself,
 	 * where the player is looking, which a line above the tabs is not once the tab has scrolled.
 	 */
-	final JPanel groupActions = column(ColorScheme.DARK_GRAY_COLOR);
-	private final JPanel groupButtons = row(ColorScheme.DARK_GRAY_COLOR);
+	final JPanel groupActions = column(DARK_GRAY_COLOR);
+	private final JPanel groupButtons = row(DARK_GRAY_COLOR);
 	private List<JButton> shownGroupActions = new ArrayList<>();
 	/** What Copy invite and the menu's Rename group… said, under the row they are pressed in. */
 	private final Said groupMessage = new Said("group.message", CARD_TEXT_WIDTH + 16);
@@ -208,9 +209,9 @@ final class ConnectCard extends JPanel
 	 * offers a way in; and in the Group tab under Copy invite and Switch ▾ while the menu that opened
 	 * it is what the player pressed.
 	 */
-	private final JPanel field = column(ColorScheme.DARK_GRAY_COLOR);
-	private final JPanel fieldAbove = column(ColorScheme.DARK_GRAY_COLOR);
-	private final JPanel fieldBelow = column(ColorScheme.DARK_GRAY_COLOR);
+	private final JPanel field = column(DARK_GRAY_COLOR);
+	private final JPanel fieldAbove = column(DARK_GRAY_COLOR);
+	private final JPanel fieldBelow = column(DARK_GRAY_COLOR);
 
 	/**
 	 * The join field, and what it says back.
@@ -231,7 +232,7 @@ final class ConnectCard extends JPanel
 	private final JLabel joinHeading = sectionHead("Have an invite?");
 	/** Under Paste and Join while the map refuses the group: what to put in the field. See {@link #refusedNextStep}. */
 	private final JLabel nextStep = MapCompanionPanel.label(11f, ColorScheme.LIGHT_GRAY_COLOR);
-	private final JPanel refusedGap = gap(8, ColorScheme.DARK_GRAY_COLOR);
+	private final JPanel refusedGap = gap(8, DARK_GRAY_COLOR);
 
 	/**
 	 * True while the map is being asked for an invite link.
@@ -260,12 +261,12 @@ final class ConnectCard extends JPanel
 		this.settingsOpen = settingsOpen;
 		this.applyMapAddress = applyMapAddress;
 		this.mapUrl = mapUrl;
-		column(this, ColorScheme.DARK_GRAY_COLOR);
+		column(this, DARK_GRAY_COLOR);
 
 		/* The status card. Dot beside the sentence, so the state reads at a glance and again in words. */
 		JPanel status = card();
-		dot.setFont(dot.getFont().deriveFont(12f));
-		statusLabel.setFont(statusLabel.getFont().deriveFont(12f));
+		MapCompanionPanel.refont(dot, 12f);
+		MapCompanionPanel.refont(statusLabel, 12f);
 		/*
 		 * The dot, the words and the gear keep to the first line, so a sentence that wraps does not
 		 * draw the other two beside its middle, where they read as belonging to the group's name. The
@@ -284,7 +285,7 @@ final class ConnectCard extends JPanel
 		MapCompanionPanel.bare(gearButton, 0, 4, 0).setFocusPainted(false);
 		gearButton.setVerticalAlignment(SwingConstants.TOP);
 		status.add(left(MapCompanionPanel.bar(6, ColorScheme.DARKER_GRAY_COLOR, dot, statusLabel, gearButton)));
-		groupLabel.setFont(groupLabel.getFont().deriveFont(12f));
+		MapCompanionPanel.refont(groupLabel, 12f);
 		status.add(groupLabel);
 		status.add(sharingLabel);
 		nameLink.setName("companion.rename");
@@ -295,7 +296,7 @@ final class ConnectCard extends JPanel
 		status.add(nameLink);
 		status.add(cardMessage);
 		add(status);
-		add(gap(6, ColorScheme.DARK_GRAY_COLOR));
+		add(gap(6, DARK_GRAY_COLOR));
 
 		/*
 		 * The one button that matters, in the brand's colour, and the only filled one. It was the
@@ -304,8 +305,8 @@ final class ConnectCard extends JPanel
 		 */
 		openMapButton.setBackground(ColorScheme.BRAND_ORANGE);
 		openMapButton.setForeground(Color.WHITE);
-		add(fill(openMapButton, ColorScheme.DARK_GRAY_COLOR));
-		add(gap(10, ColorScheme.DARK_GRAY_COLOR));
+		add(fill(openMapButton, DARK_GRAY_COLOR));
+		add(gap(10, DARK_GRAY_COLOR));
 
 		/* The connection is reachable from every tab, including after changing the server. */
 		joinBlock = buildJoinBlock();
@@ -316,7 +317,7 @@ final class ConnectCard extends JPanel
 		/* Between the field and the tabs, which follow it only while the map refuses the group. */
 		refusedGap.setVisible(false);
 		add(refusedGap);
-		knownGroupsRow = row(ColorScheme.DARK_GRAY_COLOR, knownGroupsButton);
+		knownGroupsRow = row(DARK_GRAY_COLOR, knownGroupsButton);
 		knownGroupsRow.setBorder(new EmptyBorder(4, 0, 0, 0));
 		MapCompanionPanel.capped(knownGroupsRow);
 		add(left(knownGroupsRow));
@@ -349,9 +350,9 @@ final class ConnectCard extends JPanel
 	 */
 	private JPanel buildJoinBlock()
 	{
-		JPanel block = column(ColorScheme.DARK_GRAY_COLOR);
+		JPanel block = column(DARK_GRAY_COLOR);
 		block.add(joinHeading);
-		block.add(gap(3, ColorScheme.DARK_GRAY_COLOR));
+		block.add(gap(3, DARK_GRAY_COLOR));
 		joinField.setName("join.field");
 		joinField.setToolTipText(Words.of("connect.joinFieldTip"));
 		joinButton.setName("join.button");
@@ -360,9 +361,9 @@ final class ConnectCard extends JPanel
 		joinField.addActionListener(e -> joinFromField());
 		/* Connect joins an invite in the field, so its tooltip follows a paste or a keystroke at once. */
 		MapCompanionPanel.onEdit(joinField.getDocument(), refresh);
-		block.add(fill(joinField, ColorScheme.DARK_GRAY_COLOR));
-		block.add(gap(4, ColorScheme.DARK_GRAY_COLOR));
-		block.add(left(row(ColorScheme.DARK_GRAY_COLOR, pasteButton, joinButton)));
+		block.add(fill(joinField, DARK_GRAY_COLOR));
+		block.add(gap(4, DARK_GRAY_COLOR));
+		block.add(left(row(DARK_GRAY_COLOR, pasteButton, joinButton)));
 		nextStep.setVisible(false);
 		block.add(nextStep);
 		return left(block);
@@ -498,7 +499,7 @@ final class ConnectCard extends JPanel
 		}
 		ask();
 		connectClient.start(server, identity.installationKey(),
-			outcome -> SwingUtilities.invokeLater(() -> finishConnect(server, outcome, true)));
+			outcome -> invokeLater(() -> finishConnect(server, outcome, true)));
 	}
 
 	/** Join with a friend's invite: the one question for another map, then the map spends the invite. */
@@ -516,7 +517,7 @@ final class ConnectCard extends JPanel
 		}
 		ask();
 		connectClient.join(server, identity.installationKey(), invited.code, invited.invite,
-			outcome -> SwingUtilities.invokeLater(() -> finishConnect(server, outcome, false)));
+			outcome -> invokeLater(() -> finishConnect(server, outcome, false)));
 	}
 
 	/**
@@ -610,7 +611,7 @@ final class ConnectCard extends JPanel
 		}
 		asking = true;
 		refresh.run();
-		connectClient.link(server, code, member, secret, url -> SwingUtilities.invokeLater(() ->
+		connectClient.link(server, code, member, secret, url -> invokeLater(() ->
 		{
 			asking = false;
 			LinkBrowser.browse(url != null ? url : mapUrl.get() + "/map?task=companion");
@@ -988,7 +989,7 @@ final class ConnectCard extends JPanel
 			return;
 		}
 		under(line, "Renaming…", false, false);
-		connectClient.rename(server, code, member, secret, name, outcome -> SwingUtilities.invokeLater(() ->
+		connectClient.rename(server, code, member, secret, name, outcome -> invokeLater(() ->
 		{
 			if (outcome.name != null && server.equals(pairing.serverUrl()) && code.equalsIgnoreCase(pairingCode()))
 			{
@@ -1042,7 +1043,7 @@ final class ConnectCard extends JPanel
 			return;
 		}
 		under(groupMessage, "Removing " + name + "…", false, false);
-		connectClient.remove(server, code, member, secret, friendId, outcome -> SwingUtilities.invokeLater(() ->
+		connectClient.remove(server, code, member, secret, friendId, outcome -> invokeLater(() ->
 		{
 			if (!server.equals(pairing.serverUrl()) || !code.equalsIgnoreCase(pairingCode()))
 			{
@@ -1491,7 +1492,7 @@ final class ConnectCard extends JPanel
 		copyInviteButton.setText("Asking the map…");
 		String secret = pairing.secret(server, code, memberId);
 		relay.requestInvite(server, code, memberId, secret, (invite, status) ->
-							SwingUtilities.invokeLater(() -> finishInvite(server, code, invite, status, secret != null)));
+							invokeLater(() -> finishInvite(server, code, invite, status, secret != null)));
 	}
 
 	/**

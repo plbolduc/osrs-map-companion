@@ -27,7 +27,6 @@ package com.pbolduc.mapcompanion;
 
 import java.util.HashMap;
 import java.util.Map;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -52,7 +51,7 @@ final class PatchStates
 	static final Decoded UNREADABLE = new Decoded(UNKNOWN, null, null, false, null);
 	private static final Map<String, Decoded[]> TABLE = load();
 
-	@AllArgsConstructor(access = AccessLevel.PACKAGE)
+	@AllArgsConstructor
 	static final class Decoded
 	{
 		final String state;

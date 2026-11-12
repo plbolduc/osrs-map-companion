@@ -31,6 +31,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
+import static com.pbolduc.mapcompanion.SharingFields.Field;
+import static com.pbolduc.mapcompanion.SharingFields.Section;
 
 /**
  * Each sharing group's switch in RuneLite's list, kept in step with the fields it stands for.
@@ -92,9 +94,9 @@ final class SharingGroups
 	}
 
 	/** Every field in the group on: the only state its switch shows as on. */
-	static boolean on(SharingFields.Section section, MapCompanionConfig config, ConfigStore store)
+	static boolean on(Section section, MapCompanionConfig config, ConfigStore store)
 	{
-		for (SharingFields.Field field : section.fields)
+		for (Field field : section.fields)
 		{
 			if (!field.on(config, store))
 			{
@@ -105,10 +107,10 @@ final class SharingGroups
 	}
 
 	/** The group's fields that are on, in its own order: what a partly shared group names. */
-	static List<SharingFields.Field> shared(SharingFields.Section section, MapCompanionConfig config, ConfigStore store)
+	static List<Field> shared(Section section, MapCompanionConfig config, ConfigStore store)
 	{
-		List<SharingFields.Field> on = new ArrayList<>();
-		for (SharingFields.Field field : section.fields)
+		List<Field> on = new ArrayList<>();
+		for (Field field : section.fields)
 		{
 			if (field.on(config, store))
 			{
@@ -119,9 +121,9 @@ final class SharingGroups
 	}
 
 	/** Every field of the group to {@code on}, writing only those that differ, as a press of its switch does. */
-	static void choose(SharingFields.Section section, boolean on, MapCompanionConfig config, ConfigStore store)
+	static void choose(Section section, boolean on, MapCompanionConfig config, ConfigStore store)
 	{
-		for (SharingFields.Field field : section.fields)
+		for (Field field : section.fields)
 		{
 			if (field.on(config, store) != on)
 			{
@@ -145,7 +147,7 @@ final class SharingGroups
 		String marker = store.get(KEY_SETTLED);
 		boolean read = marker != null;
 		int settledWith = marker == null ? 0 : marker.matches("[0-9]{1,4}") ? Integer.parseInt(marker) : 1;
-		for (SharingFields.Section section : SharingFields.GROUPS)
+		for (Section section : SharingFields.GROUPS)
 		{
 			boolean fields = on(section, config, store);
 			boolean shown = section.read.test(config);
@@ -156,7 +158,7 @@ final class SharingGroups
 			if (read)
 			{
 				/* The switch wins over the fields it stood for, never over one added since. */
-				for (SharingFields.Field field : section.fields)
+				for (Field field : section.fields)
 				{
 					boolean known = added.getOrDefault(field.key, 1) <= settledWith;
 					if (known && field.on(config, store) != shown)
@@ -190,7 +192,7 @@ final class SharingGroups
 	 */
 	static void changed(String key, @Nullable String value, MapCompanionConfig config, ConfigStore store)
 	{
-		for (SharingFields.Section section : SharingFields.GROUPS)
+		for (Section section : SharingFields.GROUPS)
 		{
 			if (section.key.equals(key))
 			{
@@ -200,7 +202,7 @@ final class SharingGroups
 				}
 				return;
 			}
-			for (SharingFields.Field field : section.fields)
+			for (Field field : section.fields)
 			{
 				if (!field.key.equals(key))
 				{

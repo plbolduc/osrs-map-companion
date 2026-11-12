@@ -37,7 +37,6 @@ import java.util.function.BooleanSupplier;
 import javax.annotation.Nullable;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -45,6 +44,7 @@ import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import static com.pbolduc.mapcompanion.RouteWire.text;
 
 /**
  * The sidebar's search box, asking the map's own search ({@code GET /api/companion/search}).
@@ -126,7 +126,7 @@ final class SearchClient
 	static final String ITEMS = "Items";
 
 	/** One thing the list shows: a place, or an item routed to its nearest source. */
-	@AllArgsConstructor(access = AccessLevel.PACKAGE)
+	@AllArgsConstructor
 	static final class Hit
 	{
 		final String id;
@@ -165,7 +165,7 @@ final class SearchClient
 	}
 
 	/** What the list says now. Never changes after it is made. */
-	@AllArgsConstructor(access = AccessLevel.PACKAGE)
+	@AllArgsConstructor
 	static final class Result
 	{
 		static final Result EMPTY = new Result("", Collections.<Hit>emptyList(), null, null, false);
@@ -473,7 +473,7 @@ final class SearchClient
 			return;
 		}
 		List<Hit> hits = normalize(answer);
-		String suggestion = hits.isEmpty() ? RouteWire.text(answer.suggestion, MAX_QUERY) : null;
+		String suggestion = hits.isEmpty() ? text(answer.suggestion, MAX_QUERY) : null;
 		show(new Result(query, hits, suggestion, hits.isEmpty() && suggestion == null ? NOTHING : null, false));
 	}
 
@@ -505,15 +505,15 @@ final class SearchClient
 					break;
 				}
 				String id = id(row == null ? null : row.id);
-				String name = row == null ? null : RouteWire.text(row.name, 120);
+				String name = row == null ? null : text(row.name, 120);
 				if (id == null || name == null)
 				{
 					continue;
 				}
 				int plane = row.plane == null ? 0 : row.plane;
 				boolean onMap = row.x > 0 && row.y > 0 && row.x <= 16_383 && row.y <= 16_383 && plane >= 0 && plane <= 3;
-				String section = "Places".equals(row.section) ? null : RouteWire.text(row.section, 20);
-				String kind = RouteWire.text(row.kind, 20);
+				String section = "Places".equals(row.section) ? null : text(row.section, 20);
+				String kind = text(row.kind, 20);
 				hits.add(new Hit(id, name, rowLine(row), placeLine(row), section, onMap ? new int[]{row.x, row.y, plane} : null, kind, null));
 			}
 		}
@@ -523,7 +523,7 @@ final class SearchClient
 			for (Item item : answer.items)
 			{
 				String id = id(item == null ? null : item.id);
-				String name = item == null ? null : RouteWire.text(item.name, 120);
+				String name = item == null ? null : text(item.name, 120);
 				if (id == null || name == null || items >= MAX_ITEMS)
 				{
 					continue;
@@ -539,7 +539,7 @@ final class SearchClient
 	/** "Character · Shilo Village": the website's own subtitle, without the effort; see {@link Hit#note}. */
 	static String placeLine(Row row)
 	{
-		String line = RouteWire.text(row.line, 120);
+		String line = text(row.line, 120);
 		return line == null ? "" : line;
 	}
 

@@ -32,12 +32,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nullable;
-import javax.swing.BorderFactory;
+import javax.swing.border.EmptyBorder;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import net.runelite.client.ui.ColorScheme;
+import static com.pbolduc.mapcompanion.PortTaskReader.Slot;
 
 /**
  * The port tasks this character holds, what each still asks, and the run that does them, in Home.
@@ -78,7 +79,7 @@ final class PortTasksPanel extends JPanel
 	private final JLabel hint = MapCompanionPanel.label(11f, MUTED);
 	private final JPanel starter = new JPanel(new GridLayout(1, 1));
 	private final RunView run;
-	private List<PortTaskReader.Slot> shown;
+	private List<Slot> shown;
 	private Integer shownHold;
 	private boolean shownRunning;
 
@@ -93,12 +94,12 @@ final class PortTasksPanel extends JPanel
 		this.run = new RunView(true, state, client, follower, routes, shortest, sprites, config);
 		/* The bold face's last "s" draws past its advance; two pixels keep it inside the label. */
 		MapCompanionPanel.taskCard(this, "portTasks", "Port tasks", sprites, "Sailing")
-			.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 2));
+			.setBorder(new EmptyBorder(0, 0, 0, 2));
 		body.setOpaque(false);
 		body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
 		add(MapCompanionPanel.left(body));
 		starter.setOpaque(false);
-		starter.setBorder(BorderFactory.createEmptyBorder(4, 0, 0, 0));
+		starter.setBorder(new EmptyBorder(4, 0, 0, 0));
 		start.setToolTipText(START_TIP);
 		starter.add(start);
 		MapCompanionPanel.capped(starter);
@@ -125,7 +126,7 @@ final class PortTasksPanel extends JPanel
 	/** The same, knowing whether a character is logged in: with none, Start run waits for one. */
 	void refresh(boolean connected, boolean loggedIn)
 	{
-		List<PortTaskReader.Slot> slots = settings.on("sharePortTasks") ? reader.shown() : null;
+		List<Slot> slots = settings.on("sharePortTasks") ? reader.shown() : null;
 		/* Through a hop's window these are the tasks from before it: shown, but not a reading to plan from. */
 		boolean kept = slots != null && reader.latest() == null;
 		boolean worth = slots != null && slots.stream().anyMatch(s -> s.held() || PortTaskReader.UNKNOWN.equals(s.state));
@@ -163,7 +164,7 @@ final class PortTasksPanel extends JPanel
 		shownHold = hold;
 		shownRunning = running;
 		body.removeAll();
-		for (PortTaskReader.Slot slot : slots)
+		for (Slot slot : slots)
 		{
 			if (!slot.held() || running)
 			{
@@ -180,19 +181,19 @@ final class PortTasksPanel extends JPanel
 	}
 
 	/** Something a run can do: a courier or a bounty, read this session. */
-	static boolean startable(@Nullable List<PortTaskReader.Slot> slots)
+	static boolean startable(@Nullable List<Slot> slots)
 	{
-		return slots != null && slots.stream().anyMatch(PortTaskReader.Slot::held);
+		return slots != null && slots.stream().anyMatch(Slot::held);
 	}
 
 	/** A courier whose every crate is delivered: what {@link #next} says as "All 3 crates delivered". */
-	static boolean delivered(PortTaskReader.Slot slot)
+	static boolean delivered(Slot slot)
 	{
 		return PortTaskReader.COURIER.equals(slot.state) && slot.needed > 0 && slot.delivered >= slot.needed;
 	}
 
 	/** The game's own name for the task, or its kind where the table gave none. */
-	static String title(PortTaskReader.Slot slot)
+	static String title(Slot slot)
 	{
 		if (slot.name != null)
 		{
@@ -205,7 +206,7 @@ final class PortTasksPanel extends JPanel
 	 * What the task still asks, in the order it is done: the crates to collect and where they go,
 	 * then the crates aboard to deliver; the parts still owed, then the board they go back to.
 	 */
-	static String next(PortTaskReader.Slot slot)
+	static String next(Slot slot)
 	{
 		String to = slot.to == null ? "the board" : slot.to;
 		if (PortTaskReader.COURIER.equals(slot.state))
@@ -237,7 +238,7 @@ final class PortTasksPanel extends JPanel
 	 * hold not seen yet is a step to take rather than a fact, so it is said as the step. The hold is
 	 * a capacity, and "carries 30 crates" reads as cargo aboard.
 	 */
-	static String footer(List<PortTaskReader.Slot> slots, @Nullable Integer hold)
+	static String footer(List<Slot> slots, @Nullable Integer hold)
 	{
 		List<String> said = new ArrayList<>();
 		long free = slots.stream().filter(s -> PortTaskReader.EMPTY.equals(s.state)).count();
@@ -267,7 +268,7 @@ final class PortTasksPanel extends JPanel
 	private static JLabel line(String text, Color color, float size, int top)
 	{
 		JLabel label = MapCompanionPanel.wrapped(text, size, color, WIDTH);
-		label.setBorder(BorderFactory.createEmptyBorder(top, 0, 0, 0));
+		label.setBorder(new EmptyBorder(top, 0, 0, 0));
 		return label;
 	}
 }

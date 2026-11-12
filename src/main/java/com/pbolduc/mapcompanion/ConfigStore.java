@@ -27,6 +27,7 @@ package com.pbolduc.mapcompanion;
 
 import javax.annotation.Nullable;
 import net.runelite.client.config.ConfigManager;
+import static com.pbolduc.mapcompanion.MapCompanionConfig.GROUP;
 
 /**
  * The two lines of key-value storage this plugin keeps its own state in.
@@ -139,7 +140,7 @@ interface ConfigStore
 			@Override
 			public String getScoped(String scope, String key)
 			{
-				return scope == null ? null : configManager.getConfiguration(MapCompanionConfig.GROUP, scope, key);
+				return scope == null ? null : configManager.getConfiguration(GROUP, scope, key);
 			}
 
 			@Override
@@ -147,7 +148,7 @@ interface ConfigStore
 			{
 				if (scope != null)
 				{
-					configManager.setConfiguration(MapCompanionConfig.GROUP, scope, key, value);
+					configManager.setConfiguration(GROUP, scope, key, value);
 				}
 			}
 
@@ -156,7 +157,7 @@ interface ConfigStore
 			{
 				if (scope != null)
 				{
-					configManager.unsetConfiguration(MapCompanionConfig.GROUP, scope, key);
+					configManager.unsetConfiguration(GROUP, scope, key);
 				}
 			}
 		};
@@ -171,19 +172,19 @@ interface ConfigStore
 			@Override
 			public String get(String key)
 			{
-				return configManager.getConfiguration(MapCompanionConfig.GROUP, key);
+				return configManager.getConfiguration(GROUP, key);
 			}
 
 			@Override
 			public void set(String key, String value)
 			{
-				configManager.setConfiguration(MapCompanionConfig.GROUP, key, value);
+				configManager.setConfiguration(GROUP, key, value);
 			}
 
 			@Override
 			public void unset(String key)
 			{
-				configManager.unsetConfiguration(MapCompanionConfig.GROUP, key);
+				configManager.unsetConfiguration(GROUP, key);
 			}
 
 			@Override

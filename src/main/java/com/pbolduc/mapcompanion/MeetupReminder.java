@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 
 /**
@@ -56,7 +55,7 @@ final class MeetupReminder
 	static final long SPACING_MS = 60_000L;
 
 	/** One meetup as this needs it: something to tell it apart by, a title, and when. */
-	@AllArgsConstructor(access = AccessLevel.PACKAGE)
+	@AllArgsConstructor
 	static final class Upcoming
 	{
 		final String key;

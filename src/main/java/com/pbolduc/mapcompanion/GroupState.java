@@ -35,8 +35,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nullable;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import static com.pbolduc.mapcompanion.RelayResponse.MemberDot;
 
 /**
  * What this sidebar holds about the group beyond what the map last said: whose dot the player
@@ -71,7 +71,7 @@ public class GroupState
 	private final DestinationState destinations;
 	private long seen = -1;
 	private final Set<String> shown = new HashSet<>();
-	private List<RelayResponse.MemberDot> dots = Collections.emptyList();
+	private List<MemberDot> dots = Collections.emptyList();
 	private long dotsAtMs;
 	@Nullable
 	private String pending;
@@ -89,7 +89,7 @@ public class GroupState
 	 */
 	private volatile int world;
 
-	@AllArgsConstructor(access = AccessLevel.PACKAGE)
+	@AllArgsConstructor
 	private static final class Answered
 	{
 		final String answer;
@@ -155,7 +155,7 @@ public class GroupState
 	}
 
 	/** The positions a stream frame carried. Null is "not asked" and changes nothing. */
-	synchronized void dots(@Nullable List<RelayResponse.MemberDot> members, long now)
+	synchronized void dots(@Nullable List<MemberDot> members, long now)
 	{
 		current();
 		if (members == null)
@@ -180,13 +180,13 @@ public class GroupState
 	}
 
 	/** Only the friends the player asked to see, for drawing while the group layer is off. */
-	synchronized List<RelayResponse.MemberDot> shownDots(@Nullable List<RelayResponse.MemberDot> members)
+	synchronized List<MemberDot> shownDots(@Nullable List<MemberDot> members)
 	{
 		current();
-		List<RelayResponse.MemberDot> kept = new ArrayList<>();
+		List<MemberDot> kept = new ArrayList<>();
 		if (members != null)
 		{
-			for (RelayResponse.MemberDot dot : members)
+			for (MemberDot dot : members)
 			{
 				if (dot != null && dot.id != null && shown.contains(dot.id))
 				{
@@ -202,12 +202,12 @@ public class GroupState
 	 * then asks for positions, and {@link #arrived} hands back the dot once it comes.
 	 */
 	@Nullable
-	synchronized RelayResponse.MemberDot routeTo(String id, long now)
+	synchronized MemberDot routeTo(String id, long now)
 	{
 		current();
 		lost = null;
 		inside = null;
-		RelayResponse.MemberDot dot = now - dotsAtMs < DOT_FRESH_MS ? find(dots, id) : null;
+		MemberDot dot = now - dotsAtMs < DOT_FRESH_MS ? find(dots, id) : null;
 		if (dot != null)
 		{
 			pending = null;
@@ -227,7 +227,7 @@ public class GroupState
 	 * not sharing a position just now, and their row says so rather than waiting on.
 	 */
 	@Nullable
-	synchronized RelayResponse.MemberDot arrived(@Nullable List<RelayResponse.MemberDot> members, long now)
+	synchronized MemberDot arrived(@Nullable List<MemberDot> members, long now)
 	{
 		current();
 		if (pending == null || members == null)
@@ -241,7 +241,7 @@ public class GroupState
 			lost = id;
 			return null;
 		}
-		RelayResponse.MemberDot dot = find(members, id);
+		MemberDot dot = find(members, id);
 		if (dot == null)
 		{
 			lost = id;
@@ -327,7 +327,7 @@ public class GroupState
 	 * their world and where they are in words as the destination's line, and their disc beside it as
 	 * the world map draws them. The disc has no presence dot: the card is not where they are now.
 	 */
-	static RoutePress.Target routeTarget(RelayResponse.MemberDot dot, @Nullable List<RelayResponse.RosterRow> roster)
+	static RoutePress.Target routeTarget(MemberDot dot, @Nullable List<RelayResponse.RosterRow> roster)
 	{
 		RelayResponse.RosterRow row = null;
 		if (roster != null)
@@ -349,9 +349,9 @@ public class GroupState
 	}
 
 	@Nullable
-	private static RelayResponse.MemberDot find(List<RelayResponse.MemberDot> members, String id)
+	private static MemberDot find(List<MemberDot> members, String id)
 	{
-		for (RelayResponse.MemberDot dot : members)
+		for (MemberDot dot : members)
 		{
 			if (dot != null && id.equals(dot.id))
 			{

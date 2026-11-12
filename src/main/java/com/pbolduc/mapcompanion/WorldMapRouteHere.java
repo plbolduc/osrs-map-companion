@@ -44,6 +44,7 @@ import net.runelite.client.chat.ChatMessageBuilder;
 import net.runelite.client.chat.ChatMessageManager;
 import net.runelite.client.chat.QueuedMessage;
 import net.runelite.client.ui.overlay.worldmap.WorldMapOverlay;
+import static com.pbolduc.mapcompanion.RoutePress.Said;
 
 /**
  * Route here, on a right-click of the game's own world map: the question Route asks beside a search
@@ -87,7 +88,7 @@ class WorldMapRouteHere
 	/** Whether a press is waiting for its answer, and what this source said before it. */
 	private boolean awaiting;
 	@Nullable
-	private RoutePress.Said before;
+	private Said before;
 
 	void menuOpened()
 	{
@@ -147,7 +148,7 @@ class WorldMapRouteHere
 		{
 			return;
 		}
-		RoutePress.Said said = routePress.said(SOURCE);
+		Said said = routePress.said(SOURCE);
 		String refusal = refusal(before, said);
 		if (refusal == null && !answered(before, said))
 		{
@@ -169,14 +170,14 @@ class WorldMapRouteHere
 	}
 
 	/** True once this source holds a finished answer that is not the one it held before the press. */
-	static boolean answered(@Nullable RoutePress.Said before, @Nullable RoutePress.Said now)
+	static boolean answered(@Nullable Said before, @Nullable Said now)
 	{
 		return now != null && now != before && !now.planning;
 	}
 
 	/** The sentence a finished, refused press left, or null while waiting or after a route came back. */
 	@Nullable
-	static String refusal(@Nullable RoutePress.Said before, @Nullable RoutePress.Said now)
+	static String refusal(@Nullable Said before, @Nullable Said now)
 	{
 		return answered(before, now) ? now.message : null;
 	}

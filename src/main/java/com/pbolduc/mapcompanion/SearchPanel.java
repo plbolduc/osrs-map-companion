@@ -45,6 +45,7 @@ import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.gameval.SpriteID;
 import net.runelite.client.ui.ColorScheme;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.label;
+import static com.pbolduc.mapcompanion.RoutePress.Said;
 
 /**
  * Search the map from the sidebar: a box at the top of Home and up to eight places under it.
@@ -104,10 +105,10 @@ final class SearchPanel extends JPanel
 	private SearchClient.Hit picked;
 	/** The press's last word this list has acted on, so each answer folds or opens it once. */
 	@Nullable
-	private RoutePress.Said heard;
+	private Said heard;
 	/** A word from a pick the player has typed past, which the line under the box no longer says. */
 	@Nullable
-	private RoutePress.Said quiet;
+	private Said quiet;
 	/** The player typed while a pick was planning, so its answer, when it lands, is typed past too. */
 	private boolean typedPast;
 	@Nullable
@@ -160,7 +161,7 @@ final class SearchPanel extends JPanel
 	{
 		folded = false;
 		picked = null;
-		RoutePress.Said said = press.said(SOURCE);
+		Said said = press.said(SOURCE);
 		quiet = said;
 		typedPast = said != null && said.planning;
 	}
@@ -176,9 +177,9 @@ final class SearchPanel extends JPanel
 	{
 		search.checkScope();
 		SearchClient.Result result = search.result();
-		RoutePress.Said said = press.said(SOURCE);
+		Said said = press.said(SOURCE);
 		heard(said);
-		RoutePress.Said shown = said == quiet ? null : said;
+		Said shown = said == quiet ? null : said;
 		long now = System.currentTimeMillis();
 		String line = shown != null && shown.planning ? "Planning the way there…"
 			: shown != null && shown.message != null ? named(press.words(shown, now))
@@ -268,7 +269,7 @@ final class SearchPanel extends JPanel
 	 * Fold or open the list on each new word from a pick, once: an answer that filled the card folds
 	 * it, since the card is the answer now, and a refusal leaves the rows up to try the next one.
 	 */
-	private void heard(@Nullable RoutePress.Said said)
+	private void heard(@Nullable Said said)
 	{
 		if (said == heard)
 		{

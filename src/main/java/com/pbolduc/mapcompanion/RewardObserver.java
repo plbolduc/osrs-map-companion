@@ -50,6 +50,7 @@ import net.runelite.client.events.ServerNpcLoot;
 import net.runelite.client.game.ItemStack;
 import net.runelite.client.plugins.loottracker.LootReceived;
 import net.runelite.http.api.loottracker.LootRecordType;
+import static com.pbolduc.mapcompanion.CollectionItemCatalog.clean;
 
 /**
  * Joins complementary reward signals without counting a receipt twice.
@@ -123,7 +124,7 @@ public final class RewardObserver
 		{
 			return;
 		}
-		String source = CollectionItemCatalog.clean(event.getComposition().getName());
+		String source = clean(event.getComposition().getName());
 		if (source != null)
 		{
 			readLoot(event.getItems(), "npc", source);
@@ -196,7 +197,7 @@ public final class RewardObserver
 		{
 			return;
 		}
-		String message = CollectionItemCatalog.clean(event.getMessage());
+		String message = clean(event.getMessage());
 		if (message == null)
 		{
 			return;
@@ -263,9 +264,9 @@ public final class RewardObserver
 			popupStarted = false;
 			int mode = client.getVarbitValue(VarbitID.OPTION_COLLECTION_NEW_ITEM);
 			if (started && (mode == 2 || mode == 3) && "Collection log".equalsIgnoreCase(
-					CollectionItemCatalog.clean(client.getVarcStrValue(VarClientID.NOTIFICATION_TITLE))))
+					clean(client.getVarcStrValue(VarClientID.NOTIFICATION_TITLE))))
 			{
-				String message = CollectionItemCatalog.clean(client.getVarcStrValue(VarClientID.NOTIFICATION_MAIN));
+				String message = clean(client.getVarcStrValue(VarClientID.NOTIFICATION_MAIN));
 				if (message != null && message.startsWith(POPUP_PREFIX))
 				{
 					collected(message.substring(POPUP_PREFIX.length()), pets, collections);
@@ -289,7 +290,7 @@ public final class RewardObserver
 
 	private void collection(String itemName)
 	{
-		String name = CollectionItemCatalog.clean(itemName);
+		String name = clean(itemName);
 		if (name == null || name.length() > 120)
 		{
 			return;
@@ -322,7 +323,7 @@ public final class RewardObserver
 
 	private void namePet(String itemName)
 	{
-		String name = CollectionItemCatalog.clean(itemName);
+		String name = clean(itemName);
 		Integer id = catalog.findItemId(name);
 		if (id != null && catalog.isPet(id))
 		{

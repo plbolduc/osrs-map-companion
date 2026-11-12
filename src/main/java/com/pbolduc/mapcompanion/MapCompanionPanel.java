@@ -49,7 +49,6 @@ import java.util.Locale;
 import javax.annotation.Nullable;
 import javax.swing.AbstractButton;
 import javax.swing.border.EmptyBorder;
-import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -67,6 +66,7 @@ import net.runelite.client.callback.ClientThread;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
+import static net.runelite.client.ui.ColorScheme.DARK_GRAY_COLOR;
 
 /**
  * The sidebar, kept deliberately small.
@@ -121,7 +121,7 @@ public class MapCompanionPanel extends PluginPanel
 	 * What there is to start, under what is happening: the farm run, Slayer and port tasks. Each card
 	 * hides while it has nothing to offer, and the heading goes with the last of them.
 	 */
-	private final JPanel tasks = column(ColorScheme.DARK_GRAY_COLOR);
+	private final JPanel tasks = column(DARK_GRAY_COLOR);
 	/**
 	 * Every button that opens the browser says so. "Show on map" opened the website here and drew on
 	 * the game's world map on a friend's card, one label for two maps; the game's map is "World map".
@@ -137,12 +137,12 @@ public class MapCompanionPanel extends PluginPanel
 	private final GroupPanel groupPanel;
 
 	/* Drop luck: one monster's card, or every monster tracked. See {@link DropLuckPanel}. */
-	private final JPanel drySection = column(ColorScheme.DARK_GRAY_COLOR);
+	private final JPanel drySection = column(DARK_GRAY_COLOR);
 	private final DropLuckPanel dropLuck;
 	private final JLabel dropLuckPaused = wrapped(LootLog.PAUSED, 11f, ColorScheme.LIGHT_GRAY_COLOR, TEXT_WIDTH);
 	/** Drop luck's heading, given up while the card's own first row says it (see DropLuckPanel.namesItself). */
 	private final JLabel dryHeading = sectionHead(DropLuckPanel.HEADING);
-	private final JPanel dryHeadingGap = gap(3, ColorScheme.DARK_GRAY_COLOR);
+	private final JPanel dryHeadingGap = gap(3, DARK_GRAY_COLOR);
 
 	/** The status card, the orange button, the join field and the group's buttons. See {@link ConnectCard}. */
 	private final ConnectCard connectCard;
@@ -239,22 +239,22 @@ public class MapCompanionPanel extends PluginPanel
 		this.starsPanel.pictures(sprites);
 
 		setLayout(new BorderLayout());
-		setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+		setBorder(new EmptyBorder(10, 10, 10, 10));
 
 		/*
 		 * No title. RuneLite's sidebar button already names the plugin, and the row it took is the
 		 * one the status card now starts on.
 		 */
-		JPanel body = column(ColorScheme.DARK_GRAY_COLOR);
+		JPanel body = column(DARK_GRAY_COLOR);
 		body.setName("companionDaily");
 
 		body.add(connectCard);
 		body.add(recommendedSharing);
-		JPanel overview = column(ColorScheme.DARK_GRAY_COLOR);
+		JPanel overview = column(DARK_GRAY_COLOR);
 		overview.setName("companionHome");
 		/* First, because "where is it and how do I get there" is the question the map answers best. */
 		overview.add(searchPanel);
-		searchGap = gap(8, ColorScheme.DARK_GRAY_COLOR);
+		searchGap = gap(8, DARK_GRAY_COLOR);
 		overview.add(searchGap);
 
 		overview.add(nowCards);
@@ -265,11 +265,11 @@ public class MapCompanionPanel extends PluginPanel
 		 * with two Start runs in it.
 		 */
 		tasks.add(sectionHead("Tasks"));
-		tasks.add(gap(3, ColorScheme.DARK_GRAY_COLOR));
+		tasks.add(gap(3, DARK_GRAY_COLOR));
 		tasks.add(slot(farmRunPanel));
 		tasks.add(slot(slayerPanel));
 		tasks.add(slot(portTasksPanel));
-		tasks.add(gap(7, ColorScheme.DARK_GRAY_COLOR));
+		tasks.add(gap(7, DARK_GRAY_COLOR));
 		overview.add(tasks);
 
 		/* Drop luck works with no pairing code set, so it sits above everything the group needs. */
@@ -277,13 +277,13 @@ public class MapCompanionPanel extends PluginPanel
 		drySection.add(dryHeadingGap);
 		drySection.add(dropLuckPaused);
 		drySection.add(dropLuck);
-		drySection.add(gap(10, ColorScheme.DARK_GRAY_COLOR));
+		drySection.add(gap(10, DARK_GRAY_COLOR));
 		overview.add(drySection);
 
-		JPanel group = column(ColorScheme.DARK_GRAY_COLOR);
+		JPanel group = column(DARK_GRAY_COLOR);
 		group.setName("companionGroupView");
 		group.add(groupPanel);
-		group.add(gap(4, ColorScheme.DARK_GRAY_COLOR));
+		group.add(gap(4, DARK_GRAY_COLOR));
 		group.add(left(connectCard.groupActions));
 		views = new CompanionViews(overview, group, starsPanel, starsPanel::selected);
 		body.add(views);
@@ -380,7 +380,7 @@ public class MapCompanionPanel extends PluginPanel
 	static JComponent slot(JPanel card)
 	{
 		JPanel slot = new JPanel(new BorderLayout());
-		slot.setBackground(ColorScheme.DARK_GRAY_COLOR);
+		slot.setBackground(DARK_GRAY_COLOR);
 		slot.setBorder(new EmptyBorder(0, 0, 3, 0));
 		slot.add(card, BorderLayout.CENTER);
 		return left(slot);
@@ -444,11 +444,30 @@ public class MapCompanionPanel extends PluginPanel
 		return left(capped(holder));
 	}
 
+	/**
+	 * A component's own font at another size, in another style, or both: {@code Font.deriveFont}'s three
+	 * forms, for the callers that would otherwise name the component twice to say it.
+	 */
+	static void refont(Component component, float size)
+	{
+		component.setFont(component.getFont().deriveFont(size));
+	}
+
+	static void refont(Component component, int style)
+	{
+		component.setFont(component.getFont().deriveFont(style));
+	}
+
+	static void refont(Component component, int style, float size)
+	{
+		component.setFont(component.getFont().deriveFont(style, size));
+	}
+
 	/** A line in one size and ink, its words set later: the shape most of the sidebar's labels start from. */
 	static JLabel label(float size, Color colour)
 	{
 		JLabel label = new JLabel();
-		label.setFont(label.getFont().deriveFont(size));
+		refont(label, size);
 		label.setForeground(colour);
 		return label;
 	}
@@ -469,11 +488,11 @@ public class MapCompanionPanel extends PluginPanel
 	{
 		column(card, ColorScheme.DARKER_GRAY_COLOR);
 		/* Each card's inset; the gap between cards is the Tasks column's to draw. */
-		card.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+		card.setBorder(new EmptyBorder(8, 8, 8, 8));
 		card.setName(name);
 		JLabel heading = new JLabel(title);
 		heading.setForeground(Color.WHITE);
-		heading.setFont(heading.getFont().deriveFont(Font.BOLD, 13f));
+		refont(heading, Font.BOLD, 13f);
 		sprites.skill(heading, skill, 16);
 		card.add(heading);
 		return heading;
@@ -483,7 +502,7 @@ public class MapCompanionPanel extends PluginPanel
 	static JLabel sectionHead(String text)
 	{
 		JLabel heading = new JLabel(text);
-		heading.setFont(heading.getFont().deriveFont(Font.BOLD, 11f));
+		refont(heading, Font.BOLD, 11f);
 		heading.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
 		return heading;
 	}
@@ -492,7 +511,7 @@ public class MapCompanionPanel extends PluginPanel
 	static JButton smallButton(String text)
 	{
 		JButton button = new JButton(text);
-		button.setFont(button.getFont().deriveFont(11f));
+		refont(button, 11f);
 		button.setMargin(new Insets(1, 6, 1, 6));
 		return button;
 	}
@@ -501,7 +520,7 @@ public class MapCompanionPanel extends PluginPanel
 	static JButton linkButton(String text)
 	{
 		JButton button = new JButton(text);
-		button.setFont(button.getFont().deriveFont(11f));
+		refont(button, 11f);
 		button.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
 		button.setHorizontalAlignment(SwingConstants.LEFT);
 		return bare(button, 3, 0, 3);
@@ -512,7 +531,7 @@ public class MapCompanionPanel extends PluginPanel
 	{
 		button.setBorderPainted(false);
 		button.setContentAreaFilled(false);
-		button.setBorder(BorderFactory.createEmptyBorder(top, left, bottom, 0));
+		button.setBorder(new EmptyBorder(top, left, bottom, 0));
 		button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		return button;
 	}

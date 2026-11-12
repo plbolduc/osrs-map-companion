@@ -45,6 +45,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okio.BufferedSource;
+import static com.pbolduc.mapcompanion.RelayResponse.StreamDirective;
 
 /**
  * A held connection that receives what the map wants this client to know.
@@ -189,7 +190,7 @@ public class DirectiveStream
 		String code,
 		String memberId,
 		@Nullable String memberSecret,
-		Consumer<? super RelayResponse.StreamDirective> onDirective)
+		Consumer<? super StreamDirective> onDirective)
 	{
 		start(baseUrl, code, memberId, memberSecret, false, onDirective);
 	}
@@ -206,7 +207,7 @@ public class DirectiveStream
 		String memberId,
 		@Nullable String memberSecret,
 		boolean withMembers,
-		Consumer<? super RelayResponse.StreamDirective> onDirective)
+		Consumer<? super StreamDirective> onDirective)
 	{
 		if (code == null || code.isEmpty())
 		{
@@ -263,7 +264,7 @@ public class DirectiveStream
 	 * stopping and restarting the same group; late callbacks must not affect the replacement.
 	 */
 	private synchronized void open(
-		HttpUrl url, long streamGeneration, @Nullable String secret, Consumer<? super RelayResponse.StreamDirective> onDirective)
+		HttpUrl url, long streamGeneration, @Nullable String secret, Consumer<? super StreamDirective> onDirective)
 	{
 		if (!isCurrent(streamGeneration))
 		{
@@ -362,7 +363,7 @@ public class DirectiveStream
 	 * is skipped rather than parsed, because reading a field this plugin does not act on would be
 	 * inventing a contract.
 	 */
-	private void read(Response response, long streamGeneration, Consumer<? super RelayResponse.StreamDirective> onDirective)
+	private void read(Response response, long streamGeneration, Consumer<? super StreamDirective> onDirective)
 	throws IOException
 	{
 		ResponseBody body = response.body();
@@ -406,8 +407,8 @@ public class DirectiveStream
 			}
 			try
 			{
-				RelayResponse.StreamDirective directive =
-					gson.fromJson(json, RelayResponse.StreamDirective.class);
+				StreamDirective directive =
+					gson.fromJson(json, StreamDirective.class);
 				synchronized (this)
 				{
 					if (isCurrent(streamGeneration) && directive != null)
@@ -431,7 +432,7 @@ public class DirectiveStream
 	 * the generation also rejects a task that had already started when stop was called.
 	 */
 	private synchronized void scheduleReconnect(
-		HttpUrl url, long streamGeneration, @Nullable String secret, Consumer<? super RelayResponse.StreamDirective> onDirective)
+		HttpUrl url, long streamGeneration, @Nullable String secret, Consumer<? super StreamDirective> onDirective)
 	{
 		if (!isCurrent(streamGeneration) || reconnectTask != null)
 		{

@@ -29,8 +29,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import static com.pbolduc.mapcompanion.SharingFields.Field;
 
 /**
  * What the status card's second line says is shared, in the six switches Settings has.
@@ -53,12 +53,12 @@ final class SharingSummary
 	}
 
 	/** One switch as the status card weighs it: its words in a sentence, and its fields going out. */
-	@AllArgsConstructor(access = AccessLevel.PACKAGE)
+	@AllArgsConstructor
 	private static final class Switch
 	{
 		final String title;
-		final List<SharingFields.Field> fields;
-		final List<SharingFields.Field> sent;
+		final List<Field> fields;
+		final List<Field> sent;
 
 		boolean whole()
 		{
@@ -137,8 +137,8 @@ final class SharingSummary
 		switches.add(single(SharingFields.NAME, config, store));
 		for (SharingFields.Section section : SharingFields.GROUPS)
 		{
-			List<SharingFields.Field> sent = new ArrayList<>();
-			for (SharingFields.Field field : SharingGroups.shared(section, config, store))
+			List<Field> sent = new ArrayList<>();
+			for (Field field : SharingGroups.shared(section, config, store))
 			{
 				if (goesOut(field, store))
 				{
@@ -151,14 +151,14 @@ final class SharingSummary
 		return switches;
 	}
 
-	private static Switch single(SharingFields.Field field, MapCompanionConfig config, ConfigStore store)
+	private static Switch single(Field field, MapCompanionConfig config, ConfigStore store)
 	{
-		List<SharingFields.Field> sent = field.on(config, store) ? Arrays.asList(field) : new ArrayList<>();
+		List<Field> sent = field.on(config, store) ? Arrays.asList(field) : new ArrayList<>();
 		return new Switch(field.label, Arrays.asList(field), sent);
 	}
 
 	/** Pets and collection additions ride on Notable drops and levels: with it off, neither is sent. */
-	private static boolean goesOut(SharingFields.Field field, ConfigStore store)
+	private static boolean goesOut(Field field, ConfigStore store)
 	{
 		boolean riding = MapCompanionConfig.KEY_SHARE_PETS.equals(field.key) || MapCompanionConfig.KEY_SHARE_COLLECTION.equals(field.key);
 		return !riding || store.on(MapCompanionConfig.KEY_SHARE_MILESTONES);
