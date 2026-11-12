@@ -146,7 +146,7 @@ final class StarsPanel extends JPanel
 	private final JToggleButton members = chip("P2P"), free = chip("F2P"), safe = chip("Safe");
 	private final JToggleButton filters = toggle("⋯");
 	private final JPanel more = column(), rows = column(), selection = column();
-	private final JLabel levels = label(""), order = label("Most time left first"), count = label(""), status = label("");
+	private final JLabel levels = label(""), updated = label(""), count = label(""), status = label("");
 	/**
 	 * The game the list is about, in gold over it, only when it is not the main game: on a Hardcore
 	 * or League world the list is a different one, and nothing else on the tab would say why.
@@ -268,7 +268,9 @@ final class StarsPanel extends JPanel
 		add(fill(game));
 		count.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
 		refont(count, Font.BOLD, 11f);
-		add(fill(MapCompanionPanel.bar(0, getBackground(), order, null, count)));
+		/* How old the list is and how much of it shows, on one line; the list's own column of times says its order. */
+		updated.setName("stars.updated");
+		add(fill(MapCompanionPanel.bar(0, getBackground(), updated, null, count)));
 		add(status);
 		add(gap(2));
 		add(rows);
@@ -363,12 +365,15 @@ final class StarsPanel extends JPanel
 		/* Nothing is counted, and no age given, until the map has answered once: there is no list yet. */
 		count.setText(model.feed == null ? "" : locations + (locations == 1 ? " site · " : " sites · ") + stars + (stars == 1 ? " star" : " stars"));
 		/* A list it holds says how old it is, the same when Star Miners or the last refresh failed. */
-		/* The tab is a member's, so the group is there: logging in is the one thing left to do. */
+		updated.setText(model.feed == null ? "" : "Updated " + age(model.feed.snapshotAgeSeconds * 1000 + elapsed));
+		/*
+		 * Under that, a line only for what is wrong; a list with nothing wrong has none. The tab is a
+		 * member's, so the group is there: logging in is the one thing left to do.
+		 */
 		String notice = loggedOut ? LOG_IN
 			: model.feed == null ? service.message
 			: f.safe() && !model.feed.worldsAvailable ? Words.of("stars.noWorldList")
-			: "Updated " + age(model.feed.snapshotAgeSeconds * 1000 + elapsed) + " · "
-				+ (service.message != null ? "couldn't refresh, retrying" : model.feed.stale ? "Star Miners not answering" : "estimates");
+			: service.message != null ? "Couldn't refresh, retrying" : model.feed.stale ? "Star Miners not answering" : null;
 		status.setVisible(notice != null);
 		if (notice != null)
 		{

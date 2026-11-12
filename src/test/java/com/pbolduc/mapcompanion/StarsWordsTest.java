@@ -105,7 +105,8 @@ public class StarsWordsTest
 				assertFalse("nobody logged in is told to log in: " + word, word.toLowerCase().contains("log"));
 			}
 			assertEquals("no count of a list not yet here", "", text(named(panel, "stars.count")));
-			assertFalse("and no age for it", named(panel, "stars.status").isVisible());
+			assertEquals("and no age for it", "", text(named(panel, "stars.updated")));
+			assertFalse(named(panel, "stars.status").isVisible());
 		});
 	}
 
@@ -119,14 +120,44 @@ public class StarsWordsTest
 		SwingUtilities.invokeAndWait(() ->
 		{
 			panel.refresh();
+			/*
+			 * One line said both, "Updated 14m ago · Star Miners not answering". The age shares the
+			 * count's line now, and what is wrong has the line under it to itself.
+			 */
 			JLabel status = (JLabel) named(panel, "stars.status");
-			assertEquals("Updated 14m ago · Star Miners not answering", text(status));
+			assertEquals("Updated 14m ago", text(named(panel, "stars.updated")));
+			assertEquals("Star Miners not answering", text(status));
 
 			/* What a failed refresh leaves, with the list it kept. */
 			service.message = "Stars unavailable. Retrying shortly.";
 			panel.refresh();
-			assertEquals("Updated 14m ago · couldn't refresh, retrying", text(status));
+			assertEquals("Updated 14m ago", text(named(panel, "stars.updated")));
+			assertEquals("Couldn't refresh, retrying", text(status));
 			assertEquals("and why, on a hover", "Stars unavailable. Retrying shortly.", status.getToolTipText());
+		});
+	}
+
+	/**
+	 * A list with nothing wrong has one line over it: how old it is, and how much of it shows. It had
+	 * two, "Most time left first" beside the count and "Updated just now · estimates" under them. The
+	 * order is the column of times down the list's right edge, and every time is written "~46m".
+	 */
+	@Test
+	public void aListWithNothingWrongHasOneLineOverIt() throws Exception
+	{
+		scene(fixture(), false);
+		open();
+		until(() -> service.model.feed != null);
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.refresh();
+			assertEquals("Updated just now", text(named(panel, "stars.updated")));
+			assertEquals("on the count's line", named(panel, "stars.count").getParent(), named(panel, "stars.updated").getParent());
+			assertFalse("and no line for trouble there is none of", named(panel, "stars.status").isVisible());
+			for (String word : words(panel))
+			{
+				assertFalse(word, word.contains("first") || word.contains("estimates"));
+			}
 		});
 	}
 
@@ -149,7 +180,8 @@ public class StarsWordsTest
 
 			service.model.accept(new Gson().fromJson(fixture(), StarsModel.Feed.class));
 			panel.refresh();
-			assertEquals("Updated just now · couldn't refresh, retrying", text(status));
+			assertEquals("Updated just now", text(named(panel, "stars.updated")));
+			assertEquals("Couldn't refresh, retrying", text(status));
 			assertEquals(ColorScheme.LIGHT_GRAY_COLOR, status.getForeground());
 		});
 	}
