@@ -228,6 +228,8 @@ public class SidebarPolishShot
 				config.set(key, !key.equals("showGroupOnWorldMap"));
 			}
 		}
+		/* A game tick has read which world this is, as one has by the time a player sees the sidebar. */
+		lootLog.onTick(1, 0, 0);
 		Scenes.fill(state, injector, config, lootLog);
 		MapCompanionPanel panel = injector.getInstance(MapCompanionPanel.class);
 		/* Drop luck uses its own picture seam, separate from the other panels' GameSprites. */
@@ -413,8 +415,8 @@ public class SidebarPolishShot
 			directive.destination.note = "From Cara";
 			directive.destination.route = SidebarPolishShot.route();
 			destinations.accept(directive);
-			route.sync(destinations.getDestination());
-			route.advance(standing);
+			route.sync(destinations.getDestination(), null);
+			route.advance(standing, DestinationRoute.Sailing.ASHORE_UNKNOWN);
 		}
 
 		static void death(Injector injector, HarnessConfig config) throws Exception
