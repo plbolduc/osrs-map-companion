@@ -128,14 +128,15 @@ final class SearchClient
 	{
 		final String id;
 		final String name;
-		/** The grey line under the name, in the website's words. */
+		/** The grey line under the name, in the website's words; a pick writes it under the destination's name too. */
 		final String line;
 		/**
-		 * What a pick writes under the destination's name: the line without the effort. That was
-		 * measured from where the search was typed and stops being true as the player walks, while
-		 * the route's own way line under it gives the length from where they stood at the press.
+		 * "~210t": the effort the map measured, drawn at the right edge of the row and nowhere else;
+		 * null where it measured none. It was measured from where the search was typed and stops being
+		 * true as the player walks, so a pick's card leaves it to the route's own way line.
 		 */
-		final String note;
+		@Nullable
+		final String far;
 		/** "Sold at", "Dropped by" or {@link #ITEMS}; null for the ordinary rows. */
 		@Nullable
 		final String section;
@@ -157,7 +158,7 @@ final class SearchClient
 		Hit(String id, String name, String line, @Nullable String section, @Nullable int[] tile,
 			@Nullable String kind, @Nullable Integer itemId)
 		{
-			this(id, name, line, line, section, tile, kind, itemId);
+			this(id, name, line, null, section, tile, kind, itemId);
 		}
 	}
 
@@ -495,7 +496,7 @@ final class SearchClient
 				boolean onMap = row.x > 0 && row.y > 0 && row.x <= 16_383 && row.y <= 16_383 && plane >= 0 && plane <= 3;
 				String section = "Places".equals(row.section) ? null : text(row.section, 20);
 				String kind = text(row.kind, 20);
-				hits.add(new Hit(id, name, rowLine(row), placeLine(row), section, onMap ? new int[]{row.x, row.y, plane} : null, kind, null));
+				hits.add(new Hit(id, name, placeLine(row), far(row), section, onMap ? new int[]{row.x, row.y, plane} : null, kind, null));
 			}
 		}
 		if (answer.items != null)
@@ -517,26 +518,18 @@ final class SearchClient
 		return hits;
 	}
 
-	/** "Character · Shilo Village": the website's own subtitle, without the effort; see {@link Hit#note}. */
+	/** "Character · Shilo Village": the website's own subtitle, without the effort; see {@link Hit#far}. */
 	static String placeLine(Row row)
 	{
 		String line = text(row.line, 120);
 		return line == null ? "" : line;
 	}
 
-	/** "Character · Shilo Village · ~15 tiles": the website's own subtitle, then the effort it measured. */
-	static String rowLine(Row row)
+	/** "~15t": the effort the map measured, short enough to stand at the row's right edge; null where it measured none. */
+	@Nullable
+	static String far(Row row)
 	{
-		StringBuilder sb = new StringBuilder(placeLine(row));
-		if (row.effortTiles != null && row.effortTiles >= 0)
-		{
-			if (sb.length() > 0)
-			{
-				sb.append(" · ");
-			}
-			sb.append('~').append(row.effortTiles).append(" tiles");
-		}
-		return sb.toString();
+		return row.effortTiles != null && row.effortTiles >= 0 ? "~" + row.effortTiles + "t" : null;
 	}
 
 	/**

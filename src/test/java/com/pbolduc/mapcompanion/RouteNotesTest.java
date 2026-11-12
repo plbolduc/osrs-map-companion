@@ -166,7 +166,7 @@ public class RouteNotesTest
 		assertEquals("now.quest.route", routes.get(1).getName());
 	}
 
-	/** The row keeps the distance it measured; the card under it carries the route's own length instead. */
+	/** The row keeps the distance it measured, at its right edge; the card under it carries the route's own length instead. */
 	@Test
 	public void aSearchPickWritesTheRowsWordsWithoutItsDistance() throws Exception
 	{
@@ -176,7 +176,9 @@ public class RouteNotesTest
 			+ "\"name\":\"Lumbridge Castle bank\",\"line\":\"Bank · Lumbridge Castle · 2nd floor\",\"x\":3208,\"y\":3220,"
 			+ "\"plane\":2,\"effortTiles\":40}]}", SearchClient.Answer.class);
 		SearchClient.Hit hit = SearchClient.normalize(answer).get(0);
-		assertEquals("the row still says how far", "Bank · Lumbridge Castle · 2nd floor · ~40 tiles", hit.line);
+		/* The row says how far beside its name now, not at the end of its grey line. */
+		assertEquals("the row still says how far", "~40t", hit.far);
+		assertEquals("Bank · Lumbridge Castle · 2nd floor", hit.line);
 		SwingUtilities.invokeAndWait(() -> new SearchPanel(new SearchClient(new OkHttpClient(), new Gson(), pairing, identity), press, null)
 			.pick(hit));
 		settle(press, SearchPanel.SOURCE);

@@ -301,7 +301,7 @@ final class SearchPanel extends JPanel
 		StringBuilder sb = new StringBuilder();
 		for (SearchClient.Hit hit : result.hits)
 		{
-			sb.append(hit.id).append('|').append(hit.line).append(';');
+			sb.append(hit.id).append('|').append(hit.line).append('|').append(hit.far).append(';');
 		}
 		return sb.toString();
 	}
@@ -309,6 +309,10 @@ final class SearchPanel extends JPanel
 	/**
 	 * One place: its picture, its name, and the website's grey line under it. The whole row is the
 	 * button, pressable only while a press would go: otherwise its name is greyed as a button's is.
+	 *
+	 * <p>How far the map measured it is at the right edge of the name's first line, so the distances
+	 * read down one edge and are compared without reading a sentence. The name gives up that much
+	 * width; the grey line and a row with no distance keep all of it.
 	 */
 	private JPanel row(SearchClient.Hit hit, boolean live)
 	{
@@ -321,9 +325,24 @@ final class SearchPanel extends JPanel
 		JPanel words = MapCompanionPanel.column(ColorScheme.DARKER_GRAY_COLOR);
 		words.setOpaque(false);
 		int width = WIDTH - PICTURE - 6;
-		JLabel name = MapCompanionPanel.wrapped(hit.name, 12f, live ? Color.WHITE : greyed(), width);
+		JLabel far = MapCompanionPanel.label(11f, ColorScheme.LIGHT_GRAY_COLOR);
+		far.setName("search.far");
+		far.setText(hit.far);
+		far.setVerticalAlignment(SwingConstants.TOP);
+		JLabel name = MapCompanionPanel.wrapped(hit.name, 12f, live ? Color.WHITE : greyed(),
+			hit.far == null ? width : width - far.getPreferredSize().width - 4);
 		name.setName("search.name");
-		words.add(name);
+		if (hit.far == null)
+		{
+			words.add(name);
+		}
+		else
+		{
+			JPanel first = MapCompanionPanel.bar(4, ColorScheme.DARKER_GRAY_COLOR, null, name, far);
+			first.setOpaque(false);
+			/* Capped, or a row with no grey line stretches it to the picture's height and centres the name under the distance. */
+			words.add(MapCompanionPanel.left(MapCompanionPanel.capped(first)));
+		}
 		if (!hit.line.isEmpty())
 		{
 			words.add(MapCompanionPanel.wrapped(hit.line, 11f, ColorScheme.LIGHT_GRAY_COLOR, width));
@@ -478,6 +497,6 @@ final class SearchPanel extends JPanel
 		{
 			return "For " + hit.name;
 		}
-		return hit.note.isEmpty() ? null : hit.note;
+		return hit.line.isEmpty() ? null : hit.line;
 	}
 }

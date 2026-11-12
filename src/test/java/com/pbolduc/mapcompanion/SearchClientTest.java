@@ -151,7 +151,11 @@ public class SearchClientTest
 		List<SearchClient.Hit> hits = search.result().hits;
 		assertEquals(3, hits.size());
 		assertEquals("Lumbridge Castle bank", hits.get(0).name);
-		assertEquals("Bank · 2nd floor · ~40 tiles", hits.get(0).line);
+		/* The distance left the sentence for the row's right edge, where the rows' distances make a column. */
+		assertEquals("Bank · 2nd floor", hits.get(0).line);
+		assertEquals("~40t", hits.get(0).far);
+		assertNull("a row the map measured no distance for has none", hits.get(1).far);
+		assertNull("nor has an item, which stands nowhere yet", hits.get(2).far);
 		assertNull("Places carries no heading of its own", hits.get(0).section);
 		assertEquals("Dropped by", hits.get(1).section);
 		assertEquals("item:Abyssal whip", hits.get(2).id);
