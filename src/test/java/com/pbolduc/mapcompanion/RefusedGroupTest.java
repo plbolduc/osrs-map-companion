@@ -69,7 +69,7 @@ public class RefusedGroupTest
 	private final ConnectCard card = new ConnectCard(new JPanel(), config, store, new MapCompanionPlugin(), identity, pairing,
 		relay, new DirectiveStream(new OkHttpClient(), new Gson(), (action, delay) -> null),
 		new ConnectClient(new OkHttpClient(), new Gson()), new RecommendedSharing(config, store, () -> { }),
-		() -> { }, open -> { }, () -> true, () -> MapCompanionConfig.DEFAULT_MAP_URL);
+		() -> { }, open -> { }, () -> MapCompanionConfig.DEFAULT_MAP_URL);
 	private GroupPanel groupPanel;
 
 	@Test

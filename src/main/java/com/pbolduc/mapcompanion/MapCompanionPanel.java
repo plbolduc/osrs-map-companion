@@ -200,7 +200,7 @@ public class MapCompanionPanel extends PluginPanel
 		/* Before the connect card, which offers it after a first Connect. */
 		this.recommendedSharing = new RecommendedSharing(config, settings, this::refresh);
 		this.connectCard = new ConnectCard(this, config, settings, plugin, identity, pairing, relay, directiveStream, connectClient,
-			recommendedSharing, this::refresh, this::openSettings, this::applyMapAddress, this::mapUrl);
+			recommendedSharing, this::refresh, this::openSettings, this::mapUrl);
 		this.groupPanel = new GroupPanel(destinationState, groupState, routePress, meetupClient, config, sprites);
 		groupPanel.remover(new GroupPanel.Remover()
 		{
@@ -960,11 +960,5 @@ public class MapCompanionPanel extends PluginPanel
 	private void openSettings(boolean open)
 	{
 		pages.open(open);
-	}
-
-	/** The address typed in Settings, applied: Connect and Join apply it before they ask the map. */
-	private boolean applyMapAddress()
-	{
-		return settingsPage.applyMapAddress();
 	}
 }

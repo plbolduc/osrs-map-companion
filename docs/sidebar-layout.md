@@ -1248,3 +1248,12 @@ Group tab with the form open, and the form says *A meetup at the spot you picked
 link's says *A meetup where you stand*. The request is the one it always was, with that tile in
 the place of the player's. Put away and opened again from its link, the form is back to where the
 player stands, so a spot picked once is never the place of a later meetup.
+
+### Advanced, taken off the page
+
+*Advanced* held the map address with its *Apply*, *Show what's sent*, and the two buttons that
+leave a group and forget the kill log. Only somebody running a map of their own changes the
+address, and RuneLite's own list has held the setting all along, so the field and its button are
+gone from the sidebar and the fold with them. *Show what's sent* and the two buttons are the page's
+foot. *Show what's sent* stays because it is how a player, and every live check here, sees what
+would be sent rather than being told.

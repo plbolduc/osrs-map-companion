@@ -53,13 +53,12 @@ import static net.runelite.client.ui.ColorScheme.DARK_GRAY_COLOR;
 
 /**
  * Settings, the page behind the gear: What's new, every sharing choice ({@link SharingControls}),
- * then Advanced with the map address, Show what's sent, Leave group and Forget kill log.
+ * then Show what's sent, Leave group and Forget kill log at its foot.
  *
  * <p>A class of its own because it is a page of its own ({@link SidebarPages}), set once and seldom
- * read again, and nothing on it is part of a session. What Leave group and a new map address did is
- * said on the daily page they turn back to, under the join field, through {@link ConnectCard}; an
- * address Apply refuses is said under Apply. {@link MapCompanionPanel} hands it to the pages and
- * calls {@link #refresh(boolean)} last in its own.
+ * read again, and nothing on it is part of a session. What Leave group did is said on the daily page
+ * it turns back to, under the join field, through {@link ConnectCard}. {@link MapCompanionPanel} hands
+ * it to the pages and calls {@link #refresh(boolean)} last in its own.
  *
  * <p>Two of the buttons are about trust rather than about the map. <b>Show what's sent</b> prints
  * the actual snapshot, built by the same code that would post it, because a plugin that claims to
@@ -92,14 +91,8 @@ final class SettingsPage extends JPanel
 
 	private final JButton previewButton = smallButton("Show what's sent");
 	private final SharingControls sharingControls;
-	private final JTextField mapAddress = new JTextField();
-	/** Under Apply: why the address typed was not taken. It only ever says why Apply refused an address. */
-	private final JLabel addressSaid = MapCompanionPanel.label(11f, MapCompanionPanel.REFUSED);
-	private String displayedAddress;
 
-	/*
-	 * The reset actions live in Advanced: neither is a thing a player does every session.
-	 */
+	/* The reset actions are the page's foot: neither is a thing a player does every session. */
 	private final JPanel foot = row(DARK_GRAY_COLOR);
 	private List<JButton> shownFoot = new ArrayList<>();
 	private final JButton leaveButton = smallButton("Leave group");
@@ -142,8 +135,14 @@ final class SettingsPage extends JPanel
 		add(sectionHead("What you share"));
 		add(MapCompanionPanel.wrapped(Words.of("settings.shareSub"), 11f, ColorScheme.LIGHT_GRAY_COLOR, MapCompanionPanel.CARD_TEXT_WIDTH + 16));
 		add(sharingControls);
-		add(gap(4, DARK_GRAY_COLOR));
-		add(buildAdvanced());
+		/*
+		 * The foot: the three presses that are about trust or about leaving, none a setting. The map
+		 * address is in RuneLite's own list alone: only somebody running a map of their own changes it.
+		 */
+		add(gap(8, DARK_GRAY_COLOR));
+		add(hug(previewButton, DARK_GRAY_COLOR));
+		add(gap(8, DARK_GRAY_COLOR));
+		add(left(foot));
 
 		previewButton.setToolTipText(Words.of("settings.previewTip"));
 		previewButton.addActionListener(e -> showSnapshotPreview());
@@ -156,78 +155,9 @@ final class SettingsPage extends JPanel
 	}
 
 	/** The actual address is editable here; there is no second default or explanatory footnote. */
-	private JPanel buildAdvanced()
-	{
-		JPanel contents = column(DARK_GRAY_COLOR);
-		contents.add(sectionHead("Map address"));
-		mapAddress.setText(config.relayUrl());
-		mapAddress.addActionListener(e -> applyMapAddress(true));
-		contents.add(fill(mapAddress, DARK_GRAY_COLOR));
-		JButton apply = smallButton("Apply");
-		apply.addActionListener(e -> applyMapAddress(true));
-		contents.add(hug(apply, DARK_GRAY_COLOR));
-		addressSaid.setVisible(false);
-		contents.add(addressSaid);
-		contents.add(gap(8, DARK_GRAY_COLOR));
-		contents.add(hug(previewButton, DARK_GRAY_COLOR));
-		contents.add(gap(8, DARK_GRAY_COLOR));
-		contents.add(left(foot));
-		return SharingControls.fold("Advanced", contents);
-	}
-
-	/** The address typed here, applied before Connect or Join asks, which answer on the page they are on. */
-	boolean applyMapAddress()
-	{
-		return applyMapAddress(false);
-	}
-
-	/**
-	 * Apply the address typed, with a scheme left off put back ({@link Pairing#withScheme}), so what was
-	 * meant is written into the field rather than refused. A refusal is said where the press was:
-	 * under Apply for Apply and Enter, which leave Settings open, and under the join field for Connect
-	 * and Join, which are on the daily page.
-	 */
-	private boolean applyMapAddress(boolean here)
-	{
-		String server = Pairing.normalizeServer(Pairing.withScheme(mapAddress.getText()));
-		if (server == null)
-		{
-			String why = Words.of("settings.badAddress");
-			if (here)
-			{
-				setWrapped(addressSaid, why);
-				addressSaid.setVisible(true);
-			}
-			else
-			{
-				connectCard.refuse(why);
-			}
-			return false;
-		}
-		addressSaid.setVisible(false);
-		mapAddress.setText(server);
-		if (!server.equals(pairing.serverUrl()))
-		{
-			settings.set(MapCompanionConfig.KEY_RELAY_URL, server);
-			connectCard.joinOpen = true;
-			connectCard.say("Map address changed. Press Connect.");
-			/* The field and the line that asks for it are on the daily page. */
-			settingsOpen.accept(false);
-			refresh.run();
-		}
-		return true;
-	}
-
-	/** The sharing choices, the map address as saved, and the reset actions there is something for. EDT. */
 	void refresh(boolean paired)
 	{
 		sharingControls.refresh();
-		String configuredAddress = config.relayUrl();
-		if (!java.util.Objects.equals(displayedAddress, configuredAddress))
-		{
-			displayedAddress = configuredAddress;
-			mapAddress.setText(configuredAddress == null ? MapCompanionConfig.DEFAULT_MAP_URL : configuredAddress);
-		}
 
 		List<JButton> footRow = new ArrayList<>();
 		if (paired)

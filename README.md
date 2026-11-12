@@ -182,7 +182,7 @@ sharing choice off.
 <summary>Full sharing details and settings</summary>
 
 <p>
-  <img src="docs/mockups/sidebar-settings.png" width="300" alt="Settings: six sharing switches, all on but Where you died, as one press at Connect leaves them, then What each one sends, a rule, and In your game with a line saying nothing there shares anything about you, and Advanced, closed">
+  <img src="docs/mockups/sidebar-settings.png" width="300" alt="Settings: six sharing switches, all on but Where you died, as one press at Connect leaves them, then What each one sends, a rule, and In your game, closed, with a line saying nothing there shares anything about you, then Show what's sent and Leave group">
 </p>
 
 Sharing is six switches, and every one starts off. After your first Connect, one press of
@@ -230,7 +230,7 @@ Large snapshots include a flag saying some of it was left out.
 **Connect**, with no group yet, sends a random key for this RuneLite, once per press; the map makes
 your group with it. **Join** with a pasted invite, or **Connect** with one in the field, sends that
 key and the invite. Neither sends
-anything about your character. If you have changed **Settings → Advanced → Map address** to a server
+anything about your character. If you have changed **Map address**, under Advanced in RuneLite's own settings for the plugin, to a server
 other than osrs-map.com, the first Connect to it asks you first, naming it.
 **Open the map** sends your group's credentials once per press, and opens a one-time link that
 adds that browser to your group as you. **Rename group…** sends the new name, once per press, and
@@ -269,7 +269,7 @@ you: Route to a meetup tells nobody you are coming.
 
 Your chat, other players, your bank and inventory, your existing collection log slots, a complete
 loot history and anything derived from your account's identifiers are never sent. **Settings →
-Advanced → Show what's sent** shows what would go out right now. The server's operator and your group's
+Show what's sent** shows what would go out right now. The server's operator and your group's
 members can see what you share.
 
 osrs-map.com keeps live positions and progress in memory only, with no movement history. Groups,
