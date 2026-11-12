@@ -58,6 +58,15 @@ import net.runelite.client.config.ConfigManager;
  * accumulating ghosts in a friend's party list. A member id is filed under the installation key it
  * was minted with, so {@link #forget} — a new key — gives every character a new id at once,
  * including the ones not logged in, whose profiles this class cannot reach.
+ *
+ * <p><b>The two are kept in different places, so the id's key names the installation.</b> RuneLite
+ * keeps a RuneScape profile's values in one store all its own profiles share, and this plugin's
+ * settings, the installation key and each group's member secret with them, in the RuneLite profile
+ * that is open. A player with the plugin on two RuneLite profiles therefore has two installation
+ * keys and one place for a character's id. So the id is stored as {@code memberId.<tag>}, the tag
+ * being {@link #tag} of the installation key: each RuneLite profile keeps its own id for a
+ * character, beside the secret the map issued that id, and neither replaces the other's. To the
+ * map each is a member of its own, which is what its installation key already made it.
  */
 @Singleton
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
@@ -108,14 +117,23 @@ public class MemberIdentity
 			return null;
 		}
 		String tag = tag(installationKey());
-		String existing = profile.getScoped(scope, KEY);
-		if (existing != null && existing.startsWith(tag + ":") && existing.length() > tag.length() + 1)
+		String id = profile.getScoped(scope, KEY + "." + tag);
+		if (id == null || id.trim().isEmpty())
 		{
-			return existing.substring(tag.length() + 1).trim();
+			/*
+			 * Before an id's key named its installation a character had one slot, "tag:id". An id
+			 * there under this installation's tag is still this character's, so an update changes
+			 * nobody's; one under another tag is another RuneLite profile's, and is left for it.
+			 */
+			String single = profile.getScoped(scope, KEY);
+			id = single != null && single.startsWith(tag + ":") ? single.substring(tag.length() + 1) : "";
+			if (id.trim().isEmpty())
+			{
+				id = UUID.randomUUID().toString();
+			}
+			profile.setScoped(scope, KEY + "." + tag, id.trim());
 		}
-		String minted = UUID.randomUUID().toString();
-		profile.setScoped(scope, KEY, tag + ":" + minted);
-		return minted;
+		return id.trim();
 	}
 
 	/**
@@ -140,16 +158,18 @@ public class MemberIdentity
 
 	/**
 	 * Forgetting the identity is part of leaving a group cleanly: a new installation key, so every
-	 * character's next id is new and the map has nothing to link the old ones to.
+	 * character's next id is new and the map has nothing to link the old ones to. Only this
+	 * installation's: another RuneLite profile's ids are under its own key's tag, and are not
+	 * this one's to forget.
 	 */
 	public synchronized void forget()
 	{
-		settings.unset(KEY_INSTALLATION);
 		String scope = profile.scopeKey();
 		if (scope != null)
 		{
-			profile.unsetScoped(scope, KEY);
+			profile.unsetScoped(scope, KEY + "." + tag(installationKey()));
 		}
+		settings.unset(KEY_INSTALLATION);
 	}
 
 	/**

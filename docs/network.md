@@ -293,7 +293,10 @@ key, sent on snapshots so another character can join the same browser's group wi
 paste, and on **Connect** and **Join**, where it names the RuneLite that made or joined a group; with
 a group code it admits your characters to your groups, so connect only to a map you trust. The
 member id and installation key are the same for every map and group this RuneLite connects to until
-**Leave group**, and the receive stream carries the group code and member id in its URL.
+**Leave group**, and the receive stream carries the group code and member id in its URL. Each
+RuneLite profile keeps an installation key of its own, and with it its own member id for a
+character: a character played from two RuneLite profiles is two members of a group, each with the
+secret the group issued it, and switching profile mints nothing.
 `X-Companion-Member-Secret` is a random credential for one server, group and character, used on
 snapshots, invites, the receive stream and **Open the map**. It is never displayed
 or logged. **Leave group** deletes every one of these member secrets and replaces the installation
