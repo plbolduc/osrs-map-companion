@@ -1107,7 +1107,9 @@ public class GroupPanelTest
 		SwingUtilities.invokeAndWait(() ->
 		{
 			panel.get().refresh(true);
-			assertFalse(String.join("\n", labelTexts(panel.get())).contains("#34d399"));
+			/* The meetup's card alone, where this read the whole tab: Dax is on W330, and his row is green there now. */
+			assertFalse(String.join("\n", labelTexts((Container) namedComponent(panel.get(), "group.meetup.star-hunt")))
+				.contains("#34d399"));
 			assertFalse(named(panel.get(), "group.meetupFold.raids").getText().contains("#34d399"));
 		});
 		group.onWorld(302);
@@ -1134,6 +1136,76 @@ public class GroupPanelTest
 			assertFalse("on no world, no world is green", String.join("\n", labelTexts(panel.get())).contains("#34d399"));
 			assertFalse(named(panel.get(), "group.meetupFold.raids").getText().contains("#34d399"));
 		});
+	}
+
+	/**
+	 * A friend's row leads with the world they are on, so it is read in one place down the rows, and
+	 * it alone is green while this client is on that world, as a meetup's is. A friend who shares a
+	 * world and no place has the world alone, and one who shares neither has no line.
+	 */
+	@Test
+	public void aFriendsRowLeadsWithTheirWorldGreenWhileYouAreOnIt() throws Exception
+	{
+		AtomicReference<GroupPanel> panel = new AtomicReference<>();
+		SwingUtilities.invokeAndWait(() -> panel.set(panel()));
+		long starts = System.currentTimeMillis() + 3_600_000L;
+		social(starts);
+		group.onWorld(444);
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.get().refresh(true);
+			assertTrue("the world first, in the line's grey on another world: " + friendWords(panel.get(), "cara"),
+				friendWords(panel.get(), "cara").contains(">W302 · near Lumbridge Castle · Near you<"));
+			assertTrue(friendWords(panel.get(), "dax"), friendWords(panel.get(), "dax").contains(">W330 · in an instance<"));
+			assertFalse("no world shared, none said: " + friendWords(panel.get(), "rob"),
+				friendWords(panel.get(), "rob").contains("W3"));
+		});
+		group.onWorld(302);
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.get().refresh(true);
+			assertTrue("on W302 only Cara's world is green: " + friendWords(panel.get(), "cara"), friendWords(panel.get(), "cara")
+				.contains("<font color='#34d399'>W302</font> · near Lumbridge Castle · Near you<"));
+			assertFalse(friendWords(panel.get(), "dax").contains("#34d399"));
+		});
+		group.onWorld(330);
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.get().refresh(true);
+			assertTrue("a hop to W330 greens Dax's", friendWords(panel.get(), "dax")
+				.contains("<font color='#34d399'>W330</font> · in an instance<"));
+			assertFalse(friendWords(panel.get(), "cara").contains("#34d399"));
+		});
+
+		/* The friend's own hop, with nothing else about the group changed: their row is redrawn for it. */
+		RelayResponse.StreamDirective hopped = new Gson().fromJson(new String(Files.readAllBytes(
+			Paths.get("src", "test", "resources", "contract", "stream.json")), StandardCharsets.UTF_8), RelayResponse.StreamDirective.class);
+		hopped.events.get(0).startsAtMs = starts;
+		hopped.roster.get(0).world = 416;
+		destinations.acceptSocial(hopped, true);
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.get().refresh(true);
+			assertTrue(friendWords(panel.get(), "cara"), friendWords(panel.get(), "cara").contains(">W416 · near Lumbridge Castle · Near you<"));
+		});
+
+		RelayResponse.RosterRow row = new RelayResponse.RosterRow();
+		assertNull("neither a world nor a place", GroupPanel.whereLine(row));
+		row.world = 302;
+		assertEquals("a world and no place", "W302", GroupPanel.whereLine(row));
+		row.near = "near W302 Lounge";
+		assertEquals("the world that leads the line is the one coloured, not the same letters in a place's name",
+			"<html><body width='100'><font color='#34d399'>W302</font> · near W302 Lounge</body></html>",
+			GroupPanel.markup(GroupPanel.whereLine(row), "W302", "#34d399", 100));
+		row.world = null;
+		row.nearYou = true;
+		assertEquals("as before for a friend with no world", "near W302 Lounge · Near you", GroupPanel.whereLine(row));
+	}
+
+	/** Every label's text on one friend's card, markup and all. */
+	private static String friendWords(GroupPanel panel, String id)
+	{
+		return String.join("\n", labelTexts((Container) namedComponent(panel, "group.friend." + id)));
 	}
 
 	/** A button's words without the markup that wraps them. */
