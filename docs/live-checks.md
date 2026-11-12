@@ -55,6 +55,16 @@ often. A clean run is now 443 tests with no failures or skips.
 
 ## Still to verify
 
+- [ ] **One character on two RuneLite profiles (`MemberIdentity`, checked against RuneLite 1.13.4's
+      `ConfigManager` and in `MemberIdentityTest`, not yet seen live).** With the plugin connected on
+      profile A, log in and note the group's roster on the map. Switch to a profile B that also has
+      the plugin and is in the same group, with the same character: the roster gains one member for
+      B, once. Switch A, B, A, B, logging in each time: the roster stays at those two, each keeps
+      its dot and name, *Open the map* works on both, and neither is ever answered
+      *That group is full* or *needs an invite*. A profile that was connected before this update
+      keeps the member it had; the other gains one. **Leave group** on A gives A a new member on its
+      next Connect and leaves B's alone.
+
 - [ ] **Mortimer's offer (`MortimerOfferReader`, from the game's task choice script, not yet seen
       live).** With *Slayer task* shared and no task, talk to Mortimer and open the choice: the map's
       Mortimer picker fills with the same two or three tasks, mortifiers and amounts, and says it was

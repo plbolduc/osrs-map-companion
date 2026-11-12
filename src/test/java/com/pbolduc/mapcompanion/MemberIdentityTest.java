@@ -25,6 +25,8 @@
  */
 package com.pbolduc.mapcompanion;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nullable;
@@ -39,7 +41,9 @@ import org.junit.Test;
  *
  * <p>What these pin is the two lifetimes: a member id per RuneScape profile, so an alt is never
  * the main's dot, and one installation key, so the map can link both to one browser; and that
- * leaving reaches every character at once, including the ones not logged in.
+ * leaving reaches every character at once, including the ones not logged in. And where the two
+ * are kept: the key in one RuneLite profile's settings, the ids in a store every RuneLite profile
+ * shares, so that two profiles do not take turns minting one character's id.
  */
 public class MemberIdentityTest
 {
@@ -65,6 +69,90 @@ public class MemberIdentityTest
 		@Override public String getScoped(String scope, String key) { return scope == null ? null : scoped.get(scope + "." + key); }
 		@Override public void setScoped(String scope, String key, String value) { if (scope != null) scoped.put(scope + "." + key, value); }
 		@Override public void unsetScoped(String scope, String key) { if (scope != null) scoped.remove(scope + "." + key); }
+	}
+
+	/** One RuneLite profile's own settings, which is where its installation key is. */
+	private static ConfigStore settings()
+	{
+		Map<String, String> held = new HashMap<>();
+		return new ConfigStore()
+		{
+			@Override public String get(String key) { return held.get(key); }
+			@Override public void set(String key, String value) { held.put(key, value); }
+			@Override public void unset(String key) { held.remove(key); }
+		};
+	}
+
+	/**
+	 * RuneLite keeps a RuneScape profile's values in one store that all its own profiles share, and
+	 * this plugin's settings in the profile that is open. So a player with the plugin on two RuneLite
+	 * profiles is two settings stores, each with its own installation key, over one place for a
+	 * character's id. The id was one slot a character, accepted only under the open profile's key:
+	 * each switch minted it again over the other profile's, the map met a new member every time, and
+	 * the secret it had issued the old one stopped matching.
+	 */
+	@Test
+	public void twoRuneLiteProfilesEachKeepTheirOwnIdForOneCharacter()
+	{
+		Profiles shared = new Profiles();
+		MemberIdentity first = new MemberIdentity(settings(), shared);
+		MemberIdentity second = new MemberIdentity(settings(), shared);
+		shared.selected = "main";
+
+		String onFirst = first.id();
+		String onSecond = second.id();
+		assertNotEquals("each RuneLite profile is an installation, and a member, of its own", onFirst, onSecond);
+
+		for (int round = 0; round < 3; round++)
+		{
+			assertEquals("back on the first profile it is who it was", onFirst, first.id());
+			assertEquals("and on the second", onSecond, second.id());
+		}
+		assertEquals("two ids for the character however often the player switches", 2, shared.scoped.size());
+	}
+
+	/** Leave group on one RuneLite profile replaces that profile's ids, and no other's. */
+	@Test
+	public void leavingOnOneRuneLiteProfileLeavesTheOthersIdsAlone()
+	{
+		Profiles shared = new Profiles();
+		MemberIdentity first = new MemberIdentity(settings(), shared);
+		MemberIdentity second = new MemberIdentity(settings(), shared);
+		shared.selected = "alt";
+		String altOnFirst = first.id();
+		shared.selected = "main";
+		String onFirst = first.id();
+		String onSecond = second.id();
+
+		first.forget();
+
+		assertNotEquals(onFirst, first.id());
+		assertEquals("the other profile never left", onSecond, second.id());
+		shared.selected = "alt";
+		assertNotEquals("the alt was not logged in and is forgotten anyway", altOnFirst, first.id());
+	}
+
+	/**
+	 * An id stored before its key named the installation, as "tag:id" in the character's one slot,
+	 * is still the character's on the RuneLite profile whose key it was minted under, so an update
+	 * re-mints nobody. Any other profile finds another's tag there, leaves it, and keeps its own.
+	 */
+	@Test
+	public void anIdFromBeforeTheUpdateIsKeptByTheProfileItWasMintedOn() throws Exception
+	{
+		Profiles shared = new Profiles();
+		MemberIdentity first = new MemberIdentity(settings(), shared);
+		MemberIdentity second = new MemberIdentity(settings(), shared);
+		shared.selected = "main";
+		byte[] digest = MessageDigest.getInstance("SHA-256").digest(first.installationKey().getBytes(StandardCharsets.UTF_8));
+		String tag = String.format("%02x%02x%02x%02x", digest[0], digest[1], digest[2], digest[3]);
+		shared.scoped.put("main.memberId", tag + ":5f0c1d3e-0000-4000-8000-000000000001");
+
+		assertNotEquals("another profile's id is not this one's", "5f0c1d3e-0000-4000-8000-000000000001", second.id());
+		assertEquals("5f0c1d3e-0000-4000-8000-000000000001", first.id());
+		assertEquals("and stays the first profile's after the second has been played", "5f0c1d3e-0000-4000-8000-000000000001", first.id());
+		assertEquals("the old slot is left as it was found", tag + ":5f0c1d3e-0000-4000-8000-000000000001",
+			shared.scoped.get("main.memberId"));
 	}
 
 	@Test
