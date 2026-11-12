@@ -87,7 +87,7 @@ public class RefusedGroupTest
 		assertTrue("the group's name is the second line", words.contains("ABC 234"));
 		assertTrue(words.toString(), words.contains("Have an invite?"));
 		assertTrue(words.toString(), words.contains(
-			"Paste another group's invite here, or use Leave group in Settings → Advanced to start over."));
+			"Paste another group's invite here, or use Leave group in Settings to start over."));
 		assertTrue("the field itself", shown(named(card, "join.field")));
 
 		relay.handle(reply(200, "{\"pollIntervalMs\":2000}"), null);
