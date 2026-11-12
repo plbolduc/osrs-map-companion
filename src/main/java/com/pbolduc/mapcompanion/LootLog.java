@@ -1067,19 +1067,6 @@ public class LootLog
 			this.lastKillMs = lastKillMs;
 			this.drops = Collections.unmodifiableList(drops);
 		}
-
-		/** True where at least one of its drops has a rate, which is where odds can be given. */
-		public boolean rated()
-		{
-			for (Drop drop : drops)
-			{
-				if (drop.oneIn != null)
-				{
-					return true;
-				}
-			}
-			return false;
-		}
 	}
 
 	/** One drop's standing. {@code oneIn} null is a collection item with no rate to price it. */
