@@ -57,13 +57,15 @@ final class MapWait
 
 	/**
 	 * A Retry-After header as a wait in milliseconds: its seconds, held between five and three
-	 * hundred, and thirty for a reply that names none or names something that is not a number.
+	 * hundred, and thirty for a reply that names none or names something that is not a number. Held
+	 * as seconds, before they are multiplied: a number near the largest there is would wrap to a
+	 * negative one and read as the shortest wait.
 	 */
 	static long retryDelay(@Nullable String header)
 	{
 		try
 		{
-			return Math.max(5_000, Math.min(300_000, Long.parseLong(header) * 1_000));
+			return Math.max(5, Math.min(300, Long.parseLong(header))) * 1_000;
 		}
 		catch (RuntimeException invalid)
 		{

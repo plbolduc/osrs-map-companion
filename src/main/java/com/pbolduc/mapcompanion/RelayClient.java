@@ -552,8 +552,8 @@ public class RelayClient
 
 		if (code == 429)
 		{
-			long retryAfter = parseRetryAfterSeconds(response.header("Retry-After"));
-			nextAllowedPostMs = now + Math.max(retryAfter * 1000L, DEFAULT_INTERVAL_MS);
+			/* Read as every press reads it, with its ceiling: a proxy's huge value must not stop posting until a rejoin. */
+			nextAllowedPostMs = now + Math.max(MapWait.retryDelay(response.header("Retry-After")), DEFAULT_INTERVAL_MS);
 			return;
 		}
 
@@ -946,22 +946,6 @@ public class RelayClient
 			default:
 				/** Reached for a malformed URL, not for a status we retry. Does not claim permanence. */
 				return "The map refused this plugin's data (" + code + ").";
-		}
-	}
-
-	private static long parseRetryAfterSeconds(@Nullable String header)
-	{
-		if (header == null)
-		{
-			return 30L;
-		}
-		try
-		{
-			return Math.max(1L, Long.parseLong(header.trim()));
-		}
-		catch (NumberFormatException e)
-		{
-			return 30L;
 		}
 	}
 
