@@ -25,11 +25,7 @@
  */
 package com.pbolduc.mapcompanion;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import javax.annotation.Nullable;
 import static com.pbolduc.mapcompanion.SharingFields.Field;
 import static com.pbolduc.mapcompanion.SharingFields.Section;

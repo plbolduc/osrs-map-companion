@@ -25,18 +25,10 @@
  */
 package com.pbolduc.mapcompanion;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.*;
 import java.util.function.LongSupplier;
 import java.util.function.Predicate;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.regex.Pattern;
-import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import net.runelite.api.ChatMessageType;

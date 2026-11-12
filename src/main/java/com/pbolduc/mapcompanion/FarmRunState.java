@@ -26,14 +26,7 @@
 package com.pbolduc.mapcompanion;
 
 import com.google.inject.Singleton;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import javax.annotation.Nullable;
 import net.runelite.api.coords.WorldPoint;
 import static com.pbolduc.mapcompanion.PortTaskReader.Slot;

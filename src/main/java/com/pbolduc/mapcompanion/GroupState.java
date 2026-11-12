@@ -27,13 +27,7 @@ package com.pbolduc.mapcompanion;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import javax.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import static com.pbolduc.mapcompanion.RelayResponse.MemberDot;

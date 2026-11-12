@@ -27,10 +27,7 @@ package com.pbolduc.mapcompanion;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import javax.annotation.Nullable;
 import net.runelite.api.Client;
 import net.runelite.api.gameval.InterfaceID;

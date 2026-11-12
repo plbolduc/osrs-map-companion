@@ -27,14 +27,9 @@ package com.pbolduc.mapcompanion;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.Set;
 import javax.annotation.Nullable;
 import net.runelite.api.Client;
 import net.runelite.api.gameval.InventoryID;

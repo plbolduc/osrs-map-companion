@@ -27,9 +27,7 @@ package com.pbolduc.mapcompanion;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;

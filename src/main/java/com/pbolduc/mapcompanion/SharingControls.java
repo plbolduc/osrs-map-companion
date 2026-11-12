@@ -25,21 +25,14 @@
  */
 package com.pbolduc.mapcompanion;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Insets;
+import java.awt.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 import javax.swing.border.EmptyBorder;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 import lombok.AllArgsConstructor;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;

@@ -25,10 +25,7 @@
  */
 package com.pbolduc.mapcompanion;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import javax.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import static com.pbolduc.mapcompanion.DropOdds.count;

@@ -28,15 +28,10 @@ package com.pbolduc.mapcompanion;
 import com.google.inject.Inject;
 import java.awt.Color;
 import java.awt.GridLayout;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import javax.annotation.Nullable;
 import javax.swing.border.EmptyBorder;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.*;
 import net.runelite.client.ui.ColorScheme;
 import static com.pbolduc.mapcompanion.PortTaskReader.Slot;
 

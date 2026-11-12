@@ -25,10 +25,7 @@
  */
 package com.pbolduc.mapcompanion;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import net.runelite.api.coords.WorldPoint;
 import static net.runelite.api.gameval.VarbitID.*;
 

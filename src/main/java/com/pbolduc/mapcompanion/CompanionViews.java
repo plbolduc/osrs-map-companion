@@ -25,18 +25,11 @@
  */
 package com.pbolduc.mapcompanion;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.GridLayout;
-import java.awt.Insets;
+import java.awt.*;
 import java.util.Locale;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
-import javax.swing.JPanel;
-import javax.swing.JToggleButton;
+import javax.swing.*;
 import net.runelite.client.ui.ColorScheme;
 
 /**

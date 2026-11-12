@@ -26,10 +26,7 @@
 package com.pbolduc.mapcompanion;
 
 import com.google.inject.Singleton;
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import javax.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import net.runelite.api.Skill;

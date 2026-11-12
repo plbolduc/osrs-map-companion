@@ -29,12 +29,7 @@ import com.google.inject.Inject;
 import java.awt.BorderLayout;
 import java.util.List;
 import javax.annotation.Nullable;
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.ListCellRenderer;
+import javax.swing.*;
 import net.runelite.client.ui.ColorScheme;
 
 /**
