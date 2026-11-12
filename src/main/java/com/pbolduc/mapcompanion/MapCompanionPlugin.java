@@ -679,6 +679,11 @@ public class MapCompanionPlugin extends Plugin
 		farmingObserver.onSessionEnded();
 		diaryReader.onSessionEnded();
 		endSessions(false);
+		/*
+		 * A death is one character's, and the next lifetime may log in as another. It forgets the
+		 * profile below, so the switch that would clear this at that login is not seen as one.
+		 */
+		deathWatcher.clear();
 		lastPosition = null;
 		meetupReminder.clear();
 		pickpocketTick = -1;
