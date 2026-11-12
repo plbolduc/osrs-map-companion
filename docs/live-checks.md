@@ -433,7 +433,8 @@ The website plan's second session, once the routes in the game are built: a memb
       now: the Settings page still shows everything off. Change the map address to a local map and
       Connect: one question names that server, and Cancel sends nothing. Connect and press Share
       what's ticked: Settings shows every switch on but *Where you died*, the receive stream opens,
-      and *Meetup reminder* stays off. Restart RuneLite and reconnect: no step. In RuneLite's
+      and *Meetup reminder* stays off. Under *In your game*, *Group in RuneLite* is ticked; untick
+      *Group on the world map* in RuneLite's own settings and the row shows a dash. Restart RuneLite and reconnect: no step. In RuneLite's
       own config panel, ticking a sharing setting asks no "Are you sure?".
 - [ ] **Sharing as six switches after an update.** On a RuneLite profile that ran 1.3.0 with all of
       Map presence and two fields of Tasks and timers ticked, start this version. RuneLite's list

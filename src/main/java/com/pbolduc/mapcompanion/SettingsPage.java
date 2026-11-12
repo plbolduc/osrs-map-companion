@@ -109,7 +109,7 @@ final class SettingsPage extends JPanel
 	SettingsPage(MapCompanionConfig config, DestinationState destinationState, LootLog lootLog,
 		SnapshotBuilder snapshotBuilder, ClientThread clientThread, ConfigStore settings, MemberIdentity identity,
 		Pairing pairing, Gson gson, FarmRunState farmRunState, FarmRunClient farmRunClient, ConnectCard connectCard,
-		Runnable refresh, Consumer<Boolean> settingsOpen, Supplier<String> mapUrl)
+		Runnable refresh, Consumer<Boolean> settingsOpen, Supplier<String> mapUrl, java.util.function.BooleanSupplier paths)
 	{
 		this.config = config;
 		this.destinationState = destinationState;
@@ -125,7 +125,7 @@ final class SettingsPage extends JPanel
 		this.connectCard = connectCard;
 		this.refresh = refresh;
 		this.settingsOpen = settingsOpen;
-		this.sharingControls = new SharingControls(config, settings);
+		this.sharingControls = new SharingControls(config, settings, paths);
 		column(this, DARK_GRAY_COLOR);
 
 		/*
@@ -140,6 +140,7 @@ final class SettingsPage extends JPanel
 		add(whatsNew);
 		add(gap(4, DARK_GRAY_COLOR));
 		add(sectionHead("What you share"));
+		add(MapCompanionPanel.wrapped(Words.of("settings.shareSub"), 11f, ColorScheme.LIGHT_GRAY_COLOR, MapCompanionPanel.CARD_TEXT_WIDTH + 16));
 		add(sharingControls);
 		add(gap(4, DARK_GRAY_COLOR));
 		add(buildAdvanced());

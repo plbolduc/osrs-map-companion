@@ -65,7 +65,7 @@ final class SharingControls extends JPanel
 	/** The column's width for a wrapped line, as the rest of the sidebar takes it. */
 	private static final int TEXT = PluginPanel.PANEL_WIDTH - 30;
 	/** What this client draws and does, named as RuneLite's list and the step after Connect name it. */
-	static final String CLIENT_TITLE = "In RuneLite";
+	static final String CLIENT_TITLE = "In your game";
 	static final String KEYS_ELSEWHERE = Words.of("settings.keysElsewhere");
 	private final MapCompanionConfig config;
 	private final ConfigStore store;
@@ -76,14 +76,24 @@ final class SharingControls extends JPanel
 	private final JLabel nicknameHint = MapCompanionPanel.label(11f, LIGHT_GRAY_COLOR);
 	private String displayedNickname;
 
+	/** Whether Shortest Path is installed: its box is drawn only then. */
+	private final BooleanSupplier paths;
+	private JCheckBox pathsBox;
+
 	SharingControls(MapCompanionConfig config, ConfigStore store)
+	{
+		this(config, store, () -> true);
+	}
+
+	SharingControls(MapCompanionConfig config, ConfigStore store, BooleanSupplier paths)
 	{
 		this.config = config;
 		this.store = store;
+		this.paths = paths;
 		MapCompanionPanel.column(this, ColorScheme.DARK_GRAY_COLOR);
 
 		/* The six switches, in the order the step after Connect and RuneLite's list give them. */
-		add(row(choice(SharingFields.NAME, true)));
+		add(row(choice(java.util.Collections.singletonList(SharingFields.NAME), SharingFields.NAME.label, true)));
 		/* Under the switch's words, as a partly shared group's line is: it is what the switch leaves the group. */
 		JPanel nameBox = column();
 		nameBox.setName("sharing.nameBox");
@@ -113,47 +123,81 @@ final class SharingControls extends JPanel
 			groups.add(group);
 			add(group.panel);
 		}
-		add(row(choice(SharingFields.DEATH, true)));
+		add(row(choice(java.util.Collections.singletonList(SharingFields.DEATH), SharingFields.DEATH.label, true)));
 		add(fold("What each one sends", whatEachOneSends()));
 
 		JPanel client = column();
-		for (Field field : SharingFields.CLIENT)
+		for (List<Field> row : SharingFields.CLIENT_ROWS)
 		{
-			client.add(choice(field, false));
+			String[] said = SharingFields.row(row);
+			if (said != null && !said[1].isEmpty())
+			{
+				JLabel head = line(said[1], LIGHT_GRAY_COLOR, 4);
+				refont(head, Font.BOLD);
+				client.add(head);
+			}
+			JCheckBox box = choice(row, said == null ? MapCompanionPanel.escape(row.get(0).label) : said[2], false);
+			client.add(box);
+			if (row.contains(SharingFields.SHORTEST_PATH))
+			{
+				pathsBox = box;
+			}
 		}
 		/* The settings a box cannot hold live only in RuneLite's list, and the README sends players to them. */
 		JLabel elsewhere = line(KEYS_ELSEWHERE, LIGHT_GRAY_COLOR, 2);
 		elsewhere.setName("sharing.keysElsewhere");
 		client.add(elsewhere);
-		add(fold(CLIENT_TITLE, client));
+		/*
+		 * The two halves say what makes them different: the boxes above leave this computer, and these
+		 * only change the player's own game. The line stays under the heading while the fold is closed.
+		 */
+		JPanel lower = fold(CLIENT_TITLE, client);
+		lower.add(line(Words.of("client.sub"), LIGHT_GRAY_COLOR, 0), 1);
+		lower.setBorder(new javax.swing.border.CompoundBorder(new EmptyBorder(6, 0, 0, 0),
+			BorderFactory.createMatteBorder(1, 0, 0, 0, ColorScheme.MEDIUM_GRAY_COLOR)));
+		add(lower);
 		refresh();
 	}
 
-	/** A choice of its own: a switch drawn as the groups' are, or one of this client's in a smaller hand. */
-	private JCheckBox choice(Field field, boolean sharing)
+	/**
+	 * A box over one setting or a row of them, named after the first: a sharing switch drawn as the
+	 * groups' are, or one of this client's in a smaller hand, whose words are markup of this plugin's
+	 * own. A press writes every setting under it; partly on, it is off with the dash a partly shared
+	 * group has, so a press turns the row on.
+	 */
+	private JCheckBox choice(List<Field> row, String words, boolean sharing)
 	{
-		String key = field.key;
-		BooleanSupplier read = () -> field.on(config, store);
-		JCheckBox box = new JCheckBox(sharing ? field.label
-			: "<html><body width='150'>" + MapCompanionPanel.escape(field.label) + "</body></html>");
-		box.setName(key);
+		JCheckBox box = new JCheckBox(sharing ? words : "<html><body width='150'>" + words + "</body></html>");
+		box.setName(row.get(0).key);
 		box.setBackground(ColorScheme.DARK_GRAY_COLOR);
 		box.setFont(sharing ? box.getFont().deriveFont(Font.BOLD, 12f) : box.getFont().deriveFont(11f));
-		box.setToolTipText(field.detail);
+		box.setToolTipText(row.get(0).detail);
 		/* A checkbox chooses data; only Connect may approve a server or start requests. */
 		box.addActionListener(e ->
 		{
-			if (field.notification)
+			for (Field field : row)
 			{
-				store.chooseNotification(key, box.isSelected());
-			}
-			else
-			{
-				store.set(key, Boolean.toString(box.isSelected()));
+				if (field.notification)
+				{
+					store.chooseNotification(field.key, box.isSelected());
+				}
+				else
+				{
+					store.set(field.key, Boolean.toString(box.isSelected()));
+				}
 			}
 			refresh();
 		});
-		choices.add(new Choice(box, read));
+		choices.add(new Choice(box, () ->
+		{
+			int on = 0;
+			for (Field field : row)
+			{
+				on += field.on(config, store) ? 1 : 0;
+			}
+			box.putClientProperty("JButton.selectedState", on > 0 && on < row.size() ? "indeterminate" : null);
+			return on == row.size();
+		}));
 		return box;
 	}
 
@@ -167,6 +211,7 @@ final class SharingControls extends JPanel
 		{
 			group.refresh();
 		}
+		pathsBox.setVisible(paths.getAsBoolean());
 		String alias = SnapshotBuilder.alias(config);
 		if (!alias.equals(displayedNickname))
 		{

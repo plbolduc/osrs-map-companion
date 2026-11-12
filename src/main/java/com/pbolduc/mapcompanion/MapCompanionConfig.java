@@ -126,7 +126,7 @@ public interface MapCompanionConfig extends Config
 	String advancedSection = "advanced";
 
 	@ConfigSection(
-		name = "In RuneLite",
+		name = "In your game",
 		description = "What the plugin shows and does in RuneLite",
 		position = 4,
 		closedByDefault = true

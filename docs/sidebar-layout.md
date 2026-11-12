@@ -1195,3 +1195,44 @@ Khazard* under the name, and the count adds the tiles left. Its tasks keep their
 
 A port-task stop has no picture of its own yet. A courier's crate and a bounty's part would be the
 ones, and the map keeps no picture of a cargo crate to check a client's against.
+
+## Settings in two halves, 12 November 2026
+
+### What makes the halves different
+
+The page was *What you share*, six switches, and under it a fold named *In RuneLite*, eleven more
+boxes. Both were lists of boxes, and the fold's name did not say what set it apart: the switches
+above leave this computer, and the boxes below only change the player's own game.
+
+Each half now says so under its name. *What you share* has *Sent to the map and shown to your
+group.* A rule ends it, and the fold is *In your game*, with *Only what you see on your own screen.
+Nothing here shares anything about you.* under its name whether it is open or closed. RuneLite's
+own list names its section the same.
+
+### Eleven boxes to seven rows
+
+Eleven boxes in a row, in no order, were eleven decisions. They are seven rows under three small
+headings:
+
+- **With your group:** *Group in RuneLite*, which is destinations, meetups and friends on the world
+  map, and *Meetup reminder*.
+- **Following a route:** *Step on screen*, with its teleport outlined in the bag, the spellbook and
+  the bank, *Hint arrow to a destination*, and *Draw paths with Shortest Path*.
+- **Extras:** *Boats and Route here* on the world map, and *Drop luck in chat*.
+
+A row over several settings is on while every one of them is, and a press writes them all. Partly
+on, it draws the dash a partly shared group draws, so the update changes nothing for anyone until
+they press. No setting was removed: RuneLite's own list keeps all eleven apart, for a player who
+wants half of a row.
+
+*Draw paths with Shortest Path* is drawn only with that plugin installed.
+
+The hint arrow keeps a box of its own because the game has one arrow and other plugins point it
+too, and the reminder and the chat line because they are the two a player who dislikes
+notifications turns off and nothing else.
+
+### Proposed and not built here
+
+The same pass proposed three sharing switches where there are six, with the character name
+included, and Advanced without the map address and *Show what's sent*. Those change what the step
+after Connect says and what a switch stands for, so they are a change of their own.

@@ -44,3 +44,6 @@ shareProgressAndTravel|Progress and travel|
 shareTasksAndTimers|Tasks and timers|
 shareLootAndMilestones|Loot and milestones|
 notifyMeetups|Meetup reminder|A RuneLite notification before a meetup starts. Ticked here, it comes while you play too; how it arrives follows RuneLite's own notification settings.
+row.showDestination|With your group|Group in RuneLite<br><font color='#7d7d7d'>destinations, meetups, friends</font>
+row.showStepOnScreen|Following a route|Step on screen<br><font color='#7d7d7d'>with its teleport outlined</font>
+row.showBoatsOnWorldMap|Extras|Boats and Route here<br><font color='#7d7d7d'>on the world map</font>

@@ -93,6 +93,8 @@ settings.leaveOthers= other groups will need a new invite too, so they leave you
 settings.forgetLoot=Forget every kill and drop counted for this character?\n\nDrop luck starts again from zero, and your pinned drop goes with it.\nThis cannot be undone.
 
 # SharingControls: What you share in Settings.
+settings.shareSub=Sent to the map and shown to your group.
+client.sub=Only what you see on your own screen. Nothing here shares anything about you.
 settings.keysElsewhere=Keys for Reroute and Follow, and the reminder's minutes, are in RuneLite's own settings for this plugin.
 settings.nicknameTip=What your group sees beside your dot. Saves on Enter or when you leave the field.
 
@@ -120,7 +122,7 @@ now.arrivalKey= or with
 now.arrivalYours=, from the map. Following it
 
 # GroupPanel: the Group tab, its friends and its meetups.
-group.meetupsOff=Meetups show here with Destinations and meetups on (Settings → In RuneLite).
+group.meetupsOff=Meetups show here with Group in RuneLite on (Settings → In your game).
 group.meetHereTip=Make a meetup where you stand, on this world, and copy its link for your clan chat or Discord
 group.titleTip=The meetup's title, up to sixty characters. Everybody in the group sees it.
 group.makeTip=Make the meetup at the tile and world you are on, and copy its link
