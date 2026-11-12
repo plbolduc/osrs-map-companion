@@ -1158,10 +1158,35 @@ public class MapCompanionPlugin extends Plugin
 		}
 	}
 
+	/**
+	 * What a run's player carries and wears, for its bring list, worked out when it can have changed
+	 * and not on every tick of the run: each time it matches every carried item's name against every
+	 * teleport the map knows. It can have changed when a container did, when the run is another one,
+	 * whose flags start unknown, and while the inventory has not arrived, which reads as null. Once
+	 * a minute besides, so an item the client could not name at the time is not left out for long.
+	 * Client thread; package-private for its test.
+	 */
+	void readCarried()
+	{
+		long run = farmRunState.generation();
+		if (carriedStale || run != carriedRun || client.getTickCount() % 100 == 0)
+		{
+			List<String> flags = capabilityEvaluator.evaluate();
+			carriedStale = flags == null;
+			carriedRun = run;
+			farmRunState.carried(flags);
+		}
+	}
+
+	private boolean carriedStale = true;
+	private long carriedRun = -1;
+
 	/** Notice an inventory gap between snapshots, including replacement beginner scrolls. */
 	@Subscribe
 	public void onItemContainerChanged(ItemContainerChanged event)
 	{
+		/* Any container: the bank's changes too, which costs one more reading and no rule about which ones matter. */
+		carriedStale = true;
 		if (client.getGameState() == GameState.LOGGED_IN
 			&& event.getContainerId() == net.runelite.api.gameval.InventoryID.INV)
 		{
@@ -1375,7 +1400,7 @@ public class MapCompanionPlugin extends Plugin
 		announceCompletions(now);
 		if (farmRunState.active())
 		{
-			farmRunState.carried(capabilityEvaluator.evaluate());
+			readCarried();
 			farmRunState.observe(farmingObserver.observations(now), birdhouseReader.read(now), standing(client), now);
 			/* A port-task run's stops tick by the slots read this tick, and by nothing else. */
 			farmRunState.observePorts(settings().on("sharePortTasks") ? portTaskReader.latest() : null);
