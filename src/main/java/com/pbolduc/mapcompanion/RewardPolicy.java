@@ -25,9 +25,7 @@
  */
 package com.pbolduc.mapcompanion;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 

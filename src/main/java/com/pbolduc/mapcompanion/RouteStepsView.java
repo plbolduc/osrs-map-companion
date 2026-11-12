@@ -25,18 +25,12 @@
  */
 package com.pbolduc.mapcompanion;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
+import java.awt.*;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.IntConsumer;
 import javax.annotation.Nullable;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import net.runelite.client.ui.ColorScheme;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.label;

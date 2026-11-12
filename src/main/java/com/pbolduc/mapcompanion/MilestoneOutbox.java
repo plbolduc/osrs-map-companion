@@ -26,16 +26,7 @@
 package com.pbolduc.mapcompanion;
 
 import com.google.inject.Singleton;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Deque;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * The things worth telling a group about as they happen, held until the map says it heard.

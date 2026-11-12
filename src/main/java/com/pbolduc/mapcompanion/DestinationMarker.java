@@ -27,10 +27,7 @@ package com.pbolduc.mapcompanion;
 
 import java.awt.Color;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.*;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;

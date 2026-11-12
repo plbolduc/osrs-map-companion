@@ -25,13 +25,8 @@
  */
 package com.pbolduc.mapcompanion;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Polygon;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
+import java.awt.*;
+import java.util.*;
 import java.util.List;
 import javax.annotation.Nullable;
 import javax.inject.Inject;

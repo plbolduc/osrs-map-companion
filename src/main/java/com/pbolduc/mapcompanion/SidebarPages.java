@@ -26,9 +26,7 @@
 package com.pbolduc.mapcompanion;
 
 import java.awt.Color;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 import net.runelite.client.ui.ColorScheme;
 
 /**

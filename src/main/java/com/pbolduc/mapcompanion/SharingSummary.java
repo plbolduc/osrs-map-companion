@@ -25,10 +25,7 @@
  */
 package com.pbolduc.mapcompanion;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import lombok.AllArgsConstructor;
 import static com.pbolduc.mapcompanion.SharingFields.Field;
 
