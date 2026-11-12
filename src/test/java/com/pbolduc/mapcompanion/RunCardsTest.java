@@ -1269,6 +1269,20 @@ public class RunCardsTest
 		assertTrue(tip(ports), tip(ports).startsWith("The map asked to wait: "));
 	}
 
+	/**
+	 * The farm card's Start run had no tooltip, where Port tasks' says what its press asks the map. It
+	 * says the same of its own; the wait between presses still takes the tooltip over, as above.
+	 */
+	@Test
+	public void theFarmCardsStartRunSaysWhatItAsks() throws Exception
+	{
+		/* A preset, which needs no sharing choice, so the button is a press and not held back by one. */
+		choose("Herb run");
+		refresh();
+		assertTrue(enabled(farm, "Start run"));
+		assertEquals("Ask the map for the run chosen above, starting from where you stand", tip(farm));
+	}
+
 	/** Start run's tooltip on a card, or "" with none. */
 	private static String tip(Component card) throws Exception
 	{

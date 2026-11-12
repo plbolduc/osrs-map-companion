@@ -159,8 +159,8 @@ final class FarmRunPanel extends JPanel
 	{
 		String missing = needs(STARTS.get(kind.getSelectedIndex()).split("\\|")[0], settings);
 		start.setEnabled(ready && missing == null);
-		/* Greyed by the wait alone, it says how long is left; a choice that is off has the line under it. */
-		MapWait.tip(start, null, missing == null ? wait : 0L);
+		/* Greyed by the wait alone, it says how long is left; a choice that is off has the line under it. Else what the press asks. */
+		MapWait.tip(start, Words.of("farm.startTip"), missing == null ? wait : 0L);
 		needs.setVisible(picker.isVisible() && missing != null);
 		MapCompanionPanel.setWrapped(needs, missing == null ? "" : missing, MapCompanionPanel.CARD_TEXT_WIDTH);
 	}
