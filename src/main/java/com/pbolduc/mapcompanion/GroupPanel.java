@@ -188,16 +188,9 @@ final class GroupPanel extends JPanel
 	 * press under the pointer, so the rows hand these over when they are built and they are run.
 	 */
 	private final List<LongConsumer> ticking = new ArrayList<>();
-	/**
-	 * Copy invite, which {@link ConnectCard} owns, presses and words. The card of a group of one
-	 * holds it, under the sentence that is about it; otherwise it sits beside Switch ▾ under the tab.
-	 */
-	private final JButton invite;
-	/** Whether the rows last drawn are that card, so the row under the tab leaves the button out. */
-	private boolean holdsInvite;
 
 	GroupPanel(DestinationState destinations, GroupState group, RoutePress press, MeetupClient meetups,
-		MapCompanionConfig config, GameSprites sprites, JButton invite)
+		MapCompanionConfig config, GameSprites sprites)
 	{
 		this.destinations = destinations;
 		this.group = group;
@@ -205,7 +198,6 @@ final class GroupPanel extends JPanel
 		this.meetups = meetups;
 		this.config = config;
 		this.sprites = sprites;
-		this.invite = invite;
 		column(this, DARK_GRAY_COLOR);
 		setName("companionGroup");
 		add(friends);
@@ -436,7 +428,6 @@ final class GroupPanel extends JPanel
 		drawn = words;
 		ticking.clear();
 		friends.removeAll();
-		holdsInvite = roster != null && roster.isEmpty();
 		if (roster != null)
 		{
 			for (RosterRow row : roster)
@@ -532,9 +523,9 @@ final class GroupPanel extends JPanel
 	 * A group of one: what the tab is for, said where the friends will be.
 	 *
 	 * <p>Most groups start this way now, because Connect makes one for a player alone. An empty tab
-	 * reads as "nothing works"; this reads as "nobody yet", and holds the button that changes that,
-	 * Copy invite, under the sentence that is about it. It comes with the map's empty roster, and
-	 * goes, giving the button back to the row under the tab, the moment a friend's row arrives.
+	 * reads as "nothing works"; this reads as "nobody yet". The button that changes that, Copy invite,
+	 * is over the tabs, in view from here, so the card is the sentence alone. It comes with the map's
+	 * empty roster, and goes the moment a friend's row arrives.
 	 */
 	static final String ALONE = Words.of("group.alone");
 
@@ -543,19 +534,7 @@ final class GroupPanel extends JPanel
 		JPanel card = card();
 		card.setName("group.alone");
 		card.add(MapCompanionPanel.wrapped(ALONE, 11f, LIGHT_GRAY_COLOR, WIDTH));
-		card.add(gap(5));
-		card.add(left(actions(invite)));
 		return slot(card);
-	}
-
-	/**
-	 * Whether the card of a group of one is drawn, holding Copy invite, so the row under the tab leaves
-	 * it out. It says what was drawn rather than what the roster says now, so the two places never both
-	 * want the button and never both let it go.
-	 */
-	boolean holdsInvite()
-	{
-		return holdsInvite;
 	}
 
 	/** Who answers a friend card's right-click; set once the status card exists. */

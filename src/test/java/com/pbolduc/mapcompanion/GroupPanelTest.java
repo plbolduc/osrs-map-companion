@@ -43,7 +43,6 @@ import java.util.Locale;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.swing.AbstractButton;
-import javax.swing.JButton;
 import javax.swing.SwingUtilities;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.ui.ColorScheme;
@@ -122,15 +121,11 @@ public class GroupPanelTest
 			});
 		meetups = new MeetupClient(meetupHttp, new Gson(),
 			MeetupClientTest.game(false), now(), pairing, identity, destinations, group, link -> { });
-		invite = MapCompanionPanel.smallButton("Copy invite");
-		return new GroupPanel(destinations, group, press, meetups, config, pictures, invite);
+		return new GroupPanel(destinations, group, press, meetups, config, pictures);
 	}
 
 	/** The panel's meetup writes, for a test that waits on one. */
 	private MeetupClient meetups;
-
-	/** Copy invite, which the sidebar hands the Group tab for the card of a group of one. */
-	private JButton invite;
 
 	/** What the panel asked the game's sprites for, by the label it asked for. */
 	private final List<String> drawn = new CopyOnWriteArrayList<>();
@@ -179,14 +174,16 @@ public class GroupPanelTest
 	}
 
 	/**
-	 * A group of one says so where the friends will be, and holds the button that changes it: Copy
-	 * invite sits in the card, under the sentence that is about it, rather than being named there and
-	 * found a section further down. Most groups start this way now that Connect makes one for a player
-	 * alone; a blank tab read as "nothing works". The card comes with the map's empty roster, not when
-	 * the next minute redraws the rows, and goes the moment a friend arrives, giving the button back.
+	 * A group of one says so where the friends will be. Most groups start this way now that Connect
+	 * makes one for a player alone; a blank tab read as "nothing works". The card comes with the map's
+	 * empty roster, not when the next minute redraws the rows, and goes the moment a friend arrives.
+	 *
+	 * <p>The card held Copy invite while the group's buttons were the tab's foot, a section further
+	 * down. They sit over the tabs now, in view from the card, so this asserts the card is the
+	 * sentence alone: a second Copy invite two rows under the first would be the same button twice.
 	 */
 	@Test
-	public void aGroupOfOneSaysSoAtOnceAndHoldsCopyInvite() throws Exception
+	public void aGroupOfOneSaysSoAtOnce() throws Exception
 	{
 		AtomicReference<GroupPanel> panel = new AtomicReference<>();
 		SwingUtilities.invokeAndWait(() ->
@@ -196,7 +193,6 @@ public class GroupPanelTest
 			panel.get().refresh(true);
 		});
 		assertFalse(SidebarWords.words(panel.get()).contains(GroupPanel.ALONE));
-		assertFalse(panel.get().holdsInvite());
 
 		RelayResponse.StreamDirective alone = new Gson().fromJson("{\"roster\":[],\"events\":[]}",
 			RelayResponse.StreamDirective.class);
@@ -204,14 +200,31 @@ public class GroupPanelTest
 		SwingUtilities.invokeAndWait(() -> panel.get().refresh(true));
 		assertTrue("the card comes with the empty roster, within the same minute: " + SidebarWords.words(panel.get()),
 			SidebarWords.words(panel.get()).contains(GroupPanel.ALONE));
-		assertTrue(panel.get().holdsInvite());
-		assertTrue("Copy invite is in the card", SwingUtilities.isDescendingFrom(invite, namedComponent(panel.get(), "group.alone")));
+		assertFalse("the card is the sentence alone", holdsButton(namedComponent(panel.get(), "group.alone")));
 
 		social();
 		SwingUtilities.invokeAndWait(() -> panel.get().refresh(true));
 		assertFalse(SidebarWords.words(panel.get()).contains(GroupPanel.ALONE));
-		assertFalse("with a friend in, the button is the row's under the tab again", panel.get().holdsInvite());
-		assertFalse(SwingUtilities.isDescendingFrom(invite, panel.get()));
+	}
+
+	/** Whether {@code component} is a button or holds one. */
+	private static boolean holdsButton(Component component)
+	{
+		if (component instanceof AbstractButton)
+		{
+			return true;
+		}
+		if (component instanceof Container)
+		{
+			for (Component child : ((Container) component).getComponents())
+			{
+				if (holdsButton(child))
+				{
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	private void social() throws Exception

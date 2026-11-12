@@ -159,10 +159,10 @@ pictures use made-up characters and stars.
 1. Install **OSRS Map Companion** from the Plugin Hub and open its sidebar.
 2. Press **Connect**. The plugin makes a group for you, called *Our group*; you can use it on your
    own, and rename it with **Rename group…** under its name, or **Switch ▾ → Rename group…** under
-   **Group**.
+   **Open the map**.
 3. Press **Share what's ticked**, or untick what you would rather keep to yourself first, or
    **Not now** to share nothing yet. The gear opens **Settings** whenever you want to change your choices.
-4. To play with friends, press **Copy invite** under **Group** and send it. A friend copies it and
+4. To play with friends, press **Copy invite** under **Open the map** and send it. A friend copies it and
    presses **Paste** under **Have an invite?** in their own sidebar, which joins your group.
 
 **Open the map** opens osrs-map.com already in your group, as you, for the bigger map on another

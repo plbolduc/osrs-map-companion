@@ -128,8 +128,7 @@ public class RouteNotesTest
 			GroupState group = new GroupState(destinations);
 			MeetupClient meetups = new MeetupClient(new OkHttpClient(), new Gson(), MeetupClientTest.game(false), now(), pairing,
 				identity, destinations, group, link -> { });
-			GroupPanel panel = new GroupPanel(destinations, group, press, meetups, config, new GameSprites(null, null, null),
-				MapCompanionPanel.smallButton("Copy invite"));
+			GroupPanel panel = new GroupPanel(destinations, group, press, meetups, config, new GameSprites(null, null, null));
 			panel.refresh(true);
 			((AbstractButton) named(panel, "group.meetupRoute.star-hunt")).doClick();
 		});

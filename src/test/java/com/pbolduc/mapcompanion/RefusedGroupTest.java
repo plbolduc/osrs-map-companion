@@ -176,12 +176,11 @@ public class RefusedGroupTest
 				});
 			MeetupClient meetups = new MeetupClient(new OkHttpClient(), new Gson(), MeetupClientTest.game(false), now,
 				pairing, identity, destinations, group, link -> { });
-			groupPanel = new GroupPanel(destinations, group, press, meetups, config, new GameSprites(null, null, null),
-				card.copyInviteButton);
+			groupPanel = new GroupPanel(destinations, group, press, meetups, config, new GameSprites(null, null, null));
 		}
 		groupPanel.refresh(true);
 		card.refreshStatus(health, pairing.code(), true, true);
-		card.refreshButtons(true, true, pairing.knownCodes(), groupPanel);
+		card.refreshButtons(true, true, pairing.knownCodes());
 	}
 
 	/** The words a player can see: every label and button inside nothing hidden, without their markup. */
