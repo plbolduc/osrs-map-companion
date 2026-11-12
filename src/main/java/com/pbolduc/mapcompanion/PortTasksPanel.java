@@ -87,20 +87,18 @@ final class PortTasksPanel extends JPanel
 		this.client = client;
 		this.routes = routes;
 		this.run = new RunView(true, state, client, follower, routes, shortest, sprites, config);
-		/* The bold face's last "s" draws past its advance; two pixels keep it inside the label. */
-		MapCompanionPanel.taskCard(this, "portTasks", "Port tasks", sprites, "Sailing")
-			.setBorder(new EmptyBorder(0, 0, 0, 2));
+		JPanel card = MapCompanionPanel.taskCard(this, "portTasks", "Port tasks", sprites, "Sailing", settings);
 		body.setOpaque(false);
 		body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
-		add(MapCompanionPanel.left(body));
+		card.add(MapCompanionPanel.left(body));
 		starter.setOpaque(false);
 		starter.setBorder(new EmptyBorder(4, 0, 0, 0));
 		start.setToolTipText(START_TIP);
 		starter.add(start);
 		MapCompanionPanel.capped(starter);
-		add(MapCompanionPanel.left(starter));
-		add(hint);
-		add(run);
+		card.add(MapCompanionPanel.left(starter));
+		card.add(hint);
+		card.add(run);
 		start.addActionListener(e -> client.start(FarmRunWire.PORT_TASKS));
 		setVisible(false);
 	}

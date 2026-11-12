@@ -85,7 +85,7 @@ final class FarmRunPanel extends JPanel
 		this.routes = routes;
 		this.settings = settings;
 		this.run = new RunView(false, state, client, follower, routes, shortest, sprites, config);
-		MapCompanionPanel.taskCard(this, "farmRun", "Farm run", sprites, "Farming");
+		JPanel card = MapCompanionPanel.taskCard(this, "farmRun", "Farm run", sprites, "Farming", settings);
 		picker.setBackground(getBackground());
 		for (String choice : STARTS)
 		{
@@ -100,12 +100,12 @@ final class FarmRunPanel extends JPanel
 		picker.add(kind, BorderLayout.CENTER);
 		picker.add(start, BorderLayout.SOUTH);
 		picker.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
-		add(MapCompanionPanel.left(picker));
+		card.add(MapCompanionPanel.left(picker));
 		needs.setVisible(false);
-		add(needs);
+		card.add(needs);
 		waiting.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
-		add(waiting);
-		add(run);
+		card.add(waiting);
+		card.add(run);
 
 		start.addActionListener(e ->
 		{
