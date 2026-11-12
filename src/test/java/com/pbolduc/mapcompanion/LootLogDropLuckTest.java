@@ -349,6 +349,8 @@ public class LootLogDropLuckTest
 	{
 		store.set(LootLog.STORE_KEY, "{\"Abyssal demon\":{\"kills\":1024,\"collectionSince\":0,"
 			+ "\"obtained\":{\"Abyssal whip\":2},\"killsAtLast\":{\"Abyssal whip\":900},\"trackedSince\":{\"Abyssal whip\":800}}}");
+		/* A game tick has read which world this is; the list goes by that, since Swing's thread asks for it. */
+		log.onTick(1, 0, 0);
 		LootLog.Drop whip = null;
 		for (LootLog.Drop drop : monster("Abyssal demon").drops)
 		{
