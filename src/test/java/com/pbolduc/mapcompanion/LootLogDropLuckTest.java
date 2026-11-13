@@ -377,7 +377,16 @@ public class LootLogDropLuckTest
 			Collections.singletonList(new ItemStack(WHIP, 1))));
 		assertEquals(1, drops.size());
 		assertEquals(80, drops.get(0).wait);
-		assertEquals("Abyssal whip after 80 kills — luckier than 86% of players.", DropLuckView.chatLine(drops.get(0)));
+		/* The first one the log has seen: the kills before it were never counted, and the line says so. */
+		assertEquals("Abyssal whip after 80 recorded kills — luckier than 86% of players.", DropLuckView.chatLine(drops.get(0)));
+		for (int i = 0; i < 779; i++)
+		{
+			kill("Abyssal demon", COINS);
+		}
+		List<LootLog.Notable> second = log.record(new ServerNpcLoot(game.npc("Abyssal demon"),
+			Collections.singletonList(new ItemStack(WHIP, 1))));
+		assertEquals("a wait between two drops is a whole wait, and is said plainly",
+			"Abyssal whip after 780 kills — drier than 78% of players.", DropLuckView.chatLine(second.get(0)));
 
 		List<LootLog.Notable> visage = log.record(new ServerNpcLoot(game.npc("Corporeal Beast"),
 			Collections.singletonList(new ItemStack(VISAGE, 1))));

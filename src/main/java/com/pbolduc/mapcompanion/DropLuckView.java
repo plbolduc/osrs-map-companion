@@ -419,6 +419,10 @@ final class DropLuckView
 	 *
 	 * <p>Null for a drop with no rate: the game prints its own collection-log line for those, and a
 	 * second line with no number in it would only repeat it.
+	 *
+	 * <p>The first one the log has seen says "recorded kills". Its wait runs from when watching
+	 * began, and a player 2,000 kills dry before installing is not "luckier than 86% of players"
+	 * for getting it 80 kills later; "recorded" says whose count the comparison is made on.
 	 */
 	@Nullable
 	static String chatLine(LootLog.Notable drop)
@@ -427,7 +431,7 @@ final class DropLuckView
 		{
 			return null;
 		}
-		return drop.item + " after " + count(drop.wait) + (drop.wait == 1 ? " kill" : " kills")
+		return drop.item + " after " + count(drop.wait) + (drop.first ? " recorded" : "") + (drop.wait == 1 ? " kill" : " kills")
 			+ " — " + DropOdds.waitComparison(new DropOdds.Kills(drop.wait - drop.waitBoosted, drop.waitBoosted), drop.rate()) + ".";
 	}
 }
