@@ -75,6 +75,12 @@ public final class RewardObserver
 	private static final String POPUP_PREFIX = "New item:";
 	private static final String UNTRADEABLE_PREFIX = "Untradeable drop: ";
 	private static final Set<String> PET_MESSAGES = new HashSet<>(Resources.lines("/pet-messages.txt"));
+
+	/** Whether this is the game's line for a pet arriving, or one that would have; Drop luck counts it too. */
+	static boolean isPetMessage(String message)
+	{
+		return message != null && PET_MESSAGES.contains(message);
+	}
 	private static final Pattern PICKPOCKET_MESSAGE = Pattern.compile("You pick (the )?.+'s? pocket.*");
 	/**
 	 * Exact core LootTrackerPlugin event labels, listed in reward-activities.txt with the source they

@@ -291,6 +291,95 @@ public class LootLog
 		 * no piece is its own chance, but "the next piece" is one constant chance a kill.
 		 */
 		List<String> pieces;
+		/**
+		 * A pet: never in the loot, so counted from the game's own chat line against the kill it came
+		 * with ({@link #onPetMessage}).
+		 */
+		Boolean pet;
+		/** {@code "solo"}: a team boss priced for a player alone, whose shared kills are not counted. */
+		String kills;
+		/** {@code "outside-instances"}: a name an instanced monster shares, whose kills there are not counted. */
+		String where;
+	}
+
+	/** Whether any of a monster's rows says its kills count only under {@code value}. */
+	private static boolean anyRow(List<Rate> watched, String field, String value)
+	{
+		for (Rate rate : watched)
+		{
+			if (value.equals("kills".equals(field) ? rate.kills : rate.where))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * How long before a team boss dies another player's hit on it still makes the kill shared: a
+	 * minute of ticks. A group hits until the end, so a shared kill has one near its death; a fight
+	 * alone after a group left has none.
+	 */
+	static final int SHARED_TICKS = 100;
+	/** Per monster name, the tick another player's hit last landed on it. */
+	private final Map<String, Integer> othersHitAt = new HashMap<>();
+
+	/** A hitsplat on a monster: only another player's matters, and only on a boss priced alone. */
+	public synchronized void onHitsplat(@Nullable String npc, boolean others, int tick)
+	{
+		if (others && npc != null)
+		{
+			othersHitAt.put(key(npc), tick);
+		}
+	}
+
+	/** The kill a pet message is counted against: the last one, if it was this tick or the last. */
+	@Nullable
+	private String lastKillNpc;
+	private int lastKillTick = Integer.MIN_VALUE;
+	private boolean lastKillPetted;
+	/** A pet message that came before its kill's loot, waiting a tick for it. */
+	@Nullable
+	private Integer petPendingAt;
+
+	/**
+	 * The game says a pet arrived: "You have a funny feeling like you're being followed.", or that
+	 * one would have. Counted against the kill it came with, which is the one this tick or the last,
+	 * or — where the message comes first — the next within a tick. A pet nobody killed for (a
+	 * skilling pet) finds no kill and counts nothing.
+	 */
+	public synchronized List<Notable> onPetMessage(int tick)
+	{
+		if (lastKillNpc != null && !lastKillPetted && tick - lastKillTick <= 1)
+		{
+			lastKillPetted = true;
+			return pet(lastKillNpc);
+		}
+		petPendingAt = tick;
+		return emptyList();
+	}
+
+	private List<Notable> pet(String npc)
+	{
+		Tally tally = tallies.get(npc);
+		if (tally == null)
+		{
+			return emptyList();
+		}
+		for (Rate rate : tracked.getOrDefault(key(npc), emptyList()))
+		{
+			if (Boolean.TRUE.equals(rate.pet))
+			{
+				int wait = tally.kills - baseline(tally, rate.item);
+				boolean first = tally.obtained.getOrDefault(rate.item, 0) == 0;
+				tally.obtained.put(rate.item, (int) Math.min(MAX_COUNT, (long) tally.obtained.getOrDefault(rate.item, 0) + 1));
+				tally.killsAtLast.put(rate.item, tally.kills);
+				unsaved = true;
+				saveIfDue();
+				return Collections.singletonList(new Notable(npc, rate.item, -1, 1, rate.oneIn, wait, 0, null, null, first));
+			}
+		}
+		return emptyList();
 	}
 
 	/** Gson fills this from the table's {@code boost: { when, oneIn }}. */
@@ -462,6 +551,18 @@ public class LootLog
 			return emptyList();
 		}
 		List<Rate> watched = tracked.getOrDefault(key(name), emptyList());
+		int tick = client.getTickCount();
+		Integer othersAt = othersHitAt.remove(key(name));
+		if (anyRow(watched, "kills", "solo") && othersAt != null && tick - othersAt <= SHARED_TICKS)
+		{
+			/* Shared by damage: its odds were not the player's alone, so it is not counted. */
+			return emptyList();
+		}
+		if (anyRow(watched, "where", "outside-instances") && WorldTiles.isInstance(client))
+		{
+			/* The Chambers of Xeric's shaman shares the name and not the table. */
+			return emptyList();
+		}
 
 		Tally tally = tallies.get(name);
 		if (tally == null)
@@ -592,6 +693,15 @@ public class LootLog
 				notable.add(new Notable(name, item, stack.getId(), stack.getQuantity(), null, wait, 0, null, null, false));
 			}
 		}
+		lastKillNpc = name;
+		lastKillTick = tick;
+		lastKillPetted = false;
+		if (petPendingAt != null && tick - petPendingAt <= 1)
+		{
+			lastKillPetted = true;
+			notable.addAll(pet(name));
+		}
+		petPendingAt = null;
 		unsaved = true;
 		saveIfDue();
 		return notable;
@@ -1134,7 +1244,7 @@ public class LootLog
 					rate == null ? null : rate.oneIn,
 					boost ? rate.boost.oneIn : null, boost ? rate.boost.when : null));
 			}
-			out.add(new Monster(entry.getKey(), tally.kills, tally.lastKillMs, drops));
+			out.add(new Monster(entry.getKey(), tally.kills, tally.lastKillMs, drops, anyRow(watched, "kills", "solo")));
 		}
 		return out;
 	}
@@ -1147,13 +1257,22 @@ public class LootLog
 		/** Wall-clock ms of the last kill, or zero when the log predates keeping it. */
 		public final long lastKillMs;
 		public final List<Drop> drops;
+		/** Its odds are for a player alone, and only kills alone are counted. */
+		public final boolean solo;
 
+		/** A monster priced per kill, as every one is but a team boss. */
 		Monster(String npc, int kills, long lastKillMs, List<Drop> drops)
+		{
+			this(npc, kills, lastKillMs, drops, false);
+		}
+
+		Monster(String npc, int kills, long lastKillMs, List<Drop> drops, boolean solo)
 		{
 			this.npc = npc;
 			this.kills = kills;
 			this.lastKillMs = lastKillMs;
 			this.drops = Collections.unmodifiableList(drops);
+			this.solo = solo;
 		}
 	}
 

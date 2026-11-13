@@ -453,4 +453,92 @@ public class LootLogDropLuckTest
 		kill("Araxxor", 99_999);
 		assertEquals("an unreadable item is never taken for a destroy", 3, monster("Araxxor").kills);
 	}
+
+	private LootLog.Drop drop(String npc, String item)
+	{
+		return monster(npc).drops.stream().filter(d -> d.item.equals(item)).findFirst().orElse(null);
+	}
+
+	/** A pet is never in the loot: the game's line after the kill counts it, against that kill. */
+	@Test
+	public void aPetIsCountedFromTheGamesLineAgainstTheKillItCameWith()
+	{
+		for (int i = 0; i < 40; i++)
+		{
+			kill("Cerberus", BONES);
+			game.tick();
+		}
+		List<LootLog.Notable> said = log.onPetMessage(game.client().getTickCount());
+		LootLog.Drop pup = drop("Cerberus", "Hellpuppy");
+		assertEquals(1, pup.obtained);
+		assertEquals(0, pup.sinceLast);
+		assertEquals("Hellpuppy", said.get(0).item);
+		assertEquals("one message, one pet", 0, log.onPetMessage(game.client().getTickCount()).size());
+		assertEquals(1, drop("Cerberus", "Hellpuppy").obtained);
+	}
+
+	/** The line can come before the loot; it waits a tick for its kill. */
+	@Test
+	public void aPetLineBeforeItsKillWaitsForIt()
+	{
+		kill("Cerberus", BONES);
+		game.tick();
+		game.tick();
+		game.tick();
+		assertTrue(log.onPetMessage(game.client().getTickCount()).isEmpty());
+		kill("Cerberus", BONES);
+		assertEquals(1, drop("Cerberus", "Hellpuppy").obtained);
+	}
+
+	/** A pet from woodcutting finds no kill, and counts nothing anywhere. */
+	@Test
+	public void aPetWithNoKillBesideItCountsNothing()
+	{
+		kill("Cerberus", BONES);
+		for (int i = 0; i < 5; i++)
+		{
+			game.tick();
+		}
+		log.onPetMessage(game.client().getTickCount());
+		for (int i = 0; i < 5; i++)
+		{
+			game.tick();
+		}
+		kill("Cerberus", BONES);
+		assertEquals(0, drop("Cerberus", "Hellpuppy").obtained);
+	}
+
+	/**
+	 * Callisto's uniques are shared by damage in a group. A kill where another player's hit landed
+	 * in the last minute is not the player's alone, and is not counted; one alone is.
+	 */
+	@Test
+	public void aTeamBossIsCountedOnlyWhenKilledAlone()
+	{
+		log.onHitsplat("Callisto", true, game.client().getTickCount());
+		kill("Callisto", BONES);
+		assertNull("shared, so not counted", DropLuckView.find(log.monsters(), "Callisto"));
+		log.onHitsplat("Callisto", true, game.client().getTickCount());
+		for (int i = 0; i <= LootLog.SHARED_TICKS; i++)
+		{
+			game.tick();
+		}
+		kill("Callisto", BONES);
+		kill("Callisto", BONES);
+		assertEquals(2, monster("Callisto").kills);
+		assertTrue(monster("Callisto").solo);
+		assertTrue(DropLuckView.context(monster("Callisto"), false, null, now).endsWith("2 solo kills"));
+		log.onHitsplat("Abyssal demon", true, game.client().getTickCount());
+		kill("Abyssal demon", BONES);
+		assertEquals("another player's hit means nothing on a monster priced per kill", 1, monster("Abyssal demon").kills);
+	}
+
+	/** Outside an instance the canyon shaman is counted, warhammer and all. */
+	@Test
+	public void theCanyonShamanCountsItsWarhammer()
+	{
+		kill("Lizardman shaman", BONES);
+		assertNotNull(drop("Lizardman shaman", "Dragon warhammer"));
+		assertEquals(1, monster("Lizardman shaman").kills);
+	}
 }
