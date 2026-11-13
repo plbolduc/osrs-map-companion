@@ -99,18 +99,25 @@ public class RouteNotesTest
 				route, null, null, null, rerouting -> null, () -> { }));
 			service.model.accept(new Gson().fromJson(new InputStreamReader(RouteNotesTest.class.getResourceAsStream(
 				"/companion-stars.sample.json"), StandardCharsets.UTF_8), StarsModel.Feed.class));
+			/* One press pins the star and, its dwell over, asks the way; Pin and then Route were pressed for these. */
+			Runnable[] dwell = new Runnable[1];
+			stars.get().dwell = (action, delayMs) ->
+			{
+				dwell[0] = action;
+				return () -> { };
+			};
 			stars.get().refresh();
 			((AbstractButton) named(stars.get(), "stars.site.tile:2974,3241")).doClick();
-			((AbstractButton) named(stars.get(), "stars.pin")).doClick();
 			assertEquals(Integer.valueOf(302), destinations.getDestination().world);
 			assertNull("the pin's card says its world and nothing that ages", destinations.getDestination().note);
 
-			((AbstractButton) named(stars.get(), "stars.route")).doClick();
+			dwell[0].run();
 		});
 		settle(press, StarsPanel.SOURCE);
 		RelayResponse.Destination answered = destinations.getDestination();
 		assertEquals("Rimmington mine", answered.name);
 		assertEquals(Integer.valueOf(302), answered.world);
+		assertNotNull("the way landed", answered.route);
 		assertNull("nor does the route's", answered.note);
 	}
 

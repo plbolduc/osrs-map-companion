@@ -39,7 +39,7 @@ import okhttp3.OkHttpClient;
 /**
  * Paints the real MapCompanionPanel at 225px with RuneLite 1.13.4's own look and feel, in the states
  * the last polish pass changed: a fresh install with and without a kill log, the step after a first
- * Connect, a busy Home, the Group tab, Settings with Advanced open, Stars with a world picked, the
+ * Connect, a busy Home, the Group tab, Settings with Advanced open, Stars with a star pressed, the
  * search answering "bank" and "whip", the death and clue cards, a meetup, and Drop luck alone.
  * The README's pictures are route, search-whip-card, farm-count, group, stars-route, dropluck-boss-card,
  * slayer-card, settings-closed, port-run and chart-run, with VoyageShot's voyage-sail; the card scenes
@@ -69,7 +69,7 @@ import okhttp3.OkHttpClient;
 public class SidebarPolishShot
 {
 	static final List<String> STATES = Arrays.asList("fresh", "fresh-log", "connect", "home", "route", "group", "settings", "settings-closed",
-		"stars", "stars-filters", "stars-route", "stars-pinned", "stars-busy", "stars-busy-picked", "stars-busy-open", "stars-busy-ways", "search", "search-whip", "search-whip-card", "death", "meetup", "dropluck", "dropluck-card", "dropluck-boss-card", "status",
+		"stars", "stars-filters", "stars-route", "stars-pinned", "stars-refused", "stars-guess", "stars-busy", "stars-busy-pressed", "stars-busy-open", "stars-busy-ways", "search", "search-whip", "search-whip-card", "death", "meetup", "dropluck", "dropluck-card", "dropluck-boss-card", "status",
 		"farm", "farm-card", "farm-bring", "farm-count", "slayer", "slayer-card", "slayer-open", "slayer-expanded", "slayer-blocked",
 		"port-tasks", "port-tasks-card", "port-tasks-unread", "port-run", "port-run-changed", "chart-run", "quest-route", "tasks", "tasks-folded");
 
@@ -689,44 +689,57 @@ public class SidebarPolishShot
 			}
 			press(panel, "companionView.stars");
 			stars.refresh();
+			/* The star a scene is about: Rimmington mine's first world, or the busy list's mine by the hunter guild. */
+			StarsModel.Star star = null;
 			for (StarsModel.Site site : client.model.sites())
 			{
 				if (site.name.equals("Rimmington mine") && !busy)
 				{
-					/* Its first world picked, by a press on the card, and the fold opened on the others. */
-					press(panel, "stars.site." + site.key);
+					/* The fold opened on its other worlds. */
+					star = site.worlds.get(0);
 					press(panel, "stars.expand." + site.key);
 				}
-				if (site.name.equals("Mine north-west of hunter guild") && (state.equals("stars-busy-picked") || state.equals("stars-busy-ways")))
+				if (site.name.equals("Mine north-west of hunter guild"))
 				{
-					press(panel, "stars.site." + site.key);
+					star = site.worlds.get(0);
 				}
 				if (site.name.equals("Varrock east bank") && state.equals("stars-busy-open"))
 				{
 					press(panel, "stars.expand." + site.key);
 				}
+				/* A star whose spot is a guess, picked by a press on its card: it is never pinned, and opens on the website. */
+				if (site.name.equals("Mining Guild") && state.equals("stars-guess"))
+				{
+					press(panel, "stars.site." + site.key);
+				}
 			}
-			/* Pin, by the steps its press takes: the press itself needs the marker a renderer has none of. */
-			if (state.equals("stars-pinned"))
+			DestinationState destinations = (DestinationState) get(panel, "destinationState");
+			RoutePress.Target target = RoutePress.Target.tile(StarsPanel.SOURCE, new WorldPoint(star.x, star.y, star.plane), star.name, star.world, null);
+			/*
+			 * A star just pressed, by the steps its press takes, since the press itself needs the marker
+			 * a renderer has none of: pinned as this client's destination with no way, and its question
+			 * still waiting out the dwell, which is the head's Planning….
+			 */
+			if (state.equals("stars-pinned") || state.equals("stars-busy-pressed") || state.equals("stars-refused"))
 			{
-				StarsModel.Star star = client.model.find(client.model.selected);
-				RelayResponse.Destination next = new RelayResponse.Destination();
-				next.x = star.x;
-				next.y = star.y;
-				next.plane = star.plane;
-				next.name = star.name;
-				next.world = star.world;
-				((DestinationState) get(panel, "destinationState")).selectLocal(next);
+				RelayResponse.Destination pin = RoutePress.destination(target, null, null);
+				destinations.selectLocal(pin);
+				set(stars, "asking", pin);
+				/* The question asked and refused: the map's words under the star, and Route beside Unpin to ask again. */
+				if (state.equals("stars-refused"))
+				{
+					set(stars, "asking", null);
+					set(stars, "asked", star.id);
+					((RoutePress) get(get(panel, "nowCards"), "routePress")).refuse(StarsPanel.SOURCE, MapWait.BUSY);
+				}
 				refresh(panel);
 				stars.refresh();
 			}
-			/* A star routed with four ways, two of them not open to the account: the strip's chips, the blocked ones last. */
+			/* The same press answered with four ways, two of them not open to the account: the strip's chips, the blocked ones last. */
 			if (state.equals("stars-busy-ways"))
 			{
-				StarsModel.Star star = client.model.find(client.model.selected);
-				RelayResponse.Destination answer = RoutePress.destination(RoutePress.Target.tile(StarsPanel.SOURCE,
-					new WorldPoint(star.x, star.y, star.plane), star.name, star.world, null), null, Busy.route());
-				((DestinationState) get(panel, "destinationState")).selectLocal(answer);
+				RelayResponse.Destination answer = RoutePress.destination(target, null, Busy.route());
+				destinations.selectLocal(answer);
 				((DestinationRoute) get(get(panel, "nowCards"), "destinationRoute")).adoptPressed(answer);
 				refresh(panel);
 				stars.refresh();
@@ -735,9 +748,12 @@ public class SidebarPolishShot
 			{
 				press(panel, "stars.filters");
 			}
+			/* A star's press answered, by RoutePress's own steps for an answer: pinned with its way, and followed. */
 			if (state.equals("stars-route"))
 			{
-				starRouted(panel, client);
+				RelayResponse.Destination answer = RoutePress.destination(target, null, starRoute());
+				destinations.selectLocal(answer);
+				((DestinationRoute) get(get(panel, "nowCards"), "destinationRoute")).adoptPressed(answer);
 				refresh(panel);
 				stars.refresh();
 			}
@@ -749,10 +765,6 @@ public class SidebarPolishShot
 		refresh(panel);
 	}
 
-	/**
-	 * The picked star's Route, answered, by RoutePress's own steps for an answer: the star pinned as this
-	 * client's destination with its way, followed from the press, as a pressed Route always is.
-	 */
 	/**
 	 * Home after Route on Quest Helper's step, as the press's answer leaves it: the step pinned at
 	 * Lumbridge Castle's bank, the contract's own route for the way there, and the quest-start star
@@ -774,15 +786,6 @@ public class SidebarPolishShot
 		java.lang.reflect.Constructor<?> shown = Class.forName("com.pbolduc.mapcompanion.RoutePress$Shown").getDeclaredConstructors()[0];
 		shown.setAccessible(true);
 		set(press, "shown", shown.newInstance(DestinationRoute.keyOf(answer), get(target, "picture"), destinations.generation()));
-	}
-
-	static void starRouted(MapCompanionPanel panel, StarsClient client) throws Exception
-	{
-		StarsModel.Star star = client.model.find(client.model.selected);
-		RelayResponse.Destination answer = RoutePress.destination(RoutePress.Target.tile(StarsPanel.SOURCE,
-			new WorldPoint(star.x, star.y, star.plane), star.name, star.world, null), null, starRoute());
-		((DestinationState) get(panel, "destinationState")).selectLocal(answer);
-		((DestinationRoute) get(get(panel, "nowCards"), "destinationRoute")).adoptPressed(answer);
 	}
 
 	static List<Component> all(java.awt.Container root)

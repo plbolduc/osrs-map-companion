@@ -582,9 +582,9 @@ of `docs/plan-where-to-go-for-a-task.md` in `osrs-stars-map`.
   now stand, and a new destination always starts on its best way. The pick is matched by the
   way's id, since a new answer is free to reorder its ways.
   A route ranked from no position says so above the steps. A destination with no
-  way yet, a star pinned on Stars or a place the map sent bare, has **Route** in Reroute's cell
-  instead: it asks by the destination's own tile, as a star's Route does, so the card that shows a
-  place can always lead there.
+  way yet, a star pinned on Stars whose way has not landed or a place the map sent bare, has
+  **Route** in Reroute's cell instead: it asks by the destination's own tile, as a star's Route
+  does, so the card that shows a place can always lead there.
 - **On the world map** each step's end has a pin with the step's number. The current one is amber
   and holds the map's edge, the ones behind it fade, and the last step leaves the destination's
   own pin uncovered. The game's arrow points at the current step's end once it is loaded.
@@ -623,8 +623,10 @@ Step 8. Each card under *Now* that names a place gains the way there, planned fr
 *Hard clue* over *Coordinate · Route finds the dig spot*, whose Route appears when the step names a
 tile. The tile itself is the line's tooltip, as the death's is: there is nowhere in the game to
 type a pair of numbers, and Route already goes to the spot.
-In Stars, Route sits beside *Pin destination* for a precise site; an approximate one has **Open on
-map** there instead. While the map answers the button reads *Planning…*, and a refusal is one line
+In Stars, Route sat beside *Pin destination* for a precise site, and an approximate one had **Open on
+map** there instead. Since 13 November a press on a precise site's star is the pin and the question
+at once (*One press on a star* below), and Route is only beside Unpin, for a pinned star with no
+way. While the map answers the button reads *Planning…*, and a refusal is one line
 under it in the refusal pink, in the map's own words when it gives them, as it does for a clue step
 it cannot place.
 The answer fills the destination's card, as a pick from Search does, and a star's is drawn under the
@@ -788,7 +790,7 @@ not fit beside Route), *Hide on map* once pressed, and *On world map* while the 
 on.
 
 Slayer's button beside Route says **Pin**. It said *World map*, but it makes the place this client's
-destination, as Stars' *Pin destination* does: Home's card, the arrow and the world map's pin. A
+destination, as a press on a star does on Stars: Home's card, the arrow and the world map's pin. A
 friend's *World map* draws only that friend's dot, so the one word named two acts.
 
 ### The group's buttons
@@ -922,7 +924,9 @@ line says what it hides: *For Mining 72: up to T7 · worlds up to 1620 total*. *
 website* has since been removed: the filters and favourite sites stay on this machine. *Selected world*
 stays at the top, once the player picks one: nothing is picked for them, so the tab opens on the
 list, a pick goes when its star leaves the feed rather than moving to another, and a pick the
-filters hide is not offered until they show it again.
+filters hide is not offered until they show it again. (The head of the tab has since become the
+pinned star's, and since 13 November only a star whose spot is approximate is picked: *One press
+on a star* below.)
 
 Once a star's Route is answered, its way is drawn under the star, in a card between the star's
 live line and its buttons: the steps Home's destination card draws, read from the same route, with
@@ -930,7 +934,8 @@ Home's own Follow and Reroute, offered and pressable exactly when Home's are, an
 button where Home has Dismiss. Star hunters hop from this tab, and steps a tab away cost them their
 place in the list; Home's card still shows the same route, and nothing switches tabs. A star pinned
 with no way yet keeps **Route** beside Unpin, so the way there is one press rather than Unpin, then
-Route.
+Route. Since 13 November that is a star whose own question came to nothing, and the button is the
+way to ask again.
 
 A star's tier is drawn in the map's own colour for it, the dark ramp of `lib/tier-color.ts`, so T7
 is one pink here and in the map's list; its time left keeps the line's ink until it is under twenty
@@ -1400,3 +1405,50 @@ minutes; under a meetup's answer, Meet here and the search it read as any failur
 again within half a minute. All five say it now and wait the five minutes, read in the one place
 their replies from the map go through. Connect, Join, Rename and the status card's own line are
 as they were.
+
+## One press on a star, 13 November 2026
+
+A press on a star picked it, and its card opened on **Route** and **Pin** to choose between: Route
+asked the map the way and its answer pinned the star, Pin set the pin alone. Picking a search
+result was already one press, and so is a star now. Built, and not yet seen in a real client:
+`docs/live-checks.md` lists what to look at.
+
+- **The press pins.** A star with a tile of its own and time left becomes the destination on the
+  press, as Pin made it: the world map's pin, the arrow, Home's card, and *Pinned destination* at
+  the head of the tab, which scrolls up to it. It replaces whatever was pinned. The pin is this
+  client's own, so it is made at once and for every star pressed, and nothing is sent for it.
+- **Then it asks the way.** Beside Unpin a greyed button reads *Planning…*, the word a pressed
+  Route has always shown, from the press until the map has answered. The answer lands as a pressed
+  Route's did: the chips and the steps under the star, followed from the start.
+- **Asked sparingly.** A route is one of the member's on the map, a few in a row and then one every
+  five seconds, so the question waits until the star has stayed the destination for 0.7 seconds,
+  and until the gate every Route, Reroute and run shares is open. Pressing down the list pins each
+  star and asks for the one stopped on. A press ends the wait of the press before it, so one
+  question at most is waiting. If the destination is something else when the wait ends, another
+  star, a place from the website, nothing, the question is dropped. With the gate shut then, by a
+  wait or by another question still out, the same question waits again; that is a timer in this
+  client and asks the map nothing.
+- **The press was the asking.** Once pressed, the question goes whichever tab is showing and with
+  the sidebar closed, and its way arrives on Home's card and in the box over the game all the same.
+- **A late answer does not move the pin.** The question belongs to the pin it was asked for. A
+  player who presses another star while the first is still being planned keeps the second: the
+  first one's answer is dropped and nothing is said of it. Route beside Unpin is bound to its pin
+  the same way.
+- **No retry.** A refusal or a failure is one pink line under the pinned star, with the wait
+  counting down, and the star stays pinned. Nothing asks again. **Route** beside Unpin, greyed for
+  the wait, is the player's own press. The line is not carried to the next star pressed.
+- **Where nobody can be asked as,** nobody logged in or no member the map takes, which on this tab
+  is a press during a hop, the star is pinned and nothing is sent or said: nobody pressed Route,
+  so there is no refusal to read. *Planning…* shows for the dwell and then gives way to Route.
+- **Other presses.** The pinned star pressed again does nothing; Unpin is at the head. A star whose
+  spot is approximate has no tile to pin, so it is still picked: its card opens on **Open website**
+  and its note, and a second press folds it away. A star with no time left is not a press. A
+  world's row under a fold pins that world, and the pinned world's row is the darker one, as a
+  picked row was.
+
+The star's own card has no buttons now, so it is the same height pressed as not. The head of the
+tab is new when the first star is pinned, and the list moves down by its height; from one pinned
+star to the next it keeps its height until a way lands.
+
+`SidebarPolishShot` paints the two states: `stars-busy-pressed` is a star just pressed, pinned at
+the head with *Planning…*, and `stars-busy-ways` the same star with its way drawn.

@@ -133,9 +133,13 @@ green when you are already on that world; a
 site with stars on several worlds shows the one with the most time left and how many more there
 are. Filter by tier and world type, and save favourite sites; your filters and favourites stay on
 your computer.
-Press a star to open **Route** and **Pin** under it: Route plans the way there and pins the star,
-and Pin only marks it on the world map. The pinned star stays at the top of the tab with its steps,
-as on Home, so you can stay on Stars while you hop.
+Press a star to go there. It is pinned at once, on the world map and with the game's arrow, in
+place of whatever was pinned, and a moment later the map is asked the way. The pinned star stays at
+the top of the tab with its ways and steps, as on Home, so you can stay on Stars while you hop.
+Pressing down the list pins each star you press and plans only for the one you stop on. If the map
+cannot answer, the star stays pinned and says why, and **Route** beside **Unpin** asks again. A
+star whose spot is approximate opens **Open website** instead, and a star with no time left
+cannot be pinned.
 
 To change worlds, type `::hop` and the world, for example `::hop 444`.
 

@@ -101,8 +101,9 @@ often. A clean run is now 443 tests with no failures or skips.
 - [ ] Log back in: the same character keeps its member identity. Withdraw Position while logged in
       and confirm the next accepted snapshot clears the map pin.
 - [ ] Walk a short distance manually and verify live movement and reconnection.
-- [ ] Open Stars and pick a world, then hop with the world switcher and cross a loading line: the
-      list and the pick stay through both, and no line says to log in. Log out: the list clears.
+- [ ] Open Stars and press a star, then press one whose spot is approximate so its card opens.
+      Hop with the world switcher and cross a loading line: the list, the pinned star at its head
+      and the open card stay through both, and no line says to log in. Log out: the list clears.
 - [ ] On Stars, each world is its number behind the world switcher's own star: gold on a members
       world, silver on a free one, and with Safe off, the PvP star on a PvP or high-risk world and
       the Deadman star on a Deadman world, each the star the game's world switcher shows for that
@@ -116,7 +117,7 @@ often. A clean run is now 443 tests with no failures or skips.
 - [ ] On Stars, a star on the world you are logged into has its world in green, in its card, in
       its site's list of worlds and at the head of the tab once pinned; hop, and the green moves to
       the stars of the new world. Every site name fits one line beside its favourite star, and a
-      press anywhere on a card but its star or its fold opens Route and Pin.
+      press anywhere on a card but its star or its fold pins that star.
 - [ ] Log in on a Hardcore World: Stars says *Hardcore Worlds* in gold over the list and lists only
       stars on Hardcore Worlds, or says none has been called there yet. Hop to an ordinary world:
       the line goes and the main game's stars are back. This is the first client read of
@@ -455,15 +456,20 @@ The website plan's second session, once the routes in the game are built: a memb
       the pin's tooltip say it, *Near Lumbridge Castle*; where it names none, *Picked on the world map*.
       Between the press and the answer the spot has a faded amber pin, *Planning the way here…*,
       which stays put when the map is panned away and goes with the answer or the chat box's refusal.
-- [ ] **Route on a star and a meetup.** In Stars, press a precise site: Route and Pin open in its
-      own card, under the star, and a second press folds them away; an approximate one shows Open
-      website. Far down the list, the card scrolls so both buttons are in view. Press Route: the
-      star heads the tab as *Pinned destination* with its steps, the tab scrolls up to it, Stars
-      stays the tab, and under the steps are two buttons, Reroute and Unpin. Reroute acts as
-      Home's does while you walk and hop; Unpin clears the star and Home's card together and the
-      star is a plain row again. Pause the route from Home, from the box over the game or with its
-      key: Follow appears beside Reroute on Stars, and goes again once pressed. With one star pinned, press another: the pinned
-      one keeps the head of the tab and the other opens its own Route and Pin. A meetup's Route
+- [ ] **A press on a star, and Route on a meetup.** In Stars, press a precise site: at once the
+      star heads the tab as *Pinned destination*, the tab scrolls up to it, the world map has its
+      pin and the arrow points at it, and beside Unpin a greyed button reads *Planning…*. Within a
+      second or two its way is drawn under it, chips and steps, with two buttons under them,
+      Reroute and Unpin, and the step box over the game names the first step: the way is followed
+      without a press. Stars stays the tab. The star's own card has no buttons, and its border is
+      gold. Press the pinned star again: nothing changes. Press a site whose spot is approximate:
+      nothing is pinned, its card opens on Open website and its note, and a second press folds it
+      away; far down the list, the card scrolls so the button is in view. A depleted star, with
+      *Depleted stars* shown, does nothing when pressed. Reroute acts as Home's does while you
+      walk and hop; Unpin clears the star and Home's card together and the star is a plain row
+      again. Pause the route from Home, from the box over the game or with its key: Follow appears
+      beside Reroute on Stars, and goes again once pressed. With one star pinned, press another:
+      it takes the head of the tab and the first is a plain row again. A meetup's Route
       prints its world and its day and clock in the destination's line, with no countdown, and
       nobody in the group is told. Pressed on Group, a meetup's or a friend's Route turns the
       sidebar to Home once its way lands, with the card in view; a refusal stays under the button.
@@ -624,6 +630,26 @@ under the entries they changed.
       comes back, open a monster under Drop luck, and turn to Group, Stars, Settings and back:
       after each, every card below the change sits where it should, with no gap left where a
       card was and nothing overlapping or cut at its old height.
+- [ ] **A press on a star asks for one route.** With the map's log in view, press three stars one
+      after another, less than half a second apart: each heads the tab in turn and the world map's
+      pin moves with it, and the map logs one `POST /api/companion/route`, for the last, about
+      0.7 seconds after its press. Press a star and Unpin at once: no request. Press a star and,
+      inside the dwell, send a place from the website: the place stays and no request is made for
+      the star. Press a star, wait for its way, then press another within five seconds: it is
+      pinned at once, reads *Planning…*, and its request arrives when the five seconds are over,
+      not before. Press a star and, while it reads *Planning…* and before its way lands, press
+      another: the first star's way never replaces the second, and the second's way arrives after
+      the wait. Press a star, turn to Home inside the dwell: the way still arrives, on Home's
+      card. Press a star and close the sidebar inside the dwell: the step box appears over the
+      game all the same. Press a star in a site folded over several worlds, by its row: that
+      world is the one pinned, and its row is the darker one.
+- [ ] **A star's refusal is said once.** Make the map refuse a route (press stars until it answers
+      429, or stop the map): the star stays pinned, a pink line under it says why with the wait
+      counting down, **Route** beside Unpin is greyed for the wait, and the map's log shows no
+      second request for that star however long the tab is left open. When the wait ends, Route
+      can be pressed and asks once more. Press another star while the line shows: it is pinned
+      with no line under it. Press a star during a hop, before the new world loads: it is pinned,
+      nothing is said, no request is made, and Route beside Unpin is there once the hop ends.
 - [ ] **Stars holds still.** On Stars with a full list, watch a minute turn over: a star's time
       left, a world's age and a row's *reported … ago* tooltip change in place, and no row jumps
       or loses the pointer's hover. Stay on Home for two minutes and turn to Stars: the list is

@@ -193,6 +193,15 @@ final class SearchClient
 		Runnable schedule(Runnable action, long delayMs);
 	}
 
+	/** Swing's timer, run once: the client's {@link Debouncer}, for the search box and a pressed star's dwell. */
+	static final Debouncer SWING = (action, delayMs) ->
+	{
+		Timer timer = new Timer((int) delayMs, e -> action.run());
+		timer.setRepeats(false);
+		timer.start();
+		return timer::stop;
+	};
+
 	/** The credentials a search is asked with, read when it goes. Null when there are none to ask with. */
 	interface Credentials
 	{
@@ -227,13 +236,7 @@ final class SearchClient
 	@Inject
 	SearchClient(OkHttpClient http, Gson gson, Pairing pairing, MemberIdentity identity)
 	{
-		this(http, gson, () -> pairing.signed(identity.id()), () -> identity.id() != null, (action, delayMs) ->
-		{
-			Timer timer = new Timer((int) delayMs, e -> action.run());
-			timer.setRepeats(false);
-			timer.start();
-			return timer::stop;
-		}, SwingUtilities::invokeLater);
+		this(http, gson, () -> pairing.signed(identity.id()), () -> identity.id() != null, SWING, SwingUtilities::invokeLater);
 	}
 
 	/** A search with a character always there to ask as, for a test that is not about logging in. */

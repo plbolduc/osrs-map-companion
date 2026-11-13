@@ -172,7 +172,11 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RoutePress`, `SearchClien
   with its tier and scroll item id alone.
   A clue or death that is not shared leaves only in that request. Same
   one-at-a-time rule and wait; the answer becomes the destination. Nothing is walked. **Route here**
-  on a right-click of the world map sends it too, with the clicked tile as the target.
+  on a right-click of the world map sends it too, with the clicked tile as the target. On Stars, a
+  press on a star pins it in the client and, once it has stayed pinned for 0.7 seconds, sends this
+  request once with the star's tile as the target and no further press: one request for the star
+  stopped on and none for stars pressed past, never repeated on its own, under the same
+  one-at-a-time rule and waits; the README says a press sends the two tiles.
 - **PUT /api/companion/event/answer** — one press of a meetup's answer (**Going**, **Maybe**,
   **Can't**, **On my way**). JSON is the meetup's id and the answer. Headers:
   `X-Companion-Code`, `X-Companion-Member`, `X-Companion-Member-Secret`.
@@ -278,6 +282,11 @@ answering a reviewer. Since 1.9.0:
   only the kills the plugin recorded. The existing *Drop luck in chat* setting governs it.
 - **Description and tags:** the manifest and the `@PluginDescriptor` name Drop luck, with the tags
   `loot`, `drops`, `luck` and `dry`.
+- **One press on a star:** a press on a star in the Stars tab pins it and then asks the way, where it
+  opened Route and Pin to choose between. The request is Route's own, listed under Network requests:
+  sent once, 0.7 seconds after the press if the star is still pinned, through the gate every route
+  shares, and not repeated after a refusal. The star list's own request and its once-a-minute
+  schedule are unchanged.
 
 No request, field, setting or warning is added.
 

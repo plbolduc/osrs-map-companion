@@ -237,8 +237,8 @@ Each row's picture is the game's own, from the client's sprite cache: the map's 
 a world-map icon, and an item's `itemId`, where the map names one, picks its sprite. No picture is
 ever fetched from the map or anywhere else.
 
-**Route** beside the clue being carried, the last death, Quest Helper's step, a star in the Stars tab
-or a meetup, or on the destination's card while it has no way yet, is the same request with a tile as
+**Route** beside the clue being carried, the last death, Quest Helper's step, a star pinned on Stars
+with no way yet or a meetup, or on the destination's card while it has no way yet, is the same request with a tile as
 its target: the clue's dig spot or beginner map, the death's tile, the step's, the star's tile, the
 meetup's, the destination's
 own: a star pinned on Stars, a Slayer spot set on the world map, a place the map sent bare. A clue
@@ -254,6 +254,23 @@ from, and the map decides whether that route goes to the boss's way in. A star w
 approximate offers **Open website** instead, which opens the map's search for the site's name in
 your browser and sends this client nothing. The clue is now read whether or not *Clue step* is shared,
 so the sidebar has it to offer; the snapshot still carries it only with that choice.
+
+**A press on a star** in the Stars tab pins it in this client at once, which sends nothing, and then
+sends that same request with no press of Route: one `POST /api/companion/route` with the star's
+tile as the target and the tile you stand on, even with position sharing off. It goes once the star
+has stayed the pinned destination for 0.7 seconds, so stars pressed past on the way down the list
+are pinned and send nothing. If by then the destination is another star, a place the map sent, or
+nothing, it is not sent. It goes through Route's one-flight gate and keeps Route's waits, the map's
+Retry-After, five seconds after any answer and thirty after a failure: a star pressed inside a
+wait, or while another route is being planned, is asked about once the gate opens, by a timer in
+this client that sends nothing while it waits. It is one request for a press. A refusal or a
+failure is said under the pinned star and is never repeated on its own; **Route** beside Unpin is
+the player's own press to ask again. The press was the asking, so the request goes whichever tab is
+showing by then, and with the sidebar closed. With nobody logged in, or no member credentials, it is
+not sent and nothing is said. Its answer becomes the destination's way as a Route press's does,
+unless the pin has been replaced since it was asked, and then it is dropped. A star whose tile is
+approximate is never pinned, and a star with no time left cannot be. The star list is fetched as
+it was: none of this asks for it, or asks for it sooner.
 
 **The Group section** is read from what the map already sends: `roster`, one row per other member
 with their name, colour, presence, world, *near*, *Near you* and newest news, arrives on every snapshot

@@ -106,9 +106,10 @@ sail is, and a bar how much of the run is done.
 </p>
 
 **Stars** lists active stars by site, world, tier and time left, with a star on the world you
-are on marked in green. Filter them, save favourite sites, and press one to route to it; its steps
-stay at the top of the tab while you hop, and the pin clears itself when you get there. On a
-Hardcore or League world it lists that game's stars instead.
+are on marked in green. Filter them, save favourite sites, and press one to go there: it is pinned
+at once and its way follows a moment later. Its steps stay at the top of the tab while you hop, and
+the pin clears itself when you get there. On a Hardcore or League world it lists that game's stars
+instead.
 
 ## Friends and meetups
 
@@ -257,7 +258,8 @@ Reroute does, so the way is planned from there.
 
 **Route**, beside your clue, your last death, your Quest Helper step, a star or a meetup, sends the
 tile you are standing on and the tile it goes to, once per press, as does **Route** on a destination
-that has no way yet.
+that has no way yet. Pressing a star on Stars pins it and, a moment later, sends those two tiles
+once as well, for the star you stopped on.
 That includes your clue's tile and where you died when you do not share them: they leave in that
 one request and the map plans with them and keeps neither.
 For a clue step that is words, or a map above beginner, Route sends the clue instead, its tier, any

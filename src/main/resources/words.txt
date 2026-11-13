@@ -138,7 +138,7 @@ group.openMeetupTip=Open this meetup: who is coming, Route and your answer
 
 # StarsPanel: the Stars tab.
 stars.routeTip=Plan the way to this star from where you stand. The world is in the steps.
-stars.pinTip=Pin this star on the world map and point the game's arrow at it, without planning a route.
+stars.pressTip=: press to pin it and plan the way there
 stars.safeTip=Hide Wilderness, PvP, high-risk and Deadman
 stars.noWorldList=World list unavailable: PvP and Deadman filters cannot be checked.
 stars.openTip=Show the possible spots on osrs-map.com in your browser
