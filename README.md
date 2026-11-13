@@ -157,8 +157,8 @@ dailies you have collected left out of a dailies run.
 
 See how lucky or dry you are on the monster you are killing, with sourced drop odds and the chance
 over your next kills. **All monsters** lists everything you have killed, driest first if you like,
-and a chat line says how lucky a rare drop was when it lands. It works without connecting to the
-website.
+and a chat line says how lucky a rare drop was when it lands. Pets count too, and a boss fought in
+groups counts the kills you make alone. It works without connecting to the website.
 
 Every control and rule, feature by feature, is in [docs/features.md](docs/features.md). The
 pictures use made-up characters and stars.
@@ -317,7 +317,9 @@ settings for the plugin.
 ## Good to know
 
 - Drop luck counts the kills the plugin has seen on normal members worlds, not your lifetime kill
-  count, and only drops with a sourced rate get odds. At Araxxor it counts only harvested corpses. Activity rewards need RuneLite's
+  count, and only drops with a sourced rate get odds. At Callisto, Venenatis, Vet'ion, the
+  Nightmare, the Hueycoatl and Scurrius it counts only kills nobody else hit, and at Araxxor only
+  harvested corpses. Activity rewards need RuneLite's
   **Loot Tracker** plugin. **Forget kill log** clears the current character's counts.
 - Birdhouses need RuneLite's **Time Tracking** plugin. Farm timers are estimates; disease and later
   visits can change them.

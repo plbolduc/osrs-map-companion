@@ -178,10 +178,18 @@ often. A clean run is now 443 tests with no failures or skips.
 - [ ] Carry two clue tiers, read the one in the later slot, and check the map shows that step.
 - [ ] Kill a few monsters and log out within thirty seconds; the kill log keeps them.
 - [ ] Kill a monster and close RuneLite within thirty seconds; after a restart the kill is there.
+- [ ] Drop luck's pets: on a boss kill that gives a pet (or "would have been followed"), the pet's
+      row counts one, against that kill. The game's line and the loot come within a tick of each
+      other in the harness; until a real one is seen, which comes first is a guess.
+- [ ] Drop luck's team bosses: kill Callisto with another player hitting it, then alone. The
+      shared kill is not counted and the solo one is, and the card says "solo kills". Other
+      players' hitsplats are read as `isOthers()`; no build has seen one on a boss yet.
 - [ ] Drop luck at Araxxor: destroy a corpse, then harvest one. The destroyed kill is not counted;
       the harvested one is, and a noxious piece counts under *Noxious halberd piece*.
 - [ ] Drop luck at the Alchemical Hydra: a ring piece counts under *Brimstone ring piece*, drawn
       with the eye until one falls.
+- [ ] Drop luck at a lizardman shaman: one in the canyon counts, with the warhammer row; one in the
+      Chambers of Xeric does not.
 - [ ] Paste a full RuneLite code (with its suffix) into a fresh install; the first post is
       accepted and the map links the dot to the browser without a second paste.
 

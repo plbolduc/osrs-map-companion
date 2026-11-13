@@ -127,7 +127,7 @@ per-item baseline and print **<1%** for a nonzero probability that rounds below 
 
 How Drop luck counts:
 
-- **Every monster is counted**, not only the 176 with a rate. Beside the rated rows, a monster keeps
+- **Every monster is counted**, not only the 183 with a rate. Beside the rated rows, a monster keeps
   any collection-log item that actually fell, read from the same cache vocabulary the announcements
   use; pets are left out for the reason above. A collection row is a count of what was seen and
   never the basis of a probability, so a kill the vocabulary could not judge moves its window
@@ -162,10 +162,16 @@ How Drop luck counts:
   745 expected drops, so past 200 the normal curve takes over, on both sides alike.
 - **One local chat line per rated drop**, "Abyssal whip after 780 kills — drier than 78% of
   players.", behind *Drop luck in chat* (on by default; nothing leaves the machine).
-- **Sets, and a corpse given up.** A set (`pieces` in the table) counts any of its pieces under the
-  set's name, once a kill, drawn with its first piece until one falls. An Araxxor receipt holding
-  only the elite clue, the coagulated venom or a Konar key is a destroyed corpse and not a kill.
-  Neither sends anything new: the counts travel as every rated row's do.
+- **Pets, sets and kills that do not count.** A pet row (`pet` in the table) is counted from the
+  game's pet line ("You have a funny feeling…"), never from the loot, against the kill this tick or
+  the last, or the next within a tick; a pet with no kill beside it (a skilling pet) counts nothing.
+  A set (`pieces`) counts any of its pieces under the set's name, once a kill, drawn with its first
+  piece until one falls. A monster whose rows say `kills: "solo"` counts no kill where another
+  player's hit landed on it in the 100 ticks before it died (`LootLog.SHARED_TICKS`), read from
+  `HitsplatApplied` as `isOthers()` and kept only as a tick per monster name. One whose rows say
+  `where: "outside-instances"` counts no kill in an instance. An Araxxor receipt holding only the
+  elite clue, the coagulated venom or a Konar key is a destroyed corpse and not a kill. None of this
+  sends anything new: the counts travel as every rated row's do.
 
 ## Validation and limits
 

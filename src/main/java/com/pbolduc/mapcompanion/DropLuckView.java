@@ -154,7 +154,7 @@ final class DropLuckView
 	/** "Slayer task · 143 left · 1,024 recorded kills", or the last kill's age. */
 	static String context(Monster monster, boolean isNow, @Nullable Integer taskLeft, long now)
 	{
-		String kills = count(monster.kills) + " recorded " + (monster.kills == 1 ? "kill" : "kills");
+		String kills = count(monster.kills) + (monster.solo ? " solo " : " recorded ") + (monster.kills == 1 ? "kill" : "kills");
 		if (isNow && taskLeft != null)
 		{
 			return "Slayer task · " + count(taskLeft) + " left · " + kills;

@@ -116,6 +116,13 @@
     },
     {
       "npc": "Alchemical Hydra",
+      "item": "Ikkle Hydra",
+      "oneIn": 3000,
+      "page": "Alchemical Hydra",
+      "pet": true
+    },
+    {
+      "npc": "Alchemical Hydra",
       "item": "Jar of Chemicals",
       "oneIn": 2000,
       "page": "Alchemical Hydra"
@@ -125,6 +132,13 @@
       "item": "Glacial temotli",
       "oneIn": 100,
       "page": "Amoxliatl"
+    },
+    {
+      "npc": "Amoxliatl",
+      "item": "Moxi",
+      "oneIn": 3000,
+      "page": "Amoxliatl",
+      "pet": true
     },
     {
       "npc": "Ancient Wyvern",
@@ -196,6 +210,13 @@
       "item": "Zombie champion scroll",
       "oneIn": 5000,
       "page": "Armoured zombie (Defender of Varrock)"
+    },
+    {
+      "npc": "Artio",
+      "item": "Callisto cub",
+      "oneIn": 2800,
+      "page": "Artio",
+      "pet": true
     },
     {
       "npc": "Artio",
@@ -376,6 +397,56 @@
       "page": "Brutal red dragon"
     },
     {
+      "npc": "Brutus",
+      "item": "Beef",
+      "oneIn": 1000,
+      "page": "Brutus",
+      "pet": true
+    },
+    {
+      "npc": "Callisto",
+      "item": "Callisto cub",
+      "oneIn": 1500,
+      "page": "Callisto",
+      "pet": true,
+      "kills": "solo"
+    },
+    {
+      "npc": "Callisto",
+      "item": "Claws of Callisto",
+      "oneIn": 196,
+      "page": "Callisto",
+      "kills": "solo"
+    },
+    {
+      "npc": "Callisto",
+      "item": "Dragon 2h sword",
+      "oneIn": 256,
+      "page": "Callisto",
+      "kills": "solo"
+    },
+    {
+      "npc": "Callisto",
+      "item": "Dragon pickaxe",
+      "oneIn": 256,
+      "page": "Callisto",
+      "kills": "solo"
+    },
+    {
+      "npc": "Callisto",
+      "item": "Tyrannical ring",
+      "oneIn": 512,
+      "page": "Callisto",
+      "kills": "solo"
+    },
+    {
+      "npc": "Callisto",
+      "item": "Voidwaker hilt",
+      "oneIn": 360,
+      "page": "Callisto",
+      "kills": "solo"
+    },
+    {
       "npc": "Calvar'ion",
       "item": "Ring of the gods",
       "oneIn": 716,
@@ -386,6 +457,13 @@
       "item": "Skull of Vet'ion",
       "oneIn": 618,
       "page": "Calvar'ion"
+    },
+    {
+      "npc": "Calvar'ion",
+      "item": "Vet'ion Jr.",
+      "oneIn": 2800,
+      "page": "Calvar'ion",
+      "pet": true
     },
     {
       "npc": "Calvar'ion",
@@ -437,6 +515,13 @@
     },
     {
       "npc": "Cerberus",
+      "item": "Hellpuppy",
+      "oneIn": 3000,
+      "page": "Cerberus",
+      "pet": true
+    },
+    {
+      "npc": "Cerberus",
       "item": "Jar of Souls",
       "oneIn": 2000,
       "page": "Cerberus"
@@ -466,6 +551,13 @@
       "page": "Chaos Elemental"
     },
     {
+      "npc": "Chaos Elemental",
+      "item": "Pet chaos elemental",
+      "oneIn": 300,
+      "page": "Chaos Elemental",
+      "pet": true
+    },
+    {
       "npc": "Chaos Fanatic",
       "item": "Malediction shard 1",
       "oneIn": 256,
@@ -476,6 +568,13 @@
       "item": "Odium shard 1",
       "oneIn": 256,
       "page": "Chaos Fanatic"
+    },
+    {
+      "npc": "Chaos Fanatic",
+      "item": "Pet chaos elemental",
+      "oneIn": 1000,
+      "page": "Chaos Fanatic",
+      "pet": true
     },
     {
       "npc": "City guard",
@@ -500,6 +599,13 @@
       "item": "Armadyl crossbow",
       "oneIn": 508,
       "page": "Commander Zilyana"
+    },
+    {
+      "npc": "Commander Zilyana",
+      "item": "Pet Zilyana",
+      "oneIn": 5000,
+      "page": "Commander Zilyana",
+      "pet": true
     },
     {
       "npc": "Commander Zilyana",
@@ -530,6 +636,13 @@
       "item": "Jar of Spirits",
       "oneIn": 1000,
       "page": "Corporeal Beast"
+    },
+    {
+      "npc": "Corporeal Beast",
+      "item": "Pet dark core",
+      "oneIn": 5000,
+      "page": "Corporeal Beast",
+      "pet": true
     },
     {
       "npc": "Corporeal Beast",
@@ -581,6 +694,13 @@
     },
     {
       "npc": "Dagannoth Prime",
+      "item": "Pet Dagannoth Prime",
+      "oneIn": 5000,
+      "page": "Dagannoth Prime",
+      "pet": true
+    },
+    {
+      "npc": "Dagannoth Prime",
       "item": "Seers ring",
       "oneIn": 128,
       "page": "Dagannoth Prime"
@@ -599,6 +719,13 @@
     },
     {
       "npc": "Dagannoth Rex",
+      "item": "Pet Dagannoth Rex",
+      "oneIn": 5000,
+      "page": "Dagannoth Rex",
+      "pet": true
+    },
+    {
+      "npc": "Dagannoth Rex",
       "item": "Warrior ring",
       "oneIn": 128,
       "page": "Dagannoth Rex"
@@ -614,6 +741,13 @@
       "item": "Dragon axe",
       "oneIn": 128,
       "page": "Dagannoth Supreme"
+    },
+    {
+      "npc": "Dagannoth Supreme",
+      "item": "Pet Dagannoth Supreme",
+      "oneIn": 5000,
+      "page": "Dagannoth Supreme",
+      "pet": true
     },
     {
       "npc": "Dagannoth Supreme",
@@ -944,6 +1078,13 @@
       "page": "General Graardor"
     },
     {
+      "npc": "General Graardor",
+      "item": "Pet General Graardor",
+      "oneIn": 5000,
+      "page": "General Graardor",
+      "pet": true
+    },
+    {
       "npc": "Ghoul",
       "item": "Ghoul champion scroll",
       "oneIn": 5000,
@@ -954,6 +1095,13 @@
       "item": "Curved bone",
       "oneIn": 5012.5,
       "page": "Giant frog"
+    },
+    {
+      "npc": "Giant Mole",
+      "item": "Baby Mole",
+      "oneIn": 3000,
+      "page": "Giant Mole",
+      "pet": true
     },
     {
       "npc": "Giant Mole",
@@ -1155,6 +1303,13 @@
     },
     {
       "npc": "K'ril Tsutsaroth",
+      "item": "Pet K'ril Tsutsaroth",
+      "oneIn": 5000,
+      "page": "K'ril Tsutsaroth",
+      "pet": true
+    },
+    {
+      "npc": "K'ril Tsutsaroth",
       "item": "Staff of the Dead",
       "oneIn": 508,
       "page": "K'ril Tsutsaroth"
@@ -1188,6 +1343,13 @@
       "item": "Jar of Sand",
       "oneIn": 2000,
       "page": "Kalphite Queen"
+    },
+    {
+      "npc": "Kalphite Queen",
+      "item": "Kalphite Princess",
+      "oneIn": 3000,
+      "page": "Kalphite Queen",
+      "pet": true
     },
     {
       "npc": "Kalphite Queen",
@@ -1226,6 +1388,13 @@
       "page": "King Black Dragon"
     },
     {
+      "npc": "King Black Dragon",
+      "item": "Prince Black Dragon",
+      "oneIn": 3000,
+      "page": "King Black Dragon",
+      "pet": true
+    },
+    {
       "npc": "Kraka",
       "item": "Curved bone",
       "oneIn": 5012.5,
@@ -1242,6 +1411,13 @@
       "item": "Kraken tentacle",
       "oneIn": 400,
       "page": "Kraken"
+    },
+    {
+      "npc": "Kraken",
+      "item": "Pet Kraken",
+      "oneIn": 3000,
+      "page": "Kraken",
+      "pet": true
     },
     {
       "npc": "Kraken",
@@ -1278,6 +1454,13 @@
       "item": "Curved bone",
       "oneIn": 5012.5,
       "page": "Kree'arra"
+    },
+    {
+      "npc": "Kree'arra",
+      "item": "Pet Kree'arra",
+      "oneIn": 5000,
+      "page": "Kree'arra",
+      "pet": true
     },
     {
       "npc": "Kurask",
@@ -1339,7 +1522,15 @@
       "npc": "Lizardman shaman",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Lizardman shaman"
+      "page": "Lizardman shaman",
+      "where": "outside-instances"
+    },
+    {
+      "npc": "Lizardman shaman",
+      "item": "Dragon warhammer",
+      "oneIn": 3000,
+      "page": "Lizardman shaman",
+      "where": "outside-instances"
     },
     {
       "npc": "Long-tailed Wyvern",
@@ -1475,6 +1666,13 @@
     },
     {
       "npc": "Phantom Muspah",
+      "item": "Muphin",
+      "oneIn": 2500,
+      "page": "Phantom Muspah",
+      "pet": true
+    },
+    {
+      "npc": "Phantom Muspah",
       "item": "Venator shard",
       "oneIn": 100,
       "page": "Phantom Muspah"
@@ -1520,6 +1718,13 @@
       "item": "Jar of Dreams",
       "oneIn": 4000,
       "page": "Phosani's Nightmare"
+    },
+    {
+      "npc": "Phosani's Nightmare",
+      "item": "Little Nightmare",
+      "oneIn": 1400,
+      "page": "Phosani's Nightmare",
+      "pet": true
     },
     {
       "npc": "Phosani's Nightmare",
@@ -1576,6 +1781,13 @@
       "page": "Sarachnis"
     },
     {
+      "npc": "Sarachnis",
+      "item": "Sraracha",
+      "oneIn": 3000,
+      "page": "Sarachnis",
+      "pet": true
+    },
+    {
       "npc": "Scorpia",
       "item": "Malediction shard 3",
       "oneIn": 256,
@@ -1586,6 +1798,21 @@
       "item": "Odium shard 3",
       "oneIn": 256,
       "page": "Scorpia"
+    },
+    {
+      "npc": "Scorpia",
+      "item": "Scorpia's offspring",
+      "oneIn": 2015.75,
+      "page": "Scorpia",
+      "pet": true
+    },
+    {
+      "npc": "Scurrius",
+      "item": "Scurry",
+      "oneIn": 3000,
+      "page": "Scurrius",
+      "pet": true,
+      "kills": "solo"
     },
     {
       "npc": "Sea Snake Young",
@@ -1805,6 +2032,13 @@
     },
     {
       "npc": "Spindel",
+      "item": "Venenatis spiderling",
+      "oneIn": 2800,
+      "page": "Spindel",
+      "pet": true
+    },
+    {
+      "npc": "Spindel",
       "item": "Voidwaker gem",
       "oneIn": 912,
       "page": "Spindel"
@@ -1888,6 +2122,77 @@
       "page": "Taloned Wyvern"
     },
     {
+      "npc": "The Hueycoatl",
+      "item": "Dragon hunter wand",
+      "oneIn": 105,
+      "page": "The Hueycoatl",
+      "kills": "solo"
+    },
+    {
+      "npc": "The Hueycoatl",
+      "item": "Huberte",
+      "oneIn": 400,
+      "page": "The Hueycoatl",
+      "pet": true,
+      "kills": "solo"
+    },
+    {
+      "npc": "The Nightmare",
+      "item": "Eldritch orb",
+      "oneIn": 960,
+      "page": "The Nightmare",
+      "kills": "solo"
+    },
+    {
+      "npc": "The Nightmare",
+      "item": "Harmonised orb",
+      "oneIn": 960,
+      "page": "The Nightmare",
+      "kills": "solo"
+    },
+    {
+      "npc": "The Nightmare",
+      "item": "Inquisitor's great helm",
+      "oneIn": 420,
+      "page": "The Nightmare",
+      "kills": "solo"
+    },
+    {
+      "npc": "The Nightmare",
+      "item": "Inquisitor's hauberk",
+      "oneIn": 420,
+      "page": "The Nightmare",
+      "kills": "solo"
+    },
+    {
+      "npc": "The Nightmare",
+      "item": "Inquisitor's mace",
+      "oneIn": 750,
+      "page": "The Nightmare",
+      "kills": "solo"
+    },
+    {
+      "npc": "The Nightmare",
+      "item": "Inquisitor's plateskirt",
+      "oneIn": 420,
+      "page": "The Nightmare",
+      "kills": "solo"
+    },
+    {
+      "npc": "The Nightmare",
+      "item": "Nightmare staff",
+      "oneIn": 300,
+      "page": "The Nightmare",
+      "kills": "solo"
+    },
+    {
+      "npc": "The Nightmare",
+      "item": "Volatile orb",
+      "oneIn": 960,
+      "page": "The Nightmare",
+      "kills": "solo"
+    },
+    {
       "npc": "Thermonuclear smoke devil",
       "item": "Dragon chainbody",
       "oneIn": 2000,
@@ -1904,6 +2209,13 @@
       "item": "Occult necklace",
       "oneIn": 350,
       "page": "Thermonuclear smoke devil"
+    },
+    {
+      "npc": "Thermonuclear smoke devil",
+      "item": "Pet Smoke Devil",
+      "oneIn": 3000,
+      "page": "Thermonuclear smoke devil",
+      "pet": true
     },
     {
       "npc": "Thermonuclear smoke devil",
@@ -2156,6 +2468,92 @@
       "item": "Staff of earth",
       "oneIn": 256,
       "page": "Vampyre Juvinate"
+    },
+    {
+      "npc": "Venenatis",
+      "item": "Dragon 2h sword",
+      "oneIn": 256,
+      "page": "Venenatis",
+      "kills": "solo"
+    },
+    {
+      "npc": "Venenatis",
+      "item": "Dragon pickaxe",
+      "oneIn": 256,
+      "page": "Venenatis",
+      "kills": "solo"
+    },
+    {
+      "npc": "Venenatis",
+      "item": "Fangs of Venenatis",
+      "oneIn": 196,
+      "page": "Venenatis",
+      "kills": "solo"
+    },
+    {
+      "npc": "Venenatis",
+      "item": "Treasonous ring",
+      "oneIn": 512,
+      "page": "Venenatis",
+      "kills": "solo"
+    },
+    {
+      "npc": "Venenatis",
+      "item": "Venenatis spiderling",
+      "oneIn": 1500,
+      "page": "Venenatis",
+      "pet": true,
+      "kills": "solo"
+    },
+    {
+      "npc": "Venenatis",
+      "item": "Voidwaker gem",
+      "oneIn": 360,
+      "page": "Venenatis",
+      "kills": "solo"
+    },
+    {
+      "npc": "Vet'ion",
+      "item": "Dragon 2h sword",
+      "oneIn": 256,
+      "page": "Vet'ion",
+      "kills": "solo"
+    },
+    {
+      "npc": "Vet'ion",
+      "item": "Dragon pickaxe",
+      "oneIn": 256,
+      "page": "Vet'ion",
+      "kills": "solo"
+    },
+    {
+      "npc": "Vet'ion",
+      "item": "Ring of the gods",
+      "oneIn": 512,
+      "page": "Vet'ion",
+      "kills": "solo"
+    },
+    {
+      "npc": "Vet'ion",
+      "item": "Skull of Vet'ion",
+      "oneIn": 196,
+      "page": "Vet'ion",
+      "kills": "solo"
+    },
+    {
+      "npc": "Vet'ion",
+      "item": "Vet'ion Jr.",
+      "oneIn": 1500,
+      "page": "Vet'ion",
+      "pet": true,
+      "kills": "solo"
+    },
+    {
+      "npc": "Vet'ion",
+      "item": "Voidwaker blade",
+      "oneIn": 360,
+      "page": "Vet'ion",
+      "kills": "solo"
     },
     {
       "npc": "Vorkath",
