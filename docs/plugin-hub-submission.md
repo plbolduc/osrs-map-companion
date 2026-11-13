@@ -9,8 +9,10 @@ to 1.5.0 (`eaa882b`) in [runelite/plugin-hub#20137](https://github.com/runelite/
 on 4 November, to 1.6.0 (`f2d681f`) in
 [runelite/plugin-hub#20209](https://github.com/runelite/plugin-hub/pull/20209) on 6 November,
 to 1.7.0 (`21e336e`) in [runelite/plugin-hub#20370](https://github.com/runelite/plugin-hub/pull/20370)
-on 9 November, and to 1.8.0 (`e70b06a`) in
-[runelite/plugin-hub#20477](https://github.com/runelite/plugin-hub/pull/20477) on 11 November;
+on 9 November, to 1.8.0 (`e70b06a`) in
+[runelite/plugin-hub#20477](https://github.com/runelite/plugin-hub/pull/20477) on 11 November, and to
+1.9.0 (`cdc324a`) in [runelite/plugin-hub#20581](https://github.com/runelite/plugin-hub/pull/20581)
+on 12 November;
 RuneLite's review bot approved and merged each update itself. The steps below are
 how it was submitted; a release after that is a merged plugin
 commit, then `commit=` updated in the Hub's `plugins/osrs-map-companion`. Completed and outstanding game checks
@@ -261,44 +263,23 @@ screenshot tools are outside `src/main`. Bundled third-party notices accompany t
 ## Changes since the approved submission
 
 What the next Hub update brings. Its description names each in a few words; the detail here is for
-answering a reviewer. Since 1.8.0:
+answering a reviewer. Since 1.9.0:
 
-- **Sea charting run:** a new row in the farm run card's picker. Start sends `sea-charts` as the run
-  kind on the existing run request; the map plans it from the sea charts already sent, and ticks a
-  stop when they say its task is charted. No request, poll or field is added.
-- **A meetup at a spot picked on the world map:** a right-click on the game's world map offers
-  *Meet here* beside *Route here*, while the group shows in RuneLite. It is the existing meetup
-  request with the clicked tile in the place of the player's, as listed under Network requests.
-- **Copy invite on every tab:** the button moved from the foot of the Group tab to a row under
-  *Open the map*. The request and the clipboard write are the ones they were, on a press.
-- **A destination is taken down on arrival:** reaching a pinned place hides it in the client, as
-  the Dismiss or Unpin press does. Nothing is sent.
-- **The map address left the sidebar:** it is set in RuneLite's own settings for the plugin only.
-  The address rules are unchanged.
-- **Fewer snapshots, and a bounded wait:** a snapshot is built at most once in two seconds whether
-  or not it was posted, and a 429's `Retry-After` is held between five seconds and five minutes,
-  as every press's already was.
-- **No reply kept on disk:** every request carries `Cache-Control: no-store` beside the versioned
-  User-Agent, so RuneLite's HTTP cache writes no reply and no address. A fixed header.
-- **A member id per RuneLite profile:** a character's member id is stored under the installation
-  key of the RuneLite profile that minted it, so switching profile mints nothing and an update
-  changes nobody's id. Switching profile also turns on no sharing: the settings RuneLite replays
-  on a profile change are not read as presses.
-- **Three sharing switches in the sidebar:** Settings and the step after Connect draw *Where you
-  are*, *Your account* and *Loot and milestones* where they drew six switches. RuneLite's list is
-  unchanged, and so is every field. A switch only part of which is on shows a dash and names the
-  part, and nothing is written until it is pressed.
-- **Where you died, for a player who shares their position:** the one setting this update turns
-  on. It moved under *Where you are*, so the first start of this version turns it on, once, for a
-  player whose *Position and world* is on, and for nobody else. It sends the tile of their most
-  recent death and its age to the group that already sees their position, as disclosed above.
-  Turned off afterwards it stays off (`SharingGroups.settle`, generation 3;
-  `SharingGroupsTest` holds both halves). The update's chat line says it was turned on and where
-  to turn it off.
-- **The step after Connect ticks everything:** *Where you died*, offered unticked before, is under
-  *Where you are* and ticked, and the character name is written with the press, which the step's
-  first line says. Nothing is on until the press, and a player who connected before this update
-  is never shown the step.
+- **Drop rates for thirteen more bosses:** the bundled `unique-rates.json` grows from 341 rates to
+  374, with Commander Zilyana, the Corporeal Beast, Phantom Muspah, the Dagannoth Kings, Spindel,
+  Calvar'ion, the Kalphite Queen, the Chaos Elemental, the Abyssal Sire, the Alchemical Hydra and
+  Amoxliatl. Each is transcribed from the wiki page's own drop line. The counts stay on the
+  computer; a player who shares *Loot and milestones* sends the same fields as before, now for
+  these drops too.
+- **A fairer Dry in All monsters:** a monster's chip and its place under *Driest* weigh its driest
+  wait against how many of its drops could be that dry, and the drop the chip is about is outlined.
+  Arithmetic on local counts; nothing is sent.
+- **"Recorded kills":** the chat line for the first drop the log has seen says its wait counts
+  only the kills the plugin recorded. The existing *Drop luck in chat* setting governs it.
+- **Description and tags:** the manifest and the `@PluginDescriptor` name Drop luck, with the tags
+  `loot`, `drops`, `luck` and `dry`.
+
+No request, field, setting or warning is added.
 
 ## Before submission
 
