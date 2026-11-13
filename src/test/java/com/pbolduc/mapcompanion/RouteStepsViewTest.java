@@ -460,6 +460,33 @@ public class RouteStepsViewTest
 	}
 
 	/**
+	 * A way that is only a walk in through an entrance, "Enter Prifddinas' Gates by the city gate",
+	 * leads its chip with the boot. Its one step is not marked a walk, since Shortest Path is never
+	 * aimed past an entrance, and its chip was a name with no picture beside chips that each had one.
+	 */
+	@Test
+	public void aWayInThroughAnEntranceIsAWalkOnItsChip()
+	{
+		RelayResponse.RouteStep enter = new RelayResponse.RouteStep();
+		enter.slot = "inside";
+		enter.title = "Enter Prifddinas' Gates by the city gate";
+		assertEquals(net.runelite.api.gameval.SpriteID.OrbIcon._2, RouteStepsView.way(enter));
+
+		RelayResponse.Route ways = DestinationRouteTest.route("Ring of dueling", DestinationRouteTest.alKharid());
+		RelayResponse.RouteOption gate = new RelayResponse.RouteOption();
+		gate.id = "approach";
+		gate.label = "Enter City Gate at Prifddinas' Gates";
+		gate.face = "Prifddinas' Gates";
+		gate.steps = new ArrayList<>(java.util.Collections.singletonList(enter));
+		ways.options.add(gate);
+		route.sync(DestinationRouteTest.destination("Prifddinas", ways), null);
+		view.show(route.view());
+		String boot = "sprite " + net.runelite.api.gameval.SpriteID.OrbIcon._2 + " at " + RouteStepsView.PICTURE;
+		assertTrue("the gate's chip asked for the boot: " + asked, asked.contains(boot));
+		assertEquals("a picture, then its name", 2, chips().get(1).getComponentCount());
+	}
+
+	/**
 	 * A way not open yet comes after the ways that are, whatever its place in the map's list, its
 	 * picture faded and its outline the card's own grey, its name as readable as any way's not
 	 * chosen, and pressing it still shows its steps. Followed, it says on a

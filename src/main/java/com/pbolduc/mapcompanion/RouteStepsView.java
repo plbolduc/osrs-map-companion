@@ -483,11 +483,17 @@ final class RouteStepsView extends JPanel
 	 * minimap's walking boot for a walk, and from the Sailing interface a boat for boarding and
 	 * docking and a ship at sea for the sail. A teleport's row had a picture and these rows were
 	 * words alone, so a leg of walk, board, sail, dock, walk was five lines to read. Only the list
-	 * of steps draws them: a stop's picture and the box over the game stay the step's own.
+	 * of steps and the strip's chips draw them: a stop's picture and the box over the game stay the
+	 * step's own.
+	 *
+	 * <p>A step {@code inside}, through a city's gate or down a dungeon's ladder, is a walk too, and
+	 * gets the boot. The map marks {@code walk} only on the rows Shortest Path may be aimed at, which a
+	 * step past an entrance is not, and a way that is that step alone would otherwise be a chip with no
+	 * picture.
 	 */
 	static int way(RouteStep step)
 	{
-		return step.walk ? SpriteID.OrbIcon._2 : RouteWire.SAIL.equals(step.slot) ? SpriteID.IconSailingStatus18x18._0
+		return step.walk || "inside".equals(step.slot) ? SpriteID.OrbIcon._2 : RouteWire.SAIL.equals(step.slot) ? SpriteID.IconSailingStatus18x18._0
 			: RouteWire.BOARD.equals(step.slot) || RouteWire.DOCK.equals(step.slot) ? SpriteID.IconSailingBoats35x35._1 : 0;
 	}
 
