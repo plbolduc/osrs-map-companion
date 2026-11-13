@@ -130,15 +130,18 @@ public class LootLogDropLuckTest
 			DropLuckView.find(log.monsters(), "Chicken").kills);
 	}
 
-	/** Corporeal Beast has no rate on file; a collection item it drops is counted. */
+	/**
+	 * Nex has no rate on file, because its chance belongs to the team; a collection item it drops is
+	 * counted. These tests named the Corporeal Beast until its sigils got rates.
+	 */
 	@Test
 	public void aCollectionItemFromAnUnratedMonsterIsKeptWithItsWait()
 	{
-		kill("Corporeal Beast", BONES);
-		kill("Corporeal Beast", BONES);
-		kill("Corporeal Beast", VISAGE);
-		kill("Corporeal Beast", BONES);
-		LootLog.Drop visage = monster("Corporeal Beast").drops.get(0);
+		kill("Nex", BONES);
+		kill("Nex", BONES);
+		kill("Nex", VISAGE);
+		kill("Nex", BONES);
+		LootLog.Drop visage = monster("Nex").drops.get(0);
 		assertEquals("Draconic visage", visage.item);
 		assertEquals(1, visage.obtained);
 		assertEquals(1, visage.sinceLast);
@@ -149,8 +152,8 @@ public class LootLogDropLuckTest
 	@Test
 	public void aPetIsNotCountedBecauseItsArrivalIsNotReliablySeen()
 	{
-		kill("Corporeal Beast", VORKI);
-		assertTrue(monster("Corporeal Beast").drops.isEmpty());
+		kill("Nex", VORKI);
+		assertTrue(monster("Nex").drops.isEmpty());
 	}
 
 	/** A kill the vocabulary could not judge moves the window rather than inventing a drought. */
@@ -158,11 +161,11 @@ public class LootLogDropLuckTest
 	public void killsTheCatalogCouldNotJudgeAreNotWatchedForCollectionItems()
 	{
 		catalogReady = false;
-		kill("Corporeal Beast", VISAGE);
-		assertTrue("not judged, so not counted", monster("Corporeal Beast").drops.isEmpty());
+		kill("Nex", VISAGE);
+		assertTrue("not judged, so not counted", monster("Nex").drops.isEmpty());
 		catalogReady = true;
-		kill("Corporeal Beast", VISAGE);
-		LootLog.Drop visage = monster("Corporeal Beast").drops.get(0);
+		kill("Nex", VISAGE);
+		LootLog.Drop visage = monster("Nex").drops.get(0);
 		assertEquals(1, visage.obtained);
 	}
 
@@ -388,7 +391,7 @@ public class LootLogDropLuckTest
 		assertEquals("a wait between two drops is a whole wait, and is said plainly",
 			"Abyssal whip after 780 kills — drier than 78% of players.", DropLuckView.chatLine(second.get(0)));
 
-		List<LootLog.Notable> visage = log.record(new ServerNpcLoot(game.npc("Corporeal Beast"),
+		List<LootLog.Notable> visage = log.record(new ServerNpcLoot(game.npc("Nex"),
 			Collections.singletonList(new ItemStack(VISAGE, 1))));
 		assertNull("the game prints its own line for a collection item", DropLuckView.chatLine(visage.get(0)));
 	}

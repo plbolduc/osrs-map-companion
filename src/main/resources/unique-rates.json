@@ -32,6 +32,12 @@
       "page": "Abyssal guardian"
     },
     {
+      "npc": "Abyssal Sire",
+      "item": "Unsired",
+      "oneIn": 100,
+      "page": "Abyssal Sire"
+    },
+    {
       "npc": "Abyssal walker",
       "item": "Elemental talisman",
       "oneIn": 256,
@@ -60,6 +66,30 @@
       "item": "Zombie champion scroll",
       "oneIn": 5000,
       "page": "Afflicted"
+    },
+    {
+      "npc": "Alchemical Hydra",
+      "item": "Alchemical hydra heads",
+      "oneIn": 256,
+      "page": "Alchemical Hydra"
+    },
+    {
+      "npc": "Alchemical Hydra",
+      "item": "Dragon thrownaxe",
+      "oneIn": 2000,
+      "page": "Alchemical Hydra"
+    },
+    {
+      "npc": "Alchemical Hydra",
+      "item": "Jar of Chemicals",
+      "oneIn": 2000,
+      "page": "Alchemical Hydra"
+    },
+    {
+      "npc": "Amoxliatl",
+      "item": "Glacial temotli",
+      "oneIn": 100,
+      "page": "Amoxliatl"
     },
     {
       "npc": "Ancient Wyvern",
@@ -282,6 +312,24 @@
       "page": "Brutal red dragon"
     },
     {
+      "npc": "Calvar'ion",
+      "item": "Ring of the gods",
+      "oneIn": 716,
+      "page": "Calvar'ion"
+    },
+    {
+      "npc": "Calvar'ion",
+      "item": "Skull of Vet'ion",
+      "oneIn": 618,
+      "page": "Calvar'ion"
+    },
+    {
+      "npc": "Calvar'ion",
+      "item": "Voidwaker blade",
+      "oneIn": 912,
+      "page": "Calvar'ion"
+    },
+    {
       "npc": "Cave crawler",
       "item": "Tooth half of key (moon key)",
       "oneIn": 1024,
@@ -348,6 +396,12 @@
       "page": "Cerberus"
     },
     {
+      "npc": "Chaos Elemental",
+      "item": "Dragon pickaxe",
+      "oneIn": 256,
+      "page": "Chaos Elemental"
+    },
+    {
       "npc": "Chaos Fanatic",
       "item": "Malediction shard 1",
       "oneIn": 256,
@@ -378,6 +432,48 @@
       "page": "Cockatrice"
     },
     {
+      "npc": "Commander Zilyana",
+      "item": "Armadyl crossbow",
+      "oneIn": 508,
+      "page": "Commander Zilyana"
+    },
+    {
+      "npc": "Commander Zilyana",
+      "item": "Saradomin hilt",
+      "oneIn": 508,
+      "page": "Commander Zilyana"
+    },
+    {
+      "npc": "Commander Zilyana",
+      "item": "Saradomin's light",
+      "oneIn": 254,
+      "page": "Commander Zilyana"
+    },
+    {
+      "npc": "Corporeal Beast",
+      "item": "Arcane sigil",
+      "oneIn": 1365,
+      "page": "Corporeal Beast"
+    },
+    {
+      "npc": "Corporeal Beast",
+      "item": "Elysian sigil",
+      "oneIn": 4095,
+      "page": "Corporeal Beast"
+    },
+    {
+      "npc": "Corporeal Beast",
+      "item": "Jar of Spirits",
+      "oneIn": 1000,
+      "page": "Corporeal Beast"
+    },
+    {
+      "npc": "Corporeal Beast",
+      "item": "Spectral sigil",
+      "oneIn": 1365,
+      "page": "Corporeal Beast"
+    },
+    {
       "npc": "Crawling Hand",
       "item": "Crawling hand (item)",
       "oneIn": 500,
@@ -406,6 +502,60 @@
       "item": "Curved bone",
       "oneIn": 5012.5,
       "page": "Dad"
+    },
+    {
+      "npc": "Dagannoth Prime",
+      "item": "Dragon axe",
+      "oneIn": 128,
+      "page": "Dagannoth Prime"
+    },
+    {
+      "npc": "Dagannoth Prime",
+      "item": "Mud battlestaff",
+      "oneIn": 128,
+      "page": "Dagannoth Prime"
+    },
+    {
+      "npc": "Dagannoth Prime",
+      "item": "Seers ring",
+      "oneIn": 128,
+      "page": "Dagannoth Prime"
+    },
+    {
+      "npc": "Dagannoth Rex",
+      "item": "Berserker ring",
+      "oneIn": 128,
+      "page": "Dagannoth Rex"
+    },
+    {
+      "npc": "Dagannoth Rex",
+      "item": "Dragon axe",
+      "oneIn": 128,
+      "page": "Dagannoth Rex"
+    },
+    {
+      "npc": "Dagannoth Rex",
+      "item": "Warrior ring",
+      "oneIn": 128,
+      "page": "Dagannoth Rex"
+    },
+    {
+      "npc": "Dagannoth Supreme",
+      "item": "Archers ring",
+      "oneIn": 128,
+      "page": "Dagannoth Supreme"
+    },
+    {
+      "npc": "Dagannoth Supreme",
+      "item": "Dragon axe",
+      "oneIn": 128,
+      "page": "Dagannoth Supreme"
+    },
+    {
+      "npc": "Dagannoth Supreme",
+      "item": "Seercull",
+      "oneIn": 128,
+      "page": "Dagannoth Supreme"
     },
     {
       "npc": "Dark beast",
@@ -953,8 +1103,32 @@
     },
     {
       "npc": "Kalphite Queen",
+      "item": "Dragon 2h sword",
+      "oneIn": 256,
+      "page": "Kalphite Queen"
+    },
+    {
+      "npc": "Kalphite Queen",
+      "item": "Dragon chainbody",
+      "oneIn": 128,
+      "page": "Kalphite Queen"
+    },
+    {
+      "npc": "Kalphite Queen",
+      "item": "Dragon pickaxe",
+      "oneIn": 400,
+      "page": "Kalphite Queen"
+    },
+    {
+      "npc": "Kalphite Queen",
       "item": "Jar of Sand",
       "oneIn": 2000,
+      "page": "Kalphite Queen"
+    },
+    {
+      "npc": "Kalphite Queen",
+      "item": "Kq head",
+      "oneIn": 128,
       "page": "Kalphite Queen"
     },
     {
@@ -1236,6 +1410,12 @@
       "page": "Pee Hat"
     },
     {
+      "npc": "Phantom Muspah",
+      "item": "Venator shard",
+      "oneIn": 100,
+      "page": "Phantom Muspah"
+    },
+    {
       "npc": "Rock",
       "item": "Curved bone",
       "oneIn": 5012.5,
@@ -1486,6 +1666,24 @@
       "item": "Zombie champion scroll",
       "oneIn": 5000,
       "page": "Sorebones"
+    },
+    {
+      "npc": "Spindel",
+      "item": "Fangs of Venenatis",
+      "oneIn": 618,
+      "page": "Spindel"
+    },
+    {
+      "npc": "Spindel",
+      "item": "Treasonous ring",
+      "oneIn": 716,
+      "page": "Spindel"
+    },
+    {
+      "npc": "Spindel",
+      "item": "Voidwaker gem",
+      "oneIn": 912,
+      "page": "Spindel"
     },
     {
       "npc": "Spitting Wyvern",
