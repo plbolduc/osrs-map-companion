@@ -276,6 +276,14 @@ answering a reviewer. Since 1.9.0, for 1.10.0, in review in
   Amoxliatl. Each is transcribed from the wiki page's own drop line. The counts stay on the
   computer; a player who shares *Loot and milestones* sends the same fields as before, now for
   these drops too.
+- **Pets, sets, team bosses alone and awakened bosses:** the table grows on to 491 rates across 192
+  monsters. A pet is counted from the game's own pet line in chat, against the kill beside it; a
+  set that drops a piece at a time counts as one drop. Callisto, Venenatis, Vet'ion, the Nightmare,
+  the Hueycoatl, Scurrius and Nex count only kills where no other player's hitsplat
+  (`HitsplatApplied`, `isOthers()`) landed in the minute before; the lizardman shaman counts none
+  in an instance; Araxxor counts no destroyed corpse; and the Desert Treasure II bosses are told
+  from their awakened fights by the loot NPC's combat level. All of it is read from events the
+  plugin already receives or from the loot itself; nothing new is sent.
 - **A fairer Dry in All monsters:** a monster's chip and its place under *Driest* weigh its driest
   wait against how many of its drops could be that dry, and the drop the chip is about is outlined.
   Arithmetic on local counts; nothing is sent.
