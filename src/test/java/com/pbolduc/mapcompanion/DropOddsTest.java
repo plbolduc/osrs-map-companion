@@ -25,7 +25,11 @@
  */
 package com.pbolduc.mapcompanion;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
@@ -191,5 +195,88 @@ public class DropOddsTest
 	{
 		assertEquals(DropOdds.Luck.VERY_DRY, DropOdds.luck(0, 2300, WHIP));
 		assertEquals(DropOdds.Luck.NORMAL, DropOdds.luck(2, 1024, WHIP));
+	}
+
+	/** A monster killed {@code kills} times, each drop as {name, 1 in, kills since the last}. */
+	private static LootLog.Monster monster(String npc, int kills, Object[]... drops)
+	{
+		List<LootLog.Drop> out = new ArrayList<>();
+		for (Object[] drop : drops)
+		{
+			int since = (int) drop[2];
+			out.add(new LootLog.Drop((String) drop[0], -1, since == kills ? 0 : 1, since, kills, 0, 0,
+				((Number) drop[1]).doubleValue(), null, null));
+		}
+		return new LootLog.Monster(npc, kills, 0, out);
+	}
+
+	private static final LootLog.Monster GORILLA = monster("Demonic gorilla", 3000,
+		new Object[] {"Zenyte shard", 300, 130}, new Object[] {"Ballista limbs", 500, 900},
+		new Object[] {"Ballista spring", 500, 300}, new Object[] {"Light frame", 750, 500},
+		new Object[] {"Heavy frame", 1500, 700}, new Object[] {"Monkey tail", 1500, 400});
+	private static final LootLog.Monster CERBERUS = monster("Cerberus", 2700,
+		new Object[] {"Eternal crystal", 520, 100}, new Object[] {"Pegasian crystal", 520, 50},
+		new Object[] {"Primordial crystal", 520, 2600}, new Object[] {"Smouldering stone", 520, 300},
+		new Object[] {"Jar of Souls", 2000, 800});
+	private static final LootLog.Monster DEMON = monster("Abyssal demon", 1024,
+		new Object[] {"Abyssal whip", 512, 700}, new Object[] {"Abyssal head", 6000, 1024},
+		new Object[] {"Abyssal dagger", 32000, 1024});
+
+	/**
+	 * The list's chip, on the map's numbers. Six drops each ordinary alone are not a dry monster,
+	 * though the limbs' 900 kills is drier than 83% of players: one of six that dry is usual.
+	 */
+	@Test
+	public void theDriestOfSeveralDropsIsWeighedAgainstHowManyCouldBeThatDry()
+	{
+		DropLuckView.Standing gorilla = DropLuckView.standing(GORILLA, null);
+		assertEquals("Ballista limbs", gorilla.drop.item);
+		assertEquals("34", DropOdds.percent(gorilla.drierThan));
+		assertEquals(DropOdds.Luck.NONE, DropLuckView.dryNow(gorilla));
+	}
+
+	/** A real drought survives the weighing: 2,600 kills among four crystals at one rate. */
+	@Test
+	public void aLongDroughtAmongEquallyCommonDropsIsStillVeryDry()
+	{
+		DropLuckView.Standing cerberus = DropLuckView.standing(CERBERUS, null);
+		assertEquals("Primordial crystal", cerberus.drop.item);
+		assertEquals("97", DropOdds.percent(cerberus.drierThan));
+		assertEquals(DropOdds.Luck.VERY_DRY, DropLuckView.dryNow(cerberus));
+		assertEquals("Primordial crystal: 2,600 kills since the last", DropLuckView.standingNote(cerberus));
+	}
+
+	/** A dagger at 1 in 32,000 cannot be dry after 1,024 kills, so it does not dilute the whip. */
+	@Test
+	public void aDropTooRareToBeDryYetDoesNotDiluteTheOthers()
+	{
+		DropLuckView.Standing demon = DropLuckView.standing(DEMON, null);
+		assertEquals("Abyssal whip", demon.drop.item);
+		assertEquals("75", DropOdds.percent(demon.drierThan));
+		assertEquals(DropOdds.Luck.DRY, DropLuckView.dryNow(demon));
+	}
+
+	/** Pinned is chosen before looking, so it is judged on its own wait and nothing else is. */
+	@Test
+	public void aPinnedDropIsJudgedOnItsOwnWait()
+	{
+		String[] pin = {"Demonic gorilla", "Ballista limbs"};
+		DropLuckView.Standing pinned = DropLuckView.standing(GORILLA, pin);
+		assertEquals("83", DropOdds.percent(pinned.drierThan));
+		assertEquals(DropOdds.Luck.DRY, DropLuckView.dryNow(pinned));
+		assertEquals("a pin on another monster changes nothing here",
+			"34", DropOdds.percent(DropLuckView.standing(GORILLA, new String[] {"Cerberus", "Jar of Souls"}).drierThan));
+	}
+
+	@Test
+	public void driestSortsByTheSameStandingTheChipShows()
+	{
+		List<LootLog.Monster> order = DropLuckView.list(Arrays.asList(GORILLA, DEMON, CERBERUS), "", DropLuckView.Sort.DRIEST, null);
+		assertEquals("Cerberus", order.get(0).npc);
+		assertEquals("Abyssal demon", order.get(1).npc);
+		assertEquals("Demonic gorilla", order.get(2).npc);
+		assertNull("a monster with no rated drop has no standing",
+			DropLuckView.standing(new LootLog.Monster("Hill Giant", 40, 0, new ArrayList<>()), null));
+		assertEquals(DropOdds.Luck.NONE, DropLuckView.dryNow(null));
 	}
 }
