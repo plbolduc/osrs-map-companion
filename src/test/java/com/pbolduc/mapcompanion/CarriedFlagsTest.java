@@ -25,7 +25,6 @@
  */
 package com.pbolduc.mapcompanion;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -53,9 +52,7 @@ public class CarriedFlagsTest
 
 	public CarriedFlagsTest() throws Exception
 	{
-		Field evaluator = MapCompanionPlugin.class.getDeclaredField("capabilityEvaluator");
-		evaluator.setAccessible(true);
-		evaluator.set(sidebar.plugin, new CapabilityEvaluator(sidebar.game.client())
+		sidebar.plugin.loop.capabilityEvaluator = new CapabilityEvaluator(sidebar.game.client())
 		{
 			@Override
 			public List<String> evaluate()
@@ -63,7 +60,7 @@ public class CarriedFlagsTest
 				asked++;
 				return carrying;
 			}
-		});
+		};
 		/* A tick that is not the once-a-minute one, so each reading below is one of the others. */
 		sidebar.game.tick();
 		runs.bind(sidebar.identity.id());
@@ -76,16 +73,16 @@ public class CarriedFlagsTest
 	@Test
 	public void theFlagsAreWorkedOutWhenAContainerChangesAndNotEachTick()
 	{
-		sidebar.plugin.readCarried();
-		sidebar.plugin.readCarried();
-		sidebar.plugin.readCarried();
+		sidebar.plugin.loop.readCarried();
+		sidebar.plugin.loop.readCarried();
+		sidebar.plugin.loop.readCarried();
 		assertEquals("three ticks with nothing changed ask once", 1, asked);
 		assertEquals(Arrays.asList("ardougne_cloak"), runs.view().carried);
 
 		carrying = new ArrayList<>(Arrays.asList("ardougne_cloak", "skills_necklace"));
 		sidebar.plugin.onItemContainerChanged(new ItemContainerChanged(InventoryID.WORN, null));
-		sidebar.plugin.readCarried();
-		sidebar.plugin.readCarried();
+		sidebar.plugin.loop.readCarried();
+		sidebar.plugin.loop.readCarried();
 		assertEquals("a necklace put on is a change, read once", 2, asked);
 		assertEquals(Arrays.asList("ardougne_cloak", "skills_necklace"), runs.view().carried);
 	}
@@ -96,14 +93,14 @@ public class CarriedFlagsTest
 	{
 		List<String> held = carrying;
 		carrying = null;
-		sidebar.plugin.readCarried();
-		sidebar.plugin.readCarried();
+		sidebar.plugin.loop.readCarried();
+		sidebar.plugin.loop.readCarried();
 		assertEquals(2, asked);
 		assertNull(runs.view().carried);
 
 		carrying = held;
-		sidebar.plugin.readCarried();
-		sidebar.plugin.readCarried();
+		sidebar.plugin.loop.readCarried();
+		sidebar.plugin.loop.readCarried();
 		assertEquals("answered, it is kept", 3, asked);
 		assertEquals(held, runs.view().carried);
 	}
@@ -112,7 +109,7 @@ public class CarriedFlagsTest
 	@Test
 	public void anotherRunIsToldWhatIsCarried() throws Exception
 	{
-		sidebar.plugin.readCarried();
+		sidebar.plugin.loop.readCarried();
 		assertEquals(1, asked);
 
 		runs.clear();
@@ -123,7 +120,7 @@ public class CarriedFlagsTest
 			1, System.currentTimeMillis());
 		assertNull("the new run starts not knowing", runs.view().carried);
 
-		sidebar.plugin.readCarried();
+		sidebar.plugin.loop.readCarried();
 		assertEquals(2, asked);
 		assertEquals(carrying, runs.view().carried);
 	}
@@ -132,12 +129,12 @@ public class CarriedFlagsTest
 	@Test
 	public void onceAMinuteItIsWorkedOutAnyway()
 	{
-		sidebar.plugin.readCarried();
+		sidebar.plugin.loop.readCarried();
 		assertEquals(1, asked);
 		for (int tick = 1; tick < 100; tick++)
 		{
 			sidebar.game.tick();
-			sidebar.plugin.readCarried();
+			sidebar.plugin.loop.readCarried();
 		}
 		assertEquals("ninety-nine ticks on, the hundredth tick of the game's clock has come round once", 2, asked);
 	}

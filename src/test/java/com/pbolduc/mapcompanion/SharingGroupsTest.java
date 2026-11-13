@@ -349,14 +349,14 @@ public class SharingGroupsTest
 	public void thePluginKeepsTheSwitchesInStepFromItsOwnEvents() throws Exception
 	{
 		Fixture fixture = new Fixture();
-		MapCompanionPlugin plugin = new MapCompanionPlugin()
+		MapCompanionPlugin plugin = TestLoop.in(new MapCompanionPlugin()
 		{
 			@Override
 			ConfigStore settings()
 			{
 				return fixture.store;
 			}
-		};
+		});
 		Field config = MapCompanionPlugin.class.getDeclaredField("config");
 		config.setAccessible(true);
 		config.set(plugin, fixture.config);
@@ -406,14 +406,14 @@ public class SharingGroupsTest
 		for (boolean switchesFirst : new boolean[] {true, false})
 		{
 			Fixture fixture = new Fixture();
-			MapCompanionPlugin plugin = new MapCompanionPlugin()
+			MapCompanionPlugin plugin = TestLoop.in(new MapCompanionPlugin()
 			{
 				@Override
 				ConfigStore settings()
 				{
 					return fixture.store;
 				}
-			};
+			});
 			set(plugin, "config", fixture.config);
 			set(plugin, "clientThread", new net.runelite.client.callback.ClientThread()
 			{
@@ -518,9 +518,7 @@ public class SharingGroupsTest
 
 	private static void set(MapCompanionPlugin plugin, String name, Object value) throws Exception
 	{
-		Field field = MapCompanionPlugin.class.getDeclaredField(name);
-		field.setAccessible(true);
-		field.set(plugin, value);
+		TestLoop.set(plugin, name, value);
 	}
 
 	/**

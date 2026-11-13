@@ -29,7 +29,7 @@ package com.pbolduc.mapcompanion;
  * The ways a session ends. They do not forget the same things, and a list of what goes, written
  * out once for each way, is a list that misses something in one of them: a death kept past the
  * plugin being turned off would be posted as the next character's. So each ending says which it
- * is, and {@code MapCompanionPlugin.end} is the one place that reads what it takes.
+ * is, and {@link CompanionLoop#end} is the one place that reads what it takes.
  */
 enum SessionEnd
 {

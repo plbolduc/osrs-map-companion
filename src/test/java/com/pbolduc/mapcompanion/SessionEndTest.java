@@ -50,12 +50,12 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 /**
- * What each way a session ends forgets, held to the one list the plugin keeps of it.
+ * What each way a session ends forgets, held to the one list the plugin's loop keeps of it.
  *
  * <p>A session ends four ways, {@link SessionEnd}'s, and they do not forget the same things. While
  * each ending kept a list of its own, a reader or a marker could be missing from one of them and
  * nothing said so: a death survived the plugin being turned off and was posted as the next
- * character's. So every reader the plugin holds is asked here, after each ending, whether it was
+ * character's. So every reader the loop holds is asked here, after each ending, whether it was
  * told, and the death whether it is still remembered. The readers are found by their type, not
  * read from the list being checked, so one left out of the list is one this finds still counting.
  *
@@ -84,19 +84,19 @@ public class SessionEndTest
 
 	/**
 	 * The list is every reader there is: each class that settles is in it, and so is each one the
-	 * plugin holds. A reader written and never listed is told of no session's start and no end.
+	 * loop holds. A reader written and never listed is told of no session's start and no end.
 	 */
 	@Test
 	public void theOneListNamesEveryReaderThatSettles() throws Exception
 	{
 		Set<String> listed = new TreeSet<>();
-		for (SettlingReader reader : plugin.readers())
+		for (SettlingReader reader : plugin.loop.readers())
 		{
 			listed.add(reader.getClass().getSimpleName());
 		}
-		assertEquals("every reader class in the source is in the plugin's list", settlingClasses(), listed);
-		assertEquals("and no reader is held beside the list", new ArrayList<>(held()).size(), plugin.readers().length);
-		assertTrue(Arrays.asList(plugin.readers()).containsAll(held()));
+		assertEquals("every reader class in the source is in the loop's list", settlingClasses(), listed);
+		assertEquals("and no reader is held beside the list", new ArrayList<>(held()).size(), plugin.loop.readers().length);
+		assertTrue(Arrays.asList(plugin.loop.readers()).containsAll(held()));
 	}
 
 	/** The login screen: every stored value is about to read zero, and the death waits for the relog. */
@@ -176,19 +176,19 @@ public class SessionEndTest
 		return names;
 	}
 
-	/** Every settling reader the plugin holds, by the type of its fields and not by its own list. */
+	/** Every settling reader the loop holds, by the type of its fields and not by its own list. */
 	private List<SettlingReader> held() throws Exception
 	{
 		List<SettlingReader> readers = new ArrayList<>();
-		for (Field field : MapCompanionPlugin.class.getDeclaredFields())
+		for (Field field : CompanionLoop.class.getDeclaredFields())
 		{
 			if (SettlingReader.class.isAssignableFrom(field.getType()))
 			{
 				field.setAccessible(true);
-				readers.add((SettlingReader) field.get(plugin));
+				readers.add((SettlingReader) field.get(plugin.loop));
 			}
 		}
-		assertTrue("the plugin's readers were not found", readers.size() > 10);
+		assertTrue("the loop's readers were not found", readers.size() > 10);
 		return readers;
 	}
 

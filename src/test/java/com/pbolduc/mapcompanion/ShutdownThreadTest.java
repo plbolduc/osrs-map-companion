@@ -42,8 +42,9 @@ import org.junit.Test;
  * past its checks can open the group stream or post a snapshot. Torn down on the EDT, that tick
  * could reopen the stream after it was stopped; queued, the teardown runs after it.
  *
- * <p>Every reader, the relay and the stream are left null here, so anything shutDown touched on
- * the calling thread would throw. It must touch none of them, and queue exactly one task.
+ * <p>The loop that holds every reader, the relay and the stream is left null here, so anything
+ * shutDown touched on the calling thread would throw. It must touch none of them, and queue exactly
+ * one task.
  */
 public class ShutdownThreadTest
 {
@@ -111,8 +112,6 @@ public class ShutdownThreadTest
 
 	private static void set(MapCompanionPlugin plugin, String name, Object value) throws Exception
 	{
-		Field field = MapCompanionPlugin.class.getDeclaredField(name);
-		field.setAccessible(true);
-		field.set(plugin, value);
+		TestLoop.set(plugin, name, value);
 	}
 }

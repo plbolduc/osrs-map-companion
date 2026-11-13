@@ -54,10 +54,10 @@ import static org.junit.Assert.assertTrue;
  * them, and its constructor is the injector's alone. So this assembles the collaborators as
  * {@code HarnessMain} does and calls that constructor by reflection.
  *
- * <p>The plugin behind it holds every collaborator this injector can make, which is everything a
- * game tick owns, so turning it off runs its real teardown. What only a running RuneLite can make,
- * its toolbar, overlay manager and keys, is left out, and {@code removeInterface}, which is all
- * that touches them, does nothing here.
+ * <p>The plugin behind it holds every collaborator this injector can make, its {@link CompanionLoop}
+ * among them, which is everything a game tick owns, so turning it off runs its real teardown. What
+ * only a running RuneLite can make, its toolbar, overlay manager and keys, is left out, and
+ * {@code removeInterface}, which is all that touches them, does nothing here.
  *
  * <p>Nothing leaves the machine: every request the cards could make fails before it is sent. The
  * search's debounce is a list here, as in {@code SearchClientTest}, so a test can see what is
@@ -142,12 +142,13 @@ final class TestSidebar
 				bind(ShortestPath.class).toInstance(new ShortestPath(message -> { }));
 				bind(GameSprites.class).toInstance(new GameSprites(null, null, null));
 				bind(SearchClient.class).toInstance(search);
+				/* The loop draws through the plugin, as the plugin's own provider says. Not toInstance, which would have Guice fill the plugin's fields. */
+				bind(CompanionLoop.Surface.class).toProvider(() -> plugin);
 			}
 		});
-		plugin.rewardObserver = new RewardObserver(game.client(), injector.getInstance(CollectionItemCatalog.class));
 		for (Field field : MapCompanionPlugin.class.getDeclaredFields())
 		{
-			if (field.isAnnotationPresent(Inject.class) && field.getType() != RewardObserver.class)
+			if (field.isAnnotationPresent(Inject.class))
 			{
 				field.setAccessible(true);
 				try

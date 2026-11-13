@@ -57,10 +57,10 @@ public class GroupNameTest
 		RelayResponse reply = gson.fromJson(
 								  "{\"pollIntervalMs\":2000,\"groupName\":\"Sunday raids\"}", RelayResponse.class);
 
-		plugin.noteGroupName(plugin.pairing.serverUrl(), "KQX482", reply.groupName);
-		plugin.storeToldName();
+		plugin.loop.noteGroupName(plugin.loop.pairing.serverUrl(), "KQX482", reply.groupName);
+		plugin.loop.storeToldName();
 
-		assertEquals("Sunday raids", plugin.pairing.name("KQX482"));
+		assertEquals("Sunday raids", plugin.loop.pairing.name("KQX482"));
 	}
 
 	@Test
@@ -72,15 +72,15 @@ public class GroupNameTest
 		 * turn every name in the menu back into a code.
 		 */
 		MapCompanionPlugin plugin = pluginJoinedTo("KQX482");
-		plugin.noteGroupName(plugin.pairing.serverUrl(), "KQX482", "Sunday raids");
-		plugin.storeToldName();
+		plugin.loop.noteGroupName(plugin.loop.pairing.serverUrl(), "KQX482", "Sunday raids");
+		plugin.loop.storeToldName();
 
 		RelayResponse quiet = gson.fromJson("{\"pollIntervalMs\":2000}", RelayResponse.class);
 		assertNull(quiet.groupName);
-		plugin.noteGroupName(plugin.pairing.serverUrl(), "KQX482", quiet.groupName);
-		plugin.storeToldName();
+		plugin.loop.noteGroupName(plugin.loop.pairing.serverUrl(), "KQX482", quiet.groupName);
+		plugin.loop.storeToldName();
 
-		assertEquals("Sunday raids", plugin.pairing.name("KQX482"));
+		assertEquals("Sunday raids", plugin.loop.pairing.name("KQX482"));
 	}
 
 	@Test
@@ -88,14 +88,14 @@ public class GroupNameTest
 	{
 		/** The same race as the secret's: the reply is about the post, not about whoever is current. */
 		MapCompanionPlugin plugin = pluginJoinedTo("KQX482");
-		plugin.noteGroupName(plugin.pairing.serverUrl(), "KQX482", "Sunday raids");
+		plugin.loop.noteGroupName(plugin.loop.pairing.serverUrl(), "KQX482", "Sunday raids");
 
-		plugin.pairing.join(JoinCode.parse("PMN934"));
+		plugin.loop.pairing.join(JoinCode.parse("PMN934"));
 		plugin.onGroupChanged();
-		plugin.storeToldName();
+		plugin.loop.storeToldName();
 
-		assertNull("the group joined since is not given the other one's name", plugin.pairing.name("PMN934"));
-		assertEquals("Sunday raids", plugin.pairing.name("KQX482"));
+		assertNull("the group joined since is not given the other one's name", plugin.loop.pairing.name("PMN934"));
+		assertEquals("Sunday raids", plugin.loop.pairing.name("KQX482"));
 	}
 
 	@Test
@@ -127,17 +127,17 @@ public class GroupNameTest
 	/** The plugin with the collaborators these paths touch, as {@code MemberSecretTest} builds it. */
 	private MapCompanionPlugin pluginJoinedTo(String code)
 	{
-		MapCompanionPlugin plugin = new MapCompanionPlugin();
-		plugin.pairing = new Pairing(new FakeStore(), gson);
-		plugin.milestones = new MilestoneOutbox();
-		plugin.destinationState = new DestinationState(gson);
+		MapCompanionPlugin plugin = TestLoop.in(new MapCompanionPlugin());
+		plugin.loop.pairing = new Pairing(new FakeStore(), gson);
+		plugin.loop.milestones = new MilestoneOutbox();
+		plugin.loop.destinationState = new DestinationState(gson);
 		plugin.destinationMarker = new TestDestinationMarker();
 		plugin.groupMarkers = new GroupMarkers(null, null);
 		plugin.boatPins = new BoatPins(null, null);
 		HarnessGame game = new HarnessGame();
-		plugin.rewardObserver = new RewardObserver(game.client(), new CollectionItemCatalog(game.client()));
+		plugin.loop.rewardObserver = new RewardObserver(game.client(), new CollectionItemCatalog(game.client()));
 		TestFarmRuns.attach(plugin);
-		plugin.pairing.join(JoinCode.parse(code));
+		plugin.loop.pairing.join(JoinCode.parse(code));
 		return plugin;
 	}
 

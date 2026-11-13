@@ -31,6 +31,8 @@ import com.google.gson.JsonObject;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
@@ -42,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.runelite.api.Client;
 import net.runelite.api.coords.WorldPoint;
@@ -49,6 +52,7 @@ import net.runelite.api.GameState;
 import net.runelite.api.Quest;
 import net.runelite.api.QuestState;
 import net.runelite.api.Skill;
+import net.runelite.client.config.Notification;
 import net.runelite.client.events.ServerNpcLoot;
 import net.runelite.client.game.ItemStack;
 import okhttp3.Interceptor;
@@ -75,8 +79,8 @@ import okhttp3.Response;
  * headers, the claim, the member secret, the refusals, the stream — was covered by two descriptions
  * of a contract and by nothing that had ever seen both sides at once. This is the thing that sees
  * both: the map's own dev server, a real browser driven beside it, and <em>this</em> plugin's real
- * {@link RelayClient}, {@link SnapshotBuilder}, {@link DirectiveStream}, {@link Pairing},
- * {@link JoinCode}, {@link MilestoneOutbox}, {@link LootLog} and readers, wired to
+ * {@link CompanionLoop}, {@link RelayClient}, {@link SnapshotBuilder}, {@link DirectiveStream},
+ * {@link Pairing}, {@link JoinCode}, {@link MilestoneOutbox}, {@link LootLog} and readers, wired to
  * {@link HarnessGame} instead of to a game.
  *
  * <h2>What is real and what is not</h2>
@@ -87,11 +91,17 @@ import okhttp3.Response;
  * events RuneLite would raise, and {@link HarnessStore} raises the config change that a real
  * settings write raises.
  *
- * <p><b>And the tick loop is a transcription rather than the original.</b> {@link #tick} is
- * {@code MapCompanionPlugin.onGameTick} written out again, minus the parts that need Swing or the
- * world map. That is the one place this harness can drift from the plugin it is testing, and it is
- * written down here rather than left to be discovered: a change to the order of things in
- * {@code onGameTick} belongs here too. Everything the tick <em>calls</em> is the plugin's own.
+ * <p><b>The tick, the logout and the resume are the plugin's own.</b> {@link CompanionLoop} holds
+ * them, and the plugin and this harness call the same methods: a {@code tick} command is
+ * {@link CompanionLoop#tick}, a {@code logout} is {@link CompanionLoop#gameState} at the login
+ * screen. This harness is the loop's {@link CompanionLoop.Surface}, the one that draws nothing, so
+ * a step the plugin takes on a tick cannot be missing here, and {@code HarnessLoopTest} fails if a
+ * copy of one is written here again.
+ *
+ * <p><b>What is still written out again.</b> The commands that stand in for the plugin's other
+ * handlers: {@link #xp} for {@code onStatChanged}, {@link #onConfigChanged} for its namesake and
+ * the group change under it, and {@code leave} for the sidebar's button. They are short, and each
+ * says which handler it follows; a change to one of those handlers belongs here too.
  *
  * <h2>The protocol</h2>
  *
@@ -104,15 +114,10 @@ import okhttp3.Response;
  * (every request this plugin makes and what came back), {@code posted}, {@code refused},
  * {@code directive}, {@code streamState}, {@code invite}, {@code joined}, {@code link}, {@code error}.
  */
-public final class HarnessMain
+public final class HarnessMain implements CompanionLoop.Surface
 {
 	/** A game tick, which is what the plugin's own cadence is written against. */
 	private static final long TICK_MS = 600L;
-
-	/** {@code MapCompanionPlugin}'s own three numbers, transcribed with the loop that uses them. */
-	private static final long MIN_POST_INTERVAL_MS = 2_000L;
-	private static final long HEARTBEAT_MS = 6_000L;
-	private static final long STREAMED_HEARTBEAT_MS = 20_000L;
 
 	/** What the plugin is given, and what RuneLite gives it: a plain one. */
 	private final Gson gson = new Gson();
@@ -130,9 +135,11 @@ public final class HarnessMain
 	private final HarnessStore store = new HarnessStore();
 	private final HarnessConfig config;
 	private final long tickMs;
-	/** The plugin's own, as {@code MapCompanionPlugin} holds one: not injected, and reset by hand. */
-	private final CompletionWatcher completions = new CompletionWatcher();
-
+	/**
+	 * The plugin's tick, its endings and the state they keep, made by the same injector that makes
+	 * the plugin's. Package-private so a test can ask its readers what a command did to them.
+	 */
+	final CompanionLoop loop;
 	private final RelayClient relay;
 	private final ScheduledExecutorService reconnects = Executors.newSingleThreadScheduledExecutor(action ->
 	{
@@ -143,44 +150,22 @@ public final class HarnessMain
 	private final DirectiveStream directiveStream;
 	/** Who {@link GroupMarkers} would be drawing, written by the stream's thread. */
 	private volatile List<String> groupOnMap = new ArrayList<>();
-	private final SnapshotBuilder snapshotBuilder;
-	private final SnapshotFingerprint snapshotFingerprint;
 	private final DestinationState destinationState;
 	private final FarmRunState farmRunState;
 	private final SlayerState slayerState;
 	private final RoutePress routePress;
 	private final FarmRunClient farmRunClient;
-	private final FarmRunRoute farmRunRoute;
-	private final DestinationRoute destinationRoute;
-	private final BirdhouseReader birdhouseReader;
-	private final CapabilityEvaluator capabilityEvaluator;
 	private final MilestoneOutbox milestones;
 	private final XpTracker xpTracker;
-	private final ClueReader clueReader;
-	private final DiaryReader diaryReader;
 	private final QuestReader questReader;
-	private final FarmingObserver farmingObserver;
 	private final LootLog lootLog;
 	private final MemberIdentity identity;
 	private final Pairing pairing;
 	private final ConnectClient connectClient;
 
-	private volatile boolean dirty = true;
-	private long lastPostAtMs = 0L;
-	/** As the plugin's: when a snapshot was last built, posted or not. */
-	private long lastBuildAtMs = 0L;
-	private WorldPoint lastPosition = null;
-	private String lastSentFingerprint = null;
-	private volatile boolean suffixClaimed = false;
-	private volatile String issuedSecretCode = null;
-	private volatile String issuedSecret = null;
-	private volatile String issuedSecretMember = null;
-	/** The group's name from the last reply and the code it answered, as the plugin holds them. */
-	private volatile String toldNameCode = null;
-	private volatile String toldName = null;
-
-	private String status = "Not paired";
-	private Health health = Health.IDLE;
+	/* Written by the tick and read by whichever thread prints the state: the stream's, or a reply's. */
+	private volatile String status = "Not paired";
+	private volatile Health health = Health.IDLE;
 	private String lastStateLine = null;
 	private boolean streamConnected = false;
 	private volatile boolean running = true;
@@ -193,18 +178,51 @@ public final class HarnessMain
 		new HarnessMain(map, tickMs, System.out).run();
 	}
 
-	private HarnessMain(String mapUrl, long tickMs, PrintStream out)
+	/** Package-private so a test can make one, hand it commands and read what it printed. */
+	HarnessMain(String mapUrl, long tickMs, PrintStream out)
 	{
 		this.out = out;
 		this.tickMs = tickMs;
 		this.config = new HarnessConfig(store, mapUrl);
 
 		OkHttpClient http = new OkHttpClient.Builder().addInterceptor(watcher()).build();
+		/*
+		 * The two doors the map's words come in through, each with this harness listening behind the
+		 * plugin: what the loop does with a reply or a frame is the loop's, and a story hears of it
+		 * only once the loop has taken it in.
+		 */
+		RelayClient posts = new RelayClient(http, gson)
+		{
+			@Override
+			public synchronized boolean post(String baseUrl, String code, @Nullable String suffix, @Nullable String memberSecret,
+				@Nullable String installationKey, CompanionSnapshot snapshot, Consumer<RelayResponse> onDirective)
+			{
+				return super.post(baseUrl, code, suffix, memberSecret, installationKey, snapshot, response ->
+				{
+					onDirective.accept(response);
+					posted(response);
+				});
+			}
+		};
+		DirectiveStream frames = new DirectiveStream(http, gson, reconnects)
+		{
+			@Override
+			public synchronized void start(String baseUrl, String code, String memberId, @Nullable String memberSecret,
+				boolean withMembers, Consumer<? super RelayResponse.StreamDirective> onDirective)
+			{
+				super.start(baseUrl, code, memberId, memberSecret, withMembers, directive ->
+				{
+					onDirective.accept(directive);
+					streamed(directive);
+				});
+			}
+		};
 		/**
 		 * Guice, because that is how this plugin is really assembled: every constructor here is the
 		 * one RuneLite's own injector calls. The four instances bound by hand are the four classes
 		 * that keep their own state in the settings — see {@link ConfigStore}, which is the seam
-		 * that makes them constructible at all outside a client.
+		 * that makes them constructible at all outside a client. The loop's surface is this harness,
+		 * and the reward observer is made as the plugin's own provider makes it.
 		 */
 		Injector injector = Guice.createInjector(new AbstractModule()
 		{
@@ -223,6 +241,9 @@ public final class HarnessMain
 				bind(Gson.class).toInstance(gson);
 				bind(OkHttpClient.class).toInstance(http);
 				bind(ScheduledExecutorService.class).toInstance(reconnects);
+				bind(RelayClient.class).toInstance(posts);
+				bind(DirectiveStream.class).toInstance(frames);
+				bind(CompanionLoop.Surface.class).toInstance(HarnessMain.this);
 				bind(MapCompanionConfig.class).toInstance(config);
 				bind(ConfigStore.class).toInstance(store);
 				bind(MemberIdentity.class).toInstance(new MemberIdentity(store));
@@ -231,30 +252,31 @@ public final class HarnessMain
 				bind(FarmingObserver.class).toInstance(new FarmingObserver(game.client(), store, gson));
 				bind(BirdhouseReader.class).toInstance(new BirdhouseReader(key -> null));
 			}
+
+			/** {@code MapCompanionPlugin.provideRewardObserver}, which this injector has no plugin to ask for. */
+			@Provides
+			@Singleton
+			RewardObserver provideRewardObserver(Client client, CollectionItemCatalog catalog, RewardPolicy policy)
+			{
+				return new RewardObserver(client, catalog, policy::includes);
+			}
 		});
 
-		this.relay = injector.getInstance(RelayClient.class);
-		this.directiveStream = injector.getInstance(DirectiveStream.class);
-		this.snapshotBuilder = injector.getInstance(SnapshotBuilder.class);
-		this.snapshotFingerprint = injector.getInstance(SnapshotFingerprint.class);
-		this.destinationState = injector.getInstance(DestinationState.class);
-		this.farmRunState = injector.getInstance(FarmRunState.class);
-		this.slayerState = injector.getInstance(SlayerState.class);
-		this.routePress = injector.getInstance(RoutePress.class);
-		this.farmRunClient = injector.getInstance(FarmRunClient.class);
-		this.farmRunRoute = injector.getInstance(FarmRunRoute.class);
-		this.destinationRoute = injector.getInstance(DestinationRoute.class);
-		this.birdhouseReader = injector.getInstance(BirdhouseReader.class);
-		this.capabilityEvaluator = injector.getInstance(CapabilityEvaluator.class);
-		this.milestones = injector.getInstance(MilestoneOutbox.class);
-		this.xpTracker = injector.getInstance(XpTracker.class);
-		this.clueReader = injector.getInstance(ClueReader.class);
-		this.diaryReader = injector.getInstance(DiaryReader.class);
-		this.questReader = injector.getInstance(QuestReader.class);
-		this.farmingObserver = injector.getInstance(FarmingObserver.class);
-		this.lootLog = injector.getInstance(LootLog.class);
-		this.identity = injector.getInstance(MemberIdentity.class);
-		this.pairing = injector.getInstance(Pairing.class);
+		/* The loop's own collaborators, so a command here and a tick there can only mean the same object. */
+		this.loop = injector.getInstance(CompanionLoop.class);
+		this.relay = loop.relay;
+		this.directiveStream = loop.directiveStream;
+		this.destinationState = loop.destinationState;
+		this.farmRunState = loop.farmRunState;
+		this.slayerState = loop.slayerState;
+		this.routePress = loop.routePress;
+		this.farmRunClient = loop.farmRunClient;
+		this.milestones = loop.milestones;
+		this.xpTracker = loop.xpTracker;
+		this.questReader = loop.questReader;
+		this.lootLog = loop.lootLog;
+		this.identity = loop.identity;
+		this.pairing = loop.pairing;
 		this.connectClient = injector.getInstance(ConnectClient.class);
 
 		/** The event bus, for the one event this plugin acts on — see {@link HarnessStore}. */
@@ -365,7 +387,8 @@ public final class HarnessMain
 		shutDown();
 	}
 
-	private void handle(JsonObject command)
+	/** One command, as {@link #run} reads it off stdin. Package-private so a test can hand one over. */
+	void handle(JsonObject command)
 	{
 		String cmd = text(command, "cmd", "");
 		switch (cmd)
@@ -377,15 +400,15 @@ public final class HarnessMain
 					number(command, "x", 3222),
 					number(command, "y", 3218),
 					number(command, "plane", 0));
-				/** What {@code onGameStateChanged} does for LOGGED_IN, and nothing more. */
-				dirty = true;
+				/** The state change the client raises, less the update's chat line, which the plugin says itself. */
+				loop.gameState(GameState.LOGGED_IN);
 				break;
 			case "logout":
 				logout();
 				break;
 			case "nick":
 				config.nickname(text(command, "nick", "Me"));
-				dirty = true;
+				loop.dirty = true;
 				break;
 			case "join":
 				join(text(command, "text", ""));
@@ -409,7 +432,12 @@ public final class HarnessMain
 				for (int i = 0; i < number(command, "n", 1) && running; i++)
 				{
 					game.tick();
-					tick();
+					loop.tick();
+					if (directiveStream.isConnected() != streamConnected)
+					{
+						streamConnected = directiveStream.isConnected();
+						emit("streamState", one("connected", streamConnected));
+					}
 					publishState();
 					sleep(tickMs);
 				}
@@ -428,11 +456,11 @@ public final class HarnessMain
 				break;
 			case "varbit":
 				game.setVarbit(number(command, "id", 0), number(command, "value", 0));
-				dirty = true;
+				loop.dirty = true;
 				break;
 			case "varp":
 				game.setVarp(number(command, "id", 0), number(command, "value", 0));
-				dirty = true;
+				loop.dirty = true;
 				break;
 			case "quest":
 				game.setQuest(Quest.valueOf(text(command, "quest", "DRAGON_SLAYER_I")),
@@ -443,12 +471,12 @@ public final class HarnessMain
 				 * not do, and only the full log's cache: the travel quests keep theirs.
 				 */
 				questReader.clearLog();
-				dirty = true;
+				loop.dirty = true;
 				break;
 			case "config":
 				config.set(text(command, "key", ""), command.has("value") && command.get("value").getAsBoolean());
 				onConfigChanged(text(command, "key", ""));
-				dirty = true;
+				loop.dirty = true;
 				break;
 			case "slayer":
 				game.setDbValue(net.runelite.api.gameval.DBTableID.SlayerTask.ID,
@@ -457,11 +485,11 @@ public final class HarnessMain
 				game.setVarp(VarPlayerIds.SLAYER_TARGET, 7);
 				game.setVarp(VarPlayerIds.SLAYER_COUNT, number(command, "remaining", 100));
 				game.setVarp(VarPlayerIds.SLAYER_AREA, 0);
-				dirty = true;
+				loop.dirty = true;
 				break;
 			case "slayerOrder":
 				store.set("slayerOrder", text(command, "order", "best"));
-				dirty = true;
+				loop.dirty = true;
 				break;
 			case "routeSlayer":
 				SlayerState.View slayer = slayerState.view(System.currentTimeMillis());
@@ -496,20 +524,11 @@ public final class HarnessMain
 		}
 	}
 
-	/** {@code MapCompanionPlugin.onGameStateChanged}, for the one state this harness can be put in. */
+	/** The login screen, as the client raises it: the game is there first, and then the plugin hears. */
 	private void logout()
 	{
-		completions.reset();
-		xpTracker.reset();
-		clueReader.reset();
-		farmingObserver.onSessionEnded();
-		diaryReader.onSessionEnded();
-		questReader.onSessionEnded();
-		lastPosition = null;
-		lastSentFingerprint = null;
-		directiveStream.stop();
 		game.logout();
-		setStatus(Health.WAITING, "Logged out");
+		loop.gameState(GameState.LOGIN_SCREEN);
 	}
 
 	/**
@@ -612,7 +631,7 @@ public final class HarnessMain
 		{
 			milestones.levelUp(XpTracker.displayName(skill), level, now);
 		}
-		dirty = true;
+		loop.dirty = true;
 	}
 
 	/** Legacy NPC protocol fixture plus the real local kill log; not the new reward observer. */
@@ -640,7 +659,7 @@ public final class HarnessMain
 		event.put("notable", notable.size());
 		event.put("pending", milestones.pendingCount());
 		emit("loot", event);
-		dirty = true;
+		loop.dirty = true;
 	}
 
 	/**
@@ -664,49 +683,9 @@ public final class HarnessMain
 								 && command.get("collectionNew").getAsBoolean() ? true : null;
 			milestones.reward(new RewardObservation(type, text(command, "item", "Pet"), id, quantity,
 													text(source, "kind", null), text(source, "name", null), collection, now), now);
-			dirty = true;
+			loop.dirty = true;
 		}
 		emit("settledReward", milestones.take(now));
-	}
-
-	/** {@code MapCompanionPlugin.announceCompletions}, with this harness's sharing check. */
-	private void announceCompletions(long now)
-	{
-		if (game.gameState() != GameState.LOGGED_IN)
-		{
-			return;
-		}
-		if (!sharingMilestones())
-		{
-			completions.reset();
-			return;
-		}
-		if (store.on("shareQuestLog") || store.on("shareQuests"))
-		{
-			Map<String, String> quests = store.on("shareQuestLog") ? questReader.readLog(now)
-				: questReader.settled(now) ? questReader.readStates(now) : null;
-			for (String quest : completions.quests(quests))
-			{
-				milestones.quest(quest, now);
-				dirty = true;
-			}
-		}
-		else
-		{
-			completions.forgetQuests();
-		}
-		if (store.on("shareDiaries"))
-		{
-			for (String[] tier : completions.diaries(diaryReader.readTiers(now)))
-			{
-				milestones.diary(tier[0], tier[1], now);
-				dirty = true;
-			}
-		}
-		else
-		{
-			completions.forgetDiaries();
-		}
 	}
 
 	private boolean sharingMilestones()
@@ -754,7 +733,7 @@ public final class HarnessMain
 		}
 		if (key.equals("shareQuests") || key.equals("shareQuestLog"))
 		{
-			completions.forgetQuests();
+			loop.completions.forgetQuests();
 		}
 		if (key.equals("shareQuestLog"))
 		{
@@ -762,14 +741,14 @@ public final class HarnessMain
 		}
 		if (key.equals("shareDiaries"))
 		{
-			completions.forgetDiaries();
+			loop.completions.forgetDiaries();
 		}
 		if (MapCompanionConfig.KEY_SHARE_MILESTONES.equals(key)
 			|| MapCompanionConfig.KEY_SHARE_PETS.equals(key)
 			|| MapCompanionConfig.KEY_SHARE_COLLECTION.equals(key))
 		{
 			milestones.reset();
-			completions.reset();
+			loop.completions.reset();
 		}
 		if (MapCompanionConfig.KEY_PAIRING_CODE.equals(key) || MapCompanionConfig.KEY_RELAY_URL.equals(key))
 		{
@@ -778,302 +757,113 @@ public final class HarnessMain
 			slayerState.clear();
 			relay.reset();
 			directiveStream.stop();
-			lastSentFingerprint = null;
+			loop.lastSentFingerprint = null;
 			if (MapCompanionConfig.KEY_PAIRING_CODE.equals(key))
 			{
 				/** {@code onGroupChanged}: neither a suffix nor an unsent drop crosses a group. */
 				pairing.clearSuffix();
 				milestones.reset();
-				completions.reset();
+				loop.completions.reset();
 			}
 		}
 		else if (MapCompanionConfig.KEY_PAIRING_SUFFIX.equals(key))
 		{
 			relay.clearRefusal();
 		}
-		dirty = true;
+		loop.dirty = true;
 	}
 
 	/**
-	 * One game tick — {@code MapCompanionPlugin.onGameTick}, transcribed.
+	 * A frame of the stream, after the loop has taken it in, on the stream's thread.
 	 *
-	 * <p>The parts left out are the ones that draw: the world-map marker, the scene overlay and the
-	 * meetup notification. Everything that decides what goes on the wire is
-	 * here, in the order the plugin does it.
+	 * <p>And what the sidebar now says, from the thread the stream delivered on. A directive that
+	 * arrives between ticks is the whole point of the stream, so a state published only by the tick
+	 * would report it a heartbeat late — or, for a reader waiting on the line rather than on a
+	 * clock, not at all.
 	 */
-	private void tick()
+	private void streamed(RelayResponse.StreamDirective directive)
 	{
-		long now = System.currentTimeMillis();
-
-		trackMovement(now);
-		if (game.gameState() == GameState.LOGGED_IN && identity.id() != null)
+		if (config.showDestination())
 		{
-			farmRunState.bind(identity.id());
+			emit("directive", describe(directive));
 		}
-		observeGameState(now);
-		announceCompletions(now);
-		if (farmRunState.active())
-		{
-			farmRunState.carried(capabilityEvaluator.evaluate());
-			farmRunState.observe(farmingObserver.observations(now), birdhouseReader.read(now), DestinationRoute.standing(game.client()), now);
-		}
-		farmRunRoute.sync();
-		RelayResponse.Destination shown = DestinationSceneOverlay.shown(config, destinationState);
-		destinationRoute.sync(shown, null);
-		destinationRoute.advance(DestinationRoute.standing(game.client()), DestinationRoute.Sailing.ASHORE_UNKNOWN);
-		if (shown != null && !farmRunRoute.owns(shown) && destinationRoute.reaches(DestinationRoute.standing(game.client()),
-			shown.world == null || shown.world == game.client().getWorld()))
-		{
-			destinationState.dismiss();
-			destinationRoute.sync(null, null);
-		}
-
-		if (suffixClaimed)
-		{
-			suffixClaimed = false;
-			pairing.clearSuffix();
-		}
-		storeIssuedSecret();
-		storeToldName();
-
-		String code = config.pairingCode().trim();
-		if (code.isEmpty())
-		{
-			setStatus(Health.IDLE, "Not paired");
-			return;
-		}
-
-		if (!pairing.hasServerConsent())
-		{
-			directiveStream.stop();
-			setStatus(Health.WAITING, "Press Connect to choose " + pairing.serverLabel());
-			return;
-		}
-
-		String fatal = relay.getFatalError();
-		if (fatal != null)
-		{
-			directiveStream.stop();
-			setStatus(Health.ERROR, fatal);
-			return;
-		}
-
-		if (game.gameState() != GameState.LOGGED_IN)
-		{
-			setStatus(Health.WAITING, "Waiting for login");
-			return;
-		}
-
-		boolean showGroup = config.showGroupOnWorldMap();
-		if (config.showDestination() || showGroup)
-		{
-			String streamedMember = identity.id();
-			directiveStream.start(config.relayUrl(), code, streamedMember, pairing.secret(streamedMember), showGroup, directive ->
-			{
-				/* As the plugin does: the week's meetups are read here, not by accept(). */
-				destinationState.acceptSocial(directive, config.showDestination());
-				if (store.on("shareSlayer"))
-				{
-					slayerState.accept(streamedMember, directive, System.currentTimeMillis());
-				}
-				if (config.showDestination())
-				{
-					destinationState.accept(directive);
-					farmRunState.acceptFor(streamedMember, directive.relayEpoch, directive.run, directive.runRevision, System.currentTimeMillis());
-					emit("directive", describe(directive));
-				}
-				if (config.showGroupOnWorldMap() && directive.members != null)
-				{
-					/** The names the world map would draw; the harness has no world map to draw them on. */
-					List<String> names = new ArrayList<>();
-					for (RelayResponse.MemberDot dot : directive.members)
-					{
-						names.add(MapPin.safe(dot.name));
-					}
-					groupOnMap = names;
-				}
-				/**
-				 * And what the sidebar now says, from the thread the stream delivered on. A
-				 * directive that arrives between ticks is the whole point of the stream, so a
-				 * state published only by the tick loop would report it a heartbeat late — or,
-				 * for a reader waiting on the line rather than on a clock, not at all.
-				 */
-				publishState();
-			});
-		}
-		else
-		{
-			directiveStream.stop();
-		}
-		if (!showGroup || !directiveStream.isConnected())
-		{
-			groupOnMap = new ArrayList<>();
-		}
-
-		if (directiveStream.isConnected() != streamConnected)
-		{
-			streamConnected = directiveStream.isConnected();
-			emit("streamState", one("connected", streamConnected));
-		}
-
-		publishHealth();
-
-		long heartbeat = directiveStream.isConnected() ? STREAMED_HEARTBEAT_MS : HEARTBEAT_MS;
-		boolean heartbeatDue = now - lastPostAtMs >= heartbeat;
-		if (!dirty && !heartbeatDue)
-		{
-			return;
-		}
-		if (now - lastBuildAtMs < MIN_POST_INTERVAL_MS || !relay.isReady(now))
-		{
-			return;
-		}
-
-		dirty = false;
-		lastBuildAtMs = now;
-		CompanionSnapshot snapshot = snapshotBuilder.build(now);
-		if (snapshot == null)
-		{
-			return;
-		}
-
-		String fingerprint = snapshotFingerprint.of(snapshot);
-		if (fingerprint.equals(lastSentFingerprint) && !heartbeatDue)
-		{
-			return;
-		}
-
-		/* As the plugin does: the member this post is made as, with this RuneLite's key. */
-		String postedAs = snapshot.member == null ? null : snapshot.member.id;
-		if (!relay.post(config.relayUrl(), code, pairing.suffix(), pairing.secret(postedAs), identity.installationKey(),
-			snapshot, response ->
-	{
-		milestones.acknowledge(response.acknowledgedMilestones);
-			if (Boolean.TRUE.equals(response.claimed))
-			{
-				suffixClaimed = true;
-			}
-			if (response.memberSecret != null && !response.memberSecret.isEmpty())
-			{
-				issuedSecretCode = code;
-				issuedSecretMember = postedAs;
-				issuedSecret = response.memberSecret;
-			}
-			if (response.groupName != null && !response.groupName.isEmpty())
-			{
-				toldNameCode = code;
-				toldName = response.groupName;
-			}
-			destinationState.acceptSocial(response.directive, config.showDestination());
-			if (store.on("shareSlayer"))
-			{
-				slayerState.accept(postedAs, response.directive, System.currentTimeMillis());
-			}
-			if (config.showDestination())
-			{
-				destinationState.accept(response.directive);
-				if (response.directive != null)
-				{
-					farmRunState.acceptFor(snapshot.member.id, response.directive.relayEpoch, response.directive.run, response.directive.runRevision, System.currentTimeMillis());
-				}
-			}
-			Map<String, Object> event = new LinkedHashMap<>();
-			event.put("claimed", Boolean.TRUE.equals(response.claimed));
-			event.put("memberSecret", response.memberSecret != null && !response.memberSecret.isEmpty());
-			event.put("groupName", response.groupName);
-			event.put("acknowledged", response.acknowledgedMilestones == null
-					  ? new ArrayList<String>()
-					  : new ArrayList<>(response.acknowledgedMilestones));
-			event.put("directive", describe(response.directive == null ? null : response.directive));
-			emit("posted", event);
-			publishState();
-		}))
-		{
-			dirty = true;
-			return;
-		}
-
-		lastSentFingerprint = fingerprint;
-		lastPostAtMs = now;
+		publishState();
 	}
 
-	/** {@code MapCompanionPlugin.storeIssuedSecret}, on the thread that is allowed to write settings. */
-	private void storeIssuedSecret()
+	/** The map's reply to a post, after the loop has taken it in, on OkHttp's thread. */
+	private void posted(RelayResponse response)
 	{
-		String secret = issuedSecret;
-		String code = issuedSecretCode;
-		String member = issuedSecretMember;
-		if (secret == null || code == null)
-		{
-			return;
-		}
-		issuedSecret = null;
-		issuedSecretCode = null;
-		issuedSecretMember = null;
-		pairing.rememberSecret(code, member, secret);
+		Map<String, Object> event = new LinkedHashMap<>();
+		event.put("claimed", Boolean.TRUE.equals(response.claimed));
+		event.put("memberSecret", response.memberSecret != null && !response.memberSecret.isEmpty());
+		event.put("groupName", response.groupName);
+		event.put("acknowledged", response.acknowledgedMilestones == null
+				  ? new ArrayList<String>()
+				  : new ArrayList<>(response.acknowledgedMilestones));
+		event.put("directive", describe(response.directive == null ? null : response.directive));
+		emit("posted", event);
+		publishState();
 	}
 
-	/** {@code MapCompanionPlugin.storeToldName}, on the same thread and for the same reason. */
-	private void storeToldName()
+	/* ---- The loop's surface. Nothing here draws, so each call is noted for the state line or left. ---- */
+
+	@Override
+	public void begin()
 	{
-		String name = toldName;
-		String code = toldNameCode;
-		if (name == null || code == null)
-		{
-			return;
-		}
-		toldName = null;
-		toldNameCode = null;
-		pairing.rememberName(code, name);
 	}
 
-	private void trackMovement(long now)
+	@Override
+	public void drawn(long now)
 	{
-		if (game.gameState() != GameState.LOGGED_IN)
-		{
-			return;
-		}
-		WorldPoint where = game.where();
-		if (lastPosition == null || !where.equals(lastPosition))
-		{
-			lastPosition = where;
-			xpTracker.onActivity(now);
-			dirty = true;
-		}
 	}
 
-	private void observeGameState(long now)
-	{
-		if (game.gameState() != GameState.LOGGED_IN)
-		{
-			return;
-		}
-		farmingObserver.onSessionResumed(now);
-		birdhouseReader.onSessionResumed(now);
-		diaryReader.onSessionResumed(now);
-		questReader.onSessionResumed(now);
-		if (store.on("shareFarming") || farmRunState.active())
-		{
-			farmingObserver.observe(now, game.where().getRegionID());
-		}
-		else
-		{
-			farmingObserver.resetSession();
-		}
-	}
-
-	private void publishHealth()
-	{
-		int failures = relay.getConsecutiveFailures();
-		boolean live = relay.isEverSucceeded();
-		setStatus(MapCompanionPlugin.healthFor(live, failures, null),
-			MapCompanionPlugin.healthSentence(live, failures, relay.getLastTransientError(), "Connected"));
-	}
-
-	private void setStatus(Health health, String status)
+	@Override
+	public void setStatus(Health health, String status)
 	{
 		this.health = health;
 		this.status = status;
+	}
+
+	/** The names the world map would draw; the harness has no world map to draw them on. */
+	@Override
+	public void group(@Nullable List<RelayResponse.MemberDot> members)
+	{
+		if (members == null)
+		{
+			return;
+		}
+		List<String> names = new ArrayList<>();
+		for (RelayResponse.MemberDot dot : members)
+		{
+			names.add(MapPin.safe(dot.name));
+		}
+		groupOnMap = names;
+	}
+
+	@Override
+	public void noGroup()
+	{
+		groupOnMap = new ArrayList<>();
+	}
+
+	@Override
+	public void destination()
+	{
+	}
+
+	@Override
+	public void remind(Notification notification, String line)
+	{
+	}
+
+	@Override
+	public void noteGroupOwner(String server, String code, @Nullable Boolean owner)
+	{
+	}
+
+	@Override
+	public void ended(SessionEnd end)
+	{
 	}
 
 	/**

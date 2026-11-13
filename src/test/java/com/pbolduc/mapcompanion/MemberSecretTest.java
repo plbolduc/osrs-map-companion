@@ -237,14 +237,14 @@ public class MemberSecretTest
 		RelayResponse issued = gson.fromJson(
 								   "{\"pollIntervalMs\":2000,\"memberSecret\":\"" + SECRET + "\"}", RelayResponse.class);
 
-		plugin.noteIssuedSecret(plugin.pairing.serverUrl(), "ABC234", MEMBER, issued.memberSecret);
-		plugin.storeIssuedSecret();
+		plugin.loop.noteIssuedSecret(plugin.loop.pairing.serverUrl(), "ABC234", MEMBER, issued.memberSecret);
+		plugin.loop.storeIssuedSecret();
 
-		assertEquals(SECRET, plugin.pairing.secret(MEMBER));
+		assertEquals(SECRET, plugin.loop.pairing.secret(MEMBER));
 
 		Doorman door = new Doorman(200, "{}");
 		RelayClient relay = new RelayClient(door.client(), gson);
-		relay.post(MAP, "ABC234", null, plugin.pairing.secret(MEMBER), null, new CompanionSnapshot(), r ->
+		relay.post(MAP, "ABC234", null, plugin.loop.pairing.secret(MEMBER), null, new CompanionSnapshot(), r ->
 		{
 		});
 
@@ -261,15 +261,15 @@ public class MemberSecretTest
 		 * never send another.
 		 */
 		MapCompanionPlugin plugin = pluginJoinedTo("ABC234");
-		plugin.noteIssuedSecret(plugin.pairing.serverUrl(), "ABC234", MEMBER, SECRET);
-		plugin.storeIssuedSecret();
+		plugin.loop.noteIssuedSecret(plugin.loop.pairing.serverUrl(), "ABC234", MEMBER, SECRET);
+		plugin.loop.storeIssuedSecret();
 
 		RelayResponse quiet = gson.fromJson("{\"pollIntervalMs\":2000}", RelayResponse.class);
 		assertNull(quiet.memberSecret);
-		plugin.noteIssuedSecret(plugin.pairing.serverUrl(), "ABC234", MEMBER, quiet.memberSecret);
-		plugin.storeIssuedSecret();
+		plugin.loop.noteIssuedSecret(plugin.loop.pairing.serverUrl(), "ABC234", MEMBER, quiet.memberSecret);
+		plugin.loop.storeIssuedSecret();
 
-		assertEquals(SECRET, plugin.pairing.secret(MEMBER));
+		assertEquals(SECRET, plugin.loop.pairing.secret(MEMBER));
 	}
 
 	@Test
@@ -281,15 +281,15 @@ public class MemberSecretTest
 		 * offer one group's credential to another group on every request it ever made.
 		 */
 		MapCompanionPlugin plugin = pluginJoinedTo("ABC234");
-		plugin.noteIssuedSecret(plugin.pairing.serverUrl(), "ABC234", MEMBER, SECRET);
+		plugin.loop.noteIssuedSecret(plugin.loop.pairing.serverUrl(), "ABC234", MEMBER, SECRET);
 
-		plugin.pairing.join(JoinCode.parse("DEF567"));
+		plugin.loop.pairing.join(JoinCode.parse("DEF567"));
 		plugin.onGroupChanged();
-		plugin.storeIssuedSecret();
+		plugin.loop.storeIssuedSecret();
 
-		assertNull("nothing of ABC234's is presented to DEF567", plugin.pairing.secret(MEMBER));
-		plugin.pairing.join(JoinCode.parse("ABC234"));
-		assertEquals("and it is still there for the group that issued it", SECRET, plugin.pairing.secret(MEMBER));
+		assertNull("nothing of ABC234's is presented to DEF567", plugin.loop.pairing.secret(MEMBER));
+		plugin.loop.pairing.join(JoinCode.parse("ABC234"));
+		assertEquals("and it is still there for the group that issued it", SECRET, plugin.loop.pairing.secret(MEMBER));
 	}
 
 	@Test
@@ -298,17 +298,17 @@ public class MemberSecretTest
 		/** The member id goes at the same moment, and a secret says which member of a group this
 		 * installation is — so an id that no longer exists leaves nothing for any of them to prove. */
 		MapCompanionPlugin plugin = pluginJoinedTo("ABC234");
-		plugin.noteIssuedSecret(plugin.pairing.serverUrl(), "ABC234", MEMBER, SECRET);
-		plugin.storeIssuedSecret();
-		plugin.pairing.join(JoinCode.parse("DEF567"));
-		plugin.noteIssuedSecret(plugin.pairing.serverUrl(), "DEF567", MEMBER, SECRET);
-		plugin.storeIssuedSecret();
+		plugin.loop.noteIssuedSecret(plugin.loop.pairing.serverUrl(), "ABC234", MEMBER, SECRET);
+		plugin.loop.storeIssuedSecret();
+		plugin.loop.pairing.join(JoinCode.parse("DEF567"));
+		plugin.loop.noteIssuedSecret(plugin.loop.pairing.serverUrl(), "DEF567", MEMBER, SECRET);
+		plugin.loop.storeIssuedSecret();
 
-		plugin.pairing.leave();
+		plugin.loop.pairing.leave();
 
-		assertNull(plugin.pairing.secret(MEMBER));
-		plugin.pairing.join(JoinCode.parse("ABC234"));
-		assertNull("Leave is not a switch: it forgets what every group issued", plugin.pairing.secret(MEMBER));
+		assertNull(plugin.loop.pairing.secret(MEMBER));
+		plugin.loop.pairing.join(JoinCode.parse("ABC234"));
+		assertNull("Leave is not a switch: it forgets what every group issued", plugin.loop.pairing.secret(MEMBER));
 	}
 
 	@Test
@@ -384,17 +384,17 @@ public class MemberSecretTest
 	/** The plugin with the two collaborators these rules touch, as {@code GroupChangeTest} builds it. */
 	private MapCompanionPlugin pluginJoinedTo(String pasted)
 	{
-		MapCompanionPlugin plugin = new MapCompanionPlugin();
-		plugin.pairing = new Pairing(new FakeStore(), gson);
-		plugin.milestones = new MilestoneOutbox();
-		plugin.destinationState = new DestinationState(gson);
+		MapCompanionPlugin plugin = TestLoop.in(new MapCompanionPlugin());
+		plugin.loop.pairing = new Pairing(new FakeStore(), gson);
+		plugin.loop.milestones = new MilestoneOutbox();
+		plugin.loop.destinationState = new DestinationState(gson);
 		plugin.destinationMarker = new TestDestinationMarker();
 		plugin.groupMarkers = new GroupMarkers(null, null);
 		plugin.boatPins = new BoatPins(null, null);
 		HarnessGame game = new HarnessGame();
-		plugin.rewardObserver = new RewardObserver(game.client(), new CollectionItemCatalog(game.client()));
+		plugin.loop.rewardObserver = new RewardObserver(game.client(), new CollectionItemCatalog(game.client()));
 		TestFarmRuns.attach(plugin);
-		plugin.pairing.join(JoinCode.parse(pasted));
+		plugin.loop.pairing.join(JoinCode.parse(pasted));
 		return plugin;
 	}
 

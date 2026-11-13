@@ -126,7 +126,9 @@ localhost URL. The first Connect still requires server approval. Never use an up
 ## Integration harness
 
 `./gradlew runHarness --args="--map http://localhost:3000"` runs the real pairing, snapshot, relay,
-stream, outbox and reader classes against `HarnessGame`, a bounded fake RuneLite client.
+stream, outbox and reader classes against `HarnessGame`, a bounded fake RuneLite client. Its tick,
+logout and resume are the plugin's own: `CompanionLoop` holds them, and the plugin and the harness
+both call it.
 It accepts one JSON command per line on stdin and emits one JSON event per line on stdout:
 
 ```json
@@ -144,7 +146,8 @@ The normal plugin jar contains only `src/main`; the harness is never shipped to 
 revision, next ordinal, confirmed `done` and reference `visited` ordinals. The map's
 `scripts/companion-farm-story.mjs` drives these against an isolated fixture production server.
 It waits through the real login settle and checks the actual Java reader/receiver, but its
-game values and tick ordering are supplied by the harness and are not live-client evidence.
+game values and the moments its ticks come are supplied by the harness and are not live-client
+evidence.
 
 `slayer` supplies a synthetic task name and remaining count through explicit DB rows and varps;
 the real reader must resolve the row by value. `slayerOrder` changes the kept ranking and

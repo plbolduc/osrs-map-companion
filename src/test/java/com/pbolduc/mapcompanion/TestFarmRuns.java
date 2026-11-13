@@ -26,7 +26,6 @@
 package com.pbolduc.mapcompanion;
 
 import com.google.gson.Gson;
-import java.lang.reflect.Field;
 import net.runelite.client.callback.ClientThread;
 import okhttp3.OkHttpClient;
 
@@ -35,7 +34,8 @@ final class TestFarmRuns
 {
 	static FarmRunState attach(MapCompanionPlugin plugin)
 	{
-		set(plugin, "slayerState", new SlayerState());
+		CompanionLoop loop = TestLoop.in(plugin).loop;
+		loop.slayerState = new SlayerState();
 		FarmRunState state = new FarmRunState();
 		DestinationRoute route = new DestinationRoute();
 		HarnessGame game = new HarnessGame();
@@ -48,38 +48,15 @@ final class TestFarmRuns
 			}
 		};
 		FarmRunClient client = new FarmRunClient(new OkHttpClient(), new Gson(), game.client(), thread,
-			plugin.pairing, new MemberIdentity(new HarnessStore()), state, plugin.destinationState, route);
-		set(plugin, "farmRunState", state);
-		set(plugin, "farmRunClient", client);
-		set(plugin, "farmRunRoute", new FarmRunRoute(state, plugin.destinationState, route, thread));
+			loop.pairing, new MemberIdentity(new HarnessStore()), state, loop.destinationState, route);
+		loop.farmRunState = state;
+		loop.farmRunClient = client;
+		loop.farmRunRoute = new FarmRunRoute(state, loop.destinationState, route, thread);
 		return state;
 	}
 
 	static FarmRunState state(MapCompanionPlugin plugin)
 	{
-		try
-		{
-			Field field = MapCompanionPlugin.class.getDeclaredField("farmRunState");
-			field.setAccessible(true);
-			return (FarmRunState) field.get(plugin);
-		}
-		catch (ReflectiveOperationException error)
-		{
-			throw new AssertionError(error);
-		}
-	}
-
-	private static void set(MapCompanionPlugin plugin, String name, Object value)
-	{
-		try
-		{
-			Field field = MapCompanionPlugin.class.getDeclaredField(name);
-			field.setAccessible(true);
-			field.set(plugin, value);
-		}
-		catch (ReflectiveOperationException error)
-		{
-			throw new AssertionError(error);
-		}
+		return plugin.loop.farmRunState;
 	}
 }

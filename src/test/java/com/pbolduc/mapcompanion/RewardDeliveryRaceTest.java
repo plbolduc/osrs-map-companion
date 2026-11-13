@@ -259,7 +259,7 @@ public class RewardDeliveryRaceTest
 	{
 		final RewardTestClient game = new RewardTestClient();
 		final CollectionItemCatalog catalog = game.catalog();
-		final MapCompanionPlugin plugin = new MapCompanionPlugin();
+		final MapCompanionPlugin plugin = TestLoop.in(new MapCompanionPlugin());
 		final AtomicReference<String> code = new AtomicReference<>("ABC234");
 		final AtomicReference<String> server = new AtomicReference<>(MapCompanionConfig.DEFAULT_MAP_URL);
 		final AtomicBoolean pets = new AtomicBoolean(true);
@@ -330,12 +330,12 @@ public class RewardDeliveryRaceTest
 					throw new AssertionError("Unexpected setting write: " + key);
 				}
 			};
-			plugin.milestones = outbox;
-			plugin.destinationState = new DestinationState(new Gson());
+			plugin.loop.milestones = outbox;
+			plugin.loop.destinationState = new DestinationState(new Gson());
 			plugin.destinationMarker = new TestDestinationMarker();
 			plugin.groupMarkers = new GroupMarkers(null, null);
-			plugin.pairing = new Pairing(new HarnessStore(), new Gson());
-			plugin.rewardObserver = new RewardObserver(game.client, catalog, catalog::contains, () -> 1000L);
+			plugin.loop.pairing = new Pairing(new HarnessStore(), new Gson());
+			plugin.loop.rewardObserver = new RewardObserver(game.client, catalog, catalog::contains, () -> 1000L);
 			TestFarmRuns.attach(plugin);
 			set("client", client);
 			set("config", config);
@@ -351,14 +351,12 @@ public class RewardDeliveryRaceTest
 		void settle()
 		{
 			game.tick += RewardObserver.SETTLE_TICKS;
-			plugin.flushRewards(5000L);
+			plugin.loop.flushRewards(5000L);
 		}
 
 		private void set(String name, Object value) throws Exception
 		{
-			Field field = MapCompanionPlugin.class.getDeclaredField(name);
-			field.setAccessible(true);
-			field.set(plugin, value);
+			TestLoop.set(plugin, name, value);
 		}
 	}
 }
