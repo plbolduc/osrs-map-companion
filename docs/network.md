@@ -53,6 +53,11 @@ credentials even with character sharing off. Snapshots are spaced at least two s
 an unchanged character normally sends a heartbeat every six seconds, or twenty with the receive
 stream connected. Automatic character sharing stops while logged out.
 
+**Where you died** is the tile and age of the character's most recent death, held in memory for
+an hour. It is kept through a logout and a hop, since a relog is when the way back is wanted, and
+forgotten at a change of character and when the plugin is turned off: the next login may be
+another character's, and the death would be posted as theirs.
+
 With **Farming contracts** shared, the crop and patch kind remain on the snapshot when the
 contract is complete, with state `return` instead of `active`. This means ready to hand in to
 Guildmaster Jane; an absent or unreadable contract remains unknown. The existing setting guards both states.
@@ -218,7 +223,8 @@ and hint arrow, with no request. The list credits the OSRS Wiki and its CC BY-NC
 **Search**, at the top of Home while connected, asks `GET /api/companion/search?q=` with the
 same three credentials, about 350ms after the last key or at once on Enter, and never for fewer than
 two characters. One is in flight at a time: a query typed meanwhile waits for it, and the older
-answer is dropped if the box has moved on. Clearing the box cancels the call. A `Retry-After` is
+answer is dropped if the box has moved on. Clearing the box cancels the call, and turning the
+plugin off cancels it with any search still waiting to be sent. A `Retry-After` is
 honoured by asking nothing until it has passed, a failure without one waits ten seconds, and a
 map address that redirects waits five minutes. The
 query is in the request's address, which the map leaves out of its logs; the plugin logs nothing it
@@ -250,7 +256,7 @@ your browser and sends this client nothing. The clue is now read whether or not 
 so the sidebar has it to offer; the snapshot still carries it only with that choice.
 
 **The Group section** is read from what the map already sends: `roster`, one row per other member
-with their name, colour, presence, *near*, *Near you* and newest news, arrives on every snapshot
+with their name, colour, presence, world, *near*, *Near you* and newest news, arrives on every snapshot
 reply and stream frame and is shown whatever the destination setting; `events`, the week's meetups
 with their answers, is shown only with **Destinations and meetups**, and the soonest of them is
 the meetup pinned on the world map. The single `event` the map still sends beside them for older
@@ -264,7 +270,8 @@ The meetup answers are `PUT /api/companion/event/answer` with the meetup's id an
 `maybe`, `no` and `on_my_way`; **Meet here** is `PUT /api/companion/event` with a title, the start
 time, your world and a tile, the one you stand on or the one right-clicked on the world map, and copies the link the map answers with after checking
 it is a path on the map address. Both carry the group code, member id and member secret, one at a
-time, and none before a `Retry-After` has passed. Neither is ever sent without a press.
+time, and none before a `Retry-After` has passed, or for five minutes after a map address that
+redirects. Neither is ever sent without a press.
 **Meetup reminder** (off) raises one RuneLite notification per meetup, the chosen number of
 minutes before it starts; it reads only what the map already sent.
 
