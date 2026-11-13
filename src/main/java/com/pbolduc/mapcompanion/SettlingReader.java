@@ -32,7 +32,7 @@ package com.pbolduc.mapcompanion;
  * the session; {@link SessionSettle} holds the rule for when a reading is worth believing after
  * that. Most readers did nothing else at those two moments but pass them on, each with its own copy
  * of the two methods, so they are said here once. A reader that forgets something of its own when
- * a session ends overrides {@link #onSessionEnded} and passes it on first.
+ * a session ends overrides {@link #onSessionEnded()} and passes it on first.
  */
 abstract class SettlingReader
 {
@@ -49,5 +49,15 @@ abstract class SettlingReader
 	public void onSessionEnded()
 	{
 		settle.ended();
+	}
+
+	/**
+	 * The session ended, and this is how. Every way one ends takes the readings with it, so that is
+	 * the answer here; a reader that keeps something through one ending, or forgets more at another,
+	 * overrides this and says which. The plugin tells every reader through this, in one list.
+	 */
+	void onSessionEnded(SessionEnd end)
+	{
+		onSessionEnded();
 	}
 }

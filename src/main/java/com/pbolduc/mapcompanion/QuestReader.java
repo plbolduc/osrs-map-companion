@@ -43,7 +43,7 @@ import net.runelite.api.QuestState;
  * unnecessary work on the game thread. Session changes discard the cached account state.
  */
 @Singleton
-public class QuestReader
+public class QuestReader extends SettlingReader
 {
 	/**
 	 * Display names, spelled as the game spells them, because that is also how the map's transport
@@ -86,7 +86,6 @@ public class QuestReader
 	}
 
 	private final Client client;
-	private final SessionSettle logSettle = new SessionSettle(15_000L);
 	private Map<String, String> log;
 	private long logReadAt;
 	private Map<String, String> travel;
@@ -163,11 +162,6 @@ public class QuestReader
 		return new LinkedHashMap<>(travel);
 	}
 
-	void onSessionResumed(long now)
-	{
-		logSettle.resumed(now);
-	}
-
 	/**
 	 * Whether quest states can be believed yet. Right after a login every quest reads as not
 	 * started, and a confident "not started" marks quest-gated routes unusable on the map, so the
@@ -175,12 +169,13 @@ public class QuestReader
 	 */
 	boolean settled(long now)
 	{
-		return logSettle.settled(now);
+		return settle.settled(now);
 	}
 
-	void onSessionEnded()
+	@Override
+	public void onSessionEnded()
 	{
-		logSettle.ended();
+		super.onSessionEnded();
 		clearLog();
 		travel = null;
 	}
@@ -193,7 +188,7 @@ public class QuestReader
 	/** Independent of the travel whitelist and called only under the full-log consent. */
 	public Map<String, String> readLog(long now)
 	{
-		if (!logSettle.settled(now))
+		if (!settle.settled(now))
 		{
 			return null;
 		}

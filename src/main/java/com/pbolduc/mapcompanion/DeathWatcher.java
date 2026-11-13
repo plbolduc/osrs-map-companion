@@ -189,6 +189,24 @@ public class DeathWatcher extends SettlingReader
 	}
 
 	/**
+	 * A logout or a hop ends the timer's reading and keeps the death, because a relog is the moment
+	 * the marker exists to survive. A death is one character's, though: another character takes it,
+	 * and so does the plugin stopping, whose next lifetime may log in as anybody.
+	 */
+	@Override
+	void onSessionEnded(SessionEnd end)
+	{
+		if (end == SessionEnd.SWITCH || end == SessionEnd.OFF)
+		{
+			clear();
+		}
+		else
+		{
+			onSessionEnded();
+		}
+	}
+
+	/**
 	 * Read the gravestone's timer, on the game tick. Shown only while {@code GRAVESTONE_VISIBLE} says
 	 * a stone stands and the timer reads something the game itself would print; any other reading,
 	 * and every reading before the session settles, shows nothing rather than a doubtful number.

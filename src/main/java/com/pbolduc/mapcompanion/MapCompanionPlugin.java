@@ -662,37 +662,7 @@ public class MapCompanionPlugin extends Plugin
 	/** Everything a game tick reads, writes or starts. Client thread only; see {@link #shutDown}. */
 	private void endLifetime()
 	{
-		farmRunClient.clear();
-		farmRunState.clear();
-		slayerState.clear();
-		lootLog.flush();
-		relay.reset();
-		stopStream();
-		/* Cleared before the pins go, so a stream frame's queued sync cannot redraw one. */
-		destinationState.clear();
-		destinationRoute.clear();
-		shortestPath.shutDown();
-		destinationMarker.remove();
-		boatPins.clear();
-		destinationArrow.clear();
-		resetRewardDelivery();
-		farmingObserver.onSessionEnded();
-		diaryReader.onSessionEnded();
-		endSessions(false);
-		/*
-		 * A death is one character's, and the next lifetime may log in as another. It forgets the
-		 * profile below, so the switch that would clear this at that login is not seen as one.
-		 */
-		deathWatcher.clear();
-		lastPosition = null;
-		meetupReminder.clear();
-		pickpocketTick = -1;
-		lastProfile = null;
-		lastSentFingerprint = null;
-		suffixClaimed = false;
-		issuedSecret = null;
-		toldName = null;
-		runsGroup = null;
+		end(SessionEnd.OFF);
 		restStatus();
 	}
 
@@ -704,38 +674,135 @@ public class MapCompanionPlugin extends Plugin
 	}
 
 	/**
-	 * What every way a session ends forgets: a logout or a hop, another character, the plugin
-	 * stopping. A hop keeps the port tasks' last settled reading for the sidebar, as
-	 * {@link PortTaskReader#onHop} says. Client thread.
+	 * What a session's end forgets, written once for every way one ends; {@link SessionEnd} names
+	 * them. One list, because a list for each ending is a list that misses something in one of them.
+	 * Here a line says which endings take a thing, so a new piece of state is asked that question
+	 * once, in sight of the answers already given, and each reader is told the ending and answers
+	 * for itself.
+	 *
+	 * <p>The connection is the lifetime's: only the plugin stopping resets the relay and takes the
+	 * destination down. A logout closes the stream too, which the game state's handler does last,
+	 * beside the words it leaves on the status card.
+	 *
+	 * <p>The client thread, and whichever thread announces a character switch.
 	 */
-	private void endSessions(boolean hop)
+	private void end(SessionEnd end)
 	{
-		xpTracker.reset();
-		clueReader.reset();
-		for (SettlingReader reader : settling())
+		boolean off = end == SessionEnd.OFF;
+		/* Somebody else may be playing next, so nothing held for this character may be delivered to them. */
+		boolean another = off || end == SessionEnd.SWITCH;
+		if (another)
 		{
-			reader.onSessionEnded();
-		}
-		if (hop)
-		{
-			portTaskReader.onHop();
+			/* Old member replies and frames must not deliver a previous character's run. */
+			farmRunClient.clear();
+			if (off)
+			{
+				farmRunState.clear();
+			}
+			else
+			{
+				farmRunState.bind(null);
+			}
+			slayerState.clear();
 		}
 		else
 		{
-			portTaskReader.onSessionEnded();
+			/* On no world until the next tick names one, so no meetup's world reads as this one meanwhile. */
+			groupState.onWorld(0);
+			if (end == SessionEnd.HOP)
+			{
+				/*
+				 * The same character, back in seconds: the task cards keep the last settled reading
+				 * until the next one settles. Only what the sidebar shows; nothing unsettled is sent.
+				 */
+				slayerState.hop();
+			}
+			else
+			{
+				slayerState.loggedOut();
+			}
 		}
-		questReader.onSessionEnded();
-		assignmentReader.onSessionEnded();
+		if (off)
+		{
+			lootLog.flush();
+			relay.reset();
+			stopStream();
+			/* Cleared before the pins go, so a stream frame's queued sync cannot redraw one. */
+			destinationState.clear();
+			destinationRoute.clear();
+			shortestPath.shutDown();
+			destinationMarker.remove();
+		}
+		if (end != SessionEnd.HOP)
+		{
+			/* Another character's boats are not this one's. A hop is the same character, whose pins stay until the next reading settles. */
+			boatPins.clear();
+		}
+		if (off)
+		{
+			destinationArrow.clear();
+			resetRewardDelivery();
+		}
+		else if (another)
+		{
+			milestones.reset();
+			completions.reset();
+		}
+		else
+		{
+			rewardObserver.reset();
+		}
+		xpTracker.reset();
+		clueReader.reset();
+		/** Stored values are about to read zero, or to be another character's; {@link SessionSettle} has the window. */
+		for (SettlingReader reader : readers())
+		{
+			/*
+			 * A switch is not told to the patches or the diaries. The logout or hop it came with ended
+			 * both, and the patches' history is filed by profile, which that reader sees change itself.
+			 */
+			if (end != SessionEnd.SWITCH || reader != farmingObserver && reader != diaryReader)
+			{
+				reader.onSessionEnded(end);
+			}
+		}
+		if (!off)
+		{
+			boatPinsStale = true;
+		}
+		if (end != SessionEnd.SWITCH)
+		{
+			lastPosition = null;
+			lastSentFingerprint = null;
+		}
+		if (another)
+		{
+			pickpocketTick = -1;
+		}
+		if (off)
+		{
+			meetupReminder.clear();
+			/*
+			 * Forgotten with the lifetime, so the next one's first login is never seen as a switch:
+			 * which is why what a switch would clear, a death among it, goes at this ending as well.
+			 */
+			lastProfile = null;
+			suffixClaimed = false;
+			issuedSecret = null;
+			toldName = null;
+			runsGroup = null;
+		}
 	}
 
 	/**
-	 * The readers told of a session's start and its end at the same moments, in every way one ends.
-	 * The farming, diary, port task and death readers are not here: each ends at a moment of its own.
+	 * Every reader that believes nothing until a session has settled. Each is told of a session's
+	 * start and of every way one ends through this one list, so a reader left out of it is told of
+	 * neither. Package-private so a test can hold the list to the readers there are.
 	 */
-	private SettlingReader[] settling()
+	SettlingReader[] readers()
 	{
-		return new SettlingReader[]{travelUnlockReader, stashReader, boatReader, birdhouseReader, dailyReader,
-			seaChartReader, mortimerOfferReader};
+		return new SettlingReader[]{farmingObserver, diaryReader, travelUnlockReader, stashReader, boatReader, birdhouseReader,
+			dailyReader, seaChartReader, mortimerOfferReader, portTaskReader, questReader, assignmentReader, deathWatcher};
 	}
 
 	/**
@@ -961,18 +1028,7 @@ public class MapCompanionPlugin extends Plugin
 		{
 			return;
 		}
-		// Old member replies and frames must not deliver a previous character's run.
-		farmRunClient.clear();
-		farmRunState.bind(null);
-		slayerState.clear();
-		milestones.reset();
-		completions.reset();
-		deathWatcher.clear();
-		endSessions(false);
-		/* Another character's boats are not this one's. */
-		boatPins.clear();
-		boatPinsStale = true;
-		pickpocketTick = -1;
+		end(SessionEnd.SWITCH);
 		dirty = true;
 	}
 
@@ -1211,39 +1267,12 @@ public class MapCompanionPlugin extends Plugin
 		}
 		if (leaving)
 		{
-			/* On no world until the next tick names one, so no meetup's world reads as this one meanwhile. */
-			groupState.onWorld(0);
-			rewardObserver.reset();
 			/**
 			 * Logging out stops the wire. Not "sends a final snapshot saying goodbye" — simply stops,
 			 * and the map's own staleness handling takes it from there, which is the same thing it
 			 * does when a client crashes or a laptop lid closes.
 			 */
-			/** Patch and diary flags are about to read zero; {@link SessionSettle} has the window. */
-			farmingObserver.onSessionEnded();
-			diaryReader.onSessionEnded();
-			endSessions(state == GameState.HOPPING);
-			boatPinsStale = true;
-			if (state == GameState.LOGIN_SCREEN)
-			{
-				/* A hop is the same character, whose pins stay until the next reading settles. */
-				boatPins.clear();
-			}
-			if (state == GameState.HOPPING)
-			{
-				/*
-				 * The same character, back in seconds: the task cards keep the last settled reading
-				 * until the next one settles. Only what the sidebar shows; nothing unsettled is sent.
-				 */
-				slayerState.hop();
-			}
-			else
-			{
-				slayerState.loggedOut();
-			}
-			deathWatcher.onSessionEnded();
-			lastPosition = null;
-			lastSentFingerprint = null;
+			end(state == GameState.HOPPING ? SessionEnd.HOP : SessionEnd.LOGOUT);
 			if (state == GameState.LOGIN_SCREEN)
 			{
 				/**
@@ -2166,15 +2195,10 @@ public class MapCompanionPlugin extends Plugin
 		 * Ahead of the sharing toggle, because a clock that only runs while a setting is on would
 		 * make turning the setting on mid-session read a fresh set of zeroes.
 		 */
-		for (SettlingReader reader : settling())
+		for (SettlingReader reader : readers())
 		{
 			reader.onSessionResumed(now);
 		}
-		farmingObserver.onSessionResumed(now);
-		diaryReader.onSessionResumed(now);
-		portTaskReader.onSessionResumed(now);
-		questReader.onSessionResumed(now);
-		deathWatcher.onSessionResumed(now);
 		assignmentReader.observe(now);
 		/*
 		 * Read every tick while the choice is on, for the sidebar as much as the snapshot: the slots

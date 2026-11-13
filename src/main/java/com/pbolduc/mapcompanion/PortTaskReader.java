@@ -202,6 +202,20 @@ public class PortTaskReader extends SettlingReader
 		keptHold = null;
 	}
 
+	/** A hop keeps the sidebar's copy, as {@link #onHop} says; every other ending forgets it too. */
+	@Override
+	void onSessionEnded(SessionEnd end)
+	{
+		if (end == SessionEnd.HOP)
+		{
+			onHop();
+		}
+		else
+		{
+			onSessionEnded();
+		}
+	}
+
 	/**
 	 * A world hop: the reading is withheld as at a logout, since every varbit is about to read zero,
 	 * and the sidebar keeps the last settled one until the new session settles. Client thread.
