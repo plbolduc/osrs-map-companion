@@ -41,7 +41,7 @@ import okhttp3.OkHttpClient;
  * the last polish pass changed: a fresh install with and without a kill log, the step after a first
  * Connect, a busy Home, the Group tab, Settings with Advanced open, Stars with a world picked, the
  * search answering "bank" and "whip", the death and clue cards, a meetup, and Drop luck alone.
- * The README's pictures are route, search-whip-card, farm-count, group, stars-route, dropluck-card,
+ * The README's pictures are route, search-whip-card, farm-count, group, stars-route, dropluck-boss-card,
  * slayer-card, settings-closed, port-run and chart-run, with VoyageShot's voyage-sail; the card scenes
  * paint the real sections without the panel's surrounding controls. The tasks scenes are Home with
  * all three task cards, open and folded; {@code -Dslayer.options=<file>} gives any Slayer scene
@@ -69,7 +69,7 @@ import okhttp3.OkHttpClient;
 public class SidebarPolishShot
 {
 	static final List<String> STATES = Arrays.asList("fresh", "fresh-log", "connect", "home", "route", "group", "settings", "settings-closed",
-		"stars", "stars-filters", "stars-route", "stars-pinned", "stars-busy", "stars-busy-picked", "stars-busy-open", "stars-busy-ways", "search", "search-whip", "search-whip-card", "death", "meetup", "dropluck", "dropluck-card", "status",
+		"stars", "stars-filters", "stars-route", "stars-pinned", "stars-busy", "stars-busy-picked", "stars-busy-open", "stars-busy-ways", "search", "search-whip", "search-whip-card", "death", "meetup", "dropluck", "dropluck-card", "dropluck-boss-card", "status",
 		"farm", "farm-card", "farm-bring", "farm-count", "slayer", "slayer-card", "slayer-open", "slayer-expanded", "slayer-blocked",
 		"port-tasks", "port-tasks-card", "port-tasks-unread", "port-run", "port-run-changed", "chart-run", "quest-route", "tasks", "tasks-folded");
 
@@ -87,7 +87,7 @@ public class SidebarPolishShot
 			SwingUtilities.invokeAndWait(() -> call(() -> after(state, panel[0])));
 			SwingUtilities.invokeAndWait(() -> call(() -> refresh(panel[0])));
 			SwingUtilities.invokeAndWait(() -> { });
-			SwingUtilities.invokeAndWait(() -> call(() -> shoot(state.equals("dropluck-card")
+			SwingUtilities.invokeAndWait(() -> call(() -> shoot(state.endsWith("-card") && state.startsWith("dropluck")
 				? (JComponent) get(panel[0], "drySection") : state.equals("search-whip-card")
 				? (JComponent) get(panel[0], "searchPanel") : state.equals("farm-card") || state.equals("farm-bring") || state.equals("farm-count")
 				|| state.equals("chart-run")
@@ -397,7 +397,11 @@ public class SidebarPolishShot
 			{
 				death(injector, config);
 			}
-			if (state.equals("home") || state.equals("fresh-log") || state.startsWith("dropluck"))
+			if (state.equals("dropluck-boss-card"))
+			{
+				bossLoot(log);
+			}
+			else if (state.equals("home") || state.equals("fresh-log") || state.startsWith("dropluck"))
 			{
 				loot(log);
 			}
@@ -467,6 +471,39 @@ public class SidebarPolishShot
 			}
 			directive.destination = null;
 			destinations.acceptSocial(directive, true);
+		}
+
+		/**
+		 * A boss with three drops at one rate, for the README: eight berserker rings in 640 kills where
+		 * five are expected, and 250 kills since the last, so the card says both things at once.
+		 */
+		static void bossLoot(LootLog log)
+		{
+			game.nameItem(6729, "Dagannoth bones");
+			game.nameItem(6737, "Berserker ring");
+			game.nameItem(6735, "Warrior ring");
+			game.nameItem(6739, "Dragon axe");
+			List<Integer> berserker = Arrays.asList(60, 95, 150, 210, 260, 300, 350, 390);
+			List<Integer> warrior = Arrays.asList(120, 330, 480, 560, 610);
+			List<Integer> axe = Arrays.asList(45, 280, 520);
+			for (int kill = 1; kill <= 640; kill++)
+			{
+				List<ItemStack> items = new ArrayList<>();
+				items.add(new ItemStack(6729, 1));
+				if (berserker.contains(kill))
+				{
+					items.add(new ItemStack(6737, 1));
+				}
+				if (warrior.contains(kill))
+				{
+					items.add(new ItemStack(6735, 1));
+				}
+				if (axe.contains(kill))
+				{
+					items.add(new ItemStack(6739, 1));
+				}
+				log.record(new ServerNpcLoot(game.npc("Dagannoth Rex"), items));
+			}
 		}
 
 		static void loot(LootLog log)

@@ -116,9 +116,9 @@ import static com.pbolduc.mapcompanion.DestinationRoute.standing;
 @Slf4j
 @PluginDescriptor(
 	name = "OSRS Map Companion",
-	description = "Step-by-step routes with teleports, search, farm runs and shooting stars from osrs-map.com in your sidebar, "
+	description = "Step-by-step routes with teleports, search, farm runs, drop luck and shooting stars from osrs-map.com in your sidebar, "
 		+ "with the friends you invite on the world map.",
-	tags = {"map", "routes", "teleport", "navigation", "search", "stars", "farming", "slayer", "clue", "sailing", "group", "friends", "travel"}
+	tags = {"map", "routes", "teleport", "navigation", "search", "stars", "farming", "slayer", "clue", "sailing", "group", "friends", "travel", "loot", "drops", "luck", "dry"}
 )
 public class MapCompanionPlugin extends Plugin
 {

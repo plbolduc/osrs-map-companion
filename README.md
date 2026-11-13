@@ -10,6 +10,7 @@ quests, route to them, and plan meetups.
 
 [Getting started](#getting-started) · [Search](#search-for-a-place-or-item) ·
 [Slayer](#slayer-in-runelite) · [Farm runs](#farm-runs-in-runelite) · [Sailing](#sailing) ·
+[Drop luck](#drop-luck) ·
 [What's new](https://osrs-map.com/whats-new)
 
 ## Routes in RuneLite
@@ -147,11 +148,13 @@ dailies you have collected left out of a dailies run.
 ## Drop luck
 
 <p>
-  <img src="docs/mockups/sidebar-drop-luck.png" width="300" alt="Drop luck for an Aberrant spectre: 1,300 recorded kills without the selected robe bottom, a Very dry verdict, and the chance over the next 100 kills">
+  <img src="docs/mockups/sidebar-drop-luck.png" width="300" alt="Drop luck for Dagannoth Rex after 640 recorded kills: eight berserker rings marked Lucky, a dragon axe and a warrior ring, then Lucky overall, dry right now, with 250 kills since the last ring, drier than 86% of players, and a 54% chance of another in the next 100 kills">
 </p>
 
 See how lucky or dry you are on the monster you are killing, with sourced drop odds and the chance
-over your next kills. It works without connecting to the website.
+over your next kills. **All monsters** lists everything you have killed, driest first if you like,
+and a chat line says how lucky a rare drop was when it lands. It works without connecting to the
+website.
 
 Every control and rule, feature by feature, is in [docs/features.md](docs/features.md). The
 pictures use made-up characters and stars.
