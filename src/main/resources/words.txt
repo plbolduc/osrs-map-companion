@@ -194,4 +194,4 @@ search.boxTip=Search the map: a place, a character, a monster or an item. A pick
 
 # UpdateNotice: the one chat line an update says, on the first login after it. Every release writes
 # it again for what that release changed, and moves CompanionVersion.LINE_VERSION with it.
-update.line=Each way to a place is now a chip with its teleport's picture, and pressing a star takes you there. Drop luck has odds for thirteen more bosses, the Dagannoth Kings, Zilyana and the Corporeal Beast among them.
+update.line=Each way to a place is now a chip with its teleport's picture, and pressing a star takes you there. Drop luck has odds for most bosses now, pets and the awakened Desert Treasure II bosses among them.
