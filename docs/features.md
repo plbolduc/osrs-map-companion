@@ -151,5 +151,7 @@ Completed farming contracts point back to Guildmaster Jane to hand them in.
 
 See how lucky or dry you are on the monster you are killing, with sourced drop odds, a dry-streak
 comparison and the chance over your next kills. **All monsters** opens your recorded history.
+There, a **Dry** chip is about the drop outlined in its colour, and a monster with several drops
+needs a longer wait to earn one. Pin a drop and its monster is judged on that drop alone.
 Optional chat lines report your luck when a drop lands. Drop luck also works without connecting
 to the website.

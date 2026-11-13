@@ -42,6 +42,9 @@ final class Sprites
 		ITEMS.put(net.runelite.api.gameval.ItemID.LUNAR_TABLET_CATHERBY_TELEPORT, "catherby-teleport-tablet");
 		ITEMS.put(net.runelite.api.gameval.ItemID.MYSTIC_ROBE_BOTTOM_DARK, "mystic-robe-bottom-dark");
 		ITEMS.put(net.runelite.api.gameval.ItemID.TWPART3, "cannon-barrels");
+		ITEMS.put(6737, "berserker-ring");
+		ITEMS.put(6735, "warrior-ring");
+		ITEMS.put(6739, "dragon-axe");
 		CHIPS.put(net.runelite.api.gameval.ItemID.SAILING_LOG, "captains-log");
 		CHIPS.put(net.runelite.api.gameval.ItemID.SAILING_CHARTING_SPYGLASS, "spyglass");
 		CHIPS.put(net.runelite.api.gameval.ItemID.SAILING_CHARTING_CROWBAR, "crowbar");

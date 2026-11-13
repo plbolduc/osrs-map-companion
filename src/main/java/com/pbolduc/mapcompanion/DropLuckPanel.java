@@ -503,7 +503,7 @@ final class DropLuckPanel extends JPanel
 				}
 			}
 		}
-		List<Monster> shown = DropLuckView.list(monsters, query, sort);
+		List<Monster> shown = DropLuckView.list(monsters, query, sort, pin);
 		results.add(section(searching ? shown.size() + " found"
 			: monsters.size() + (monsters.size() == 1 ? " monster tracked" : " monsters tracked")));
 		if (shown.isEmpty())
@@ -512,7 +512,7 @@ final class DropLuckPanel extends JPanel
 		}
 		for (Monster monster : shown)
 		{
-			results.add(monsterRow(monster, now));
+			results.add(monsterRow(monster, pin, now));
 		}
 	}
 
@@ -544,7 +544,7 @@ final class DropLuckPanel extends JPanel
 		return row;
 	}
 
-	private JComponent monsterRow(Monster monster, long now)
+	private JComponent monsterRow(Monster monster, @Nullable String[] pin, long now)
 	{
 		JPanel row = column(DARK_GRAY_COLOR);
 		row.setBorder(new CompoundBorder(
@@ -554,21 +554,32 @@ final class DropLuckPanel extends JPanel
 			DARK_GRAY_COLOR));
 		JPanel icons = new JPanel(new FlowLayout(FlowLayout.LEFT, 3, 3));
 		icons.setBackground(DARK_GRAY_COLOR);
-		int shown = 0;
-		for (Drop drop : monster.drops)
+		DropLuckView.Standing standing = DropLuckView.standing(monster, pin);
+		Luck dry = DropLuckView.dryNow(standing);
+		/*
+		 * The chip is about one drop, so that drop is outlined in the chip's colour and always among
+		 * the six drawn: a chip beside six sprites said "Dry" without saying of what.
+		 */
+		List<Drop> drawn = new ArrayList<>(monster.drops.subList(0, Math.min(6, monster.drops.size())));
+		if (dry != Luck.NONE && !drawn.contains(standing.drop))
 		{
-			if (shown++ >= 6)
-			{
-				break;
-			}
+			drawn.set(drawn.size() - 1, standing.drop);
+		}
+		for (Drop drop : drawn)
+		{
 			Picture tile = new Picture(drop.itemId, 22, drop.obtained > 0, drop.obtained);
 			tile.setToolTipText(drop.item + ": " + DropOdds.count(drop.obtained));
+			if (dry != Luck.NONE && drop == standing.drop)
+			{
+				tile.outline = dry == Luck.VERY_DRY ? VERY_DRY : DRY;
+			}
 			icons.add(tile);
 		}
-		Luck dry = DropLuckView.dryNow(monster);
 		if (dry != Luck.NONE)
 		{
-			icons.add(chip(dry));
+			JLabel chip = chip(dry);
+			chip.setToolTipText(DropLuckView.standingNote(standing));
+			icons.add(chip);
 		}
 		if (monster.drops.isEmpty())
 		{
@@ -618,6 +629,9 @@ final class DropLuckPanel extends JPanel
 		private final int count;
 		@Nullable
 		private final BufferedImage image;
+		/** A line round the tile in this colour, for the one drop a list row's chip is about. */
+		@Nullable
+		private Color outline;
 
 		Picture(int itemId, int size, boolean had, int count)
 		{
@@ -634,6 +648,11 @@ final class DropLuckPanel extends JPanel
 		@Override
 		protected void paintComponent(Graphics g)
 		{
+			if (outline != null)
+			{
+				g.setColor(outline);
+				g.drawRect(0, 0, getWidth() - 1, getHeight() - 1);
+			}
 			if (image == null)
 			{
 				return;

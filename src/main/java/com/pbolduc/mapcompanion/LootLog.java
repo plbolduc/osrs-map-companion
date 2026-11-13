@@ -403,6 +403,11 @@ public class LootLog
 		public final Double boostOneIn;
 		@Nullable
 		public final String boostLabel;
+		/**
+		 * True where {@link #wait} runs from when watching began rather than from a previous drop. The
+		 * kills before that were never seen, so the wait is the least it can have been.
+		 */
+		public final boolean first;
 
 		/** The rate this drop is priced by, or null with none. */
 		@Nullable
@@ -552,13 +557,14 @@ public class LootLog
 				}
 				int wait = tally.kills - baseline(tally, rate.item);
 				int waitBoosted = rate.boost == null ? 0 : boosted(tally, rate) - tally.boostedAtLast.getOrDefault(rate.item, 0);
+				boolean first = tally.obtained.getOrDefault(rate.item, 0) == 0;
 				count(tally, rate.item, stack);
 				if (rate.boost != null)
 				{
 					tally.boostedAtLast.put(rate.item, boosted(tally, rate));
 				}
 				notable.add(new Notable(name, rate.item, stack.getId(), stack.getQuantity(), rate.oneIn, wait,
-					waitBoosted, rate.boost == null ? null : rate.boost.oneIn, rate.boost == null ? null : boostLabel(rate.boost.when)));
+					waitBoosted, rate.boost == null ? null : rate.boost.oneIn, rate.boost == null ? null : boostLabel(rate.boost.when), first));
 			}
 			else if (judged && notables.notable(stack.getId()) && !notables.pet(stack.getId()))
 			{
@@ -573,7 +579,7 @@ public class LootLog
 				int wait = tally.kills - baseline(tally, item);
 				count(tally, item, stack);
 				tally.collection.add(item);
-				notable.add(new Notable(name, item, stack.getId(), stack.getQuantity(), null, wait, 0, null, null));
+				notable.add(new Notable(name, item, stack.getId(), stack.getQuantity(), null, wait, 0, null, null, false));
 			}
 		}
 		unsaved = true;

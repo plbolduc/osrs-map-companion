@@ -251,8 +251,11 @@ final class DropLuckView
 			"Half of players get one within " + count(DropOdds.killsFor(0.5, ahead)) + " kills" + boost + ".");
 	}
 
-	/** The list, filtered by a query on a monster's name or any of its drops, in the chosen order. */
-	static List<Monster> list(List<Monster> monsters, String query, Sort sort)
+	/**
+	 * The list, filtered by a query on a monster's name or any of its drops, in the chosen order.
+	 * The pin decides which drop a monster is dry on; see {@link #standing}.
+	 */
+	static List<Monster> list(List<Monster> monsters, String query, Sort sort, @Nullable String[] pin)
 	{
 		String q = query == null ? "" : query.trim().toLowerCase(Locale.ROOT);
 		List<Monster> out = new ArrayList<>();
@@ -270,7 +273,7 @@ final class DropLuckView
 				order = Comparator.comparingInt((Monster m) -> m.kills).reversed();
 				break;
 			case DRIEST:
-				order = Comparator.comparingDouble(DropLuckView::driest).reversed();
+				order = Comparator.comparingDouble((Monster m) -> driest(m, pin)).reversed();
 				break;
 			default:
 				order = Comparator.comparingLong((Monster m) -> m.lastKillMs).reversed();
@@ -291,25 +294,84 @@ final class DropLuckView
 		return false;
 	}
 
-	/** The monster's most unusual current wait, as a share of players it is drier than; 0 with no rate. */
-	static double driest(Monster monster)
+	/** The drop a monster's list row speaks for, and the share of players that wait is drier than. */
+	@AllArgsConstructor
+	static final class Standing
 	{
-		double worst = 0;
-		for (Drop drop : monster.drops)
-		{
-			if (drop.oneIn != null)
-			{
-				worst = Math.max(worst, DropOdds.within(drop.rate(), drop.sinceKills()));
-			}
-		}
-		return worst;
+		final Drop drop;
+		final double drierThan;
 	}
 
-	/** The list row's chip: "Dry" or "Very dry" when the monster's worst wait earns it. */
-	static DropOdds.Luck dryNow(Monster monster)
+	/**
+	 * How dry a monster is right now, and on which drop; null with no rated drop.
+	 *
+	 * <p>A pinned drop is judged on its own wait: the reader chose it before looking. Otherwise the
+	 * row speaks for the driest drop, and the driest of several is not judged alone. With six drops
+	 * watched, one of them being drier than 83% of players is what most players see, and a chip
+	 * that says "Dry" for it says nothing. So the worst wait {@code q} is weighed as the share of
+	 * players none of whose {@code m} drops would be that dry: {@code q^m}.
+	 *
+	 * <p>A drop counts towards {@code m} only where the kills it was watched for could have carried
+	 * it that far. An abyssal dagger at 1 in 32,000 cannot be dry after a thousand kills, so it
+	 * does not dilute the whip's wait; four crystals at one rate dilute each other.
+	 */
+	@Nullable
+	static Standing standing(Monster monster, @Nullable String[] pin)
 	{
-		int shown = DropOdds.shown(driest(monster));
+		Drop worst = null;
+		double q = -1;
+		for (Drop drop : monster.drops)
+		{
+			if (drop.oneIn == null)
+			{
+				continue;
+			}
+			double wait = DropOdds.within(drop.rate(), drop.sinceKills());
+			if (pin != null && monster.npc.equalsIgnoreCase(pin[0]) && drop.item.equalsIgnoreCase(pin[1]))
+			{
+				return new Standing(drop, wait);
+			}
+			if (wait > q)
+			{
+				worst = drop;
+				q = wait;
+			}
+		}
+		if (worst == null)
+		{
+			return null;
+		}
+		int could = 0;
+		for (Drop drop : monster.drops)
+		{
+			if (drop.oneIn != null && DropOdds.within(drop.rate(), drop.watchedKills()) >= q)
+			{
+				could++;
+			}
+		}
+		return new Standing(worst, Math.pow(q, Math.max(1, could)));
+	}
+
+	/** {@link #standing} as a number to sort by; 0 with no rated drop. */
+	static double driest(Monster monster, @Nullable String[] pin)
+	{
+		Standing standing = standing(monster, pin);
+		return standing == null ? 0 : standing.drierThan;
+	}
+
+	/** The list row's chip: "Dry" or "Very dry" when the monster's standing earns it. */
+	static DropOdds.Luck dryNow(@Nullable Standing standing)
+	{
+		int shown = standing == null ? 0 : DropOdds.shown(standing.drierThan);
 		return shown >= DropOdds.VERY ? DropOdds.Luck.VERY_DRY : shown >= DropOdds.NOTABLE ? DropOdds.Luck.DRY : DropOdds.Luck.NONE;
+	}
+
+	/** Which drop a row's chip is about, for its tooltip: "Primordial crystal: 2,600 kills since the last". */
+	static String standingNote(Standing standing)
+	{
+		Drop drop = standing.drop;
+		return drop.item + ": " + count(drop.sinceLast) + (drop.sinceLast == 1 ? " kill" : " kills")
+			+ (drop.obtained > 0 ? " since the last" : " without one");
 	}
 
 	/** "1,024 kills · 2 h ago". */
@@ -357,6 +419,10 @@ final class DropLuckView
 	 *
 	 * <p>Null for a drop with no rate: the game prints its own collection-log line for those, and a
 	 * second line with no number in it would only repeat it.
+	 *
+	 * <p>The first one the log has seen says "recorded kills". Its wait runs from when watching
+	 * began, and a player 2,000 kills dry before installing is not "luckier than 86% of players"
+	 * for getting it 80 kills later; "recorded" says whose count the comparison is made on.
 	 */
 	@Nullable
 	static String chatLine(LootLog.Notable drop)
@@ -365,7 +431,7 @@ final class DropLuckView
 		{
 			return null;
 		}
-		return drop.item + " after " + count(drop.wait) + (drop.wait == 1 ? " kill" : " kills")
+		return drop.item + " after " + count(drop.wait) + (drop.first ? " recorded" : "") + (drop.wait == 1 ? " kill" : " kills")
 			+ " — " + DropOdds.waitComparison(new DropOdds.Kills(drop.wait - drop.waitBoosted, drop.waitBoosted), drop.rate()) + ".";
 	}
 }
