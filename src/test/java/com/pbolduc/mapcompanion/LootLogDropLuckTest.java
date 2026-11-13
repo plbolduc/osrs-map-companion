@@ -57,6 +57,7 @@ public class LootLogDropLuckTest
 	private static final int CLUE = 90_003;
 	private static final int VENOM = 90_004;
 	private static final int SHARK = 90_005;
+	private static final int AXE_HEAD = 90_006;
 
 	private final HarnessGame game = new HarnessGame();
 	private final HarnessStore store = new HarnessStore();
@@ -102,6 +103,7 @@ public class LootLogDropLuckTest
 		game.nameItem(CLUE, "Clue scroll (elite)");
 		game.nameItem(VENOM, "Coagulated venom");
 		game.nameItem(SHARK, "Raw shark");
+		game.nameItem(AXE_HEAD, "Executioner's axe head");
 		log.clock(() -> now);
 	}
 
@@ -142,17 +144,17 @@ public class LootLogDropLuckTest
 	}
 
 	/**
-	 * Nex has no rate on file, because its chance belongs to the team; a collection item it drops is
+	 * Zalcano has no rate on file, because its chance moves with a player's points; a collection item it drops is
 	 * counted. These tests named the Corporeal Beast until its sigils got rates.
 	 */
 	@Test
 	public void aCollectionItemFromAnUnratedMonsterIsKeptWithItsWait()
 	{
-		kill("Nex", BONES);
-		kill("Nex", BONES);
-		kill("Nex", VISAGE);
-		kill("Nex", BONES);
-		LootLog.Drop visage = monster("Nex").drops.get(0);
+		kill("Zalcano", BONES);
+		kill("Zalcano", BONES);
+		kill("Zalcano", VISAGE);
+		kill("Zalcano", BONES);
+		LootLog.Drop visage = monster("Zalcano").drops.get(0);
 		assertEquals("Draconic visage", visage.item);
 		assertEquals(1, visage.obtained);
 		assertEquals(1, visage.sinceLast);
@@ -163,8 +165,8 @@ public class LootLogDropLuckTest
 	@Test
 	public void aPetIsNotCountedBecauseItsArrivalIsNotReliablySeen()
 	{
-		kill("Nex", VORKI);
-		assertTrue(monster("Nex").drops.isEmpty());
+		kill("Zalcano", VORKI);
+		assertTrue(monster("Zalcano").drops.isEmpty());
 	}
 
 	/** A kill the vocabulary could not judge moves the window rather than inventing a drought. */
@@ -172,11 +174,11 @@ public class LootLogDropLuckTest
 	public void killsTheCatalogCouldNotJudgeAreNotWatchedForCollectionItems()
 	{
 		catalogReady = false;
-		kill("Nex", VISAGE);
-		assertTrue("not judged, so not counted", monster("Nex").drops.isEmpty());
+		kill("Zalcano", VISAGE);
+		assertTrue("not judged, so not counted", monster("Zalcano").drops.isEmpty());
 		catalogReady = true;
-		kill("Nex", VISAGE);
-		LootLog.Drop visage = monster("Nex").drops.get(0);
+		kill("Zalcano", VISAGE);
+		LootLog.Drop visage = monster("Zalcano").drops.get(0);
 		assertEquals(1, visage.obtained);
 	}
 
@@ -402,7 +404,7 @@ public class LootLogDropLuckTest
 		assertEquals("a wait between two drops is a whole wait, and is said plainly",
 			"Abyssal whip after 780 kills — drier than 78% of players.", DropLuckView.chatLine(second.get(0)));
 
-		List<LootLog.Notable> visage = log.record(new ServerNpcLoot(game.npc("Nex"),
+		List<LootLog.Notable> visage = log.record(new ServerNpcLoot(game.npc("Zalcano"),
 			Collections.singletonList(new ItemStack(VISAGE, 1))));
 		assertNull("the game prints its own line for a collection item", DropLuckView.chatLine(visage.get(0)));
 	}
@@ -531,6 +533,25 @@ public class LootLogDropLuckTest
 		log.onHitsplat("Abyssal demon", true, game.client().getTickCount());
 		kill("Abyssal demon", BONES);
 		assertEquals("another player's hit means nothing on a monster priced per kill", 1, monster("Abyssal demon").kills);
+	}
+
+	/**
+	 * Vardorvis is one name and one NPC id at three combat levels: the ordinary fight, the awakened
+	 * one with three times the unique table, and the quest's. Each priced level is its own monster,
+	 * and the quest's is not counted.
+	 */
+	@Test
+	public void aBossIsCountedUnderTheVersionItsLevelNames()
+	{
+		log.record(new ServerNpcLoot(RewardTestClient.npc("Vardorvis", 784), Arrays.asList(new ItemStack(BONES, 1))));
+		log.record(new ServerNpcLoot(RewardTestClient.npc("Vardorvis", 1136), Arrays.asList(new ItemStack(AXE_HEAD, 1))));
+		log.record(new ServerNpcLoot(RewardTestClient.npc("Vardorvis", 572), Arrays.asList(new ItemStack(AXE_HEAD, 1))));
+		assertEquals(1, monster("Vardorvis").kills);
+		assertEquals(0, drop("Vardorvis", "Executioner's axe head").obtained);
+		assertEquals(1, monster("Vardorvis (awakened)").kills);
+		LootLog.Drop axe = drop("Vardorvis (awakened)", "Executioner's axe head");
+		assertEquals(1, axe.obtained);
+		assertEquals(1088 / 3.0, axe.oneIn, 1e-9);
 	}
 
 	/** Outside an instance the canyon shaman is counted, warhammer and all. */

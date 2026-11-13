@@ -190,6 +190,9 @@ often. A clean run is now 443 tests with no failures or skips.
       with the eye until one falls.
 - [ ] Drop luck at a lizardman shaman: one in the canyon counts, with the warhammer row; one in the
       Chambers of Xeric does not.
+- [ ] Drop luck at a Desert Treasure II boss: an ordinary kill counts under its name and an awakened
+      one under *(awakened)*. Both are told apart by `getCombatLevel()` on the loot's NPC (784 and
+      1136 for Vardorvis, from the wiki's infobox); no build has read an awakened one yet.
 - [ ] Paste a full RuneLite code (with its suffix) into a fresh install; the first post is
       accepted and the map links the dot to the browser without a second paste.
 

@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -52,6 +53,8 @@ public class LootLogRatesTest
 		/** Rational drop probabilities need a decimal reciprocal, not an integer approximation. */
 		double oneIn;
 		String page;
+		Integer level;
+		String game;
 	}
 
 	private static class RateFile
@@ -77,9 +80,20 @@ public class LootLogRatesTest
 				assertTrue("invalid reciprocal for " + rate.npc + "/" + rate.item,
 						   Double.isFinite(rate.oneIn) && rate.oneIn >= 1);
 				assertNotNull(rate.npc);
+				/*
+				 * A version of a monster — the awakened Vardorvis, one NPC id at another combat level —
+				 * is named for its own tally, and the game's name is then {@code game}, reached only
+				 * through the row's level. Every name the game gives is still free of a disambiguator.
+				 */
+				String inGame = rate.game != null ? rate.game : rate.npc;
 				assertFalse(
-					"wiki disambiguator on npc '" + rate.npc + "' — the generator forgot to strip",
-					rate.npc.contains(" ("));
+					"wiki disambiguator on npc '" + inGame + "' — the generator forgot to strip",
+					inGame.contains(" ("));
+				if (rate.game != null)
+				{
+					assertEquals(rate.game + " (awakened)", rate.npc);
+					assertNotNull("a version is reached only through its level: " + rate.npc, rate.level);
+				}
 			}
 			assertTrue("the revised corpus preserves non-integer reciprocals",
 					   file.rates.stream().anyMatch(rate -> rate.oneIn != Math.rint(rate.oneIn)));

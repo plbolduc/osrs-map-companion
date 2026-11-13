@@ -127,7 +127,7 @@ per-item baseline and print **<1%** for a nonzero probability that rounds below 
 
 How Drop luck counts:
 
-- **Every monster is counted**, not only the 183 with a rate. Beside the rated rows, a monster keeps
+- **Every monster is counted**, not only the 192 with a rate. Beside the rated rows, a monster keeps
   any collection-log item that actually fell, read from the same cache vocabulary the announcements
   use; pets are left out for the reason above. A collection row is a count of what was seen and
   never the basis of a probability, so a kill the vocabulary could not judge moves its window
@@ -169,7 +169,10 @@ How Drop luck counts:
   piece until one falls. A monster whose rows say `kills: "solo"` counts no kill where another
   player's hit landed on it in the 100 ticks before it died (`LootLog.SHARED_TICKS`), read from
   `HitsplatApplied` as `isOthers()` and kept only as a tick per monster name. One whose rows say
-  `where: "outside-instances"` counts no kill in an instance. An Araxxor receipt holding only the
+  `where: "outside-instances"` counts no kill in an instance. A name whose rows carry a `level` is
+  counted by the combat level of the NPC whose loot it is, under the row's `npc` at that level —
+  *Vardorvis* at 784, *Vardorvis (awakened)* at 1136 — and not at all at a level no row names, such
+  as the quest's fight; the level is read for those names only. An Araxxor receipt holding only the
   elite clue, the coagulated venom or a Konar key is a destroyed corpse and not a kill. None of this
   sends anything new: the counts travel as every rated row's do.
 
