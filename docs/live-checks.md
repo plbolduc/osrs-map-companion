@@ -178,6 +178,10 @@ often. A clean run is now 443 tests with no failures or skips.
 - [ ] Carry two clue tiers, read the one in the later slot, and check the map shows that step.
 - [ ] Kill a few monsters and log out within thirty seconds; the kill log keeps them.
 - [ ] Kill a monster and close RuneLite within thirty seconds; after a restart the kill is there.
+- [ ] Drop luck at Araxxor: destroy a corpse, then harvest one. The destroyed kill is not counted;
+      the harvested one is, and a noxious piece counts under *Noxious halberd piece*.
+- [ ] Drop luck at the Alchemical Hydra: a ring piece counts under *Brimstone ring piece*, drawn
+      with the eye until one falls.
 - [ ] Paste a full RuneLite code (with its suffix) into a fresh install; the first post is
       accepted and the map links the dot to the browser without a second paste.
 

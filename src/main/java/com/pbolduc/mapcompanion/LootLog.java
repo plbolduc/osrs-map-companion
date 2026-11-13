@@ -285,6 +285,12 @@ public class LootLog
 		double oneIn;
 		/** A better rate under a condition, or null; see {@link #condition}. */
 		Boost boost;
+		/**
+		 * A set that falls a piece at a time — the brimstone ring, the noxious halberd — or null.
+		 * {@code item} is then the set's name, and any of these pieces counts as one drop of it:
+		 * no piece is its own chance, but "the next piece" is one constant chance a kill.
+		 */
+		List<String> pieces;
 	}
 
 	/** Gson fills this from the table's {@code boost: { when, oneIn }}. */
@@ -451,6 +457,10 @@ public class LootLog
 		}
 		ensureLoaded();
 		tasks.onKill(name, client.getTickCount());
+		if (lootForfeited(name, event.getItems()))
+		{
+			return emptyList();
+		}
 		List<Rate> watched = tracked.getOrDefault(key(name), emptyList());
 
 		Tally tally = tallies.get(name);
@@ -587,6 +597,7 @@ public class LootLog
 		return notable;
 	}
 
+	/** The row an item counts under: its own, or the set it is a piece of. */
 	@Nullable
 	private static Rate rateFor(List<Rate> watched, String item)
 	{
@@ -596,8 +607,53 @@ public class LootLog
 			{
 				return candidate;
 			}
+			if (candidate.pieces != null)
+			{
+				for (String piece : candidate.pieces)
+				{
+					if (piece.equalsIgnoreCase(item))
+					{
+						return candidate;
+					}
+				}
+			}
 		}
 		return null;
+	}
+
+	/**
+	 * Monsters whose loot can be given up at the kill, and what still falls when it is. Araxxor's
+	 * corpse is harvested for its loot or destroyed for a better chance at the pet; destroyed, it
+	 * rolls none of the drops this log prices, and a kill counted then would be a kill nothing could
+	 * have dropped on. What still falls is the elite clue, the coagulated venom and a Konar key.
+	 */
+	private static final Map<String, Set<String>> LOOT_FORFEITABLE = Collections.singletonMap("araxxor",
+		new HashSet<>(Arrays.asList("clue scroll (elite)", "coagulated venom", "brimstone key")));
+
+	/**
+	 * Whether this receipt is a kill whose loot was given up: nothing in it but what falls anyway.
+	 * An item that cannot be read answers no, so a harvest is never mistaken for a destroy.
+	 */
+	private boolean lootForfeited(String npc, Collection<ItemStack> items)
+	{
+		Set<String> anyway = LOOT_FORFEITABLE.get(key(npc));
+		if (anyway == null)
+		{
+			return false;
+		}
+		for (ItemStack stack : items)
+		{
+			if (stack == null || stack.getId() <= 0 || stack.getQuantity() <= 0)
+			{
+				continue;
+			}
+			String item = itemName(stack.getId());
+			if (item == null || !anyway.contains(item.toLowerCase(Locale.ROOT).trim()))
+			{
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**
@@ -1066,7 +1122,8 @@ public class LootLog
 				Integer id = tally.itemIds.get(item);
 				if (id == null)
 				{
-					id = notables.idFor(item);
+					/* A set has no picture of its own; its first piece stands for it until one falls. */
+					id = notables.idFor(rate != null && rate.pieces != null && !rate.pieces.isEmpty() ? rate.pieces.get(0) : item);
 				}
 				Integer since = tally.trackedSince.get(item);
 				boolean boost = rate != null && rate.boost != null;
@@ -1433,13 +1490,19 @@ public class LootLog
 	private static void ensureTracked(Tally tally, List<Rate> watched)
 	{
 		Set<String> rated = new HashSet<>();
+		/* A piece of a watched set counts under the set now; its old row of sightings goes. */
+		Set<String> pieces = new HashSet<>();
 		for (Rate rate : watched)
 		{
 			rated.add(rate.item);
+			if (rate.pieces != null)
+			{
+				pieces.addAll(rate.pieces);
+			}
 		}
 		for (String item : new ArrayList<>(tally.collection))
 		{
-			if (rated.contains(item))
+			if (rated.contains(item) || pieces.contains(item))
 			{
 				tally.collection.remove(item);
 				resetHistory(tally, item);

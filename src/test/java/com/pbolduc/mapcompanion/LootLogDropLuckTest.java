@@ -51,6 +51,12 @@ public class LootLogDropLuckTest
 	private static final int VISAGE = 11286;
 	private static final int VORKI = 21992;
 	private static final int BONES = 526;
+	/* Made up: only the names given below matter to these tests. */
+	private static final int EYE = 90_001;
+	private static final int FANG = 90_002;
+	private static final int CLUE = 90_003;
+	private static final int VENOM = 90_004;
+	private static final int SHARK = 90_005;
 
 	private final HarnessGame game = new HarnessGame();
 	private final HarnessStore store = new HarnessStore();
@@ -80,7 +86,7 @@ public class LootLogDropLuckTest
 		@Override
 		public Integer idFor(String name)
 		{
-			return "Abyssal head".equals(name) ? 7979 : null;
+			return "Abyssal head".equals(name) ? Integer.valueOf(7979) : "Hydra's eye".equals(name) ? Integer.valueOf(EYE) : null;
 		}
 	});
 
@@ -91,6 +97,11 @@ public class LootLogDropLuckTest
 		game.nameItem(VISAGE, "Draconic visage");
 		game.nameItem(VORKI, "Vorki");
 		game.nameItem(BONES, "Bones");
+		game.nameItem(EYE, "Hydra's eye");
+		game.nameItem(FANG, "Hydra's fang");
+		game.nameItem(CLUE, "Clue scroll (elite)");
+		game.nameItem(VENOM, "Coagulated venom");
+		game.nameItem(SHARK, "Raw shark");
 		log.clock(() -> now);
 	}
 
@@ -394,5 +405,52 @@ public class LootLogDropLuckTest
 		List<LootLog.Notable> visage = log.record(new ServerNpcLoot(game.npc("Nex"),
 			Collections.singletonList(new ItemStack(VISAGE, 1))));
 		assertNull("the game prints its own line for a collection item", DropLuckView.chatLine(visage.get(0)));
+	}
+
+	/** The ring comes a piece at a time, so a piece is a drop of the set, counted once a kill. */
+	@Test
+	public void aPieceOfASetCountsAsOneDropOfTheSet()
+	{
+		for (int i = 0; i < 99; i++)
+		{
+			kill("Alchemical Hydra", BONES);
+		}
+		kill("Alchemical Hydra", BONES, EYE);
+		kill("Alchemical Hydra", BONES);
+		kill("Alchemical Hydra", BONES, FANG);
+		LootLog.Monster hydra = monster("Alchemical Hydra");
+		LootLog.Drop ring = hydra.drops.stream().filter(d -> d.item.equals("Brimstone ring piece")).findFirst().orElse(null);
+		assertNotNull("the set is one row", ring);
+		assertEquals(2, ring.obtained);
+		assertEquals(0, ring.sinceLast);
+		assertNotNull(ring.oneIn);
+		assertTrue("no row of its own for a piece", hydra.drops.stream().noneMatch(d -> d.item.equals("Hydra's eye") || d.item.equals("Hydra's fang")));
+		assertEquals("a piece that has fallen draws the row", FANG, ring.itemId);
+	}
+
+	@Test
+	public void aSetThatHasNotFallenIsDrawnWithItsFirstPiece()
+	{
+		kill("Alchemical Hydra", BONES);
+		LootLog.Drop ring = monster("Alchemical Hydra").drops.stream()
+			.filter(d -> d.item.equals("Brimstone ring piece")).findFirst().orElse(null);
+		assertNotNull(ring);
+		assertEquals(EYE, ring.itemId);
+	}
+
+	/**
+	 * A destroyed corpse rolls none of Araxxor's loot, so it is not a kill the fang could have
+	 * fallen on; a harvest is, and so is one whose only other drop could not be read.
+	 */
+	@Test
+	public void anAraxxorWhoseLootWasGivenUpIsNotCounted()
+	{
+		kill("Araxxor", SHARK);
+		kill("Araxxor", CLUE, VENOM);
+		kill("Araxxor");
+		kill("Araxxor", SHARK, CLUE);
+		assertEquals(2, monster("Araxxor").kills);
+		kill("Araxxor", 99_999);
+		assertEquals("an unreadable item is never taken for a destroy", 3, monster("Araxxor").kills);
 	}
 }
