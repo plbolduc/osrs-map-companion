@@ -190,4 +190,4 @@ search.boxTip=Search the map: a place, a character, a monster or an item. A pick
 
 # UpdateNotice: the one chat line an update says, on the first login after it. Every release writes
 # it again for what that release changed, and moves CompanionVersion.LINE_VERSION with it.
-update.line=the sidebar is easier to scan and sharing is three switches. If you share your position, your group now sees where you last died too: untick Where you died in RuneLite's settings for the plugin to stop that. New: meetups from a right-click on the world map, and a sea charting run.
+update.line=Drop luck has odds for thirteen more bosses, the Dagannoth Kings, Zilyana and the Corporeal Beast among them, and a monster with many drops is no longer marked Dry for one of them.
