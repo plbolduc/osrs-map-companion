@@ -317,7 +317,7 @@ settings for the plugin.
 ## Good to know
 
 - Drop luck counts the kills the plugin has seen on normal members worlds, not your lifetime kill
-  count, and only drops with a sourced rate get odds. Activity rewards need RuneLite's
+  count, and only drops with a sourced rate get odds. At Araxxor it counts only harvested corpses. Activity rewards need RuneLite's
   **Loot Tracker** plugin. **Forget kill log** clears the current character's counts.
 - Birdhouses need RuneLite's **Time Tracking** plugin. Farm timers are estimates; disease and later
   visits can change them.

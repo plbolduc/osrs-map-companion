@@ -75,8 +75,43 @@
     },
     {
       "npc": "Alchemical Hydra",
+      "item": "Brimstone ring piece",
+      "oneIn": 181.06709822190675,
+      "page": "Alchemical Hydra",
+      "pieces": [
+        "Hydra's eye",
+        "Hydra's fang",
+        "Hydra's heart"
+      ]
+    },
+    {
+      "npc": "Alchemical Hydra",
+      "item": "Dragon knife",
+      "oneIn": 2001.000500250125,
+      "page": "Alchemical Hydra"
+    },
+    {
+      "npc": "Alchemical Hydra",
       "item": "Dragon thrownaxe",
       "oneIn": 2000,
+      "page": "Alchemical Hydra"
+    },
+    {
+      "npc": "Alchemical Hydra",
+      "item": "Hydra leather",
+      "oneIn": 514.0293732855242,
+      "page": "Alchemical Hydra"
+    },
+    {
+      "npc": "Alchemical Hydra",
+      "item": "Hydra tail",
+      "oneIn": 513.0254096658259,
+      "page": "Alchemical Hydra"
+    },
+    {
+      "npc": "Alchemical Hydra",
+      "item": "Hydra's claw",
+      "oneIn": 1001.0007505003126,
       "page": "Alchemical Hydra"
     },
     {
@@ -120,6 +155,35 @@
       "item": "Curved bone",
       "oneIn": 5012.5,
       "page": "Aquanite"
+    },
+    {
+      "npc": "Araxxor",
+      "item": "Araxyte fang",
+      "oneIn": 600,
+      "page": "Araxxor"
+    },
+    {
+      "npc": "Araxxor",
+      "item": "Araxyte head",
+      "oneIn": 250,
+      "page": "Araxxor"
+    },
+    {
+      "npc": "Araxxor",
+      "item": "Jar of Venom",
+      "oneIn": 1500,
+      "page": "Araxxor"
+    },
+    {
+      "npc": "Araxxor",
+      "item": "Noxious halberd piece",
+      "oneIn": 200,
+      "page": "Araxxor",
+      "pieces": [
+        "Noxious pommel",
+        "Noxious point",
+        "Noxious blade"
+      ]
     },
     {
       "npc": "Araxyte",
@@ -1414,6 +1478,66 @@
       "item": "Venator shard",
       "oneIn": 100,
       "page": "Phantom Muspah"
+    },
+    {
+      "npc": "Phosani's Nightmare",
+      "item": "Eldritch orb",
+      "oneIn": 1600,
+      "page": "Phosani's Nightmare"
+    },
+    {
+      "npc": "Phosani's Nightmare",
+      "item": "Harmonised orb",
+      "oneIn": 1600,
+      "page": "Phosani's Nightmare"
+    },
+    {
+      "npc": "Phosani's Nightmare",
+      "item": "Inquisitor's great helm",
+      "oneIn": 700,
+      "page": "Phosani's Nightmare"
+    },
+    {
+      "npc": "Phosani's Nightmare",
+      "item": "Inquisitor's hauberk",
+      "oneIn": 700,
+      "page": "Phosani's Nightmare"
+    },
+    {
+      "npc": "Phosani's Nightmare",
+      "item": "Inquisitor's mace",
+      "oneIn": 1129.032258064516,
+      "page": "Phosani's Nightmare"
+    },
+    {
+      "npc": "Phosani's Nightmare",
+      "item": "Inquisitor's plateskirt",
+      "oneIn": 700,
+      "page": "Phosani's Nightmare"
+    },
+    {
+      "npc": "Phosani's Nightmare",
+      "item": "Jar of Dreams",
+      "oneIn": 4000,
+      "page": "Phosani's Nightmare"
+    },
+    {
+      "npc": "Phosani's Nightmare",
+      "item": "Nightmare staff",
+      "oneIn": 507.2463768115942,
+      "page": "Phosani's Nightmare"
+    },
+    {
+      "npc": "Phosani's Nightmare",
+      "item": "Parasitic egg",
+      "oneIn": 200,
+      "page": "Phosani's Nightmare"
+    },
+    {
+      "npc": "Phosani's Nightmare",
+      "item": "Volatile orb",
+      "oneIn": 1600,
+      "page": "Phosani's Nightmare"
     },
     {
       "npc": "Rock",

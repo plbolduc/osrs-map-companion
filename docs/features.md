@@ -173,5 +173,7 @@ See how lucky or dry you are on the monster you are killing, with sourced drop o
 comparison and the chance over your next kills. **All monsters** opens your recorded history.
 There, a **Dry** chip is about the drop outlined in its colour, and a monster with several drops
 needs a longer wait to earn one. Pin a drop and its monster is judged on that drop alone.
+A set that falls a piece at a time — the brimstone ring, the noxious halberd — is one row,
+whichever piece fell, and a destroyed Araxxor corpse is not a kill.
 Optional chat lines report your luck when a drop lands. Drop luck also works without connecting
 to the website.
