@@ -69,6 +69,10 @@ public class MeetupClientTest
 		OkHttpClient http = new OkHttpClient.Builder().addInterceptor(chain ->
 		{
 			sent.add(chain.request());
+			if (status == 0)
+			{
+				throw new java.io.IOException("no route to host");
+			}
 			Response.Builder reply = new Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1)
 				.code(status).message("").body(ResponseBody.create(JSON, body));
 			if (retryAfter != null)
@@ -163,6 +167,60 @@ public class MeetupClientTest
 			RoutePressTest.reply(403, "{\"reason\":\"needs_code\"}"));
 		/* The map refusing this member: one sentence for it, pointing at the card that says why. */
 		assertEquals(RoutePress.NOT_CONNECTED, forged.said("answer:x").message);
+	}
+
+	/**
+	 * How long each kind of reply keeps the next answer or Meet here waiting, and what it says. A busy
+	 * map is waited on for exactly what it asks; anything else that is no answer keeps the half
+	 * minute, or a longer wait the map names; a write that worked keeps two seconds whatever it names.
+	 */
+	@Test
+	public void eachKindOfReplyKeepsItsOwnWaitAndWords() throws Exception
+	{
+		connect();
+		String tooLong = new String(new char[CompanionHttp.MAX_REPLY_BYTES + 1]).replace('\0', ' ');
+		String link = "{\"path\":\"/map?event=abc123&task=companion\"}";
+		/* Whether it is a Meet here, the status, its Retry-After, its body, the words and the wait. */
+		Object[][] cases = {
+			{false, 429, "7", "{}", MapWait.BUSY, 7_000L},
+			{false, 429, null, "{}", MapWait.BUSY, 30_000L},
+			{false, 503, "120", "{}", MapWait.BUSY, 120_000L},
+			{false, 403, null, "{}", RoutePress.NOT_CONNECTED, 30_000L},
+			{false, 404, null, "{}", MeetupClient.GONE, 30_000L},
+			{false, 400, null, "{}", MeetupClient.FAILED, 30_000L},
+			{false, 500, "7", "oops", MeetupClient.FAILED, 30_000L},
+			{false, 500, "60", "oops", MeetupClient.FAILED, 60_000L},
+			{false, 302, null, "", MeetupClient.FAILED, 30_000L},
+			/* No reply at all. */
+			{false, 0, null, "", MeetupClient.UNREACHABLE, 30_000L},
+			{false, 200, null, tooLong, MeetupClient.FAILED, 30_000L},
+			{false, 200, "60", "{}", null, 2_000L},
+			{true, 400, null, "{}", MeetupClient.REFUSED, 30_000L},
+			{true, 404, null, "{}", MeetupClient.FAILED, 30_000L},
+			{true, 302, null, "", MeetupClient.FAILED, 30_000L},
+			/* The map made the meetup and its link could not be read: made, and the half minute. */
+			{true, 200, null, "not json at all", MeetupClient.MADE_NO_LINK, 30_000L},
+			{true, 200, "60", link, MeetupClient.MADE, 2_000L},
+		};
+		for (Object[] c : cases)
+		{
+			boolean making = (boolean) c[0];
+			String source = making ? "meet" : "answer:star-hunt";
+			MeetupClient client = client((int) c[1], (String) c[3], (String) c[2], false);
+			long before = System.currentTimeMillis();
+			if (making)
+			{
+				client.create("Barrows run", before + 3_600_000L, null);
+			}
+			else
+			{
+				client.answer("star-hunt", "maybe");
+			}
+			settle(client, source);
+			String name = (making ? "Meet here" : "An answer") + ", HTTP " + c[1] + ", Retry-After " + c[2];
+			assertEquals(name, c[4], client.said(source).message);
+			RoutePressTest.assertWait(name, (long) c[5], client.waitMs(before));
+		}
 	}
 
 	/** "Meetup made." is news for a moment, as a run's "Run ended." is; a refusal stays until the next press. */

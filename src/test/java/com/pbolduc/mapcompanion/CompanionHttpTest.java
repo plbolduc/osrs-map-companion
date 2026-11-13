@@ -27,24 +27,46 @@ package com.pbolduc.mapcompanion;
 
 import com.sun.net.httpserver.HttpServer;
 import java.io.File;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import okhttp3.Cache;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
+import okhttp3.Protocol;
+import okhttp3.Request;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
+import okio.Buffer;
+import okio.BufferedSource;
+import okio.ForwardingSource;
+import okio.Okio;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 /**
- * Nothing the map answers is kept in RuneLite's HTTP cache.
+ * Nothing the map answers is kept in RuneLite's HTTP cache, and every reply is read the one way.
  *
  * <p>RuneLite's client has a cache on disk and the plugin derives its own from it. The search's
  * words and the stream's group code and member id are in the address of a GET, which is what a
  * cache files a reply under. The map answers with no-store; a map address a player set themselves
  * might answer with anything, so the request says it.
+ *
+ * <p>{@link CompanionHttp#ask} and {@link CompanionHttp#read} are what Route, a farm run, a meetup,
+ * the search and the star list read a reply through. The tests here hold what they share; each
+ * client's own test holds its waits and its words.
  */
 public class CompanionHttpTest
 {
@@ -87,5 +109,84 @@ public class CompanionHttpTest
 			cache.delete();
 			directory.delete();
 		}
+	}
+
+	/** A call that never reached the map is the client's own word for that, with its own wait, and nothing is read. */
+	@Test
+	public void aCallThatNeverReachesTheMapIsRefusedInTheClientsOwnWords() throws Exception
+	{
+		OkHttpClient http = new OkHttpClient.Builder().addInterceptor(chain ->
+		{
+			throw new IOException("no route to host");
+		}).build();
+		List<String> said = Collections.synchronizedList(new ArrayList<>());
+		CountDownLatch landed = new CountDownLatch(1);
+		CompanionHttp.ask(http.newCall(CompanionHttp.request("https://example.invalid/").build()), 10_000L, "unreachable", "unreadable",
+			reply -> said.add("read"), (why, wait) ->
+			{
+				said.add(why + " " + wait);
+				landed.countDown();
+			});
+		assertTrue(landed.await(3, TimeUnit.SECONDS));
+		assertEquals(Collections.singletonList("unreachable 10000"), said);
+	}
+
+	/** A reply goes to the client that asked, whatever its status, and is closed once it has been read. */
+	@Test
+	public void aReplyIsTheClientsToReadAndIsClosedAfterwards()
+	{
+		for (int status : new int[]{200, 404, 429, 500})
+		{
+			AtomicBoolean closed = new AtomicBoolean();
+			List<String> said = new ArrayList<>();
+			CompanionHttp.read(reply(status, closed), 30_000L, "unreadable", reply ->
+			{
+				assertFalse("still open while it is read", closed.get());
+				said.add("read " + reply.code());
+			}, (why, wait) -> said.add(why + " " + wait));
+			assertEquals(Collections.singletonList("read " + status), said);
+			assertTrue("HTTP " + status + " is closed", closed.get());
+		}
+	}
+
+	/** A reply the client cannot read, a body too long or one that is not what it should be, is its word for that and its wait. */
+	@Test
+	public void aReplyThatCannotBeReadIsRefusedAndStillClosed()
+	{
+		List<CompanionHttp.Reply> readers = Arrays.asList(
+			reply ->
+			{
+				throw new IOException("Response too large");
+			},
+			reply ->
+			{
+				throw new IllegalStateException("not JSON");
+			});
+		for (CompanionHttp.Reply reader : readers)
+		{
+			AtomicBoolean closed = new AtomicBoolean();
+			List<String> said = new ArrayList<>();
+			CompanionHttp.read(reply(200, closed), 30_000L, "unreadable", reader, (why, wait) -> said.add(why + " " + wait));
+			assertEquals(Collections.singletonList("unreadable 30000"), said);
+			assertTrue(closed.get());
+		}
+	}
+
+	/** A reply with a body that tells {@code closed} when it is closed. */
+	private static Response reply(int status, AtomicBoolean closed)
+	{
+		BufferedSource body = Okio.buffer(new ForwardingSource(new Buffer().writeUtf8("{}"))
+		{
+			@Override
+			public void close() throws IOException
+			{
+				closed.set(true);
+				super.close();
+			}
+		});
+		Response.Builder reply = new Response.Builder().request(new Request.Builder().url("https://example.invalid/").build())
+			.protocol(Protocol.HTTP_1_1).code(status).message("")
+			.body(ResponseBody.create(MediaType.get("application/json"), 2L, body));
+		return reply.build();
 	}
 }

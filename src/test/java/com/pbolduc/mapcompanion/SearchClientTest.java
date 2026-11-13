@@ -76,6 +76,10 @@ public class SearchClientTest
 		OkHttpClient http = new OkHttpClient.Builder().addInterceptor(chain ->
 		{
 			sent.add(chain.request());
+			if (status == 0)
+			{
+				throw new java.io.IOException("no route to host");
+			}
 			if (gate != null)
 			{
 				try
@@ -227,6 +231,48 @@ public class SearchClientTest
 		assertTrue("it waits for the map's twenty seconds", (long) waiting.get(0)[1] > 19_000L);
 		search.typed("bankers");
 		assertTrue("typing inside the wait waits as long", (long) waiting.get(0)[1] > 19_000L);
+	}
+
+	/**
+	 * How long each kind of reply keeps the next search waiting, and what the box's line says. A busy
+	 * map is waited on for exactly what it asks; anything else that is no answer keeps ten seconds, or
+	 * a longer wait the map names; an answer keeps none, since the next search is the next key.
+	 */
+	@Test
+	public void eachKindOfReplyKeepsItsOwnWaitAndWords() throws Exception
+	{
+		Object[][] cases = {
+			{429, "7", "{}", MapWait.BUSY, 7_000L},
+			{429, null, "{}", MapWait.BUSY, 30_000L},
+			{503, "120", "{}", MapWait.BUSY, 120_000L},
+			{403, null, "{}", RoutePress.NOT_CONNECTED, 10_000L},
+			{500, null, "oops", SearchClient.FAILED, 10_000L},
+			{500, "60", "oops", SearchClient.FAILED, 60_000L},
+			{302, null, "", SearchClient.FAILED, 10_000L},
+			/* No reply at all. */
+			{0, null, "", SearchClient.UNREACHABLE, 10_000L},
+			{200, null, "not json at all", SearchClient.UNREADABLE, 10_000L},
+			/* A body that reads as nothing says so and keeps no wait, as any reply that was read does. */
+			{200, null, "null", SearchClient.UNREADABLE, 0L},
+			{200, "60", BANKS, null, 0L},
+		};
+		for (Object[] c : cases)
+		{
+			SearchClient search = client((int) c[0], (String) c[2], (String) c[1], null);
+			long before = System.currentTimeMillis();
+			search.enter("bank");
+			until(() -> !search.result().searching);
+			String name = "HTTP " + c[0] + ", Retry-After " + c[1];
+			assertEquals(name, c[3], search.result().message);
+			if ((long) c[4] == 0L)
+			{
+				assertEquals(name + " keeps no wait", 0L, search.waitMs(before));
+			}
+			else
+			{
+				RoutePressTest.assertWait(name, (long) c[4], search.waitMs(before));
+			}
+		}
 	}
 
 	/**

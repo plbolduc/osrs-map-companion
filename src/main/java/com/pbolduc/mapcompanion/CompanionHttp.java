@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.function.BiConsumer;
+import java.util.function.ObjLongConsumer;
 import javax.annotation.Nullable;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -157,6 +158,43 @@ final class CompanionHttp
 				answered.accept(call, response);
 			}
 		});
+	}
+
+	/** A reply the map sent, for the client that asked to read. What it throws is said as unreadable. */
+	interface Reply
+	{
+		void read(Response reply) throws IOException;
+	}
+
+	/**
+	 * Sends a call and reads what came of it, the one way the search, a farm run and the star list
+	 * do. A call that never reached the map is the client's {@code unreachable}, and a reply is read
+	 * by {@link #read}. Whatever is no answer goes to {@code refused} with the wait to keep before
+	 * asking again, in milliseconds from now. The words and the waits are arguments because each
+	 * client's are its own; the order they are tried in is not. OkHttp's thread.
+	 */
+	static void ask(Call call, long failGap, String unreachable, String unreadable, Reply reply, ObjLongConsumer<String> refused)
+	{
+		enqueue(call, (failed, error) -> refused.accept(unreachable, failGap),
+			(answered, response) -> read(response, failGap, unreadable, reply, refused));
+	}
+
+	/**
+	 * One reply, read by the client that asked and closed whatever comes of that. What {@code reply}
+	 * throws, for a body too long or one that is not what it should be, is the client's
+	 * {@code unreadable} and waits its {@code failGap}. Route and a meetup call this themselves,
+	 * from the method their tests hand a reply to; every other reply comes through {@link #ask}.
+	 */
+	static void read(Response response, long failGap, String unreadable, Reply reply, ObjLongConsumer<String> refused)
+	{
+		try (Response close = response)
+		{
+			reply.read(close);
+		}
+		catch (IOException | RuntimeException error)
+		{
+			refused.accept(unreadable, failGap);
+		}
 	}
 
 	/**

@@ -28,10 +28,10 @@ package com.pbolduc.mapcompanion;
 import com.google.gson.Gson;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.function.BooleanSupplier;
+import java.util.function.ObjLongConsumer;
 import javax.annotation.Nullable;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
@@ -40,7 +40,6 @@ import okhttp3.Call;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.Response;
 import static com.pbolduc.mapcompanion.RouteWire.text;
 
 /**
@@ -390,42 +389,19 @@ final class SearchClient
 		show(new Result(query, result.hits, null, null, true));
 		Call call = http.newCall(request);
 		inFlight = call;
-		CompanionHttp.enqueue(call,
-			(failed, error) -> swing.execute(() -> landed(call, asked, query, null, UNREACHABLE, System.currentTimeMillis() + FAILURE_GAP_MS)),
-			(completed, response) ->
+		ObjLongConsumer<String> refused = (why, gap) ->
+			swing.execute(() -> landed(call, asked, query, null, why, System.currentTimeMillis() + gap));
+		CompanionHttp.ask(call, FAILURE_GAP_MS, UNREACHABLE, UNREADABLE, reply ->
+		{
+			if (!reply.isSuccessful())
 			{
-				Answer answer = null;
-				String why = null;
-				long next;
-				try (Response close = response)
-				{
-					if (!close.isSuccessful())
-					{
-						/* A busy map is asked nothing again until the player types or presses Enter; the line counts the wait down. */
-						next = System.currentTimeMillis() + MapWait.after(close, FAILURE_GAP_MS);
-						why = MapWait.why(close.code(), FAILED);
-					}
-					else
-					{
-						next = 0L;
-						answer = gson.fromJson(CompanionHttp.readBounded(close.body()), Answer.class);
-						if (answer == null)
-						{
-							why = UNREADABLE;
-						}
-					}
-				}
-				catch (IOException | RuntimeException unreadable)
-				{
-					next = System.currentTimeMillis() + FAILURE_GAP_MS;
-					answer = null;
-					why = UNREADABLE;
-				}
-				Answer read = answer;
-				String said = why;
-				long allowed = next;
-				swing.execute(() -> landed(call, asked, query, read, said, allowed));
-			});
+				/* A busy map is asked nothing again until the player types or presses Enter; the line counts the wait down. */
+				refused.accept(MapWait.why(reply.code(), FAILED), MapWait.after(reply, FAILURE_GAP_MS));
+				return;
+			}
+			Answer answer = gson.fromJson(CompanionHttp.readBounded(reply.body()), Answer.class);
+			swing.execute(() -> landed(call, asked, query, answer, answer == null ? UNREADABLE : null, 0L));
+		}, refused);
 	}
 
 	/** Swing: the answer to {@code query}, or why there is none. */

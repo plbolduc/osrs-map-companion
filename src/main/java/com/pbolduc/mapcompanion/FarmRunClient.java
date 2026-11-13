@@ -287,9 +287,8 @@ final class FarmRunClient
 			active = ticket;
 			said = new Said(true, end ? "Ending run…" : name != null ? "Planning " + name + "…" : "Planning run…", lifetime, -1, port, false);
 			call = http.newCall(request(server, code, member, secret, question, end, id));
-			CompanionHttp.enqueue(call,
-				(failed, error) -> refuse(ticket, RoutePress.UNREACHABLE, System.currentTimeMillis() + RoutePress.FAILURE_GAP_MS),
-				(completed, response) -> handle(ticket, response));
+			CompanionHttp.ask(call, RoutePress.FAILURE_GAP_MS, RoutePress.UNREACHABLE, RoutePress.UNREADABLE,
+				reply -> handle(ticket, reply), (why, wait) -> refuse(ticket, why, System.currentTimeMillis() + wait));
 		}
 	}
 
@@ -321,67 +320,60 @@ final class FarmRunClient
 		return (end ? request.delete() : request.post(CompanionHttp.json(gson, question))).build();
 	}
 
-	private void handle(Ticket ticket, Response response)
+	/** What a reply came to: a refusal, in the map's words where it gives them, an End's removal, or the run. */
+	private void handle(Ticket ticket, Response reply) throws IOException
 	{
-		try
-			(Response close = response)
+		long now = System.currentTimeMillis();
+		long next = now + Math.max(RoutePress.MIN_GAP_MS, MapWait.named(reply));
+		if (reply.isRedirect())
 		{
-			long now = System.currentTimeMillis();
-			long next = now + Math.max(RoutePress.MIN_GAP_MS, MapWait.named(close));
-			if (close.isRedirect())
-			{
-				refuse(ticket, RoutePress.REDIRECTS, now + 300_000L);
-				return;
-			}
-			if (!close.isSuccessful())
-			{
-				int code = close.code();
-				String why = MapWait.why(code, Words.of("farm.notPrepared"));
-				String words = CompanionHttp.said(gson, CompanionHttp.readBounded(close.body()), 240);
-				boolean worded = words != null;
-				why = worded ? words : why;
-				/*
-				 * A refusal the map words (409, 404, 400) is an answer, not a failure: the map is up, read
-				 * the press and said why it will not plan it — nothing is due yet, no patch seen, no such
-				 * run. Backing off spares a map that is struggling, and this one is not; the next press is
-				 * the player's own, after they change something. So it keeps the five seconds between
-				 * presses, or the wait the map named, as Route does after a 404. No answer, a 5xx or a
-				 * reply that cannot be read keeps the half minute.
-				 */
-				boolean answered = worded && (code == 409 || code == 404 || code == 400);
-				refuse(ticket, why, answered ? next : Math.max(next, now + RoutePress.FAILURE_GAP_MS));
-				return;
-			}
-			if (ticket.end)
-			{
-				String epoch = close.header("X-Companion-Relay-Epoch");
-				if (DirectiveEpoch.clean(epoch) == null)
-				{
-					refuse(ticket, RoutePress.UNREADABLE, next);
-					return;
-				}
-				String removed = close.header("X-Companion-Run-Revision");
-				long removalRevision = removed == null ? 0 : Long.parseLong(removed);
-				if (removalRevision < 0 || removalRevision > 9_007_199_254_740_991L)
-				{
-					removalRevision = 0;
-				}
-				finish(ticket, null, removalRevision, epoch, null, next);
-				return;
-			}
-			RelayResponse.Directive answer = gson.fromJson(
-												 CompanionHttp.readBounded(close.body()), RelayResponse.Directive.class);
-			if (answer == null || answer.run == null || answer.runRevision <= 0 || answer.relayEpoch == null)
-			{
-				refuse(ticket, "The map returned no readable run.", next);
-				return;
-			}
-			finish(ticket, answer.run, answer.runRevision, answer.relayEpoch, null, next);
+			refuse(ticket, RoutePress.REDIRECTS, now + 300_000L);
+			return;
 		}
-		catch (IOException | RuntimeException unreadable)
+		if (!reply.isSuccessful())
 		{
-			refuse(ticket, RoutePress.UNREADABLE, System.currentTimeMillis() + RoutePress.FAILURE_GAP_MS);
+			int code = reply.code();
+			String why = MapWait.why(code, Words.of("farm.notPrepared"));
+			String words = CompanionHttp.said(gson, CompanionHttp.readBounded(reply.body()), 240);
+			boolean worded = words != null;
+			why = worded ? words : why;
+			/*
+			 * A refusal the map words (409, 404, 400) is an answer, not a failure: the map is up, read
+			 * the press and said why it will not plan it — nothing is due yet, no patch seen, no such
+			 * run. Backing off spares a map that is struggling, and this one is not; the next press is
+			 * the player's own, after they change something. So it keeps the five seconds between
+			 * presses, or the wait the map named, as Route does after a 404. No answer, a 5xx or a
+			 * reply that cannot be read keeps the half minute.
+			 */
+			boolean answered = worded && (code == 409 || code == 404 || code == 400);
+			refuse(ticket, why, answered ? next : Math.max(next, now + RoutePress.FAILURE_GAP_MS));
+			return;
 		}
+		if (ticket.end)
+		{
+			String epoch = reply.header("X-Companion-Relay-Epoch");
+			if (DirectiveEpoch.clean(epoch) == null)
+			{
+				refuse(ticket, RoutePress.UNREADABLE, next);
+				return;
+			}
+			String removed = reply.header("X-Companion-Run-Revision");
+			long removalRevision = removed == null ? 0 : Long.parseLong(removed);
+			if (removalRevision < 0 || removalRevision > 9_007_199_254_740_991L)
+			{
+				removalRevision = 0;
+			}
+			finish(ticket, null, removalRevision, epoch, null, next);
+			return;
+		}
+		RelayResponse.Directive answer = gson.fromJson(
+											 CompanionHttp.readBounded(reply.body()), RelayResponse.Directive.class);
+		if (answer == null || answer.run == null || answer.runRevision <= 0 || answer.relayEpoch == null)
+		{
+			refuse(ticket, "The map returned no readable run.", next);
+			return;
+		}
+		finish(ticket, answer.run, answer.runRevision, answer.relayEpoch, null, next);
 	}
 
 	/** A press the map did not answer with a run: why, and when the next may go. */

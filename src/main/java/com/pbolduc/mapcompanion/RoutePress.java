@@ -30,6 +30,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
 import java.util.function.Consumer;
+import java.util.function.ObjLongConsumer;
 import javax.annotation.Nullable;
 import javax.swing.JLabel;
 import lombok.AccessLevel;
@@ -450,29 +451,26 @@ final class RoutePress
 	 */
 	void read(Response response, Landing landing)
 	{
-		try (Response close = response)
+		ObjLongConsumer<String> refused = (why, wait) -> landing.land(null, why, System.currentTimeMillis() + wait);
+		CompanionHttp.read(response, FAILURE_GAP_MS, UNREADABLE, reply ->
 		{
-			long now = System.currentTimeMillis();
-			int status = close.code();
-			if (close.isRedirect())
+			int status = reply.code();
+			if (reply.isRedirect())
 			{
-				landing.land(null, REDIRECTS, now + 300_000L);
+				refused.accept(REDIRECTS, 300_000L);
 			}
-			else if (!close.isSuccessful())
+			else if (!reply.isSuccessful())
 			{
-				landing.land(null, status == 404 ? notFound(close) : MapWait.why(status, FAILED),
-					now + MapWait.after(close, status == 404 ? MIN_GAP_MS : FAILURE_GAP_MS));
+				refused.accept(status == 404 ? notFound(reply) : MapWait.why(status, FAILED),
+					MapWait.after(reply, status == 404 ? MIN_GAP_MS : FAILURE_GAP_MS));
 			}
 			else
 			{
-				landing.land(gson.fromJson(CompanionHttp.readBounded(close.body()), Answer.class),
-					null, now + MapWait.after(close, MIN_GAP_MS));
+				long now = System.currentTimeMillis();
+				landing.land(gson.fromJson(CompanionHttp.readBounded(reply.body()), Answer.class),
+					null, now + MapWait.after(reply, MIN_GAP_MS));
 			}
-		}
-		catch (IOException | RuntimeException unreadable)
-		{
-			landing.land(null, UNREADABLE, System.currentTimeMillis() + FAILURE_GAP_MS);
-		}
+		}, refused);
 	}
 
 	/** Read a press's reply into a destination or a sentence. Package-private for its test; OkHttp's thread. */

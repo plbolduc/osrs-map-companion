@@ -28,7 +28,6 @@ package com.pbolduc.mapcompanion;
 import com.google.gson.Gson;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.EnumSet;
@@ -43,7 +42,6 @@ import okhttp3.Call;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.Response;
 
 /**
  * Reads only this installation's approved map server, while Stars is visible and logged in.
@@ -76,7 +74,9 @@ final class StarsClient
 	 */
 	String message;
 	private boolean active, eligible;
-	private long generation, nextFeed;
+	private long generation;
+	/** When the list may next be asked for. Its test reads the wait a reply left here. */
+	long nextFeed;
 	private String connection, scope, storageKey;
 	private Call feedCall;
 
@@ -253,31 +253,22 @@ final class StarsClient
 		long epoch = generation;
 		nextFeed = System.currentTimeMillis() + 60_000;
 		feedCall = http.newCall(request(server, "/api/companion/stars").get().build());
-		CompanionHttp.enqueue(feedCall,
-			(failed, error) -> finish(epoch, null, "The map is unreachable.", 30_000),
-			(completed, response) ->
+		CompanionHttp.ask(feedCall, 30_000, "The map is unreachable.", RoutePress.UNREADABLE, reply ->
+		{
+			long delay = MapWait.retryDelay(reply.header("Retry-After"));
+			if (reply.isRedirect())
 			{
-				try (Response close = response)
-				{
-					long delay = MapWait.retryDelay(close.header("Retry-After"));
-					if (close.isRedirect())
-					{
-						finish(epoch, null, Words.of("map.redirects"), 300_000);
-					}
-					else if (!close.isSuccessful())
-					{
-						finish(epoch, null, "Stars unavailable. Retrying shortly.", delay);
-					}
-					else
-					{
-						finish(epoch, CompanionHttp.readBounded(close.body()), null, delay);
-					}
-				}
-				catch (IOException | RuntimeException error)
-				{
-					finish(epoch, null, RoutePress.UNREADABLE, 30_000);
-				}
-			});
+				finish(epoch, null, Words.of("map.redirects"), 300_000);
+			}
+			else if (!reply.isSuccessful())
+			{
+				finish(epoch, null, "Stars unavailable. Retrying shortly.", delay);
+			}
+			else
+			{
+				finish(epoch, CompanionHttp.readBounded(reply.body()), null, delay);
+			}
+		}, (why, wait) -> finish(epoch, null, why, wait));
 	}
 
 	/** The feed's text, or why there is none, taken on Swing's thread unless the reader has changed since it was asked. */
