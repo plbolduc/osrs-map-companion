@@ -455,11 +455,7 @@ final class RoutePress
 		CompanionHttp.read(response, FAILURE_GAP_MS, UNREADABLE, reply ->
 		{
 			int status = reply.code();
-			if (reply.isRedirect())
-			{
-				refused.accept(REDIRECTS, 300_000L);
-			}
-			else if (!reply.isSuccessful())
+			if (!reply.isSuccessful())
 			{
 				refused.accept(status == 404 ? notFound(reply) : MapWait.why(status, FAILED),
 					MapWait.after(reply, status == 404 ? MIN_GAP_MS : FAILURE_GAP_MS));

@@ -171,8 +171,9 @@ public class MeetupClientTest
 
 	/**
 	 * How long each kind of reply keeps the next answer or Meet here waiting, and what it says. A busy
-	 * map is waited on for exactly what it asks; anything else that is no answer keeps the half
-	 * minute, or a longer wait the map names; a write that worked keeps two seconds whatever it names.
+	 * map is waited on for exactly what it asks; a redirect keeps five minutes; anything else that is
+	 * no answer keeps the half minute, or a longer wait the map names; a write that worked keeps two
+	 * seconds whatever it names.
 	 */
 	@Test
 	public void eachKindOfReplyKeepsItsOwnWaitAndWords() throws Exception
@@ -190,14 +191,19 @@ public class MeetupClientTest
 			{false, 400, null, "{}", MeetupClient.FAILED, 30_000L},
 			{false, 500, "7", "oops", MeetupClient.FAILED, 30_000L},
 			{false, 500, "60", "oops", MeetupClient.FAILED, 60_000L},
-			{false, 302, null, "", MeetupClient.FAILED, 30_000L},
+			/*
+			 * A redirect was read as any failure, "The map could not save that just now." and the half
+			 * minute. It is the address that is wrong, so it says so and waits the five minutes Route does.
+			 */
+			{false, 302, null, "", RoutePress.REDIRECTS, 300_000L},
+			{false, 307, "7", "", RoutePress.REDIRECTS, 300_000L},
 			/* No reply at all. */
 			{false, 0, null, "", MeetupClient.UNREACHABLE, 30_000L},
 			{false, 200, null, tooLong, MeetupClient.FAILED, 30_000L},
 			{false, 200, "60", "{}", null, 2_000L},
 			{true, 400, null, "{}", MeetupClient.REFUSED, 30_000L},
 			{true, 404, null, "{}", MeetupClient.FAILED, 30_000L},
-			{true, 302, null, "", MeetupClient.FAILED, 30_000L},
+			{true, 302, null, "", RoutePress.REDIRECTS, 300_000L},
 			/* The map made the meetup and its link could not be read: made, and the half minute. */
 			{true, 200, null, "not json at all", MeetupClient.MADE_NO_LINK, 30_000L},
 			{true, 200, "60", link, MeetupClient.MADE, 2_000L},

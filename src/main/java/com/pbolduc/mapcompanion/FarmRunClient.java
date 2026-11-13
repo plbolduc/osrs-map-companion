@@ -325,11 +325,6 @@ final class FarmRunClient
 	{
 		long now = System.currentTimeMillis();
 		long next = now + Math.max(RoutePress.MIN_GAP_MS, MapWait.named(reply));
-		if (reply.isRedirect())
-		{
-			refuse(ticket, RoutePress.REDIRECTS, now + 300_000L);
-			return;
-		}
 		if (!reply.isSuccessful())
 		{
 			int code = reply.code();

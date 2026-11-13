@@ -235,8 +235,9 @@ public class SearchClientTest
 
 	/**
 	 * How long each kind of reply keeps the next search waiting, and what the box's line says. A busy
-	 * map is waited on for exactly what it asks; anything else that is no answer keeps ten seconds, or
-	 * a longer wait the map names; an answer keeps none, since the next search is the next key.
+	 * map is waited on for exactly what it asks; a redirect keeps five minutes; anything else that is
+	 * no answer keeps ten seconds, or a longer wait the map names; an answer keeps none, since the
+	 * next search is the next key.
 	 */
 	@Test
 	public void eachKindOfReplyKeepsItsOwnWaitAndWords() throws Exception
@@ -248,7 +249,13 @@ public class SearchClientTest
 			{403, null, "{}", RoutePress.NOT_CONNECTED, 10_000L},
 			{500, null, "oops", SearchClient.FAILED, 10_000L},
 			{500, "60", "oops", SearchClient.FAILED, 60_000L},
-			{302, null, "", SearchClient.FAILED, 10_000L},
+			/*
+			 * A redirect was read as any failure, "The map could not search just now." and ten seconds,
+			 * after which the next key asked again. It is the address that is wrong, so it says so and
+			 * waits the five minutes Route does.
+			 */
+			{302, null, "", RoutePress.REDIRECTS, 300_000L},
+			{307, "7", "", RoutePress.REDIRECTS, 300_000L},
 			/* No reply at all. */
 			{0, null, "", SearchClient.UNREACHABLE, 10_000L},
 			{200, null, "not json at all", SearchClient.UNREADABLE, 10_000L},

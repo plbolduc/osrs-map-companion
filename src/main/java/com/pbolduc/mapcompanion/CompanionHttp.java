@@ -55,7 +55,8 @@ import okhttp3.ResponseBody;
  * snapshot post answered with 302 becomes a GET that still carries them — and it would follow
  * https down to plain http to do it.
  * The map never redirects these paths, so refusing to follow costs nothing: a 3xx arrives as an
- * unsuccessful reply and takes the ordinary retry path.
+ * unsuccessful reply. A client that reads through {@link #read} says the address is wrong; any
+ * other takes its ordinary path for a reply that is no answer.
  *
  * <p>Derived with {@code newBuilder()}, which keeps RuneLite's dispatcher and connection pool; the
  * Hub asks plugins not to build clients of their own.
@@ -68,6 +69,9 @@ final class CompanionHttp
 	 * stopped sending could otherwise make the client hold.
 	 */
 	static final int MAX_REPLY_BYTES = 1_048_576;
+
+	/** The wait after a reply that redirects: as long as any wait the map may name, since no retry changes it. */
+	static final long REDIRECT_GAP_MS = 300_000L;
 
 	private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 
@@ -184,12 +188,23 @@ final class CompanionHttp
 	 * throws, for a body too long or one that is not what it should be, is the client's
 	 * {@code unreadable} and waits its {@code failGap}. Route and a meetup call this themselves,
 	 * from the method their tests hand a reply to; every other reply comes through {@link #ask}.
+	 *
+	 * <p>A redirect never reaches the client. It is not followed, so the answer is the same until
+	 * the player changes Map address: every client says that, in the one sentence, and waits
+	 * {@link #REDIRECT_GAP_MS} whatever wait the reply names.
 	 */
 	static void read(Response response, long failGap, String unreadable, Reply reply, ObjLongConsumer<String> refused)
 	{
 		try (Response close = response)
 		{
-			reply.read(close);
+			if (close.isRedirect())
+			{
+				refused.accept(RoutePress.REDIRECTS, REDIRECT_GAP_MS);
+			}
+			else
+			{
+				reply.read(close);
+			}
 		}
 		catch (IOException | RuntimeException error)
 		{

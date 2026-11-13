@@ -219,7 +219,8 @@ and hint arrow, with no request. The list credits the OSRS Wiki and its CC BY-NC
 same three credentials, about 350ms after the last key or at once on Enter, and never for fewer than
 two characters. One is in flight at a time: a query typed meanwhile waits for it, and the older
 answer is dropped if the box has moved on. Clearing the box cancels the call. A `Retry-After` is
-honoured by asking nothing until it has passed, and a failure without one waits ten seconds. The
+honoured by asking nothing until it has passed, a failure without one waits ten seconds, and a
+map address that redirects waits five minutes. The
 query is in the request's address, which the map leaves out of its logs; the plugin logs nothing it
 types. A pick is one `POST /api/companion/route` with the row's id and the tile you stand on, under
 Reroute's rules, and its answer becomes the destination, as a destination the map sent would.

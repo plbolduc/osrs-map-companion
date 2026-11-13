@@ -172,6 +172,43 @@ public class CompanionHttpTest
 		}
 	}
 
+	/**
+	 * A redirect is not followed, so it is the address that is wrong and asking again changes nothing.
+	 * A meetup read one as "The map could not save that just now." and the search as "The map could
+	 * not search just now.", and asked again after thirty seconds and ten; Route, a farm run and the
+	 * star list already said the address redirects and waited five minutes. Now it is said here, once,
+	 * for all five, and the client that asked never reads it.
+	 */
+	@Test
+	public void aRedirectIsTheAddressesFaultForEveryClientAndWaitsFiveMinutes()
+	{
+		for (int status : new int[]{300, 301, 302, 303, 307, 308})
+		{
+			for (String retryAfter : new String[]{null, "7", "900"})
+			{
+				AtomicBoolean closed = new AtomicBoolean();
+				List<String> said = new ArrayList<>();
+				Response redirect = reply(status, closed).newBuilder().header("Location", "https://elsewhere.invalid/").build();
+				if (retryAfter != null)
+				{
+					redirect = redirect.newBuilder().header("Retry-After", retryAfter).build();
+				}
+				CompanionHttp.read(redirect, 10_000L, "unreadable", reply -> said.add("read " + reply.code()),
+					(why, wait) -> said.add(why + " " + wait));
+				assertEquals("HTTP " + status + ", Retry-After " + retryAfter,
+					Collections.singletonList(RoutePress.REDIRECTS + " 300000"), said);
+				assertTrue(closed.get());
+			}
+		}
+		assertEquals("This map address redirects. Check Map address in RuneLite's settings for this plugin.", RoutePress.REDIRECTS);
+
+		/* Not Modified is a 3xx and no redirect: it is the client's to read, as any other status is. */
+		List<String> said = new ArrayList<>();
+		CompanionHttp.read(reply(304, new AtomicBoolean()), 10_000L, "unreadable", reply -> said.add("read " + reply.code()),
+			(why, wait) -> said.add(why + " " + wait));
+		assertEquals(Collections.singletonList("read 304"), said);
+	}
+
 	/** A reply with a body that tells {@code closed} when it is closed. */
 	private static Response reply(int status, AtomicBoolean closed)
 	{

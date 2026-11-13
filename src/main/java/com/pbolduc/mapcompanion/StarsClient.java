@@ -256,11 +256,7 @@ final class StarsClient
 		CompanionHttp.ask(feedCall, 30_000, "The map is unreachable.", RoutePress.UNREADABLE, reply ->
 		{
 			long delay = MapWait.retryDelay(reply.header("Retry-After"));
-			if (reply.isRedirect())
-			{
-				finish(epoch, null, Words.of("map.redirects"), 300_000);
-			}
-			else if (!reply.isSuccessful())
+			if (!reply.isSuccessful())
 			{
 				finish(epoch, null, "Stars unavailable. Retrying shortly.", delay);
 			}
