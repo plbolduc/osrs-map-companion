@@ -176,6 +176,7 @@ needs a longer wait to earn one. Pin a drop and its monster is judged on that dr
 A pet counts from the game's own message, against the kill it came with. A set that falls a piece
 at a time — the brimstone ring, the noxious halberd — is one row, whichever piece fell. A boss
 fought in groups counts only the kills nobody else hit, a destroyed Araxxor corpse is not a kill,
-and a lizardman shaman in the Chambers of Xeric is not counted.
+and a lizardman shaman in the Chambers of Xeric is not counted. An awakened Desert Treasure II
+boss is its own monster, at three times the unique odds, and a fight in the quest is not counted.
 Optional chat lines report your luck when a drop lands. Drop luck also works without connecting
 to the website.

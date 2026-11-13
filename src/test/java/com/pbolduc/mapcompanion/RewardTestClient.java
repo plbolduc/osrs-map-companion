@@ -158,6 +158,13 @@ final class RewardTestClient
 					 "getName".equals(method) ? name : unexpected(method));
 	}
 
+	/** An NPC whose combat level is read too: a monster priced by version, one name at several levels. */
+	static NPCComposition npc(String name, int level)
+	{
+		return proxy(NPCComposition.class, (method, ignored) ->
+					 "getName".equals(method) ? name : "getCombatLevel".equals(method) ? (Object) level : unexpected(method));
+	}
+
 	private static Object unexpected(String method)
 	{
 		throw new AssertionError("Unexpected client access: " + method);

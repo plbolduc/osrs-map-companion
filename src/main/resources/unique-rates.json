@@ -850,6 +850,81 @@
       }
     },
     {
+      "npc": "Duke Sucellus",
+      "item": "Baron",
+      "oneIn": 2500,
+      "page": "Duke Sucellus",
+      "pet": true,
+      "level": 758
+    },
+    {
+      "npc": "Duke Sucellus",
+      "item": "Chromium ingot",
+      "oneIn": 240,
+      "page": "Duke Sucellus",
+      "level": 758
+    },
+    {
+      "npc": "Duke Sucellus",
+      "item": "Eye of the Duke",
+      "oneIn": 720,
+      "page": "Duke Sucellus",
+      "level": 758
+    },
+    {
+      "npc": "Duke Sucellus",
+      "item": "Virtus mask",
+      "oneIn": 2160,
+      "page": "Duke Sucellus",
+      "level": 758
+    },
+    {
+      "npc": "Duke Sucellus",
+      "item": "Virtus robe bottom",
+      "oneIn": 2160,
+      "page": "Duke Sucellus",
+      "level": 758
+    },
+    {
+      "npc": "Duke Sucellus",
+      "item": "Virtus robe top",
+      "oneIn": 2160,
+      "page": "Duke Sucellus",
+      "level": 758
+    },
+    {
+      "npc": "Duke Sucellus (awakened)",
+      "item": "Eye of the Duke",
+      "oneIn": 240,
+      "page": "Duke Sucellus",
+      "level": 1099,
+      "game": "Duke Sucellus"
+    },
+    {
+      "npc": "Duke Sucellus (awakened)",
+      "item": "Virtus mask",
+      "oneIn": 720,
+      "page": "Duke Sucellus",
+      "level": 1099,
+      "game": "Duke Sucellus"
+    },
+    {
+      "npc": "Duke Sucellus (awakened)",
+      "item": "Virtus robe bottom",
+      "oneIn": 720,
+      "page": "Duke Sucellus",
+      "level": 1099,
+      "game": "Duke Sucellus"
+    },
+    {
+      "npc": "Duke Sucellus (awakened)",
+      "item": "Virtus robe top",
+      "oneIn": 720,
+      "page": "Duke Sucellus",
+      "level": 1099,
+      "game": "Duke Sucellus"
+    },
+    {
       "npc": "Dust devil",
       "item": "Dust battlestaff",
       "oneIn": 4000,
@@ -1623,6 +1698,14 @@
       "page": "Mountain troll"
     },
     {
+      "npc": "Nex",
+      "item": "Nexling",
+      "oneIn": 500,
+      "page": "Nex",
+      "pet": true,
+      "kills": "solo"
+    },
+    {
       "npc": "Ogre",
       "item": "Curved bone",
       "oneIn": 5012.5,
@@ -2137,6 +2220,81 @@
       "kills": "solo"
     },
     {
+      "npc": "The Leviathan",
+      "item": "Chromium ingot",
+      "oneIn": 256,
+      "page": "The Leviathan",
+      "level": 798
+    },
+    {
+      "npc": "The Leviathan",
+      "item": "Leviathan's lure",
+      "oneIn": 768,
+      "page": "The Leviathan",
+      "level": 798
+    },
+    {
+      "npc": "The Leviathan",
+      "item": "Lil'viathan",
+      "oneIn": 2500,
+      "page": "The Leviathan",
+      "pet": true,
+      "level": 798
+    },
+    {
+      "npc": "The Leviathan",
+      "item": "Virtus mask",
+      "oneIn": 2304,
+      "page": "The Leviathan",
+      "level": 798
+    },
+    {
+      "npc": "The Leviathan",
+      "item": "Virtus robe bottom",
+      "oneIn": 2304,
+      "page": "The Leviathan",
+      "level": 798
+    },
+    {
+      "npc": "The Leviathan",
+      "item": "Virtus robe top",
+      "oneIn": 2304,
+      "page": "The Leviathan",
+      "level": 798
+    },
+    {
+      "npc": "The Leviathan (awakened)",
+      "item": "Leviathan's lure",
+      "oneIn": 256,
+      "page": "The Leviathan",
+      "level": 1157,
+      "game": "The Leviathan"
+    },
+    {
+      "npc": "The Leviathan (awakened)",
+      "item": "Virtus mask",
+      "oneIn": 768,
+      "page": "The Leviathan",
+      "level": 1157,
+      "game": "The Leviathan"
+    },
+    {
+      "npc": "The Leviathan (awakened)",
+      "item": "Virtus robe bottom",
+      "oneIn": 768,
+      "page": "The Leviathan",
+      "level": 1157,
+      "game": "The Leviathan"
+    },
+    {
+      "npc": "The Leviathan (awakened)",
+      "item": "Virtus robe top",
+      "oneIn": 768,
+      "page": "The Leviathan",
+      "level": 1157,
+      "game": "The Leviathan"
+    },
+    {
       "npc": "The Nightmare",
       "item": "Eldritch orb",
       "oneIn": 960,
@@ -2180,6 +2338,14 @@
     },
     {
       "npc": "The Nightmare",
+      "item": "Little Nightmare",
+      "oneIn": 800,
+      "page": "The Nightmare",
+      "pet": true,
+      "kills": "solo"
+    },
+    {
+      "npc": "The Nightmare",
       "item": "Nightmare staff",
       "oneIn": 300,
       "page": "The Nightmare",
@@ -2191,6 +2357,81 @@
       "oneIn": 960,
       "page": "The Nightmare",
       "kills": "solo"
+    },
+    {
+      "npc": "The Whisperer",
+      "item": "Chromium ingot",
+      "oneIn": 170.66666666666666,
+      "page": "The Whisperer",
+      "level": 791
+    },
+    {
+      "npc": "The Whisperer",
+      "item": "Siren's staff",
+      "oneIn": 512,
+      "page": "The Whisperer",
+      "level": 791
+    },
+    {
+      "npc": "The Whisperer",
+      "item": "Virtus mask",
+      "oneIn": 1536,
+      "page": "The Whisperer",
+      "level": 791
+    },
+    {
+      "npc": "The Whisperer",
+      "item": "Virtus robe bottom",
+      "oneIn": 1536,
+      "page": "The Whisperer",
+      "level": 791
+    },
+    {
+      "npc": "The Whisperer",
+      "item": "Virtus robe top",
+      "oneIn": 1536,
+      "page": "The Whisperer",
+      "level": 791
+    },
+    {
+      "npc": "The Whisperer",
+      "item": "Wisp",
+      "oneIn": 2000,
+      "page": "The Whisperer",
+      "pet": true,
+      "level": 791
+    },
+    {
+      "npc": "The Whisperer (awakened)",
+      "item": "Siren's staff",
+      "oneIn": 170.66666666666666,
+      "page": "The Whisperer",
+      "level": 1146,
+      "game": "The Whisperer"
+    },
+    {
+      "npc": "The Whisperer (awakened)",
+      "item": "Virtus mask",
+      "oneIn": 512,
+      "page": "The Whisperer",
+      "level": 1146,
+      "game": "The Whisperer"
+    },
+    {
+      "npc": "The Whisperer (awakened)",
+      "item": "Virtus robe bottom",
+      "oneIn": 512,
+      "page": "The Whisperer",
+      "level": 1146,
+      "game": "The Whisperer"
+    },
+    {
+      "npc": "The Whisperer (awakened)",
+      "item": "Virtus robe top",
+      "oneIn": 512,
+      "page": "The Whisperer",
+      "level": 1146,
+      "game": "The Whisperer"
     },
     {
       "npc": "Thermonuclear smoke devil",
@@ -2468,6 +2709,81 @@
       "item": "Staff of earth",
       "oneIn": 256,
       "page": "Vampyre Juvinate"
+    },
+    {
+      "npc": "Vardorvis",
+      "item": "Butch",
+      "oneIn": 3000,
+      "page": "Vardorvis",
+      "pet": true,
+      "level": 784
+    },
+    {
+      "npc": "Vardorvis",
+      "item": "Chromium ingot",
+      "oneIn": 362.6666666666667,
+      "page": "Vardorvis",
+      "level": 784
+    },
+    {
+      "npc": "Vardorvis",
+      "item": "Executioner's axe head",
+      "oneIn": 1088,
+      "page": "Vardorvis",
+      "level": 784
+    },
+    {
+      "npc": "Vardorvis",
+      "item": "Virtus mask",
+      "oneIn": 3264,
+      "page": "Vardorvis",
+      "level": 784
+    },
+    {
+      "npc": "Vardorvis",
+      "item": "Virtus robe bottom",
+      "oneIn": 3264,
+      "page": "Vardorvis",
+      "level": 784
+    },
+    {
+      "npc": "Vardorvis",
+      "item": "Virtus robe top",
+      "oneIn": 3264,
+      "page": "Vardorvis",
+      "level": 784
+    },
+    {
+      "npc": "Vardorvis (awakened)",
+      "item": "Executioner's axe head",
+      "oneIn": 362.6666666666667,
+      "page": "Vardorvis",
+      "level": 1136,
+      "game": "Vardorvis"
+    },
+    {
+      "npc": "Vardorvis (awakened)",
+      "item": "Virtus mask",
+      "oneIn": 1088,
+      "page": "Vardorvis",
+      "level": 1136,
+      "game": "Vardorvis"
+    },
+    {
+      "npc": "Vardorvis (awakened)",
+      "item": "Virtus robe bottom",
+      "oneIn": 1088,
+      "page": "Vardorvis",
+      "level": 1136,
+      "game": "Vardorvis"
+    },
+    {
+      "npc": "Vardorvis (awakened)",
+      "item": "Virtus robe top",
+      "oneIn": 1088,
+      "page": "Vardorvis",
+      "level": 1136,
+      "game": "Vardorvis"
     },
     {
       "npc": "Venenatis",

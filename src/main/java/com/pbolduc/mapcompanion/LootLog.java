@@ -42,6 +42,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.ItemComposition;
+import net.runelite.api.NPCComposition;
 import net.runelite.api.WorldType;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.events.ServerNpcLoot;
@@ -211,6 +212,11 @@ public class LootLog
 	 * that is true of neither site.
 	 */
 	private final Map<String, List<Rate>> tracked = new HashMap<>();
+	/**
+	 * Per in-game name whose rows are priced by version, each combat level's tally name. A name
+	 * here is counted only at a level it lists: the quest's fight, at a third level, is not priced.
+	 */
+	private final Map<String, Map<Integer, String>> versions = new HashMap<>();
 
 	/** Monster name as the game spells it, to what we have seen. Insertion ordered for the panel. */
 	private final Map<String, Tally> tallies = new LinkedHashMap<>();
@@ -300,6 +306,26 @@ public class LootLog
 		String kills;
 		/** {@code "outside-instances"}: a name an instanced monster shares, whose kills there are not counted. */
 		String where;
+		/**
+		 * The combat level of the version these odds are for, or null. One name and NPC id can be
+		 * several fights — an ordinary and an awakened Vardorvis — and only the level tells them apart,
+		 * so a kill of that name counts under the row's {@code npc} at its level and nowhere else.
+		 */
+		Integer level;
+		/** The NPC's name in the game, where {@code npc} is one version of it; null where it is the name. */
+		String game;
+	}
+
+	/**
+	 * The name a kill is counted under: the game's, or for a monster priced by version the version
+	 * at its combat level — null where the table prices none at that level. The level is read only
+	 * for those, so every other monster is counted exactly as it was.
+	 */
+	@Nullable
+	private String versionOf(String game, NPCComposition npc)
+	{
+		Map<Integer, String> byLevel = versions.get(key(game));
+		return byLevel == null ? game : byLevel.get(npc.getCombatLevel());
 	}
 
 	/** Whether any of a monster's rows says its kills count only under {@code value}. */
@@ -461,6 +487,11 @@ public class LootLog
 					continue;
 				}
 				tracked.computeIfAbsent(key(rate.npc), k -> new ArrayList<>()).add(rate);
+				if (rate.level != null)
+				{
+					versions.computeIfAbsent(key(rate.game != null ? rate.game : rate.npc), k -> new HashMap<>())
+						.put(rate.level, rate.npc);
+				}
 			}
 		}
 		catch (IOException | RuntimeException e)
@@ -539,20 +570,26 @@ public class LootLog
 		{
 			return emptyList();
 		}
-		String name = event.getComposition().getName();
-		if (name == null || name.trim().isEmpty() || "null".equalsIgnoreCase(name.trim()))
+		String game = event.getComposition().getName();
+		if (game == null || game.trim().isEmpty() || "null".equalsIgnoreCase(game.trim()))
 		{
 			return emptyList();
 		}
 		ensureLoaded();
-		tasks.onKill(name, client.getTickCount());
-		if (lootForfeited(name, event.getItems()))
+		tasks.onKill(game, client.getTickCount());
+		if (lootForfeited(game, event.getItems()))
 		{
+			return emptyList();
+		}
+		Integer othersAt = othersHitAt.remove(key(game));
+		String name = versionOf(game, event.getComposition());
+		if (name == null)
+		{
+			/* A version of this monster the table does not price, such as the quest's fight. */
 			return emptyList();
 		}
 		List<Rate> watched = tracked.getOrDefault(key(name), emptyList());
 		int tick = client.getTickCount();
-		Integer othersAt = othersHitAt.remove(key(name));
 		if (anyRow(watched, "kills", "solo") && othersAt != null && tick - othersAt <= SHARED_TICKS)
 		{
 			/* Shared by damage: its odds were not the player's alone, so it is not counted. */
