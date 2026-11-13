@@ -16,13 +16,14 @@ quests, route to them, and plan meetups.
 ## Routes in RuneLite
 
 <p>
-  <img src="docs/mockups/sidebar-route.png" width="300" alt="Home in the plugin sidebar with a route to Lumbridge Castle bank: numbered steps, the current one, casting Lumbridge Home Teleport, with its number in amber beside the spell's icon, a walking boot beside each walk, a ring of dueling as the other way, and Follow, Reroute and Dismiss; under Tasks, the Farm run and Slayer cards">
+  <img src="docs/mockups/sidebar-route.png" width="300" alt="Home in the plugin sidebar with a route to Lumbridge Castle bank: the two ways there as chips over the steps, Lumbridge Home Teleport filled in orange and a ring of dueling to Ferox Enclave under it, then 52 tiles and the numbered steps, the current one, casting Lumbridge Home Teleport, with its number in amber beside the spell's icon, a walking boot beside each walk, and Follow, Reroute and Dismiss; under Tasks, the Farm run and Slayer cards">
 </p>
 
 Pick a place, a search result or a task, and the sidebar lists the way there step by step: which
 teleport to use, which ride to take, where to walk. A teleport step shows the item or spell, and
 outlines it in your inventory or spellbook while you follow; a walk shows a boot and a sail a boat. Each step gets a numbered pin on the
 game's world map, and you can right-click that map and choose **Route here** to go anywhere.
+When there is more than one way, each is a chip above the steps: press one to take it instead.
 
 Press **Follow** to keep the step you are on in a small box over the game. **Reroute** plans
 again from where you stand. Share **Your account** and routes use only the quests,
@@ -32,7 +33,7 @@ diaries, items and unlocks your account has.
 Shortest Path draws the walks.
 
 <p>
-  <img src="docs/mockups/sidebar-quest-step.png" width="225" alt="The Quest Helper step card on Home after Route: 52 tiles, casting Lumbridge Home Teleport, walking to the castle staircase and climbing to the bank, a boot beside each walk, with Pause, Reroute and Dismiss">
+  <img src="docs/mockups/sidebar-quest-step.png" width="225" alt="The Quest Helper step card on Home after Route: the two ways as chips, Lumbridge Home Teleport filled in orange, then 52 tiles, casting Lumbridge Home Teleport, walking to the castle staircase and climbing to the bank, a boot beside each walk, with Pause, Reroute and Dismiss">
 </p>
 
 **Works with Quest Helper.** With Quest Helper's *Use 'Shortest Path' plugin* setting on, Home shows
@@ -42,7 +43,7 @@ Shortest Path does not say which plugin sent it, so another plugin's path can sh
 ## Search for a place or item
 
 <p>
-  <img src="docs/mockups/sidebar-search.png" width="300" alt="Searching for whip: Abyssal demon and Abyssal Sire under Dropped by, and under Items the Abyssal whip, dropped by 3 monsters">
+  <img src="docs/mockups/sidebar-search.png" width="300" alt="Searching for whip: Abyssal demon and Abyssal Sire under Dropped by, each with how far away it is at the right of its row, and under Items the Abyssal whip, dropped by 3 monsters">
 </p>
 
 Search banks, shops, NPCs, monsters and items from **Home**. An item shows the monsters that drop
@@ -63,12 +64,12 @@ The Farm run, Slayer and Port tasks cards each fold away under their heading.
 ## Farm runs in RuneLite
 
 <p>
-  <img src="docs/mockups/sidebar-farm-run.png" width="300" alt="A farm run's card in the sidebar: a bar two thirds full over 2 of 3 tracked done, Before you leave counting one teleport not on you, Falador done and folded to one line, Catherby next with its number in amber and This leg's steps under it, the birdhouse done and the bank visited, and Pause, Reroute and End run">
+  <img src="docs/mockups/sidebar-farm-run.png" width="300" alt="A farm run's card in the sidebar: a bar two thirds full over 2 of 3 tracked done and 29 tiles left, Before you leave counting one teleport not on you, Falador done and folded to one line, Catherby next with its number in amber, its 29 tiles at the right and This leg's steps under it, the birdhouse done and the bank visited, and Pause, Reroute and End run">
 </p>
 
 Start a run from **Ready now**, **Birdhouses** or your farming contract, or build one on the
-website. The sidebar lists each stop and the way to it, checks in the bank which teleports you
-are missing, and ticks a stop off once you have replanted it.
+website. The sidebar lists each stop, the way to it and how far it is, checks in the bank which
+teleports you are missing, and ticks a stop off once you have replanted it.
 **Dailies run** visits every daily your diaries and quests allow, leaving out what you have
 collected today when **Dailies collected** is on.
 
@@ -112,10 +113,11 @@ Hardcore or League world it lists that game's stars instead.
 ## Friends and meetups
 
 <p>
-  <img src="docs/mockups/sidebar-group.png" width="300" alt="The Group tab: three friends with their initials on their discs and a dot in each corner for online, idle or offline, Route beside a name, a Woodcutting level, an Abyssal whip drop and a quest finished, then a star-hunt meetup with each answer and who gave it, and tomorrow's raid folded to one line">
+  <img src="docs/mockups/sidebar-group.png" width="300" alt="The Group tab: three friends with their initials on their discs and a dot in each corner for online, idle or offline, Route beside a name, the world a friend is on before where they are, a Woodcutting level, an Abyssal whip drop and a quest finished, then a star-hunt meetup with each answer and who gave it, and tomorrow's raid folded to one line">
 </p>
 
-**Group** shows where your friends are and their latest levels, drops, quests and diaries.
+**Group** shows where your friends are, on which world, and their latest levels, drops, quests
+and diaries.
 **Route** takes you to a friend. **Meet here…** sets a meetup everyone can answer: Going, Maybe,
 Can't or On my way. It is where you stand, or anywhere you right-click on the game's world map.
 

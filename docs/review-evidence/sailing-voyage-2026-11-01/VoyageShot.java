@@ -50,11 +50,17 @@ public class VoyageShot
 		SwingUtilities.invokeAndWait(RuneLiteLAF::setup);
 		String reply = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "contract", "reply.json")), StandardCharsets.UTF_8);
 		RelayResponse.Destination destination = new Gson().fromJson(reply, RelayResponse.class).directive.destination;
-		destination.route.options.get(3).voyage.gates.get(0).tier = "unmet";
-		destination.route.options.get(3).voyage.gates.get(0).text = "76 Sailing";
+		/*
+		 * The voyage alone, as the one way there. The fixture sets it among the ways to a bank in
+		 * Lumbridge, and a strip naming those over a sail to Catherby would show a route nobody is sent.
+		 */
+		RelayResponse.RouteOption voyage = destination.route.options.get(3);
+		voyage.best = true;
+		voyage.voyage.gates.get(0).tier = "unmet";
+		voyage.voyage.gates.get(0).text = "76 Sailing";
+		destination.route.options = new java.util.ArrayList<>(java.util.Collections.singletonList(voyage));
 		DestinationRoute route = new DestinationRoute();
 		route.sync(destination, null);
-		route.choose(3);
 		Map<Integer, String> moored = new HashMap<>();
 		moored.put(1, "Port Sarim");
 		String out = args[0];
