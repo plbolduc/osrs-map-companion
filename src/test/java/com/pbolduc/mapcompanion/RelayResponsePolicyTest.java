@@ -187,6 +187,23 @@ public class RelayResponsePolicyTest
 	}
 
 	/**
+	 * The map's own 404 for a code with no group latches, so the status card says the group is gone
+	 * rather than retrying under "Map having trouble" every thirty seconds; a proxy's bare 404 during
+	 * a deploy is still a failure to retry.
+	 */
+	@Test
+	public void aCodeTheMapHasNoGroupForStopsThePluginAndAProxys404DoesNot() throws IOException
+	{
+		relay.handle(reply(404, "{\"reason\":\"not_found\",\"error\":\"There is no group with that code.\"}"), null);
+		assertEquals("That group is gone from the map.", relay.getFatalError());
+		assertEquals(RelayClient.Refused.GONE, relay.getRefused());
+
+		RelayClient proxied = new RelayClient(new OkHttpClient(), new Gson());
+		proxied.handle(reply(404, "<html>Not Found</html>"), null);
+		assertNull(proxied.getFatalError());
+	}
+
+	/**
 	 * A full relay is not a full group, and the sentence has to say which: somebody refused by the
 	 * first cannot fix it by asking an owner to remove anybody, and waiting is the whole answer.
 	 * Both still latch — a full relay asked again every two seconds by every plugin turned away is
