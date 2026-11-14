@@ -85,6 +85,32 @@ public class SnapshotFingerprintTest
 		assertEquals(fingerprint.of(a), fingerprint.of(b));
 	}
 
+	/**
+	 * Every build stamps each monster's age since its last kill, so with a kill log shared every
+	 * stray varbit posted at the two-second floor instead of the heartbeat. A new kill still changes
+	 * the count, and that is posted at once.
+	 */
+	@Test
+	public void ignoresTheAgeOfALastKillButNotANewKill()
+	{
+		CompanionSnapshot a = withKill(40, 12_000L);
+		CompanionSnapshot b = withKill(40, 13_800L);
+		assertEquals(fingerprint.of(a), fingerprint.of(b));
+		assertNotEquals(fingerprint.of(a), fingerprint.of(withKill(41, 0L)));
+	}
+
+	private static CompanionSnapshot withKill(int kills, long lastKillMsAgo)
+	{
+		CompanionSnapshot snapshot = base();
+		snapshot.loot = new CompanionSnapshot.Loot();
+		CompanionSnapshot.Npc npc = new CompanionSnapshot.Npc();
+		npc.npc = "Vorkath";
+		npc.kills = kills;
+		npc.lastKillMsAgo = lastKillMsAgo;
+		snapshot.loot.npcs = new ArrayList<>(Collections.singletonList(npc));
+		return snapshot;
+	}
+
 	@Test
 	public void aOneTileMoveIsADifferentSnapshot()
 	{
