@@ -152,7 +152,7 @@ dailies you have collected left out of a dailies run.
 ## Drop luck
 
 <p>
-  <img src="docs/mockups/sidebar-drop-luck.png" width="300" alt="Drop luck for Dagannoth Rex after 640 recorded kills: eight berserker rings marked Lucky, a dragon axe and a warrior ring, then Lucky overall, dry right now, with 250 kills since the last ring, drier than 86% of players, and a 54% chance of another in the next 100 kills">
+  <img src="docs/mockups/sidebar-drop-luck.png" width="300" alt="Drop luck for Dagannoth Rex after 640 recorded kills: eight berserker rings marked Lucky, a dragon axe and a warrior ring, the pet at 1 in 5,000 not yet seen, then Lucky overall, dry right now, with 250 kills since the last ring, drier than 86% of players, and a 54% chance of another in the next 100 kills">
 </p>
 
 See how lucky or dry you are on the monster you are killing, with sourced drop odds and the chance
