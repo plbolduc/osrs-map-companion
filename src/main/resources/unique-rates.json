@@ -164,7 +164,11 @@
       "npc": "Aquanite",
       "item": "Aquanite tendon",
       "oneIn": 3500,
-      "page": "Aquanite"
+      "page": "Aquanite",
+      "boost": {
+        "when": "slayer-task",
+        "oneIn": 750
+      }
     },
     {
       "npc": "Aquanite",
@@ -1662,7 +1666,11 @@
       "npc": "Gryphon",
       "item": "Horn of Plenty (empty)",
       "oneIn": 2500,
-      "page": "Gryphon"
+      "page": "Gryphon",
+      "boost": {
+        "when": "slayer-task",
+        "oneIn": 1000
+      }
     },
     {
       "npc": "Headless Beast",
