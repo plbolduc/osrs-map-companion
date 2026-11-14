@@ -48,11 +48,13 @@ import java.util.List;
  *
  * <h2>What goes, in what order, and what the reader is told</h2>
  *
- * <p>First the map's own caps are applied — forty monsters, thirty-two drops each. Any clipping is
- * disclosed, including drops the receiver would have clipped itself: an omitted obtained item
- * must never look like a known never-obtained item. A monster's collection rows go before its
- * rated ones, and only a rated row cut clears its completeness flag, because a rated row is the
- * only kind whose absence the map reads, as the default.
+ * <p>First the map's own caps are applied — forty monsters, thirty-two drops each, and no patch
+ * reading older than the week the map reads. Any clipping of the kill log is disclosed, including
+ * drops the receiver would have clipped itself: an omitted obtained item must never look like a
+ * known never-obtained item. A monster's collection rows go before its rated ones, and only a rated
+ * row cut clears its completeness flag, because a rated row is the only kind whose absence the map
+ * reads, as the default. A week-old reading is not disclosed: the map drops it on arrival, so
+ * leaving it here costs nobody anything, while sending it cost monsters off the kill log.
  *
  * <p>If that is not enough, the kill tallies go, least-killed first, then the patch observations,
  * oldest first. Those are the two least actionable things on the wire — a drought counter is a
@@ -97,6 +99,13 @@ public class SnapshotTrimmer
 	 */
 	static final int MAX_LOOT_NPCS = 40;
 	static final int MAX_DROPS_PER_NPC = 32;
+
+	/**
+	 * The oldest patch reading the map reads, its {@code MAX_OBSERVED_AGE_MS}, which the map's
+	 * contract test holds this to. A reading is restamped only while its region is loaded, so a site
+	 * visited once keeps its reading for good, and the sidebar still uses it.
+	 */
+	static final long MAX_PATCH_AGE_MS = 7 * 24 * 60 * 60_000L;
 
 	/**
 	 * Freshest first, and the id decides between two of the same age.
@@ -193,6 +202,15 @@ public class SnapshotTrimmer
 	 */
 	private void applyReceiverCaps(CompanionSnapshot snapshot)
 	{
+		if (snapshot.farming != null && snapshot.farming.patches != null)
+		{
+			snapshot.farming.patches.removeIf(patch -> patch.observedMsAgo > MAX_PATCH_AGE_MS);
+			/* As the builder sends none: an empty list would say a reading was taken. */
+			if (snapshot.farming.patches.isEmpty())
+			{
+				snapshot.farming = null;
+			}
+		}
 		if (snapshot.loot == null || snapshot.loot.npcs == null)
 		{
 			return;
