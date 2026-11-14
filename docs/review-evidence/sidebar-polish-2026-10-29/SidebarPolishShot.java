@@ -98,7 +98,7 @@ public class SidebarPolishShot
 				? (JComponent) get(panel[0], "slayerPanel") : state.equals("quest-route")
 				? (JComponent) get(get(panel[0], "nowCards"), "destinationSlot") : state.equals("slayer-blocked")
 				? (JComponent) get(panel[0], "slayerPanel") : state.equals("port-tasks-card") || state.equals("port-tasks-unread") || state.startsWith("port-run")
-				? (JComponent) get(panel[0], "portTasksPanel") : panel[0], args[0] + "/" + state + ".png")));
+				? (JComponent) get(panel[0], "portTasksPanel") : panel[0], args[0] + "/" + state + ".png", width(state))));
 		}
 		System.exit(0);
 	}
@@ -956,22 +956,38 @@ public class SidebarPolishShot
 
 	/* ---- Painting ---- */
 
+	/**
+	 * The width a scene is painted at. The whole panel is the sidebar's 225px, its own 10px insets
+	 * included; a section alone sits inside those insets, 205px. Only the Drop luck card is painted at
+	 * that so far: the other section scenes still paint at 225px, 20px wider than the game gives them,
+	 * until their pictures are painted again and looked at.
+	 */
+	static int width(String state)
+	{
+		return state.equals("dropluck-boss-card") ? net.runelite.client.ui.PluginPanel.PANEL_WIDTH - 20 : 225;
+	}
+
 	static void shoot(JComponent panel, String path) throws Exception
+	{
+		shoot(panel, path, 225);
+	}
+
+	static void shoot(JComponent panel, String path, int width) throws Exception
 	{
 		JPanel holder = new JPanel(new BorderLayout());
 		holder.setBackground(ColorScheme.DARK_GRAY_COLOR);
 		holder.add(panel, BorderLayout.NORTH);
 		int height = Math.max(panel.getPreferredSize().height, 60);
-		holder.setSize(225, height);
+		holder.setSize(width, height);
 		layoutTree(holder);
-		BufferedImage image = new BufferedImage(450, height * 2, BufferedImage.TYPE_INT_RGB);
+		BufferedImage image = new BufferedImage(width * 2, height * 2, BufferedImage.TYPE_INT_RGB);
 		Graphics2D graphics = image.createGraphics();
 		graphics.scale(2, 2);
 		graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 		holder.paint(graphics);
 		graphics.dispose();
 		ImageIO.write(image, "png", new File(path));
-		System.out.println(path + " 225x" + height + " preferredWidth=" + panel.getPreferredSize().width);
+		System.out.println(path + " " + width + "x" + height + " preferredWidth=" + panel.getPreferredSize().width);
 	}
 
 	static void layoutTree(Container parent)
