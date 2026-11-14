@@ -83,6 +83,13 @@ public class DestinationState
 	 * group's answer, and {@link RoutePress} drops it by this.
 	 */
 	private volatile long generation;
+	/**
+	 * Counts {@link #pin}s. A star is pinned the moment it is pressed, with no question to the map, so
+	 * a Route press still out has no other way to tell it was pressed before that pin. A farm run's
+	 * next stop and a press's own answer are not counted: neither is a press, and a press still out
+	 * when the run moves on is still the player's last choice.
+	 */
+	private volatile long pins;
 
 	public synchronized void selectLocal(RelayResponse.Destination selected)
 	{
@@ -91,11 +98,23 @@ public class DestinationState
 		dismissedFingerprint = null;
 	}
 
+	/** A place the player pinned by pressing it, with no question to the map: see {@link #pins}. */
+	synchronized void pin(RelayResponse.Destination selected)
+	{
+		selectLocal(selected);
+		pins++;
+	}
+
 	public boolean hasLocalDestination() { return localDestination != null; }
 
 	long generation()
 	{
 		return generation;
+	}
+
+	long pins()
+	{
+		return pins;
 	}
 
 	@Inject
