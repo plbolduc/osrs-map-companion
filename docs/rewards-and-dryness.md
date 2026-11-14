@@ -104,8 +104,9 @@ one item in a receipt, is one drop, because the odds it is compared with are per
 receipt increments the observed loot-kill counter once. The denominator is a `double`, preserving rational probabilities.
 
 Counts are **observed loot kills**, not lifetime game KC. Core does not establish every zero-loot
-outcome. The shared table now excludes pet odds and other unobservable/unsupported trials; a
-generic pet message cannot establish which NPC's drought to reset. Normal members worlds only
+outcome. The shared table leaves out trials the client cannot see or does not support. Pets are
+in it, as rated rows counted from the game's own pet line against the kill beside it (see *Drop
+luck*), never from the loot, whose event does not reliably carry a pet. Normal members worlds only
 are supported: F2P cannot roll every member-only reward, and special world modes can change rates.
 Announcements remain available independently of this restriction.
 
@@ -133,10 +134,11 @@ How Drop luck counts:
 
 - **Every monster is counted**, not only the 198 with a rate. Beside the rated rows, a monster keeps
   any collection-log item that actually fell, read from the same cache vocabulary the announcements
-  use; pets are left out for the reason above. A collection row is a count of what was seen and
-  never the basis of a probability, so a kill the vocabulary could not judge moves its window
-  rather than restarting its count. The rows' provenance is kept (`collection`), so a rate that
-  leaves the table cannot survive as a collection row and later re-adopt an unwatched history.
+  use; pets are left out, since the loot does not reliably carry them. A collection row is a count
+  of what was seen and never the basis of a probability, so a kill the vocabulary could not judge
+  moves its window rather than restarting its count. The rows' provenance is kept (`collection`),
+  so a rate that leaves the table cannot survive as a collection row and later re-adopt an
+  unwatched history.
 - **The log is bounded by monsters, not by a table**: at most 300, least recently killed first out,
   never the pinned one. Each monster keeps the wall-clock time of its last kill; the wire sends its
   age, relative like every other age on it.
@@ -160,12 +162,13 @@ How Drop luck counts:
   too as the player's share of it: their own damage over everyone's, from `HitsplatApplied`
   (`isMine()` and `isOthers()`, amounts only, per fight; Nex's minions and reavers count towards
   hers through `fight`). Nex's uniques hold her MVP's bonus (`mvp`), so a shared kill the game did
-  not name the player MVP of ("You were the MVP for this fight", a tick either side of the loot) is
-  worth its share over 1.1. A drop's shared kills and their summed share are kept beside its boost
-  baselines and sent as `sharedSinceLast`/`shareSinceLast` and `sharedWatched`/`shareWatched`, only
-  where there were any. The odds price the share as that many kills: exact for the wait, and as
-  the nearest whole number of kills for the overall tail, which for a rare drop is the same to the
-  printed percent.
+  not name the player MVP of ("You were the MVP for this fight", up to two ticks before or after
+  the loot) is worth its share over 1.1. A row at the same boss saying `kills: "solo"`, the pet at
+  Callisto, Venenatis, Vet'ion, Yama and the Royal Titans, is worth nothing on a shared kill. A
+  drop's shared kills and their summed share are kept beside its boost baselines and sent as
+  `sharedSinceLast`/`shareSinceLast` and `sharedWatched`/`shareWatched`, only where there were any.
+  The odds price the share as that many kills: exact for the wait, and as the nearest whole number
+  of kills for the overall tail, which for a rare drop is the same to the printed percent.
 - **Yama's contracts.** A row saying `unless: "contract"` counts no kill after an item named
   "Contract of …" left the inventory, read from `ItemContainerChanged` by name and count only: a
   contract is spent on the fight it starts, whose unique is guaranteed. One banked or dropped skips
@@ -192,17 +195,20 @@ How Drop luck counts:
   game's pet line ("You have a funny feeling…"), never from the loot, against the kill this tick or
   the last, or the next within a tick; a pet with no kill beside it (a skilling pet) counts nothing.
   A set (`pieces`) counts any of its pieces under the set's name, once a kill, drawn with its first
-  piece until one falls. A monster whose rows say `kills: "solo"` counts no kill where another
-  player's hit landed on it in the 100 ticks before it died (`LootLog.SHARED_TICKS`), read from
-  `HitsplatApplied` as `isOthers()` and kept only as a tick per monster name. One whose rows say
-  `where: "outside-instances"` counts no kill in an instance. A name whose rows carry a `level` is
-  counted by the combat level of the NPC whose loot it is, under the row's `npc` at that level —
-  *Vardorvis* at 784, *Vardorvis (awakened)* at 1136 — and not at all at a level no row names, such
-  as the quest's fight; the level is read for those names only. An Araxxor receipt holding only the
-  elite clue, the coagulated venom or a Konar key is a destroyed corpse and not a kill, and a Royal
-  Titan's holding only desiccated pages and clues is "Take pages" and not one either. A row's
-  `fight` names the monsters whose damage pools with its own, so both titans are one fight. None of this
-  sends anything new: the counts travel as every rated row's do, except that a pet row goes only
+  piece until one falls. A monster with rows saying `kills: "solo"` and none saying `"shared"`
+  counts no kill another player hit at any point in the fight. Damage is kept per fight, the
+  player's and everyone else's with the tick of the last hit from anyone, read from
+  `HitsplatApplied` as `isMine()`, `isOthers()` and the amount; a fight ends only after 100 ticks
+  with no hit at all (`LootLog.SHARED_TICKS`), so one hit from a passer-by early in a long fight the
+  player then finishes alone still makes it shared. One whose rows say `where: "outside-instances"`
+  counts no kill in an instance. A name whose rows carry a `level` is counted by the combat level
+  of the NPC whose loot it is, under the row's `npc` at that level — *Vardorvis* at 784,
+  *Vardorvis (awakened)* at 1136 — and not at all at a level no row names, such as the quest's
+  fight; the level is read for those names only. An Araxxor receipt holding only the elite clue,
+  the coagulated venom or a Konar key is a destroyed corpse and not a kill, and a Royal Titan's
+  holding only desiccated pages and clues is "Take pages" and not one either. A row's `fight` names
+  the monsters whose damage pools with its own, so both titans are one fight. None of this sends
+  anything new: the counts travel as every rated row's do, except that a pet row goes only
   with *Include pet rewards* under *Notable drops and levels*. Without it every pet row stays home,
   had or not, and the monster's list says it is not whole, so the map abstains on the pet alone.
 
