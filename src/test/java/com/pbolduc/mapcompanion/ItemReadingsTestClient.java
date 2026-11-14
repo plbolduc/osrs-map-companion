@@ -45,6 +45,7 @@ final class ItemReadingsTestClient
 	private final Map<Integer, ItemComposition> definitions = new HashMap<>();
 	private Item[] inventory = new Item[0];
 	private Item[] equipment = new Item[0];
+	private boolean freeWorld;
 
 	final Client client = proxy(Client.class, (method, args) ->
 	{
@@ -75,6 +76,8 @@ final class ItemReadingsTestClient
 			switch (method)
 			{
 				case "getName":
+					return freeWorld ? name + " (Members)" : name;
+				case "getMembersName":
 					return name;
 				case "getNote":
 					return noted ? 799 : -1;
@@ -82,6 +85,15 @@ final class ItemReadingsTestClient
 					throw new AssertionError("unexpected item method " + method);
 			}
 		}));
+	}
+
+	/**
+	 * A free world, or back on a members one: the client then names every members item, as every
+	 * item defined here is treated, with " (Members)" after it. Its members name stays the same.
+	 */
+	void freeWorld(boolean on)
+	{
+		freeWorld = on;
 	}
 
 	void carry(int... ids)
