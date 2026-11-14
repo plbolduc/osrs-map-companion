@@ -867,6 +867,7 @@ public class MapCompanionPlugin extends Plugin implements CompanionLoop.Surface
 			&& event.getContainerId() == net.runelite.api.gameval.InventoryID.INV)
 		{
 			loop.clueReader.read();
+			loop.lootLog.onInventory(event.getItemContainer() == null ? null : event.getItemContainer().getItems());
 		}
 	}
 

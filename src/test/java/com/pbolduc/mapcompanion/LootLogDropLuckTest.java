@@ -36,6 +36,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import net.runelite.api.Item;
 import net.runelite.client.events.ServerNpcLoot;
 import net.runelite.client.game.ItemStack;
 import org.junit.Test;
@@ -59,6 +60,7 @@ public class LootLogDropLuckTest
 	private static final int SHARK = 90_005;
 	private static final int AXE_HEAD = 90_006;
 	private static final int GOLD_RING = 90_007;
+	private static final int CONTRACT = 90_008;
 
 	private final HarnessGame game = new HarnessGame();
 	private final HarnessStore store = new HarnessStore();
@@ -106,6 +108,7 @@ public class LootLogDropLuckTest
 		game.nameItem(SHARK, "Raw shark");
 		game.nameItem(AXE_HEAD, "Executioner's axe head");
 		game.nameItem(GOLD_RING, "Gold ring");
+		game.nameItem(CONTRACT, "Contract of Oathplate Acquisition");
 		log.clock(() -> now);
 	}
 
@@ -146,17 +149,18 @@ public class LootLogDropLuckTest
 	}
 
 	/**
-	 * Yama has no rate on file, because a contract fight hands out its uniques; a collection item it
-	 * drops is counted. These tests named the Corporeal Beast, then Nex and Zalcano, until each got rates.
+	 * Sol Heredit has no rate on file, because the Colosseum's chest pays out, not the monster; a
+	 * collection item it drops is counted. These tests named the Corporeal Beast, then Nex, Zalcano
+	 * and Yama, until each got rates.
 	 */
 	@Test
 	public void aCollectionItemFromAnUnratedMonsterIsKeptWithItsWait()
 	{
-		kill("Yama", BONES);
-		kill("Yama", BONES);
-		kill("Yama", VISAGE);
-		kill("Yama", BONES);
-		LootLog.Drop visage = monster("Yama").drops.get(0);
+		kill("Sol Heredit", BONES);
+		kill("Sol Heredit", BONES);
+		kill("Sol Heredit", VISAGE);
+		kill("Sol Heredit", BONES);
+		LootLog.Drop visage = monster("Sol Heredit").drops.get(0);
 		assertEquals("Draconic visage", visage.item);
 		assertEquals(1, visage.obtained);
 		assertEquals(1, visage.sinceLast);
@@ -167,8 +171,8 @@ public class LootLogDropLuckTest
 	@Test
 	public void aPetIsNotCountedBecauseItsArrivalIsNotReliablySeen()
 	{
-		kill("Yama", VORKI);
-		assertTrue(monster("Yama").drops.isEmpty());
+		kill("Sol Heredit", VORKI);
+		assertTrue(monster("Sol Heredit").drops.isEmpty());
 	}
 
 	/** A kill the vocabulary could not judge moves the window rather than inventing a drought. */
@@ -176,11 +180,11 @@ public class LootLogDropLuckTest
 	public void killsTheCatalogCouldNotJudgeAreNotWatchedForCollectionItems()
 	{
 		catalogReady = false;
-		kill("Yama", VISAGE);
-		assertTrue("not judged, so not counted", monster("Yama").drops.isEmpty());
+		kill("Sol Heredit", VISAGE);
+		assertTrue("not judged, so not counted", monster("Sol Heredit").drops.isEmpty());
 		catalogReady = true;
-		kill("Yama", VISAGE);
-		LootLog.Drop visage = monster("Yama").drops.get(0);
+		kill("Sol Heredit", VISAGE);
+		LootLog.Drop visage = monster("Sol Heredit").drops.get(0);
 		assertEquals(1, visage.obtained);
 	}
 
@@ -406,7 +410,7 @@ public class LootLogDropLuckTest
 		assertEquals("a wait between two drops is a whole wait, and is said plainly",
 			"Abyssal whip after 780 kills — drier than 78% of players.", DropLuckView.chatLine(second.get(0)));
 
-		List<LootLog.Notable> visage = log.record(new ServerNpcLoot(game.npc("Yama"),
+		List<LootLog.Notable> visage = log.record(new ServerNpcLoot(game.npc("Sol Heredit"),
 			Collections.singletonList(new ItemStack(VISAGE, 1))));
 		assertNull("the game prints its own line for a collection item", DropLuckView.chatLine(visage.get(0)));
 	}
@@ -610,6 +614,21 @@ public class LootLogDropLuckTest
 		LootLog.Drop progress = drop("Vardorvis", "Ultor vestige progress");
 		assertEquals(2, progress.obtained);
 		assertEquals(1088 / 3.0, progress.oneIn, 1e-9);
+	}
+
+	/**
+	 * A Yama contract is spent on the fight it starts, whose unique is guaranteed: the kill after one
+	 * leaves the inventory is not counted, and the next one is.
+	 */
+	@Test
+	public void aYamaKillAfterAContractIsNotCounted()
+	{
+		log.onInventory(new Item[] {new Item(CONTRACT, 2)});
+		log.onInventory(new Item[] {new Item(CONTRACT, 1)});
+		kill("Yama", BONES);
+		assertNull("the contract's fight", DropLuckView.find(log.monsters(), "Yama"));
+		kill("Yama", BONES);
+		assertEquals(1, monster("Yama").kills);
 	}
 
 	/** Outside an instance the canyon shaman is counted, warhammer and all. */

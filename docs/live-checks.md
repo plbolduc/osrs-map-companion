@@ -189,6 +189,8 @@ often. A clean run is now 443 tests with no failures or skips.
       and the Blood Reavers included, and "You were the MVP for this fight" restores the 10% bonus
       whether it comes before the loot or just after.
 - [ ] Drop luck at Scurrius with another player: the shared kill is not counted at all.
+- [ ] Drop luck at Yama with a contract: the contract leaves the inventory when the fight starts,
+      and that kill is not counted; the next one, without a contract, is.
 - [ ] Drop luck at Araxxor: destroy a corpse, then harvest one. The destroyed kill is not counted;
       the harvested one is, and a noxious piece counts under *Noxious halberd piece*.
 - [ ] Drop luck at the Alchemical Hydra: a ring piece counts under *Brimstone ring piece*, drawn

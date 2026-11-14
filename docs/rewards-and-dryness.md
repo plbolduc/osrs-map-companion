@@ -127,7 +127,7 @@ per-item baseline and print **<1%** for a nonzero probability that rounds below 
 
 How Drop luck counts:
 
-- **Every monster is counted**, not only the 193 with a rate. Beside the rated rows, a monster keeps
+- **Every monster is counted**, not only the 194 with a rate. Beside the rated rows, a monster keeps
   any collection-log item that actually fell, read from the same cache vocabulary the announcements
   use; pets are left out for the reason above. A collection row is a count of what was seen and
   never the basis of a probability, so a kill the vocabulary could not judge moves its window
@@ -159,8 +159,13 @@ How Drop luck counts:
   not name the player MVP of ("You were the MVP for this fight", a tick either side of the loot) is
   worth its share over 1.1. A drop's shared kills and their summed share are kept beside its boost
   baselines and sent as `sharedSinceLast`/`shareSinceLast` and `sharedWatched`/`shareWatched`, only
-  where there were any. The odds price the share as that many kills: exact for the wait, and a
-  Poisson count for the overall tail, which for a rare drop is the same to the printed percent.
+  where there were any. The odds price the share as that many kills: exact for the wait, and as
+  the nearest whole number of kills for the overall tail, which for a rare drop is the same to the
+  printed percent.
+- **Yama's contracts.** A row saying `unless: "contract"` counts no kill after an item named
+  "Contract of …" left the inventory, read from `ItemContainerChanged` by name and count only: a
+  contract is spent on the fight it starts, whose unique is guaranteed. One banked or dropped skips
+  one ordinary kill instead, which errs the safe way.
 - **What a review of the build found**, each fixed with a test: a diary reading the game had not
   yet given (the fifteen seconds after every login and hop) restarted the talisman's count, so the
   last real reading is now kept per character and stands in; a finished task still counted as "on
