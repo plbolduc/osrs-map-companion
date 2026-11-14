@@ -448,6 +448,28 @@ public class RoutePressTest
 		assertWait("unreachable", 30_000L, gate.pressWait(before));
 	}
 
+	/**
+	 * "Check Map address" is the redirect's sentence, and fixing it ends the five minutes: the wait
+	 * was the old address's. A wait the map named is the member's, and a new address keeps it.
+	 */
+	@Test
+	public void changingMapAddressEndsARedirectsWaitAndNoOther() throws Exception
+	{
+		connect();
+		RoutePress.Target target = RoutePress.Target.place("search", "bank:lumbridge", "Lumbridge bank", null, null);
+		DestinationRoute redirected = new DestinationRoute();
+		long now = System.currentTimeMillis();
+		press(new OkHttpClient(), redirected).handle(destinations.generation(), target, reply(302, "", null));
+		assertWait("redirected", 300_000L, redirected.pressWait(now));
+		redirected.addressChanged();
+		assertTrue("asked again at once", redirected.pressReady(System.currentTimeMillis()));
+
+		DestinationRoute busy = new DestinationRoute();
+		press(new OkHttpClient(), busy).handle(destinations.generation(), target, reply(429, "{}", "120"));
+		busy.addressChanged();
+		assertWait("the map's own wait", 120_000L, busy.pressWait(now));
+	}
+
 	/** A press with a gate of its own, so one case's wait is not the next one's. */
 	private RoutePress press(OkHttpClient http, DestinationRoute gate)
 	{

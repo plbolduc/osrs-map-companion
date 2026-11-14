@@ -314,8 +314,8 @@ answering a reviewer. Since 1.9.0, for 1.10.0, in review in
   it names, held between five seconds and five minutes, as Route does, where it waited at least
   half a minute; the two share one gate. Asking again is still the player's press.
 - **A redirecting map address** keeps search and meetups quiet for five minutes, as Route already
-  did. Turning the plugin off cancels a search still waiting to be sent and forgets where the
-  character died.
+  did, and changing *Map address* ends that wait for all three. Turning the plugin off cancels a
+  search still waiting to be sent and forgets where the character died.
 - **Less work each tick and frame:** the sidebar, the star list and the Port tasks card are drawn
   again only when what they show has changed, and the tick's own checks run once where they ran
   several times. Nothing about what is read or sent changes.

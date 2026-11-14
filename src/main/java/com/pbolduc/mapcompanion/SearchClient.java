@@ -229,6 +229,8 @@ final class SearchClient
 	/** Bumped by {@link #clear}: an answer from before it is thrown away whatever it asked. */
 	private long generation;
 	private long nextAllowedMs;
+	/** Whether {@link #nextAllowedMs} is a redirect's: see {@link DestinationRoute#addressChanged}. */
+	private boolean redirected;
 	/** Who the list was searched as: the map, the group and the character. See {@link #checkScope}. */
 	@Nullable
 	private String scope;
@@ -315,6 +317,25 @@ final class SearchClient
 	long waitMs(long now)
 	{
 		return Math.max(0L, nextAllowedMs - now);
+	}
+
+	/**
+	 * Map address was changed: a redirect's wait goes with it, as Route's does, and a search typed
+	 * while it waited goes after the usual pause rather than at the end of the old five minutes.
+	 * Swing.
+	 */
+	void addressChanged()
+	{
+		if (redirected)
+		{
+			nextAllowedMs = 0;
+			redirected = false;
+			if (pendingTimer != null)
+			{
+				cancelTimer();
+				pendingTimer = debouncer.schedule(this::due, DEBOUNCE_MS);
+			}
+		}
 	}
 
 	/**
@@ -415,6 +436,7 @@ final class SearchClient
 			inFlight = null;
 		}
 		nextAllowedMs = Math.max(nextAllowedMs, nextAllowed);
+		redirected = RoutePress.REDIRECTS.equals(why);
 		if (asked != generation)
 		{
 			return;

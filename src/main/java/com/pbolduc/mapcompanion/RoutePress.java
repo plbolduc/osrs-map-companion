@@ -543,6 +543,7 @@ final class RoutePress
 			RelayResponse.Route ways = RouteWire.normalize(answer);
 			RelayResponse.Destination destination = ways == null ? null : destination(target, answer.target, ways);
 			route.finishPress(next);
+			route.redirected(REDIRECTS.equals(why));
 			/*
 			 * Checked and shown under the destinations' own lock, so a group left between the check
 			 * and the pin cannot keep the old group's route, and a pin replaced meanwhile stays replaced.
@@ -574,6 +575,7 @@ final class RoutePress
 		return (answer, why, next) ->
 		{
 			RelayResponse.Route ways = RouteWire.normalize(answer);
+			route.redirected(REDIRECTS.equals(why));
 			route.finishReroute(ticket, ways, ways == null && why == null ? NO_WAY : why, next);
 		};
 	}

@@ -191,7 +191,7 @@ final class CompanionHttp
 	 *
 	 * <p>A redirect never reaches the client. It is not followed, so the answer is the same until
 	 * the player changes Map address: every client says that, in the one sentence, and waits
-	 * {@link #REDIRECT_GAP_MS} whatever wait the reply names.
+	 * {@link #REDIRECT_GAP_MS} whatever wait the reply names, or until Map address is changed.
 	 */
 	static void read(Response response, long failGap, String unreadable, Reply reply, ObjLongConsumer<String> refused)
 	{

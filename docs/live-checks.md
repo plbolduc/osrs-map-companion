@@ -735,9 +735,9 @@ under the entries they changed.
       press Meet here and type in the search: each says *This map address redirects. Check Map
       address in RuneLite's settings for this plugin.*, and the map's log shows no second request
       from any of them for five minutes. Route, a run's Start and Stars say the same. Put the
-      address right and note how long a meetup's answer and the search still wait. Then stop the
-      map: Route, a run, a meetup, the search and Stars each say they could not reach it in the
-      words they used before, and ask again after their own wait.
+      address right: Route, a meetup's answer and the search can be asked again at once. Then
+      stop the map: Route, a run, a meetup, the search and Stars each say they could not reach it
+      in the words they used before, and ask again after their own wait.
 
 ## Farming procedure
 

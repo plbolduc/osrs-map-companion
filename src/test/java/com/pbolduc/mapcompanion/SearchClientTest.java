@@ -283,6 +283,35 @@ public class SearchClientTest
 	}
 
 	/**
+	 * Fixing Map address ends a redirect's five minutes, as Route's, and a search typed while they ran
+	 * goes after the usual pause; a wait the map named stays.
+	 */
+	@Test
+	public void changingMapAddressEndsARedirectsWaitAndNoOther() throws Exception
+	{
+		SearchClient redirected = client(302, "", null, null);
+		long before = System.currentTimeMillis();
+		redirected.enter("bank");
+		until(() -> !redirected.result().searching);
+		RoutePressTest.assertWait("redirected", 300_000L, redirected.waitMs(before));
+		redirected.typed("banks");
+		assertEquals(1, waiting.size());
+		assertTrue("typed inside the wait, it waits the five minutes", (long) waiting.get(0)[1] > 290_000L);
+		redirected.addressChanged();
+		assertEquals("searched again at once", 0L, redirected.waitMs(System.currentTimeMillis()));
+		assertEquals(1, waiting.size());
+		assertEquals("the waiting search goes after the usual pause", SearchClient.DEBOUNCE_MS, (long) waiting.get(0)[1]);
+		waiting.clear();
+
+		SearchClient busy = client(429, "{}", "120", null);
+		before = System.currentTimeMillis();
+		busy.enter("bank");
+		until(() -> !busy.result().searching);
+		busy.addressChanged();
+		RoutePressTest.assertWait("the map's own wait", 120_000L, busy.waitMs(before));
+	}
+
+	/**
 	 * Whether the box's line says the search did not happen, which it draws in the refusal pink: the
 	 * map refusing it is, while a wait being kept, a letter short and an empty answer are not.
 	 */

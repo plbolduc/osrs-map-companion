@@ -179,6 +179,12 @@ public class MapCompanionPlugin extends Plugin implements CompanionLoop.Surface
 	private ShortestPath shortestPath;
 
 	@Inject
+	private SearchClient searchClient;
+
+	@Inject
+	private MeetupClient meetupClient;
+
+	@Inject
 	private WorldMapRouteHere routeHere;
 
 	@Inject
@@ -771,6 +777,13 @@ public class MapCompanionPlugin extends Plugin implements CompanionLoop.Surface
 			 * behind a tick that is about to deliver it.
 			 */
 			loop.resetRewardDelivery();
+		}
+		if (MapCompanionConfig.KEY_RELAY_URL.equals(key))
+		{
+			/* What "Check Map address" asked for: a redirect's wait was the old address's. */
+			loop.destinationRoute.addressChanged();
+			meetupClient.addressChanged();
+			SwingUtilities.invokeLater(searchClient::addressChanged);
 		}
 		/*
 		 * ConfigChanged is posted on whichever thread wrote the setting — the EDT for the sidebar

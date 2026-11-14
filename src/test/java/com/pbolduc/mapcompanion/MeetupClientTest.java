@@ -229,6 +229,26 @@ public class MeetupClientTest
 		}
 	}
 
+	/** Fixing Map address ends a redirect's five minutes, as Route's; a wait the map named stays. */
+	@Test
+	public void changingMapAddressEndsARedirectsWaitAndNoOther() throws Exception
+	{
+		connect();
+		MeetupClient redirected = client(302, "", null, false);
+		redirected.answer("star-hunt", "maybe");
+		settle(redirected, "answer:star-hunt");
+		assertFalse(redirected.ready());
+		redirected.addressChanged();
+		assertTrue("asked again at once", redirected.ready());
+
+		MeetupClient busy = client(429, "{}", "120", false);
+		long before = System.currentTimeMillis();
+		busy.answer("star-hunt", "maybe");
+		settle(busy, "answer:star-hunt");
+		busy.addressChanged();
+		RoutePressTest.assertWait("the map's own wait", 120_000L, busy.waitMs(before));
+	}
+
 	/** "Meetup made." is news for a moment, as a run's "Run ended." is; a refusal stays until the next press. */
 	@Test
 	public void aMeetupMadeIsNewsForTenSecondsAndARefusalStays() throws Exception
