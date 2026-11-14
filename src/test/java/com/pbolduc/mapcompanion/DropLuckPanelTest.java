@@ -56,11 +56,14 @@ public class DropLuckPanelTest
 	private long now = System.currentTimeMillis();
 	private final LootLog log = new LootLog(game.client(), store, new Gson());
 	private final DropLuckPanel panel = new DropLuckPanel(log, null);
+	/* Made up: only its name matters here. */
+	private static final int CLAW = 90_001;
 
 	public DropLuckPanelTest()
 	{
 		game.nameItem(4151, "Abyssal whip");
 		game.nameItem(995, "Coins");
+		game.nameItem(CLAW, "Burning claw");
 		log.clock(() -> now);
 	}
 
@@ -85,27 +88,28 @@ public class DropLuckPanelTest
 	@Test
 	public void killingSomethingOpensItsCardWithTheVerdictFirst()
 	{
-		kill("Abyssal demon", 4151);
-		kill("Abyssal demon", 995);
+		kill("Tormented Demon", CLAW);
+		kill("Tormented Demon", 995);
 		panel.refresh();
 		String words = words();
-		assertTrue(words, words.contains("Abyssal demon"));
+		assertTrue(words, words.contains("Tormented Demon"));
 		assertTrue(words, words.contains("Killing now · 2 recorded kills"));
 		assertTrue(words, words.contains("All monsters ›"));
 		/*
-		 * The card opens on "Any unique", the whip, head and dagger added up: it was the whip, the
-		 * common one, until the card gained a row for the question a boss is farmed by. The detail
-		 * leads with its verdict, has no Pin (the pin is a drop's name, and no item is called "Any
-		 * unique"), says each fact once on its own line, and does not name the row again.
+		 * The card opens on "Any unique", the claw and the synapse its page lists as uniques added up,
+		 * the longbow its page files under "Other" apart. The detail leads with its verdict, has no Pin
+		 * (the pin is a drop's name, and no item is called "Any unique"), says each fact once on its own
+		 * line, and does not name the row again. This was an abyssal demon's card until Any unique was
+		 * kept to the uniques a page lists; its page lists none, and it opens on the whip.
 		 */
-		assertTrue(words, words.contains("Any unique | 1 in 465 | 1 | Very lucky | Abyssal whip | 1 in 512"));
+		assertTrue(words, words.contains("Any unique | 1 in 250 | 1 | Very lucky | Magic longbow (u) | 1 in 255"));
 		assertTrue(words, words.contains("Lucky overall, fine right now. | Had | 1 (usual under 0.1) | Since last drop | 1 kill"));
-		assertEquals(words, 1, words.split("Abyssal whip", -1).length - 1);
+		assertEquals(words, 1, words.split("Burning claw", -1).length - 1);
 		assertTrue(words, words.contains("1 kill | >99% of players would still be waiting too"));
-		assertTrue(words, words.endsWith("Next 100 kills | 19% chance"));
+		assertTrue(words, words.endsWith("Next 100 kills | 33% chance"));
 		assertFalse(words, words.contains("Pin"));
-		/* The whip's own detail keeps its Pin. */
-		assertTrue(words, SidebarWords.press(panel, "Abyssal whip"));
+		/* The claw's own detail keeps its Pin. */
+		assertTrue(words, SidebarWords.press(panel, "Burning claw"));
 		assertTrue(words(), words().contains("Lucky overall, fine right now. | Pin | Had | 1 (usual under 0.1)"));
 	}
 
@@ -346,14 +350,15 @@ public class DropLuckPanelTest
 	}
 
 	/**
-	 * Any unique's picture is four of its drops at half size, across and then down. With two rated
-	 * drops, the Crazy archaeologist's two shards, a grid with its rows set gave them one column, one over
-	 * the other.
+	 * Any unique's picture is four of its drops at half size, across and then down. With two uniques,
+	 * the Tormented demon's claw and synapse, a grid with its rows set gave them one column, one over
+	 * the other. This was the Crazy archaeologist's two shards until Any unique was kept to the uniques
+	 * a page lists; its page files them under "Pre-roll".
 	 */
 	@Test
 	public void anyUniquesTwoPicturesSitSideBySide() throws Exception
 	{
-		kill("Crazy archaeologist", 995);
+		kill("Tormented Demon", 995);
 		panel.refresh();
 		assertTrue(words(), words().contains("Any unique"));
 		SwingUtilities.invokeAndWait(() ->

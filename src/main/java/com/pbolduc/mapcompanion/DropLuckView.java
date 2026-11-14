@@ -114,10 +114,12 @@ final class DropLuckView
 	static final String ANY = "Any unique";
 
 	/**
-	 * "Any unique": the monster's own table as one drop — every rated drop but the pet and the
-	 * tertiaries, the jar or curved bone each rolled apart from it. Nex's six add up to the wiki's own
-	 * 1/43, so the row is the roll the page describes. Three in 212 kills is dry while each item
-	 * alone is normal, and only this row can say so.
+	 * "Any unique": the monster's uniques as one drop — the rows the table marks {@code unique}, which
+	 * a reviewed model names or the page lists under its own Unique(s) table. Nex's six add up to the
+	 * wiki's own 1/43, so the row is the roll the page describes. Where the page lists no uniques there
+	 * is none: the rows the rarity thresholds let in are not all uniques, and the Tormented demon's
+	 * longbow, under "Other", made its row 1 in 126 against the page's 1 in 250. Three in 212 kills is
+	 * dry while each item alone is normal, and only this row can say so.
 	 *
 	 * <p>Its rate is the sum, its count the sum, its wait the shortest. It abstains where those would
 	 * not be one wait — a task or diary rate, a Doom run worth a different amount to each drop — and
@@ -177,13 +179,13 @@ final class DropLuckView
 			latest = drop.sinceLast < latest.sinceLast ? drop : latest;
 		}
 		return new Drop(ANY, -1, obtained, latest.sinceLast, first.watched, 0, 0, 1 / p, null, null,
-			latest.sharedSinceLast, latest.shareSinceLast, first.sharedWatched, first.shareWatched, first.mvp, false, false);
+			latest.sharedSinceLast, latest.shareSinceLast, first.sharedWatched, first.shareWatched, first.mvp, false);
 	}
 
-	/** Whether "Any unique" adds this drop up: a rated drop of the monster's own table. */
+	/** Whether "Any unique" adds this drop up: a rated unique. */
 	static boolean adds(Drop drop)
 	{
-		return drop.oneIn != null && !drop.pet && !drop.tertiary;
+		return drop.oneIn != null && drop.unique;
 	}
 
 	/**
