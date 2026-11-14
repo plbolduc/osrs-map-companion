@@ -117,6 +117,11 @@ public class SnapshotFingerprint
 		{
 			copy.death.msAgo = 0L;
 		}
+		/* A new kill changes its count, which is posted at once; the age since the last only counts up. */
+		if (copy.loot != null && copy.loot.npcs != null)
+		{
+			for (CompanionSnapshot.Npc npc : copy.loot.npcs) npc.lastKillMsAgo = npc.lastKillMsAgo == null ? null : 0L;
+		}
 		return gson.toJson(copy);
 	}
 }
