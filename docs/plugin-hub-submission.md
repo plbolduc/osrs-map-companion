@@ -171,7 +171,8 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RoutePress`, `SearchClien
   meetup, and on a
   destination shown with no way yet, with that tile as the target; a clue step that is words goes
   as the clue itself, its tier, words and scroll item id, and a map above beginner as the same clue
-  with its tier and scroll item id alone.
+  with its tier and scroll item id alone. The last death's tile is marked `kind: "death"`, so the
+  map can send a death in a boss's arena to its way in.
   A clue or death that is not shared leaves only in that request. Same
   one-at-a-time rule and wait; the answer becomes the destination. Nothing is walked. **Route here**
   on a right-click of the world map sends it too, with the clicked tile as the target. On Stars, a

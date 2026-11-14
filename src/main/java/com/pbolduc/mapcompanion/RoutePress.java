@@ -247,6 +247,9 @@ final class RoutePress
 		final int x;
 		final int y;
 		final int plane;
+		/** "death" for the last death's tile, which the map sends to a boss's way in rather than into its arena. */
+		@Nullable
+		String kind;
 
 		Tile(WorldPoint point)
 		{
@@ -502,6 +505,10 @@ final class RoutePress
 		question.target = target.id != null ? new PlaceId(target.id)
 			: target.clue != null ? new ClueTarget(target.clue)
 			: new Tile(target.tile);
+		if (question.target instanceof Tile && "death".equals(target.source))
+		{
+			((Tile) question.target).kind = "death";
+		}
 		question.from = from == null ? null : new Tile(from);
 		return CompanionHttp.member(server + PATH, code, member, secret).post(CompanionHttp.json(gson, question))
 			.build();

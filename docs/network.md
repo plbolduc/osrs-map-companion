@@ -250,8 +250,9 @@ map places it with its own clue table; the words leave only in that request, whe
 *Clue step* is shared. A map above beginner has no words and no tile either, but each is a scroll of
 its own, which RuneLite's clue plugin and the map's table both know by item id: its Route sends the
 same shape with nothing but `{ clue: { tier, itemId } }`, and the map places the picture by the
-scroll. A death inside a boss's instance is recorded as the tile its arena is copied
-from, and the map decides whether that route goes to the boss's way in. A star whose tile is
+scroll. A death's tile goes as `{ x, y, plane, kind: "death" }`: a death inside a boss's instance
+is recorded as the tile its arena is copied from, and the map decides whether that route goes to
+the boss's way in. A star whose tile is
 approximate offers **Open website** instead, which opens the map's search for the site's name in
 your browser and sends this client nothing. The clue is now read whether or not *Clue step* is shared,
 so the sidebar has it to offer; the snapshot still carries it only with that choice.
