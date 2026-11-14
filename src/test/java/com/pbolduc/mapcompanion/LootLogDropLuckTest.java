@@ -64,6 +64,7 @@ public class LootLogDropLuckTest
 	private static final int CLOTH = 90_009;
 	private static final int PAGES = 90_010;
 	private static final int HILT = 90_011;
+	private static final int VESTIGE = 90_012;
 
 	private final HarnessGame game = new HarnessGame();
 	private final HarnessStore store = new HarnessStore();
@@ -93,7 +94,8 @@ public class LootLogDropLuckTest
 		@Override
 		public Integer idFor(String name)
 		{
-			return "Abyssal head".equals(name) ? Integer.valueOf(7979) : "Hydra's eye".equals(name) ? Integer.valueOf(EYE) : null;
+			return "Abyssal head".equals(name) ? Integer.valueOf(7979) : "Hydra's eye".equals(name) ? Integer.valueOf(EYE)
+				: "Ultor vestige".equals(name) ? Integer.valueOf(VESTIGE) : null;
 		}
 	});
 
@@ -774,7 +776,10 @@ public class LootLogDropLuckTest
 		assertEquals(1088 / 3.0, axe.oneIn, 1e-9);
 	}
 
-	/** A vestige is three steps the game shows, a gold ring first; each step is one drop of its progress. */
+	/**
+	 * A vestige is three steps the game shows, a gold ring first; each step is one drop of its
+	 * progress, and the row is drawn with the vestige.
+	 */
 	@Test
 	public void aGoldRingIsAStepOfTheVestige()
 	{
@@ -783,6 +788,10 @@ public class LootLogDropLuckTest
 		LootLog.Drop progress = drop("Vardorvis", "Ultor vestige progress");
 		assertEquals(2, progress.obtained);
 		assertEquals(1088 / 3.0, progress.oneIn, 1e-9);
+		assertEquals("drawn with the vestige it is progress towards, never the gold ring that fell", VESTIGE, progress.itemId);
+		assertEquals("the map's lib/drop-luck.test.ts pins the same rule",
+			"Hydra's eye", LootLog.setPicture("Brimstone ring piece", Arrays.asList("Hydra's eye", "Hydra's fang", "Hydra's heart")));
+		assertEquals("Noxious pommel", LootLog.setPicture("Noxious halberd piece", Arrays.asList("Noxious pommel", "Noxious point", "Noxious blade")));
 	}
 
 	/**
