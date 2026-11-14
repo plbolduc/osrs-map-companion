@@ -32,6 +32,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.plugins.timetracking.TimeTrackingConfig;
+import static com.pbolduc.mapcompanion.CompanionSnapshot.Birdhouse;
 
 /**
  * Time Tracking owns the region-gated observation and its account-scoped history. Reading its
@@ -59,21 +60,21 @@ public class BirdhouseReader extends SettlingReader
 	}
 
 	@Nullable
-	public List<CompanionSnapshot.Birdhouse> read(long nowMs)
+	public List<Birdhouse> read(long nowMs)
 	{
 		if (!settle.settled(nowMs)) return null;
-		List<CompanionSnapshot.Birdhouse> out = new ArrayList<>();
+		List<Birdhouse> out = new ArrayList<>();
 		for (int i = 0; i < IDS.length; i++)
 		{
 			String raw = stored.apply(TimeTrackingConfig.BIRD_HOUSE + "." + VARPS[i]);
-			CompanionSnapshot.Birdhouse reading = decode(IDS[i], raw, nowMs);
+			Birdhouse reading = decode(IDS[i], raw, nowMs);
 			if (reading != null) out.add(reading);
 		}
 		return out.isEmpty() ? null : out;
 	}
 
 	@Nullable
-	static CompanionSnapshot.Birdhouse decode(String id, String raw, long nowMs)
+	static Birdhouse decode(String id, String raw, long nowMs)
 	{
 		if (raw == null) return null;
 		String[] parts = raw.split(":", -1);
@@ -84,7 +85,7 @@ public class BirdhouseReader extends SettlingReader
 			long atMs = Math.multiplyExact(Long.parseLong(parts[1]), 1000L);
 			// Nine house types, three states each: BirdHouseState.fromVarpValue in 1.12.39.
 			if (value < 0 || value > 27 || atMs < 0 || atMs > nowMs || nowMs - atMs > 6 * 60 * 60_000L) return null;
-			CompanionSnapshot.Birdhouse out = new CompanionSnapshot.Birdhouse();
+			Birdhouse out = new Birdhouse();
 			out.id = id;
 			out.state = value == 0 ? "empty" : value % 3 == 0 ? "seeded" : "built";
 			out.observedMsAgo = nowMs - atMs;

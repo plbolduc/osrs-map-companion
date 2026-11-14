@@ -40,6 +40,8 @@ import net.runelite.api.widgets.Widget;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.plugins.cluescrolls.clues.BeginnerMapClue;
 import net.runelite.client.plugins.cluescrolls.clues.MapClue;
+import static com.pbolduc.mapcompanion.CompanionSnapshot.Clue;
+import static com.pbolduc.mapcompanion.CompanionSnapshot.Tile;
 
 /**
  * The clue step being carried, when one is.
@@ -90,7 +92,7 @@ public class ClueReader
 
 	/** The last step text read out of the interface; a scroll only shows it when opened. */
 	private String lastStepText = null;
-	private CompanionSnapshot.Tile mapTile;
+	private Tile mapTile;
 	private int lastScrollItemId = -1;
 
 	/**
@@ -106,7 +108,7 @@ public class ClueReader
 	 * <i>Share clue</i>, and a Route press sends its tile once, in the request that asks for the way.
 	 */
 	@Nullable
-	private volatile CompanionSnapshot.Clue current;
+	private volatile Clue current;
 
 	@Inject
 	ClueReader(Client client)
@@ -166,7 +168,7 @@ public class ClueReader
 	 * which is what makes a finished clue stop showing on the map without anything having to say so.
 	 */
 	@Nullable
-	public CompanionSnapshot.Clue read()
+	public Clue read()
 	{
 		ItemContainer inventory = client.getItemContainer(InventoryID.INV);
 		if (inventory == null)
@@ -219,7 +221,7 @@ public class ClueReader
 			lastScrollItemId = scrollId;
 		}
 
-		CompanionSnapshot.Clue clue = new CompanionSnapshot.Clue();
+		Clue clue = new Clue();
 		clue.tier = tier;
 		clue.text = lastStepText;
 		clue.itemId = scrollId;
@@ -231,7 +233,7 @@ public class ClueReader
 
 	/** The clue as last read on the client thread, or null. Any thread; see {@link #current}. */
 	@Nullable
-	CompanionSnapshot.Clue current()
+	Clue current()
 	{
 		return current;
 	}
@@ -242,7 +244,7 @@ public class ClueReader
 	 * instead ({@link #routesByClue}).
 	 */
 	@Nullable
-	static CompanionSnapshot.Tile routeTile(@Nullable CompanionSnapshot.Clue clue)
+	static Tile routeTile(@Nullable Clue clue)
 	{
 		if (clue == null)
 		{
@@ -256,7 +258,7 @@ public class ClueReader
 	 * no tile, whose place the map finds in its own clue table, or a map above beginner, whose scroll
 	 * alone says where. The words or the scroll leave only in that press.
 	 */
-	static boolean routesByClue(@Nullable CompanionSnapshot.Clue clue)
+	static boolean routesByClue(@Nullable Clue clue)
 	{
 		return clue != null && clue.tier != null && routeTile(clue) == null
 			&& ((clue.text != null && !clue.text.trim().isEmpty()) || mapScroll(clue));
@@ -269,7 +271,7 @@ public class ClueReader
 	 * press can send the scroll as it would send words. Beginner pictures share one item, so only
 	 * the opened window tells them apart ({@link #onMapWidget}) and they go as a tile instead.
 	 */
-	static boolean mapScroll(@Nullable CompanionSnapshot.Clue clue)
+	static boolean mapScroll(@Nullable Clue clue)
 	{
 		return clue != null && clue.itemId != null && MapClue.forItemId(clue.itemId) != null;
 	}
@@ -333,7 +335,7 @@ public class ClueReader
 		if (point == null || !adoptOpening()) return;
 		if (!"beginner".equals(tierOf(lastScrollItemId))) return;
 		lastStepText = null;
-		mapTile = new CompanionSnapshot.Tile(point.getX(), point.getY(), point.getPlane());
+		mapTile = new Tile(point.getX(), point.getY(), point.getPlane());
 	}
 
 	/** Where the beginner picture this interface shows is dug, or null for any other interface. Its own method for a test. */
@@ -396,7 +398,7 @@ public class ClueReader
 	 * a string and deserves to be checked that way.
 	 */
 	@Nullable
-	static CompanionSnapshot.Tile parseCoordinate(String text)
+	static Tile parseCoordinate(String text)
 	{
 		Matcher m = COORDINATE.matcher(text);
 		if (!m.find())
@@ -417,7 +419,7 @@ public class ClueReader
 
 			int y = (int) Math.round(3161 + latMinutes * 32.0 / 60.0);
 			int x = (int) Math.round(2440 + lonMinutes * 32.0 / 60.0);
-			return new CompanionSnapshot.Tile(x, y, 0);
+			return new Tile(x, y, 0);
 		}
 		catch (NumberFormatException e)
 		{

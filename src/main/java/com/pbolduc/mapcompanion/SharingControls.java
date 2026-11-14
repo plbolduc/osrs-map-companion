@@ -36,7 +36,7 @@ import javax.swing.*;
 import lombok.AllArgsConstructor;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
-import static com.pbolduc.mapcompanion.MapCompanionPanel.refont;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.*;
 import static com.pbolduc.mapcompanion.SharingFields.Field;
 import static net.runelite.client.ui.ColorScheme.LIGHT_GRAY_COLOR;
 
@@ -77,8 +77,8 @@ final class SharingControls extends JPanel
 	private final JTextField nickname = new JTextField();
 	private final JLabel nicknameLabel = new JLabel();
 	/** Turns the character name off, for the box under it, or back on. */
-	private final JButton nameLink = MapCompanionPanel.linkButton("");
-	private final JLabel nicknameHint = MapCompanionPanel.label(11f, LIGHT_GRAY_COLOR);
+	private final JButton nameLink = linkButton("");
+	private final JLabel nicknameHint = label(11f, LIGHT_GRAY_COLOR);
 	private String displayedNickname;
 
 	/** Whether Shortest Path is installed: its box is drawn only then. */
@@ -112,8 +112,8 @@ final class SharingControls extends JPanel
 		refont(nicknameLabel, 11f);
 		nameBox.add(nicknameLabel);
 		nickname.setName("nickname");
-		MapCompanionPanel.capped(nickname);
-		MapCompanionPanel.left(nickname);
+		capped(nickname);
+		left(nickname);
 		nickname.setToolTipText(Words.of("settings.nicknameTip"));
 		nickname.addActionListener(e -> saveNickname());
 		nickname.addFocusListener(new FocusAdapter()
@@ -146,7 +146,7 @@ final class SharingControls extends JPanel
 				refont(head, Font.BOLD);
 				client.add(head);
 			}
-			JCheckBox box = choice(row, said == null ? MapCompanionPanel.escape(row.get(0).label) : said[2]);
+			JCheckBox box = choice(row, said == null ? escape(row.get(0).label) : said[2]);
 			client.add(box);
 			if (row.contains(SharingFields.SHORTEST_PATH))
 			{
@@ -271,7 +271,7 @@ final class SharingControls extends JPanel
 
 	private static JLabel line(String text, Color colour, int above)
 	{
-		JLabel line = MapCompanionPanel.wrapped(text, 11f, colour, TEXT);
+		JLabel line = wrapped(text, 11f, colour, TEXT);
 		line.setBorder(new EmptyBorder(above, 0, 0, 0));
 		return line;
 	}
@@ -307,8 +307,8 @@ final class SharingControls extends JPanel
 		for (int i = 0; i < fields.size(); i++)
 		{
 			tip.append(i % 9 == 0 ? "<td width='220' valign='top'>" : "<br>").append("<b>")
-				.append(MapCompanionPanel.escape(fields.get(i).label)).append("</b>: ")
-				.append(MapCompanionPanel.escape(fields.get(i).detail));
+				.append(escape(fields.get(i).label)).append("</b>: ")
+				.append(escape(fields.get(i).detail));
 		}
 		return tip.append("</table></html>").toString();
 	}
@@ -329,7 +329,7 @@ final class SharingControls extends JPanel
 		header.setContentAreaFilled(false);
 		header.setForeground(LIGHT_GRAY_COLOR);
 		header.setMargin(new Insets(0, 0, 0, 0));
-		MapCompanionPanel.capped(header);
+		capped(header);
 		contents.setVisible(false);
 		header.addActionListener(e ->
 		{
@@ -359,7 +359,7 @@ final class SharingControls extends JPanel
 		final SharingFields.Toggle section;
 		final JPanel panel = column();
 		final JCheckBox box;
-		final JLabel partly = MapCompanionPanel.label(11f, LIGHT_GRAY_COLOR);
+		final JLabel partly = label(11f, LIGHT_GRAY_COLOR);
 
 		Group(SharingFields.Toggle section)
 		{
@@ -390,7 +390,7 @@ final class SharingControls extends JPanel
 			boolean part = !on.isEmpty() && !whole;
 			box.setSelected(whole);
 			box.putClientProperty("JButton.selectedState", part ? "indeterminate" : null);
-			MapCompanionPanel.showKeeping(partly, part ? partly(section.fields, on, "Not shared: ", "Partly shared: ") : section.note, TEXT - TEXT_INSET);
+			showKeeping(partly, part ? partly(section.fields, on, "Not shared: ", "Partly shared: ") : section.note, TEXT - TEXT_INSET);
 		}
 	}
 }

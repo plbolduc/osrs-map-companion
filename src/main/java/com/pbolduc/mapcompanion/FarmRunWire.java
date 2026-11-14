@@ -36,6 +36,8 @@ import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
+import static com.pbolduc.mapcompanion.RelayResponse.FarmRun;
+import static com.pbolduc.mapcompanion.RelayResponse.FarmStop;
 import static com.pbolduc.mapcompanion.RouteWire.text;
 
 /**
@@ -128,12 +130,12 @@ final class FarmRunWire
 		@Override
 		public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type)
 		{
-			return type.getRawType() != RelayResponse.FarmRun.class ? null : SocialWire.object(gson, RelayResponse.FarmRun.class, FarmRunWire::normalize);
+			return type.getRawType() != FarmRun.class ? null : SocialWire.object(gson, FarmRun.class, FarmRunWire::normalize);
 		}
 	}
 
 	@Nullable
-	static RelayResponse.FarmRun normalize(@Nullable RelayResponse.FarmRun run)
+	static FarmRun normalize(@Nullable FarmRun run)
 	{
 		if (run == null || run.id == null || !ID.matcher(run.id).matches() || run.stops == null
 			|| !KINDS.contains(run.kind)
@@ -146,11 +148,11 @@ final class FarmRunWire
 		{
 			return null;
 		}
-		List<RelayResponse.FarmStop> stops = new ArrayList<>();
+		List<FarmStop> stops = new ArrayList<>();
 		Set<Integer> taken = new HashSet<>();
-		for (RelayResponse.FarmStop stop : RouteWire.first(run.stops, MAX_STOPS))
+		for (FarmStop stop : RouteWire.first(run.stops, MAX_STOPS))
 		{
-			RelayResponse.FarmStop clean = stop(stop);
+			FarmStop clean = stop(stop);
 			if (clean != null && taken.add(clean.n))
 			{
 				stops.add(clean);
@@ -161,7 +163,7 @@ final class FarmRunWire
 			return null;
 		}
 		stops.sort(Comparator.comparingInt(stop -> stop.n));
-		RelayResponse.FarmRun clean = new RelayResponse.FarmRun();
+		FarmRun clean = new FarmRun();
 		clean.id = run.id;
 		clean.kind = run.kind;
 		clean.name = name;
@@ -193,7 +195,7 @@ final class FarmRunWire
 	}
 
 	@Nullable
-	private static RelayResponse.FarmStop stop(@Nullable RelayResponse.FarmStop stop)
+	private static FarmStop stop(@Nullable FarmStop stop)
 	{
 		if (stop == null || stop.n < 1 || stop.n > MAX_STOPS)
 		{
@@ -205,7 +207,7 @@ final class FarmRunWire
 		{
 			return null;
 		}
-		RelayResponse.FarmStop clean = new RelayResponse.FarmStop();
+		FarmStop clean = new FarmStop();
 		clean.n = stop.n;
 		clean.name = name;
 		clean.tile = tile;

@@ -33,6 +33,10 @@ import java.util.*;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
+import static com.pbolduc.mapcompanion.RelayResponse.Gate;
+import static com.pbolduc.mapcompanion.RelayResponse.Route;
+import static com.pbolduc.mapcompanion.RelayResponse.RouteOption;
+import static com.pbolduc.mapcompanion.RelayResponse.RouteStep;
 
 /**
  * Reading a route from the map without letting a bad one cost the reply it rides on.
@@ -97,19 +101,19 @@ final class RouteWire
 		@Override
 		public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type)
 		{
-			return type.getRawType() != RelayResponse.Route.class ? null : SocialWire.object(gson, RelayResponse.Route.class, RouteWire::normalize);
+			return type.getRawType() != Route.class ? null : SocialWire.object(gson, Route.class, RouteWire::normalize);
 		}
 	}
 
 	/** A route made safe to keep and to draw, or null when nothing in it is a way. */
 	@Nullable
-	static RelayResponse.Route normalize(@Nullable RelayResponse.Route route)
+	static Route normalize(@Nullable Route route)
 	{
 		if (route == null || route.options == null)
 		{
 			return null;
 		}
-		List<RelayResponse.RouteOption> kept = cleaned(route.options, Integer.MAX_VALUE, RouteWire::option);
+		List<RouteOption> kept = cleaned(route.options, Integer.MAX_VALUE, RouteWire::option);
 		if (kept.isEmpty())
 		{
 			return null;
@@ -123,10 +127,10 @@ final class RouteWire
 				break;
 			}
 		}
-		List<RelayResponse.RouteOption> ways = new ArrayList<>();
+		List<RouteOption> ways = new ArrayList<>();
 		for (int i = 0; i < kept.size(); i++)
 		{
-			RelayResponse.RouteOption option = kept.get(i);
+			RouteOption option = kept.get(i);
 			option.best = i == bestAt;
 			/* The best way is always kept, so until it is reached one place is held for it. */
 			int room = i < bestAt ? MAX_WAYS - 1 : MAX_WAYS;
@@ -135,7 +139,7 @@ final class RouteWire
 				ways.add(option);
 			}
 		}
-		RelayResponse.Route clean = new RelayResponse.Route();
+		Route clean = new Route();
 		clean.origin = "shared".equals(route.origin) || "request".equals(route.origin) ? route.origin : null;
 		clean.options = ways;
 		return clean;
@@ -169,7 +173,7 @@ final class RouteWire
 	}
 
 	@Nullable
-	private static RelayResponse.RouteOption option(@Nullable RelayResponse.RouteOption option)
+	private static RouteOption option(@Nullable RouteOption option)
 	{
 		if (option == null || option.steps == null)
 		{
@@ -185,12 +189,12 @@ final class RouteWire
 		{
 			return null;
 		}
-		List<RelayResponse.RouteStep> steps = cleaned(option.steps, MAX_STEPS, RouteWire::step);
+		List<RouteStep> steps = cleaned(option.steps, MAX_STEPS, RouteWire::step);
 		if (steps.isEmpty())
 		{
 			return null;
 		}
-		RelayResponse.RouteOption clean = new RelayResponse.RouteOption();
+		RouteOption clean = new RouteOption();
 		clean.id = id;
 		clean.label = label;
 		clean.face = text(option.face, MAX_LABEL);
@@ -237,28 +241,28 @@ final class RouteWire
 			}
 		}
 		clean.line = points.size() < 2 ? null : points.toArray(new int[0][]);
-		List<RelayResponse.Gate> gates = cleaned(voyage.gates, MAX_GATES, RouteWire::gate);
+		List<Gate> gates = cleaned(voyage.gates, MAX_GATES, RouteWire::gate);
 		clean.gates = gates.isEmpty() ? null : gates;
 		return clean;
 	}
 
 	/** A gate on a voyage as the map may send one: its words and one of the three tiers it knows. */
 	@Nullable
-	private static RelayResponse.Gate gate(@Nullable RelayResponse.Gate gate)
+	private static Gate gate(@Nullable Gate gate)
 	{
 		String said = gate == null ? null : text(gate.text, MAX_GATE);
 		if (said == null || !Arrays.asList("met", "unmet", "unknown").contains(gate.tier))
 		{
 			return null;
 		}
-		RelayResponse.Gate kept = new RelayResponse.Gate();
+		Gate kept = new Gate();
 		kept.text = said;
 		kept.tier = gate.tier;
 		return kept;
 	}
 
 	@Nullable
-	static RelayResponse.RouteStep step(@Nullable RelayResponse.RouteStep step)
+	static RouteStep step(@Nullable RouteStep step)
 	{
 		if (step == null || step.slot == null || !SLOT.matcher(step.slot).matches())
 		{
@@ -269,7 +273,7 @@ final class RouteWire
 		{
 			return null;
 		}
-		RelayResponse.RouteStep clean = new RelayResponse.RouteStep();
+		RouteStep clean = new RouteStep();
 		clean.slot = step.slot;
 		clean.title = title;
 		clean.detail = text(step.detail, MAX_DETAIL);

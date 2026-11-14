@@ -48,6 +48,7 @@ import net.runelite.api.WorldType;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.events.ServerNpcLoot;
 import net.runelite.client.game.ItemStack;
+import static com.pbolduc.mapcompanion.CompanionSnapshot.Loot;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 
@@ -1299,7 +1300,7 @@ public class LootLog
 
 	/** The same, pets included: for tests about everything else. */
 	@Nullable
-	synchronized CompanionSnapshot.Loot snapshot()
+	synchronized Loot snapshot()
 	{
 		return snapshot(true);
 	}
@@ -1311,7 +1312,7 @@ public class LootLog
 	 *     as the announcements do ({@link SharingSummary}), not on this log's own switch alone
 	 */
 	@Nullable
-	public synchronized CompanionSnapshot.Loot snapshot(boolean pets)
+	public synchronized Loot snapshot(boolean pets)
 	{
 		if (!onOrdinaryWorld())
 		{
@@ -1323,7 +1324,7 @@ public class LootLog
 			return null;
 		}
 		long now = clock.getAsLong();
-		CompanionSnapshot.Loot loot = new CompanionSnapshot.Loot();
+		Loot loot = new Loot();
 		loot.npcs = new ArrayList<>();
 		/*
 		 * The pinned monster, then most recently killed first, then the rest by kills.

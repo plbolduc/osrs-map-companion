@@ -41,8 +41,7 @@ import net.runelite.api.gameval.SpriteID;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
-import static com.pbolduc.mapcompanion.MapCompanionPanel.refont;
-import static com.pbolduc.mapcompanion.MapCompanionPanel.setWrapped;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.*;
 import static com.pbolduc.mapcompanion.StarsModel.Star;
 
 /**
@@ -280,7 +279,7 @@ final class StarsPanel extends JPanel
 		refont(count, Font.BOLD, 11f);
 		/* How old the list is and how much of it shows, on one line; the list's own column of times says its order. */
 		updated.setName("stars.updated");
-		add(fill(MapCompanionPanel.bar(0, getBackground(), updated, null, count)));
+		add(fill(bar(0, getBackground(), updated, null, count)));
 		add(status);
 		add(gap(2));
 		add(rows);
@@ -417,7 +416,7 @@ final class StarsPanel extends JPanel
 			setWrapped(status, notice, TEXT);
 		}
 		/* Pink only for why there is no list: a held list, and how old it is, is not a refusal. */
-		MapCompanionPanel.tone(status, !loggedOut && model.feed == null && service.message != null);
+		tone(status, !loggedOut && model.feed == null && service.message != null);
 		/* Why the refresh failed is a hover away, so the line over the list stays short. */
 		status.setToolTipText(model.feed != null && service.message != null ? service.message : null);
 		signature.append(model.selected).append(destination == null ? "" : destination.name + destination.world + destination.x + destination.y);
@@ -558,7 +557,7 @@ final class StarsPanel extends JPanel
 		JLabel name = label("");
 		setWrapped(name, site.name, CARD_WIDE - 22);
 		refont(name, 12f);
-		name.setForeground(primary == null ? MUTED : primary.wilderness ? MapCompanionPanel.REFUSED : Color.WHITE);
+		name.setForeground(primary == null ? MUTED : primary.wilderness ? REFUSED : Color.WHITE);
 		JButton favorite = flat(site.favorite ? "★" : "☆");
 		favorite.setForeground(site.favorite ? GOLD : MUTED);
 		favorite.setToolTipText((site.favorite ? "Unfavourite " : "Favourite ") + site.name);
@@ -566,12 +565,12 @@ final class StarsPanel extends JPanel
 		favorite.getAccessibleContext().setAccessibleName(favorite.getToolTipText());
 		favorite.setPreferredSize(new Dimension(20, 16));
 		favorite.addActionListener(e -> change(() -> service.model.toggleFavorite(primary == null ? site.key.substring("favorite:".length()) : primary.favoriteKey, site.name, primary == null ? null : primary.siteKey)));
-		JPanel top = MapCompanionPanel.bar(2, ground, null, name, MapCompanionPanel.hug(favorite, ground));
+		JPanel top = bar(2, ground, null, name, hug(favorite, ground));
 		JComponent head;
 		if (primary == null)
 		{
 			JLabel idle = cell(site.hiddenByFilters ? "Hidden by filters" : "No star right now", MUTED, 0);
-			head = MapCompanionPanel.bar(0, ground, null, top, null);
+			head = bar(0, ground, null, top, null);
 			head.add(idle, BorderLayout.SOUTH);
 		}
 		else
@@ -603,7 +602,7 @@ final class StarsPanel extends JPanel
 			 * The whole card is the press, with the favourite and the fold inside it as buttons of
 			 * their own: the name alone was a target two lines tall beside two more.
 			 */
-			JButton pick = MapCompanionPanel.bare(new Whole(), 0, 0, 0);
+			JButton pick = bare(new Whole(), 0, 0, 0);
 			pick.setFocusPainted(false);
 			pick.setLayout(new BorderLayout(0, 2));
 			pick.setName("stars.site." + site.key);
@@ -614,7 +613,7 @@ final class StarsPanel extends JPanel
 			}, elapsed);
 			pick.addActionListener(e -> select(primary));
 			pick.add(top, BorderLayout.CENTER);
-			pick.add(facts(primary, elapsed, ground, expand, primary.wilderness ? cell("Wilderness", MapCompanionPanel.REFUSED, 0) : null), BorderLayout.SOUTH);
+			pick.add(facts(primary, elapsed, ground, expand, primary.wilderness ? cell("Wilderness", REFUSED, 0) : null), BorderLayout.SOUTH);
 			head = pick;
 		}
 		box.add(fill(head));
@@ -704,7 +703,7 @@ final class StarsPanel extends JPanel
 			mark.setName("star.kind");
 			mark.setPreferredSize(new Dimension(WORLD_STAR, WORLD_STAR));
 			sprites.sprite(mark, kind, WORLD_STAR);
-			at = MapCompanionPanel.bar(3, ground, mark, world, null);
+			at = bar(3, ground, mark, world, null);
 			at.setOpaque(false);
 		}
 		JLabel left = cell("", CARD_INK, 0);
@@ -714,8 +713,8 @@ final class StarsPanel extends JPanel
 			left.setText(StarsModel.timeLeft(star.left(now)));
 			left.setForeground(lifeColour(star.left(now), CARD_INK));
 		}, elapsed);
-		JPanel lead = MapCompanionPanel.bar(6, ground, tier, at, after);
-		JPanel line = MapCompanionPanel.bar(6, ground, lead, between, left);
+		JPanel lead = bar(6, ground, tier, at, after);
+		JPanel line = bar(6, ground, lead, between, left);
 		line.setOpaque(false);
 		lead.setOpaque(false);
 		return line;
@@ -842,12 +841,12 @@ final class StarsPanel extends JPanel
 	/** A picked guess's card: the map instead of a pin, since the website can say where the star might be. */
 	private void act(JPanel box, Star star)
 	{
-		JButton open = button(MapCompanionPanel.OPEN_WEBSITE);
+		JButton open = button(OPEN_WEBSITE);
 		open.setName("stars.open");
 		open.setToolTipText(Words.of("stars.openTip"));
 		open.addActionListener(e -> net.runelite.client.util.LinkBrowser.browse(mapUrl.get() + "/map?q="
 			+ java.net.URLEncoder.encode(star.name, java.nio.charset.StandardCharsets.UTF_8)));
-		JPanel actions = MapCompanionPanel.row(box.getBackground());
+		JPanel actions = row(box.getBackground());
 		actions.add(open);
 		box.add(MapCompanionPanel.gap(5, box.getBackground()));
 		box.add(fill(actions));
@@ -895,7 +894,7 @@ final class StarsPanel extends JPanel
 		selection.add(gap(3));
 		selection.add(fill(facts(star, elapsed, getBackground(), null, null)));
 		selection.add(gap(6));
-		JPanel actions = MapCompanionPanel.row(getBackground());
+		JPanel actions = row(getBackground());
 		if (routed)
 		{
 			/*
@@ -903,7 +902,7 @@ final class StarsPanel extends JPanel
 			 * buttons that act on the way. On Home the view's top inset parts it from the card's name;
 			 * here it opens the card, so the card's own is the smaller.
 			 */
-			JPanel way = MapCompanionPanel.card();
+			JPanel way = card();
 			way.setBorder(new EmptyBorder(2, 8, 7, 8));
 			way.add(steps);
 			selection.add(fill(way));
@@ -932,7 +931,7 @@ final class StarsPanel extends JPanel
 		{
 			starSaid = label("");
 			setWrapped(starSaid, said.message, CARD_WIDE);
-			MapCompanionPanel.tone(starSaid, said.refused());
+			tone(starSaid, said.refused());
 			selection.add(starSaid);
 		}
 	}
@@ -1101,7 +1100,7 @@ final class StarsPanel extends JPanel
 		refont(button, 11f);
 		button.setFocusPainted(false);
 		button.setHorizontalAlignment(SwingConstants.LEFT);
-		return MapCompanionPanel.bare(button, 1, 0, 1);
+		return bare(button, 1, 0, 1);
 	}
 
 	/** One of a star's buttons, in small type with the inset Route has always had. */
