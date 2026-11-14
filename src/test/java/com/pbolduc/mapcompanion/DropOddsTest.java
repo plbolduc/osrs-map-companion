@@ -48,7 +48,7 @@ public class DropOddsTest
 	public void fourWhipsWhereTwoIsUsualIsLucky()
 	{
 		assertEquals(DropOdds.Luck.LUCKY, DropOdds.luck(4, 1024, WHIP));
-		assertEquals("~2 on average", DropOdds.expectation(1024, WHIP));
+		assertEquals("~2", DropOdds.usual(DropOdds.Kills.of(1024), DropOdds.Rate.of(WHIP)));
 	}
 
 	@Test
@@ -69,11 +69,17 @@ public class DropOddsTest
 	}
 
 	@Test
-	public void theRestOfATaskAndTheMedianWait()
+	public void theRestOfATask()
 	{
 		assertEquals("24", DropOdds.percent(DropOdds.within(WHIP, 143)));
-		assertEquals(355, DropOdds.killsFor(0.5, WHIP));
-		assertEquals(1178, DropOdds.killsFor(0.9, WHIP));
+	}
+
+	/** One word for both halves is said once; the card used to say "dry" twice in one sentence. */
+	@Test
+	public void aVerdictIsSaidOnceWhereOverallAndNowAgree()
+	{
+		assertEquals("Dry, overall and now.", DropOdds.verdict(1, 1500, 800, WHIP));
+		assertEquals("About normal, overall and now.", DropOdds.verdict(2, 1024, 300, WHIP));
 	}
 
 	@Test
@@ -83,12 +89,17 @@ public class DropOddsTest
 		assertEquals("Dry right now.", DropOdds.verdict(0, 880, 880, WHIP));
 	}
 
+	/**
+	 * A row says its rate, whole, as the wiki prints it: the owner asked that "1 in 469.1" lose its
+	 * decimal, so 5,012.5 is no longer kept either. How many is usual moved to the details' "Had".
+	 */
 	@Test
-	public void aRareDropIsARateNotAFractionOfADrop()
+	public void everyRatedRowSaysItsRateInWholeNumbers()
 	{
-		assertEquals("1 in 32,000", DropOdds.expectation(1024, 32000));
+		assertEquals("1 in 32,000", DropOdds.rateLine(DropOdds.Rate.of(32000), false, 1));
 		assertEquals(DropOdds.Luck.NONE, DropOdds.luck(0, 1024, 32000));
-		assertEquals("1 in 5,012.5", DropOdds.expectation(300, 5012.5));
+		assertEquals("1 in 5,013", DropOdds.rateLine(DropOdds.Rate.of(5012.5), false, 1));
+		assertEquals("under 0.1", DropOdds.usual(DropOdds.Kills.of(10), DropOdds.Rate.of(32000)));
 	}
 
 	@Test
@@ -126,8 +137,8 @@ public class DropOddsTest
 		DropOdds.Kills wait = new DropOdds.Kills(300, 100);
 		assertEquals("27", DropOdds.percent(DropOdds.within(tooth, wait)));
 		assertEquals("11", DropOdds.percent(DropOdds.within(2560, 300)));
-		assertEquals("1 in 512 on task", DropOdds.expectation(new DropOdds.Kills(100, 0), tooth, true));
-		assertEquals("1 in 2,560", DropOdds.expectation(new DropOdds.Kills(100, 0), tooth, false));
+		assertEquals("1 in 512 on task", DropOdds.rateLine(tooth, true, 1));
+		assertEquals("1 in 2,560", DropOdds.rateLine(tooth, false, 1));
 		assertEquals("one in thirty task kills of a 1/512 drop: 94% would have none",
 			DropOdds.Luck.VERY_LUCKY, DropOdds.luck(1, new DropOdds.Kills(0, 30), tooth));
 	}
@@ -141,10 +152,10 @@ public class DropOddsTest
 	}
 
 	@Test
-	public void aRateFoldedFromTwoRollsPrintsOneDecimal()
+	public void aRateFoldedFromTwoRollsPrintsWholeAsEveryRateDoes()
 	{
-		assertEquals("512.3", DropOdds.grouped(1 / (1 - Math.pow(1 - 1.0 / 1024, 2))));
-		assertEquals("6,553.8", DropOdds.grouped(1 / (1 - Math.pow(1 - 1.0 / 13107, 2))));
+		assertEquals("512", DropOdds.grouped(1 / (1 - Math.pow(1 - 1.0 / 1024, 2))));
+		assertEquals("6,554", DropOdds.grouped(1 / (1 - Math.pow(1 - 1.0 / 13107, 2))));
 	}
 
 	/** The map's lib/drop-luck.test.ts pins the same two values: the fingerprints must agree. */
@@ -161,7 +172,7 @@ public class DropOddsTest
 	{
 		assertEquals("0.9", DropOdds.oneDecimal(0.95));
 		assertEquals("8.9", DropOdds.oneDecimal(8.95));
-		assertEquals("~0.9 on average", DropOdds.expectation(950, 1000));
+		assertEquals("~0.9", DropOdds.usual(DropOdds.Kills.of(950), DropOdds.Rate.of(1000)));
 	}
 
 	/**
@@ -183,11 +194,12 @@ public class DropOddsTest
 	@Test
 	public void aDiaryRateHoldsForTheRestOfASlayerTask()
 	{
-		LootLog.Drop talisman = new LootLog.Drop("Xeric's talisman (inert)", -1, 0, 50, 50, 50, 50, 250.0, 125.0, LootLog.KOUREND_EASY_DIARY, 0, 0, 0, 0);
+		LootLog.Drop talisman = new LootLog.Drop("Xeric's talisman (inert)", -1, 0, 50, 50, 50, 50, 250.0, 125.0, LootLog.KOUREND_EASY_DIARY,
+			0, 0, 0, 0, 1, false);
 		LootLog.Monster lizardman = new LootLog.Monster("Lizardman", 50, 0, java.util.Collections.singletonList(talisman));
 		DropLuckView.Detail detail = DropLuckView.detail(lizardman, talisman, 100, true);
-		assertEquals(DropOdds.percent(DropOdds.within(125, 100)) + "% chance of one", detail.aheadValue);
-		assertEquals("Half of players get one within 87 kills with the diary.", detail.median);
+		assertEquals(DropOdds.percent(DropOdds.within(125, 100)) + "% chance", detail.aheadValue);
+		assertEquals("Rest of this Slayer task (100 kills)", detail.aheadLabel);
 	}
 
 	@Test
@@ -205,7 +217,7 @@ public class DropOddsTest
 		{
 			int since = (int) drop[2];
 			out.add(new LootLog.Drop((String) drop[0], -1, since == kills ? 0 : 1, since, kills, 0, 0,
-				((Number) drop[1]).doubleValue(), null, null, 0, 0, 0, 0));
+				((Number) drop[1]).doubleValue(), null, null, 0, 0, 0, 0, 1, false));
 		}
 		return new LootLog.Monster(npc, kills, 0, out);
 	}
@@ -293,5 +305,67 @@ public class DropOddsTest
 		assertEquals(5, shared.total());
 		assertEquals("a run deep in the Doom is worth more than its one claim", 7.0, new DropOdds.Kills(0, 0, 2, 7.0).share, 0);
 		assertEquals(DropOdds.atLeast(1, 4, 0.01), DropOdds.atLeast(1, shared, 0.01, 0.01), 1e-12);
+	}
+
+	/**
+	 * "Any unique" adds a boss's rated drops up, the pet apart. Nex's six are the wiki's own 1/43,
+	 * and three in 212 kills alone is dry while each item alone is normal. The map's
+	 * lib/drop-luck.test.ts pins the same Nex.
+	 */
+	@Test
+	public void anyUniqueIsNexsOwnRollAndDryWhereEachItemIsNormal()
+	{
+		LootLog.Monster nex = nex(0);
+		LootLog.Drop any = DropLuckView.anyUnique(nex);
+		assertEquals("1 in 43, +10% as MVP", DropLuckView.rowDetail(nex, any, false));
+		List<String> rows = new ArrayList<>();
+		for (LootLog.Drop drop : nex.drops)
+		{
+			rows.add(DropLuckView.rowDetail(nex, drop, false));
+		}
+		assertEquals(java.util.Arrays.asList("1 in 172", "1 in 258", "1 in 258", "1 in 258", "1 in 258", "1 in 516", "1 in 500"), rows);
+		assertEquals(3, any.obtained);
+		assertEquals(75, any.sinceLast);
+		assertEquals(DropOdds.Luck.DRY, DropLuckView.rowLuck(nex, any));
+		for (LootLog.Drop drop : nex.drops.subList(0, 5))
+		{
+			assertEquals(drop.item, DropOdds.Luck.NORMAL, DropLuckView.rowLuck(nex, drop));
+		}
+		DropLuckView.Detail detail = DropLuckView.detail(nex, any, null);
+		assertEquals("Dry, overall and now.", detail.verdict);
+		assertEquals("3 (usual ~5.4)", detail.had);
+		assertEquals("75 kills", detail.sinceValue);
+		assertEquals("drier than 86% of players", detail.sinceComparison);
+		assertEquals("93% chance", detail.aheadValue);
+		assertEquals(DropLuckView.ANY, DropLuckView.selected(nex, null, null).item);
+		assertEquals("Nihil horn", DropLuckView.selected(nex, "Nihil horn", null).item);
+		assertEquals("Zaryte vambraces", DropLuckView.selected(nex, null, new String[] {"Nex", "Zaryte vambraces"}).item);
+	}
+
+	/** Rows watched over different kills are no one wait, and one rated drop has nothing to add up. */
+	@Test
+	public void anyUniqueAbstainsWhereTheDropsAreNotOneWait()
+	{
+		assertNull(DropLuckView.anyUnique(nex(50)));
+		assertNull(DropLuckView.anyUnique(monster("Abyssal demon", 100, new Object[] {"Abyssal whip", 512, 100})));
+	}
+
+	/** Nex alone, 212 kills: the platelegs at kill 64, the horn at 120, the vambraces at 137. */
+	private static LootLog.Monster nex(int hiltWatchedFrom)
+	{
+		Object[][] rows = {
+			{"Zaryte vambraces", 172, 137}, {"Nihil horn", 258, 120}, {"Torva full helm (damaged)", 258, null},
+			{"Torva platebody (damaged)", 258, null}, {"Torva platelegs (damaged)", 258, 64}, {"Ancient hilt", 516, null},
+		};
+		List<LootLog.Drop> out = new ArrayList<>();
+		for (Object[] row : rows)
+		{
+			Integer at = (Integer) row[2];
+			int watched = "Ancient hilt".equals(row[0]) ? 212 - hiltWatchedFrom : 212;
+			out.add(new LootLog.Drop((String) row[0], -1, at == null ? 0 : 1, at == null ? watched : 212 - at, watched, 0, 0,
+				(Integer) row[1] / 1.1, null, null, 0, 0, 0, 0, 1.1, false));
+		}
+		out.add(new LootLog.Drop("Nexling", -1, 0, 212, 212, 0, 0, 500.0, null, null, 0, 0, 0, 0, 1, true));
+		return new LootLog.Monster("Nex", 212, 0, out);
 	}
 }

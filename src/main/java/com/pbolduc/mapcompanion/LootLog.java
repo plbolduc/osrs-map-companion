@@ -1527,7 +1527,8 @@ public class LootLog
 					boost ? boosted(tally, rate) - tally.boostedAtStart.getOrDefault(item, 0) : 0,
 					rate == null ? null : rate.oneIn,
 					boost ? rate.boost.oneIn : null, boost ? rate.boost.when : null,
-					(int) sharedSinceLast[0], sharedSinceLast[1], (int) sharedWatched[0], sharedWatched[1]));
+					(int) sharedSinceLast[0], sharedSinceLast[1], (int) sharedWatched[0], sharedWatched[1],
+					rate == null || rate.mvp == null ? 1 : rate.mvp, rate != null && Boolean.TRUE.equals(rate.pet)));
 			}
 			boolean shares = anyRow(watched, "kills", "shared");
 			int shared = 0;
@@ -1608,6 +1609,10 @@ public class LootLog
 		public final double shareSinceLast;
 		public final int sharedWatched;
 		public final double shareWatched;
+		/** The MVP's bonus its stored rate holds, where the wiki prints the rate without it: Nex's 1.1; else 1. */
+		public final double mvp;
+		/** A pet: its own roll, so never part of "Any unique". */
+		public final boolean pet;
 
 		/** The rate pair, or null for a collection item with no rate. */
 		@Nullable

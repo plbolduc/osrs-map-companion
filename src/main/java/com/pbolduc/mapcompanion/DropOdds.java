@@ -38,7 +38,8 @@ import lombok.AllArgsConstructor;
  * thing about the same history — a sidebar that calls you "dry" while the map beside it says
  * "about normal" is worse than either alone. So the thresholds are constants here and there, and
  * both test suites pin the same cases: four whips in 1,024 kills is "Lucky", 700 kills since the
- * last one is "drier than 75%", 143 task kills left is "24%", half of players have one by 355.
+ * last one is "drier than 75%", 143 task kills left is "24%", and Nex's six uniques are "1 in 43"
+ * together.
  *
  * <p><b>Two questions, never one number.</b> "How lucky have I been" is the count against the
  * kills: a binomial tail. "How dry am I right now" is the wait since the last one: a geometric
@@ -163,12 +164,6 @@ final class DropOdds
 		double share = 1 - stillWaiting(rate, kills);
 		/* The same guard from the other side: 1 - a tiny number rounds to exactly 1 in a double. */
 		return share >= 1 && Math.min(rate.oneIn, rate.boosted()) > 1 && kills.total() > 0 ? Math.nextDown(1.0) : share;
-	}
-
-	/** Kills by which a share {@code q} of players have had one: 0.5 is the median wait. */
-	static long killsFor(double q, double oneIn)
-	{
-		return (long) Math.ceil(Math.log1p(-q) / Math.log1p(-1 / oneIn));
 	}
 
 	/**
@@ -362,7 +357,8 @@ final class DropOdds
 	 * The card's first line: "Lucky overall, dry right now."
 	 *
 	 * <p>With nothing had yet, overall and now are one fact — the same kills, the same rate — so the
-	 * sentence says it once rather than twice in different words.
+	 * sentence says it once rather than twice in different words. Where both halves land on one word
+	 * it is said once too: "Dry, overall and now."
 	 */
 	static String verdict(int obtained, Kills watched, Kills sinceLast, Rate rate)
 	{
@@ -372,8 +368,9 @@ final class DropOdds
 			return capitalise(now) + ".";
 		}
 		Luck luck = luck(obtained, watched, rate);
-		String overall = luck.lucky() ? "Lucky overall" : luck.dry() ? "Dry overall" : "About normal overall";
-		return overall + ", " + now + ".";
+		String overall = luck.lucky() ? "Lucky" : luck.dry() ? "Dry" : "About normal";
+		return now.equals(overall.toLowerCase(Locale.ROOT) + " right now")
+			? overall + ", overall and now." : overall + " overall, " + now + ".";
 	}
 
 	static String waitComparison(long wait, double oneIn)
@@ -415,50 +412,38 @@ final class DropOdds
 			: percent(1 - had) + "% of players would still be waiting too";
 	}
 
-	static String expectation(long kills, double oneIn)
+	/**
+	 * A row's rate as the wiki prints it: "1 in 516", or the better one where it applies to the next
+	 * kill, "1 in 512 on task". One rate, not both: the pair took three lines of a sidebar row.
+	 *
+	 * <p>Nex's uniques are stored for a player alone, who is always her MVP, so 1/516 is kept as
+	 * 1/469.1, and printing that sent a reader comparing with the wiki looking for a mistake. {@code
+	 * mvp} undoes the bonus for the words only; every chance on the card is priced at the stored rate.
+	 */
+	static String rateLine(Rate rate, boolean boostedNow, double mvp)
 	{
-		return expectation(Kills.of(kills), Rate.of(oneIn), false);
+		return boostedNow && rate.boostOneIn != null
+			? "1 in " + grouped(rate.boostOneIn) + " " + rate.boostLabel
+			: "1 in " + grouped(rate.oneIn * mvp);
 	}
 
 	/**
-	 * "~2 on average", or "1 in 32,000" where the average would be a fraction of a drop — the rate
-	 * that applies to the next kill, named where it is the better one: "1 in 512 on task".
-	 *
-	 * <p>One rate, not both: "1 in 2,560 · 1 in 512 on task" took three lines of a sidebar row. The
-	 * details say how the wait was priced; the row says what the next kill is worth.
+	 * How many a player usually has after these kills: "~5.4", "~12". It sits beside the count in
+	 * the details; alone on a row, "~0.9 on average" read as nothing a player could have.
 	 */
-	static String expectation(Kills kills, Rate rate, boolean boostedNow)
+	static String usual(Kills kills, Rate rate)
 	{
 		double mean = (kills.ordinary + kills.share) / rate.oneIn + kills.boosted / rate.boosted();
-		if (mean >= TOO_EARLY_MEAN)
-		{
-			return "~" + (mean < 10 ? trim(oneDecimal(mean)) : count(Math.round(mean)))
-				+ " on average";
-		}
-		return boostedNow && rate.boostOneIn != null
-			? "1 in " + grouped(rate.boostOneIn) + " " + rate.boostLabel
-			: "1 in " + grouped(rate.oneIn);
+		return mean < 0.1 ? "under 0.1" : "~" + (mean < 10 ? trim(oneDecimal(mean)) : count(Math.round(mean)));
 	}
 
-	/** 5000 → "5,000", 5012.5 → "5,012.5": the digits grouped, the decimals the table kept. */
+	/**
+	 * 5000 → "5,000", 469.09 → "469": whole numbers. The wiki prints most rates whole, and a rate
+	 * folded from two rolls or a bonus taken off is no fraction anybody wrote.
+	 */
 	static String grouped(double oneIn)
 	{
-		long whole = (long) Math.floor(oneIn);
-		String text = count(whole);
-		if (oneIn == Math.rint(oneIn))
-		{
-			return text;
-		}
-		String decimals = Double.toString(oneIn);
-		String fraction = decimals.substring(decimals.indexOf('.'));
-		if (fraction.length() <= 3)
-		{
-			return text + fraction;
-		}
-		/* A per-kill rate folded from two rolls is not a fraction anybody wrote: one decimal. */
-		String rounded = oneDecimal(oneIn);
-		int dot = rounded.indexOf('.');
-		return count(Long.parseLong(rounded.substring(0, dot))) + rounded.substring(dot);
+		return count(Math.round(oneIn));
 	}
 
 	/**
