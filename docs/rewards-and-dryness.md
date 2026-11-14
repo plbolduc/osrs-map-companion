@@ -117,11 +117,15 @@ whole snapshot, so the readers with the most history were exactly the ones perma
 it was missing — and a notice that is always on says nothing on the occasion it is true.
 
 The `dropsComplete` flag is what makes leaving it out safe, because it already asserts the list
-arrived whole: under it, an absent row is that default rather than an unknown. Removing any drop to
-meet the eight-drop cap clears the flag; either drop/NPC clipping or byte-budget trimming sets
-`detailsTruncated`. Where the flag is false or absent — every released client predates it — readers
-abstain on an omitted row instead of reading it as zero drops. Local waiting odds use the same
-per-item baseline and print **<1%** for a nonzero probability that rounds below one percent.
+arrived whole: under it, an absent row is that default rather than an unknown. The cap is 32 drops a
+monster, the largest rated table (Barrows, 24) with room for collection rows, on both sides: a cap
+under a table's size cuts an honest log, and the flag it clears turns that monster's rated rows
+into unknowns. A monster's collection rows are cut before its rated ones, and only a rated row cut
+clears the flag, since only a rated row's absence is ever read. Either drop/NPC clipping or
+byte-budget trimming sets `detailsTruncated`. Where the flag is false or absent — every released
+client predates it — readers abstain on an omitted row instead of reading it as zero drops. Local
+waiting odds use the same per-item baseline and print **<1%** for a nonzero probability that rounds
+below one percent.
 
 ## Drop luck
 

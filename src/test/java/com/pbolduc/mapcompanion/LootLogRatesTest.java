@@ -30,7 +30,10 @@ import com.google.gson.Gson;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -97,6 +100,28 @@ public class LootLogRatesTest
 			}
 			assertTrue("the revised corpus preserves non-integer reciprocals",
 					   file.rates.stream().anyMatch(rate -> rate.oneIn != Math.rint(rate.oneIn)));
+		}
+	}
+
+	/**
+	 * Every rated table fits the wire's per-monster cap with eight collection rows beside it. A cap
+	 * under a table cuts an honest log, and the cut makes every rated row left off as the default an
+	 * unknown on the map. Barrows' 24 is the largest; the map's twin holds its own cap the same way.
+	 */
+	@Test
+	public void everyRatedTableFitsTheWireWithRoomForCollectionRows() throws Exception
+	{
+		try (InputStream in = LootLogRatesTest.class.getResourceAsStream("/unique-rates.json"))
+		{
+			RateFile file = new Gson().fromJson(new InputStreamReader(in, StandardCharsets.UTF_8), RateFile.class);
+			Map<String, Integer> rows = new HashMap<>();
+			for (Rate rate : file.rates)
+			{
+				rows.merge(rate.npc, 1, Integer::sum);
+			}
+			int largest = Collections.max(rows.values());
+			assertEquals("Barrows is the largest table", Integer.valueOf(largest), rows.get("Barrows"));
+			assertTrue(largest + 8 <= SnapshotTrimmer.MAX_DROPS_PER_NPC);
 		}
 	}
 }

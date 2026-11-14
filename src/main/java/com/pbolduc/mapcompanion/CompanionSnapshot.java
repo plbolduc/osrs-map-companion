@@ -394,12 +394,21 @@ public class CompanionSnapshot
 		/** Which rated drops this plugin watches for it; see {@code LootLog.ratedKey}. Absent with none. */
 		public String ratedKey;
 		public List<Drop> drops;
-		/** True only while every tracked item history is present; legacy absence is unknown. */
+		/**
+		 * True only while every rated item history is present; legacy absence is unknown. A collection
+		 * row may be cut under it, since nothing reads that row's absence as "never dropped".
+		 */
 		public Boolean dropsComplete;
 	}
 
 	public static class Drop
 	{
+		/**
+		 * Not on the wire: true when no rate prices this row, so {@link SnapshotTrimmer} can cut the
+		 * collection rows first and leave {@link Npc#dropsComplete} true while it cut only those.
+		 * False unless set, so a row built anywhere else counts as rated and its cut clears the flag.
+		 */
+		transient boolean collection;
 		public String item;
 		public int obtained;
 		/** The kill count when it last fell. Null means never, which is a different thing from zero. */

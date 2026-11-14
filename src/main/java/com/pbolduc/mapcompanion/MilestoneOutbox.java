@@ -39,7 +39,7 @@ import java.util.*;
  * happened as far as the group is concerned, and sending it twice means announcing it twice.
  *
  * <p>The map could in principle spot a drop by diffing two kill tallies, and that was the shape
- * before this. It cannot work: the tallies are capped at forty monsters and eight drops each, so a
+ * before this. It cannot work: the tallies are capped at forty monsters and thirty-two drops each, so a
  * drop that falls off the end of the cap is a drop nobody hears about, and a reconnect that
  * re-sends a whole tally would announce a year of history as news. So drops are stated, once,
  * with an id.

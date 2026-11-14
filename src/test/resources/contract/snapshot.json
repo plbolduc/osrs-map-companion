@@ -263,6 +263,67 @@
           }
         ],
         "dropsComplete": true
+      },
+      {
+        "npc": "Barrows",
+        "kills": 200,
+        "drops": [
+          {
+            "item": "Barrows piece 1",
+            "obtained": 1,
+            "killsAtLast": 20,
+            "trackedSinceKill": 0
+          },
+          {
+            "item": "Barrows piece 2",
+            "obtained": 1,
+            "killsAtLast": 40,
+            "trackedSinceKill": 0
+          },
+          {
+            "item": "Barrows piece 3",
+            "obtained": 1,
+            "killsAtLast": 60,
+            "trackedSinceKill": 0
+          },
+          {
+            "item": "Barrows piece 4",
+            "obtained": 1,
+            "killsAtLast": 80,
+            "trackedSinceKill": 0
+          },
+          {
+            "item": "Barrows piece 5",
+            "obtained": 1,
+            "killsAtLast": 100,
+            "trackedSinceKill": 0
+          },
+          {
+            "item": "Barrows piece 6",
+            "obtained": 1,
+            "killsAtLast": 120,
+            "trackedSinceKill": 0
+          },
+          {
+            "item": "Barrows piece 7",
+            "obtained": 1,
+            "killsAtLast": 140,
+            "trackedSinceKill": 0
+          },
+          {
+            "item": "Barrows piece 8",
+            "obtained": 1,
+            "killsAtLast": 160,
+            "trackedSinceKill": 0
+          },
+          {
+            "item": "Barrows piece 9",
+            "obtained": 1,
+            "killsAtLast": 180,
+            "trackedSinceKill": 0
+          }
+        ],
+        "dropsComplete": true
       }
     ],
     "current": "Abyssal demon",

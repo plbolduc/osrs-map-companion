@@ -1204,7 +1204,7 @@ public class LootLog
 		/*
 		 * The pinned monster, then most recently killed first, then the rest by kills.
 		 *
-		 * The wire format caps this at forty monsters and eight drops each, and the cap truncates —
+		 * The wire format caps this at forty monsters and thirty-two drops each, and the cap truncates —
 		 * so the order here decides what survives it. Most-killed first kept a monster ground for a
 		 * week last year above the one started this morning, which is the one the map's list is
 		 * asked about; the pinned one survives either way, because the player said it matters.
@@ -1264,6 +1264,7 @@ public class LootLog
 					continue;
 				}
 				CompanionSnapshot.Drop d = new CompanionSnapshot.Drop();
+				d.collection = rated == null;
 				d.item = item;
 				d.obtained = obtained;
 				d.killsAtLast = last;

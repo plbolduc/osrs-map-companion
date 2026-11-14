@@ -48,9 +48,11 @@ import java.util.List;
  *
  * <h2>What goes, in what order, and what the reader is told</h2>
  *
- * <p>First the map's own caps are applied — forty monsters, eight drops each. Any clipping is
+ * <p>First the map's own caps are applied — forty monsters, thirty-two drops each. Any clipping is
  * disclosed, including drops the receiver would have clipped itself: an omitted obtained item
- * must never look like a known never-obtained item. Its monster's completeness flag becomes false.
+ * must never look like a known never-obtained item. A monster's collection rows go before its
+ * rated ones, and only a rated row cut clears its completeness flag, because a rated row is the
+ * only kind whose absence the map reads, as the default.
  *
  * <p>If that is not enough, the kill tallies go, least-killed first, then the patch observations,
  * oldest first. Those are the two least actionable things on the wire — a drought counter is a
@@ -84,9 +86,17 @@ public class SnapshotTrimmer
 	 */
 	static final int BUDGET_BYTES = 15_872;
 
-	/** The map's own ceilings. Omitted history is disclosed rather than mistaken for no drops. */
+	/**
+	 * The map's own ceilings. Omitted history is disclosed rather than mistaken for no drops.
+	 *
+	 * <p>Thirty-two is Barrows' twenty-four rated pieces with room for collection rows. A cap under
+	 * a table's size cuts an honest log, and the cut makes every rated row left off as the default
+	 * an unknown on the map: an ordinary Barrows log has nine pieces by its 160th chest. Never above
+	 * {@code MAX_DROPS_PER_MONSTER} in {@code lib/companion-snapshot.ts}, which the map's contract
+	 * test holds; the byte budget below bounds the whole snapshot whatever this is.
+	 */
 	static final int MAX_LOOT_NPCS = 40;
-	static final int MAX_DROPS_PER_NPC = 8;
+	static final int MAX_DROPS_PER_NPC = 32;
 
 	/**
 	 * Freshest first, and the id decides between two of the same age.
@@ -176,8 +186,10 @@ public class SnapshotTrimmer
 	/**
 	 * The ceilings the map applies on arrival anyway.
 	 *
-	 * <p>Clipping on either side loses history. In particular, an absent ninth drop must not become
-	 * "never obtained" in a web reader; the per-monster completeness bit keeps that unknown.
+	 * <p>Clipping on either side loses history. In particular, an absent rated drop must not become
+	 * "never obtained" in a web reader; the per-monster completeness bit keeps that unknown. The
+	 * collection rows go first, from the end, which is the least recently had: the map shows one
+	 * only when it arrives, so cutting it costs that row and keeps every rated row's default.
 	 */
 	private void applyReceiverCaps(CompanionSnapshot snapshot)
 	{
@@ -192,13 +204,21 @@ public class SnapshotTrimmer
 		trimTo(snapshot.loot.npcs, MAX_LOOT_NPCS);
 		for (CompanionSnapshot.Npc npc : snapshot.loot.npcs)
 		{
-			if (npc.drops != null)
+			if (npc.drops == null || npc.drops.size() <= MAX_DROPS_PER_NPC)
 			{
-				if (npc.drops.size() > MAX_DROPS_PER_NPC)
+				continue;
+			}
+			snapshot.detailsTruncated = true;
+			for (int i = npc.drops.size() - 1; i >= 0 && npc.drops.size() > MAX_DROPS_PER_NPC; i--)
+			{
+				if (npc.drops.get(i).collection)
 				{
-					npc.dropsComplete = false;
-					snapshot.detailsTruncated = true;
+					npc.drops.remove(i);
 				}
+			}
+			if (npc.drops.size() > MAX_DROPS_PER_NPC)
+			{
+				npc.dropsComplete = false;
 				trimTo(npc.drops, MAX_DROPS_PER_NPC);
 			}
 		}
