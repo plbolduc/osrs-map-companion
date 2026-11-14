@@ -39,6 +39,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.Notification;
+import net.runelite.client.ui.ColorScheme;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -339,7 +340,7 @@ public class SharingControlsTest
 			/* The line under a switch is always there now: what the switch covers, until part of it is on. */
 			javax.swing.JLabel under = (javax.swing.JLabel) named(controls, "sharingPartly.where");
 			assertEquals("Partly shared: Position and world", plain(under));
-			assertEquals("the name is not a switch's to turn on", "Use my character name", ((JButton) named(controls, "sharing.nameLink")).getText());
+			assertEquals("the name is not a switch's to turn on", "Use my character name ›", ((JButton) named(controls, "sharing.nameLink")).getText());
 			config.set("sharePosition", false);
 			controls.refresh();
 			assertNull(find(controls, "share.where").getClientProperty("JButton.selectedState"));
@@ -413,13 +414,15 @@ public class SharingControlsTest
 			SharingControls controls = new SharingControls(config, store);
 			assertNull(find(controls, MapCompanionConfig.KEY_SHARE_NAME));
 			JButton link = (JButton) named(controls, "sharing.nameLink");
-			assertEquals("Use my character name", link.getText());
+			/* With the chevron of every pressable line here, so it no longer reads as the status above it. */
+			assertEquals("Use my character name ›", link.getText());
+			assertEquals(ColorScheme.BRAND_ORANGE, link.getForeground());
 			assertTrue(SidebarWords.words(controls).contains("Name to show instead"));
 			assertTrue(named(controls, "nickname").isVisible());
 
 			link.doClick();
 			assertEquals("true", store.get(MapCompanionConfig.KEY_SHARE_NAME));
-			assertEquals("Use another name", link.getText());
+			assertEquals("Use another name ›", link.getText());
 			assertTrue(SidebarWords.words(controls).contains("Shown as your character name"));
 			assertFalse(named(controls, "nickname").isVisible());
 
