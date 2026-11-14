@@ -131,7 +131,8 @@ public class SidebarPolishShot
 		net.runelite.client.game.ItemManager itemManager = (net.runelite.client.game.ItemManager) allocate(net.runelite.client.game.ItemManager.class);
 		/*
 		 * The real client's collection catalog resolves a rated item that has not dropped yet.
-		 * This scene supplies that one name/id without claiming a complete collection catalog.
+		 * These scenes supply the two names they show, the robe and Rex's pet, without claiming a
+		 * complete collection catalog.
 		 */
 		LootLog lootLog = new LootLog(game.client(), store, gson, new LootLog.NotableItems()
 		{
@@ -156,8 +157,8 @@ public class SidebarPolishShot
 			@Override
 			public Integer idFor(String name)
 			{
-				return "Mystic robe bottom (dark)".equals(name)
-					? net.runelite.api.gameval.ItemID.MYSTIC_ROBE_BOTTOM_DARK : null;
+				return "Mystic robe bottom (dark)".equals(name) ? net.runelite.api.gameval.ItemID.MYSTIC_ROBE_BOTTOM_DARK
+					: "Pet Dagannoth Rex".equals(name) ? net.runelite.api.gameval.ItemID.REXPET : null;
 			}
 		});
 		Pairing pairing = new Pairing(store, gson, config::relayUrl);

@@ -45,6 +45,7 @@ final class Sprites
 		ITEMS.put(6737, "berserker-ring");
 		ITEMS.put(6735, "warrior-ring");
 		ITEMS.put(6739, "dragon-axe");
+		ITEMS.put(net.runelite.api.gameval.ItemID.REXPET, "pet-dagannoth-rex");
 		CHIPS.put(net.runelite.api.gameval.ItemID.SAILING_LOG, "captains-log");
 		CHIPS.put(net.runelite.api.gameval.ItemID.SAILING_CHARTING_SPYGLASS, "spyglass");
 		CHIPS.put(net.runelite.api.gameval.ItemID.SAILING_CHARTING_CROWBAR, "crowbar");
