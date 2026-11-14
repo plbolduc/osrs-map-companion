@@ -775,8 +775,9 @@ public class LootLog
 		}
 		/*
 		 * Shared by damage, on a boss that hands its drops out by it: the player's share of a kill.
-		 * A fight with no hit of the player's seen is not a share of nothing — the loot says the
-		 * player was there — so it is counted at the share the hits that were seen give it.
+		 * A fight with none of the player's hits seen has a share of nothing, as far as can be told:
+		 * it adds a kill to the monster and none to its shared rows, and what fell on it is not
+		 * counted for them, rather than a share guessed from the loot.
 		 */
 		double share = !othersHit || !sharedRows ? 1 : (double) fight[0] / (fight[0] + fight[1]);
 		if (anyRow(watched, "where", "outside-instances") && WorldTiles.isInstance(client))
@@ -863,10 +864,15 @@ public class LootLog
 		tally.kills++;
 		tally.lastKillMs = clock.getAsLong();
 		Set<String> pets = new HashSet<>();
+		Set<String> uncounted = new HashSet<>();
 		for (Rate rate : watched)
 		{
 			double w = worth.applyAsDouble(rate);
-			if (Boolean.TRUE.equals(rate.pet))
+			if (w == 0)
+			{
+				uncounted.add(rate.item);
+			}
+			else if (Boolean.TRUE.equals(rate.pet))
 			{
 				pets.add(rate.item);
 			}
@@ -960,7 +966,11 @@ public class LootLog
 			Rate rate = rateFor(watched, item);
 			if (rate != null)
 			{
-				if (!counted.add(rate.item))
+				/*
+				 * A kill worth nothing to a row is one the row did not count, and what fell on it is not
+				 * counted either: a drop against no kills reads as the luckiest there is, and stays so.
+				 */
+				if (!counted.add(rate.item) || uncounted.contains(rate.item))
 				{
 					continue;
 				}
