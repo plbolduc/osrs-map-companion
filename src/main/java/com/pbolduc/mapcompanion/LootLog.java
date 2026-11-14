@@ -444,7 +444,23 @@ public class LootLog
 		mvpAt = tally == null ? tick : null;
 		if (tally != null)
 		{
-			lastSharedCredit.forEach((item, credit) -> tally.weighted.get(item)[1] += credit);
+			lastSharedCredit.forEach((item, credit) ->
+			{
+				double[] now = tally.weighted.get(item);
+				now[1] += credit;
+				/*
+				 * A baseline taken on that kill — the hilt fell on it — is behind the credit too, or the
+				 * drop's wait would start with a share and no kill to hold it. A baseline holds as many
+				 * shared kills as the counter only where it was taken since that kill, which was shared.
+				 */
+				for (double[] base : new double[][] {tally.sharedAtLast.get(item), tally.sharedAtStart.get(item)})
+				{
+					if (base != null && base[0] == now[0])
+					{
+						base[1] += credit;
+					}
+				}
+			});
 			lastShared = null;
 			unsaved = true;
 		}

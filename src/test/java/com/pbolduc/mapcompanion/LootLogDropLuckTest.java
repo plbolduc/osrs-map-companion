@@ -664,6 +664,53 @@ public class LootLogDropLuckTest
 	}
 
 	/**
+	 * The hilt fell on a shared kill and the MVP line came a tick later. The credit belongs to the kill
+	 * the hilt's wait starts after, so the wait holds neither kill nor share — the map refuses a share
+	 * with no kill under it, and would read the wait differently from the sidebar.
+	 */
+	@Test
+	public void anMvpLineAfterTheLootCreditsTheKillADropFellOn()
+	{
+		game.nameItem(HILT, "Ancient hilt");
+		log.onHitsplat("Nex", true, false, 50, game.client().getTickCount());
+		log.onHitsplat("Nex", false, true, 50, game.client().getTickCount());
+		kill("Nex", HILT);
+		game.tick();
+		log.onMvpMessage(game.client().getTickCount());
+		LootLog.Drop hilt = drop("Nex", "Ancient hilt");
+		assertEquals(1, hilt.obtained);
+		assertEquals(0, hilt.sharedSinceLast);
+		assertEquals(0, hilt.shareSinceLast, 0);
+		assertEquals("the kill itself is credited", 0.5, hilt.shareWatched, 1e-9);
+		CompanionSnapshot.Drop wire = DropLuckViewTestSupport.npc(log.snapshot(), "Nex").drops.stream()
+			.filter(d -> d.item.equals("Ancient hilt")).findFirst().orElse(null);
+		assertEquals(Integer.valueOf(0), wire.sharedSinceLast);
+		assertEquals(Double.valueOf(0), wire.shareSinceLast);
+	}
+
+	/** The MVP line is the kill's two ticks after its loot, and no longer: a third is another fight's. */
+	@Test
+	public void anMvpLineCountsForTheKillUpToTwoTicksAfterIt()
+	{
+		for (int late = 2; late <= 3; late++)
+		{
+			log.onHitsplat("Nex", true, false, 50, game.client().getTickCount());
+			log.onHitsplat("Nex", false, true, 50, game.client().getTickCount());
+			kill("Nex", BONES);
+			for (int i = 0; i < late; i++)
+			{
+				game.tick();
+			}
+			log.onMvpMessage(game.client().getTickCount());
+			for (int i = 0; i <= LootLog.SHARED_TICKS; i++)
+			{
+				game.tick();
+			}
+		}
+		assertEquals("credited at two ticks, not at three", 0.5 + 0.5 / 1.1, drop("Nex", "Ancient hilt").shareWatched, 1e-9);
+	}
+
+	/**
 	 * Vardorvis is one name and one NPC id at three combat levels: the ordinary fight, the awakened
 	 * one with three times the unique table, and the quest's. Each priced level is its own monster,
 	 * and the quest's is not counted.
