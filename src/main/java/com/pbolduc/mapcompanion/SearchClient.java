@@ -80,9 +80,9 @@ final class SearchClient
 	/** No character to search as: a search is asked as a member, and a member is a character. */
 	static final String LOG_IN = "Log in to search.";
 	static final String UNREACHABLE = RoutePress.UNREACHABLE;
-	static final String FAILED = "The map could not search just now.";
+	static final String FAILED = Words.of("search.failed");
 	static final String UNREADABLE = RoutePress.UNREADABLE;
-	static final String NOTHING = "Nothing on the map by that name.";
+	static final String NOTHING = Words.of("search.nothing");
 	/** Under a one-letter box: {@link #MIN_QUERY} is two, and a query of one asks nothing. */
 	static final String ONE_MORE = "Type one more letter.";
 

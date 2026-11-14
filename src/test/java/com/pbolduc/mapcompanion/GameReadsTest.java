@@ -45,6 +45,7 @@ public class GameReadsTest
 		CLASSES.put("daily", new Class<?>[] {VarbitID.class});
 		CLASSES.put("charting", new Class<?>[] {VarPlayerID.class});
 		CLASSES.put("mortimer", new Class<?>[] {VarbitID.class});
+		CLASSES.put("travel", new Class<?>[] {VarbitID.class});
 	}
 
 	@Test

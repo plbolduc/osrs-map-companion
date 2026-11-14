@@ -420,7 +420,7 @@ final class DropOdds
 		double had = within(rate, kills);
 		return shown(had) >= 50
 			? "drier than " + than(had) + "% of players"
-			: percent(1 - had) + "% of players would still be waiting too";
+			: percent(1 - had) + Words.of("luck.stillWaiting");
 	}
 
 	/**

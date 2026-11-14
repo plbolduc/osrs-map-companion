@@ -57,7 +57,7 @@ import static net.runelite.client.ui.ColorScheme.LIGHT_GRAY_COLOR;
  */
 final class RunView extends JPanel
 {
-	private static final int WIDTH = MapCompanionPanel.CARD_TEXT_WIDTH;
+	private static final int WIDTH = CARD_TEXT_WIDTH;
 	/** A stop's picture, at the size This leg draws a step's. */
 	private static final int PICTURE = 16;
 	static final String CHANGED = Words.of("run.changed");
@@ -78,16 +78,16 @@ final class RunView extends JPanel
 	/** How much of a run is done, as a bar over the count that says it in words. */
 	private final JProgressBar bar = new JProgressBar();
 	private final JLabel changed = label(11f, MapPin.AMBER);
-	private final JButton before = MapCompanionPanel.linkButton("▸ Before you leave");
+	private final JButton before = linkButton("▸ Before you leave");
 	private final JPanel bring = column();
 	private final JPanel stops = column();
 	/*
 	 * Small buttons, as the destination card's are: these act, and a link is a fold's own opener. A
 	 * third of the card is too narrow for "Pause route", so the button says Pause and its tip the rest.
 	 */
-	private final JButton follow = MapCompanionPanel.smallButton("Follow");
-	private final JButton reroute = MapCompanionPanel.smallButton("Reroute");
-	private final JButton end = MapCompanionPanel.smallButton("End run");
+	private final JButton follow = smallButton("Follow");
+	private final JButton reroute = smallButton("Reroute");
+	private final JButton end = smallButton("End run");
 	private final JPanel actions = new JPanel(new GridLayout(1, 0, 4, 0));
 	private List<JButton> shownActions = Collections.emptyList();
 	/** A run shown, or one being planned or ended: the card's own Start would replace it. EDT. */
@@ -146,18 +146,18 @@ final class RunView extends JPanel
 		paused.setBorder(new EmptyBorder(6, 0, 0, 0));
 		paused.setVisible(false);
 		legHead.setText(legHeading(null));
-		MapCompanionPanel.refont(legHead, Font.BOLD);
+		refont(legHead, Font.BOLD);
 		legHead.setBorder(new CompoundBorder(
 			new EmptyBorder(6, 0, 0, 0),
 			new CompoundBorder(
 				BorderFactory.createMatteBorder(1, 0, 0, 0, ColorScheme.MEDIUM_GRAY_COLOR),
 				new EmptyBorder(5, 0, 1, 0))));
-		MapCompanionPanel.capped(legHead);
+		capped(legHead);
 		legHead.setVisible(false);
 		legEnd.setBorder(new CompoundBorder(
 			new EmptyBorder(6, 0, 0, 0),
 			BorderFactory.createMatteBorder(1, 0, 0, 0, ColorScheme.MEDIUM_GRAY_COLOR)));
-		MapCompanionPanel.capped(legEnd);
+		capped(legEnd);
 		legEnd.setVisible(false);
 		actions.setOpaque(false);
 		actions.setBorder(new EmptyBorder(5, 0, 0, 0));
@@ -210,7 +210,7 @@ final class RunView extends JPanel
 	 * its Follow is still a click away. EDT.
 	 */
 	@Nullable
-	JButton actButton(MapCompanionPanel.Act act)
+	JButton actButton(Act act)
 	{
 		if (!shownActions.contains(follow))
 		{
@@ -221,7 +221,7 @@ final class RunView extends JPanel
 		{
 			return null;
 		}
-		return act == MapCompanionPanel.Act.REROUTE ? reroute : act == MapCompanionPanel.Act.FOLLOW ? follow : end;
+		return act == Act.REROUTE ? reroute : act == Act.FOLLOW ? follow : end;
 	}
 
 	/**
@@ -270,7 +270,7 @@ final class RunView extends JPanel
 			wanted.add(reroute);
 		}
 		wanted.add(end);
-		shownActions = MapCompanionPanel.syncRow(actions, wanted, shownActions);
+		shownActions = syncRow(actions, wanted, shownActions);
 		// The Port tasks card's own heading already names its one kind of run.
 		title.setVisible(active && !port);
 		progress.setVisible(active);
@@ -292,14 +292,14 @@ final class RunView extends JPanel
 				bringOpen = false;
 			}
 			shownRun = view.run.id;
-			MapCompanionPanel.setWrapped(title, view.run.name, WIDTH);
-			MapCompanionPanel.setWrapped(progress, progressLine(view), WIDTH);
+			setWrapped(title, view.run.name, WIDTH);
+			setWrapped(progress, progressLine(view), WIDTH);
 			/* It counts what the line under it counts: the stops something can witness, or every stop where nothing can. */
 			boolean witnessed = view.tracked() > 0;
 			bar.setMaximum(witnessed ? view.tracked() : view.run.stops.size());
 			bar.setValue(witnessed ? view.trackedDone() : view.visited.size());
 			progress.setForeground(left ? LIGHT_GRAY_COLOR : Color.WHITE);
-			MapCompanionPanel.setWrapped(changed, CHANGED, WIDTH);
+			setWrapped(changed, CHANGED, WIDTH);
 			follow.setText(view.following ? "Pause" : "Follow");
 			follow.setToolTipText(view.following ? Words.of("run.unfollowTip") : null);
 			follow.setEnabled(left);
@@ -337,7 +337,7 @@ final class RunView extends JPanel
 		boolean speaks = mine && said.shown(now);
 		MapCompanionPanel.show(message, speaks ? client.words(said, now) : null, WIDTH);
 		/* A refusal in pink; Planning…, Ending run… and Run ended. in the line's grey. */
-		MapCompanionPanel.tone(message, speaks && said.refused());
+		tone(message, speaks && said.refused());
 		return active || speaks || planning || ending;
 	}
 
@@ -451,11 +451,11 @@ final class RunView extends JPanel
 	/** The stop's name, its number bold and amber when it is the next stop, as the world map draws its pin. */
 	static String stopName(FarmStop stop, boolean next, int width)
 	{
-		String name = MapCompanionPanel.escape(stop.name);
+		String name = escape(stop.name);
 		String number = stop.n + ".";
 		/* What a leg says besides its length, "ashore at The Onyx Crest", in grey under the name it belongs to. */
 		String more = stop.leg == null || stop.leg.more == null ? ""
-			: "<br><font color='#c6c6c6'>" + MapCompanionPanel.escape(stop.leg.more) + "</font>";
+			: "<br><font color='#c6c6c6'>" + escape(stop.leg.more) + "</font>";
 		return "<html><body width='" + width + "'>" + (next ? "<b><font color='" + MapPin.AMBER_FONT + "'>" + number + "</font></b>" : number)
 			+ " " + name + more + "</body></html>";
 	}
@@ -551,9 +551,9 @@ final class RunView extends JPanel
 					}
 					name = name.trim() + "…";
 				}
-				String named = MapCompanionPanel.escape(name);
+				String named = escape(name);
 				line.setText("<html><body width='" + WIDTH + "'><strike>" + named + "</strike>"
-					+ MapCompanionPanel.escape(" · " + at) + "</body></html>");
+					+ escape(" · " + at) + "</body></html>");
 				row.add(line);
 				stops.add(left(row));
 				continue;
@@ -597,7 +597,7 @@ final class RunView extends JPanel
 			}
 			else
 			{
-				row.add(tiles < 0 ? name : left(MapCompanionPanel.bar(4, ColorScheme.DARKER_GRAY_COLOR, null, name, length)));
+				row.add(tiles < 0 ? name : left(bar(4, ColorScheme.DARKER_GRAY_COLOR, null, name, length)));
 				method.add(wrapped(stop.method == null ? "Walk" : stop.method, 11f, LIGHT_GRAY_COLOR, beside), BorderLayout.CENTER);
 			}
 			row.add(left(method));

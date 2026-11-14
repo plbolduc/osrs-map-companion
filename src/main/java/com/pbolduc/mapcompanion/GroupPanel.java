@@ -86,7 +86,7 @@ import static net.runelite.client.ui.ColorScheme.LIGHT_GRAY_COLOR;
  */
 final class GroupPanel extends JPanel
 {
-	private static final int WIDTH = MapCompanionPanel.CARD_TEXT_WIDTH;
+	private static final int WIDTH = CARD_TEXT_WIDTH;
 	private static final Color FALLBACK = new Color(161, 161, 170);
 	/*
 	 * The website's presence colours, from its MemberDisc: Tailwind's emerald-500, amber-500 and
@@ -145,7 +145,7 @@ final class GroupPanel extends JPanel
 	 * Meetups heading. Logged in with no roster yet it stays hidden, since the roster is on its way.
 	 */
 	private final JLabel logIn = new JLabel();
-	private final JLabel meetupsHead = MapCompanionPanel.sectionHead("Meetups");
+	private final JLabel meetupsHead = sectionHead("Meetups");
 	/**
 	 * Under the Meetups heading while Destinations and meetups is off. The map's meetups are taken only
 	 * with it on ({@link DestinationState#acceptSocial}), so the section is empty, and a meetup made
@@ -154,7 +154,7 @@ final class GroupPanel extends JPanel
 	static final String MEETUPS_OFF = Words.of("group.meetupsOff");
 	private final JLabel meetupsOff = new JLabel();
 	private final JPanel meetupCards = column(DARK_GRAY_COLOR);
-	private final JButton meetHere = MapCompanionPanel.linkButton("Meet here…");
+	private final JButton meetHere = linkButton("Meet here…");
 	private final JLabel meetSaid = new JLabel();
 	private final JPanel form = column(DARKER_GRAY_COLOR);
 	private final JTextField title = new JTextField();
@@ -216,10 +216,10 @@ final class GroupPanel extends JPanel
 		meetHere.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
 		meetHere.setToolTipText(Words.of("group.meetHereTip"));
 		meetHere.addActionListener(e -> openForm(!formOpen));
-		JPanel head = MapCompanionPanel.bar(0, DARK_GRAY_COLOR, meetupsHead, null, meetHere);
+		JPanel head = bar(0, DARK_GRAY_COLOR, meetupsHead, null, meetHere);
 		head.setName("group.meetupsHead");
 		head.setBorder(new EmptyBorder(4, 0, 3, 0));
-		MapCompanionPanel.capped(head);
+		capped(head);
 		add(left(head));
 		/*
 		 * The form opens under the link that opened it, above the meetups, and its answer is said there;
@@ -251,9 +251,9 @@ final class GroupPanel extends JPanel
 		day.setName("group.meetDay");
 		hour.setName("group.meetHour");
 		minute.setName("group.meetMinute");
-		MapCompanionPanel.refont(day, 11f);
-		MapCompanionPanel.refont(hour, 11f);
-		MapCompanionPanel.refont(minute, 11f);
+		refont(day, 11f);
+		refont(hour, 11f);
+		refont(minute, 11f);
 		form.add(fill(day));
 		form.add(gap(4));
 		form.add(fill(actions(hour, minute)));
@@ -315,7 +315,7 @@ final class GroupPanel extends JPanel
 			day.addItem(i == 0 ? "Today" : i == 1 ? "Tomorrow"
 				: date.format(DateTimeFormatter.ofPattern("EEE d MMM", Locale.ENGLISH)));
 		}
-		boolean twelve = MapCompanionPanel.clockPattern(locale).startsWith("h");
+		boolean twelve = clockPattern(locale).startsWith("h");
 		hour.removeAllItems();
 		for (int h = 0; h < 24; h++)
 		{
@@ -427,7 +427,7 @@ final class GroupPanel extends JPanel
 		if (showMeet)
 		{
 			setWrapped(meetSaid, fresh.message, WIDTH + 16);
-			MapCompanionPanel.tone(meetSaid, fresh.refused());
+			tone(meetSaid, fresh.refused());
 		}
 		make.setEnabled(asks && meetups.ready() && (meet == null || !meet.sending));
 		meetHere.setEnabled(asks);
@@ -552,7 +552,7 @@ final class GroupPanel extends JPanel
 	{
 		JPanel card = card();
 		card.setName("group.alone");
-		card.add(MapCompanionPanel.wrapped(ALONE, 11f, LIGHT_GRAY_COLOR, WIDTH));
+		card.add(wrapped(ALONE, 11f, LIGHT_GRAY_COLOR, WIDTH));
 		return slot(card);
 	}
 
@@ -795,7 +795,7 @@ final class GroupPanel extends JPanel
 		route.addActionListener(e ->
 		{
 			press.press(RoutePress.Target.tile(source, new WorldPoint(meetup.x, meetup.y, meetup.plane), meetup.title,
-				meetup.world, MapCompanionPanel.meetupStarts(meetup.startsAtMs, System.currentTimeMillis(), ZoneId.systemDefault(),
+				meetup.world, meetupStarts(meetup.startsAtMs, System.currentTimeMillis(), ZoneId.systemDefault(),
 					Locale.getDefault(Locale.Category.FORMAT))));
 			redraw();
 		});
@@ -857,7 +857,7 @@ final class GroupPanel extends JPanel
 			});
 			answers.add(button);
 		}
-		MapCompanionPanel.capped(answers);
+		capped(answers);
 		card.add(left(answers));
 		boolean routed = said != null && said.message != null;
 		String message = routed ? said.message : answer != null ? answer.message : null;
@@ -888,7 +888,7 @@ final class GroupPanel extends JPanel
 	{
 		String words = (open ? "▾ " : "▸ ") + meetup.title + " · " + dayAndClock(meetup.startsAtMs, now, ZoneId.systemDefault(),
 			Locale.getDefault(Locale.Category.FORMAT)) + (meetup.world == null ? "" : " · W" + meetup.world);
-		JButton line = MapCompanionPanel.linkButton("");
+		JButton line = linkButton("");
 		line.setName("group.meetupFold." + meetup.id);
 		/* Wrapped as a label is, since the title is whatever the group typed and a button's own text would widen the tab. */
 		line.setText(markup(words, onWorld(meetup.world) ? "W" + meetup.world : null, HERE, WIDTH + 16));
@@ -1020,7 +1020,7 @@ final class GroupPanel extends JPanel
 	 */
 	static String dayAndClock(long startsAtMs, long nowMs, ZoneId zone, Locale locale)
 	{
-		return MapCompanionPanel.meetupStarts(startsAtMs, nowMs, zone, locale);
+		return meetupStarts(startsAtMs, nowMs, zone, locale);
 	}
 
 	/** The countdown a when line ends with: "in 25m", "in 3h 20m", "now", "started", or null past twelve hours. */
@@ -1128,14 +1128,14 @@ final class GroupPanel extends JPanel
 	{
 		line.setVisible(true);
 		setWrapped(line, message, WIDTH);
-		MapCompanionPanel.tone(line, false);
+		tone(line, false);
 	}
 
 	/** The same line, for a press that did not happen. */
 	private void refuse(JLabel line, String message)
 	{
 		say(line, message);
-		MapCompanionPanel.tone(line, true);
+		tone(line, true);
 	}
 
 	private static JPanel card()
@@ -1175,7 +1175,7 @@ final class GroupPanel extends JPanel
 
 	private static JPanel actions(JComponent... items)
 	{
-		return MapCompanionPanel.row(DARKER_GRAY_COLOR, items);
+		return row(DARKER_GRAY_COLOR, items);
 	}
 
 	/**
@@ -1193,7 +1193,7 @@ final class GroupPanel extends JPanel
 		JPanel hug = new JPanel(new java.awt.BorderLayout());
 		hug.setBackground(DARKER_GRAY_COLOR);
 		hug.add(stack, java.awt.BorderLayout.NORTH);
-		return MapCompanionPanel.capped(MapCompanionPanel.bar(4, DARKER_GRAY_COLOR, null, words, hug));
+		return capped(bar(4, DARKER_GRAY_COLOR, null, words, hug));
 	}
 
 	/** The buttons a card has, in order, leaving out the ones it does not. */

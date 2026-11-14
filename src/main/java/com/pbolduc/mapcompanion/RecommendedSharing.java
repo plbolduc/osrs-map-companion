@@ -97,7 +97,7 @@ final class RecommendedSharing extends JPanel
 	static final String DESTINATIONS_DETAIL = Words.of("share.destinationsDetail");
 	static final String GROUP_DETAIL = Words.of("share.groupDetail");
 
-	private static final int TEXT = MapCompanionPanel.CARD_TEXT_WIDTH;
+	private static final int TEXT = CARD_TEXT_WIDTH;
 	private static final int INDENT = 20;
 	private static final Color BACK = ColorScheme.DARKER_GRAY_COLOR;
 
@@ -174,13 +174,13 @@ final class RecommendedSharing extends JPanel
 		orange(share, true);
 		share.setToolTipText(Words.of("share.shareTip"));
 		share.addActionListener(e -> share());
-		card.add(MapCompanionPanel.fill(share, BACK));
+		card.add(fill(share, BACK));
 
-		JButton skip = MapCompanionPanel.linkButton("Not now");
+		JButton skip = linkButton("Not now");
 		skip.setName("recommended.skip");
 		skip.setToolTipText(Words.of("share.skipTip"));
 		skip.addActionListener(e -> close());
-		card.add(MapCompanionPanel.fill(skip, BACK));
+		card.add(fill(skip, BACK));
 		setVisible(false);
 	}
 
@@ -329,7 +329,7 @@ final class RecommendedSharing extends JPanel
 	private JPanel fold(JPanel details)
 	{
 		JPanel panel = column();
-		JButton toggle = MapCompanionPanel.linkButton("▸ What each one sends");
+		JButton toggle = linkButton("▸ What each one sends");
 		toggle.setName("recommended.detailsToggle");
 		details.setBorder(new EmptyBorder(0, 0, 4, 0));
 		details.setVisible(false);

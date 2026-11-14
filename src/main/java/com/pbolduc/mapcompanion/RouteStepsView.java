@@ -92,7 +92,7 @@ import static net.runelite.client.ui.ColorScheme.DARKER_GRAY_COLOR;
  */
 final class RouteStepsView extends JPanel
 {
-	private static final int WIDTH = MapCompanionPanel.CARD_TEXT_WIDTH;
+	private static final int WIDTH = CARD_TEXT_WIDTH;
 	/** The step numbers' column: two digits, right-aligned, so 9 and 10 end at one x. */
 	private static final int NUMBER = 14;
 	/** A step's picture: the size the website's chips draw a sprite, and the friends list's news. */
@@ -104,7 +104,7 @@ final class RouteStepsView extends JPanel
 	private static final Color DONE = ColorScheme.MEDIUM_GRAY_COLOR;
 	private static final Color AHEAD = ColorScheme.LIGHT_GRAY_COLOR;
 	/** An unmet gate, in the Slayer list's colour for one: the sidebar's refusal pink. */
-	private static final Color UNMET = MapCompanionPanel.REFUSED;
+	private static final Color UNMET = REFUSED;
 
 	private final IntConsumer choose;
 	@Nullable
@@ -261,7 +261,7 @@ final class RouteStepsView extends JPanel
 		String status = view.rerouting ? "Planning from where you stand…"
 			: MapWait.words(view.message, view.nextRerouteMs - System.currentTimeMillis());
 		MapCompanionPanel.show(message, status, WIDTH);
-		MapCompanionPanel.tone(message, !view.rerouting && view.refused);
+		tone(message, !view.rerouting && view.refused);
 	}
 
 	/**
@@ -285,8 +285,8 @@ final class RouteStepsView extends JPanel
 		JLabel title = label(12f, place == 0 ? Color.WHITE : place < 0 ? DONE : AHEAD);
 		if (place == 0)
 		{
-			MapCompanionPanel.refont(number, Font.BOLD);
-			MapCompanionPanel.refont(title, Font.BOLD);
+			refont(number, Font.BOLD);
+			refont(title, Font.BOLD);
 			title.setToolTipText("The step you are on");
 		}
 		Dimension column = new Dimension(NUMBER, number.getPreferredSize().height);
@@ -308,7 +308,7 @@ final class RouteStepsView extends JPanel
 			}
 			/* Faded behind the current step, as the world map fades the pins of steps done. */
 			picture.setEnabled(place >= 0);
-			lead = MapCompanionPanel.bar(PICTURE_GAP, DARKER_GRAY_COLOR, number, picture, null);
+			lead = bar(PICTURE_GAP, DARKER_GRAY_COLOR, number, picture, null);
 		}
 		int width = WIDTH - NUMBER - PICTURE_GAP - (slot ? PICTURE + PICTURE_GAP : 0);
 		JPanel words = column(DARKER_GRAY_COLOR);
@@ -337,15 +337,15 @@ final class RouteStepsView extends JPanel
 				words.add(said);
 			}
 		}
-		JPanel row = MapCompanionPanel.bar(PICTURE_GAP, DARKER_GRAY_COLOR, lead, words, null);
+		JPanel row = bar(PICTURE_GAP, DARKER_GRAY_COLOR, lead, words, null);
 		row.setBorder(new EmptyBorder(3, 0, 0, 0));
-		return MapCompanionPanel.left(row);
+		return left(row);
 	}
 
 	/** A line under a step's title, in its column: its detail, a note, a docking gate. */
 	private static JLabel under(String text, int width)
 	{
-		return MapCompanionPanel.wrapped(text, 11f, AHEAD, width);
+		return wrapped(text, 11f, AHEAD, width);
 	}
 
 	/**

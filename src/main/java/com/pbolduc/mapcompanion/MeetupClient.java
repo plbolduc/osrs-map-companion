@@ -73,15 +73,15 @@ final class MeetupClient
 	private static final Pattern PATH = Pattern.compile("/[A-Za-z0-9/?=&%._~+\\-]{0,2000}");
 
 	/** A press with no character logged in: an answer and a meetup are a member's, and a member is a character. */
-	static final String LOG_IN = "Log in to answer or make a meetup.";
+	static final String LOG_IN = Words.of("meetup.logIn");
 	/** The cause and the one step that fixes it: a meetup is made on the tile you stand on, which an instance does not give. */
 	static final String NEEDS_TILE = Words.of("meetup.needsTile");
-	static final String ONE_AT_A_TIME = "The last answer is still on its way.";
+	static final String ONE_AT_A_TIME = Words.of("meetup.oneAtATime");
 	static final String GONE = Words.of("meetup.gone");
 	static final String REFUSED = Words.of("meetup.refused");
 	static final String UNREACHABLE = RoutePress.UNREACHABLE;
 	static final String FAILED = Words.of("meetup.failed");
-	static final String MADE = "Meetup made. Its link is copied.";
+	static final String MADE = Words.of("meetup.made");
 	static final String MADE_NO_LINK = "Meetup made.";
 
 	/** What the last write said, for the sidebar. */
