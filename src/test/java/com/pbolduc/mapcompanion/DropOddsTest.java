@@ -283,7 +283,16 @@ public class DropOddsTest
 		assertEquals("Primordial crystal", cerberus.drop.item);
 		assertEquals("97", DropOdds.percent(cerberus.drierThan));
 		assertEquals(DropOdds.Luck.VERY_DRY, DropLuckView.dryNow(cerberus));
-		assertEquals("Primordial crystal: 2,600 kills since the last", DropLuckView.standingNote(cerberus));
+		assertEquals("Primordial crystal: 2,600 kills since the last", DropLuckView.standingNote(cerberus, CERBERUS));
+	}
+
+	/** The chip's tooltip counts what the monster counts, as the card does; the map pins the same chests. */
+	@Test
+	public void theChipsTooltipCountsChestsAtBarrows()
+	{
+		LootLog.Drop helm = new LootLog.Drop("Dharok's helm", -1, 1, 300, 400, 0, 0, 350.14, null, null, 0, 0, 0, 0, 1, false);
+		LootLog.Monster barrows = new LootLog.Monster("Barrows", 400, 0, java.util.Collections.singletonList(helm), false, "chest", 0);
+		assertEquals("Dharok's helm: 300 chests since the last", DropLuckView.standingNote(DropLuckView.standing(barrows, null), barrows));
 	}
 
 	/** A dagger at 1 in 32,000 cannot be dry after 1,024 kills, so it does not dilute the whip. */
