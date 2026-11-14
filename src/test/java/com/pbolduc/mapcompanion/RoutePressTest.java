@@ -185,6 +185,21 @@ public class RoutePressTest
 	}
 
 	/**
+	 * A death inside a boss's instance is recorded as the tile its arena is copied from, and the map
+	 * sends a tile marked as a death to that boss's way in. Unmarked, Route back after the Inferno
+	 * planned a way into the fight.
+	 */
+	@Test
+	public void aDeathTravelsAsATileMarkedAsADeath() throws Exception
+	{
+		connect();
+		RoutePress press = press(200, ANSWER, null);
+		press.press(RoutePress.Target.tile("death", new WorldPoint(2271, 5345, 0), "Where you died", null, null));
+		settle(press, "death");
+		assertEquals("{\"x\":2271,\"y\":5345,\"plane\":0,\"kind\":\"death\"}", body(sent.get(0)).get("target").toString());
+	}
+
+	/**
 	 * A spot picked on the world map has no name of its own, so the card takes the landmark the map
 	 * names near it, capitalised to head the card, and keeps the press's own words from a map that
 	 * names none. Any other tile keeps the name it was pressed under.
