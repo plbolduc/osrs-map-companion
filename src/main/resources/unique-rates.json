@@ -279,6 +279,222 @@
       "page": "Banshee"
     },
     {
+      "npc": "Barrows",
+      "item": "Ahrim's hood",
+      "oneIn": 350.1430906172214,
+      "page": "Chest (Barrows)",
+      "rolls": 7,
+      "perRollOneIn": 2448,
+      "needs": "all-brothers"
+    },
+    {
+      "npc": "Barrows",
+      "item": "Ahrim's robeskirt",
+      "oneIn": 350.1430906172214,
+      "page": "Chest (Barrows)",
+      "rolls": 7,
+      "perRollOneIn": 2448,
+      "needs": "all-brothers"
+    },
+    {
+      "npc": "Barrows",
+      "item": "Ahrim's robetop",
+      "oneIn": 350.1430906172214,
+      "page": "Chest (Barrows)",
+      "rolls": 7,
+      "perRollOneIn": 2448,
+      "needs": "all-brothers"
+    },
+    {
+      "npc": "Barrows",
+      "item": "Ahrim's staff",
+      "oneIn": 350.1430906172214,
+      "page": "Chest (Barrows)",
+      "rolls": 7,
+      "perRollOneIn": 2448,
+      "needs": "all-brothers"
+    },
+    {
+      "npc": "Barrows",
+      "item": "Dharok's greataxe",
+      "oneIn": 350.1430906172214,
+      "page": "Chest (Barrows)",
+      "rolls": 7,
+      "perRollOneIn": 2448,
+      "needs": "all-brothers"
+    },
+    {
+      "npc": "Barrows",
+      "item": "Dharok's helm",
+      "oneIn": 350.1430906172214,
+      "page": "Chest (Barrows)",
+      "rolls": 7,
+      "perRollOneIn": 2448,
+      "needs": "all-brothers"
+    },
+    {
+      "npc": "Barrows",
+      "item": "Dharok's platebody",
+      "oneIn": 350.1430906172214,
+      "page": "Chest (Barrows)",
+      "rolls": 7,
+      "perRollOneIn": 2448,
+      "needs": "all-brothers"
+    },
+    {
+      "npc": "Barrows",
+      "item": "Dharok's platelegs",
+      "oneIn": 350.1430906172214,
+      "page": "Chest (Barrows)",
+      "rolls": 7,
+      "perRollOneIn": 2448,
+      "needs": "all-brothers"
+    },
+    {
+      "npc": "Barrows",
+      "item": "Guthan's chainskirt",
+      "oneIn": 350.1430906172214,
+      "page": "Chest (Barrows)",
+      "rolls": 7,
+      "perRollOneIn": 2448,
+      "needs": "all-brothers"
+    },
+    {
+      "npc": "Barrows",
+      "item": "Guthan's helm",
+      "oneIn": 350.1430906172214,
+      "page": "Chest (Barrows)",
+      "rolls": 7,
+      "perRollOneIn": 2448,
+      "needs": "all-brothers"
+    },
+    {
+      "npc": "Barrows",
+      "item": "Guthan's platebody",
+      "oneIn": 350.1430906172214,
+      "page": "Chest (Barrows)",
+      "rolls": 7,
+      "perRollOneIn": 2448,
+      "needs": "all-brothers"
+    },
+    {
+      "npc": "Barrows",
+      "item": "Guthan's warspear",
+      "oneIn": 350.1430906172214,
+      "page": "Chest (Barrows)",
+      "rolls": 7,
+      "perRollOneIn": 2448,
+      "needs": "all-brothers"
+    },
+    {
+      "npc": "Barrows",
+      "item": "Karil's coif",
+      "oneIn": 350.1430906172214,
+      "page": "Chest (Barrows)",
+      "rolls": 7,
+      "perRollOneIn": 2448,
+      "needs": "all-brothers"
+    },
+    {
+      "npc": "Barrows",
+      "item": "Karil's crossbow",
+      "oneIn": 350.1430906172214,
+      "page": "Chest (Barrows)",
+      "rolls": 7,
+      "perRollOneIn": 2448,
+      "needs": "all-brothers"
+    },
+    {
+      "npc": "Barrows",
+      "item": "Karil's leatherskirt",
+      "oneIn": 350.1430906172214,
+      "page": "Chest (Barrows)",
+      "rolls": 7,
+      "perRollOneIn": 2448,
+      "needs": "all-brothers"
+    },
+    {
+      "npc": "Barrows",
+      "item": "Karil's leathertop",
+      "oneIn": 350.1430906172214,
+      "page": "Chest (Barrows)",
+      "rolls": 7,
+      "perRollOneIn": 2448,
+      "needs": "all-brothers"
+    },
+    {
+      "npc": "Barrows",
+      "item": "Torag's hammers",
+      "oneIn": 350.1430906172214,
+      "page": "Chest (Barrows)",
+      "rolls": 7,
+      "perRollOneIn": 2448,
+      "needs": "all-brothers"
+    },
+    {
+      "npc": "Barrows",
+      "item": "Torag's helm",
+      "oneIn": 350.1430906172214,
+      "page": "Chest (Barrows)",
+      "rolls": 7,
+      "perRollOneIn": 2448,
+      "needs": "all-brothers"
+    },
+    {
+      "npc": "Barrows",
+      "item": "Torag's platebody",
+      "oneIn": 350.1430906172214,
+      "page": "Chest (Barrows)",
+      "rolls": 7,
+      "perRollOneIn": 2448,
+      "needs": "all-brothers"
+    },
+    {
+      "npc": "Barrows",
+      "item": "Torag's platelegs",
+      "oneIn": 350.1430906172214,
+      "page": "Chest (Barrows)",
+      "rolls": 7,
+      "perRollOneIn": 2448,
+      "needs": "all-brothers"
+    },
+    {
+      "npc": "Barrows",
+      "item": "Verac's brassard",
+      "oneIn": 350.1430906172214,
+      "page": "Chest (Barrows)",
+      "rolls": 7,
+      "perRollOneIn": 2448,
+      "needs": "all-brothers"
+    },
+    {
+      "npc": "Barrows",
+      "item": "Verac's flail",
+      "oneIn": 350.1430906172214,
+      "page": "Chest (Barrows)",
+      "rolls": 7,
+      "perRollOneIn": 2448,
+      "needs": "all-brothers"
+    },
+    {
+      "npc": "Barrows",
+      "item": "Verac's helm",
+      "oneIn": 350.1430906172214,
+      "page": "Chest (Barrows)",
+      "rolls": 7,
+      "perRollOneIn": 2448,
+      "needs": "all-brothers"
+    },
+    {
+      "npc": "Barrows",
+      "item": "Verac's plateskirt",
+      "oneIn": 350.1430906172214,
+      "page": "Chest (Barrows)",
+      "rolls": 7,
+      "perRollOneIn": 2448,
+      "needs": "all-brothers"
+    },
+    {
       "npc": "Basilisk",
       "item": "Basilisk head",
       "oneIn": 2000,
@@ -808,6 +1024,54 @@
       "item": "Mystic robe bottom (dark)",
       "oneIn": 512,
       "page": "Deviant spectre"
+    },
+    {
+      "npc": "Doom of Mokhaiotl",
+      "item": "Avernic treads",
+      "oneIn": 540,
+      "page": "Doom of Mokhaiotl",
+      "delves": [
+        null,
+        null,
+        1350,
+        810,
+        765,
+        720,
+        630,
+        540
+      ]
+    },
+    {
+      "npc": "Doom of Mokhaiotl",
+      "item": "Eye of Ayak (uncharged)",
+      "oneIn": 540,
+      "page": "Doom of Mokhaiotl",
+      "delves": [
+        null,
+        2000,
+        1350,
+        810,
+        765,
+        720,
+        630,
+        540
+      ]
+    },
+    {
+      "npc": "Doom of Mokhaiotl",
+      "item": "Mokhaiotl cloth",
+      "oneIn": 540,
+      "page": "Doom of Mokhaiotl",
+      "delves": [
+        2500,
+        2000,
+        1350,
+        810,
+        765,
+        720,
+        630,
+        540
+      ]
     },
     {
       "npc": "Drake",

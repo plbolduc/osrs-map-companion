@@ -61,6 +61,7 @@ public class LootLogDropLuckTest
 	private static final int AXE_HEAD = 90_006;
 	private static final int GOLD_RING = 90_007;
 	private static final int CONTRACT = 90_008;
+	private static final int CLOTH = 90_009;
 
 	private final HarnessGame game = new HarnessGame();
 	private final HarnessStore store = new HarnessStore();
@@ -109,6 +110,7 @@ public class LootLogDropLuckTest
 		game.nameItem(AXE_HEAD, "Executioner's axe head");
 		game.nameItem(GOLD_RING, "Gold ring");
 		game.nameItem(CONTRACT, "Contract of Oathplate Acquisition");
+		game.nameItem(CLOTH, "Mokhaiotl cloth");
 		log.clock(() -> now);
 	}
 
@@ -629,6 +631,38 @@ public class LootLogDropLuckTest
 		assertNull("the contract's fight", DropLuckView.find(log.monsters(), "Yama"));
 		kill("Yama", BONES);
 		assertEquals(1, monster("Yama").kills);
+	}
+
+	/** A Barrows chest is priced for all six brothers' rolls, and one opened with fewer is not counted. */
+	@Test
+	public void aBarrowsChestCountsOnlyWithAllSixBrothers()
+	{
+		log.recordEvent("Barrows", Arrays.asList(new ItemStack(BONES, 1)), null, false);
+		assertNull("five brothers, fewer rolls", DropLuckView.find(log.monsters(), "Barrows"));
+		log.recordEvent("Barrows", Arrays.asList(new ItemStack(BONES, 1)), null, true);
+		assertEquals(1, monster("Barrows").kills);
+		assertEquals(350.14, drop("Barrows", "Ahrim's hood").oneIn, 0.01);
+	}
+
+	/**
+	 * A Doom run claimed at delve 3 rolled delve 2 and delve 3: the cloth at 1/2,500 and 1/2,000, the
+	 * eye only at 1/2,000, each in kills at its delve-9 rate. A claim with no delve is not counted.
+	 */
+	@Test
+	public void aDoomRunIsWorthEveryDelveItRolled()
+	{
+		log.recordEvent("Doom of Mokhaiotl", Arrays.asList(new ItemStack(CLOTH, 1)), null, false);
+		assertNull(DropLuckView.find(log.monsters(), "Doom of Mokhaiotl"));
+		log.recordEvent("Doom of Mokhaiotl", Arrays.asList(new ItemStack(BONES, 1)), 3, false);
+		double per = Math.log1p(-1 / 540.0);
+		assertEquals((Math.log1p(-1 / 2500.0) + Math.log1p(-1 / 2000.0)) / per,
+			drop("Doom of Mokhaiotl", "Mokhaiotl cloth").shareWatched, 1e-9);
+		assertEquals(Math.log1p(-1 / 2000.0) / per, drop("Doom of Mokhaiotl", "Eye of Ayak (uncharged)").shareWatched, 1e-9);
+		assertEquals(0, drop("Doom of Mokhaiotl", "Avernic treads").shareWatched, 1e-9);
+		log.recordEvent("Doom of Mokhaiotl", Arrays.asList(new ItemStack(CLOTH, 1)), 12, false);
+		assertEquals(1, drop("Doom of Mokhaiotl", "Mokhaiotl cloth").obtained);
+		assertEquals("three delves past the ninth are three kills at its rate", 3 + 1,
+			LootLog.delveWorth(Arrays.asList(1350.0, 540.0), 12) - LootLog.delveWorth(Arrays.asList(1350.0, 540.0), 9) + 1, 1e-9);
 	}
 
 	/** Outside an instance the canyon shaman is counted, warhammer and all. */

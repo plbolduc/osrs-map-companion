@@ -291,7 +291,7 @@ public class DropOddsTest
 		DropOdds.Kills shared = new DropOdds.Kills(3, 0, 2, 1.0);
 		assertEquals(DropOdds.stillWaiting(100, 4), DropOdds.stillWaiting(rate, shared), 1e-12);
 		assertEquals(5, shared.total());
-		assertEquals("a share is never more than its kills", 2.0, new DropOdds.Kills(0, 0, 2, 7.0).share, 0);
+		assertEquals("a run deep in the Doom is worth more than its one claim", 7.0, new DropOdds.Kills(0, 0, 2, 7.0).share, 0);
 		assertEquals(DropOdds.atLeast(1, 4, 0.01), DropOdds.atLeast(1, shared, 0.01, 0.01), 1e-12);
 	}
 }

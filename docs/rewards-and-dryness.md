@@ -127,7 +127,7 @@ per-item baseline and print **<1%** for a nonzero probability that rounds below 
 
 How Drop luck counts:
 
-- **Every monster is counted**, not only the 194 with a rate. Beside the rated rows, a monster keeps
+- **Every monster is counted**, not only the 196 with a rate. Beside the rated rows, a monster keeps
   any collection-log item that actually fell, read from the same cache vocabulary the announcements
   use; pets are left out for the reason above. A collection row is a count of what was seen and
   never the basis of a probability, so a kill the vocabulary could not judge moves its window
@@ -166,6 +166,14 @@ How Drop luck counts:
   "Contract of …" left the inventory, read from `ItemContainerChanged` by name and count only: a
   contract is spent on the fight it starts, whose unique is guaranteed. One banked or dropped skips
   one ordinary kill instead, which errs the safe way.
+- **Two reward events.** RuneLite's loot tracker posts the Barrows chest and the Doom of Mokhaiotl's
+  claimed run as `LootReceived` events, which `LootLog.recordEvent` counts like a kill. A row saying
+  `needs: "all-brothers"` counts a chest only with all six `BARROWS_KILLED_*` varbits set, where the
+  chest rolls seven times. A row with `delves` is worth, for a run claimed at delve L (the event's
+  metadata), every delve from the second to L at that delve's chance, in kills at the row's rate.
+  Kills worth other than one whole kill — a share, a run — are kept per item as a count and a summed
+  worth, beside the boost baselines, and travel as the four `shared…`/`share…` fields; a worth may
+  pass its count for a deep run.
 - **What a review of the build found**, each fixed with a test: a diary reading the game had not
   yet given (the fifteen seconds after every login and hop) restarted the talisman's count, so the
   last real reading is now kept per character and stands in; a finished task still counted as "on

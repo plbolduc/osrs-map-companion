@@ -323,7 +323,8 @@ settings for the plugin.
   Hueycoatl, Nex and Yama a kill shared with others counts as your share of the damage, and a Yama
   fight you spent a contract on is not counted; at the Nightmare,
   Scurrius and Zalcano it counts only kills nobody else hit. Araxxor counts only harvested corpses,
-  and the Desert Treasure II bosses only fights outside the quest. Activity rewards need RuneLite's
+  the Desert Treasure II bosses only fights outside the quest, the Barrows chest only with all six
+  brothers killed, and the Doom of Mokhaiotl each claimed run by how deep it went. Activity rewards need RuneLite's
   **Loot Tracker** plugin. **Forget kill log** clears the current character's counts.
 - Birdhouses need RuneLite's **Time Tracking** plugin. Farm timers are estimates; disease and later
   visits can change them.

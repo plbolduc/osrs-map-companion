@@ -27,6 +27,7 @@ package com.pbolduc.mapcompanion;
 
 import com.google.inject.Provides;
 import java.awt.image.BufferedImage;
+import java.util.stream.IntStream;
 import java.util.*;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -54,6 +55,7 @@ import net.runelite.api.events.WidgetLoaded;
 import net.runelite.api.events.WorldViewUnloaded;
 import net.runelite.api.GameState;
 import net.runelite.api.gameval.InterfaceID;
+import net.runelite.api.gameval.VarbitID;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.chat.ChatColorType;
 import net.runelite.client.chat.ChatMessageBuilder;
@@ -588,6 +590,25 @@ public class MapCompanionPlugin extends Plugin implements CompanionLoop.Surface
 	public void onLootReceived(LootReceived event)
 	{
 		loop.whileRewarding(() -> loop.rewardObserver.onLootReceived(event));
+		/*
+		 * Drop luck prices two reward events: the Barrows chest with all six brothers dead, read from
+		 * the game's own killed flags, and the Doom's claimed run, whose delve the loot tracker passes.
+		 */
+		boolean barrows = "Barrows".equals(event.getName());
+		if (!barrows && !"Doom of Mokhaiotl".equals(event.getName()))
+		{
+			return;
+		}
+		List<LootLog.Notable> drops = loop.lootLog.recordEvent(event.getName(), event.getItems(),
+			event.getMetadata() instanceof Integer ? (Integer) event.getMetadata() : null,
+			barrows && IntStream.of(VarbitID.BARROWS_KILLED_AHRIM, VarbitID.BARROWS_KILLED_DHAROK, VarbitID.BARROWS_KILLED_GUTHAN,
+				VarbitID.BARROWS_KILLED_KARIL, VarbitID.BARROWS_KILLED_TORAG, VarbitID.BARROWS_KILLED_VERAC)
+				.allMatch(v -> client.getVarbitValue(v) > 0));
+		if (config.dropLuckChat())
+		{
+			drops.forEach(this::announceDropLuck);
+		}
+		loop.dirty |= !drops.isEmpty();
 	}
 
 	@Subscribe

@@ -102,7 +102,8 @@ final class DropOdds
 		/** Kills shared with other players, each worth only the player's share of one. */
 		final long shared;
 		/**
-		 * The sum of those shares: a kill where the player did 40% of the damage is 0.4 of a kill at
+		 * What those kills were worth summed, in kills at the drop's rate — more than their count for a
+		 * run claimed deep in the Doom. A kill where the player did 40% of the damage is 0.4 of a kill at
 		 * the drop's rate. Priced as that many kills, which is exact for the wait — (1 − 1/r)^0.4 is the
 		 * share still waiting after it — and, for a rare drop, as near exact as a printed percent shows.
 		 */
@@ -118,7 +119,7 @@ final class DropOdds
 			this.ordinary = Math.max(0, ordinary);
 			this.boosted = Math.max(0, boosted);
 			this.shared = Math.max(0, shared);
-			this.share = Double.isFinite(share) ? Math.max(0, Math.min(this.shared, share)) : 0;
+			this.share = Double.isFinite(share) ? Math.max(0, share) : 0;
 		}
 
 		static Kills of(long kills)
