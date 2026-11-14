@@ -1529,8 +1529,16 @@ public class LootLog
 					boost ? rate.boost.oneIn : null, boost ? rate.boost.when : null,
 					(int) sharedSinceLast[0], sharedSinceLast[1], (int) sharedWatched[0], sharedWatched[1]));
 			}
-			out.add(new Monster(entry.getKey(), tally.kills, tally.lastKillMs, drops,
-				anyRow(watched, "kills", "solo") && !anyRow(watched, "kills", "shared")));
+			boolean shares = anyRow(watched, "kills", "shared");
+			int shared = 0;
+			for (Rate rate : shares ? watched : Collections.<Rate>emptyList())
+			{
+				/* Every rated row counts a shared kill, so the most any row saw is how many there were. */
+				shared = Math.max(shared, (int) tally.weighted.getOrDefault(rate.item, new double[2])[0]);
+			}
+			boolean delves = watched.stream().anyMatch(rate -> rate.delves != null);
+			out.add(new Monster(entry.getKey(), tally.kills, tally.lastKillMs, drops, anyRow(watched, "kills", "solo") && !shares,
+				anyRow(watched, "needs", "all-brothers") ? "chest" : delves ? "run" : "kill", shared));
 		}
 		return out;
 	}
@@ -1546,19 +1554,26 @@ public class LootLog
 		/** Its odds are for a player alone, and only kills alone are counted. */
 		public final boolean solo;
 
+		/** What one of its kills is: "kill", or a Barrows "chest" opened, a Doom "run" claimed. */
+		public final String unit;
+		/** Of {@link #kills}, how many were shared with other players, where its drops count a share. */
+		public final int shared;
+
 		/** A monster priced per kill, as every one is but a team boss. */
 		Monster(String npc, int kills, long lastKillMs, List<Drop> drops)
 		{
-			this(npc, kills, lastKillMs, drops, false);
+			this(npc, kills, lastKillMs, drops, false, "kill", 0);
 		}
 
-		Monster(String npc, int kills, long lastKillMs, List<Drop> drops, boolean solo)
+		Monster(String npc, int kills, long lastKillMs, List<Drop> drops, boolean solo, String unit, int shared)
 		{
 			this.npc = npc;
 			this.kills = kills;
 			this.lastKillMs = lastKillMs;
 			this.drops = Collections.unmodifiableList(drops);
 			this.solo = solo;
+			this.unit = unit;
+			this.shared = shared;
 		}
 	}
 
