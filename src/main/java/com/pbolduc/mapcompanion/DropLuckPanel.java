@@ -611,7 +611,7 @@ final class DropLuckPanel extends JPanel
 		if (dry != Luck.NONE)
 		{
 			JLabel chip = chip(dry);
-			chip.setToolTipText(DropLuckView.standingNote(standing));
+			chip.setToolTipText(DropLuckView.standingNote(standing, monster));
 			icons.add(chip);
 		}
 		if (monster.drops.isEmpty())

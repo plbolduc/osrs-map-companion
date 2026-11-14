@@ -451,12 +451,14 @@ final class DropLuckView
 		return shown >= DropOdds.VERY ? DropOdds.Luck.VERY_DRY : shown >= DropOdds.NOTABLE ? DropOdds.Luck.DRY : DropOdds.Luck.NONE;
 	}
 
-	/** Which drop a row's chip is about, for its tooltip: "Primordial crystal: 2,600 kills since the last". */
-	static String standingNote(Standing standing)
+	/**
+	 * Which drop a row's chip is about, for its tooltip: "Primordial crystal: 2,600 kills since the
+	 * last", or chests and runs where those are what the monster counts, as the card says.
+	 */
+	static String standingNote(Standing standing, Monster monster)
 	{
 		Drop drop = standing.drop;
-		return drop.item + ": " + count(drop.sinceLast) + (drop.sinceLast == 1 ? " kill" : " kills")
-			+ (drop.obtained > 0 ? " since the last" : " without one");
+		return drop.item + ": " + units(monster, drop.sinceLast) + (drop.obtained > 0 ? " since the last" : " without one");
 	}
 
 	/** "1 kill", "12 chests", "3 runs": a count of what the monster's tally counts. */
