@@ -43,17 +43,20 @@ import org.junit.Test;
  * <p>The Hub's bot reviews an update by itself only while the source stays under 200k tokens, and
  * it counts src/main/java with comments removed: resources, tests and the README are not counted.
  * 1.4.0 measured 795,928 characters that way and the bot counted 206k tokens, about 3.86
- * characters a token, so it went to a person instead. The budget here is 752,700 characters, about
- * 195k tokens, which leaves room for the ratio to be a little off.
+ * characters a token, so it went to a person instead. The budget here is 772,000 characters, about
+ * 199.8k tokens at that ratio: the Hub's own limit, by the owner's choice, with no room for the
+ * ratio to be off. If a release under it still goes to a person, the ratio moved; measure it again
+ * from that release and lower this.
  *
  * <p>Over budget, the way down is the one the cut that made this test took: tables and words a
  * player reads belong in src/main/resources, behind Resources.lines and Words.of, and code that
- * says the same thing twice can say it once. Raising the number only moves the review to a person.
+ * says the same thing twice can say it once. The number is already the Hub's; past it the review
+ * goes to a person.
  */
 public class SourceSizeTest
 {
-	/** About 195k tokens at 1.4.0's 3.86 characters a token, under the Hub's 200k. */
-	static final int BUDGET = 752_700;
+	/** About 199.8k tokens at 1.4.0's 3.86 characters a token: the Hub's 200k, and no further. */
+	static final int BUDGET = 772_000;
 
 	@Test
 	public void theSourceStaysUnderTheSizeTheHubReviewsAutomatically() throws IOException
@@ -70,9 +73,9 @@ public class SourceSizeTest
 			total += strip(new String(Files.readAllBytes(source), StandardCharsets.UTF_8)).length();
 		}
 		assertTrue("src/main/java is " + total + " characters without comments, about " + Math.round(total / 3860.0)
-			+ "k tokens, over this plugin's budget of " + BUDGET + " (about 195k). The Plugin Hub reviews an update"
-			+ " automatically only under 200k tokens; move tables or words into src/main/resources, which it does"
-			+ " not count, rather than raise the budget.", total <= BUDGET);
+			+ "k tokens, over this plugin's budget of " + BUDGET + " (about 199.8k). The Plugin Hub reviews an update"
+			+ " automatically only under 200k tokens, and this is that limit; move tables or words into"
+			+ " src/main/resources, which it does not count.", total <= BUDGET);
 	}
 
 	/** The counting rule on its own: what goes, what stays. */

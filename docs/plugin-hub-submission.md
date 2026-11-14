@@ -324,8 +324,8 @@ is the route request a star press makes, which is Route's own.
       `PluginDescriptionTest` checks, and still say what the plugin does, which only a reader can.
 - [ ] Run `./gradlew clean build -PruneLiteVersion=1.13.4` from a clean checkout.
       Recheck the Hub's [current client version](https://github.com/runelite/plugin-hub/blob/master/runelite.version).
-- [ ] `SourceSizeTest` passes: `src/main/java` without comments stays under 752,700 characters,
-      about 195k tokens, because the Hub reviews an update automatically only under 200k.
+- [ ] `SourceSizeTest` passes: `src/main/java` without comments stays under 772,000 characters,
+      about 199.8k tokens, because the Hub reviews an update automatically only under 200k.
 - [ ] Verify production sources against the Hub's
       [standard template](https://github.com/runelite/plugin-hub-tooling/blob/v4/package/src/main/resources/net/runelite/pluginhub/packager/standard-build.gradle).
 - [ ] Run the map's required plugin-contract tests and integration story against the submitted SHA.
