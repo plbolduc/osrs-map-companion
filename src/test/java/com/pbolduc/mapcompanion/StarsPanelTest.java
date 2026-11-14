@@ -38,6 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.swing.AbstractButton;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
@@ -483,6 +484,35 @@ public class StarsPanelTest
 			tab.stars.refresh();
 			assertNull(named(tab.stars, "stars.follow"));
 			assertNotNull(named(tab.stars, "stars.reroute"));
+		});
+	}
+
+	/**
+	 * After every landed press Home's Reroute is greyed for the map's wait, and its tip counts that
+	 * wait down each second. Its tip was part of what the list compared, so the whole list was built
+	 * again every second of the wait, losing a hover and a press that landed as a row was replaced.
+	 * The tip is said again on the same button; only its words and whether it is pressable rebuild.
+	 */
+	@Test
+	public void aWaitCountingDownOnHomesRerouteKeepsTheListStanding() throws Exception
+	{
+		SwingUtilities.invokeAndWait(() ->
+		{
+			Tab tab = new Tab();
+			tab.pick();
+			tab.routeTo(302);
+			tab.offer(tab.reroute);
+			tab.reroute.setEnabled(false);
+			tab.reroute.setToolTipText("The map asked to wait: 5s");
+			tab.stars.refresh();
+			Component reroute = named(tab.stars, "stars.reroute");
+			Component site = named(tab.stars, "stars.site.tile:2974,3241");
+
+			tab.reroute.setToolTipText("The map asked to wait: 4s");
+			tab.stars.refresh();
+			assertSame("the same button, not one built again", reroute, named(tab.stars, "stars.reroute"));
+			assertSame("and the same list", site, named(tab.stars, "stars.site.tile:2974,3241"));
+			assertEquals("The map asked to wait: 4s", ((JComponent) reroute).getToolTipText());
 		});
 	}
 

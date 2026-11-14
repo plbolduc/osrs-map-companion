@@ -539,7 +539,7 @@ final class StarsPanel extends JPanel
 	private String offered(boolean routed, boolean rerouting)
 	{
 		JButton own = routed ? homeButton.apply(rerouting) : null;
-		return own == null ? "|" : "|" + own.getText() + own.isEnabled() + own.getToolTipText();
+		return own == null ? "|" : "|" + own.getText() + own.isEnabled();
 	}
 
 	private JComponent site(StarsModel.Site site, long elapsed, @Nullable Star pinned)
@@ -967,6 +967,8 @@ final class StarsPanel extends JPanel
 		here.setToolTipText(own.getToolTipText());
 		here.setEnabled(own.isEnabled());
 		here.addActionListener(e -> MapCompanionPanel.press(homeButton.apply(rerouting)));
+		/* Home's tip counts a wait down each second: said again here, where a rebuild would eat a press. */
+		clocks.add(at -> here.setToolTipText(homeButton.apply(rerouting) == null ? null : homeButton.apply(rerouting).getToolTipText()));
 		actions.add(here);
 	}
 
