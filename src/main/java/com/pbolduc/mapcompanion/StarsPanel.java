@@ -806,8 +806,9 @@ final class StarsPanel extends JPanel
 	 * before. It goes only while that pin is still the destination, so a star passed over, unpinned
 	 * or replaced by a place from the map is never asked about. With the gate still shut then, by a
 	 * wait named since or a question still out, nothing is sent and the same question waits again:
-	 * the gate is this client's own, and looking at it asks the map nothing. Sent, it is the map's to
-	 * answer and is not asked again from here.
+	 * the gate is this client's own, and looking at it asks the map nothing. Between worlds the same
+	 * question is handed back and waits again, while the pin stands. Sent, it is the map's to answer
+	 * and is not asked again from here.
 	 */
 	private void ask(Star star, RelayResponse.Destination pin)
 	{
@@ -825,7 +826,14 @@ final class StarsPanel extends JPanel
 			if (stands)
 			{
 				asked = star.id;
-				press.follow(target(star).pinned(pin));
+				/* Checked again when it comes back: a star pressed since has its own question waiting. */
+				press.follow(target(star).pinned(pin), () ->
+				{
+					if (destinations.getDestination() == pin)
+					{
+						ask(star, pin);
+					}
+				});
 			}
 			redraw();
 		}, Math.max(DWELL_MS, press.waitMs(System.currentTimeMillis())));

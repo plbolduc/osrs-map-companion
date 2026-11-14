@@ -33,6 +33,7 @@ import java.util.function.Consumer;
 import java.util.function.ObjLongConsumer;
 import javax.annotation.Nullable;
 import javax.swing.JLabel;
+import javax.swing.SwingUtilities;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import net.runelite.api.Client;
@@ -317,11 +318,24 @@ final class RoutePress
 	 * The way to a place a press has already pinned, asked after it with no press of Route: see the
 	 * class comment. Planning is said from here, so the pinned star's head says it without a gap.
 	 * Any thread.
+	 *
+	 * <p>A hop or a loading screen is not "logged out", but it has no character to ask as, and a star
+	 * hunter presses the next star while the last hop is still loading. Asked then, the question would
+	 * be dropped as nobody's and the star left pinned with no way. So it is handed back to
+	 * {@code notYet}, on Swing's thread, to be asked again once the player is on a world.
 	 */
-	void follow(Target target)
+	void follow(Target target, Runnable notYet)
 	{
 		said = new Said(target.source, true, null, null, destinations.generation());
-		clientThread.invokeLater(() -> start(target, true));
+		clientThread.invokeLater(() ->
+		{
+			if (StarsClient.betweenWorlds(client.getGameState()))
+			{
+				SwingUtilities.invokeLater(notYet);
+				return;
+			}
+			start(target, true);
+		});
 	}
 
 	/** Whether the pin a question is the way to has been replaced, unpinned or cleared since. */

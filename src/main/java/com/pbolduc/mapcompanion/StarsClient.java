@@ -152,7 +152,7 @@ final class StarsClient
 	 * character on the same connection, which is how the plugin's own stream treats all three. A
 	 * reconnect that fails ends on the login screen, and that is where the list is cleared.
 	 */
-	private static boolean betweenWorlds(GameState state)
+	static boolean betweenWorlds(GameState state)
 	{
 		return state == GameState.HOPPING || state == GameState.LOADING || state == GameState.CONNECTION_LOST;
 	}
