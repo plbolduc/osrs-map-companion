@@ -110,28 +110,84 @@ final class DropLuckView
 		return null;
 	}
 
-	/** The row the details open on: the reader's, else the pinned one here, else the first. */
+	/** The name of the row that adds a monster's rated drops up. No item is called this. */
+	static final String ANY = "Any unique";
+
+	/**
+	 * "Any unique": every rated drop but the pet, as one drop. Nex's six add up to the wiki's own
+	 * 1/43, so the row is the roll the page describes. Three in 212 kills is dry while each item
+	 * alone is normal, and only this row can say so.
+	 *
+	 * <p>Its rate is the sum, its count the sum, its wait the shortest. It abstains where those would
+	 * not be one wait — a task or diary rate, a Doom run worth a different amount to each drop, rows
+	 * watched over different kills — and with fewer than two drops it would repeat the one row. The
+	 * map's {@code anyUnique}, rule for rule.
+	 */
+	@Nullable
+	static Drop anyUnique(Monster monster)
+	{
+		List<Drop> of = new ArrayList<>();
+		for (Drop drop : monster.drops)
+		{
+			if (drop.oneIn != null && !drop.pet)
+			{
+				of.add(drop);
+			}
+		}
+		if (of.size() < 2 || "run".equals(monster.unit))
+		{
+			return null;
+		}
+		Drop first = of.get(0);
+		Drop latest = first;
+		int obtained = 0;
+		double p = 0;
+		for (Drop drop : of)
+		{
+			if (drop.boostOneIn != null || drop.watched != first.watched || drop.mvp != first.mvp
+				|| drop.sharedWatched != first.sharedWatched)
+			{
+				return null;
+			}
+			obtained += drop.obtained;
+			p += 1 / drop.oneIn;
+			latest = drop.sinceLast < latest.sinceLast ? drop : latest;
+		}
+		return new Drop(ANY, -1, obtained, latest.sinceLast, first.watched, 0, 0, 1 / p, null, null,
+			latest.sharedSinceLast, latest.shareSinceLast, first.sharedWatched, first.shareWatched, first.mvp, false);
+	}
+
+	/**
+	 * The row the details open on: the reader's, else the pinned one here, else "Any unique" where
+	 * there is one — the question a boss is farmed by — else the first.
+	 */
 	@Nullable
 	static Drop selected(Monster monster, @Nullable String chosen, @Nullable String[] pin)
 	{
+		Drop any = anyUnique(monster);
+		Drop drop = byName(monster, any, chosen);
+		if (drop == null && pin != null && monster.npc.equalsIgnoreCase(pin[0]))
+		{
+			drop = byName(monster, any, pin[1]);
+		}
+		return drop != null ? drop : any != null ? any : monster.drops.isEmpty() ? null : monster.drops.get(0);
+	}
+
+	@Nullable
+	private static Drop byName(Monster monster, @Nullable Drop any, @Nullable String item)
+	{
+		if (any != null && ANY.equalsIgnoreCase(item))
+		{
+			return any;
+		}
 		for (Drop drop : monster.drops)
 		{
-			if (drop.item.equalsIgnoreCase(chosen))
+			if (drop.item.equalsIgnoreCase(item))
 			{
 				return drop;
 			}
 		}
-		if (pin != null && monster.npc.equalsIgnoreCase(pin[0]))
-		{
-			for (Drop drop : monster.drops)
-			{
-				if (drop.item.equalsIgnoreCase(pin[1]))
-				{
-					return drop;
-				}
-			}
-		}
-		return monster.drops.isEmpty() ? null : monster.drops.get(0);
+		return null;
 	}
 
 	/**
@@ -169,8 +225,8 @@ final class DropLuckView
 	}
 
 	/**
-	 * A drop row's second line: the average, or the rate where the average would be a fraction,
-	 * knowing whether the next kill gets the drop's better rate.
+	 * A drop row's second line: its rate as the wiki prints it, knowing whether the next kill gets
+	 * the better one. "Any unique" names the MVP's bonus the one time: "1 in 43, +10% as MVP".
 	 */
 	static String rowDetail(Monster monster, Drop drop, boolean boostedNow)
 	{
@@ -178,7 +234,8 @@ final class DropLuckView
 		{
 			return drop.obtained == 0 ? "Not had yet" : units(monster, drop.sinceLast) + " since the last";
 		}
-		return DropOdds.expectation(drop.watchedKills(), drop.rate(), boostedNow);
+		String line = DropOdds.rateLine(drop.rate(), boostedNow, drop.mvp);
+		return ANY.equals(drop.item) && drop.mvp > 1 ? line + ", +" + Math.round((drop.mvp - 1) * 100) + "% as MVP" : line;
 	}
 
 	/** The chip beside a drop's count, or NONE where there is no rate or nothing to say yet. */
@@ -204,8 +261,9 @@ final class DropLuckView
 		final String aheadLabel;
 		@Nullable
 		final String aheadValue;
+		/** "3 (usual ~5.4)": the count beside how many players usually have by now; null with no rate. */
 		@Nullable
-		final String median;
+		final String had;
 	}
 
 	/**
@@ -213,7 +271,8 @@ final class DropLuckView
 	 *
 	 * <p>The forward line is the rest of the slayer task where the monster is on it — the number a
 	 * reader decides "keep going or not" by — and the next hundred kills otherwise, which is a size
-	 * of session rather than a promise.
+	 * of session rather than a promise. Each fact is said once: the median wait answered the forward
+	 * line's question a second way, and went.
 	 */
 	static Detail detail(Monster monster, Drop drop, @Nullable Integer taskLeft)
 	{
@@ -222,7 +281,7 @@ final class DropLuckView
 
 	/**
 	 * The same, knowing whether the drop's better rate applies to the next kill — on the task, with
-	 * the diary — which is the rate the forward line and the median are priced at.
+	 * the diary — which is the rate the forward line is priced at.
 	 */
 	static Detail detail(Monster monster, Drop drop, @Nullable Integer taskLeft, boolean boostedNow)
 	{
@@ -240,17 +299,16 @@ final class DropLuckView
 		boolean boostAhead = LootLog.SLAYER_TASK.equals(drop.boostWhen) ? taskAhead || boostedNow : boostedNow;
 		double ahead = boostAhead ? rate.boosted() : rate.oneIn;
 		double drierThan = DropOdds.within(rate, drop.sinceKills());
-		String another = drop.obtained > 0 ? "another" : "one";
 		String boost = ahead != rate.oneIn ? " " + rate.boostLabel : "";
 		String aheadLabel = taskAhead ? "Rest of this Slayer task (" + count(taskLeft) + " kills)"
 			: "Next " + units(monster, 100) + boost;
-		String aheadValue = DropOdds.percent(DropOdds.within(ahead, taskAhead ? taskLeft : 100)) + "% chance of " + another;
+		String aheadValue = DropOdds.percent(DropOdds.within(ahead, taskAhead ? taskLeft : 100)) + "% chance";
 		return new Detail(
 			DropOdds.verdict(drop.obtained, drop.watchedKills(), drop.sinceKills(), rate),
 			sinceLabel, sinceValue,
 			DropOdds.waitSoFar(drop.sinceKills(), rate),
 			drierThan, aheadLabel, aheadValue,
-			"Half of players get one within " + units(monster, DropOdds.killsFor(0.5, ahead)) + boost + ".");
+			count(drop.obtained) + " (usual " + DropOdds.usual(drop.watchedKills(), rate) + ")");
 	}
 
 	/**

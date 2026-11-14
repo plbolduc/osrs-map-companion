@@ -19,7 +19,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import javax.imageio.ImageIO;
 import javax.swing.AbstractButton;
 import javax.swing.JButton;
@@ -131,7 +134,7 @@ public class SidebarPolishShot
 		net.runelite.client.game.ItemManager itemManager = (net.runelite.client.game.ItemManager) allocate(net.runelite.client.game.ItemManager.class);
 		/*
 		 * The real client's collection catalog resolves a rated item that has not dropped yet.
-		 * These scenes supply the two names they show, the robe and Rex's pet, without claiming a
+		 * These scenes supply the names they show, the robe and Nex's table, without claiming a
 		 * complete collection catalog.
 		 */
 		LootLog lootLog = new LootLog(game.client(), store, gson, new LootLog.NotableItems()
@@ -158,7 +161,7 @@ public class SidebarPolishShot
 			public Integer idFor(String name)
 			{
 				return "Mystic robe bottom (dark)".equals(name) ? net.runelite.api.gameval.ItemID.MYSTIC_ROBE_BOTTOM_DARK
-					: "Pet Dagannoth Rex".equals(name) ? net.runelite.api.gameval.ItemID.REXPET : null;
+					: Scenes.NEX.get(name);
 			}
 		});
 		Pairing pairing = new Pairing(store, gson, config::relayUrl);
@@ -475,36 +478,42 @@ public class SidebarPolishShot
 		}
 
 		/**
-		 * A boss with three drops at one rate, for the README: eight berserker rings in 640 kills where
-		 * five are expected, and 250 kills since the last, so the card says both things at once.
+		 * Nex alone, for the README: three uniques in 212 kills where 5.4 are usual — the platelegs
+		 * at kill 64, the horn at 120, the vambraces at 137 — so each item alone is normal and only
+		 * "Any unique" can say the run is dry.
 		 */
 		static void bossLoot(LootLog log)
 		{
-			game.nameItem(6729, "Dagannoth bones");
-			game.nameItem(6737, "Berserker ring");
-			game.nameItem(6735, "Warrior ring");
-			game.nameItem(6739, "Dragon axe");
-			List<Integer> berserker = Arrays.asList(60, 95, 150, 210, 260, 300, 350, 390);
-			List<Integer> warrior = Arrays.asList(120, 330, 480, 560, 610);
-			List<Integer> axe = Arrays.asList(45, 280, 520);
-			for (int kill = 1; kill <= 640; kill++)
+			game.nameItem(net.runelite.api.gameval.ItemID.BIG_BONES, "Big bones");
+			NEX.forEach((name, id) -> game.nameItem(id, name));
+			Map<Integer, Integer> uniques = new HashMap<>();
+			uniques.put(64, NEX.get("Torva platelegs (damaged)"));
+			uniques.put(120, NEX.get("Nihil horn"));
+			uniques.put(137, NEX.get("Zaryte vambraces"));
+			for (int kill = 1; kill <= 212; kill++)
 			{
 				List<ItemStack> items = new ArrayList<>();
-				items.add(new ItemStack(6729, 1));
-				if (berserker.contains(kill))
+				items.add(new ItemStack(net.runelite.api.gameval.ItemID.BIG_BONES, 1));
+				if (uniques.containsKey(kill))
 				{
-					items.add(new ItemStack(6737, 1));
+					items.add(new ItemStack(uniques.get(kill), 1));
 				}
-				if (warrior.contains(kill))
-				{
-					items.add(new ItemStack(6735, 1));
-				}
-				if (axe.contains(kill))
-				{
-					items.add(new ItemStack(6739, 1));
-				}
-				log.record(new ServerNpcLoot(game.npc("Dagannoth Rex"), items));
+				log.record(new ServerNpcLoot(game.npc("Nex"), items));
 			}
+		}
+
+		/** Nex's table by the names the rate table uses, for the scene's stub catalog. */
+		static final Map<String, Integer> NEX = new LinkedHashMap<>();
+
+		static
+		{
+			NEX.put("Zaryte vambraces", net.runelite.api.gameval.ItemID.ZARYTE_VAMBRACES);
+			NEX.put("Nihil horn", net.runelite.api.gameval.ItemID.NIHIL_HORN);
+			NEX.put("Torva full helm (damaged)", net.runelite.api.gameval.ItemID.BROKEN_TORVA_HELM);
+			NEX.put("Torva platebody (damaged)", net.runelite.api.gameval.ItemID.BROKEN_TORVA_CHEST);
+			NEX.put("Torva platelegs (damaged)", net.runelite.api.gameval.ItemID.BROKEN_TORVA_LEGS);
+			NEX.put("Ancient hilt", net.runelite.api.gameval.ItemID.GODWARS_GODSWORD_HILT_ANCIENT);
+			NEX.put("Nexling", net.runelite.api.gameval.ItemID.NEXPET);
 		}
 
 		static void loot(LootLog log)

@@ -249,7 +249,7 @@ public class LootLogHistoryTest
 	 * <p>This asserted "2.5× the rate · 8% still waiting" until How dry became Drop luck. The same
 	 * 1,300 kills are now "drier than 92% of players" — the same fact as 8% still waiting, said the
 	 * way people say it — and, with nothing had yet, one sentence rather than two. The counts stay
-	 * grouped, and a rational rate keeps its decimals.
+	 * grouped, and a rate prints whole: the owner asked that "1 in 469.1" lose its decimal.
 	 */
 	@Test
 	public void aDroughtIsSaidInPlayersWords()
@@ -264,8 +264,7 @@ public class LootLogHistoryTest
 		assertEquals("Very dry right now.", detail.verdict);
 		assertEquals("1,300 kills", detail.sinceValue);
 		assertEquals("drier than 92% of players", detail.sinceComparison);
-		assertEquals("a rational rate keeps the decimals the table kept",
-					 "5,012.5", DropOdds.grouped(5012.5));
+		assertEquals("a rate prints whole, as the wiki prints it", "5,013", DropOdds.grouped(5012.5));
 	}
 
 	@Test

@@ -152,11 +152,12 @@ dailies you have collected left out of a dailies run.
 ## Drop luck
 
 <p>
-  <img src="docs/mockups/sidebar-drop-luck.png" width="300" alt="Drop luck for Dagannoth Rex after 640 recorded kills: eight berserker rings marked Lucky, a dragon axe and a warrior ring, the pet at 1 in 5,000 not yet seen, then Lucky overall, dry right now, with 250 kills since the last ring, drier than 86% of players, and a 54% chance of another in the next 100 kills">
+  <img src="docs/mockups/sidebar-drop-luck.png" width="300" alt="Drop luck for Nex after 212 recorded kills: Any unique first, 1 in 43 plus 10% as MVP, three had and marked Dry, then each unique at the wiki's rate, the vambraces, the horn and the platelegs had once and each Normal, and the pet at 1 in 500; under them Dry, overall and now: had 3 where about 5.4 is usual, 75 kills since the last, drier than 86% of players, and a 93% chance in the next 100 kills">
 </p>
 
 See how lucky or dry you are on the monster you are killing, with sourced drop odds and the chance
-over your next kills. **All monsters** lists everything you have killed, driest first if you like,
+over your next kills. **Any unique** shows how you are doing across a boss's whole unique table.
+**All monsters** lists everything you have killed, driest first if you like,
 and a chat line says how lucky a rare drop was when it lands. Pets count too, a boss fought in a
 group counts your share of each kill, and an awakened Desert Treasure II boss is its own monster.
 It works without connecting to the website.

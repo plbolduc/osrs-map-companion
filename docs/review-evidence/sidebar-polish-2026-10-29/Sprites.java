@@ -45,7 +45,13 @@ final class Sprites
 		ITEMS.put(6737, "berserker-ring");
 		ITEMS.put(6735, "warrior-ring");
 		ITEMS.put(6739, "dragon-axe");
-		ITEMS.put(net.runelite.api.gameval.ItemID.REXPET, "pet-dagannoth-rex");
+		ITEMS.put(net.runelite.api.gameval.ItemID.ZARYTE_VAMBRACES, "zaryte-vambraces");
+		ITEMS.put(net.runelite.api.gameval.ItemID.NIHIL_HORN, "nihil-horn");
+		ITEMS.put(net.runelite.api.gameval.ItemID.BROKEN_TORVA_HELM, "torva-full-helm-damaged");
+		ITEMS.put(net.runelite.api.gameval.ItemID.BROKEN_TORVA_CHEST, "torva-platebody-damaged");
+		ITEMS.put(net.runelite.api.gameval.ItemID.BROKEN_TORVA_LEGS, "torva-platelegs-damaged");
+		ITEMS.put(net.runelite.api.gameval.ItemID.GODWARS_GODSWORD_HILT_ANCIENT, "ancient-hilt");
+		ITEMS.put(net.runelite.api.gameval.ItemID.NEXPET, "nexling");
 		CHIPS.put(net.runelite.api.gameval.ItemID.SAILING_LOG, "captains-log");
 		CHIPS.put(net.runelite.api.gameval.ItemID.SAILING_CHARTING_SPYGLASS, "spyglass");
 		CHIPS.put(net.runelite.api.gameval.ItemID.SAILING_CHARTING_CROWBAR, "crowbar");

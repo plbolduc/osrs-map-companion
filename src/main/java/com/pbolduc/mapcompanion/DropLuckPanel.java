@@ -321,10 +321,17 @@ final class DropLuckPanel extends JPanel
 			return;
 		}
 		Drop selected = DropLuckView.selected(monster, chosen.get(monster.npc), pin);
-		for (Drop drop : monster.drops)
+		/* "Any unique" first, and by name: it is built afresh on every call, so never the same object. */
+		List<Drop> rows = new ArrayList<>(monster.drops);
+		Drop any = DropLuckView.anyUnique(monster);
+		if (any != null)
+		{
+			rows.add(0, any);
+		}
+		for (Drop drop : rows)
 		{
 			boolean pinned = pinnedHere && drop.item.equalsIgnoreCase(pin[1]);
-			card.add(dropRow(monster, drop, drop == selected, pinned));
+			card.add(dropRow(monster, drop, selected != null && drop.item.equals(selected.item), pinned));
 		}
 		if (selected != null)
 		{
@@ -359,8 +366,8 @@ final class DropLuckPanel extends JPanel
 			chip.setAlignmentX(Component.RIGHT_ALIGNMENT);
 			count.add(chip);
 		}
-		JPanel row = MapCompanionPanel.bar(6, background,
-			new Picture(drop.itemId, 32, drop.obtained > 0 || drop.oneIn != null, -1), words, count);
+		JPanel row = MapCompanionPanel.bar(6, background, DropLuckView.ANY.equals(drop.item) ? anyPicture(monster, background)
+			: new Picture(drop.itemId, 32, drop.obtained > 0 || drop.oneIn != null, -1), words, count);
 		row.setBorder(new CompoundBorder(
 			new MatteBorder(0, 2, 0, 0, selected ? BRAND_ORANGE : background),
 			new EmptyBorder(3, 4, 3, 2)));
@@ -373,9 +380,37 @@ final class DropLuckPanel extends JPanel
 		return row;
 	}
 
+	/** "Any unique" is no one item: four of the drops it adds up, at half size, stand for it. */
+	private JComponent anyPicture(Monster monster, Color background)
+	{
+		JPanel grid = new JPanel(new GridLayout(2, 2, 0, 0));
+		grid.setBackground(background);
+		for (Drop drop : monster.drops)
+		{
+			if (drop.oneIn != null && !drop.pet && grid.getComponentCount() < 4)
+			{
+				grid.add(new Picture(drop.itemId, 16, true, -1));
+			}
+		}
+		Dimension d = new Dimension(34, 32);
+		grid.setPreferredSize(d);
+		grid.setMaximumSize(d);
+		return grid;
+	}
+
+	/** One fact on one line: its name on the left in grey, its number on the right in white. */
+	private static JComponent fact(String label, String value)
+	{
+		JLabel number = label(value, 13f, Color.WHITE);
+		return MapCompanionPanel.fill(MapCompanionPanel.bar(6, DARKER_GRAY_COLOR, null,
+			wrapped(label, TEXT_WIDTH - number.getPreferredSize().width - 6, 11f, LIGHT_GRAY_COLOR), number), DARKER_GRAY_COLOR);
+	}
+
 	private void buildDetail(JPanel card, Monster monster, Drop drop, boolean pinned, @Nullable Integer taskLeft)
 	{
 		DropLuckView.Detail detail = DropLuckView.detail(monster, drop, taskLeft, log.boostedNow(monster.npc, drop.boostWhen));
+		/* The pin is a drop's name on the wire, and no item is called "Any unique": it has none. */
+		boolean pinnable = !DropLuckView.ANY.equals(drop.item);
 		JButton pin = MapCompanionPanel.smallButton(pinned ? "Pinned" : "Pin");
 		pin.setFocusable(false);
 		if (pinned)
@@ -403,12 +438,16 @@ final class DropLuckPanel extends JPanel
 		pinAtTop.setBackground(DARKER_GRAY_COLOR);
 		pinAtTop.add(pin, BorderLayout.NORTH);
 		card.add(MapCompanionPanel.fill(MapCompanionPanel.bar(6, DARKER_GRAY_COLOR, null,
-			wrapped(detail.verdict, TEXT_WIDTH - pin.getPreferredSize().width - 6, 13f, Color.WHITE), pinAtTop),
-			DARKER_GRAY_COLOR));
+			wrapped(detail.verdict, TEXT_WIDTH - (pinnable ? pin.getPreferredSize().width + 6 : 0), 13f, Color.WHITE),
+			pinnable ? pinAtTop : null), DARKER_GRAY_COLOR));
 		card.add(inset(5));
-		card.add(note(detail.sinceLabel));
-		/* Two labels, not one with a <font size>: a size change in markup leaves RuneLite's font and its "·". */
-		card.add(wrapped(detail.sinceValue, TEXT_WIDTH, 13f, Color.WHITE));
+		/* Each fact once, on its own line. Two labels, not one with a <font size>: markup leaves RuneLite's font. */
+		if (detail.had != null)
+		{
+			card.add(fact("Had", detail.had));
+			card.add(inset(3));
+		}
+		card.add(fact(detail.sinceLabel, detail.sinceValue));
 		if (detail.sinceComparison != null)
 		{
 			card.add(note(detail.sinceComparison));
@@ -431,13 +470,7 @@ final class DropLuckPanel extends JPanel
 		if (detail.aheadLabel != null)
 		{
 			card.add(inset(5));
-			card.add(note(detail.aheadLabel));
-			card.add(wrapped(detail.aheadValue, TEXT_WIDTH, 13f, Color.WHITE));
-		}
-		if (detail.median != null)
-		{
-			card.add(inset(4));
-			card.add(note(detail.median));
+			card.add(fact(detail.aheadLabel, detail.aheadValue));
 		}
 	}
 

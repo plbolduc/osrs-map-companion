@@ -93,15 +93,20 @@ public class DropLuckPanelTest
 		assertTrue(words, words.contains("Killing now · 2 recorded kills"));
 		assertTrue(words, words.contains("All monsters ›"));
 		/*
-		 * The opened drop is the whip, the common one, not the 1 in 32,000: only it has dropped, so
-		 * only its detail can count kills since the last one. The detail leads with its verdict and
-		 * Pin, and does not name the drop again under the row that already does.
+		 * The card opens on "Any unique", the whip, head and dagger added up: it was the whip, the
+		 * common one, until the card gained a row for the question a boss is farmed by. The detail
+		 * leads with its verdict, has no Pin (the pin is a drop's name, and no item is called "Any
+		 * unique"), says each fact once on its own line, and does not name the row again.
 		 */
-		assertTrue(words, words.contains("Lucky overall, fine right now. | Pin | Since last drop | 1 kill"));
+		assertTrue(words, words.contains("Any unique | 1 in 465 | 1 | Very lucky | Abyssal whip | 1 in 512"));
+		assertTrue(words, words.contains("Lucky overall, fine right now. | Had | 1 (usual under 0.1) | Since last drop | 1 kill"));
 		assertEquals(words, 1, words.split("Abyssal whip", -1).length - 1);
-		assertTrue(words, words.contains("Since last drop"));
 		assertTrue(words, words.contains("1 kill | >99% of players would still be waiting too"));
-		assertTrue(words, words.contains("Pin"));
+		assertTrue(words, words.endsWith("Next 100 kills | 19% chance"));
+		assertFalse(words, words.contains("Pin"));
+		/* The whip's own detail keeps its Pin. */
+		assertTrue(words, SidebarWords.press(panel, "Abyssal whip"));
+		assertTrue(words(), words().contains("Lucky overall, fine right now. | Pin | Had | 1 (usual under 0.1)"));
 	}
 
 	@Test
