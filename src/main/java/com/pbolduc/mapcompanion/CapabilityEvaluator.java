@@ -30,6 +30,7 @@ import com.google.inject.Singleton;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.runelite.api.Client;
 import net.runelite.api.gameval.InventoryID;
@@ -68,11 +69,6 @@ public class CapabilityEvaluator
 		/** Nonzero where the name cannot tell a spent item from a charged one, so the id decides. */
 		final int itemId;
 
-		Capability(String flag, String regex)
-		{
-			this(flag, regex, 0);
-		}
-
 		Capability(String flag, String regex, int itemId)
 		{
 			this.flag = flag;
@@ -82,52 +78,13 @@ public class CapabilityEvaluator
 	}
 
 	/**
-	 * Prefixes cover variants of items that disappear when spent. Jewellery that remains when
-	 * empty instead requires a positive charge suffix. Every match starts at the item's own name.
+	 * The table, from {@code capabilities.txt}: a flag, a tab and its pattern a line. The ring of the
+	 * elements is named exactly as the charged one when empty, so its charged item's id decides.
 	 */
-	private static final List<Capability> CAPABILITIES = Collections.unmodifiableList(Arrays.asList(
-			new Capability("achievementDiaryCape", "^achievement diary cape"),
-			new Capability("maxCape", "^max cape"),
-			new Capability("masterScrollBook", "^master scroll book"),
-			new Capability("slayerRing", "^slayer ring"),
-			new Capability("amuletOfGlory", "^(?:amulet of glory\\s*\\(t?[1-9][0-9]*\\)|amulet of eternal glory)$"),
-			/* The game shortens it: "Construct. cape", and "Construct. cape(t)" trimmed. */
-			new Capability("constructionCape", "^construct(?:ion|\\.) cape"),
-			new Capability("skillsNecklace", "^skills necklace\\s*\\([1-9][0-9]*\\)$"),
-			new Capability("pendantOfAtes", "^pendant of ates"),
-			new Capability("radasBlessing", "^rada'?s blessing"),
-			new Capability("gamesNecklace", "^games necklace"),
-			new Capability("kharedstMemoirs", "^kharedst'?s memoirs"),
-			new Capability("bookOfTheDead", "^book of the dead"),
-			new Capability("xericsTalisman", "^xeric'?s talisman"),
-			new Capability("ringOfShadows", "^ring of shadows"),
-			new Capability("ardougneCloak", "^ardougne cloak"),
-			new Capability("morytaniaLegs", "^morytania legs"),
-			new Capability("fremennikSeaBoots", "^fremennik sea boots"),
-			new Capability("ringOfDueling", "^ring of dueling"),
-			new Capability("combatBracelet", "^combat bracelet\\s*\\([1-9][0-9]*\\)$"),
-			new Capability("ringOfWealth", "^ring of wealth\\s*\\(i?[1-9][0-9]*\\)$"),
-			new Capability("enchantedLyre", "^enchanted lyre"),
-			new Capability("pharaohsSceptre", "^pharaoh'?s sceptre"),
-			/* The empty ring is named exactly as the charged one. */
-			new Capability("ringOfTheElements", "^ring of the elements", ItemID.RING_OF_ELEMENTS_CHARGED),
-			new Capability("digsitePendant", "^digsite pendant"),
-			new Capability("necklaceOfPassage", "^necklace of passage"),
-			new Capability("burningAmulet", "^burning amulet"),
-			new Capability("hunterCape", "^hunter cape"),
-			new Capability("fishingCape", "^fishing cape"),
-			new Capability("drakansMedallion", "^drakan'?s medallion"),
-			new Capability("giantsoulAmulet", "^giantsoul amulet"),
-			new Capability("sailorsAmulet", "^sailors'? amulet"),
-			new Capability("desertAmulet", "^desert amulet"),
-			new Capability("teleportCrystal", "^(eternal )?teleport crystal"),
-			new Capability("camulet", "^camulet"),
-			new Capability("stonyBasalt", "^stony basalt"),
-			new Capability("karamjaGloves", "^karamja gloves"),
-			new Capability("quetzalWhistle", "^(perfected |basic |enhanced )?quetzal whistle"),
-			new Capability("royalSeedPod", "^royal seed pod"),
-			new Capability("dramenStaff", "^(dramen|lunar) staff")
-		));
+	private static final List<Capability> CAPABILITIES = Collections.unmodifiableList(Resources.lines("/capabilities.txt").stream()
+		.map(line -> line.split("\t", 2))
+		.map(f -> new Capability(f[0], f[1], "ringOfTheElements".equals(f[0]) ? ItemID.RING_OF_ELEMENTS_CHARGED : 0))
+		.collect(Collectors.toList()));
 
 	private final Client client;
 
