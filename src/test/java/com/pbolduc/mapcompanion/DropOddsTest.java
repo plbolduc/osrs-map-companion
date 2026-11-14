@@ -407,14 +407,42 @@ public class DropOddsTest
 	}
 
 	/**
-	 * Rows watched over different kills are no one wait, and one rated drop has nothing to add up;
-	 * nor are a task's rate, whose kills split differently, or a Doom run, worth a different amount
-	 * to each drop. The map's lib/drop-luck.test.ts pins the same four.
+	 * A row a table gained in an update is watched from the upgrade, the others from before. Refusing
+	 * them for good, as this once did, took Any unique from everybody who had killed the monster
+	 * already; the row is priced over the kills every row was watched for instead. The map's
+	 * lib/drop-luck.test.ts pins the same Nex and the same two rows.
+	 */
+	@Test
+	public void anyUniqueIsPricedOverTheKillsEveryRowWasWatchedFor()
+	{
+		/* The hilt watched from kill 50: the platelegs at 64, the horn at 120, the vambraces at 137 all fall inside. */
+		LootLog.Drop from50 = DropLuckView.anyUnique(nex(50));
+		assertEquals(Arrays.asList(3, 162, 75), Arrays.asList(from50.obtained, from50.watched, from50.sinceLast));
+		/* From kill 130: the platelegs and the horn fell before the window, the vambraces in it. */
+		LootLog.Drop from130 = DropLuckView.anyUnique(nex(130));
+		assertEquals(Arrays.asList(1, 82, 75), Arrays.asList(from130.obtained, from130.watched, from130.sinceLast));
+		/* Two had, the last inside the window: how many of the two fell inside is a count nobody kept. */
+		assertNull(DropLuckView.anyUnique(twoRows(2, 40)));
+		LootLog.Drop before = DropLuckView.anyUnique(twoRows(2, 150));
+		assertEquals(Arrays.asList(0, 100, 100), Arrays.asList(before.obtained, before.watched, before.sinceLast));
+	}
+
+	/** A row watched for the last 100 of 300 kills, and one watched for all 300 with its own history. */
+	private static LootLog.Monster twoRows(int obtained, int sinceLast)
+	{
+		return new LootLog.Monster("Monster", 300, 0, Arrays.asList(
+			new LootLog.Drop("New", -1, 0, 100, 100, 0, 0, 500.0, null, null, 0, 0, 0, 0, 1, false, false),
+			new LootLog.Drop("Old", -1, obtained, sinceLast, 300, 0, 0, 500.0, null, null, 0, 0, 0, 0, 1, false, false)));
+	}
+
+	/**
+	 * One rated drop has nothing to add up; nor are a task's rate, whose kills split differently, or
+	 * a Doom run, worth a different amount to each drop, one wait. The map's lib/drop-luck.test.ts
+	 * pins the same three.
 	 */
 	@Test
 	public void anyUniqueAbstainsWhereTheDropsAreNotOneWait()
 	{
-		assertNull(DropLuckView.anyUnique(nex(50)));
 		assertNull(DropLuckView.anyUnique(monster("Abyssal demon", 100, new Object[] {"Abyssal whip", 512, 100})));
 		List<LootLog.Drop> drake = Arrays.asList(
 			new LootLog.Drop("Drake's tooth", -1, 0, 10, 10, 0, 0, 2560.0, 512.0, LootLog.SLAYER_TASK, 0, 0, 0, 0, 1, false, false),

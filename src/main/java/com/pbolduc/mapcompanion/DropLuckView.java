@@ -120,9 +120,17 @@ final class DropLuckView
 	 * alone is normal, and only this row can say so.
 	 *
 	 * <p>Its rate is the sum, its count the sum, its wait the shortest. It abstains where those would
-	 * not be one wait — a task or diary rate, a Doom run worth a different amount to each drop, rows
-	 * watched over different kills — and with fewer than two drops it would repeat the one row. The
-	 * map's {@code anyUnique}, rule for rule.
+	 * not be one wait — a task or diary rate, a Doom run worth a different amount to each drop — and
+	 * with fewer than two drops it would repeat the one row. The map's {@code anyUnique}, rule for
+	 * rule.
+	 *
+	 * <p>Rows watched over different kills are priced over the shortest window, the kills every row
+	 * was watched for. A table gains a row with each update, and the new row's watching starts at the
+	 * upgrade while the old ones keep theirs; refusing those for good took the row from every player
+	 * who killed the monster before. Inside the window a longer-watched row had none if it never
+	 * dropped or its last fell before, and one if it fell once, inside; more than once with the last
+	 * inside is a count nobody kept, and the row abstains. A shared kill before the window shows as a
+	 * longer row's larger shared count, which abstains as before.
 	 */
 	@Nullable
 	static Drop anyUnique(Monster monster)
@@ -140,17 +148,31 @@ final class DropLuckView
 			return null;
 		}
 		Drop first = of.get(0);
+		for (Drop drop : of)
+		{
+			first = drop.watched < first.watched ? drop : first;
+		}
 		Drop latest = first;
 		int obtained = 0;
 		double p = 0;
 		for (Drop drop : of)
 		{
-			if (drop.boostOneIn != null || drop.watched != first.watched || drop.mvp != first.mvp
-				|| drop.sharedWatched != first.sharedWatched)
+			if (drop.boostOneIn != null || drop.mvp != first.mvp || drop.sharedWatched != first.sharedWatched)
 			{
 				return null;
 			}
-			obtained += drop.obtained;
+			if (drop.watched != first.watched && drop.obtained > 0 && drop.sinceLast < first.watched)
+			{
+				if (drop.obtained > 1)
+				{
+					return null;
+				}
+				obtained += 1;
+			}
+			else if (drop.watched == first.watched)
+			{
+				obtained += drop.obtained;
+			}
 			p += 1 / drop.oneIn;
 			latest = drop.sinceLast < latest.sinceLast ? drop : latest;
 		}
