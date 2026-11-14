@@ -3210,6 +3210,47 @@
       }
     },
     {
+      "npc": "Yama",
+      "item": "Oathplate chest",
+      "oneIn": 600,
+      "page": "Yama",
+      "kills": "shared",
+      "unless": "contract"
+    },
+    {
+      "npc": "Yama",
+      "item": "Oathplate helm",
+      "oneIn": 600,
+      "page": "Yama",
+      "kills": "shared",
+      "unless": "contract"
+    },
+    {
+      "npc": "Yama",
+      "item": "Oathplate legs",
+      "oneIn": 600,
+      "page": "Yama",
+      "kills": "shared",
+      "unless": "contract"
+    },
+    {
+      "npc": "Yama",
+      "item": "Soulflame horn",
+      "oneIn": 300,
+      "page": "Yama",
+      "kills": "shared",
+      "unless": "contract"
+    },
+    {
+      "npc": "Yama",
+      "item": "Yami",
+      "oneIn": 2500,
+      "page": "Yama",
+      "pet": true,
+      "kills": "solo",
+      "unless": "contract"
+    },
+    {
       "npc": "Zakl'n Gritch",
       "item": "Godsword shard 1",
       "oneIn": 1524,

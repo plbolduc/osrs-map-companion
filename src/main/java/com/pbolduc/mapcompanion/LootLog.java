@@ -41,6 +41,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
+import net.runelite.api.Item;
 import net.runelite.api.ItemComposition;
 import net.runelite.api.NPCComposition;
 import net.runelite.api.WorldType;
@@ -329,6 +330,11 @@ public class LootLog
 		Double mvp;
 		/** Other monsters whose damage counts towards this one's share: Nex's minions and reavers. */
 		List<String> fight;
+		/**
+		 * {@code "contract"}: a kill after a Yama contract left the inventory is not counted. A contract
+		 * fight hands out a unique as its guaranteed reward, which is no drop at the listed rate.
+		 */
+		String unless;
 		/** {@code "outside-instances"}: a name an instanced monster shares, whose kills there are not counted. */
 		String where;
 		/**
@@ -377,7 +383,7 @@ public class LootLog
 	{
 		for (Rate rate : watched)
 		{
-			if (value.equals("kills".equals(field) ? rate.kills : rate.where))
+			if (value.equals("kills".equals(field) ? rate.kills : "unless".equals(field) ? rate.unless : rate.where))
 			{
 				return true;
 			}
@@ -434,6 +440,27 @@ public class LootLog
 			lastShared = null;
 			unsaved = true;
 		}
+	}
+
+	/** Yama's contracts in the inventory at the last look, and whether one has gone since. */
+	@Nullable
+	private Integer contracts;
+	private boolean contractSpent;
+
+	/**
+	 * The inventory, for Yama's contracts: one leaving it is spent on the next fight, which is then not
+	 * counted. A contract banked or dropped skips one ordinary kill too, which errs the safe way.
+	 */
+	public synchronized void onInventory(@Nullable Item[] items)
+	{
+		int count = 0;
+		for (Item item : items == null ? new Item[0] : items)
+		{
+			String name = item.getId() > 0 ? itemName(item.getId()) : null;
+			count += name != null && name.startsWith("Contract of ") ? item.getQuantity() : 0;
+		}
+		contractSpent |= contracts != null && count < contracts;
+		contracts = count;
 	}
 
 	/** The last shared kill the player was not yet named MVP of, and what naming them would add. */
@@ -692,6 +719,12 @@ public class LootLog
 			return emptyList();
 		}
 		List<Rate> watched = tracked.getOrDefault(key(name), emptyList());
+		if (anyRow(watched, "unless", "contract") && contractSpent)
+		{
+			/* The fight a contract was spent on: its reward was guaranteed, so the kill is not counted. */
+			contractSpent = false;
+			return emptyList();
+		}
 		boolean sharedRows = anyRow(watched, "kills", "shared");
 		if (othersHit && !sharedRows && anyRow(watched, "kills", "solo"))
 		{

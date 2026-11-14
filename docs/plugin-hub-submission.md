@@ -276,13 +276,15 @@ answering a reviewer. Since 1.9.0, for 1.10.0, in review in
   Amoxliatl. Each is transcribed from the wiki page's own drop line. The counts stay on the
   computer; a player who shares *Loot and milestones* sends the same fields as before, now for
   these drops too.
-- **Pets, sets, team bosses alone and awakened bosses:** the table grows on to 506 rates across 193
+- **Pets, sets, team bosses and awakened bosses:** the table grows on to 511 rates across 194
   monsters. A pet is counted from the game's own pet line in chat, against the kill beside it; a
   set that drops a piece at a time counts as one drop. Callisto, Venenatis, Vet'ion, the Hueycoatl
   and Nex count a kill other players hit as the player's share of it: their own damage over
   everyone's, from `HitsplatApplied` (`isMine()`, `isOthers()` and the amount, kept per fight for a
   minute), with Nex's MVP read from the game's "You were the MVP for this fight". The Nightmare,
-  Scurrius and Zalcano count only kills no other player hit. The lizardman shaman counts none
+  Scurrius and Zalcano count only kills no other player hit. A Yama kill after an item named
+  "Contract of …" left the inventory is not counted; only the inventory's item names and counts are
+  read, on the client, for that. The lizardman shaman counts none
   in an instance; Araxxor counts no destroyed corpse; and the Desert Treasure II bosses are told
   from their awakened fights by the loot NPC's combat level. All of it is read from events the
   plugin already receives or from the loot itself. Each drop's report gains four fields — how many
