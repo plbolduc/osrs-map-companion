@@ -46,6 +46,8 @@ final class ItemReadingsTestClient
 	private Item[] inventory = new Item[0];
 	private Item[] equipment = new Item[0];
 	private boolean freeWorld;
+	/** The item the game's item box shows being handed over, or -1 while it is closed. */
+	private int handed = -1;
 
 	final Client client = proxy(Client.class, (method, args) ->
 	{
@@ -53,6 +55,20 @@ final class ItemReadingsTestClient
 		{
 			case "getItemDefinition":
 				return definitions.get((int) args[0]);
+			case "getWidget":
+				/* Only the item box a step is handed over in; no other interface is open here. */
+				if ((int) args[0] != net.runelite.api.gameval.InterfaceID.Objectbox.ITEM)
+				{
+					throw new AssertionError("unexpected widget " + args[0]);
+				}
+				return handed < 0 ? null : proxy(Widget.class, (asked, none) ->
+				{
+					if ("getItemId".equals(asked))
+					{
+						return handed;
+					}
+					throw new AssertionError("unexpected widget method " + asked);
+				});
 			case "getItemContainer":
 				int id = (int) args[0];
 				if (id == InventoryID.INV)
@@ -94,6 +110,12 @@ final class ItemReadingsTestClient
 	void freeWorld(boolean on)
 	{
 		freeWorld = on;
+	}
+
+	/** The item box open on {@code itemId}, as the game shows a scroll an NPC hands over; -1 closes it. */
+	void hand(int itemId)
+	{
+		handed = itemId;
 	}
 
 	void carry(int... ids)

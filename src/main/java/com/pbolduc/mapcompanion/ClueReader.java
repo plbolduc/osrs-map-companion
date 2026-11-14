@@ -33,7 +33,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import net.runelite.api.Client;
+import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.gameval.InventoryID;
+import net.runelite.api.gameval.ItemID;
 import net.runelite.api.Item;
 import net.runelite.api.ItemContainer;
 import net.runelite.api.widgets.Widget;
@@ -213,8 +215,15 @@ public class ClueReader
 			return null;
 		}
 
-		/** A different scroll is a different clue; the remembered text belongs to the old one. */
-		if (scrollId != lastScrollItemId)
+		/*
+		 * A different scroll is a different clue; the remembered text belongs to the old one. Beginner
+		 * and master scrolls keep one id for every step, so the next step handed over in the same slot
+		 * is no different scroll: the item box shows it as it is handed over, and RuneLite's clue
+		 * plugin forgets its step on that, as this does until the new one is read.
+		 */
+		Widget handed = client.getWidget(InterfaceID.Objectbox.ITEM);
+		if (scrollId != lastScrollItemId || handed != null
+			&& (handed.getItemId() == ItemID.TRAIL_CLUE_BEGINNER || handed.getItemId() == ItemID.TRAIL_CLUE_MASTER))
 		{
 			lastStepText = null;
 			mapTile = null;

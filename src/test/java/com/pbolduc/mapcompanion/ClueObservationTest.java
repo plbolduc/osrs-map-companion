@@ -25,6 +25,7 @@
  */
 package com.pbolduc.mapcompanion;
 
+import net.runelite.api.gameval.ItemID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -219,5 +220,27 @@ public class ClueObservationTest
 		assertNull(reader.read());
 		game.carry(1);
 		assertNull(reader.read().mapTile);
+	}
+
+	/**
+	 * Hans hands the next beginner step over into the same slot, under the same item id, so no
+	 * reading ever sees the scroll change or go. The game's item box shows it being handed over, and
+	 * that is when the step just done is forgotten, so its Route does not lead back to it.
+	 */
+	@Test
+	public void aStepHandedOverUnderTheSameIdForgetsTheOneJustDone()
+	{
+		game.define(ItemID.TRAIL_CLUE_BEGINNER, "Clue scroll (beginner)", false);
+		game.carry(ItemID.TRAIL_CLUE_BEGINNER);
+		reader.onScrollRead(ItemID.TRAIL_CLUE_BEGINNER);
+		reader.onClueWidget(ItemReadingsTestClient.widget("Speak to Hans to solve the clue."));
+		assertEquals("Speak to Hans to solve the clue.", reader.read().text);
+
+		game.hand(ItemID.TRAIL_CLUE_BEGINNER);
+		CompanionSnapshot.Clue next = reader.read();
+		assertEquals("beginner", next.tier);
+		assertNull("read the scroll, not the step just done", next.text);
+		game.hand(-1);
+		assertNull(reader.read().text);
 	}
 }

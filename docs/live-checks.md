@@ -480,6 +480,9 @@ The website plan's second session, once the routes in the game are built: a memb
       hard map: before and after opening it, the card says *Map · Route finds where it shows* with
       Route, and Route names the place the picture shows. A step the map cannot place says why under
       Route, in the map's own sentence. Nothing about the clue reaches the map's member page.
+- [ ] **The next beginner or master step.** Solve a beginner step at Hans, or dig a master step,
+      and take the next one into the same slot: as the item box shows it, the card stops showing the
+      step just done and its Route, and says to read the scroll; reading it shows the new step.
 - [ ] **Route back.** Die somewhere ordinary with *Share death* off, respawn and press Route back.
       Then, if convenient, die at a boss fought in an instance (Vorkath, Zulrah): note where the
       route goes. The map's half decides whether it is the boss's way in.
