@@ -200,6 +200,39 @@ public class StarsWordsTest
 		});
 	}
 
+	/**
+	 * The tab is drawn the moment it is turned to, before the game has been asked whether anyone is
+	 * logged in. Not knowing yet is no reason to say "Log in", over a list that is still good.
+	 */
+	@Test
+	public void turningToTheTabWhileLoggedInDoesNotSayToLogIn() throws Exception
+	{
+		scene(fixture(), false);
+		open();
+		until(() -> service.model.feed != null);
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.selected(false);
+			panel.selected(true);
+			assertFalse("turned to: " + words(panel), words(panel).contains(StarsPanel.LOG_IN));
+		});
+	}
+
+	/** Pressing the tab it is already on asks nothing again, and does not drop the list on its way. */
+	@Test
+	public void pressingTheTabItIsOnKeepsTheCallOut() throws Exception
+	{
+		scene(fixture(), true);
+		open();
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.selected(true);
+			assertFalse("pressed again: " + words(panel), words(panel).contains(StarsPanel.LOG_IN));
+		});
+		answer.countDown();
+		until(() -> service.model.feed != null);
+	}
+
 	@Test
 	public void anHourWithNoStarsIsNotThePlayersFilters() throws Exception
 	{
