@@ -25,9 +25,11 @@
  */
 package com.pbolduc.mapcompanion;
 
+import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import net.runelite.api.ItemComposition;
 import net.runelite.api.gameval.ItemID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -69,6 +71,26 @@ public class FarmBankOverlayTest
 		assertTrue("the charged ring, by its id", FarmBankOverlay.grants(wanted, ItemID.RING_OF_ELEMENTS_CHARGED, "Ring of the elements"));
 		assertFalse("the spent ring has the same name", FarmBankOverlay.grants(wanted, ItemID.RING_OF_ELEMENTS_CHARGED + 1, "Ring of the elements"));
 		assertFalse(FarmBankOverlay.grants(wanted, 8007, "Catherby teleport"));
+	}
+
+	/**
+	 * A bank with no glory left still shows one: its placeholder, under the same name, which the
+	 * glory's pattern matches. The outline said a teleport was there to take, and the slot was empty.
+	 */
+	@Test
+	public void marksNoPlaceholder()
+	{
+		List<CapabilityEvaluator.ItemTest> wanted = FarmBankOverlay.wanted(run("herb", Collections.emptyList()));
+		assertTrue(FarmBankOverlay.marks(wanted, 1712, item("Amulet of glory(4)", -1)));
+		assertFalse(FarmBankOverlay.marks(wanted, 1713, item("Amulet of glory(4)", 14401)));
+	}
+
+	/** An item definition with only its name and whether it is a placeholder. */
+	private static ItemComposition item(String name, int placeholderTemplateId)
+	{
+		return (ItemComposition) Proxy.newProxyInstance(ItemComposition.class.getClassLoader(), new Class<?>[] {ItemComposition.class},
+			(proxy, method, args) -> "getName".equals(method.getName()) ? name
+				: "getPlaceholderTemplateId".equals(method.getName()) ? (Object) placeholderTemplateId : null);
 	}
 
 	@Test

@@ -819,8 +819,9 @@ continuously witnessed empty-to-newly-planted transition mints a stable completi
       follows a teleport taken from the bank. Complete a seeded birdhouse and check its weaker
       sighting label.
 - [ ] Open the bank during a herb run that names an Amulet of glory you are not carrying: charged
-      glories are outlined and an emptied one is not; withdraw one and the outlines go within a
-      tick. Seeds and a tablet no travel flag names are never outlined, and nothing moves or hides.
+      glories are outlined and an emptied one is not, nor the placeholder a glory leaves once the
+      last of it is withdrawn; withdraw one and the outlines go within a tick. Seeds and a tablet no
+      travel flag names are never outlined, and nothing moves or hides.
 - [ ] Start a herb run: the kind of run and Start run leave the card while it is planned and walked,
       and come back after End run or once the run is gone.
 - [ ] Reach a personal stop. It says Visited, never Done. Reroute keeps completed and visited
