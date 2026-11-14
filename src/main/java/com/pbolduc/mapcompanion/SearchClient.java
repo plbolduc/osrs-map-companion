@@ -435,8 +435,15 @@ final class SearchClient
 		{
 			inFlight = null;
 		}
-		nextAllowedMs = Math.max(nextAllowedMs, nextAllowed);
-		redirected = RoutePress.REDIRECTS.equals(why);
+		/*
+		 * A call the box cleared away was cancelled here, and OkHttp says so as a failure: no reason
+		 * to wait. A reply the map did give before the cancel keeps the wait it named.
+		 */
+		if (!call.isCanceled() || !UNREACHABLE.equals(why))
+		{
+			nextAllowedMs = Math.max(nextAllowedMs, nextAllowed);
+			redirected = RoutePress.REDIRECTS.equals(why);
+		}
 		if (asked != generation)
 		{
 			return;
