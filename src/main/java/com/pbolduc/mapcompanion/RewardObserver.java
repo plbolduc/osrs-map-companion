@@ -76,10 +76,15 @@ public final class RewardObserver
 	private static final String UNTRADEABLE_PREFIX = "Untradeable drop: ";
 	private static final Set<String> PET_MESSAGES = new HashSet<>(Resources.lines("/pet-messages.txt"));
 
-	/** Whether this is the game's line for a pet arriving, or one that would have; Drop luck counts it too. */
+	/**
+	 * Whether this is the game's line for a pet arriving, or one that would have; Drop luck counts it
+	 * too. Cleaned first, as this observer reads it, so a colour tag or a non-breaking space in the
+	 * game's text cannot leave one reader counting a pet the other never saw.
+	 */
 	static boolean isPetMessage(String message)
 	{
-		return message != null && PET_MESSAGES.contains(message);
+		String text = clean(message);
+		return text != null && PET_MESSAGES.contains(text);
 	}
 	private static final Pattern PICKPOCKET_MESSAGE = Pattern.compile("You pick (the )?.+'s? pocket.*");
 	/**

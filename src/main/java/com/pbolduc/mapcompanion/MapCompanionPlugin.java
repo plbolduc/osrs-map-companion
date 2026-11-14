@@ -622,7 +622,8 @@ public class MapCompanionPlugin extends Plugin implements CompanionLoop.Surface
 	public void onChatMessage(ChatMessage event)
 	{
 		loop.onChatMessage(event);
-		String message = event.getMessage();
+		/* Read without its tags, as the reward observer reads it, so both see the same line. */
+		String message = CollectionItemCatalog.clean(event.getMessage());
 		if (event.getType() == ChatMessageType.GAMEMESSAGE && message != null && message.contains("You were the MVP for this fight"))
 		{
 			loop.lootLog.onMvpMessage(client.getTickCount());
