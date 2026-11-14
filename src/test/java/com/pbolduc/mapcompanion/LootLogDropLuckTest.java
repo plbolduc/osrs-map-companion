@@ -63,6 +63,7 @@ public class LootLogDropLuckTest
 	private static final int CONTRACT = 90_008;
 	private static final int CLOTH = 90_009;
 	private static final int PAGES = 90_010;
+	private static final int HILT = 90_011;
 
 	private final HarnessGame game = new HarnessGame();
 	private final HarnessStore store = new HarnessStore();
@@ -578,6 +579,46 @@ public class LootLogDropLuckTest
 		log.onHitsplat("Abyssal demon", false, true, 50, game.client().getTickCount());
 		kill("Abyssal demon", BONES);
 		assertEquals("another player's hit means nothing on a monster priced per kill", 1, monster("Abyssal demon").kills);
+	}
+
+	/**
+	 * The cub's row counts Callisto alone, so a kill shared with a team is worth nothing to it, and a
+	 * cub that arrives on one is not counted either: against no kills it would read "Very lucky"
+	 * forever. The same cub on a kill alone is counted.
+	 */
+	@Test
+	public void aPetOnAKillItsRowDidNotCountIsNotCounted()
+	{
+		int tick = game.client().getTickCount();
+		log.onHitsplat("Callisto", true, false, 30, tick);
+		log.onHitsplat("Callisto", false, true, 70, tick);
+		kill("Callisto", BONES);
+		assertTrue("no chat line for it", log.onPetMessage(game.client().getTickCount()).isEmpty());
+		assertEquals(0, drop("Callisto", "Callisto cub").obtained);
+		assertEquals("the kill still counts for the claws", 1, drop("Callisto", "Claws of Callisto").sharedWatched);
+		for (int i = 0; i <= LootLog.SHARED_TICKS; i++)
+		{
+			game.tick();
+		}
+		kill("Callisto", BONES);
+		assertEquals(1, log.onPetMessage(game.client().getTickCount()).size());
+		assertEquals(1, drop("Callisto", "Callisto cub").obtained);
+	}
+
+	/**
+	 * A Nex kill where none of the player's hits were seen is a share of nothing: it is worth nothing
+	 * to her rows, and the hilt that fell on it is not counted against them.
+	 */
+	@Test
+	public void aDropOnAShareOfNothingIsNotCounted()
+	{
+		game.nameItem(HILT, "Ancient hilt");
+		log.onHitsplat("Nex", false, true, 100, game.client().getTickCount());
+		kill("Nex", HILT);
+		LootLog.Drop hilt = drop("Nex", "Ancient hilt");
+		assertEquals(0, hilt.obtained);
+		assertEquals(1, hilt.sharedWatched);
+		assertEquals(0, hilt.shareWatched, 0);
 	}
 
 	/** Scurrius's pet is the top damage's alone, so a kill another player hit is not counted at all. */
