@@ -326,8 +326,9 @@ public class FarmRunClientTest
 
 	/**
 	 * How long each kind of reply keeps every Route, Reroute and run waiting, and what the card says.
-	 * Nothing that is no answer is waited on for less than the half minute, a busy map included, where
-	 * Route takes a shorter wait the map names; a refusal the map words has its own test above.
+	 * A busy map is waited on for exactly what it asks, as Route waits on it: the two share one gate,
+	 * so a run that waited longer would keep Route shut past the map's own word. A refusal the map
+	 * words has its own test above.
 	 */
 	@Test
 	public void eachKindOfReplyKeepsItsOwnWaitAndWords() throws Exception
@@ -336,7 +337,8 @@ public class FarmRunClientTest
 		String worded = "{\"error\":\"Please wait for this run.\"}";
 		String notPrepared = Words.of("farm.notPrepared");
 		Object[][] cases = {
-			{429, "7", "{}", MapWait.BUSY, 30_000L},
+			{429, "7", "{}", MapWait.BUSY, 7_000L},
+			{503, "7", "{}", MapWait.BUSY, 7_000L},
 			{429, "90", "{}", MapWait.BUSY, 90_000L},
 			{429, null, worded, "Please wait for this run.", 30_000L},
 			{503, null, "{}", MapWait.BUSY, 30_000L},

@@ -338,10 +338,11 @@ final class FarmRunClient
 			 * run. Backing off spares a map that is struggling, and this one is not; the next press is
 			 * the player's own, after they change something. So it keeps the five seconds between
 			 * presses, or the wait the map named, as Route does after a 404. No answer, a 5xx or a
-			 * reply that cannot be read keeps the half minute.
+			 * reply that cannot be read keeps the half minute, and a busy map the wait it asks for,
+			 * as Route keeps them: the two share one gate, so they read the map's wait the same way.
 			 */
 			boolean answered = worded && (code == 409 || code == 404 || code == 400);
-			refuse(ticket, why, answered ? next : Math.max(next, now + RoutePress.FAILURE_GAP_MS));
+			refuse(ticket, why, answered ? next : now + MapWait.after(reply, RoutePress.FAILURE_GAP_MS));
 			return;
 		}
 		if (ticket.end)
