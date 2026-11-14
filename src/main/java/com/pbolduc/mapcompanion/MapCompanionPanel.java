@@ -131,6 +131,12 @@ public class MapCompanionPanel extends PluginPanel
 	/** The status card, the orange button, the join field and the group's buttons. See {@link ConnectCard}. */
 	private final ConnectCard connectCard;
 	private final CompanionViews views;
+	/**
+	 * Space under the connect card before a group. It ends on Paste and Join then, with nothing under
+	 * them, and the next thing on Home, Drop luck's heading for most, would sit 2px under them; in a
+	 * group it ends on the orange button's own 10px, and the group's row follows.
+	 */
+	private final JPanel connectFoot = gap(8, DARK_GRAY_COLOR);
 	/** Copy invite and Switch ▾, between the orange button and the tabs. */
 	private final JPanel groupRow = column(DARK_GRAY_COLOR);
 	private final SidebarPages pages;
@@ -236,6 +242,7 @@ public class MapCompanionPanel extends PluginPanel
 		body.setName("companionDaily");
 
 		body.add(connectCard);
+		body.add(connectFoot);
 		body.add(recommendedSharing);
 		/*
 		 * The group's buttons, over the tabs. An invite is wanted from any tab, and at the foot of the
@@ -746,6 +753,7 @@ public class MapCompanionPanel extends PluginPanel
 			groupPanel.refresh(true, loggedIn, System.currentTimeMillis());
 		}
 		connectCard.refreshButtons(paired, ready, loggedIn, known, System.currentTimeMillis());
+		connectFoot.setVisible(!paired);
 		/* With the tabs: before a group there are none, and the step after a first Connect is the page. */
 		groupRow.setVisible(ready && views.isVisible());
 		/* Offered for the group just joined; leaving it, or a changed map, takes the offer away. */
