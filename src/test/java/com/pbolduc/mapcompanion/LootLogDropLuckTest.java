@@ -502,6 +502,38 @@ public class LootLogDropLuckTest
 		assertEquals(1, drop("Cerberus", "Hellpuppy").obtained);
 	}
 
+	/**
+	 * A chinchompa kills Kree'arra and a Flight Kilisa on one tick, and the bodyguard's loot can come
+	 * second. The pet is Kree'arra's, the latest kill with a pet row, whichever order the loot came in.
+	 */
+	@Test
+	public void aPetGoesToTheBossNotTheMinionKilledOnTheSameTick()
+	{
+		kill("Kree'arra", BONES);
+		kill("Flight Kilisa", BONES);
+		log.onPetMessage(game.client().getTickCount());
+		assertEquals(1, drop("Kree'arra", "Pet Kree'arra").obtained);
+		game.tick();
+		game.tick();
+		log.onPetMessage(game.client().getTickCount());
+		kill("Flight Kilisa", BONES);
+		assertEquals("a line before its loot waits past the minion", 1, drop("Kree'arra", "Pet Kree'arra").obtained);
+		kill("Kree'arra", BONES);
+		assertEquals(2, drop("Kree'arra", "Pet Kree'arra").obtained);
+	}
+
+	/** Scurrius shared is not counted, and its pet is not handed to the Cerberus kill a tick before. */
+	@Test
+	public void aKillThatIsNotCountedKeepsItsPetFromTheKillBesideIt()
+	{
+		kill("Cerberus", BONES);
+		game.tick();
+		log.onHitsplat("Scurrius", false, true, 10, game.client().getTickCount());
+		kill("Scurrius", BONES);
+		log.onPetMessage(game.client().getTickCount());
+		assertEquals(0, drop("Cerberus", "Hellpuppy").obtained);
+	}
+
 	/** A pet from woodcutting finds no kill, and counts nothing anywhere. */
 	@Test
 	public void aPetWithNoKillBesideItCountsNothing()
