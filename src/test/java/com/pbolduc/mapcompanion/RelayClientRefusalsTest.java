@@ -154,6 +154,22 @@ public class RelayClientRefusalsTest
 		assertNotNull(RelayClient.permanentReason(410, "something new"));
 	}
 
+	/**
+	 * A mistyped code, or a group closed so long ago the map has forgotten it, was answered with a
+	 * bare 404 and retried every thirty seconds under "Map having trouble · retrying" for as long as
+	 * the player played. The map names its own 404 now; a proxy's, during a deploy, names nothing and
+	 * is still retried.
+	 */
+	@Test
+	public void theMapsOwn404SaysTheGroupIsGoneAndAProxysIsRetried()
+	{
+		assertEquals("That group is gone from the map.", RelayClient.permanentReason(404, "not_found"));
+		assertEquals(RelayClient.Refused.GONE, RelayClient.refusedFor(404, " NOT_FOUND "));
+		assertNull(RelayClient.permanentReason(404, null));
+		assertNull(RelayClient.refusedFor(404, null));
+		assertNull(RelayClient.permanentReason(404, "closed"));
+	}
+
 	@Test
 	public void everyOtherStatusIsUnchangedByThisRule()
 	{

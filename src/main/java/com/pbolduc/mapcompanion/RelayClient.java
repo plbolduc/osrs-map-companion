@@ -525,7 +525,7 @@ public class RelayClient
 	throws IOException
 	{
 		int code = response.code();
-		String reason = code == 507 || code == 403 || code == 410 ? readReason(response) : null;
+		String reason = code == 507 || code == 403 || code == 404 || code == 410 ? readReason(response) : null;
 		RelayResponse parsed = null;
 		ResponseBody body = response.body();
 		if (response.isSuccessful() && body != null)
@@ -565,12 +565,13 @@ public class RelayClient
 			return;
 		}
 
-		if (code == 403 || code == 410)
+		if (code == 403 || code == 404 || code == 410)
 		{
 			/**
-			 * The two statuses whose meaning is in the body. The map answers a member it has never
-			 * heard of with {@code 403 needs_code} and a member it will never hear from again with
-			 * {@code 410 closed} or {@code 410 removed}; a proxy answers 403 with HTML. Reading the
+			 * The statuses whose meaning is in the body. The map answers a member it has never
+			 * heard of with {@code 403 needs_code}, a code it has no group for with {@code 404
+			 * not_found}, and a member it will never hear from again with {@code 410 closed} or
+			 * {@code 410 removed}; a proxy answers 403 or 404 with HTML. Reading the
 			 * reason is what tells those apart, and getting it wrong in either direction is bad:
 			 * retrying a removal every thirty seconds forever, or telling somebody their group is
 			 * closed because a deploy was in progress.
@@ -661,7 +662,7 @@ public class RelayClient
 	/**
 	 * The sentence to print for a refusal that carries a reason, or null to keep retrying.
 	 *
-	 * <p>Three of these are the map speaking on purpose, and each is something the player can act
+	 * <p>Four of these are the map speaking on purpose, and each is something the player can act
 	 * on or has to accept:
 	 *
 	 * <ul>
@@ -672,10 +673,12 @@ public class RelayClient
 	 *       tombstone so that an old plugin cannot bring it back.
 	 *   <li>{@code 410 removed} — an owner removed this member. Retrying that thirty seconds later,
 	 *       which is what the previous release did, is a plugin arguing with a decision.
+	 *   <li>{@code 404 not_found} — no group has this code: mistyped, or closed so long ago the map
+	 *       has forgotten it. Retried, it said "Map having trouble" for as long as the player played.
 	 * </ul>
 	 *
-	 * <p><b>403 with anything else is not permanent</b>, and that asymmetry is deliberate: a proxy
-	 * in front of the map answers 403 with HTML during a deploy, and latching on it is how "the
+	 * <p><b>403 or 404 with anything else is not permanent</b>, and that asymmetry is deliberate: a
+	 * proxy in front of the map answers both with HTML during a deploy, and latching on it is how "the
 	 * plugin is broken until you edit the settings" happened before. 410 with anything else is,
 	 * because 410 is not a status anything in the path emits by accident — it means gone, and the
 	 * five-minute retry window still gives a redeployed map one chance to disagree.
@@ -691,6 +694,11 @@ public class RelayClient
 			return "needs_code".equals(tidy)
 				   ? Words.of("relay.needsInvite")
 				   : null;
+		}
+		if (status == 404)
+		{
+			/* The map's own, for a code it has no group for: a proxy's 404 during a deploy names no word. */
+			return "not_found".equals(tidy) ? Words.of("relay.gone") : null;
 		}
 		if (status == 410)
 		{
@@ -746,6 +754,8 @@ public class RelayClient
 				return Refused.BAD_CODE;
 			case 403:
 				return permanentReason(status, reason) != null ? Refused.NEEDS_INVITE : null;
+			case 404:
+				return permanentReason(status, reason) != null ? Refused.GONE : null;
 			case 410:
 				return "closed".equals(tidy) ? Refused.CLOSED : "removed".equals(tidy) ? Refused.REMOVED : Refused.GONE;
 			case 422:
