@@ -65,7 +65,8 @@
       "npc": "Afflicted",
       "item": "Zombie champion scroll",
       "oneIn": 5000,
-      "page": "Afflicted"
+      "page": "Afflicted",
+      "tertiary": true
     },
     {
       "npc": "Alchemical Hydra",
@@ -125,7 +126,8 @@
       "npc": "Alchemical Hydra",
       "item": "Jar of Chemicals",
       "oneIn": 2000,
-      "page": "Alchemical Hydra"
+      "page": "Alchemical Hydra",
+      "tertiary": true
     },
     {
       "npc": "Amoxliatl",
@@ -168,7 +170,8 @@
       "npc": "Aquanite",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Aquanite"
+      "page": "Aquanite",
+      "tertiary": true
     },
     {
       "npc": "Araxxor",
@@ -186,7 +189,8 @@
       "npc": "Araxxor",
       "item": "Jar of Venom",
       "oneIn": 1500,
-      "page": "Araxxor"
+      "page": "Araxxor",
+      "tertiary": true
     },
     {
       "npc": "Araxxor",
@@ -209,7 +213,8 @@
       "npc": "Armoured zombie",
       "item": "Zombie champion scroll",
       "oneIn": 5000,
-      "page": "Armoured zombie (Defender of Varrock)"
+      "page": "Armoured zombie (Defender of Varrock)",
+      "tertiary": true
     },
     {
       "npc": "Artio",
@@ -228,7 +233,8 @@
       "npc": "Artio",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Artio"
+      "page": "Artio",
+      "tertiary": true
     },
     {
       "npc": "Artio",
@@ -246,7 +252,8 @@
       "npc": "Baby blue dragon",
       "item": "Tooth half of key (moon key)",
       "oneIn": 1066,
-      "page": "Baby blue dragon"
+      "page": "Baby blue dragon",
+      "tertiary": true
     },
     {
       "npc": "Balfrug Kreeyath",
@@ -526,7 +533,8 @@
       "npc": "Basilisk Knight",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Basilisk Knight"
+      "page": "Basilisk Knight",
+      "tertiary": true
     },
     {
       "npc": "Basilisk Knight",
@@ -538,7 +546,8 @@
       "npc": "Berry",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Berry"
+      "page": "Berry",
+      "tertiary": true
     },
     {
       "npc": "Blood Reaver",
@@ -710,19 +719,22 @@
       "npc": "Cave crawler",
       "item": "Tooth half of key (moon key)",
       "oneIn": 1024,
-      "page": "Cave crawler"
+      "page": "Cave crawler",
+      "tertiary": true
     },
     {
       "npc": "Cave goblin",
       "item": "Goblin champion scroll",
       "oneIn": 5000,
-      "page": "Cave goblin (monster)"
+      "page": "Cave goblin (monster)",
+      "tertiary": true
     },
     {
       "npc": "Cave goblin guard",
       "item": "Goblin champion scroll",
       "oneIn": 5000,
-      "page": "Cave goblin guard"
+      "page": "Cave goblin guard",
+      "tertiary": true
     },
     {
       "npc": "Cave horror",
@@ -734,7 +746,8 @@
       "npc": "Cave horror",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Cave horror"
+      "page": "Cave horror",
+      "tertiary": true
     },
     {
       "npc": "Cave kraken",
@@ -759,7 +772,8 @@
       "npc": "Cerberus",
       "item": "Jar of Souls",
       "oneIn": 2000,
-      "page": "Cerberus"
+      "page": "Cerberus",
+      "tertiary": true
     },
     {
       "npc": "Cerberus",
@@ -815,7 +829,8 @@
       "npc": "City guard",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "City guard"
+      "page": "City guard",
+      "tertiary": true
     },
     {
       "npc": "Cockatrice",
@@ -870,7 +885,8 @@
       "npc": "Corporeal Beast",
       "item": "Jar of Spirits",
       "oneIn": 1000,
-      "page": "Corporeal Beast"
+      "page": "Corporeal Beast",
+      "tertiary": true
     },
     {
       "npc": "Corporeal Beast",
@@ -907,13 +923,15 @@
       "npc": "Cyclops",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Cyclops"
+      "page": "Cyclops",
+      "tertiary": true
     },
     {
       "npc": "Dad",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Dad"
+      "page": "Dad",
+      "tertiary": true
     },
     {
       "npc": "Dagannoth Prime",
@@ -994,7 +1012,8 @@
       "npc": "Dark beast",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Dark beast"
+      "page": "Dark beast",
+      "tertiary": true
     },
     {
       "npc": "Dark beast",
@@ -1228,7 +1247,8 @@
       "npc": "Earth warrior",
       "item": "Earth warrior champion scroll",
       "oneIn": 5000,
-      "page": "Earth warrior"
+      "page": "Earth warrior",
+      "tertiary": true
     },
     {
       "npc": "Earthen Nagua",
@@ -1289,19 +1309,22 @@
       "npc": "Enclave guard",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Enclave guard"
+      "page": "Enclave guard",
+      "tertiary": true
     },
     {
       "npc": "Fire giant",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Fire giant"
+      "page": "Fire giant",
+      "tertiary": true
     },
     {
       "npc": "Fire giant",
       "item": "Giant champion scroll",
       "oneIn": 5000,
-      "page": "Fire giant"
+      "page": "Fire giant",
+      "tertiary": true
     },
     {
       "npc": "Flawed Golem",
@@ -1385,31 +1408,36 @@
       "npc": "Frenzied ice troll female",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Frenzied ice troll female"
+      "page": "Frenzied ice troll female",
+      "tertiary": true
     },
     {
       "npc": "Frenzied ice troll grunt",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Frenzied ice troll grunt"
+      "page": "Frenzied ice troll grunt",
+      "tertiary": true
     },
     {
       "npc": "Frenzied ice troll male",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Frenzied ice troll male"
+      "page": "Frenzied ice troll male",
+      "tertiary": true
     },
     {
       "npc": "Frenzied ice troll runt",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Frenzied ice troll runt"
+      "page": "Frenzied ice troll runt",
+      "tertiary": true
     },
     {
       "npc": "Frost Crab",
       "item": "Tooth half of key (moon key)",
       "oneIn": 1354,
-      "page": "Frost Crab"
+      "page": "Frost Crab",
+      "tertiary": true
     },
     {
       "npc": "Frost dragon",
@@ -1463,7 +1491,8 @@
       "npc": "General Graardor",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "General Graardor"
+      "page": "General Graardor",
+      "tertiary": true
     },
     {
       "npc": "General Graardor",
@@ -1476,13 +1505,15 @@
       "npc": "Ghoul",
       "item": "Ghoul champion scroll",
       "oneIn": 5000,
-      "page": "Ghoul"
+      "page": "Ghoul",
+      "tertiary": true
     },
     {
       "npc": "Giant frog",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Giant frog"
+      "page": "Giant frog",
+      "tertiary": true
     },
     {
       "npc": "Giant Mole",
@@ -1495,31 +1526,36 @@
       "npc": "Giant Mole",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Giant Mole"
+      "page": "Giant Mole",
+      "tertiary": true
     },
     {
       "npc": "Giant skeleton",
       "item": "Skeleton champion scroll",
       "oneIn": 5000,
-      "page": "Giant skeleton (Shadow Dungeon)"
+      "page": "Giant skeleton (Shadow Dungeon)",
+      "tertiary": true
     },
     {
       "npc": "Goblin",
       "item": "Goblin champion scroll",
       "oneIn": 5000,
-      "page": "Goblin"
+      "page": "Goblin",
+      "tertiary": true
     },
     {
       "npc": "Gorad",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Gorad"
+      "page": "Gorad",
+      "tertiary": true
     },
     {
       "npc": "Gorak",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Gorak"
+      "page": "Gorak",
+      "tertiary": true
     },
     {
       "npc": "Growler",
@@ -1555,7 +1591,8 @@
       "npc": "Headless Beast",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Headless Beast"
+      "page": "Headless Beast",
+      "tertiary": true
     },
     {
       "npc": "Hermit crab",
@@ -1567,13 +1604,15 @@
       "npc": "Hill Giant",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Hill Giant"
+      "page": "Hill Giant",
+      "tertiary": true
     },
     {
       "npc": "Hill Giant",
       "item": "Giant champion scroll",
       "oneIn": 5000,
-      "page": "Hill Giant"
+      "page": "Hill Giant",
+      "tertiary": true
     },
     {
       "npc": "Hydra",
@@ -1609,61 +1648,71 @@
       "npc": "Ice giant",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Ice giant"
+      "page": "Ice giant",
+      "tertiary": true
     },
     {
       "npc": "Ice giant",
       "item": "Giant champion scroll",
       "oneIn": 5000,
-      "page": "Ice giant"
+      "page": "Ice giant",
+      "tertiary": true
     },
     {
       "npc": "Ice troll",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Ice troll"
+      "page": "Ice troll",
+      "tertiary": true
     },
     {
       "npc": "Ice troll female",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Ice troll female"
+      "page": "Ice troll female",
+      "tertiary": true
     },
     {
       "npc": "Ice troll grunt",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Ice troll grunt"
+      "page": "Ice troll grunt",
+      "tertiary": true
     },
     {
       "npc": "Ice troll male",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Ice troll male"
+      "page": "Ice troll male",
+      "tertiary": true
     },
     {
       "npc": "Ice troll runt",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Ice troll runt"
+      "page": "Ice troll runt",
+      "tertiary": true
     },
     {
       "npc": "Icefiend",
       "item": "Tooth half of key (moon key)",
       "oneIn": 1373,
-      "page": "Icefiend"
+      "page": "Icefiend",
+      "tertiary": true
     },
     {
       "npc": "Icelord",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Icelord"
+      "page": "Icelord",
+      "tertiary": true
     },
     {
       "npc": "Imp",
       "item": "Imp champion scroll",
       "oneIn": 5000,
-      "page": "Imp"
+      "page": "Imp",
+      "tertiary": true
     },
     {
       "npc": "Infernal Mage",
@@ -1687,7 +1736,8 @@
       "npc": "Jogre",
       "item": "Jogre champion scroll",
       "oneIn": 5000,
-      "page": "Jogre"
+      "page": "Jogre",
+      "tertiary": true
     },
     {
       "npc": "K'ril Tsutsaroth",
@@ -1730,7 +1780,8 @@
       "npc": "Kalphite Queen",
       "item": "Jar of Sand",
       "oneIn": 2000,
-      "page": "Kalphite Queen"
+      "page": "Kalphite Queen",
+      "tertiary": true
     },
     {
       "npc": "Kalphite Queen",
@@ -1755,7 +1806,8 @@
       "npc": "Khazard Ogre",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Khazard Ogre"
+      "page": "Khazard Ogre",
+      "tertiary": true
     },
     {
       "npc": "Killerwatt",
@@ -1786,13 +1838,15 @@
       "npc": "Kraka",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Kraka"
+      "page": "Kraka",
+      "tertiary": true
     },
     {
       "npc": "Kraken",
       "item": "Jar of Dirt",
       "oneIn": 1000,
-      "page": "Kraken"
+      "page": "Kraken",
+      "tertiary": true
     },
     {
       "npc": "Kraken",
@@ -1841,7 +1895,8 @@
       "npc": "Kree'arra",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Kree'arra"
+      "page": "Kree'arra",
+      "tertiary": true
     },
     {
       "npc": "Kree'arra",
@@ -1884,7 +1939,8 @@
       "npc": "Lizard",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Lizard"
+      "page": "Lizard",
+      "tertiary": true
     },
     {
       "npc": "Lizardman",
@@ -1911,6 +1967,7 @@
       "item": "Curved bone",
       "oneIn": 5012.5,
       "page": "Lizardman shaman",
+      "tertiary": true,
       "where": "outside-instances"
     },
     {
@@ -1942,7 +1999,8 @@
       "npc": "Mammoth",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Mammoth"
+      "page": "Mammoth",
+      "tertiary": true
     },
     {
       "npc": "Mammoth",
@@ -1984,7 +2042,8 @@
       "npc": "Monkey Zombie",
       "item": "Zombie champion scroll",
       "oneIn": 5000,
-      "page": "Monkey Zombie"
+      "page": "Monkey Zombie",
+      "tertiary": true
     },
     {
       "npc": "Moonlight Cockatrice",
@@ -2002,13 +2061,15 @@
       "npc": "Moss Guardian",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Moss Guardian"
+      "page": "Moss Guardian",
+      "tertiary": true
     },
     {
       "npc": "Mountain troll",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Mountain troll"
+      "page": "Mountain troll",
+      "tertiary": true
     },
     {
       "npc": "Nex",
@@ -2119,19 +2180,22 @@
       "npc": "Ogre",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Ogre"
+      "page": "Ogre",
+      "tertiary": true
     },
     {
       "npc": "Ogre chieftain",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Ogre chieftain"
+      "page": "Ogre chieftain",
+      "tertiary": true
     },
     {
       "npc": "Ogress Shaman",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Ogress Shaman"
+      "page": "Ogress Shaman",
+      "tertiary": true
     },
     {
       "npc": "Ogress Shaman",
@@ -2143,7 +2207,8 @@
       "npc": "Ogress Warrior",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Ogress Warrior"
+      "page": "Ogress Warrior",
+      "tertiary": true
     },
     {
       "npc": "Ogress Warrior",
@@ -2155,7 +2220,8 @@
       "npc": "Pee Hat",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Pee Hat"
+      "page": "Pee Hat",
+      "tertiary": true
     },
     {
       "npc": "Phantom Muspah",
@@ -2210,7 +2276,8 @@
       "npc": "Phosani's Nightmare",
       "item": "Jar of Dreams",
       "oneIn": 4000,
-      "page": "Phosani's Nightmare"
+      "page": "Phosani's Nightmare",
+      "tertiary": true
     },
     {
       "npc": "Phosani's Nightmare",
@@ -2241,7 +2308,8 @@
       "npc": "Rock",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Rock (Troll)"
+      "page": "Rock (Troll)",
+      "tertiary": true
     },
     {
       "npc": "Rune dragon",
@@ -2265,7 +2333,8 @@
       "npc": "Sarachnis",
       "item": "Jar of Eyes",
       "oneIn": 2000,
-      "page": "Sarachnis"
+      "page": "Sarachnis",
+      "tertiary": true
     },
     {
       "npc": "Sarachnis",
@@ -2311,7 +2380,8 @@
       "npc": "Sea Snake Young",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Sea Snake Young"
+      "page": "Sea Snake Young",
+      "tertiary": true
     },
     {
       "npc": "Sergeant Grimspike",
@@ -2335,7 +2405,8 @@
       "npc": "Sergeant Grimspike",
       "item": "Goblin champion scroll",
       "oneIn": 5000,
-      "page": "Sergeant Grimspike"
+      "page": "Sergeant Grimspike",
+      "tertiary": true
     },
     {
       "npc": "Sergeant Grimspike",
@@ -2377,7 +2448,8 @@
       "npc": "Sergeant Steelwill",
       "item": "Goblin champion scroll",
       "oneIn": 5000,
-      "page": "Sergeant Steelwill"
+      "page": "Sergeant Steelwill",
+      "tertiary": true
     },
     {
       "npc": "Sergeant Steelwill",
@@ -2419,7 +2491,8 @@
       "npc": "Sergeant Strongstack",
       "item": "Goblin champion scroll",
       "oneIn": 5000,
-      "page": "Sergeant Strongstack"
+      "page": "Sergeant Strongstack",
+      "tertiary": true
     },
     {
       "npc": "Sergeant Strongstack",
@@ -2455,37 +2528,43 @@
       "npc": "Skeleton brute",
       "item": "Skeleton champion scroll",
       "oneIn": 5000,
-      "page": "Skeleton brute"
+      "page": "Skeleton brute",
+      "tertiary": true
     },
     {
       "npc": "Skeleton Mage",
       "item": "Skeleton champion scroll",
       "oneIn": 5000,
-      "page": "Skeleton Mage"
+      "page": "Skeleton Mage",
+      "tertiary": true
     },
     {
       "npc": "Skeleton thug",
       "item": "Skeleton champion scroll",
       "oneIn": 5000,
-      "page": "Skeleton thug"
+      "page": "Skeleton thug",
+      "tertiary": true
     },
     {
       "npc": "Skeleton warlord",
       "item": "Skeleton champion scroll",
       "oneIn": 5000,
-      "page": "Skeleton warlord"
+      "page": "Skeleton warlord",
+      "tertiary": true
     },
     {
       "npc": "Skogre",
       "item": "Skeleton champion scroll",
       "oneIn": 5000,
-      "page": "Skogre"
+      "page": "Skogre",
+      "tertiary": true
     },
     {
       "npc": "Skogre",
       "item": "Zombie champion scroll",
       "oneIn": 5000,
-      "page": "Skogre"
+      "page": "Skogre",
+      "tertiary": true
     },
     {
       "npc": "Skotizo",
@@ -2509,7 +2588,8 @@
       "npc": "Sorebones",
       "item": "Zombie champion scroll",
       "oneIn": 5000,
-      "page": "Sorebones"
+      "page": "Sorebones",
+      "tertiary": true
     },
     {
       "npc": "Spindel",
@@ -2582,7 +2662,8 @@
       "npc": "Stick",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Stick"
+      "page": "Stick",
+      "tertiary": true
     },
     {
       "npc": "Sulphur Nagua",
@@ -2594,7 +2675,8 @@
       "npc": "Suqah",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Suqah"
+      "page": "Suqah",
+      "tertiary": true
     },
     {
       "npc": "Taloned Wyvern",
@@ -2762,6 +2844,7 @@
       "item": "Jar of Dreams",
       "oneIn": 1900,
       "page": "The Nightmare",
+      "tertiary": true,
       "kills": "solo"
     },
     {
@@ -2882,7 +2965,8 @@
       "npc": "Thermonuclear smoke devil",
       "item": "Jar of Smoke",
       "oneIn": 2000,
-      "page": "Thermonuclear smoke devil"
+      "page": "Thermonuclear smoke devil",
+      "tertiary": true
     },
     {
       "npc": "Thermonuclear smoke devil",
@@ -2913,7 +2997,8 @@
       "npc": "Thrower Troll",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Thrower Troll"
+      "page": "Thrower Troll",
+      "tertiary": true
     },
     {
       "npc": "Tormented Demon",
@@ -2949,7 +3034,8 @@
       "npc": "Tortured gorilla",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Tortured gorilla"
+      "page": "Tortured gorilla",
+      "tertiary": true
     },
     {
       "npc": "Tortured gorilla",
@@ -2979,13 +3065,15 @@
       "npc": "Troll general",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Troll general"
+      "page": "Troll general",
+      "tertiary": true
     },
     {
       "npc": "Troll spectator",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Troll spectator"
+      "page": "Troll spectator",
+      "tertiary": true
     },
     {
       "npc": "Tstanon Karlak",
@@ -3027,7 +3115,8 @@
       "npc": "Twig",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Twig"
+      "page": "Twig",
+      "tertiary": true
     },
     {
       "npc": "Twisted Banshee",
@@ -3123,19 +3212,22 @@
       "npc": "Undead Druid",
       "item": "Zombie champion scroll",
       "oneIn": 5000,
-      "page": "Undead Druid"
+      "page": "Undead Druid",
+      "tertiary": true
     },
     {
       "npc": "Undead one",
       "item": "Skeleton champion scroll",
       "oneIn": 5000,
-      "page": "Undead one"
+      "page": "Undead one",
+      "tertiary": true
     },
     {
       "npc": "Undead one",
       "item": "Zombie champion scroll",
       "oneIn": 5000,
-      "page": "Undead one"
+      "page": "Undead one",
+      "tertiary": true
     },
     {
       "npc": "Vampyre Juvinate",
@@ -3349,7 +3441,8 @@
       "npc": "Vorkath",
       "item": "Jar of Decay",
       "oneIn": 3000,
-      "page": "Vorkath"
+      "page": "Vorkath",
+      "tertiary": true
     },
     {
       "npc": "Vorkath",
@@ -3574,7 +3667,8 @@
       "npc": "Zakl'n Gritch",
       "item": "Lesser demon champion scroll",
       "oneIn": 5000,
-      "page": "Zakl'n Gritch"
+      "page": "Zakl'n Gritch",
+      "tertiary": true
     },
     {
       "npc": "Zakl'n Gritch",
@@ -3608,25 +3702,29 @@
       "npc": "Zogre",
       "item": "Zombie champion scroll",
       "oneIn": 5000,
-      "page": "Zogre"
+      "page": "Zogre",
+      "tertiary": true
     },
     {
       "npc": "Zombie pirate",
       "item": "Zombie champion scroll",
       "oneIn": 5000,
-      "page": "Zombie pirate"
+      "page": "Zombie pirate",
+      "tertiary": true
     },
     {
       "npc": "Zombie swab",
       "item": "Zombie champion scroll",
       "oneIn": 5000,
-      "page": "Zombie swab"
+      "page": "Zombie swab",
+      "tertiary": true
     },
     {
       "npc": "Zulrah",
       "item": "Jar of Swamp",
       "oneIn": 3000,
-      "page": "Zulrah"
+      "page": "Zulrah",
+      "tertiary": true
     },
     {
       "npc": "Zulrah",

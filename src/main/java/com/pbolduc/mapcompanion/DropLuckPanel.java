@@ -402,7 +402,7 @@ final class DropLuckPanel extends JPanel
 		grid.setBackground(background);
 		for (Drop drop : monster.drops)
 		{
-			if (drop.oneIn != null && !drop.pet && grid.getComponentCount() < 4)
+			if (DropLuckView.adds(drop) && grid.getComponentCount() < 4)
 			{
 				grid.add(new Picture(drop.itemId, 16, true, -1));
 			}

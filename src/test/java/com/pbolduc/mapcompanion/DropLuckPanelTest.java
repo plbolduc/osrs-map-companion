@@ -347,12 +347,13 @@ public class DropLuckPanelTest
 
 	/**
 	 * Any unique's picture is four of its drops at half size, across and then down. With two rated
-	 * drops, the Lizardman shaman's, a grid with its rows set gave them one column, one over the other.
+	 * drops, the Crazy archaeologist's two shards, a grid with its rows set gave them one column, one over
+	 * the other.
 	 */
 	@Test
 	public void anyUniquesTwoPicturesSitSideBySide() throws Exception
 	{
-		kill("Lizardman shaman", 995);
+		kill("Crazy archaeologist", 995);
 		panel.refresh();
 		assertTrue(words(), words().contains("Any unique"));
 		SwingUtilities.invokeAndWait(() ->

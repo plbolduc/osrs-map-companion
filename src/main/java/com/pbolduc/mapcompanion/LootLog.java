@@ -316,6 +316,11 @@ public class LootLog
 		 */
 		Boolean pet;
 		/**
+		 * A tertiary — a jar, a curved bone, a key half — rolled apart from the monster's own table: a
+		 * row of its own, never part of "Any unique".
+		 */
+		Boolean tertiary;
+		/**
 		 * Which kills count for this row, where not every one alone does. {@code "solo"}: only kills no
 		 * other player hit. {@code "shared"}: a kill others hit too counts as the player's share of one,
 		 * their damage over everyone's — the boss hands its drop out weighted by damage.
@@ -1633,7 +1638,8 @@ public class LootLog
 					rate == null ? null : rate.oneIn,
 					boost ? rate.boost.oneIn : null, boost ? rate.boost.when : null,
 					(int) sharedSinceLast[0], sharedSinceLast[1], (int) sharedWatched[0], sharedWatched[1],
-					rate == null || rate.mvp == null ? 1 : rate.mvp, rate != null && Boolean.TRUE.equals(rate.pet)));
+					rate == null || rate.mvp == null ? 1 : rate.mvp, rate != null && Boolean.TRUE.equals(rate.pet),
+					rate != null && Boolean.TRUE.equals(rate.tertiary)));
 			}
 			boolean shares = anyRow(watched, "kills", "shared");
 			int shared = 0;
@@ -1731,6 +1737,8 @@ public class LootLog
 		public final double mvp;
 		/** A pet: its own roll, so never part of "Any unique". */
 		public final boolean pet;
+		/** A tertiary, rolled apart from the monster's own table: never part of "Any unique" either. */
+		public final boolean tertiary;
 
 		/** The rate pair, or null for a collection item with no rate. */
 		@Nullable
