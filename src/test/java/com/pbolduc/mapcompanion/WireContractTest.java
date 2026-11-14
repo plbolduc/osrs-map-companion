@@ -367,8 +367,26 @@ public class WireContractTest
 		demon.dropsComplete = true;
 		demon.lastKillMsAgo = 90_000L;
 		demon.ratedKey = "0a1b2c3d";
+		/*
+		 * More rows than the map once kept for a monster, so its contract test proves it reads every
+		 * row this plugin can send: nine Barrows pieces had, which an ordinary log has by chest 200.
+		 */
+		CompanionSnapshot.Npc barrows = new CompanionSnapshot.Npc();
+		barrows.npc = "Barrows";
+		barrows.kills = 200;
+		barrows.drops = new ArrayList<>();
+		for (int i = 0; i < 9; i++)
+		{
+			CompanionSnapshot.Drop piece = new CompanionSnapshot.Drop();
+			piece.item = "Barrows piece " + (i + 1);
+			piece.obtained = 1;
+			piece.killsAtLast = 20 * (i + 1);
+			piece.trackedSinceKill = 0;
+			barrows.drops.add(piece);
+		}
+		barrows.dropsComplete = true;
 		s.loot = new CompanionSnapshot.Loot();
-		s.loot.npcs = Arrays.asList(demon);
+		s.loot.npcs = Arrays.asList(demon, barrows);
 		s.loot.current = "Abyssal demon";
 		s.loot.currentOnTask = true;
 		s.loot.pinned = new CompanionSnapshot.Pin();

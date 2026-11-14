@@ -25,7 +25,9 @@
  */
 package com.pbolduc.mapcompanion;
 
+import com.google.gson.Gson;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
@@ -243,6 +245,34 @@ public class NetworkDisclosureTest
 					 + "the new shape here.", expected, wireShape());
 	}
 
+	/**
+	 * A {@code transient} field is the one kind left out of the shape above, because Gson never writes
+	 * one: RuneLite's {@code RuneLiteAPI.GSON} keeps Gson's default exclusion of transient and static
+	 * fields. This holds that to an actual serialisation, so a field cannot leave the machine by
+	 * being marked transient under a Gson that writes it anyway.
+	 */
+	@Test
+	public void aTransientFieldNeverLeavesTheMachine() throws ReflectiveOperationException
+	{
+		int checked = 0;
+		for (Class<?> type : CompanionSnapshot.class.getDeclaredClasses())
+		{
+			for (Field field : type.getDeclaredFields())
+			{
+				if (Modifier.isTransient(field.getModifiers()))
+				{
+					Constructor<?> make = type.getDeclaredConstructor();
+					make.setAccessible(true);
+					String json = new Gson().toJson(make.newInstance());
+					assertTrue(type.getSimpleName() + "." + field.getName() + " was written: " + json,
+							   !json.contains("\"" + field.getName() + "\""));
+					checked++;
+				}
+			}
+		}
+		assertTrue("Drop.collection is transient, so at least it is checked", checked > 0);
+	}
+
 	/** Each wire class and its instance fields, sorted, read from the classes rather than a writer. */
 	private static Map<String, String> wireShape()
 	{
@@ -255,7 +285,9 @@ public class NetworkDisclosureTest
 			Set<String> names = new TreeSet<>();
 			for (Field field : type.getDeclaredFields())
 			{
-				if (field.isSynthetic() || Modifier.isStatic(field.getModifiers()))
+				/* Transient is not sent, which aTransientFieldNeverLeavesTheMachine holds to Gson. */
+				if (field.isSynthetic() || Modifier.isStatic(field.getModifiers())
+					|| Modifier.isTransient(field.getModifiers()))
 				{
 					continue;
 				}

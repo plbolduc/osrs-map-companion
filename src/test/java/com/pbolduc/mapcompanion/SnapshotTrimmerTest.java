@@ -83,11 +83,119 @@ public class SnapshotTrimmerTest
 	@Test
 	public void capsTheDropsPerMonsterWithoutCallingTheMissingItemsNeverObtained()
 	{
-		CompanionSnapshot snapshot = snapshotWith(10, 12);
+		/* No row marked as collection, so each counts as rated: the cut takes one and clears the flag. */
+		CompanionSnapshot snapshot = snapshotWith(1, SnapshotTrimmer.MAX_DROPS_PER_NPC + 4);
 		trimmer.fit(snapshot);
 		assertEquals(SnapshotTrimmer.MAX_DROPS_PER_NPC, snapshot.loot.npcs.get(0).drops.size());
 		assertEquals(Boolean.TRUE, snapshot.detailsTruncated);
 		assertEquals(Boolean.FALSE, snapshot.loot.npcs.get(0).dropsComplete);
+	}
+
+	/**
+	 * A collection row has no rate, so the map never reads its absence; a rated row's absence is
+	 * the default, which only a complete list may claim. So the collection rows go first, the least
+	 * recently had of them first, and while only they went the list still vouches for its rates.
+	 */
+	@Test
+	public void cutsCollectionRowsBeforeRatedOnesAndKeepsTheRatedDefaults()
+	{
+		CompanionSnapshot snapshot = barrowsWith(12);
+		trimmer.fit(snapshot);
+		CompanionSnapshot.Npc barrows = snapshot.loot.npcs.get(0);
+		assertEquals(SnapshotTrimmer.MAX_DROPS_PER_NPC, barrows.drops.size());
+		assertEquals("every rated row stays", 24, barrows.drops.stream().filter(d -> !d.collection).count());
+		assertEquals("the most recently had collection rows stay", "Collection item 7",
+			barrows.drops.get(barrows.drops.size() - 1).item);
+		assertEquals(Boolean.TRUE, barrows.dropsComplete);
+		assertEquals("a reader is still told a row was cut", Boolean.TRUE, snapshot.detailsTruncated);
+	}
+
+	/** The largest rated table with eight collection rows beside it travels untouched. */
+	@Test
+	public void sendsTheLargestTableWholeBesideItsCollectionRows()
+	{
+		CompanionSnapshot snapshot = barrowsWith(8);
+		trimmer.fit(snapshot);
+		assertEquals(32, snapshot.loot.npcs.get(0).drops.size());
+		assertEquals(Boolean.TRUE, snapshot.loot.npcs.get(0).dropsComplete);
+		assertNull(snapshot.detailsTruncated);
+	}
+
+	/**
+	 * The heaviest log a player plausibly has: every Barrows piece and a collection row, the three
+	 * long tables a 1.9.0 log sends whole after its upgrade, and three obtained uniques on each of
+	 * thirty-six more monsters, every one with its last kill and fingerprint, at real name lengths.
+	 * It is past the budget, so the trimmer has to get it under, and it does so by dropping the
+	 * monsters killed longest ago: the Barrows log on top survives with every row and its defaults.
+	 */
+	@Test
+	public void getsTheHeaviestRealisticLogUnderTheBudgetWithBarrowsWhole()
+	{
+		CompanionSnapshot snapshot = snapshotWith(SnapshotTrimmer.MAX_LOOT_NPCS, 3);
+		int[] tables = {25, 11, 10, 9};
+		for (int i = 0; i < snapshot.loot.npcs.size(); i++)
+		{
+			CompanionSnapshot.Npc npc = snapshot.loot.npcs.get(i);
+			npc.npc = pad(npc.npc, 24);
+			npc.lastKillMsAgo = 123_456_789L;
+			npc.ratedKey = "0a1b2c3d";
+			if (i < tables.length)
+			{
+				npc.drops = new ArrayList<>();
+				for (int d = 0; d < tables[i]; d++)
+				{
+					CompanionSnapshot.Drop drop = new CompanionSnapshot.Drop();
+					drop.item = pad("Rated drop " + d, 23);
+					/* Barrows had; the upgraded tables watched since the kills they already had. */
+					drop.obtained = i == 0 ? 1 : 0;
+					drop.killsAtLast = i == 0 ? 3_900 : null;
+					drop.trackedSinceKill = i == 0 ? 0 : 312;
+					npc.drops.add(drop);
+				}
+			}
+			else
+			{
+				for (int d = 0; d < npc.drops.size(); d++)
+				{
+					npc.drops.get(d).item = pad("Notable drop " + d, 24);
+				}
+			}
+		}
+		assertTrue("the fixture should not already fit", trimmer.sizeOf(snapshot) > SnapshotTrimmer.BUDGET_BYTES);
+
+		trimmer.fit(snapshot);
+
+		assertTrue(trimmer.sizeOf(snapshot) <= SnapshotTrimmer.BUDGET_BYTES);
+		assertEquals(Boolean.TRUE, snapshot.detailsTruncated);
+		CompanionSnapshot.Npc barrows = snapshot.loot.npcs.get(0);
+		assertEquals(25, barrows.drops.size());
+		assertEquals(Boolean.TRUE, barrows.dropsComplete);
+		for (int i = 1; i < tables.length; i++)
+		{
+			assertEquals(tables[i], snapshot.loot.npcs.get(i).drops.size());
+		}
+	}
+
+	/**
+	 * Barrows' 24 rated rows, then {@code collection} collection rows, most recently had first:
+	 * the order {@code LootLog} sends them in.
+	 */
+	private static CompanionSnapshot barrowsWith(int collection)
+	{
+		CompanionSnapshot snapshot = snapshotWith(1, 24);
+		CompanionSnapshot.Npc barrows = snapshot.loot.npcs.get(0);
+		barrows.npc = "Barrows";
+		for (int d = 0; d < collection; d++)
+		{
+			CompanionSnapshot.Drop drop = new CompanionSnapshot.Drop();
+			drop.collection = true;
+			drop.item = "Collection item " + d;
+			drop.obtained = 1;
+			drop.killsAtLast = 800 - d;
+			drop.trackedSinceKill = 0;
+			barrows.drops.add(drop);
+		}
+		return snapshot;
 	}
 
 	@Test
@@ -339,7 +447,7 @@ public class SnapshotTrimmerTest
 	 */
 	private static CompanionSnapshot worstCase()
 	{
-		CompanionSnapshot snapshot = snapshotWith(SnapshotTrimmer.MAX_LOOT_NPCS, 12);
+		CompanionSnapshot snapshot = snapshotWith(SnapshotTrimmer.MAX_LOOT_NPCS, SnapshotTrimmer.MAX_DROPS_PER_NPC);
 		snapshot.member.characterName = "Abcdefghijkl";
 		snapshot.member.nick = "Abcdefghijklmnopqrst";
 		snapshot.accountType = "ultimate_ironman";

@@ -31,6 +31,7 @@ import net.runelite.client.events.ServerNpcLoot;
 import net.runelite.client.game.ItemStack;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 /**
@@ -94,5 +95,38 @@ public class LootLogCapTest
 		new SnapshotTrimmer(new Gson()).fit(snapshot);
 		assertEquals(SnapshotTrimmer.MAX_LOOT_NPCS, snapshot.loot.npcs.size());
 		assertNull(snapshot.detailsTruncated);
+	}
+
+	/**
+	 * Nine Barrows pieces from 200 chests, which is an ordinary log by then: the nine travel, the
+	 * fifteen never had stay off as the default, and the list still says it is whole. Past a cap of
+	 * eight the ninth was cut, and the map read all sixteen absent pieces as unknowns. The map's
+	 * {@code lib/drop-luck.test.ts} reads the same nine back into every piece's odds and Any unique.
+	 */
+	@Test
+	public void nineBarrowsPiecesTravelWholeAndTheRestStayTheDefault()
+	{
+		String[] pieces = {"Ahrim's hood", "Ahrim's robeskirt", "Ahrim's robetop", "Ahrim's staff", "Dharok's greataxe",
+			"Dharok's helm", "Dharok's platebody", "Dharok's platelegs", "Guthan's chainskirt"};
+		for (int i = 0; i < pieces.length; i++)
+		{
+			game.nameItem(90_100 + i, pieces[i]);
+		}
+		for (int chest = 1; chest <= 200; chest++)
+		{
+			int piece = chest % 20 == 0 && chest / 20 <= pieces.length ? 90_100 + chest / 20 - 1 : 995;
+			log.recordEvent("Barrows", Collections.singletonList(new ItemStack(piece, 1)), null, true);
+		}
+
+		CompanionSnapshot snapshot = new CompanionSnapshot();
+		snapshot.loot = log.snapshot();
+		new SnapshotTrimmer(new Gson()).fit(snapshot);
+		CompanionSnapshot.Npc barrows = snapshot.loot.npcs.get(0);
+		assertEquals("Barrows", barrows.npc);
+		assertEquals(200, barrows.kills);
+		assertEquals(pieces.length, barrows.drops.size());
+		assertTrue(barrows.drops.stream().allMatch(d -> d.obtained == 1 && d.trackedSinceKill == 0));
+		assertEquals(Boolean.TRUE, barrows.dropsComplete);
+		assertNull("nothing was cut", snapshot.detailsTruncated);
 	}
 }
