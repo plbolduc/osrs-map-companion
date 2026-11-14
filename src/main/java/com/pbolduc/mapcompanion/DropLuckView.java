@@ -154,7 +154,8 @@ final class DropLuckView
 	/** "Slayer task · 143 left · 1,024 recorded kills", or the last kill's age. */
 	static String context(Monster monster, boolean isNow, @Nullable Integer taskLeft, long now)
 	{
-		String kills = count(monster.kills) + (monster.solo ? " solo " : " recorded ") + (monster.kills == 1 ? "kill" : "kills");
+		String kills = count(monster.kills) + (monster.solo ? " solo " : " recorded ") + monster.unit + (monster.kills == 1 ? "" : "s")
+			+ (monster.shared > 0 ? ", " + count(monster.shared) + " shared" : "");
 		if (isNow && taskLeft != null)
 		{
 			return "Slayer task · " + count(taskLeft) + " left · " + kills;
@@ -163,7 +164,8 @@ final class DropLuckView
 		{
 			return "Killing now · " + kills;
 		}
-		return monster.lastKillMs > 0 ? "Last killed " + ago(now - monster.lastKillMs) + " · " + kills : kills;
+		String last = "chest".equals(monster.unit) ? "Last opened " : "run".equals(monster.unit) ? "Last claimed " : "Last killed ";
+		return monster.lastKillMs > 0 ? last + ago(now - monster.lastKillMs) + " · " + kills : kills;
 	}
 
 	/**
@@ -174,7 +176,7 @@ final class DropLuckView
 	{
 		if (drop.oneIn == null)
 		{
-			return drop.obtained == 0 ? "Not had yet" : count(drop.sinceLast) + " kills since the last";
+			return drop.obtained == 0 ? "Not had yet" : units(monster, drop.sinceLast) + " since the last";
 		}
 		return DropOdds.expectation(drop.watchedKills(), drop.rate(), boostedNow);
 	}
@@ -225,7 +227,7 @@ final class DropLuckView
 	static Detail detail(Monster monster, Drop drop, @Nullable Integer taskLeft, boolean boostedNow)
 	{
 		String sinceLabel = drop.obtained > 0 ? "Since last drop" : "No drop recorded yet";
-		String sinceValue = count(drop.sinceLast) + (drop.sinceLast == 1 ? " kill" : " kills");
+		String sinceValue = units(monster, drop.sinceLast);
 		if (drop.oneIn == null)
 		{
 			return new Detail(drop.obtained > 0
@@ -241,14 +243,14 @@ final class DropLuckView
 		String another = drop.obtained > 0 ? "another" : "one";
 		String boost = ahead != rate.oneIn ? " " + rate.boostLabel : "";
 		String aheadLabel = taskAhead ? "Rest of this Slayer task (" + count(taskLeft) + " kills)"
-			: "Next 100 kills" + boost;
+			: "Next " + units(monster, 100) + boost;
 		String aheadValue = DropOdds.percent(DropOdds.within(ahead, taskAhead ? taskLeft : 100)) + "% chance of " + another;
 		return new Detail(
 			DropOdds.verdict(drop.obtained, drop.watchedKills(), drop.sinceKills(), rate),
 			sinceLabel, sinceValue,
 			DropOdds.waitSoFar(drop.sinceKills(), rate),
 			drierThan, aheadLabel, aheadValue,
-			"Half of players get one within " + count(DropOdds.killsFor(0.5, ahead)) + " kills" + boost + ".");
+			"Half of players get one within " + units(monster, DropOdds.killsFor(0.5, ahead)) + boost + ".");
 	}
 
 	/**
@@ -374,10 +376,16 @@ final class DropLuckView
 			+ (drop.obtained > 0 ? " since the last" : " without one");
 	}
 
+	/** "1 kill", "12 chests", "3 runs": a count of what the monster's tally counts. */
+	static String units(Monster monster, long n)
+	{
+		return count(n) + " " + monster.unit + (n == 1 ? "" : "s");
+	}
+
 	/** "1,024 kills · 2 h ago". */
 	static String listMeta(Monster monster, long now)
 	{
-		String kills = count(monster.kills) + (monster.kills == 1 ? " kill" : " kills");
+		String kills = units(monster, monster.kills);
 		return monster.lastKillMs > 0 ? kills + " · " + ago(now - monster.lastKillMs) : kills;
 	}
 

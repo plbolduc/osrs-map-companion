@@ -525,7 +525,7 @@ final class DropLuckPanel extends JPanel
 		row.add(new Picture(drop.itemId, 26, true, -1), BorderLayout.WEST);
 		JPanel words = column(ColorScheme.DARKER_GRAY_HOVER_COLOR);
 		words.add(wrapped(drop.item, ROW_TEXT_WIDTH, 12f, BRAND_ORANGE));
-		words.add(wrapped(monster.npc + " · " + DropOdds.count(drop.sinceLast) + " kills since last",
+		words.add(wrapped(monster.npc + " · " + DropLuckView.units(monster, drop.sinceLast) + " since last",
 			ROW_TEXT_WIDTH, 11f, LIGHT_GRAY_COLOR));
 		row.add(words, BorderLayout.CENTER);
 		if (drop.oneIn != null)

@@ -644,6 +644,7 @@ public class LootLogDropLuckTest
 		log.recordEvent("Barrows", Arrays.asList(new ItemStack(BONES, 1)), null, true);
 		assertEquals(1, monster("Barrows").kills);
 		assertEquals(350.14, drop("Barrows", "Ahrim's hood").oneIn, 0.01);
+		assertTrue("a chest is opened, not killed", DropLuckView.context(monster("Barrows"), false, null, now).endsWith("1 recorded chest"));
 	}
 
 	/**
@@ -682,6 +683,7 @@ public class LootLogDropLuckTest
 		kill("Branda the Fire Queen", BONES);
 		assertEquals(1, monster("Branda the Fire Queen").kills);
 		assertEquals(0.6, drop("Branda the Fire Queen", "Fire element staff crown").shareWatched, 1e-9);
+		assertTrue(DropLuckView.context(monster("Branda the Fire Queen"), false, null, now).endsWith("1 recorded kill, 1 shared"));
 		assertEquals(75.0, drop("Branda the Fire Queen", "Fire element staff crown").oneIn, 0);
 	}
 
