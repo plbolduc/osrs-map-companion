@@ -1609,11 +1609,18 @@ public class LootLog
 			for (String item : dropOrder(tally, watched, false))
 			{
 				Rate rate = rateFor(watched, item);
-				Integer id = tally.itemIds.get(item);
+				/* A set has no picture of its own: the piece that fell, else the one that stands for it. */
+				boolean set = rate != null && rate.pieces != null && !rate.pieces.isEmpty();
+				String stands = set ? setPicture(item, rate.pieces) : item;
+				/* Progress towards a piece is always that piece, never a step that fell on the way. */
+				Integer id = set && !stands.equals(rate.pieces.get(0)) ? notables.idFor(stands) : null;
 				if (id == null)
 				{
-					/* A set has no picture of its own; its first piece stands for it until one falls. */
-					id = notables.idFor(rate != null && rate.pieces != null && !rate.pieces.isEmpty() ? rate.pieces.get(0) : item);
+					id = tally.itemIds.get(item);
+				}
+				if (id == null)
+				{
+					id = notables.idFor(stands);
 				}
 				Integer since = tally.trackedSince.get(item);
 				boolean boost = rate != null && rate.boost != null;
@@ -1640,6 +1647,19 @@ public class LootLog
 				anyRow(watched, "needs", "all-brothers") ? "chest" : delves ? "run" : "kill", shared));
 		}
 		return out;
+	}
+
+	/**
+	 * The piece whose picture stands for a set. The first, where no piece is the point of the set —
+	 * the brimstone ring's eye, the halberd's pommel — but the last where the set is progress towards
+	 * that piece and named for it: a vestige's gold rings are steps to the vestige, and a gold ring
+	 * with a count on it, alone on a list tile, reads as a gold ring drop. The map's {@code
+	 * setPicture}, rule for rule.
+	 */
+	static String setPicture(String item, List<String> pieces)
+	{
+		String last = pieces.get(pieces.size() - 1);
+		return item.toLowerCase(Locale.ROOT).startsWith(last.toLowerCase(Locale.ROOT) + " ") ? last : pieces.get(0);
 	}
 
 	/** One monster, for the sidebar. */
