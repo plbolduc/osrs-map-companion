@@ -484,8 +484,9 @@ The website plan's second session, once the routes in the game are built: a memb
       and take the next one into the same slot: as the item box shows it, the card stops showing the
       step just done and its Route, and says to read the scroll; reading it shows the new step.
 - [ ] **Route back.** Die somewhere ordinary with *Share death* off, respawn and press Route back.
-      Then, if convenient, die at a boss fought in an instance (Vorkath, Zulrah): note where the
-      route goes. The map's half decides whether it is the boss's way in.
+      Then, if convenient, die at a boss fought in an instance (Vorkath, Zulrah): Route back goes
+      to the boss's way in, not into the arena. On an emote clue whose STASH unit is not beside
+      the spot, press Route, then Reroute before the unit: the new way still goes by the unit.
 - [ ] **The gravestone's time left.** Die somewhere ordinary. Once you respawn, the death card says
       *Gravestone · 15m left* under *You died …*, over a full orange bar. For a few minutes, compare
       it with the game's own gravestone timer: the card's minutes are the game's, rounded up, which
