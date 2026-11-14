@@ -415,6 +415,66 @@ public class SnapshotTrimmerTest
 	}
 
 	/**
+	 * Recommended sharing with the full quest log and a farm run, over the budget before a single
+	 * monster. Cutting in order emptied the kill log, then dropped the quest log anyway and never
+	 * gave the room back, so the map had no Drop luck for that player at all. The log now gets every
+	 * monster the room left by the quest log holds, and not one fewer.
+	 */
+	@Test
+	public void givesTheKillLogTheRoomTheQuestLogLeft()
+	{
+		CompanionSnapshot snapshot = worstCase();
+		snapshot.stashUnits = null;
+		snapshot.seaCharts = null;
+		snapshot.boats = null;
+		snapshot.portTasks = null;
+		snapshot.milestones = null;
+		snapshot.farming.patches.subList(20, snapshot.farming.patches.size()).clear();
+		snapshot.loot = null;
+		assertTrue("the fixture should be over the budget without a kill log",
+			trimmer.sizeOf(snapshot) > SnapshotTrimmer.BUDGET_BYTES);
+		snapshot.loot = realisticLog(0).loot;
+
+		trimmer.fit(snapshot);
+
+		assertTrue(trimmer.sizeOf(snapshot) <= SnapshotTrimmer.BUDGET_BYTES);
+		assertNull(snapshot.questLog);
+		assertEquals(20, snapshot.farming.patches.size());
+		assertNotNull("the room the quest log left goes to the kill log", snapshot.loot);
+		int kept = snapshot.loot.npcs.size();
+		assertTrue("kept " + kept + " monsters", kept > 1 && kept < SnapshotTrimmer.MAX_LOOT_NPCS);
+		assertTrue("the log is cut from its foot", snapshot.loot.npcs.get(0).npc.startsWith("npc-0"));
+		snapshot.loot.npcs.add(realisticLog(0).loot.npcs.get(kept));
+		assertTrue("one more monster would have fit", trimmer.sizeOf(snapshot) > SnapshotTrimmer.BUDGET_BYTES);
+		assertEquals(Boolean.TRUE, snapshot.detailsTruncated);
+	}
+
+	/**
+	 * A collection row has no rate, so the map never reads its absence; a whole monster is its kills
+	 * and every rated default. So over the budget the collection rows go first, from the foot of the
+	 * log, and every monster stays with its rated rows and its claim to be complete.
+	 */
+	@Test
+	public void cutsCollectionRowsBeforeWholeMonsters()
+	{
+		CompanionSnapshot snapshot = realisticLog(3);
+		assertTrue("the fixture should not already fit", trimmer.sizeOf(snapshot) > SnapshotTrimmer.BUDGET_BYTES);
+
+		trimmer.fit(snapshot);
+
+		assertTrue(trimmer.sizeOf(snapshot) <= SnapshotTrimmer.BUDGET_BYTES);
+		assertEquals(SnapshotTrimmer.MAX_LOOT_NPCS, snapshot.loot.npcs.size());
+		assertEquals("the top of the log keeps its collection rows", 6, snapshot.loot.npcs.get(0).drops.size());
+		CompanionSnapshot.Npc foot = snapshot.loot.npcs.get(SnapshotTrimmer.MAX_LOOT_NPCS - 1);
+		assertEquals("the foot keeps its rated rows", 3, foot.drops.size());
+		for (CompanionSnapshot.Npc npc : snapshot.loot.npcs)
+		{
+			assertEquals(Boolean.TRUE, npc.dropsComplete);
+		}
+		assertEquals(Boolean.TRUE, snapshot.detailsTruncated);
+	}
+
+	/**
 	 * The forty-monster log of {@link #aRealisticFullKillLogFitsWithoutTheOmissionNotice}, which fits
 	 * untouched, each monster with {@code collection} collection rows after its three rated ones.
 	 */

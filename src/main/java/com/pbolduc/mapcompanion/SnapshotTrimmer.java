@@ -29,8 +29,12 @@ import com.google.gson.Gson;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.function.IntConsumer;
+import java.util.stream.Collectors;
 
 /**
  * Making a snapshot fit, and saying so when something had to go.
@@ -56,25 +60,28 @@ import java.util.List;
  * reads, as the default. A week-old reading is not disclosed: the map drops it on arrival, so
  * leaving it here costs nobody anything, while sending it cost monsters off the kill log.
  *
- * <p>If that is not enough, the kill tallies go, least-killed first, then the patch observations,
- * oldest first. Those are the two least actionable things on the wire — a drought counter is a
- * curiosity and a six-hour-old patch reading is already a "go and look" — and everything else here
- * is bounded by a table rather than by how long somebody has played.
- *
- * <p>The optional full quest log goes before recent farming observations if the snapshot still
- * cannot fit. It is dropped whole: a subset must not masquerade as a complete log. STASH
- * construction is the next optional catalogue if the remaining fixed fields need space, then the
- * sea charts charted. Both are dropped whole too, and the map reads an absent one as not told,
- * never as none built or charted.
+ * <p>If that is not enough, the least useful thing goes first: the kill log's collection rows, from
+ * the monsters at the foot of the list, then whole monsters from the foot, then the optional full
+ * quest log, then the patch observations, oldest first. A drought counter is a curiosity and a
+ * six-hour-old patch reading is already a "go and look", and everything else here is bounded by a
+ * table rather than by how long somebody has played. The quest log is dropped whole: a subset must
+ * not masquerade as a complete log. STASH construction goes next if the remaining fixed fields
+ * need space, then the sea charts charted. Both are dropped whole too, and the map reads an absent
+ * one as not told, never as none built or charted.
  * The worst-case test includes every category so a new one cannot silently outgrow the budget.
  * Any clipping sets detailsTruncated, which the map discloses alongside the shared facts.
  *
- * <h2>Halving rather than one at a time</h2>
+ * <h2>Put back in order, not cut in order</h2>
  *
- * <p>The measurement is a serialisation, so dropping one row and re-measuring forty times would put
- * forty passes over a twenty-kilobyte string on the game thread every couple of seconds. Halving
- * gets there in at most six, overshoots by at most one row's worth, and errs towards a smaller
- * snapshot — which is the right direction for the thing being avoided.
+ * <p>Everything that may go comes off at once, and each part goes back while it fits, the one most
+ * worth keeping first. Cutting in order instead is greedy: a whole part dropped late frees room
+ * that a list cut early never gets back, so the kill log went to nothing and then the quest log
+ * went anyway, and a player sharing what the Connect press recommends showed no kill log at all.
+ *
+ * <p>The measurement is a serialisation, so a list is not put back a row at a time, which would
+ * be forty passes over a twenty-kilobyte string on the game thread every couple of seconds. It is
+ * tried whole, since it usually fits, and otherwise bisected: seven passes for a hundred rows, and
+ * it keeps exactly as many as fit rather than the half that halving would.
  */
 @Singleton
 public class SnapshotTrimmer
@@ -131,65 +138,121 @@ public class SnapshotTrimmer
 	}
 
 	/** Trim in place until it fits, flagging the snapshot if a reader lost anything by it. */
-	void fit(CompanionSnapshot snapshot)
+	void fit(CompanionSnapshot s)
 	{
-		applyReceiverCaps(snapshot);
-		if (fits(snapshot))
+		applyReceiverCaps(s);
+		if (fits(s))
 		{
 			return;
 		}
+		Map<String, String> questLog = s.questLog;
+		Map<Integer, Boolean> stash = s.stashUnits;
+		List<CompanionSnapshot.Patch> patches = s.farming == null ? new ArrayList<>() : s.farming.patches;
+		List<CompanionSnapshot.Npc> npcs = s.loot == null ? new ArrayList<>() : s.loot.npcs;
+		List<CompanionSnapshot.Patch> byAge = new ArrayList<>(patches);
+		List<CompanionSnapshot.Npc> log = new ArrayList<>(npcs);
+		byAge.sort(BY_AGE_THEN_ID);
+		patches.clear();
+		npcs.clear();
+		s.questLog = null;
+		s.stashUnits = null;
 
-		boolean lost = false;
-		/** The tallies first: least-killed off the end, since the log is ordered most-killed first. */
-		while (lootRows(snapshot) > 0 && !fits(snapshot))
+		/**
+		 * Kept longest: the sea charts, the largest catalogue at up to 384 ids, then STASH, then the
+		 * freshest observations, then the quest log, then the kill log. Dailies and Mortimer's offer are
+		 * a few hundred bytes together and are never dropped: the worst case fits with both kept.
+		 */
+		boolean lost = !fits(s) && s.seaCharts != null;
+		if (lost)
 		{
-			trimTo(snapshot.loot.npcs, lootRows(snapshot) / 2);
+			s.seaCharts = null;
+		}
+		s.stashUnits = stash;
+		if (!fits(s) && stash != null)
+		{
+			s.stashUnits = null;
 			lost = true;
 		}
-		if (snapshot.loot != null && snapshot.loot.npcs.isEmpty())
+		lost |= most(s, patches, byAge) < byAge.size();
+		s.questLog = questLog;
+		if (!fits(s) && questLog != null)
 		{
-			snapshot.loot = null;
-		}
-
-		if (!fits(snapshot) && snapshot.questLog != null)
-		{
-			snapshot.questLog = null;
-			lost = true;
-		}
-
-		/** Then the observations, oldest first — the ones already too stale to act on. */
-		while (patchRows(snapshot) > 0 && !fits(snapshot))
-		{
-			List<CompanionSnapshot.Patch> patches = snapshot.farming.patches;
-			patches.sort(BY_AGE_THEN_ID);
-			trimTo(patches, patches.size() / 2);
-			lost = true;
-		}
-		if (snapshot.farming != null && snapshot.farming.patches.isEmpty())
-		{
-			snapshot.farming = null;
-		}
-
-		if (!fits(snapshot) && snapshot.stashUnits != null)
-		{
-			snapshot.stashUnits = null;
+			s.questLog = null;
 			lost = true;
 		}
 
 		/**
-		 * Then the sea charts, the largest catalogue at up to 384 ids. Dailies and Mortimer's offer are
-		 * a few hundred bytes together and are never dropped: the worst case fits with both kept.
+		 * Whole monsters from the top of the log with their rated rows, then their collection rows, again
+		 * from the top. The log is ordered pinned, then most recently killed, so the foot is what goes;
+		 * and a collection row has no rate, so the map never reads its absence, which makes the 40th
+		 * monster's rated rows worth more than the 1st's collection rows.
 		 */
-		if (!fits(snapshot) && snapshot.seaCharts != null)
+		List<List<CompanionSnapshot.Drop>> whole = new ArrayList<>();
+		List<List<CompanionSnapshot.Drop>> rated = new ArrayList<>();
+		for (CompanionSnapshot.Npc npc : log)
 		{
-			snapshot.seaCharts = null;
-			lost = true;
+			whole.add(npc.drops);
+			rated.add(npc.drops = npc.drops == null ? null
+				: npc.drops.stream().filter(d -> !d.collection).collect(Collectors.toList()));
 		}
-
+		int kept = most(s, npcs, log);
+		int full = most(s, kept, n ->
+		{
+			for (int i = 0; i < kept; i++)
+			{
+				log.get(i).drops = (i < n ? whole : rated).get(i);
+			}
+		});
+		lost |= kept < log.size() || !whole.subList(full, kept).equals(rated.subList(full, kept));
+		if (patches.isEmpty())
+		{
+			s.farming = null;
+		}
+		if (npcs.isEmpty())
+		{
+			s.loot = null;
+		}
 		if (lost)
 		{
-			snapshot.detailsTruncated = true;
+			s.detailsTruncated = true;
 		}
+	}
+
+	/** As many of {@code rows}, from the top, as fit in {@code target}: how many that was. */
+	private <T> int most(CompanionSnapshot s, List<T> target, List<T> rows)
+	{
+		return most(s, rows.size(), n ->
+		{
+			target.clear();
+			target.addAll(rows.subList(0, n));
+		});
+	}
+
+	/** The most of {@code count} rows that fit, each try measured whole: what is sent is what was measured. */
+	private int most(CompanionSnapshot s, int count, IntConsumer keep)
+	{
+		keep.accept(count);
+		if (fits(s))
+		{
+			return count;
+		}
+		int lo = 0;
+		int hi = count - 1;
+		while (lo < hi)
+		{
+			int mid = (lo + hi + 1) / 2;
+			keep.accept(mid);
+			if (fits(s))
+			{
+				lo = mid;
+			}
+			else
+			{
+				hi = mid - 1;
+			}
+		}
+		keep.accept(lo);
+		return lo;
 	}
 
 	/**
@@ -253,18 +316,7 @@ public class SnapshotTrimmer
 		return gson.toJson(snapshot).getBytes(StandardCharsets.UTF_8).length;
 	}
 
-	private int lootRows(CompanionSnapshot snapshot)
-	{
-		return snapshot.loot == null || snapshot.loot.npcs == null ? 0 : snapshot.loot.npcs.size();
-	}
-
-	private int patchRows(CompanionSnapshot snapshot)
-	{
-		return snapshot.farming == null || snapshot.farming.patches == null
-			   ? 0 : snapshot.farming.patches.size();
-	}
-
-	/** Keep the first {@code keep} rows. Package-private so the halving can be pinned by a test. */
+	/** Keep the first {@code keep} rows. */
 	static void trimTo(List<?> rows, int keep)
 	{
 		while (rows.size() > Math.max(0, keep))
