@@ -67,7 +67,7 @@
         {
           "slot": "inside",
           "title": "Enter Pandemonium Cave",
-          "detail": "19t inside to Spyglass · Kharidian Sea",
+          "detail": "19t inside to the spot",
           "notes": [
             "Done on foot: your boat waits at The Pandemonium"
           ],
@@ -146,7 +146,7 @@
         {
           "slot": "arrival-walk",
           "title": "Walk",
-          "detail": "About 20 tiles to Spyglass · Kharidian Sea",
+          "detail": "About 20 tiles to the spot",
           "notes": [
             "Done on foot: your boat waits at The Pandemonium"
           ],
