@@ -162,12 +162,12 @@ slayer.nextTask=Get your next task from a Slayer master.
 slayer.noneOpen=No place for this task is open to you yet.
 slayer.settling=The current assignment appears here once the game has settled.
 slayer.stale=Waiting for the map to reconnect. These are the last places received.
-slayer.orderTip=Rank potential with an area attack, or one target at a time
+slayer.orderTip=Rank potential with an area attack, or for one target
 slayer.wikiTip=Open this task's source page in your browser
 slayer.licenceTip=The licence for the Wiki's locations and rates
 slayer.pinTip=Pin this spot as your destination: world map, arrow and Home
 slayer.routeTip=Plan the way to this spot from where you stand
-slayer.rankingSingle=Ranking again for one target at a time…
+slayer.rankingSingle=Ranking again for one target…
 slayer.rankingSafe=Ranking again without Wilderness places…
 slayer.rankingAll=Ranking again with Wilderness places…
 

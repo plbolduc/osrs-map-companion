@@ -239,7 +239,7 @@ final class SlayerPanel extends JPanel
 			body.add(more);
 			if (expanded)
 			{
-				JComboBox<String> order = new JComboBox<>(new String[] {"Best spot", "One target at a time"});
+				JComboBox<String> order = new JComboBox<>(new String[] {"Best spot", "Best for one target"});
 				/* The closed box says what it chooses; the open list keeps the choices' own names. */
 				ListCellRenderer<? super String> names = order.getRenderer();
 				order.setRenderer((list, value, index, selected, focused) -> names.getListCellRendererComponent(list,
