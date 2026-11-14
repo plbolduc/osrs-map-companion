@@ -621,11 +621,16 @@ public class GroupPanelTest
 			long raidAt = destinations.getEvents().stream().filter(m -> m.id.equals("raids")).findFirst().get().startsAtMs;
 			String at = GroupPanel.dayAndClock(raidAt, System.currentTimeMillis(), ZoneId.systemDefault(),
 				Locale.getDefault(Locale.Category.FORMAT));
-			assertEquals("▸ Chambers of Xeric · " + at + " · W416", plain(line));
+			/*
+			 * The triangle and the world held to the line with no-break spaces: a wrap had left "W416"
+			 * alone under the triangle, the line ending on its dot.
+			 */
+			assertEquals("▸\u00a0Chambers of Xeric · " + at + "\u00a0·\u00a0W416", plain(line));
+			assertTrue("the triangle has a cell of its own", line.getText().contains("▸\u00a0</td><td width="));
 			line.doClick();
 			assertNotNull("pressed, it opens to the same card", namedComponent(panel.get(), "group.meetup.raids"));
 			assertNotNull(named(panel.get(), "group.answer.raids.going"));
-			assertTrue(plain(named(panel.get(), "group.meetupFold.raids")).startsWith("▾ "));
+			assertTrue(plain(named(panel.get(), "group.meetupFold.raids")).startsWith("▾\u00a0"));
 			named(panel.get(), "group.meetupFold.raids").doClick();
 			assertNull("and folds again", namedComponent(panel.get(), "group.meetup.raids"));
 		});

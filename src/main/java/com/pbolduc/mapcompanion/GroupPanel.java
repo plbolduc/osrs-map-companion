@@ -887,12 +887,18 @@ final class GroupPanel extends JPanel
 	 */
 	private JButton fold(Meetup meetup, boolean open, long now)
 	{
-		String words = (open ? "▾ " : "▸ ") + meetup.title + " · " + dayAndClock(meetup.startsAtMs, now, ZoneId.systemDefault(),
-			Locale.getDefault(Locale.Category.FORMAT)) + (meetup.world == null ? "" : " · W" + meetup.world);
+		/* The world held to its dot, so a wrap never leaves it alone on a line or the dot at an end. */
+		String words = meetup.title + " · " + dayAndClock(meetup.startsAtMs, now, ZoneId.systemDefault(),
+			Locale.getDefault(Locale.Category.FORMAT)) + (meetup.world == null ? "" : "\u00a0·\u00a0W" + meetup.world);
 		JButton line = linkButton("");
 		line.setName("group.meetupFold." + meetup.id);
-		/* Wrapped as a label is, since the title is whatever the group typed and a button's own text would widen the tab. */
-		line.setText(markup(words, onWorld(meetup.world) ? "W" + meetup.world : null, HERE, WIDTH + 16));
+		/*
+		 * Wrapped as a label is, since the title is whatever the group typed and a button's own text would
+		 * widen the tab; the triangle in a cell of its own, so a wrapped line starts under the title.
+		 */
+		line.setText(markup(words, onWorld(meetup.world) ? "W" + meetup.world : null, HERE, WIDTH + 4).replace("<body width",
+			"<body><table cellpadding=0 cellspacing=0><tr><td valign=top>" + (open ? "▾" : "▸") + "\u00a0</td><td width")
+			.replace("</body>", "</td></tr></table></body>"));
 		line.setToolTipText(open ? "Fold this meetup to its line" : Words.of("group.openMeetupTip"));
 		line.addActionListener(e ->
 		{
