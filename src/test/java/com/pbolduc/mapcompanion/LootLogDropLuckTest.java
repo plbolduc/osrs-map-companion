@@ -711,6 +711,51 @@ public class LootLogDropLuckTest
 	}
 
 	/**
+	 * A shared kill travels on every row it moved, a never-dropped one included, since without the row
+	 * the map would read whole kills; to the thousandth, and only where there were shared kills. It
+	 * survives a save and a reload.
+	 */
+	@Test
+	public void sharedKillsTravelAndSurviveAReload()
+	{
+		log.onHitsplat("Nex", true, false, 1, game.client().getTickCount());
+		log.onHitsplat("Nex", false, true, 2, game.client().getTickCount());
+		kill("Nex", BONES);
+		kill("Abyssal demon", BONES);
+		CompanionSnapshot.Loot loot = log.snapshot();
+		CompanionSnapshot.Drop hilt = DropLuckViewTestSupport.npc(loot, "Nex").drops.stream()
+			.filter(d -> d.item.equals("Ancient hilt")).findFirst().orElse(null);
+		assertNotNull("never dropped, and sent for its shared kill", hilt);
+		assertEquals(Integer.valueOf(1), hilt.sharedWatched);
+		assertEquals(Double.valueOf(0.303), hilt.shareWatched);
+		assertEquals(Integer.valueOf(1), hilt.sharedSinceLast);
+		assertEquals(Double.valueOf(0.303), hilt.shareSinceLast);
+		for (CompanionSnapshot.Drop drop : DropLuckViewTestSupport.npc(loot, "Abyssal demon").drops)
+		{
+			assertNull("a monster fought alone sends what it always did", drop.sharedWatched);
+		}
+
+		log.reload();
+		log.onTick(1, 0, 0);
+		assertEquals(1 / 3.0 / 1.1, drop("Nex", "Ancient hilt").shareWatched, 1e-9);
+		assertEquals(1, drop("Nex", "Ancient hilt").sharedSinceLast);
+	}
+
+	/** A shared counter stored as null, or a pair that is not one, is repaired rather than losing the log. */
+	@Test
+	public void aStoredNullSharedCounterKeepsTheLog()
+	{
+		store.set(LootLog.STORE_KEY, "{\"Nex\":{\"kills\":12,\"collectionSince\":0,\"weighted\":null,"
+			+ "\"sharedAtLast\":{\"Ancient hilt\":null},\"sharedAtStart\":{\"Nihil horn\":[1]}},"
+			+ "\"Abyssal demon\":{\"kills\":5,\"collectionSince\":0}}");
+		log.onTick(1, 0, 0);
+		assertEquals(12, monster("Nex").kills);
+		assertEquals(5, monster("Abyssal demon").kills);
+		kill("Nex", BONES);
+		assertEquals(13, monster("Nex").kills);
+	}
+
+	/**
 	 * Vardorvis is one name and one NPC id at three combat levels: the ordinary fight, the awakened
 	 * one with three times the unique table, and the quest's. Each priced level is its own monster,
 	 * and the quest's is not counted.

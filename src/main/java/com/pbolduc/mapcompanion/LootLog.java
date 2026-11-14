@@ -368,6 +368,23 @@ public class LootLog
 		return byLevel == null ? game : byLevel.get(npc.getCombatLevel());
 	}
 
+	/** Stored [count, worth] pairs, keeping only what is one: never a null map, a null pair or another length. */
+	private static Map<String, double[]> pairs(@Nullable Map<String, double[]> stored)
+	{
+		Map<String, double[]> kept = new LinkedHashMap<>();
+		if (stored != null)
+		{
+			stored.forEach((item, pair) ->
+			{
+				if (item != null && pair != null && pair.length == 2)
+				{
+					kept.put(item, pair);
+				}
+			});
+		}
+		return kept;
+	}
+
 	/** An item's weighted kills as they stand: [count, worth]. */
 	private static double[] sharedNow(Tally tally, String item)
 	{
@@ -1902,6 +1919,10 @@ public class LootLog
 						{
 							tally.boostedAtStart = new LinkedHashMap<>();
 						}
+						/* The shared counters too, and a pair that is not one: either would throw and lose every monster. */
+						tally.weighted = pairs(tally.weighted);
+						tally.sharedAtLast = pairs(tally.sharedAtLast);
+						tally.sharedAtStart = pairs(tally.sharedAtStart);
 						if (tally.lastKillMs < 0)
 						{
 							tally.lastKillMs = 0;
