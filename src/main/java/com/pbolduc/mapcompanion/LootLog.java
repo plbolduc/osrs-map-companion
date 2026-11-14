@@ -745,15 +745,16 @@ public class LootLog
 		}
 		ensureLoaded();
 		tasks.onKill(game, client.getTickCount());
-		if (lootForfeited(game, event.getItems()))
-		{
-			return emptyList();
-		}
+		/* The fight ends with the kill, counted or not: a duo's damage must not carry into the next one. */
 		int tick = client.getTickCount();
 		long[] fight = fights.remove(fightOf.getOrDefault(key(game), key(game)));
 		boolean othersHit = fight != null && fight[1] > 0 && tick - fight[2] <= SHARED_TICKS;
 		boolean mvp = mvpAt != null && tick - mvpAt <= 2;
 		mvpAt = null;
+		if (lootForfeited(game, event.getItems()))
+		{
+			return noteKill(game, tracked.getOrDefault(key(game), emptyList()), Collections.emptySet(), tick);
+		}
 		String name = versionOf(game, event.getComposition());
 		if (name == null)
 		{

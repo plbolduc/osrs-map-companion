@@ -760,6 +760,23 @@ public class LootLogDropLuckTest
 		assertEquals(75.0, drop("Branda the Fire Queen", "Fire element staff crown").oneIn, 0);
 	}
 
+	/** A fight whose pages were taken still ended: a partner's damage in it does not reach the next one, alone. */
+	@Test
+	public void takingPagesEndsTheFightItsDamageWasIn()
+	{
+		int tick = game.client().getTickCount();
+		log.onHitsplat("Eldric the Ice King", true, false, 50, tick);
+		log.onHitsplat("Branda the Fire Queen", false, true, 50, tick);
+		kill("Branda the Fire Queen", PAGES);
+		game.tick();
+		log.onHitsplat("Branda the Fire Queen", true, false, 100, game.client().getTickCount());
+		kill("Branda the Fire Queen", BONES);
+		LootLog.Drop crown = drop("Branda the Fire Queen", "Fire element staff crown");
+		assertEquals("a fight alone is a whole kill", 1, crown.watchedKills().ordinary);
+		assertEquals(0, crown.sharedWatched);
+		assertEquals(0, drop("Branda the Fire Queen", "Bran").sharedWatched);
+	}
+
 	/** Outside an instance the canyon shaman is counted, warhammer and all. */
 	@Test
 	public void theCanyonShamanCountsItsWarhammer()
