@@ -795,7 +795,7 @@ public class SidebarPolishShot
 		((DestinationRoute) get(cards, "destinationRoute")).adoptPressed(answer);
 		java.lang.reflect.Constructor<?> shown = Class.forName("com.pbolduc.mapcompanion.RoutePress$Shown").getDeclaredConstructors()[0];
 		shown.setAccessible(true);
-		set(press, "shown", shown.newInstance(DestinationRoute.keyOf(answer), get(target, "picture"), destinations.generation()));
+		set(press, "shown", shown.newInstance(DestinationRoute.keyOf(answer), get(target, "picture"), destinations.generation(), target));
 	}
 
 	static List<Component> all(java.awt.Container root)
