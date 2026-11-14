@@ -69,7 +69,7 @@ public class CompletionAnnouncementTest
 		game.setQuest(Quest.DRAGON_SLAYER_I, QuestState.IN_PROGRESS);
 		game.setQuest(Quest.COOKS_ASSISTANT, QuestState.FINISHED);
 		/* Varrock easy done, medium plainly not. */
-		game.setVarbit(VarbitIds.DIARY_VARROCK[0], 1);
+		game.setVarbit(DiaryReader.completionOf("Varrock")[0], 1);
 
 		diaries = construct(DiaryReader.class, game.client());
 		RewardTestClient definitions = new RewardTestClient();
@@ -112,7 +112,7 @@ public class CompletionAnnouncementTest
 	{
 		settleThenWatch();
 		game.setQuest(Quest.DRAGON_SLAYER_I, QuestState.FINISHED);
-		game.setVarbit(VarbitIds.DIARY_VARROCK[1], 1);
+		game.setVarbit(DiaryReader.completionOf("Varrock")[1], 1);
 		readAgain();
 
 		List<CompanionSnapshot.Milestone> sent = plugin.loop.milestones.take(now);
@@ -145,7 +145,7 @@ public class CompletionAnnouncementTest
 		settleThenWatch();
 		plugin.onGameStateChanged(state(GameState.HOPPING));
 		game.setQuest(Quest.DRAGON_SLAYER_I, QuestState.FINISHED);
-		game.setVarbit(VarbitIds.DIARY_VARROCK[1], 1);
+		game.setVarbit(DiaryReader.completionOf("Varrock")[1], 1);
 		settleThenWatch();
 		readAgain();
 		assertEquals(0, plugin.loop.milestones.pendingCount());
@@ -168,7 +168,7 @@ public class CompletionAnnouncementTest
 		settleThenWatch();
 		plugin.onGameStateChanged(state(GameState.CONNECTION_LOST));
 		game.setQuest(Quest.DRAGON_SLAYER_I, QuestState.FINISHED);
-		game.setVarbit(VarbitIds.DIARY_VARROCK[1], 1);
+		game.setVarbit(DiaryReader.completionOf("Varrock")[1], 1);
 		/* Nothing ended the readers' session, so they answer at once: only the watcher can refuse. */
 		readAgain();
 		readAgain();
@@ -193,7 +193,7 @@ public class CompletionAnnouncementTest
 		plugin.onRuneScapeProfileChanged(new RuneScapeProfileChanged(null, "a"));
 		plugin.onRuneScapeProfileChanged(new RuneScapeProfileChanged("a", "b"));
 		game.setQuest(Quest.DRAGON_SLAYER_I, QuestState.FINISHED);
-		game.setVarbit(VarbitIds.DIARY_VARROCK[1], 1);
+		game.setVarbit(DiaryReader.completionOf("Varrock")[1], 1);
 		settleThenWatch();
 		readAgain();
 		assertEquals(0, plugin.loop.milestones.pendingCount());
@@ -206,7 +206,7 @@ public class CompletionAnnouncementTest
 		toggle(MapCompanionConfig.KEY_SHARE_MILESTONES, false);
 		readAgain();
 		game.setQuest(Quest.DRAGON_SLAYER_I, QuestState.FINISHED);
-		game.setVarbit(VarbitIds.DIARY_VARROCK[1], 1);
+		game.setVarbit(DiaryReader.completionOf("Varrock")[1], 1);
 		readAgain();
 		toggle(MapCompanionConfig.KEY_SHARE_MILESTONES, true);
 		readAgain();
@@ -222,7 +222,7 @@ public class CompletionAnnouncementTest
 		toggle("shareQuests", false);
 		toggle("shareDiaries", false);
 		game.setQuest(Quest.DRAGON_SLAYER_I, QuestState.FINISHED);
-		game.setVarbit(VarbitIds.DIARY_VARROCK[1], 1);
+		game.setVarbit(DiaryReader.completionOf("Varrock")[1], 1);
 		readAgain();
 		assertEquals("neither is watched with its choice off", 0, plugin.loop.milestones.pendingCount());
 		config.set("shareQuestLog", true);
@@ -243,7 +243,7 @@ public class CompletionAnnouncementTest
 	{
 		settleThenWatch();
 		toggle("shareDiaries", false);
-		game.setVarbit(VarbitIds.DIARY_VARROCK[1], 1);
+		game.setVarbit(DiaryReader.completionOf("Varrock")[1], 1);
 		toggle("shareDiaries", true);
 		readAgain();
 		readAgain();

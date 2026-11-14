@@ -87,10 +87,6 @@ public class DiaryReader extends SettlingReader
 	/** A flag this client could not read at all, kept distinct from a flag that reads zero. */
 	static final int UNREADABLE = -1;
 
-	/** Every other region's flags mean "done" at 1; Karamja's three older ones at 2. See above. */
-	private static final int[] DONE_AT_ONE = {1, 1, 1, 1};
-	private static final int[] KARAMJA_DONE_AT = {2, 2, 2, 1};
-
 	/**
 	 * One region, named as the game's Achievement Diary tab names it.
 	 *
@@ -107,20 +103,31 @@ public class DiaryReader extends SettlingReader
 		final int[] completeAt;
 	}
 
-	private static final List<Region> REGIONS = Arrays.asList(
-			new Region("Ardougne", VarbitIds.DIARY_ARDOUGNE, VarbitIds.DIARY_ARDOUGNE_REWARDS, DONE_AT_ONE),
-			new Region("Desert", VarbitIds.DIARY_DESERT, VarbitIds.DIARY_DESERT_REWARDS, DONE_AT_ONE),
-			new Region("Falador", VarbitIds.DIARY_FALADOR, VarbitIds.DIARY_FALADOR_REWARDS, DONE_AT_ONE),
-			new Region("Fremennik", VarbitIds.DIARY_FREMENNIK, VarbitIds.DIARY_FREMENNIK_REWARDS, DONE_AT_ONE),
-			new Region("Kandarin", VarbitIds.DIARY_KANDARIN, VarbitIds.DIARY_KANDARIN_REWARDS, DONE_AT_ONE),
-			new Region("Karamja", VarbitIds.DIARY_KARAMJA, VarbitIds.DIARY_KARAMJA_REWARDS, KARAMJA_DONE_AT),
-			new Region("Kourend & Kebos", VarbitIds.DIARY_KOUREND, VarbitIds.DIARY_KOUREND_REWARDS, DONE_AT_ONE),
-			new Region("Lumbridge & Draynor", VarbitIds.DIARY_LUMBRIDGE, VarbitIds.DIARY_LUMBRIDGE_REWARDS, DONE_AT_ONE),
-			new Region("Morytania", VarbitIds.DIARY_MORYTANIA, VarbitIds.DIARY_MORYTANIA_REWARDS, DONE_AT_ONE),
-			new Region("Varrock", VarbitIds.DIARY_VARROCK, VarbitIds.DIARY_VARROCK_REWARDS, DONE_AT_ONE),
-			new Region("Western Provinces", VarbitIds.DIARY_WESTERN, VarbitIds.DIARY_WESTERN_REWARDS, DONE_AT_ONE),
-			new Region("Wilderness", VarbitIds.DIARY_WILDERNESS, VarbitIds.DIARY_WILDERNESS_REWARDS, DONE_AT_ONE)
-		);
+	/**
+	 * The table, from {@code diaries.txt}: a region, then its completion varbits, its reward varbits
+	 * and the values completion is done at, each four numbers. Karamja's older tiers are done at 2.
+	 */
+	private static final List<Region> REGIONS = Resources.lines("/diaries.txt").stream()
+		.map(line -> line.split("\t"))
+		.map(f -> new Region(f[0], ints(f[1]), ints(f[2]), ints(f[3])))
+		.collect(java.util.stream.Collectors.toList());
+
+	private static int[] ints(String csv)
+	{
+		return Arrays.stream(csv.split(",")).mapToInt(Integer::parseInt).toArray();
+	}
+
+	/** A region's completion varbits, for the tests that set them; empty for a name not in the table. */
+	static int[] completionOf(String region)
+	{
+		return REGIONS.stream().filter(r -> r.name.equals(region)).map(r -> r.completion).findFirst().orElse(new int[0]);
+	}
+
+	/** A region's reward varbits, likewise. */
+	static int[] rewardsOf(String region)
+	{
+		return REGIONS.stream().filter(r -> r.name.equals(region)).map(r -> r.rewards).findFirst().orElse(new int[0]);
+	}
 
 	private final Client client;
 
@@ -220,7 +227,7 @@ public class DiaryReader extends SettlingReader
 			 */
 			out.put(region.name, completion
 				? completedTierFrom(values, region.completeAt)
-				: tierFrom(values, DONE_AT_ONE));
+				: tierFrom(values, new int[] {1, 1, 1, 1}));
 		}
 		return out;
 	}
