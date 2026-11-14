@@ -490,11 +490,17 @@ final class RouteStepsView extends JPanel
 	 * gets the boot. The map marks {@code walk} only on the rows Shortest Path may be aimed at, which a
 	 * step past an entrance is not, and a way that is that step alone would otherwise be a chip with no
 	 * picture.
+	 *
+	 * <p>A {@code descend} step is the way in when the map has not measured the walk inside it: the
+	 * ladder, trapdoor or cave mouth itself. The game has no ladder picture, so it gets the interface's
+	 * down arrow, which says "down" at chip size whatever the entrance is. The rope or a spade would
+	 * read as an item to bring, as every other item picture on a chip does.
 	 */
 	static int way(RouteStep step)
 	{
 		return step.walk || "inside".equals(step.slot) ? SpriteID.OrbIcon._2 : RouteWire.SAIL.equals(step.slot) ? SpriteID.IconSailingStatus18x18._0
-			: RouteWire.BOARD.equals(step.slot) || RouteWire.DOCK.equals(step.slot) ? SpriteID.IconSailingBoats35x35._1 : 0;
+			: RouteWire.BOARD.equals(step.slot) || RouteWire.DOCK.equals(step.slot) ? SpriteID.IconSailingBoats35x35._1
+			: "descend".equals(step.slot) ? SpriteID.Arrows25._2 : 0;
 	}
 
 	/** A step's own picture: its item's sprite, or its spell's icon. */

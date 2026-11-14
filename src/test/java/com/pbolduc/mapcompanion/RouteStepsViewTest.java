@@ -487,6 +487,33 @@ public class RouteStepsViewTest
 	}
 
 	/**
+	 * A way in whose inside the map has not measured, "Climb-down Ladder at Taverley Dungeon", is one
+	 * {@code descend} step and leads its chip with the game's down arrow. It had no picture, the one
+	 * chip in the strip that was a name alone.
+	 */
+	@Test
+	public void aWayDownAnUnmeasuredEntranceLeadsWithTheDownArrow()
+	{
+		RelayResponse.RouteStep down = new RelayResponse.RouteStep();
+		down.slot = "descend";
+		down.title = "Climb-down Ladder at Taverley Dungeon";
+		assertEquals(net.runelite.api.gameval.SpriteID.Arrows25._2, RouteStepsView.way(down));
+
+		RelayResponse.Route ways = DestinationRouteTest.route("Ring of dueling", DestinationRouteTest.alKharid());
+		RelayResponse.RouteOption ladder = new RelayResponse.RouteOption();
+		ladder.id = "approach";
+		ladder.label = "Climb-down Ladder at Taverley Dungeon";
+		ladder.face = "Taverley Dungeon";
+		ladder.steps = new ArrayList<>(java.util.Collections.singletonList(down));
+		ways.options.add(ladder);
+		route.sync(DestinationRouteTest.destination("Blue dragons", ways), null);
+		view.show(route.view());
+		String arrow = "sprite " + net.runelite.api.gameval.SpriteID.Arrows25._2 + " at " + RouteStepsView.PICTURE;
+		assertTrue("the ladder's chip asked for the arrow: " + asked, asked.contains(arrow));
+		assertEquals("a picture, then its name", 2, chips().get(1).getComponentCount());
+	}
+
+	/**
 	 * A way not open yet comes after the ways that are, whatever its place in the map's list, its
 	 * picture faded and its outline the card's own grey, its name as readable as any way's not
 	 * chosen, and pressing it still shows its steps. Followed, it says on a
