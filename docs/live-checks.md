@@ -185,6 +185,14 @@ often. A clean run is now 443 tests with no failures or skips.
       shared kill counts as your share of the damage and the solo one as a whole kill. Your hits
       are read as `isMine()` and other players' as `isOthers()`, amounts and all; no build has seen
       a shared boss yet, nor whether any of the other players' hits go unseen.
+- [ ] Drop luck's shares with venom, poison and a thrall: at a shared boss, fight with a blowpipe or
+      a serpentine helm and a thrall out. RuneLite's `isMine()` and `isOthers()` name only the
+      damage hitsplat types, so venom and poison count for nobody. Whether a thrall's hits land as
+      the player's, as another player's or as neither is not known; note which, and how far the
+      share falls under the game's own contribution.
+- [ ] Drop luck at the Hueycoatl: hit its tail and its body as well as its head. Its rows pool no
+      other NPC (`fight`), so only hits on an NPC named *The Hueycoatl* make the share; note the
+      names the segments' hitsplats land on, and whether the game counts their damage.
 - [ ] Drop luck at Nex in a team: the kill counts your share, damage to Fumus, Umbra, Cruor, Glacies
       and the Blood Reavers included, and "You were the MVP for this fight" restores the 10% bonus
       whether it comes before the loot or just after.
@@ -196,7 +204,10 @@ often. A clean run is now 443 tests with no failures or skips.
 - [ ] Drop luck at Barrows: a chest after all six brothers counts; one after five does not. The
       six killed varbits must still be set when the chest's reward appears; no build has seen it.
 - [ ] Drop luck at the Doom of Mokhaiotl: claiming a run counts it once, at the delve the loot
-      tracker reports (its event's metadata); a run lost to death counts nothing.
+      tracker reports (its event's metadata); a run lost to death counts nothing. The kill log's
+      own `ServerNpcLoot` reader does not check for a run's rows, so if the game posts NPC loot for
+      the Doom at each delve, every delve also counts as a whole run: check the count after a run
+      of several delves is one run's worth, not one more for each delve.
 - [ ] Drop luck at Araxxor: destroy a corpse, then harvest one. The destroyed kill is not counted;
       the harvested one is, and a noxious piece counts under *Noxious halberd piece*.
 - [ ] Drop luck at the Alchemical Hydra: a ring piece counts under *Brimstone ring piece*, drawn
