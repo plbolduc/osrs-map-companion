@@ -708,6 +708,17 @@ public class LootLogDropLuckTest
 		assertEquals(1, monster("Yama").kills);
 	}
 
+	/** Contracts are counted per login: another character's, gone at the switch, spent nothing. */
+	@Test
+	public void aContractHeldBeforeALoginIsNotSpentByIt()
+	{
+		log.onInventory(new Item[] {new Item(CONTRACT, 2)});
+		log.reload();
+		log.onInventory(new Item[0]);
+		kill("Yama", BONES);
+		assertEquals(1, monster("Yama").kills);
+	}
+
 	/** A Barrows chest is priced for all six brothers' rolls, and one opened with fewer is not counted. */
 	@Test
 	public void aBarrowsChestCountsOnlyWithAllSixBrothers()
