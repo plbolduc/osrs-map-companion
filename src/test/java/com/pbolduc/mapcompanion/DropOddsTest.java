@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
@@ -402,12 +403,24 @@ public class DropOddsTest
 		assertEquals("Zaryte vambraces", DropLuckView.selected(nex, null, new String[] {"Nex", "Zaryte vambraces"}).item);
 	}
 
-	/** Rows watched over different kills are no one wait, and one rated drop has nothing to add up. */
+	/**
+	 * Rows watched over different kills are no one wait, and one rated drop has nothing to add up;
+	 * nor are a task's rate, whose kills split differently, or a Doom run, worth a different amount
+	 * to each drop. The map's lib/drop-luck.test.ts pins the same four.
+	 */
 	@Test
 	public void anyUniqueAbstainsWhereTheDropsAreNotOneWait()
 	{
 		assertNull(DropLuckView.anyUnique(nex(50)));
 		assertNull(DropLuckView.anyUnique(monster("Abyssal demon", 100, new Object[] {"Abyssal whip", 512, 100})));
+		List<LootLog.Drop> drake = Arrays.asList(
+			new LootLog.Drop("Drake's tooth", -1, 0, 10, 10, 0, 0, 2560.0, 512.0, LootLog.SLAYER_TASK, 0, 0, 0, 0, 1, false),
+			new LootLog.Drop("Drake's claw", -1, 0, 10, 10, 0, 0, 2560.0, 512.0, LootLog.SLAYER_TASK, 0, 0, 0, 0, 1, false));
+		assertNull("a task's rate", DropLuckView.anyUnique(new LootLog.Monster("Drake", 10, 0, drake)));
+		LootLog.Monster doom = new LootLog.Monster("Doom of Mokhaiotl", 10, 0, monster("Doom of Mokhaiotl", 10,
+			new Object[] {"Mokhaiotl cloth", 540, 10}, new Object[] {"Avernic treads", 540, 10}).drops, false, "run", 0);
+		assertNull("a Doom run", DropLuckView.anyUnique(doom));
+		assertNotNull("the same rows counted per kill add up", DropLuckView.anyUnique(new LootLog.Monster("Doom of Mokhaiotl", 10, 0, doom.drops)));
 	}
 
 	/** Nex alone, 212 kills: the platelegs at kill 64, the horn at 120, the vambraces at 137. */
