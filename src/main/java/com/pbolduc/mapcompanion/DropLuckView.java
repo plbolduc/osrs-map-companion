@@ -267,12 +267,29 @@ final class DropLuckView
 	}
 
 	/**
+	 * What one of this player's kills has been worth to a drop, on average, in kills at its rate: a
+	 * shared kill its share, a Nex kill without the MVP its share over 1.1, a Doom run every delve it
+	 * rolled. 1 where every kill was whole, or where nothing says otherwise. The map's {@code worthPerKill}.
+	 */
+	static double worthPerKill(Drop drop)
+	{
+		DropOdds.Kills watched = drop.watchedKills();
+		long kills = watched.ordinary + watched.shared;
+		return kills > 0 ? (watched.ordinary + watched.share) / kills : 1;
+	}
+
+	/**
 	 * The details for one drop.
 	 *
 	 * <p>The forward line is the rest of the slayer task where the monster is on it — the number a
 	 * reader decides "keep going or not" by — and the next hundred kills otherwise, which is a size
 	 * of session rather than a promise. Each fact is said once: the median wait answered the forward
 	 * line's question a second way, and went.
+	 *
+	 * <p>The next hundred are the player's own, fought the way the watched ones were: each worth
+	 * {@link #worthPerKill}. Priced as whole solo kills, a team Nex player at a quarter of the damage
+	 * would read 93% where their own kills make it 57%, and a Doom run claimed at delve 9, worth
+	 * several delve-9 kills, would count as one. A task's kills are whole, at the task's own rate.
 	 */
 	static Detail detail(Monster monster, Drop drop, @Nullable Integer taskLeft)
 	{
@@ -302,7 +319,8 @@ final class DropLuckView
 		String boost = ahead != rate.oneIn ? " " + rate.boostLabel : "";
 		String aheadLabel = taskAhead ? "Rest of this Slayer task (" + count(taskLeft) + " kills)"
 			: "Next " + units(monster, 100) + boost;
-		String aheadValue = DropOdds.percent(DropOdds.within(ahead, taskAhead ? taskLeft : 100)) + "% chance";
+		String aheadValue = DropOdds.percent(taskAhead ? DropOdds.within(ahead, taskLeft)
+			: DropOdds.within(DropOdds.Rate.of(ahead), new DropOdds.Kills(0, 0, 100, 100 * worthPerKill(drop)))) + "% chance";
 		return new Detail(
 			DropOdds.verdict(drop.obtained, drop.watchedKills(), drop.sinceKills(), rate),
 			sinceLabel, sinceValue,

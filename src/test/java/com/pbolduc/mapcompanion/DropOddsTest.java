@@ -308,6 +308,29 @@ public class DropOddsTest
 	}
 
 	/**
+	 * The next hundred are priced at what the player's own kills have been worth. The map's
+	 * lib/drop-luck.test.ts pins the same two: a team Nex, and a Doom claimed deep.
+	 */
+	@Test
+	public void theNextHundredArePricedAtWhatThePlayersOwnKillsHaveBeenWorth()
+	{
+		/* 22 kills alone and 190 at a quarter of the damage: about a third of a kill each, not one. */
+		LootLog.Drop team = new LootLog.Drop("Any", -1, 0, 212, 212, 0, 0, 43 / 1.1, null, null, 190, 47.5, 190, 47.5, 1, false);
+		LootLog.Monster nex = new LootLog.Monster("Nex", 212, 0, java.util.Collections.singletonList(team));
+		DropLuckView.Detail detail = DropLuckView.detail(nex, team, null);
+		assertEquals("Next 100 kills", detail.aheadLabel);
+		assertEquals("57% chance", detail.aheadValue);
+		/* Three runs worth thirty delve-9 kills: a run is ten, and a hundred runs a thousand. */
+		LootLog.Drop treads = new LootLog.Drop("Any", -1, 0, 3, 3, 0, 0, 540.0, null, null, 3, 30, 3, 30, 1, false);
+		LootLog.Monster doom = new LootLog.Monster("Doom of Mokhaiotl", 3, 0, java.util.Collections.singletonList(treads), false, "run", 0);
+		DropLuckView.Detail run = DropLuckView.detail(doom, treads, null);
+		assertEquals("Next 100 runs", run.aheadLabel);
+		assertEquals("84% chance", run.aheadValue);
+		assertEquals("a task's line keeps the task's whole kills",
+			DropOdds.percent(DropOdds.within(43 / 1.1, 50)) + "% chance", DropLuckView.detail(nex, team, 50).aheadValue);
+	}
+
+	/**
 	 * "Any unique" adds a boss's rated drops up, the pet apart. Nex's six are the wiki's own 1/43,
 	 * and three in 212 kills alone is dry while each item alone is normal. The map's
 	 * lib/drop-luck.test.ts pins the same Nex.
