@@ -117,6 +117,16 @@ public class DropOddsTest
 		assertEquals("drier than 50% of players", DropOdds.waitSoFar(355, WHIP));
 	}
 
+	/** A "than" never carries ">": the map's lib/drop-luck.test.ts pins the same three. */
+	@Test
+	public void aThanSaysNinetyNineRatherThanMoreThanNinetyNine()
+	{
+		assertEquals("drier than 99% of players", DropOdds.waitSoFar(4000, WHIP));
+		assertEquals("drier than 99% of players", DropOdds.waitComparison(4000, WHIP));
+		assertEquals("luckier than 99% of players", DropOdds.waitComparison(2, WHIP));
+		assertEquals("a number alone keeps its mark", ">99", DropOdds.percent(DropOdds.within(WHIP, 4000)));
+	}
+
 	@Test
 	public void percentagesNeverRoundAPossibilityAway()
 	{

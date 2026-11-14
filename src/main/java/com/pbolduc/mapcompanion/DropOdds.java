@@ -274,6 +274,17 @@ final class DropOdds
 		return Long.toString(rounded);
 	}
 
+	/**
+	 * A share as a "than" says it: "drier than 99% of players", never "drier than >99%", which read as
+	 * a typo. "Drier than" already says "more than", and 99 is still true of any share {@link #percent}
+	 * prints as ">99"; a number standing alone, ">99% chance", keeps the mark. The map's {@code than}.
+	 */
+	static String than(double share)
+	{
+		String printed = percent(share);
+		return ">99".equals(printed) ? "99" : printed;
+	}
+
 	/** The percentile a word is decided on: the number the reader is shown, not the one behind it. */
 	static int shown(double share)
 	{
@@ -388,8 +399,8 @@ final class DropOdds
 	{
 		double had = within(rate, wait);
 		return had < 0.5
-			? "luckier than " + percent(1 - had) + "% of players"
-			: "drier than " + percent(had) + "% of players";
+			? "luckier than " + than(1 - had) + "% of players"
+			: "drier than " + than(had) + "% of players";
 	}
 
 	static String waitSoFar(long kills, double oneIn)
@@ -408,7 +419,7 @@ final class DropOdds
 	{
 		double had = within(rate, kills);
 		return shown(had) >= 50
-			? "drier than " + percent(had) + "% of players"
+			? "drier than " + than(had) + "% of players"
 			: percent(1 - had) + "% of players would still be waiting too";
 	}
 
