@@ -191,6 +191,8 @@ often. A clean run is now 443 tests with no failures or skips.
 - [ ] Drop luck at Scurrius with another player: the shared kill is not counted at all.
 - [ ] Drop luck at Yama with a contract: the contract leaves the inventory when the fight starts,
       and that kill is not counted; the next one, without a contract, is.
+- [ ] Drop luck at the Royal Titans: looting one counts it under that titan's name; "Take pages"
+      and sacrificing do not. In a duo the crown counts your share of the damage to both titans.
 - [ ] Drop luck at Barrows: a chest after all six brothers counts; one after five does not. The
       six killed varbits must still be set when the chest's reward appears; no build has seen it.
 - [ ] Drop luck at the Doom of Mokhaiotl: claiming a run counts it once, at the delve the loot

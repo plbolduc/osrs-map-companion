@@ -62,6 +62,7 @@ public class LootLogDropLuckTest
 	private static final int GOLD_RING = 90_007;
 	private static final int CONTRACT = 90_008;
 	private static final int CLOTH = 90_009;
+	private static final int PAGES = 90_010;
 
 	private final HarnessGame game = new HarnessGame();
 	private final HarnessStore store = new HarnessStore();
@@ -111,6 +112,7 @@ public class LootLogDropLuckTest
 		game.nameItem(GOLD_RING, "Gold ring");
 		game.nameItem(CONTRACT, "Contract of Oathplate Acquisition");
 		game.nameItem(CLOTH, "Mokhaiotl cloth");
+		game.nameItem(PAGES, "Desiccated page");
 		log.clock(() -> now);
 	}
 
@@ -663,6 +665,24 @@ public class LootLogDropLuckTest
 		assertEquals(1, drop("Doom of Mokhaiotl", "Mokhaiotl cloth").obtained);
 		assertEquals("three delves past the ninth are three kills at its rate", 3 + 1,
 			LootLog.delveWorth(Arrays.asList(1350.0, 540.0), 12) - LootLog.delveWorth(Arrays.asList(1350.0, 540.0), 9) + 1, 1e-9);
+	}
+
+	/**
+	 * A Royal Titan is counted only when looted: "Take pages" leaves nothing but pages and clues. In a
+	 * duo the crown counts the player's share of the damage to both titans, whichever is looted.
+	 */
+	@Test
+	public void aRoyalTitanCountsOnlyALootedKillAndASharedOneByShare()
+	{
+		kill("Branda the Fire Queen", PAGES);
+		assertNull("pages taken instead of loot", DropLuckView.find(log.monsters(), "Branda the Fire Queen"));
+		int tick = game.client().getTickCount();
+		log.onHitsplat("Eldric the Ice King", true, false, 60, tick);
+		log.onHitsplat("Branda the Fire Queen", false, true, 40, tick);
+		kill("Branda the Fire Queen", BONES);
+		assertEquals(1, monster("Branda the Fire Queen").kills);
+		assertEquals(0.6, drop("Branda the Fire Queen", "Fire element staff crown").shareWatched, 1e-9);
+		assertEquals(75.0, drop("Branda the Fire Queen", "Fire element staff crown").oneIn, 0);
 	}
 
 	/** Outside an instance the canyon shaman is counted, warhammer and all. */

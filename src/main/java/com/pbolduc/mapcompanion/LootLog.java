@@ -327,7 +327,10 @@ public class LootLog
 		 * divided by this.
 		 */
 		Double mvp;
-		/** Other monsters whose damage counts towards this one's share: Nex's minions and reavers. */
+		/**
+		 * Other monsters whose damage counts towards this one's share: Nex's minions and reavers, the
+		 * other Royal Titan. All of them and the row's own monster are one fight.
+		 */
 		List<String> fight;
 		/**
 		 * {@code "contract"}: a kill after a Yama contract left the inventory is not counted. A contract
@@ -605,10 +608,11 @@ public class LootLog
 					continue;
 				}
 				tracked.computeIfAbsent(key(rate.npc), k -> new ArrayList<>()).add(rate);
-				for (String minion : rate.fight == null ? Collections.<String>emptyList() : rate.fight)
-				{
-					fightOf.put(key(minion), key(rate.npc));
-				}
+				/* One fight for the row's monster and every name in its fight, kept under the first of them by name. */
+				List<String> pool = new ArrayList<>(rate.fight == null ? Collections.<String>emptyList() : rate.fight);
+				pool.add(rate.npc);
+				String at = pool.stream().map(LootLog::key).sorted().findFirst().orElse(key(rate.npc));
+				pool.forEach(member -> fightOf.put(key(member), at));
 				if (rate.level != null)
 				{
 					versions.computeIfAbsent(key(rate.game != null ? rate.game : rate.npc), k -> new HashMap<>())
@@ -713,7 +717,7 @@ public class LootLog
 			return emptyList();
 		}
 		int tick = client.getTickCount();
-		long[] fight = fights.remove(key(game));
+		long[] fight = fights.remove(fightOf.getOrDefault(key(game), key(game)));
 		boolean othersHit = fight != null && fight[1] > 0 && tick - fight[2] <= SHARED_TICKS;
 		boolean mvp = mvpAt != null && tick - mvpAt <= 2;
 		mvpAt = null;
@@ -996,8 +1000,16 @@ public class LootLog
 	 * rolls none of the drops this log prices, and a kill counted then would be a kill nothing could
 	 * have dropped on. What still falls is the elite clue, the coagulated venom and a Konar key.
 	 */
-	private static final Map<String, Set<String>> LOOT_FORFEITABLE = Collections.singletonMap("araxxor",
-		new HashSet<>(Arrays.asList("clue scroll (elite)", "coagulated venom", "brimstone key")));
+	private static final Map<String, Set<String>> LOOT_FORFEITABLE = new HashMap<>();
+
+	static
+	{
+		LOOT_FORFEITABLE.put("araxxor", new HashSet<>(Arrays.asList("clue scroll (elite)", "coagulated venom", "brimstone key")));
+		/* A Royal Titan whose loot was traded for "Take pages": pages and the tertiaries only. */
+		Set<String> pages = new HashSet<>(Arrays.asList("desiccated page", "clue scroll (hard)", "clue scroll (elite)"));
+		LOOT_FORFEITABLE.put("branda the fire queen", pages);
+		LOOT_FORFEITABLE.put("eldric the ice king", pages);
+	}
 
 	/**
 	 * Whether this receipt is a kill whose loot was given up: nothing in it but what falls anyway.
