@@ -67,9 +67,13 @@ final class DropLuckPanel extends JPanel
 {
 	/** The sidebar's column inside the companion panel's ten-pixel insets. */
 	private static final int WIDTH = PluginPanel.PANEL_WIDTH - 20;
-	/** Text beside a 32px picture and a count, inside a card's eight-pixel insets. */
-	private static final int ROW_TEXT_WIDTH = WIDTH - 16 - 36 - 46;
 	private static final int TEXT_WIDTH = WIDTH - 16;
+	/** A drop row's 2px edge and its 4px and 2px insets, which its words are wrapped inside of. */
+	private static final int ROW_EDGES = 8;
+	/** A 32px picture as {@link Picture} lays it out, two wider than tall. */
+	private static final int ROW_PICTURE = 34;
+	/** Between a row's picture, words and count, and the Now killing bar's words and Back. */
+	private static final int ROW_GAP = 6;
 
 	/** The section's name, as the sidebar heads its others. */
 	static final String HEADING = "Drop luck";
@@ -275,9 +279,15 @@ final class DropLuckPanel extends JPanel
 
 	private JComponent nowBar(Monster monster)
 	{
-		JPanel bar = MapCompanionPanel.bar(6, new Color(0x3a2e1a), null, small("<html>Now killing <font color='#ffffff'>"
-			+ MapCompanionPanel.escape(monster.npc) + "</font></html>", LIGHT_GRAY_COLOR),
-			small("Back ›", BRAND_ORANGE));
+		JLabel back = small("Back ›", BRAND_ORANGE);
+		/*
+		 * Wrapped beside Back, inside the bar's 1px line and 6px insets: unwrapped, a markup label is cut
+		 * without an ellipsis, and "Duke Sucellus (awakened)" would lose the word that tells its log apart.
+		 */
+		int width = WIDTH - 14 - ROW_GAP - back.getPreferredSize().width;
+		JPanel bar = MapCompanionPanel.bar(ROW_GAP, new Color(0x3a2e1a), null, small("<html><body width='" + width
+			+ "'>Now killing <font color='#ffffff'>" + MapCompanionPanel.escape(monster.npc) + "</font></body></html>",
+			LIGHT_GRAY_COLOR), back);
 		bar.setBorder(new CompoundBorder(
 			BorderFactory.createLineBorder(new Color(0x7a5410)), new EmptyBorder(3, 6, 3, 6)));
 		clickable(bar, () -> open(null, null));
@@ -347,12 +357,6 @@ final class DropLuckPanel extends JPanel
 	private JComponent dropRow(Monster monster, Drop drop, boolean selected, boolean pinned)
 	{
 		Color background = selected ? ColorScheme.DARKER_GRAY_HOVER_COLOR : DARKER_GRAY_COLOR;
-		JPanel words = column(background);
-		/* The pinned drop's name is orange, the sidebar's own accent: an emoji pin is not in RuneLite's font. */
-		words.add(wrapped(drop.item, ROW_TEXT_WIDTH, 12f, pinned ? BRAND_ORANGE : Color.WHITE));
-		words.add(wrapped(DropLuckView.rowDetail(monster, drop, log.boostedNow(monster.npc, drop.boostWhen)),
-			ROW_TEXT_WIDTH, 11f, LIGHT_GRAY_COLOR));
-
 		JPanel count = column(background);
 		JLabel n = new JLabel(DropOdds.count(drop.obtained), SwingConstants.RIGHT);
 		refont(n, 16f);
@@ -366,7 +370,18 @@ final class DropLuckPanel extends JPanel
 			chip.setAlignmentX(Component.RIGHT_ALIGNMENT);
 			count.add(chip);
 		}
-		JPanel row = MapCompanionPanel.bar(6, background, DropLuckView.ANY.equals(drop.item) ? anyPicture(monster, background)
+		/*
+		 * The words take what the picture, the count and the row's edges leave, as fact() does. A markup
+		 * label keeps the width it was wrapped at and is cut mid-letter past the room it is given, and the
+		 * count is as wide as its chip, "Dry" to "Very lucky", so one width for every row fits none.
+		 */
+		int textWidth = TEXT_WIDTH - ROW_EDGES - ROW_PICTURE - 2 * ROW_GAP - count.getPreferredSize().width;
+		JPanel words = column(background);
+		/* The pinned drop's name is orange, the sidebar's own accent: an emoji pin is not in RuneLite's font. */
+		words.add(wrapped(drop.item, textWidth, 12f, pinned ? BRAND_ORANGE : Color.WHITE));
+		words.add(wrapped(DropLuckView.rowDetail(monster, drop, log.boostedNow(monster.npc, drop.boostWhen)),
+			textWidth, 11f, LIGHT_GRAY_COLOR));
+		JPanel row = MapCompanionPanel.bar(ROW_GAP, background, DropLuckView.ANY.equals(drop.item) ? anyPicture(monster, background)
 			: new Picture(drop.itemId, 32, drop.obtained > 0 || drop.oneIn != null, -1), words, count);
 		row.setBorder(new CompoundBorder(
 			new MatteBorder(0, 2, 0, 0, selected ? BRAND_ORANGE : background),
@@ -392,7 +407,7 @@ final class DropLuckPanel extends JPanel
 				grid.add(new Picture(drop.itemId, 16, true, -1));
 			}
 		}
-		Dimension d = new Dimension(34, 32);
+		Dimension d = new Dimension(ROW_PICTURE, 32);
 		grid.setPreferredSize(d);
 		grid.setMaximumSize(d);
 		return grid;
@@ -551,25 +566,32 @@ final class DropLuckPanel extends JPanel
 
 	private JComponent pinnedRow(Monster monster, Drop drop)
 	{
-		JPanel row = new JPanel(new BorderLayout(6, 0));
+		JPanel row = new JPanel(new BorderLayout(ROW_GAP, 0));
 		row.setBackground(ColorScheme.DARKER_GRAY_HOVER_COLOR);
 		row.setBorder(new CompoundBorder(
 			new MatteBorder(0, 2, 0, 0, BRAND_ORANGE), new EmptyBorder(3, 4, 3, 4)));
 		row.add(new Picture(drop.itemId, 26, true, -1), BorderLayout.WEST);
-		JPanel words = column(ColorScheme.DARKER_GRAY_HOVER_COLOR);
-		words.add(wrapped(drop.item, ROW_TEXT_WIDTH, 12f, BRAND_ORANGE));
-		words.add(wrapped(monster.npc + " · " + DropLuckView.units(monster, drop.sinceLast) + " since last",
-			ROW_TEXT_WIDTH, 11f, LIGHT_GRAY_COLOR));
-		row.add(words, BorderLayout.CENTER);
+		/* The words get what the 2px edge, the 4px insets, the picture and the chip leave, as a drop row's do. */
+		int textWidth = WIDTH - 10 - 28 - ROW_GAP;
+		JPanel side = null;
 		if (drop.oneIn != null)
 		{
 			int shown = DropOdds.shown(DropOdds.within(drop.rate(), drop.sinceKills()));
 			Luck luck = shown >= DropOdds.VERY ? Luck.VERY_DRY : shown >= DropOdds.NOTABLE ? Luck.DRY : Luck.NORMAL;
 			/* In a column of its own, so the chip keeps its height rather than filling the row's. */
-			JPanel side = column(ColorScheme.DARKER_GRAY_HOVER_COLOR);
+			side = column(ColorScheme.DARKER_GRAY_HOVER_COLOR);
 			JLabel chip = chip(luck);
 			chip.setAlignmentX(Component.RIGHT_ALIGNMENT);
 			side.add(chip);
+			textWidth -= ROW_GAP + side.getPreferredSize().width;
+		}
+		JPanel words = column(ColorScheme.DARKER_GRAY_HOVER_COLOR);
+		words.add(wrapped(drop.item, textWidth, 12f, BRAND_ORANGE));
+		words.add(wrapped(monster.npc + " · " + DropLuckView.units(monster, drop.sinceLast) + " since last",
+			textWidth, 11f, LIGHT_GRAY_COLOR));
+		row.add(words, BorderLayout.CENTER);
+		if (side != null)
+		{
 			row.add(side, BorderLayout.EAST);
 		}
 		left(MapCompanionPanel.capped(row));
@@ -582,8 +604,15 @@ final class DropLuckPanel extends JPanel
 		JPanel row = column(DARK_GRAY_COLOR);
 		row.setBorder(new CompoundBorder(
 			new MatteBorder(1, 0, 0, 0, DARKER_GRAY_COLOR), new EmptyBorder(5, 2, 5, 2)));
+		/*
+		 * The name wraps in what the kills and their age leave, inside the row's 2px insets: cut with an
+		 * ellipsis beside "12,345 kills · 3 days ago", it read "Phosani's Nightm…", and nothing on the row
+		 * gave the rest. The meta keeps to the name's first line.
+		 */
+		JLabel meta = small(DropLuckView.listMeta(monster, now), LIGHT_GRAY_COLOR);
+		meta.setVerticalAlignment(SwingConstants.TOP);
 		row.add(MapCompanionPanel.fill(MapCompanionPanel.bar(4, DARK_GRAY_COLOR, null,
-			label(monster.npc, 12f, Color.WHITE), small(DropLuckView.listMeta(monster, now), LIGHT_GRAY_COLOR)),
+			wrapped(monster.npc, WIDTH - 4 - 4 - meta.getPreferredSize().width, 12f, Color.WHITE), meta),
 			DARK_GRAY_COLOR));
 		JPanel icons = new JPanel(new FlowLayout(FlowLayout.LEFT, 3, 3));
 		icons.setBackground(DARK_GRAY_COLOR);

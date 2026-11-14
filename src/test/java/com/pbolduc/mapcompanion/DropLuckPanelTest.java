@@ -284,6 +284,69 @@ public class DropLuckPanelTest
 		assertNear("very dry", 0xf87171, drawn.getRGB(4 + w - 1, 8));
 	}
 
+	/**
+	 * Every line laid out at the sidebar's real column, 205px, is given at least the width it asks for.
+	 * A markup label keeps the width it was wrapped at and is cut mid-letter past what it is given, so a
+	 * row's words wrapped at one width for every chip lost their ends beside "Very lucky"; the Now
+	 * killing bar cut a long name, and the list cut one with an ellipsis. Each is here: Any unique's
+	 * Very lucky row, a monster whose name is longer than the bar and the list leave, and the pinned row.
+	 */
+	@Test
+	public void everyLineFitsTheRealColumn() throws Exception
+	{
+		now -= 3 * 60 * 60_000L;
+		kill("Abyssal demon", 4151);
+		kill("Abyssal demon", 995);
+		panel.refresh();
+		assertTrue(words(), words().contains("Very lucky"));
+		assertFits("the card");
+		assertTrue(words(), SidebarWords.press(panel, "Abyssal head"));
+		assertTrue(words(), SidebarWords.press(panel, "Pin"));
+		now += 3 * 60 * 60_000L;
+		kill("Thermonuclear smoke devil", 995);
+		assertTrue(words(), SidebarWords.press(panel, "All monsters ›"));
+		String list = words();
+		assertTrue(list, list.contains("Now killing Thermonuclear smoke devil"));
+		assertTrue(list, list.contains("Pinned"));
+		assertFits("the list");
+	}
+
+	private void assertFits(String what) throws Exception
+	{
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.refresh();
+			panel.setSize(PluginPanel.PANEL_WIDTH - 20, panel.getPreferredSize().height);
+			layout(panel);
+			for (JLabel label : labels(panel, new ArrayList<>()))
+			{
+				assertTrue(what + ": \"" + label.getText() + "\" asks for " + label.getPreferredSize().width + "px and is given "
+					+ label.getWidth(), label.getWidth() >= label.getPreferredSize().width);
+			}
+		});
+	}
+
+	/** Every label showing. */
+	private static List<JLabel> labels(Container parent, List<JLabel> found)
+	{
+		for (Component child : parent.getComponents())
+		{
+			if (!child.isVisible())
+			{
+				continue;
+			}
+			if (child instanceof JLabel)
+			{
+				found.add((JLabel) child);
+			}
+			else if (child instanceof Container)
+			{
+				labels((Container) child, found);
+			}
+		}
+		return found;
+	}
+
 	/** Each stack holding a spacer, squeezed 4px under its height and laid out; how many spacers held. */
 	private int squeezed() throws Exception
 	{
