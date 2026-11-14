@@ -147,6 +147,9 @@ and member secret. It carries the destination's tile and the tile you stand on, 
 position sharing is on, because a route from where you stand is what the press asks for. One is in
 flight at a time, and none before the wait the map last asked for: its `Retry-After`, and at least
 five seconds between presses that reached it. The map plans with both tiles and keeps neither.
+On the way a clue's Route made, Reroute sends the clue as that Route did, in place of the
+destination's tile, until the way's STASH unit is behind: the tile is the emote spot or the dig,
+and a way to it alone would leave out the unit and the clue's notes.
 The Reroute key and Reroute on the step box's Shift-right-click menu press that same button, under
 the same rules, and send nothing of their own.
 A teleport step's picture is the game's own, from the client's sprite cache: the step names an

@@ -69,7 +69,8 @@ import static com.pbolduc.mapcompanion.RelayResponse.Destination;
  *
  * <p><b>Reroute</b> is the same question about the destination already shown: its tile, and the
  * tile the player stands on, which the map did not have if position sharing is off. A route from
- * here is the whole of what Reroute asks, so with no tile it asks nothing. The map's routes are never
+ * here is the whole of what Reroute asks, so with no tile it asks nothing. A clue's way is asked about
+ * as its press asked, by the clue, until its STASH row is behind. The map's routes are never
  * recomputed on their own, which keeps the server's work to presses. The answer replaces the steps
  * through {@link DestinationRoute#finishReroute}, which drops one for a destination since replaced,
  * and what it says is the route's own line rather than a press's.
@@ -191,13 +192,15 @@ final class RoutePress
 		void draw(JLabel label, int box);
 	}
 
-	/** The picture of the destination the last answered press made, by that destination's key. */
+	/** The picture of the destination the last answered press made, and what it asked, by that destination's key. */
 	@AllArgsConstructor
 	private static final class Shown
 	{
 		final String key;
+		@Nullable
 		final Picture picture;
 		final long generation;
+		final Target asked;
 	}
 
 	/** What the last press said, for the sidebar. Never changes after it is made. */
@@ -469,8 +472,21 @@ final class RoutePress
 		DestinationRoute.Ticket ticket = route.beginReroute(System.currentTimeMillis());
 		if (ticket != null)
 		{
-			send(signed, Target.tile(NowCards.DESTINATION, ticket.target, "", null, null), from, rerouted(ticket));
+			send(signed, again(ticket, route.view()), from, rerouted(ticket));
 		}
+	}
+
+	/**
+	 * What a Reroute asks: the destination's tile, or the clue the press asked about while it is that
+	 * press's destination and no STASH row is behind. The tile is the emote spot or the dig, and a way
+	 * to it alone drops the unit, the key's note and the hot and cold one.
+	 */
+	private Target again(DestinationRoute.Ticket ticket, @Nullable DestinationRoute.View view)
+	{
+		Shown pressed = shown;
+		return pressed != null && pressed.asked.clue != null && view != null && pressed.generation == destinations.generation()
+			&& pressed.key.equals(view.key) && view.steps().stream().limit(view.step).noneMatch(done -> "stash".equals(done.slot))
+			? pressed.asked : Target.tile(NowCards.DESTINATION, ticket.target, "", null, null);
 	}
 
 	/** The member's credentials to ask with, or null once {@code refuse} has said why there are none. Client thread. */
@@ -570,7 +586,7 @@ final class RoutePress
 				}
 				destinations.selectLocal(destination);
 				route.adoptPressed(destination);
-				shown = target.picture == null ? null : new Shown(DestinationRoute.keyOf(destination), target.picture, asked);
+				shown = new Shown(DestinationRoute.keyOf(destination), target.picture, asked, target);
 			}
 			said = new Said(target.source, false, null, DestinationRoute.keyOf(destination), asked);
 			marker.sync();

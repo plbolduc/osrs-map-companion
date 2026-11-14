@@ -60,7 +60,7 @@ final class TestLoop
 		}
 	}
 
-	private static boolean put(Class<?> type, Object holder, String name, Object value)
+	static boolean put(Class<?> type, Object holder, String name, Object value)
 	{
 		try
 		{
