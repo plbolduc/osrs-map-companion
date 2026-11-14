@@ -617,14 +617,6 @@
     },
     {
       "npc": "Branda the Fire Queen",
-      "item": "Bran",
-      "oneIn": 3000,
-      "page": "Branda the Fire Queen",
-      "pet": true,
-      "kills": "solo"
-    },
-    {
-      "npc": "Branda the Fire Queen",
       "item": "Fire element staff crown",
       "oneIn": 75,
       "page": "Branda the Fire Queen",
@@ -1407,14 +1399,6 @@
       "item": "Zamorak monk top",
       "oneIn": 354.75,
       "page": "Elder Chaos druid"
-    },
-    {
-      "npc": "Eldric the Ice King",
-      "item": "Bran",
-      "oneIn": 3000,
-      "page": "Eldric the Ice King",
-      "pet": true,
-      "kills": "solo"
     },
     {
       "npc": "Eldric the Ice King",
@@ -2497,6 +2481,18 @@
       "oneIn": 5012.5,
       "page": "Rock (Troll)",
       "tertiary": true
+    },
+    {
+      "npc": "Royal Titans",
+      "item": "Bran",
+      "oneIn": 3000,
+      "page": "Branda the Fire Queen",
+      "pet": true,
+      "kills": "solo",
+      "from": [
+        "Branda the Fire Queen",
+        "Eldric the Ice King"
+      ]
     },
     {
       "npc": "Rune dragon",

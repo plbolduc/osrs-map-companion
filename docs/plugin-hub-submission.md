@@ -278,7 +278,7 @@ answering a reviewer. Since 1.9.0, for 1.10.0, in review in
   Amoxliatl. Each is transcribed from the wiki page's own drop line. The counts stay on the
   computer; a player who shares *Loot and milestones* sends the same fields as before, now for
   these drops too.
-- **Pets, sets, team bosses and awakened bosses:** the table now holds 535 rates across 173
+- **Pets, sets, team bosses and awakened bosses:** the table now holds 534 rates across 174
   monsters: the God Wars generals' whole unique tables, each awakened boss's, and the task rates of
   the Gryphon and the Aquanite, while champion's scrolls, which stop dropping once their champion is
   beaten, and the moon key's tooth half where it drops in one place only, leave it. A pet is

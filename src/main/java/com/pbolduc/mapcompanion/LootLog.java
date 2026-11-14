@@ -49,6 +49,7 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.events.ServerNpcLoot;
 import net.runelite.client.game.ItemStack;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
 
 /**
  * Kill counts and notable drops, kept on this machine.
@@ -359,6 +360,11 @@ public class LootLog
 		Integer level;
 		/** The NPC's name in the game, where {@code npc} is one version of it; null where it is the name. */
 		String game;
+		/**
+		 * Where {@code npc} names a fight rather than an NPC, the monsters a kill of it is: "Royal Titans"
+		 * is Branda and Eldric, either of whom is looted, and Bran is rolled once a fight.
+		 */
+		List<String> from;
 	}
 
 	/**
@@ -434,6 +440,8 @@ public class LootLog
 	private final Map<String, long[]> fights = new HashMap<>();
 	/** Per minion name, the boss whose share its damage counts towards; see {@link Rate#fight}. */
 	private final Map<String, String> fightOf = new HashMap<>();
+	/** Per monster name, the fight a kill of it is also a kill of: a Royal Titan's "Royal Titans"; see {@link Rate#from}. */
+	private final Map<String, String> wholeOf = new HashMap<>();
 	/** The tick the game last said the player was the MVP of a fight. */
 	@Nullable
 	private Integer mvpAt;
@@ -684,6 +692,10 @@ public class LootLog
 				pool.add(rate.npc);
 				String at = pool.stream().map(LootLog::key).sorted().findFirst().orElse(key(rate.npc));
 				pool.forEach(member -> fightOf.put(key(member), at));
+				if (rate.from != null)
+				{
+					rate.from.forEach(member -> wholeOf.put(key(member), rate.npc));
+				}
 				if (rate.level != null)
 				{
 					versions.computeIfAbsent(key(rate.game != null ? rate.game : rate.npc), k -> new HashMap<>())
@@ -789,28 +801,38 @@ public class LootLog
 		boolean othersHit = fight != null && fight[1] > 0 && tick - fight[2] <= SHARED_TICKS;
 		boolean mvp = mvpAt != null && tick - mvpAt <= 2;
 		mvpAt = null;
+		/*
+		 * A fight's row — Bran, rolled once a Royal Titans fight at whichever titan was looted — counts
+		 * the fight, its loot the titan's. "Take pages" still rolls the pet, so a receipt with a page
+		 * counts; one with nothing but a clue may be a "Sacrifice", the pet at twice its rate, and counts
+		 * nothing, nor does a fight others hit, the pet's rate not following damage. See Rate#from.
+		 */
+		String whole = wholeOf.get(key(game));
+		List<Notable> notable = new ArrayList<>(whole == null ? emptyList() : othersHit || lootForfeited(whole, event.getItems())
+			? noteKill(whole, tracked.get(key(whole)), emptySet(), tick)
+			: countKill(whole, tracked.get(key(whole)), emptyList(), rate -> 1, null, tick));
 		if (lootForfeited(game, event.getItems()))
 		{
-			return noteKill(game, tracked.getOrDefault(key(game), emptyList()), Collections.emptySet(), tick);
+			return with(notable, noteKill(game, tracked.getOrDefault(key(game), emptyList()), emptySet(), tick));
 		}
 		String name = versionOf(game, event.getComposition());
 		if (name == null)
 		{
 			/* A version of this monster the table does not price, such as the quest's fight. */
-			return emptyList();
+			return notable;
 		}
 		List<Rate> watched = tracked.getOrDefault(key(name), emptyList());
 		if (anyRow(watched, "unless", "contract") && contractSpent)
 		{
 			/* The fight a contract was spent on: its reward was guaranteed, so the kill is not counted. */
 			contractSpent = false;
-			return noteKill(name, watched, Collections.emptySet(), tick);
+			return with(notable, noteKill(name, watched, emptySet(), tick));
 		}
 		boolean sharedRows = anyRow(watched, "kills", "shared");
 		if (othersHit && !sharedRows && anyRow(watched, "kills", "solo"))
 		{
 			/* Shared by damage, on a boss whose odds are a player's alone: not counted at all. */
-			return noteKill(name, watched, Collections.emptySet(), tick);
+			return with(notable, noteKill(name, watched, emptySet(), tick));
 		}
 		/*
 		 * Shared by damage, on a boss that hands its drops out by it: the player's share of a kill.
@@ -822,13 +844,13 @@ public class LootLog
 		if (anyRow(watched, "where", "outside-instances") && WorldTiles.isInstance(client))
 		{
 			/* The Chambers of Xeric's shaman shares the name and not the table. */
-			return noteKill(name, watched, Collections.emptySet(), tick);
+			return with(notable, noteKill(name, watched, emptySet(), tick));
 		}
 		/* A row counted alone takes nothing of a shared kill; an MVP row not the player's, its share over the bonus. */
 		lastSharedCredit = new HashMap<>();
 		lastShared = share < 1 && !mvp ? name : null;
 		lastSharedTick = tick;
-		return countKill(name, watched, event.getItems(), rate ->
+		return with(notable, countKill(name, watched, event.getItems(), rate ->
 		{
 			double worth = share == 1 ? 1 : "solo".equals(rate.kills) ? 0 : rate.mvp != null && !mvp ? share / rate.mvp : share;
 			if (worth != share && rate.mvp != null && share < 1 && !"solo".equals(rate.kills))
@@ -836,7 +858,14 @@ public class LootLog
 				lastSharedCredit.put(rate.item, share - worth);
 			}
 			return worth;
-		}, kourendEasy, tick);
+		}, kourendEasy, tick));
+	}
+
+	/** The fight's notables, then the kill's own: the list a receipt says. */
+	private static List<Notable> with(List<Notable> fight, List<Notable> own)
+	{
+		fight.addAll(own);
+		return fight;
 	}
 
 	/**
@@ -1084,8 +1113,12 @@ public class LootLog
 	static
 	{
 		LOOT_FORFEITABLE.put("araxxor", new HashSet<>(Arrays.asList("clue scroll (elite)", "coagulated venom", "brimstone key")));
+		/* A Royal Titans fight sacrificed for twice the pet's chance: nothing but a clue, or nothing. */
+		Set<String> clues = new HashSet<>(Arrays.asList("clue scroll (hard)", "clue scroll (elite)"));
+		LOOT_FORFEITABLE.put("royal titans", clues);
 		/* A Royal Titan whose loot was traded for "Take pages": pages and the tertiaries only. */
-		Set<String> pages = new HashSet<>(Arrays.asList("desiccated page", "clue scroll (hard)", "clue scroll (elite)"));
+		Set<String> pages = new HashSet<>(clues);
+		pages.add("desiccated page");
 		LOOT_FORFEITABLE.put("branda the fire queen", pages);
 		LOOT_FORFEITABLE.put("eldric the ice king", pages);
 	}
@@ -1492,7 +1525,8 @@ public class LootLog
 	}
 
 	/**
-	 * The monster being killed now: the last one killed, if that was within {@link #CURRENT_MS}.
+	 * The monster being killed now: the last one killed, if that was within {@link #CURRENT_MS}. Never
+	 * a fight's name, which is killed with the titan beside it at the same moment: the titan is.
 	 */
 	@Nullable
 	public synchronized String current()
@@ -1502,7 +1536,7 @@ public class LootLog
 		long bestMs = 0;
 		for (Map.Entry<String, Tally> entry : tallies.entrySet())
 		{
-			if (entry.getValue().lastKillMs > bestMs)
+			if (entry.getValue().lastKillMs > bestMs && !wholeOf.containsValue(entry.getKey()))
 			{
 				bestMs = entry.getValue().lastKillMs;
 				best = entry.getKey();

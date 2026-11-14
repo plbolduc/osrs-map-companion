@@ -901,7 +901,92 @@ public class LootLogDropLuckTest
 		LootLog.Drop crown = drop("Branda the Fire Queen", "Fire element staff crown");
 		assertEquals("a fight alone is a whole kill", 1, crown.watchedKills().ordinary);
 		assertEquals(0, crown.sharedWatched);
-		assertEquals(0, drop("Branda the Fire Queen", "Bran").sharedWatched);
+		/* Bran was Branda's row here until it became the fight's: the shared fight is not one of its kills, the one alone is. */
+		assertEquals(1, monster("Royal Titans").kills);
+		assertEquals(0, drop("Royal Titans", "Bran").sharedWatched);
+	}
+
+	/**
+	 * Bran is rolled once a Royal Titans fight, at whichever titan is looted, so a fight counts one kill
+	 * of "Royal Titans" whichever it was, and neither titan has a Bran of its own. The titan is still
+	 * the monster being killed.
+	 */
+	@Test
+	public void aRoyalTitansFightCountsOnceForBranWhicheverTitanIsLooted()
+	{
+		int tick = game.client().getTickCount();
+		log.onHitsplat("Branda the Fire Queen", true, false, 300, tick);
+		log.onHitsplat("Eldric the Ice King", true, false, 300, tick);
+		kill("Branda the Fire Queen", BONES);
+		game.tick();
+		now += 60_000;
+		kill("Eldric the Ice King", BONES);
+		assertEquals(2, monster("Royal Titans").kills);
+		assertEquals(1, monster("Branda the Fire Queen").kills);
+		assertEquals(1, monster("Eldric the Ice King").kills);
+		assertNull(drop("Branda the Fire Queen", "Bran"));
+		assertNull(drop("Eldric the Ice King", "Bran"));
+		LootLog.Drop bran = drop("Royal Titans", "Bran");
+		assertEquals(0, bran.obtained);
+		assertEquals(2, bran.watched);
+		assertEquals(3000.0, bran.oneIn, 0);
+		assertEquals("Eldric the Ice King", log.current());
+	}
+
+	/** The pet's line, after a fight looted at either titan, is Bran's. */
+	@Test
+	public void aPetLineAfterARoyalTitansFightCreditsBran()
+	{
+		kill("Branda the Fire Queen", BONES);
+		game.tick();
+		kill("Eldric the Ice King", BONES);
+		List<LootLog.Notable> said = log.onPetMessage(game.client().getTickCount());
+		assertEquals("Bran", said.get(0).item);
+		assertEquals("Royal Titans", said.get(0).npc);
+		assertEquals(1, drop("Royal Titans", "Bran").obtained);
+		assertEquals(0, drop("Royal Titans", "Bran").sinceLast);
+	}
+
+	/**
+	 * "Take pages" gives up the loot for pages, and the pet is still rolled: that fight is one of
+	 * Bran's, though not a crown's. "Sacrifice" gives up the loot for twice the pet's chance and hands
+	 * over nothing or only a clue, which the log cannot tell from the rest, so it counts for nothing:
+	 * not the fight, and not a Bran it gives.
+	 */
+	@Test
+	public void takingPagesCountsForBranAndASacrificeCountsNothing()
+	{
+		kill("Eldric the Ice King", PAGES, CLUE);
+		assertEquals(1, monster("Royal Titans").kills);
+		assertNull("no crown's kill", DropLuckView.find(log.monsters(), "Eldric the Ice King"));
+		for (int i = 0; i < 3; i++)
+		{
+			game.tick();
+			game.tick();
+			game.tick();
+		}
+		kill("Eldric the Ice King", CLUE);
+		game.tick();
+		game.tick();
+		game.tick();
+		kill("Branda the Fire Queen");
+		assertTrue("its pet is no Bran counted", log.onPetMessage(game.client().getTickCount()).isEmpty());
+		assertEquals(1, monster("Royal Titans").kills);
+		assertEquals(0, drop("Royal Titans", "Bran").obtained);
+		assertNull(DropLuckView.find(log.monsters(), "Branda the Fire Queen"));
+	}
+
+	/** A duo's fight is a share for a crown, and nothing for Bran: the pet's rate does not follow damage. */
+	@Test
+	public void aRoyalTitansFightOthersHitCountsNothingForBran()
+	{
+		int tick = game.client().getTickCount();
+		log.onHitsplat("Eldric the Ice King", true, false, 60, tick);
+		log.onHitsplat("Branda the Fire Queen", false, true, 40, tick);
+		kill("Eldric the Ice King", BONES);
+		assertEquals(0.6, drop("Eldric the Ice King", "Ice element staff crown").shareWatched, 1e-9);
+		assertNull(DropLuckView.find(log.monsters(), "Royal Titans"));
+		assertTrue(log.onPetMessage(game.client().getTickCount()).isEmpty());
 	}
 
 	/** Outside an instance the canyon shaman is counted, warhammer and all. */
