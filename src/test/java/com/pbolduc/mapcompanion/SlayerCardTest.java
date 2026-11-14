@@ -131,7 +131,7 @@ public class SlayerCardTest
 		state.choices("single", true);
 		refresh();
 		List<String> waiting = shown(panel);
-		assertTrue(waiting.toString(), waiting.contains("Ranking again for one target at a time…"));
+		assertTrue(waiting.toString(), waiting.contains("Ranking again for one target…"));
 		assertTrue(waiting.toString(), waiting.contains("1. Slayer Tower (basement)"));
 		/* A place that is not the open one is its name as a link, with the fold's arrow: see onePlaceIsOpenAtATime. */
 		assertTrue(waiting.toString(), waiting.contains("▸ 3. Slayer Tower (roof)"));
@@ -145,7 +145,7 @@ public class SlayerCardTest
 		refresh();
 		List<String> ranked = shown(panel);
 		assertTrue(ranked.toString(), ranked.contains("Slayer Tower"));
-		assertFalse(ranked.toString(), ranked.contains("Ranking again for one target at a time…"));
+		assertFalse(ranked.toString(), ranked.contains("Ranking again for one target…"));
 		assertTrue(button(panel, "Route").isEnabled());
 	}
 
@@ -233,7 +233,8 @@ public class SlayerCardTest
 			JComboBox<String> order = (JComboBox<String>) find(panel, "slayer.order");
 			JList<String> list = new JList<>();
 			assertEquals("Order: Best spot", ((JLabel) order.getRenderer().getListCellRendererComponent(list, "Best spot", -1, false, false)).getText());
-			assertEquals("One target at a time", ((JLabel) order.getRenderer().getListCellRendererComponent(list, "One target at a time", 1, false, false)).getText());
+			/* The website's name for the same order, so a player choosing it on either side reads one choice. */
+			assertEquals("Best for one target", ((JLabel) order.getRenderer().getListCellRendererComponent(list, "Best for one target", 1, false, false)).getText());
 		});
 	}
 
