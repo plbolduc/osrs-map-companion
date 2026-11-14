@@ -102,7 +102,8 @@ excluding compost bins. This includes the additional hops, bushes, hardwood, spi
 cactus, special Guild crops, calquat, belladonna, mushrooms, grapes, crystal trees, Hespori and
 coral. The same setting, snapshot cadence and local replant evidence apply to every kind.
 Off-surface patches can be observed even where the website's surface run planner cannot visit.
-The snapshot byte cap is unchanged: it drops older observations first and flags omitted details.
+A reading more than a week old is not sent, since the map reads none older. The snapshot byte cap
+is unchanged: it drops older observations first and flags omitted details.
 
 **Boats and moorings** sends, for each boat slot that shows a boat, its slot number, the game's
 dock id for where it is moored and that dock's name, and its teleport focus as none, teleport or

@@ -215,9 +215,10 @@ turns on, or off, everything it can send:
   (tier, item id, observed clue text and resolved tile); your observed hunter rumour;
   your Mahogany Homes customer and tier; the crop requested by your farming contract and whether
   it is ready to hand in;
-  birdhouse states and observation ages; the state of farming patches you have walked past,
-  including crop, stages, observation age, estimated growth windows and witnessed replant receipts
-  for the 99 patches supported by RuneLite's crop tracker (including grapes, coral and seaweed);
+  birdhouse states and observation ages; the state of farming patches you have walked past
+  in the last week, including crop, stages, observation age, estimated growth windows and
+  witnessed replant receipts for the 99 patches supported by RuneLite's crop tracker (including
+  grapes, coral and seaweed);
   which Sailing port task each of your five slots holds, with crates collected and delivered or
   bounty parts still owed, and whether a slot is empty, locked or unreadable; how many crates
   the cargo hold of the boat you last stood on carries, though cargo is not read; and which of the

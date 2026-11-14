@@ -356,6 +356,101 @@ public class SnapshotTrimmerTest
 		assertEquals(SnapshotTrimmer.MAX_LOOT_NPCS, snapshot.loot.npcs.size());
 	}
 
+	/**
+	 * A reading is restamped only while its region is loaded, so a site visited once kept its
+	 * reading for good, and the map drops anything over a week old on arrival. Not sending it loses
+	 * the map nothing, so it is not called an omission.
+	 */
+	@Test
+	public void sendsNoPatchReadingOlderThanTheMapReads()
+	{
+		CompanionSnapshot snapshot = snapshotWith(1, 1);
+		snapshot.farming = new CompanionSnapshot.Farming();
+		snapshot.farming.progressVersion = 1;
+		snapshot.farming.patches = new ArrayList<>();
+		snapshot.farming.patches.add(patch("fresh", 60_000L));
+		snapshot.farming.patches.add(patch("a-week", SnapshotTrimmer.MAX_PATCH_AGE_MS));
+		snapshot.farming.patches.add(patch("stale", SnapshotTrimmer.MAX_PATCH_AGE_MS + 1));
+
+		trimmer.fit(snapshot);
+
+		assertEquals(Arrays.asList("a-week", "fresh"), survivingPatches(snapshot));
+		assertNull(snapshot.detailsTruncated);
+
+		CompanionSnapshot allStale = snapshotWith(1, 1);
+		allStale.farming = new CompanionSnapshot.Farming();
+		allStale.farming.patches = new ArrayList<>(Collections.singletonList(patch("stale", 21L * 24 * 60 * 60_000L)));
+		trimmer.fit(allStale);
+		assertNull("no reading left is sent as no farming, as the builder sends it", allStale.farming);
+	}
+
+	/**
+	 * Weeks of stale readings from the sites a player once walked past, beside a full kill log that
+	 * fits on its own. The readings used to travel, push the snapshot over, and cost monsters off the
+	 * kill log, for bytes the map threw away.
+	 */
+	@Test
+	public void cutsNoMonsterForReadingsTheMapWouldDrop()
+	{
+		CompanionSnapshot snapshot = realisticLog(0);
+		snapshot.farming = new CompanionSnapshot.Farming();
+		snapshot.farming.progressVersion = 1;
+		snapshot.farming.patches = new ArrayList<>();
+		for (int i = 0; i < 35; i++)
+		{
+			CompanionSnapshot.Patch stale = patch(FarmingPatchCatalog.PATCHES.get(i).id, 21L * 24 * 60 * 60_000L);
+			stale.produce = pad("Produce name", 22);
+			stale.stagesLeft = 3;
+			stale.readyInMinMs = 4_800_000L;
+			stale.readyInMaxMs = 7_200_000L;
+			snapshot.farming.patches.add(stale);
+		}
+		assertTrue("the fixture should not already fit", trimmer.sizeOf(snapshot) > SnapshotTrimmer.BUDGET_BYTES);
+
+		trimmer.fit(snapshot);
+
+		assertEquals(SnapshotTrimmer.MAX_LOOT_NPCS, snapshot.loot.npcs.size());
+		assertNull(snapshot.farming);
+		assertNull(snapshot.detailsTruncated);
+	}
+
+	/**
+	 * The forty-monster log of {@link #aRealisticFullKillLogFitsWithoutTheOmissionNotice}, which fits
+	 * untouched, each monster with {@code collection} collection rows after its three rated ones.
+	 */
+	private static CompanionSnapshot realisticLog(int collection)
+	{
+		CompanionSnapshot snapshot = snapshotWith(SnapshotTrimmer.MAX_LOOT_NPCS, 3);
+		for (CompanionSnapshot.Npc npc : snapshot.loot.npcs)
+		{
+			npc.npc = pad(npc.npc, 24);
+			for (int d = 0; d < npc.drops.size(); d++)
+			{
+				npc.drops.get(d).item = pad("Notable drop " + d, 24);
+			}
+			for (int d = 0; d < collection; d++)
+			{
+				CompanionSnapshot.Drop drop = new CompanionSnapshot.Drop();
+				drop.collection = true;
+				drop.item = pad("Collection item " + d, 24);
+				drop.obtained = 1;
+				drop.killsAtLast = 900;
+				drop.trackedSinceKill = 0;
+				npc.drops.add(drop);
+			}
+		}
+		return snapshot;
+	}
+
+	private static CompanionSnapshot.Patch patch(String id, long observedMsAgo)
+	{
+		CompanionSnapshot.Patch patch = new CompanionSnapshot.Patch();
+		patch.id = id;
+		patch.state = PatchStates.GROWING;
+		patch.observedMsAgo = observedMsAgo;
+		return patch;
+	}
+
 	@Test
 	public void staysUnderTheCapTheMapEnforces()
 	{
