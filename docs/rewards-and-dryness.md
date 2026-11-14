@@ -127,7 +127,7 @@ per-item baseline and print **<1%** for a nonzero probability that rounds below 
 
 How Drop luck counts:
 
-- **Every monster is counted**, not only the 192 with a rate. Beside the rated rows, a monster keeps
+- **Every monster is counted**, not only the 193 with a rate. Beside the rated rows, a monster keeps
   any collection-log item that actually fell, read from the same cache vocabulary the announcements
   use; pets are left out for the reason above. A collection row is a count of what was seen and
   never the basis of a probability, so a kill the vocabulary could not judge moves its window

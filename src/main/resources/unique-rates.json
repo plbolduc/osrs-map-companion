@@ -873,6 +873,17 @@
     },
     {
       "npc": "Duke Sucellus",
+      "item": "Magus vestige progress",
+      "oneIn": 240,
+      "page": "Duke Sucellus",
+      "pieces": [
+        "Gold ring",
+        "Magus vestige"
+      ],
+      "level": 758
+    },
+    {
+      "npc": "Duke Sucellus",
       "item": "Virtus mask",
       "oneIn": 2160,
       "page": "Duke Sucellus",
@@ -1699,10 +1710,52 @@
     },
     {
       "npc": "Nex",
+      "item": "Ancient hilt",
+      "oneIn": 469.09090909090907,
+      "page": "Nex",
+      "kills": "solo"
+    },
+    {
+      "npc": "Nex",
       "item": "Nexling",
       "oneIn": 500,
       "page": "Nex",
       "pet": true,
+      "kills": "solo"
+    },
+    {
+      "npc": "Nex",
+      "item": "Nihil horn",
+      "oneIn": 234.54545454545453,
+      "page": "Nex",
+      "kills": "solo"
+    },
+    {
+      "npc": "Nex",
+      "item": "Torva full helm (damaged)",
+      "oneIn": 234.54545454545453,
+      "page": "Nex",
+      "kills": "solo"
+    },
+    {
+      "npc": "Nex",
+      "item": "Torva platebody (damaged)",
+      "oneIn": 234.54545454545453,
+      "page": "Nex",
+      "kills": "solo"
+    },
+    {
+      "npc": "Nex",
+      "item": "Torva platelegs (damaged)",
+      "oneIn": 234.54545454545453,
+      "page": "Nex",
+      "kills": "solo"
+    },
+    {
+      "npc": "Nex",
+      "item": "Zaryte vambraces",
+      "oneIn": 156.36363636363635,
+      "page": "Nex",
       "kills": "solo"
     },
     {
@@ -2243,6 +2296,17 @@
     },
     {
       "npc": "The Leviathan",
+      "item": "Venator vestige progress",
+      "oneIn": 256,
+      "page": "The Leviathan",
+      "pieces": [
+        "Gold ring",
+        "Venator vestige"
+      ],
+      "level": 798
+    },
+    {
+      "npc": "The Leviathan",
       "item": "Virtus mask",
       "oneIn": 2304,
       "page": "The Leviathan",
@@ -2338,6 +2402,13 @@
     },
     {
       "npc": "The Nightmare",
+      "item": "Jar of Dreams",
+      "oneIn": 1900,
+      "page": "The Nightmare",
+      "kills": "solo"
+    },
+    {
+      "npc": "The Nightmare",
       "item": "Little Nightmare",
       "oneIn": 800,
       "page": "The Nightmare",
@@ -2357,6 +2428,17 @@
       "oneIn": 960,
       "page": "The Nightmare",
       "kills": "solo"
+    },
+    {
+      "npc": "The Whisperer",
+      "item": "Bellator vestige progress",
+      "oneIn": 170.66666666666666,
+      "page": "The Whisperer",
+      "pieces": [
+        "Gold ring",
+        "Bellator vestige"
+      ],
+      "level": 791
     },
     {
       "npc": "The Whisperer",
@@ -2734,6 +2816,17 @@
     },
     {
       "npc": "Vardorvis",
+      "item": "Ultor vestige progress",
+      "oneIn": 362.6666666666667,
+      "page": "Vardorvis",
+      "pieces": [
+        "Gold ring",
+        "Ultor vestige"
+      ],
+      "level": 784
+    },
+    {
+      "npc": "Vardorvis",
       "item": "Virtus mask",
       "oneIn": 3264,
       "page": "Vardorvis",
@@ -2758,6 +2851,18 @@
       "item": "Executioner's axe head",
       "oneIn": 362.6666666666667,
       "page": "Vardorvis",
+      "level": 1136,
+      "game": "Vardorvis"
+    },
+    {
+      "npc": "Vardorvis (awakened)",
+      "item": "Ultor vestige progress",
+      "oneIn": 120.8888888888889,
+      "page": "Vardorvis",
+      "pieces": [
+        "Gold ring",
+        "Ultor vestige"
+      ],
       "level": 1136,
       "game": "Vardorvis"
     },
@@ -3078,6 +3183,28 @@
       "item": "Zamorakian spear",
       "oneIn": 5376.333333333333,
       "page": "Zakl'n Gritch"
+    },
+    {
+      "npc": "Zalcano",
+      "item": "Crystal tool seed",
+      "oneIn": 205.12820512820514,
+      "page": "Zalcano",
+      "kills": "solo"
+    },
+    {
+      "npc": "Zalcano",
+      "item": "Smolcano",
+      "oneIn": 2250,
+      "page": "Zalcano",
+      "pet": true,
+      "kills": "solo"
+    },
+    {
+      "npc": "Zalcano",
+      "item": "Uncut onyx",
+      "oneIn": 8000,
+      "page": "Zalcano",
+      "kills": "solo"
     },
     {
       "npc": "Zogre",
