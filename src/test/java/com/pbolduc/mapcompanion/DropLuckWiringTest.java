@@ -26,13 +26,22 @@
 package com.pbolduc.mapcompanion;
 
 import com.google.gson.Gson;
+import java.lang.reflect.Proxy;
 import java.util.Collections;
 import net.runelite.api.ChatMessageType;
+import net.runelite.api.Hitsplat;
+import net.runelite.api.HitsplatID;
+import net.runelite.api.NPC;
 import net.runelite.api.events.ChatMessage;
+import net.runelite.api.events.HitsplatApplied;
+import net.runelite.api.gameval.VarbitID;
 import net.runelite.client.events.ServerNpcLoot;
 import net.runelite.client.game.ItemStack;
+import net.runelite.client.plugins.loottracker.LootReceived;
+import net.runelite.http.api.loottracker.LootRecordType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import org.junit.Test;
 
 /**
@@ -111,5 +120,80 @@ public class DropLuckWiringTest
 		kill("Nex");
 		chat("<col=ff0000>You were the MVP for" + NBSP + "this fight.</col>");
 		assertEquals(0.5, drop("Nex", "Ancient hilt").shareWatched, 1e-9);
+	}
+
+	/** A hitsplat on an NPC, read as the game marks it: the player's own, or another player's. */
+	private void hit(String npc, int type, int amount)
+	{
+		HitsplatApplied event = new HitsplatApplied();
+		event.setActor((NPC) Proxy.newProxyInstance(NPC.class.getClassLoader(), new Class<?>[] {NPC.class},
+			(proxy, method, args) -> "getName".equals(method.getName()) ? npc : null));
+		event.setHitsplat(new Hitsplat()
+		{
+			@Override
+			public int getHitsplatType()
+			{
+				return type;
+			}
+
+			@Override
+			public int getAmount()
+			{
+				return amount;
+			}
+
+			@Override
+			public int getDisappearsOnGameCycle()
+			{
+				return 0;
+			}
+		});
+		plugin.onHitsplatApplied(event);
+	}
+
+	/** Callisto's hits arrive as the game's own types, and a share is read from them in the right order. */
+	@Test
+	public void hitsplatsGiveASharedKillItsShare()
+	{
+		hit("Callisto", HitsplatID.DAMAGE_ME, 30);
+		hit("Callisto", HitsplatID.DAMAGE_OTHER, 70);
+		hit("Callisto", HitsplatID.POISON, 50);
+		kill("Callisto");
+		assertEquals("a poison is nobody's share", 0.3, drop("Callisto", "Claws of Callisto").shareWatched, 1e-9);
+	}
+
+	private void reward(String name, Object metadata)
+	{
+		plugin.onLootReceived(new LootReceived(name, -1, LootRecordType.EVENT,
+			Collections.singletonList(new ItemStack(BONES, 1)), 1, metadata));
+	}
+
+	/** The chest counts only once the game says all six brothers died; five is fewer rolls. */
+	@Test
+	public void aBarrowsChestReadsTheSixBrothersFromTheGame()
+	{
+		int[] brothers = {VarbitID.BARROWS_KILLED_AHRIM, VarbitID.BARROWS_KILLED_DHAROK, VarbitID.BARROWS_KILLED_GUTHAN,
+			VarbitID.BARROWS_KILLED_KARIL, VarbitID.BARROWS_KILLED_TORAG, VarbitID.BARROWS_KILLED_VERAC};
+		for (int i = 0; i < 5; i++)
+		{
+			game.setVarbit(brothers[i], 1);
+		}
+		reward("Barrows", null);
+		assertNull("five brothers", DropLuckView.find(log.monsters(), "Barrows"));
+		game.setVarbit(brothers[5], 1);
+		reward("Barrows", null);
+		assertEquals(1, DropLuckView.find(log.monsters(), "Barrows").kills);
+	}
+
+	/** The Doom's run is counted at the delve the loot tracker's event carries, and not without one. */
+	@Test
+	public void aDoomRunIsCountedAtTheDelveItsEventCarries()
+	{
+		reward("Doom of Mokhaiotl", null);
+		assertNull(DropLuckView.find(log.monsters(), "Doom of Mokhaiotl"));
+		reward("Doom of Mokhaiotl", 3);
+		double per = Math.log1p(-1 / 540.0);
+		assertEquals((Math.log1p(-1 / 2500.0) + Math.log1p(-1 / 2000.0)) / per,
+			drop("Doom of Mokhaiotl", "Mokhaiotl cloth").shareWatched, 1e-9);
 	}
 }
