@@ -23,7 +23,8 @@ Pick a place, a search result or a task, and the sidebar lists the way there ste
 teleport to use, which ride to take, where to walk. A teleport step shows the item or spell, and
 outlines it in your inventory or spellbook while you follow; a walk shows a boot and a sail a boat. Each step gets a numbered pin on the
 game's world map, and you can right-click that map and choose **Route here** to go anywhere.
-When there is more than one way, each is a chip above the steps: press one to take it instead.
+When there is more than one way, each is a chip above the steps with its teleport's picture and the
+name osrs-map.com gives it: press one to take it instead. A Reroute before you set off keeps it.
 
 Press **Follow** to keep the step you are on in a small box over the game. **Reroute** plans
 again from where you stand. Share **Your account** and routes use only the quests,
