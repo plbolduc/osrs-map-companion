@@ -394,11 +394,18 @@ class CompanionLoop
 			lootLog.flush();
 			relay.reset();
 			stopStream();
-			/* Cleared before the pins go, so a stream frame's queued sync cannot redraw one. */
+		}
+		if (another)
+		{
+			/*
+			 * Cleared before the pins go, so a stream frame's queued sync cannot redraw one. A switch
+			 * too: Route beside a death or a clue was the last character's, ranked from its teleports,
+			 * and the next one's first reply brings back whatever the map sends the group.
+			 */
 			destinationState.clear();
 			destinationRoute.clear();
 		}
-		/* What is drawn of the session goes here: the boats' pins, and with the lifetime the route's marks. */
+		/* What is drawn of the session goes here: the boats' pins, and with another character the route's marks. */
 		surface.ended(end);
 		if (off)
 		{

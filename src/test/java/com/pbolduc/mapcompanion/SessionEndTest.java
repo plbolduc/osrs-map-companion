@@ -44,6 +44,7 @@ import net.runelite.api.events.ActorDeath;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.client.events.RuneScapeProfileChanged;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -134,6 +135,34 @@ public class SessionEndTest
 
 		assertEquals(except("FarmingObserver", "DiaryReader", "DeathWatcher"), unsettled());
 		assertNull("a death is one character's", deaths.snapshot(System.currentTimeMillis()));
+	}
+
+	/**
+	 * A way pressed beside one character's death is ranked from that character's teleports and leads
+	 * to that character's gravestone, so the next character on the same client does not inherit it.
+	 * A logout keeps it: a relog wants the way back.
+	 */
+	@Test
+	public void anotherCharacterTakesThePressedDestinationAndALogoutKeepsIt() throws Exception
+	{
+		plugin.loop.destinationState.selectLocal(gravestone());
+		sidebar.game.logout();
+		plugin.onGameStateChanged(state(GameState.LOGIN_SCREEN));
+		assertNotNull("a relog wants the way back", plugin.loop.destinationState.getDestination());
+
+		plugin.onRuneScapeProfileChanged(new RuneScapeProfileChanged(null, "a"));
+		plugin.onRuneScapeProfileChanged(new RuneScapeProfileChanged("a", "b"));
+		assertNull(plugin.loop.destinationState.getDestination());
+		assertFalse(plugin.loop.destinationState.hasLocalDestination());
+	}
+
+	private static RelayResponse.Destination gravestone()
+	{
+		RelayResponse.Destination grave = new RelayResponse.Destination();
+		grave.x = 2271;
+		grave.y = 5345;
+		grave.name = "Where you died";
+		return grave;
 	}
 
 	/** Turned off: the next lifetime may be anybody's, so the death goes here too. */

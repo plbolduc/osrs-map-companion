@@ -77,7 +77,10 @@ public class CompletionAnnouncementTest
 		plugin.loop.milestones = new MilestoneOutbox();
 		plugin.loop.pairing = new Pairing(store, new Gson());
 		plugin.loop.destinationState = new DestinationState(new Gson());
+		plugin.loop.destinationRoute = new DestinationRoute();
 		plugin.destinationMarker = new TestDestinationMarker();
+		/* Another character takes the last one's way down, the arrow with it. */
+		plugin.destinationArrow = new DestinationArrow(game.client(), config, plugin.loop.destinationState, plugin.loop.destinationRoute);
 		plugin.groupMarkers = new GroupMarkers(null, null);
 		plugin.boatPins = new BoatPins(null, null);
 		plugin.loop.rewardObserver = new RewardObserver(definitions.client, catalog, catalog::contains, () -> 1000L);
