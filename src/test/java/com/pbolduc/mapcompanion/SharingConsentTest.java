@@ -35,6 +35,8 @@ import java.util.HashSet;
 import net.runelite.api.Client;
 import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.Notification;
+import net.runelite.client.events.ServerNpcLoot;
+import net.runelite.client.game.ItemStack;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -170,12 +172,48 @@ public class SharingConsentTest
 		assertTrue(manifest.group(1), manifest.group(1).contains("IP address") && manifest.group(1).contains("third-party"));
 	}
 
+	/**
+	 * Pets ride on Notable drops and levels with Include pet rewards, as their announcements do, so
+	 * Observed kills and drops alone sends no pet row. The map hears the list is not whole and
+	 * abstains on the pet, every other row still going as a row; whether a pet was had is not told.
+	 */
+	@Test
+	public void aPetCountGoesOnlyWherePetsAreShared()
+	{
+		Fixture fixture = new Fixture();
+		fixture.config.set("shareLoot", true);
+		fixture.game.nameItem(526, "Bones");
+		fixture.lootLog.record(new ServerNpcLoot(fixture.game.npc("Cerberus"), Arrays.asList(new ItemStack(526, 1))));
+		fixture.lootLog.onPetMessage(fixture.game.client().getTickCount());
+
+		JsonObject cerberus = fixture.sent().getAsJsonObject("loot").getAsJsonArray("npcs").get(0).getAsJsonObject();
+		assertEquals("Cerberus", cerberus.get("npc").getAsString());
+		assertFalse(cerberus.get("dropsComplete").getAsBoolean());
+		assertFalse(drops(cerberus).contains("Hellpuppy"));
+		assertTrue("an untouched row goes as a row, so the map can still read it", drops(cerberus).contains("Eternal crystal"));
+
+		fixture.config.set(MapCompanionConfig.KEY_SHARE_MILESTONES, true);
+		fixture.config.set(MapCompanionConfig.KEY_SHARE_PETS, true);
+		cerberus = fixture.sent().getAsJsonObject("loot").getAsJsonArray("npcs").get(0).getAsJsonObject();
+		assertTrue(cerberus.get("dropsComplete").getAsBoolean());
+		assertTrue(drops(cerberus).contains("Hellpuppy"));
+		assertFalse("and the defaults go back to being left out", drops(cerberus).contains("Eternal crystal"));
+	}
+
+	private static java.util.List<String> drops(JsonObject npc)
+	{
+		java.util.List<String> items = new java.util.ArrayList<>();
+		npc.getAsJsonArray("drops").forEach(drop -> items.add(drop.getAsJsonObject().get("item").getAsString()));
+		return items;
+	}
+
 	private static final class Fixture
 	{
 		private final HarnessGame game = new HarnessGame();
 		private final HarnessStore store = new HarnessStore();
 		private final HarnessConfig config = new HarnessConfig(store, "http://localhost");
 		private final Gson gson = new Gson();
+		private final LootLog lootLog = new LootLog(game.client(), store, gson);
 		private final SnapshotBuilder builder;
 
 		private Fixture()
@@ -192,7 +230,7 @@ public class SharingConsentTest
 					bind(MapCompanionConfig.class).toInstance(config);
 					bind(ConfigStore.class).toInstance(store);
 					bind(MemberIdentity.class).toInstance(new MemberIdentity(store));
-					bind(LootLog.class).toInstance(new LootLog(game.client(), store, gson));
+					bind(LootLog.class).toInstance(lootLog);
 					bind(FarmingObserver.class).toInstance(new FarmingObserver(game.client(), store, gson));
 					bind(BirdhouseReader.class).toInstance(new BirdhouseReader(key -> null));
 				}

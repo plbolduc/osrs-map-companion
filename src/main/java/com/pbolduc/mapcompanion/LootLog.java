@@ -1242,9 +1242,21 @@ public class LootLog
 		}
 	}
 
-	/** What goes on the wire, or null when there is nothing worth sending. */
+	/** The same, pets included: for tests about everything else. */
 	@Nullable
-	public synchronized CompanionSnapshot.Loot snapshot()
+	synchronized CompanionSnapshot.Loot snapshot()
+	{
+		return snapshot(true);
+	}
+
+	/**
+	 * What goes on the wire, or null when there is nothing worth sending.
+	 *
+	 * @param pets whether pets go out: they ride on Notable drops and levels and Include pet rewards,
+	 *     as the announcements do ({@link SharingSummary}), not on this log's own switch alone
+	 */
+	@Nullable
+	public synchronized CompanionSnapshot.Loot snapshot(boolean pets)
 	{
 		if (!onOrdinaryWorld())
 		{
@@ -1286,7 +1298,14 @@ public class LootLog
 			npc.npc = entry.getKey();
 			npc.kills = tally.kills;
 			npc.lastKillMsAgo = tally.lastKillMs > 0 ? Math.max(0L, now - tally.lastKillMs) : null;
-			npc.dropsComplete = true;
+			/*
+			 * A pet the player has not chosen to share stays here, and so does whether there was one:
+			 * every monster's pet row is left out alike, had or not. The list is
+			 * then not whole, which the map must hear so it abstains on the pet rather than reading it
+			 * as never had, and every other row goes as a row so that only the pet is unknown there.
+			 */
+			boolean withheld = !pets && watched.stream().anyMatch(rate -> Boolean.TRUE.equals(rate.pet));
+			npc.dropsComplete = !withheld;
 			npc.drops = new ArrayList<>();
 			/* Sent even for no rated drops: a map whose table has some must learn this one had none. */
 			npc.ratedKey = ratedKey(watched);
@@ -1296,6 +1315,10 @@ public class LootLog
 				Integer last = tally.killsAtLast.get(item);
 				Integer since = tally.trackedSince.get(item);
 				Rate rated = rateFor(watched, item);
+				if (withheld && rated != null && Boolean.TRUE.equals(rated.pet))
+				{
+					continue;
+				}
 				Integer boostedSinceLast = rated == null || rated.boost == null ? null
 					: boosted(tally, rated) - tally.boostedAtLast.getOrDefault(item, 0);
 				Integer boostedWatched = rated == null || rated.boost == null ? null
@@ -1315,7 +1338,7 @@ public class LootLog
 				 * travelled. A baseline other than zero is a real fact about when tracking began, and
 				 * always travels.
 				 */
-				if (obtained == 0 && last == null && since != null && since == 0
+				if (!withheld && obtained == 0 && last == null && since != null && since == 0
 					&& (boostedWatched == null || boostedWatched == 0) && sharedWatched[0] == 0)
 				{
 					continue;

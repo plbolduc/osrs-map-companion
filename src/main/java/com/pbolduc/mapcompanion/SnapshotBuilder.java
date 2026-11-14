@@ -287,11 +287,14 @@ public class SnapshotBuilder
 		/*
 		 * The tallies are gathered whether or not they are shared — the log is the player's own and
 		 * lives on their disk either way. This toggle decides only whether the totals leave the
-		 * machine, which is the distinction the setting text makes too.
+		 * machine, which is the distinction the setting text makes too. A pet's row goes only where
+		 * pets do, on Notable drops and levels with Include pet rewards: that is the switch a player
+		 * turns off to keep a pet to themselves.
 		 */
 		if (settings.on("shareLoot"))
 		{
-			snapshot.loot = lootLog.snapshot();
+			snapshot.loot = lootLog.snapshot(settings.on(MapCompanionConfig.KEY_SHARE_MILESTONES)
+				&& settings.on(MapCompanionConfig.KEY_SHARE_PETS));
 		}
 
 		/*
