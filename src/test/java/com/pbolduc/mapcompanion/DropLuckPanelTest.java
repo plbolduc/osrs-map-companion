@@ -329,6 +329,23 @@ public class DropLuckPanelTest
 	}
 
 	/**
+	 * The list's first row names the list alone. The sidebar heads the section "Drop luck" over the
+	 * list, as it does over every card whose first row does not say it (namesItself), and the row said
+	 * "Drop luck · your monsters" under it, the section's name twice.
+	 */
+	@Test
+	public void theListSaysDropLuckOnce()
+	{
+		kill("Abyssal demon", 995);
+		panel.refresh();
+		assertTrue(words(), SidebarWords.press(panel, "All monsters ›"));
+		assertFalse(panel.namesItself());
+		String list = words();
+		assertTrue(list, list.contains("Back › | Your monsters | Close"));
+		assertFalse(list, list.contains("Drop luck"));
+	}
+
+	/**
 	 * Any unique's picture is four of its drops at half size, across and then down. With two rated
 	 * drops, the Lizardman shaman's, a grid with its rows set gave them one column, one over the other.
 	 */
