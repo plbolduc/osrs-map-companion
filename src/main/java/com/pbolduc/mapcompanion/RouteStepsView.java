@@ -101,7 +101,11 @@ final class RouteStepsView extends JPanel
 	/** Between two chips of the strip, and under each of its rows. */
 	private static final int CHIP_GAP = 4;
 	private static final String BEST = " · best";
-	private static final Color DONE = ColorScheme.MEDIUM_GRAY_COLOR;
+	/**
+	 * A step behind the player, and a run's stop behind it: dimmed, but read at 4.5:1 on the card,
+	 * as Drop luck's quiet words are. RuneLite's MEDIUM_GRAY was 2:1, and its Done and Charted barely read.
+	 */
+	static final Color DONE = new Color(0x8a8a8a);
 	private static final Color AHEAD = ColorScheme.LIGHT_GRAY_COLOR;
 	/** An unmet gate, in the Slayer list's colour for one: the sidebar's refusal pink. */
 	private static final Color UNMET = REFUSED;
@@ -405,7 +409,7 @@ final class RouteStepsView extends JPanel
 		chip.setLayout(new FlowLayout(FlowLayout.CENTER, 3, 0));
 		chip.setContentAreaFilled(on);
 		chip.setBackground(ColorScheme.BRAND_ORANGE);
-		chip.setBorder(new CompoundBorder(new LineBorder(on ? ColorScheme.BRAND_ORANGE : option.blocked ? ColorScheme.DARK_GRAY_COLOR : DONE), new EmptyBorder(2, 1, 2, 2)));
+		chip.setBorder(new CompoundBorder(new LineBorder(on ? ColorScheme.BRAND_ORANGE : option.blocked ? ColorScheme.DARK_GRAY_COLOR : ColorScheme.MEDIUM_GRAY_COLOR), new EmptyBorder(2, 1, 2, 2)));
 		RouteStep shows = firstPictured(option.steps);
 		/* A voyage is its boat, though it starts with the walk to it: a boot would say it is a walk. */
 		int kind = shows != null || option.steps.isEmpty() ? 0

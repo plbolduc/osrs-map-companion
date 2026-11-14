@@ -145,7 +145,9 @@ public class RouteStepsViewTest
 		/* A step behind is its title alone, so the step being walked is the first bright line. */
 		assertEquals("Lumbridge Home Teleport | Walk | Lumbridge Castle | Docking point | 52 tiles | 1"
 			+ " | Lumbridge Home Teleport | 2 | Walk 12 tiles to the bank", shown());
-		assertEquals(ColorScheme.MEDIUM_GRAY_COLOR, label("1").getForeground());
+		/* Dimmed, but read: RuneLite's MEDIUM_GRAY was 2:1 on the card, and a struck stop's Done barely read. */
+		assertEquals(RouteStepsView.DONE, label("1").getForeground());
+		assertTrue(contrast(RouteStepsView.DONE, ColorScheme.DARKER_GRAY_COLOR) >= 4.5);
 		assertEquals(MapPin.AMBER, label("2").getForeground());
 		List<JLabel> places = named("route.step.picture");
 		assertFalse("the passed teleport's picture fades, as its pin does", places.get(0).isEnabled());
@@ -861,5 +863,23 @@ public class RouteStepsViewTest
 		assertTrue("a walk still ahead", RouteStepsView.walkLeft(Arrays.asList(sail, walk), 0));
 		assertTrue("the walk you are on", RouteStepsView.walkLeft(Arrays.asList(sail, walk), 1));
 		assertFalse("a walk already behind you", RouteStepsView.walkLeft(Arrays.asList(walk, sail), 1));
+	}
+
+	/** WCAG's contrast ratio, as DropLuckPanelTest measures its quiet words. */
+	private static double contrast(Color a, Color b)
+	{
+		double x = luminance(a);
+		double y = luminance(b);
+		return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+	}
+
+	private static double luminance(Color c)
+	{
+		double[] rgb = {c.getRed() / 255.0, c.getGreen() / 255.0, c.getBlue() / 255.0};
+		for (int i = 0; i < 3; i++)
+		{
+			rgb[i] = rgb[i] <= 0.03928 ? rgb[i] / 12.92 : Math.pow((rgb[i] + 0.055) / 1.055, 2.4);
+		}
+		return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
 	}
 }
