@@ -130,8 +130,8 @@ public class DiaryTierTest
 	{
 		java.util.Map<Integer, Integer> varbits = new java.util.HashMap<>();
 		/* Kourend & Kebos: medium and hard finished, easy not. */
-		varbits.put(VarbitIds.DIARY_KOUREND[1], 1);
-		varbits.put(VarbitIds.DIARY_KOUREND[2], 1);
+		varbits.put(DiaryReader.completionOf("Kourend & Kebos")[1], 1);
+		varbits.put(DiaryReader.completionOf("Kourend & Kebos")[2], 1);
 		net.runelite.api.Client client = (net.runelite.api.Client) java.lang.reflect.Proxy.newProxyInstance(
 			net.runelite.api.Client.class.getClassLoader(), new Class<?>[] {net.runelite.api.Client.class},
 			(proxy, method, args) ->

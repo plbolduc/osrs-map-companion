@@ -1,0 +1,24 @@
+# The twelve achievement diary regions, one a line: the name the game's Achievement Diary tab gives it
+# (the join to the map's lib/diaries.ts, so spelled exactly as there), then tab-separated the four
+# completion varbits, the four reward varbits, and the value each completion varbit holds when done,
+# all in easy, medium, hard, elite order. Kept here rather than in Java so the Hub's size count leaves
+# it out; VarbitIdsTest holds every number to RuneLite's own constants.
+#
+# Completion is from net.runelite.api.Varbits.DIARY_*, which is where lib/diaries.ts took its copy.
+# Rewards are a separate flag, gameval.VarbitID.<REGION>_<TIER>_REWARD: finishing the tasks is not
+# taking the cloak, and only the cloak's teleport works. Karamja's three lower tiers predate the rest:
+# ATJUN_EASY_DONE, ATJUN_MED_DONE and ATJUN_HARD_DONE store completion as 2 (ATJUN_*_REWARD for
+# rewards), and its elite is the modern flag, done at 1. DiaryReader says why a Karamja 1 is unknown.
+
+Ardougne	4458,4459,4460,4461	4499,4500,4501,4502	1,1,1,1
+Desert	4483,4484,4485,4486	4523,4524,4525,4526	1,1,1,1
+Falador	4462,4463,4464,4465	4503,4504,4505,4506	1,1,1,1
+Fremennik	4491,4492,4493,4494	4531,4532,4533,4534	1,1,1,1
+Kandarin	4475,4476,4477,4478	4515,4516,4517,4518	1,1,1,1
+Karamja	3578,3599,3611,4566	3577,3598,3610,4567	2,2,2,1
+Kourend & Kebos	7925,7926,7927,7928	7929,7930,7931,7932	1,1,1,1
+Lumbridge & Draynor	4495,4496,4497,4498	4535,4536,4537,4538	1,1,1,1
+Morytania	4487,4488,4489,4490	4527,4528,4529,4530	1,1,1,1
+Varrock	4479,4480,4481,4482	4519,4520,4521,4522	1,1,1,1
+Western Provinces	4471,4472,4473,4474	4511,4512,4513,4514	1,1,1,1
+Wilderness	4466,4467,4468,4469	4507,4508,4509,4510	1,1,1,1

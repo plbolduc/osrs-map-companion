@@ -88,45 +88,45 @@ public class VarbitIdsTest
 	{
 		assertArrayEquals(tiers(
 							  VarbitID.ARDOUGNE_DIARY_EASY_COMPLETE, VarbitID.ARDOUGNE_DIARY_MEDIUM_COMPLETE,
-							  VarbitID.ARDOUGNE_DIARY_HARD_COMPLETE, VarbitID.ARDOUGNE_DIARY_ELITE_COMPLETE), VarbitIds.DIARY_ARDOUGNE);
+							  VarbitID.ARDOUGNE_DIARY_HARD_COMPLETE, VarbitID.ARDOUGNE_DIARY_ELITE_COMPLETE), DiaryReader.completionOf("Ardougne"));
 		assertArrayEquals(tiers(
 							  VarbitID.DESERT_DIARY_EASY_COMPLETE, VarbitID.DESERT_DIARY_MEDIUM_COMPLETE,
-							  VarbitID.DESERT_DIARY_HARD_COMPLETE, VarbitID.DESERT_DIARY_ELITE_COMPLETE), VarbitIds.DIARY_DESERT);
+							  VarbitID.DESERT_DIARY_HARD_COMPLETE, VarbitID.DESERT_DIARY_ELITE_COMPLETE), DiaryReader.completionOf("Desert"));
 		assertArrayEquals(tiers(
 							  VarbitID.FALADOR_DIARY_EASY_COMPLETE, VarbitID.FALADOR_DIARY_MEDIUM_COMPLETE,
-							  VarbitID.FALADOR_DIARY_HARD_COMPLETE, VarbitID.FALADOR_DIARY_ELITE_COMPLETE), VarbitIds.DIARY_FALADOR);
+							  VarbitID.FALADOR_DIARY_HARD_COMPLETE, VarbitID.FALADOR_DIARY_ELITE_COMPLETE), DiaryReader.completionOf("Falador"));
 		assertArrayEquals(tiers(
 							  VarbitID.FREMENNIK_DIARY_EASY_COMPLETE, VarbitID.FREMENNIK_DIARY_MEDIUM_COMPLETE,
 							  VarbitID.FREMENNIK_DIARY_HARD_COMPLETE, VarbitID.FREMENNIK_DIARY_ELITE_COMPLETE),
-						  VarbitIds.DIARY_FREMENNIK);
+						  DiaryReader.completionOf("Fremennik"));
 		assertArrayEquals(tiers(
 							  VarbitID.KANDARIN_DIARY_EASY_COMPLETE, VarbitID.KANDARIN_DIARY_MEDIUM_COMPLETE,
-							  VarbitID.KANDARIN_DIARY_HARD_COMPLETE, VarbitID.KANDARIN_DIARY_ELITE_COMPLETE), VarbitIds.DIARY_KANDARIN);
+							  VarbitID.KANDARIN_DIARY_HARD_COMPLETE, VarbitID.KANDARIN_DIARY_ELITE_COMPLETE), DiaryReader.completionOf("Kandarin"));
 		/** Karamja's three older flags are {@code ATJUN_*_DONE}; only the elite one is modern. */
 		assertArrayEquals(tiers(
 							  VarbitID.ATJUN_EASY_DONE, VarbitID.ATJUN_MED_DONE,
-							  VarbitID.ATJUN_HARD_DONE, VarbitID.KARAMJA_DIARY_ELITE_COMPLETE), VarbitIds.DIARY_KARAMJA);
+							  VarbitID.ATJUN_HARD_DONE, VarbitID.KARAMJA_DIARY_ELITE_COMPLETE), DiaryReader.completionOf("Karamja"));
 		assertArrayEquals(tiers(
 							  VarbitID.KOUREND_DIARY_EASY_COMPLETE, VarbitID.KOUREND_DIARY_MEDIUM_COMPLETE,
-							  VarbitID.KOUREND_DIARY_HARD_COMPLETE, VarbitID.KOUREND_DIARY_ELITE_COMPLETE), VarbitIds.DIARY_KOUREND);
+							  VarbitID.KOUREND_DIARY_HARD_COMPLETE, VarbitID.KOUREND_DIARY_ELITE_COMPLETE), DiaryReader.completionOf("Kourend & Kebos"));
 		assertArrayEquals(tiers(
 							  VarbitID.LUMBRIDGE_DIARY_EASY_COMPLETE, VarbitID.LUMBRIDGE_DIARY_MEDIUM_COMPLETE,
 							  VarbitID.LUMBRIDGE_DIARY_HARD_COMPLETE, VarbitID.LUMBRIDGE_DIARY_ELITE_COMPLETE),
-						  VarbitIds.DIARY_LUMBRIDGE);
+						  DiaryReader.completionOf("Lumbridge & Draynor"));
 		assertArrayEquals(tiers(
 							  VarbitID.MORYTANIA_DIARY_EASY_COMPLETE, VarbitID.MORYTANIA_DIARY_MEDIUM_COMPLETE,
 							  VarbitID.MORYTANIA_DIARY_HARD_COMPLETE, VarbitID.MORYTANIA_DIARY_ELITE_COMPLETE),
-						  VarbitIds.DIARY_MORYTANIA);
+						  DiaryReader.completionOf("Morytania"));
 		assertArrayEquals(tiers(
 							  VarbitID.VARROCK_DIARY_EASY_COMPLETE, VarbitID.VARROCK_DIARY_MEDIUM_COMPLETE,
-							  VarbitID.VARROCK_DIARY_HARD_COMPLETE, VarbitID.VARROCK_DIARY_ELITE_COMPLETE), VarbitIds.DIARY_VARROCK);
+							  VarbitID.VARROCK_DIARY_HARD_COMPLETE, VarbitID.VARROCK_DIARY_ELITE_COMPLETE), DiaryReader.completionOf("Varrock"));
 		assertArrayEquals(tiers(
 							  VarbitID.WESTERN_DIARY_EASY_COMPLETE, VarbitID.WESTERN_DIARY_MEDIUM_COMPLETE,
-							  VarbitID.WESTERN_DIARY_HARD_COMPLETE, VarbitID.WESTERN_DIARY_ELITE_COMPLETE), VarbitIds.DIARY_WESTERN);
+							  VarbitID.WESTERN_DIARY_HARD_COMPLETE, VarbitID.WESTERN_DIARY_ELITE_COMPLETE), DiaryReader.completionOf("Western Provinces"));
 		assertArrayEquals(tiers(
 							  VarbitID.WILDERNESS_DIARY_EASY_COMPLETE, VarbitID.WILDERNESS_DIARY_MEDIUM_COMPLETE,
 							  VarbitID.WILDERNESS_DIARY_HARD_COMPLETE, VarbitID.WILDERNESS_DIARY_ELITE_COMPLETE),
-						  VarbitIds.DIARY_WILDERNESS);
+						  DiaryReader.completionOf("Wilderness"));
 	}
 
 	@Test
@@ -135,51 +135,51 @@ public class VarbitIdsTest
 		assertArrayEquals(tiers(
 							  VarbitID.ARDOUGNE_EASY_REWARD, VarbitID.ARDOUGNE_MEDIUM_REWARD,
 							  VarbitID.ARDOUGNE_HARD_REWARD, VarbitID.ARDOUGNE_ELITE_REWARD),
-						  VarbitIds.DIARY_ARDOUGNE_REWARDS);
+						  DiaryReader.rewardsOf("Ardougne"));
 		assertArrayEquals(tiers(
 							  VarbitID.DESERT_EASY_REWARD, VarbitID.DESERT_MEDIUM_REWARD,
 							  VarbitID.DESERT_HARD_REWARD, VarbitID.DESERT_ELITE_REWARD),
-						  VarbitIds.DIARY_DESERT_REWARDS);
+						  DiaryReader.rewardsOf("Desert"));
 		assertArrayEquals(tiers(
 							  VarbitID.FALADOR_EASY_REWARD, VarbitID.FALADOR_MEDIUM_REWARD,
 							  VarbitID.FALADOR_HARD_REWARD, VarbitID.FALADOR_ELITE_REWARD),
-						  VarbitIds.DIARY_FALADOR_REWARDS);
+						  DiaryReader.rewardsOf("Falador"));
 		assertArrayEquals(tiers(
 							  VarbitID.FREMENNIK_EASY_REWARD, VarbitID.FREMENNIK_MEDIUM_REWARD,
 							  VarbitID.FREMENNIK_HARD_REWARD, VarbitID.FREMENNIK_ELITE_REWARD),
-						  VarbitIds.DIARY_FREMENNIK_REWARDS);
+						  DiaryReader.rewardsOf("Fremennik"));
 		assertArrayEquals(tiers(
 							  VarbitID.KANDARIN_EASY_REWARD, VarbitID.KANDARIN_MEDIUM_REWARD,
 							  VarbitID.KANDARIN_HARD_REWARD, VarbitID.KANDARIN_ELITE_REWARD),
-						  VarbitIds.DIARY_KANDARIN_REWARDS);
+						  DiaryReader.rewardsOf("Kandarin"));
 		assertArrayEquals(tiers(
 							  VarbitID.ATJUN_EASY_REWARD, VarbitID.ATJUN_MED_REWARD,
 							  VarbitID.ATJUN_HARD_REWARD, VarbitID.KARAMJA_ELITE_REWARD),
-						  VarbitIds.DIARY_KARAMJA_REWARDS);
+						  DiaryReader.rewardsOf("Karamja"));
 		assertArrayEquals(tiers(
 							  VarbitID.KOUREND_EASY_REWARD, VarbitID.KOUREND_MEDIUM_REWARD,
 							  VarbitID.KOUREND_HARD_REWARD, VarbitID.KOUREND_ELITE_REWARD),
-						  VarbitIds.DIARY_KOUREND_REWARDS);
+						  DiaryReader.rewardsOf("Kourend & Kebos"));
 		assertArrayEquals(tiers(
 							  VarbitID.LUMBRIDGE_EASY_REWARD, VarbitID.LUMBRIDGE_MEDIUM_REWARD,
 							  VarbitID.LUMBRIDGE_HARD_REWARD, VarbitID.LUMBRIDGE_ELITE_REWARD),
-						  VarbitIds.DIARY_LUMBRIDGE_REWARDS);
+						  DiaryReader.rewardsOf("Lumbridge & Draynor"));
 		assertArrayEquals(tiers(
 							  VarbitID.MORYTANIA_EASY_REWARD, VarbitID.MORYTANIA_MEDIUM_REWARD,
 							  VarbitID.MORYTANIA_HARD_REWARD, VarbitID.MORYTANIA_ELITE_REWARD),
-						  VarbitIds.DIARY_MORYTANIA_REWARDS);
+						  DiaryReader.rewardsOf("Morytania"));
 		assertArrayEquals(tiers(
 							  VarbitID.VARROCK_EASY_REWARD, VarbitID.VARROCK_MEDIUM_REWARD,
 							  VarbitID.VARROCK_HARD_REWARD, VarbitID.VARROCK_ELITE_REWARD),
-						  VarbitIds.DIARY_VARROCK_REWARDS);
+						  DiaryReader.rewardsOf("Varrock"));
 		assertArrayEquals(tiers(
 							  VarbitID.WESTERN_EASY_REWARD, VarbitID.WESTERN_MEDIUM_REWARD,
 							  VarbitID.WESTERN_HARD_REWARD, VarbitID.WESTERN_ELITE_REWARD),
-						  VarbitIds.DIARY_WESTERN_REWARDS);
+						  DiaryReader.rewardsOf("Western Provinces"));
 		assertArrayEquals(tiers(
 							  VarbitID.WILDERNESS_EASY_REWARD, VarbitID.WILDERNESS_MEDIUM_REWARD,
 							  VarbitID.WILDERNESS_HARD_REWARD, VarbitID.WILDERNESS_ELITE_REWARD),
-						  VarbitIds.DIARY_WILDERNESS_REWARDS);
+						  DiaryReader.rewardsOf("Wilderness"));
 	}
 
 	private static int[] tiers(int easy, int medium, int hard, int elite)

@@ -72,58 +72,6 @@ final class VarbitIds
 	static final int FARMING_TRANSMIT_G = 7905;
 	static final int FARMING_TRANSMIT_K = 7909;
 
-	/**
-	 * Achievement diary completion, four tiers per region in easy, medium, hard, elite order.
-	 *
-	 * <p>From {@code net.runelite.api.Varbits.DIARY_*}, which is also where the map's own
-	 * {@code lib/diaries.ts} took its copy — the two tables have to agree, or a diary read here
-	 * would be looked up there under a different number and silently never join.
-	 *
-	 * <p>Karamja is the odd one out and stays that way: its three lower tiers predate the rest and
-	 * are named {@code ATJUN_*_DONE} in {@code gameval.VarbitID}, which is why they do not follow
-	 * the four-in-a-row pattern every other region does. {@link DiaryReader} also reads their
-	 * values differently, and says there why.
-	 */
-	static final int[] DIARY_ARDOUGNE = {4458, 4459, 4460, 4461};
-	static final int[] DIARY_DESERT = {4483, 4484, 4485, 4486};
-	static final int[] DIARY_FALADOR = {4462, 4463, 4464, 4465};
-	static final int[] DIARY_FREMENNIK = {4491, 4492, 4493, 4494};
-	static final int[] DIARY_KANDARIN = {4475, 4476, 4477, 4478};
-	/** {@code ATJUN_EASY_DONE}, {@code ATJUN_MED_DONE}, {@code ATJUN_HARD_DONE}, then the modern elite flag. */
-	static final int[] DIARY_KARAMJA = {3578, 3599, 3611, 4566};
-	static final int[] DIARY_KOUREND = {7925, 7926, 7927, 7928};
-	static final int[] DIARY_LUMBRIDGE = {4495, 4496, 4497, 4498};
-	static final int[] DIARY_MORYTANIA = {4487, 4488, 4489, 4490};
-	static final int[] DIARY_VARROCK = {4479, 4480, 4481, 4482};
-	static final int[] DIARY_WESTERN = {4471, 4472, 4473, 4474};
-	static final int[] DIARY_WILDERNESS = {4466, 4467, 4468, 4469};
-
-	/**
-	 * Achievement diary <i>rewards</i>, in the same tier order.
-	 *
-	 * <p>A separate flag from completion, and the distinction is the whole reason both are sent:
-	 * finishing the tasks is not the same as having gone to the diary's NPC and taken the cloak,
-	 * and only the second one means the teleport on it actually works. The map ranks routes on
-	 * what a player can use, so guessing one from the other would recommend a teleport nobody
-	 * owns.
-	 *
-	 * <p>From {@code net.runelite.api.gameval.VarbitID.<REGION>_<TIER>_REWARD}, and for Karamja
-	 * from {@code ATJUN_EASY_REWARD}, {@code ATJUN_MED_REWARD}, {@code ATJUN_HARD_REWARD} and
-	 * {@code KARAMJA_ELITE_REWARD}.
-	 */
-	static final int[] DIARY_ARDOUGNE_REWARDS = {4499, 4500, 4501, 4502};
-	static final int[] DIARY_DESERT_REWARDS = {4523, 4524, 4525, 4526};
-	static final int[] DIARY_FALADOR_REWARDS = {4503, 4504, 4505, 4506};
-	static final int[] DIARY_FREMENNIK_REWARDS = {4531, 4532, 4533, 4534};
-	static final int[] DIARY_KANDARIN_REWARDS = {4515, 4516, 4517, 4518};
-	static final int[] DIARY_KARAMJA_REWARDS = {3577, 3598, 3610, 4567};
-	static final int[] DIARY_KOUREND_REWARDS = {7929, 7930, 7931, 7932};
-	static final int[] DIARY_LUMBRIDGE_REWARDS = {4535, 4536, 4537, 4538};
-	static final int[] DIARY_MORYTANIA_REWARDS = {4527, 4528, 4529, 4530};
-	static final int[] DIARY_VARROCK_REWARDS = {4519, 4520, 4521, 4522};
-	static final int[] DIARY_WESTERN_REWARDS = {4511, 4512, 4513, 4514};
-	static final int[] DIARY_WILDERNESS_REWARDS = {4507, 4508, 4509, 4510};
-
 	private VarbitIds()
 	{
 	}
