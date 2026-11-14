@@ -852,6 +852,24 @@
     },
     {
       "npc": "Commander Zilyana",
+      "item": "Godsword shard 1",
+      "oneIn": 762,
+      "page": "Commander Zilyana"
+    },
+    {
+      "npc": "Commander Zilyana",
+      "item": "Godsword shard 2",
+      "oneIn": 762,
+      "page": "Commander Zilyana"
+    },
+    {
+      "npc": "Commander Zilyana",
+      "item": "Godsword shard 3",
+      "oneIn": 762,
+      "page": "Commander Zilyana"
+    },
+    {
+      "npc": "Commander Zilyana",
       "item": "Pet Zilyana",
       "oneIn": 5000,
       "page": "Commander Zilyana",
@@ -861,6 +879,12 @@
       "npc": "Commander Zilyana",
       "item": "Saradomin hilt",
       "oneIn": 508,
+      "page": "Commander Zilyana"
+    },
+    {
+      "npc": "Commander Zilyana",
+      "item": "Saradomin sword",
+      "oneIn": 127,
       "page": "Commander Zilyana"
     },
     {
@@ -879,6 +903,12 @@
       "npc": "Corporeal Beast",
       "item": "Elysian sigil",
       "oneIn": 4095,
+      "page": "Corporeal Beast"
+    },
+    {
+      "npc": "Corporeal Beast",
+      "item": "Holy elixir",
+      "oneIn": 170.66666666666666,
       "page": "Corporeal Beast"
     },
     {
@@ -1207,9 +1237,38 @@
     },
     {
       "npc": "Duke Sucellus (awakened)",
+      "item": "Baron",
+      "oneIn": 2500,
+      "page": "Duke Sucellus",
+      "pet": true,
+      "level": 1099,
+      "game": "Duke Sucellus"
+    },
+    {
+      "npc": "Duke Sucellus (awakened)",
+      "item": "Chromium ingot",
+      "oneIn": 80,
+      "page": "Duke Sucellus",
+      "level": 1099,
+      "game": "Duke Sucellus"
+    },
+    {
+      "npc": "Duke Sucellus (awakened)",
       "item": "Eye of the Duke",
       "oneIn": 240,
       "page": "Duke Sucellus",
+      "level": 1099,
+      "game": "Duke Sucellus"
+    },
+    {
+      "npc": "Duke Sucellus (awakened)",
+      "item": "Magus vestige progress",
+      "oneIn": 80,
+      "page": "Duke Sucellus",
+      "pieces": [
+        "Gold ring",
+        "Magus vestige"
+      ],
       "level": 1099,
       "game": "Duke Sucellus"
     },
@@ -1496,6 +1555,24 @@
     },
     {
       "npc": "General Graardor",
+      "item": "Godsword shard 1",
+      "oneIn": 762,
+      "page": "General Graardor"
+    },
+    {
+      "npc": "General Graardor",
+      "item": "Godsword shard 2",
+      "oneIn": 762,
+      "page": "General Graardor"
+    },
+    {
+      "npc": "General Graardor",
+      "item": "Godsword shard 3",
+      "oneIn": 762,
+      "page": "General Graardor"
+    },
+    {
+      "npc": "General Graardor",
       "item": "Pet General Graardor",
       "oneIn": 5000,
       "page": "General Graardor",
@@ -1741,6 +1818,24 @@
     },
     {
       "npc": "K'ril Tsutsaroth",
+      "item": "Godsword shard 1",
+      "oneIn": 762,
+      "page": "K'ril Tsutsaroth"
+    },
+    {
+      "npc": "K'ril Tsutsaroth",
+      "item": "Godsword shard 2",
+      "oneIn": 762,
+      "page": "K'ril Tsutsaroth"
+    },
+    {
+      "npc": "K'ril Tsutsaroth",
+      "item": "Godsword shard 3",
+      "oneIn": 762,
+      "page": "K'ril Tsutsaroth"
+    },
+    {
+      "npc": "K'ril Tsutsaroth",
       "item": "Pet K'ril Tsutsaroth",
       "oneIn": 5000,
       "page": "K'ril Tsutsaroth",
@@ -1754,8 +1849,20 @@
     },
     {
       "npc": "K'ril Tsutsaroth",
+      "item": "Steam battlestaff",
+      "oneIn": 127,
+      "page": "K'ril Tsutsaroth"
+    },
+    {
+      "npc": "K'ril Tsutsaroth",
       "item": "Zamorak hilt",
       "oneIn": 508,
+      "page": "K'ril Tsutsaroth"
+    },
+    {
+      "npc": "K'ril Tsutsaroth",
+      "item": "Zamorakian spear",
+      "oneIn": 127,
       "page": "K'ril Tsutsaroth"
     },
     {
@@ -1897,6 +2004,24 @@
       "oneIn": 5012.5,
       "page": "Kree'arra",
       "tertiary": true
+    },
+    {
+      "npc": "Kree'arra",
+      "item": "Godsword shard 1",
+      "oneIn": 762,
+      "page": "Kree'arra"
+    },
+    {
+      "npc": "Kree'arra",
+      "item": "Godsword shard 2",
+      "oneIn": 762,
+      "page": "Kree'arra"
+    },
+    {
+      "npc": "Kree'arra",
+      "item": "Godsword shard 3",
+      "oneIn": 762,
+      "page": "Kree'arra"
     },
     {
       "npc": "Kree'arra",
@@ -2767,9 +2892,38 @@
     },
     {
       "npc": "The Leviathan (awakened)",
+      "item": "Chromium ingot",
+      "oneIn": 85.33333333333333,
+      "page": "The Leviathan",
+      "level": 1157,
+      "game": "The Leviathan"
+    },
+    {
+      "npc": "The Leviathan (awakened)",
       "item": "Leviathan's lure",
       "oneIn": 256,
       "page": "The Leviathan",
+      "level": 1157,
+      "game": "The Leviathan"
+    },
+    {
+      "npc": "The Leviathan (awakened)",
+      "item": "Lil'viathan",
+      "oneIn": 2500,
+      "page": "The Leviathan",
+      "pet": true,
+      "level": 1157,
+      "game": "The Leviathan"
+    },
+    {
+      "npc": "The Leviathan (awakened)",
+      "item": "Venator vestige progress",
+      "oneIn": 85.33333333333333,
+      "page": "The Leviathan",
+      "pieces": [
+        "Gold ring",
+        "Venator vestige"
+      ],
       "level": 1157,
       "game": "The Leviathan"
     },
@@ -2925,6 +3079,26 @@
     },
     {
       "npc": "The Whisperer (awakened)",
+      "item": "Bellator vestige progress",
+      "oneIn": 56.888888888888886,
+      "page": "The Whisperer",
+      "pieces": [
+        "Gold ring",
+        "Bellator vestige"
+      ],
+      "level": 1146,
+      "game": "The Whisperer"
+    },
+    {
+      "npc": "The Whisperer (awakened)",
+      "item": "Chromium ingot",
+      "oneIn": 56.888888888888886,
+      "page": "The Whisperer",
+      "level": 1146,
+      "game": "The Whisperer"
+    },
+    {
+      "npc": "The Whisperer (awakened)",
       "item": "Siren's staff",
       "oneIn": 170.66666666666666,
       "page": "The Whisperer",
@@ -2952,6 +3126,15 @@
       "item": "Virtus robe top",
       "oneIn": 512,
       "page": "The Whisperer",
+      "level": 1146,
+      "game": "The Whisperer"
+    },
+    {
+      "npc": "The Whisperer (awakened)",
+      "item": "Wisp",
+      "oneIn": 2000,
+      "page": "The Whisperer",
+      "pet": true,
       "level": 1146,
       "game": "The Whisperer"
     },
@@ -3297,6 +3480,23 @@
     },
     {
       "npc": "Vardorvis (awakened)",
+      "item": "Butch",
+      "oneIn": 3000,
+      "page": "Vardorvis",
+      "pet": true,
+      "level": 1136,
+      "game": "Vardorvis"
+    },
+    {
+      "npc": "Vardorvis (awakened)",
+      "item": "Chromium ingot",
+      "oneIn": 120.8888888888889,
+      "page": "Vardorvis",
+      "level": 1136,
+      "game": "Vardorvis"
+    },
+    {
+      "npc": "Vardorvis (awakened)",
       "item": "Executioner's axe head",
       "oneIn": 362.6666666666667,
       "page": "Vardorvis",
@@ -3449,6 +3649,13 @@
       "item": "Skeletal visage",
       "oneIn": 5000,
       "page": "Vorkath"
+    },
+    {
+      "npc": "Vorkath",
+      "item": "Vorki",
+      "oneIn": 3000,
+      "page": "Vorkath",
+      "pet": true
     },
     {
       "npc": "Vyrewatch",
@@ -3741,6 +3948,13 @@
       "page": "Zulrah",
       "rolls": 2,
       "perRollOneIn": 13107
+    },
+    {
+      "npc": "Zulrah",
+      "item": "Pet Snakeling",
+      "oneIn": 4000,
+      "page": "Zulrah",
+      "pet": true
     },
     {
       "npc": "Zulrah",
