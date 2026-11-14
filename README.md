@@ -254,8 +254,9 @@ adds that browser to your group as you. **Rename group…** sends the new name, 
 **Remove from group…** sends which friend to remove, once per press.
 
 **Reroute**, under the steps of a destination the map sent, sends the tile you are standing on,
-once per press and whatever you share, so the map can plan the way from there. The map plans with
-it and does not keep it.
+once per press and whatever you share, so the map can plan the way from there; on a clue's way,
+until its STASH unit is behind you, it sends the clue again as **Route** did. The map plans with
+them and does not keep them.
 
 **Search**, at the top of Home once you are connected, sends what you type to the map, which
 answers with places and keeps nothing. Picking a result sends the tile you are standing on, as

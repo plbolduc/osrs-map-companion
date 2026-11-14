@@ -250,6 +250,49 @@ public class RoutePressTest
 	}
 
 	/**
+	 * An emote clue's way goes by its STASH unit, and the destination is the emote spot. Reroute asked
+	 * about that spot's bare tile, so the new way went straight there without the unit, and a key's
+	 * or a hot and cold step's note went the same way. Until the STASH row is behind, Reroute asks the
+	 * press's own question again; past it, the spot's tile is the whole question.
+	 */
+	@Test
+	public void rerouteAsksTheClueAgainUntilItsStashRowIsBehind() throws Exception
+	{
+		connect();
+		String throughStash = ANSWER.replace("\"name\":\"Abyssal demon\"", "\"name\":\"Lumbridge Swamp Caves\"").replace(
+			"\"steps\":[", "\"steps\":[{\"slot\":\"walk-leg\",\"title\":\"Walk to the STASH unit\",\"walk\":true,\"at\":{\"x\":3200,\"y\":3200,\"plane\":0}},"
+				+ "{\"slot\":\"stash\",\"title\":\"Take the items from the STASH unit\",\"walk\":false,\"at\":{\"x\":3200,\"y\":3200,\"plane\":0}},");
+		RoutePress press = press(200, throughStash, null);
+		CompanionSnapshot.Clue clue = new CompanionSnapshot.Clue();
+		clue.tier = "elite";
+		clue.text = "Blow a kiss in the Lumbridge Swamp Caves.";
+		clue.itemId = 12_073;
+		press.press(RoutePress.Target.clue("clue", clue, "Elite clue", "Elite clue"));
+		settle(press, "clue");
+		String asked = body(sent.get(0)).get("target").toString();
+
+		reroute(press, 2);
+		assertEquals("the unit is ahead, so the clue is asked again", asked, body(sent.get(1)).get("target").toString());
+
+		TestLoop.put(DestinationRoute.class, route, "step", 2);
+		reroute(press, 3);
+		assertEquals("past the unit, the spot's tile", "{\"x\":3408,\"y\":3573,\"plane\":2}", body(sent.get(2)).get("target").toString());
+	}
+
+	/** Reroute now, the map's wait since the last answer set aside, and wait for its {@code n}th question's answer. */
+	private void reroute(RoutePress press, int n) throws Exception
+	{
+		TestLoop.put(DestinationRoute.class, route, "nextRerouteMs", 0L);
+		press.reroute();
+		long deadline = System.currentTimeMillis() + 3_000;
+		while ((sent.size() < n || route.view().rerouting) && System.currentTimeMillis() < deadline)
+		{
+			Thread.sleep(10);
+		}
+		assertEquals(n, sent.size());
+	}
+
+	/**
 	 * A map above beginner has no words and no tile: it goes as the clue a worded step goes as, with
 	 * nothing in it but its tier and its scroll, and the map places the picture by the scroll's id.
 	 */

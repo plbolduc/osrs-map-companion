@@ -165,7 +165,8 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RoutePress`, `SearchClien
   map sent. One in flight, and none before the wait the map last asked for (Retry-After, at least
   five seconds). Headers: `X-Companion-Code`, `X-Companion-Member`, `X-Companion-Member-Secret`.
   JSON is the destination's tile and the player's own tile, sent on the press even with position
-  sharing off; the README says so. The answer replaces the sidebar's steps. Nothing is walked.
+  sharing off; the README says so. On a clue's way, until its STASH unit is passed, the target is
+  the clue as its Route sent it. The answer replaces the sidebar's steps. Nothing is walked.
   `RoutePress` sends the same request for a pick from **Search**, with the row's id as the target,
   and for **Route** beside the carried clue, the last death, Quest Helper's step, a star and a
   meetup, and on a
