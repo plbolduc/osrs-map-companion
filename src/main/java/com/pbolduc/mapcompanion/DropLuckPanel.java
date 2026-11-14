@@ -501,7 +501,8 @@ final class DropLuckPanel extends JPanel
 
 	private void buildList(List<Monster> monsters, @Nullable String[] pin, long now)
 	{
-		add(fill(MapCompanionPanel.bar(0, DARK_GRAY_COLOR, small("Drop luck · your monsters", LIGHT_GRAY_COLOR),
+		/* The sidebar's own heading says "Drop luck" over the list, so this row names only the list, as the website's does. */
+		add(fill(MapCompanionPanel.bar(0, DARK_GRAY_COLOR, small("Your monsters", LIGHT_GRAY_COLOR),
 			null, link("Close", () -> open(null, null)))));
 		add(space(4));
 		add(search);
