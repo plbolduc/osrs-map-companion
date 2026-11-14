@@ -535,7 +535,7 @@ final class RunView extends JPanel
 			 */
 			if (done || view.visited.contains(stop.n))
 			{
-				JLabel line = label(12f, ColorScheme.MEDIUM_GRAY_COLOR);
+				JLabel line = label(12f, RouteStepsView.DONE);
 				String name = stop.n + ". " + stop.name;
 				/*
 				 * A name too long for the card, a charting task's sentence, is cut to share one line with
