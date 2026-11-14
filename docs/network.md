@@ -53,6 +53,11 @@ credentials even with character sharing off. Snapshots are spaced at least two s
 an unchanged character normally sends a heartbeat every six seconds, or twenty with the receive
 stream connected. Automatic character sharing stops while logged out.
 
+**Where you died** is the tile and age of the character's most recent death, held in memory for
+an hour. It is kept through a logout and a hop, since a relog is when the way back is wanted, and
+forgotten at a change of character and when the plugin is turned off: the next login may be
+another character's, and the death would be posted as theirs.
+
 With **Farming contracts** shared, the crop and patch kind remain on the snapshot when the
 contract is complete, with state `return` instead of `active`. This means ready to hand in to
 Guildmaster Jane; an absent or unreadable contract remains unknown. The existing setting guards both states.
@@ -218,8 +223,10 @@ and hint arrow, with no request. The list credits the OSRS Wiki and its CC BY-NC
 **Search**, at the top of Home while connected, asks `GET /api/companion/search?q=` with the
 same three credentials, about 350ms after the last key or at once on Enter, and never for fewer than
 two characters. One is in flight at a time: a query typed meanwhile waits for it, and the older
-answer is dropped if the box has moved on. Clearing the box cancels the call. A `Retry-After` is
-honoured by asking nothing until it has passed, and a failure without one waits ten seconds. The
+answer is dropped if the box has moved on. Clearing the box cancels the call, and turning the
+plugin off cancels it with any search still waiting to be sent. A `Retry-After` is
+honoured by asking nothing until it has passed, a failure without one waits ten seconds, and a
+map address that redirects waits five minutes. The
 query is in the request's address, which the map leaves out of its logs; the plugin logs nothing it
 types. A pick is one `POST /api/companion/route` with the row's id and the tile you stand on, under
 Reroute's rules, and its answer becomes the destination, as a destination the map sent would.
@@ -230,8 +237,8 @@ Each row's picture is the game's own, from the client's sprite cache: the map's 
 a world-map icon, and an item's `itemId`, where the map names one, picks its sprite. No picture is
 ever fetched from the map or anywhere else.
 
-**Route** beside the clue being carried, the last death, Quest Helper's step, a star in the Stars tab
-or a meetup, or on the destination's card while it has no way yet, is the same request with a tile as
+**Route** beside the clue being carried, the last death, Quest Helper's step, a star pinned on Stars
+with no way yet or a meetup, or on the destination's card while it has no way yet, is the same request with a tile as
 its target: the clue's dig spot or beginner map, the death's tile, the step's, the star's tile, the
 meetup's, the destination's
 own: a star pinned on Stars, a Slayer spot set on the world map, a place the map sent bare. A clue
@@ -248,8 +255,25 @@ approximate offers **Open website** instead, which opens the map's search for th
 your browser and sends this client nothing. The clue is now read whether or not *Clue step* is shared,
 so the sidebar has it to offer; the snapshot still carries it only with that choice.
 
+**A press on a star** in the Stars tab pins it in this client at once, which sends nothing, and then
+sends that same request with no press of Route: one `POST /api/companion/route` with the star's
+tile as the target and the tile you stand on, even with position sharing off. It goes once the star
+has stayed the pinned destination for 0.7 seconds, so stars pressed past on the way down the list
+are pinned and send nothing. If by then the destination is another star, a place the map sent, or
+nothing, it is not sent. It goes through Route's one-flight gate and keeps Route's waits, the map's
+Retry-After, five seconds after any answer and thirty after a failure: a star pressed inside a
+wait, or while another route is being planned, is asked about once the gate opens, by a timer in
+this client that sends nothing while it waits. It is one request for a press. A refusal or a
+failure is said under the pinned star and is never repeated on its own; **Route** beside Unpin is
+the player's own press to ask again. The press was the asking, so the request goes whichever tab is
+showing by then, and with the sidebar closed. With nobody logged in, or no member credentials, it is
+not sent and nothing is said. Its answer becomes the destination's way as a Route press's does,
+unless the pin has been replaced since it was asked, and then it is dropped. A star whose tile is
+approximate is never pinned, and a star with no time left cannot be. The star list is fetched as
+it was: none of this asks for it, or asks for it sooner.
+
 **The Group section** is read from what the map already sends: `roster`, one row per other member
-with their name, colour, presence, *near*, *Near you* and newest news, arrives on every snapshot
+with their name, colour, presence, world, *near*, *Near you* and newest news, arrives on every snapshot
 reply and stream frame and is shown whatever the destination setting; `events`, the week's meetups
 with their answers, is shown only with **Destinations and meetups**, and the soonest of them is
 the meetup pinned on the world map. The single `event` the map still sends beside them for older
@@ -263,7 +287,8 @@ The meetup answers are `PUT /api/companion/event/answer` with the meetup's id an
 `maybe`, `no` and `on_my_way`; **Meet here** is `PUT /api/companion/event` with a title, the start
 time, your world and a tile, the one you stand on or the one right-clicked on the world map, and copies the link the map answers with after checking
 it is a path on the map address. Both carry the group code, member id and member secret, one at a
-time, and none before a `Retry-After` has passed. Neither is ever sent without a press.
+time, and none before a `Retry-After` has passed, or for five minutes after a map address that
+redirects. Neither is ever sent without a press.
 **Meetup reminder** (off) raises one RuneLite notification per meetup, the chosen number of
 minutes before it starts; it reads only what the map already sent.
 

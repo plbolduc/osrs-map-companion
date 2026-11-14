@@ -45,7 +45,7 @@ public class RewardDeliveryTest
 	private final CollectionItemCatalog catalog = game.catalog();
 	private final HarnessStore store = new HarnessStore();
 	private final HarnessConfig config = new HarnessConfig(store, "http://localhost");
-	private final MapCompanionPlugin plugin = new MapCompanionPlugin();
+	private final MapCompanionPlugin plugin = TestLoop.in(new MapCompanionPlugin());
 
 	public RewardDeliveryTest() throws Exception
 	{
@@ -55,13 +55,13 @@ public class RewardDeliveryTest
 		config.set(MapCompanionConfig.KEY_SHARE_COLLECTION, true);
 		game.state = GameState.LOGGED_IN;
 		store.set(MapCompanionConfig.KEY_PAIRING_CODE, "ABC234");
-		plugin.milestones = new MilestoneOutbox();
-		plugin.destinationState = new DestinationState(new Gson());
+		plugin.loop.milestones = new MilestoneOutbox();
+		plugin.loop.destinationState = new DestinationState(new Gson());
 		plugin.destinationMarker = new TestDestinationMarker();
 		plugin.groupMarkers = new GroupMarkers(null, null);
 		plugin.boatPins = new BoatPins(null, null);
-		plugin.pairing = new Pairing(store, new Gson());
-		plugin.rewardObserver = new RewardObserver(game.client, catalog, catalog::contains, () -> 1000L);
+		plugin.loop.pairing = new Pairing(store, new Gson());
+		plugin.loop.rewardObserver = new RewardObserver(game.client, catalog, catalog::contains, () -> 1000L);
 		TestFarmRuns.attach(plugin);
 		set("client", game.client);
 		set("config", config);
@@ -75,18 +75,18 @@ public class RewardDeliveryTest
 	public void theActualNpcSubscriptionProducesOneAdditiveRewardAfterSettling()
 	{
 		npc(10020);
-		assertEquals(0, plugin.milestones.pendingCount());
+		assertEquals(0, plugin.loop.milestones.pendingCount());
 		settle();
-		CompanionSnapshot.Milestone reward = plugin.milestones.take(5000).get(0);
+		CompanionSnapshot.Milestone reward = plugin.loop.milestones.take(5000).get(0);
 		assertEquals("reward", reward.kind);
 		assertEquals("item", reward.rewardType);
 		assertEquals("npc", reward.source.kind);
 		assertEquals("Boss", reward.source.name);
 		assertEquals(Integer.valueOf(2), reward.quantity);
 		assertNull(reward.npc);
-		assertEquals(reward.id, plugin.milestones.take(6000).get(0).id);
-		plugin.milestones.acknowledge(Collections.singletonList(reward.id));
-		assertTrue(plugin.milestones.take(7000).isEmpty());
+		assertEquals(reward.id, plugin.loop.milestones.take(6000).get(0).id);
+		plugin.loop.milestones.acknowledge(Collections.singletonList(reward.id));
+		assertTrue(plugin.loop.milestones.take(7000).isEmpty());
 	}
 
 	@Test
@@ -96,12 +96,12 @@ public class RewardDeliveryTest
 		npc(10020);
 		store.set(MapCompanionConfig.KEY_PAIRING_CODE, "ABC234");
 		settle();
-		assertEquals(0, plugin.milestones.pendingCount());
+		assertEquals(0, plugin.loop.milestones.pendingCount());
 		game.state = GameState.LOGIN_SCREEN;
 		npc(10020);
 		game.state = GameState.LOGGED_IN;
 		settle();
-		assertEquals(0, plugin.milestones.pendingCount());
+		assertEquals(0, plugin.loop.milestones.pendingCount());
 	}
 
 	@Test
@@ -110,7 +110,7 @@ public class RewardDeliveryTest
 		npc(10020);
 		plugin.onGroupChanged();
 		settle();
-		assertEquals(0, plugin.milestones.pendingCount());
+		assertEquals(0, plugin.loop.milestones.pendingCount());
 	}
 
 	@Test
@@ -119,7 +119,7 @@ public class RewardDeliveryTest
 		npc(10020);
 		plugin.onRuneScapeProfileChanged(new RuneScapeProfileChanged("a", null));
 		settle();
-		assertEquals(0, plugin.milestones.pendingCount());
+		assertEquals(0, plugin.loop.milestones.pendingCount());
 	}
 
 	@Test
@@ -135,7 +135,7 @@ public class RewardDeliveryTest
 		plugin.onConfigChanged(changed);
 		config.set("shareMilestones", true);
 		settle();
-		assertEquals(0, plugin.milestones.pendingCount());
+		assertEquals(0, plugin.loop.milestones.pendingCount());
 	}
 
 	@Test
@@ -144,18 +144,18 @@ public class RewardDeliveryTest
 		config.set("sharePets", false);
 		npc(10000);
 		settle();
-		assertEquals(0, plugin.milestones.pendingCount());
+		assertEquals(0, plugin.loop.milestones.pendingCount());
 		chat("New item added to your collection log: Pet replacement");
 		settle();
-		CompanionSnapshot.Milestone collection = plugin.milestones.take(5000).get(0);
+		CompanionSnapshot.Milestone collection = plugin.loop.milestones.take(5000).get(0);
 		assertEquals("collection_log", collection.rewardType);
 		assertEquals(Boolean.TRUE, collection.collectionNew);
-		plugin.milestones.reset();
+		plugin.loop.milestones.reset();
 		config.set("sharePets", true);
 		config.set("shareCollectionLog", false);
 		chat("You have a funny feeling like you're being followed.");
 		settle();
-		CompanionSnapshot.Milestone pet = plugin.milestones.take(5000).get(0);
+		CompanionSnapshot.Milestone pet = plugin.loop.milestones.take(5000).get(0);
 		assertEquals("pet", pet.rewardType);
 		assertEquals("Pet", pet.item);
 		assertNull(pet.itemId);
@@ -167,12 +167,12 @@ public class RewardDeliveryTest
 	@Test
 	public void invalidRewardMetadataCannotBeQueuedAsAValidItem()
 	{
-		plugin.milestones.reward(new RewardObservation("item", "Mystery", null, null, null, null, null, 1000), 2000);
-		plugin.milestones.reward(new RewardObservation("pet", "Pet", -1, null, null, null, null, 1000), 2000);
-		assertEquals(0, plugin.milestones.pendingCount());
-		plugin.milestones.reward(new RewardObservation("collection_log", "Mystery", null, null,
+		plugin.loop.milestones.reward(new RewardObservation("item", "Mystery", null, null, null, null, null, 1000), 2000);
+		plugin.loop.milestones.reward(new RewardObservation("pet", "Pet", -1, null, null, null, null, 1000), 2000);
+		assertEquals(0, plugin.loop.milestones.pendingCount());
+		plugin.loop.milestones.reward(new RewardObservation("collection_log", "Mystery", null, null,
 				"guessed", "Last boss seen", true, 1000), 2000);
-		CompanionSnapshot.Milestone reward = plugin.milestones.take(2000).get(0);
+		CompanionSnapshot.Milestone reward = plugin.loop.milestones.take(2000).get(0);
 		assertNull(reward.source);
 		String wire = new Gson().toJson(reward);
 		assertFalse(wire.contains("itemId"));
@@ -194,13 +194,11 @@ public class RewardDeliveryTest
 	private void settle()
 	{
 		game.tick += RewardObserver.SETTLE_TICKS;
-		plugin.flushRewards(5000L);
+		plugin.loop.flushRewards(5000L);
 	}
 
 	private void set(String name, Object value) throws Exception
 	{
-		Field field = MapCompanionPlugin.class.getDeclaredField(name);
-		field.setAccessible(true);
-		field.set(plugin, value);
+		TestLoop.set(plugin, name, value);
 	}
 }

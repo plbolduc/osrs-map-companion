@@ -101,8 +101,9 @@ often. A clean run is now 443 tests with no failures or skips.
 - [ ] Log back in: the same character keeps its member identity. Withdraw Position while logged in
       and confirm the next accepted snapshot clears the map pin.
 - [ ] Walk a short distance manually and verify live movement and reconnection.
-- [ ] Open Stars and pick a world, then hop with the world switcher and cross a loading line: the
-      list and the pick stay through both, and no line says to log in. Log out: the list clears.
+- [ ] Open Stars and press a star, then press one whose spot is approximate so its card opens.
+      Hop with the world switcher and cross a loading line: the list, the pinned star at its head
+      and the open card stay through both, and no line says to log in. Log out: the list clears.
 - [ ] On Stars, each world is its number behind the world switcher's own star: gold on a members
       world, silver on a free one, and with Safe off, the PvP star on a PvP or high-risk world and
       the Deadman star on a Deadman world, each the star the game's world switcher shows for that
@@ -110,12 +111,13 @@ often. A clean run is now 443 tests with no failures or skips.
       they are those two stars and that a high-risk world shows the PvP one. The number does not
       move when the star appears, and no row says *W* unless the map has no world list.
 - [ ] On Stars, a site with stars on several worlds says how many besides the one on its card,
-      *+2*, and the fold opens exactly that many rows: the card's own world is not listed again
+      *+2 ▸*, and the fold opens exactly that many rows and reads *+2 ▾* while open, the way every
+      other fold in the sidebar points: the card's own world is not listed again
       under it. Hovering the card says how long ago its star was reported.
 - [ ] On Stars, a star on the world you are logged into has its world in green, in its card, in
       its site's list of worlds and at the head of the tab once pinned; hop, and the green moves to
       the stars of the new world. Every site name fits one line beside its favourite star, and a
-      press anywhere on a card but its star or its fold opens Route and Pin.
+      press anywhere on a card but its star or its fold pins that star.
 - [ ] Log in on a Hardcore World: Stars says *Hardcore Worlds* in gold over the list and lists only
       stars on Hardcore Worlds, or says none has been called there yet. Hop to an ordinary world:
       the line goes and the main game's stars are back. This is the first client read of
@@ -309,10 +311,27 @@ The website plan's second session, once the routes in the game are built: a memb
 `./gradlew runClient`, and a local map whose card can *Send to RuneLite* with its steps.
 
 - [ ] **The steps arrive.** Send a destination from a card with a route. The steps appear under
-      the destination's card in the card's own words, the first one marked; the other ways fold
-      behind one line, and pressing one shows its steps. Open, each way is its name with its
-      length at the row's far end, a long name wrapping under itself rather than being cut; ways
-      the account cannot take yet come last, under *You can't take these yet:*, pictures faded.
+      the destination's card in the card's own words, the first one marked. With more than one
+      way, a strip of chips sits over the steps, one for every way: its picture, then its name,
+      which is where a teleport lands when the website's chip says that, and the chosen chip is
+      filled orange. Press another chip, once on its picture and once on its name: that way's
+      steps show, the fill moves to it, and no chip changes place. The line under the strip is
+      the chosen way's length, ending *N more than best* on any way but the best. Hovering a chip,
+      over its picture and over its name, gives the way's whole label and length, with *best* on
+      the best. Ways the account cannot take yet come last with their pictures faded and their
+      names still readable; pressed, one shows its steps under *You can't take this way yet.* in
+      pink. A route with one way, a farm run's leg and an arrived route have no strip.
+- [ ] **The chips keep their place.** On a route with four ways or more, on Home and under a
+      pinned star on Stars: the strip starts a second row inside the card rather than running
+      past its edge, and a name wider than the card is cut, whole in its tooltip. Watch the strip
+      as the route arrives: each chip's picture lands in its place a moment after the chip, and
+      no chip or row moves when it does. A voyage's chip is a boat and a walk's a boot.
+- [ ] **A pick outlasts Reroute until you set off.** On a route with two ways you can take,
+      press the chip that is not the best, then Reroute before moving: the same chip is still
+      filled, its steps are the ones shown, and the box over the game names its first step. Take that
+      way's first step, then Reroute: the best way from where you now stand is chosen. Pick a
+      way, then send the same place from the website again: the pick stays while its first step
+      is the current one. Pin another place: it starts on its best way.
 - [ ] **Step pictures.** A route whose steps use an item (a games necklace, a tablet) and a spell
       (Lumbridge Home Teleport) shows each one's picture before its number, at 16px, as the
       card's sprite for that row: the item's sprite from the item cache and the spell's icon from
@@ -355,8 +374,13 @@ The website plan's second session, once the routes in the game are built: a memb
       *Civitas illa Fortis east bank deposit box* and follow it: the whole name wraps inside the box.
       Route to a star on another world: the box and the tile's label both end in its world, *(W302)*;
       hop to that world and both drop it.
+      The step is its words with no number before them, and at the right of its line is how far
+      through the way it is, *2/3*, in amber: the number the step's pin has on the world map, of
+      the steps in the way followed. It is at the box's right edge with a picture and without
+      one, the box is no wider than it was, and a step too long to sit beside it wraps on its
+      left; look at it in RuneLite's other overlay fonts too.
       Follow a farm run: the box is headed by the stop's number, *2. Catherby*, as its pin on the
-      world map is, and the step under it has no number of its own, *Use Catherby tablet*.
+      world map is, and the step under it, *Use Catherby tablet*, counts the leg's own steps, *1/2*.
       A teleport step shows its picture before its words, bare, as the sidebar's row does: the
       Catherby tablet, Explorer's ring 2, the Lumbridge Home Teleport icon. The words stand a
       picture's width in from the first frame, and the picture fills that place without the words
@@ -395,11 +419,16 @@ The website plan's second session, once the routes in the game are built: a memb
       without cutting a word.
 - [ ] **Search.** Connected, type *bank* in the box at the top of Home: the rows match the
       website's dropdown for the same word, in its order, and nothing is asked until the typing
-      stops. Pick one: the destination's card fills with its steps, Shortest Path draws the first
+      stops. Each place the map measured has its distance, *~210t*, at the right of its name's
+      line, the distances ending on one edge down the rows; the grey line under the name holds no
+      distance, a long name wraps beside its distance rather than under it, and an item's row has
+      none. Pick one: the destination's card fills with its steps, Shortest Path draws the first
       walk, and the list folds. Type *abysal whip* and see *Did you mean*. Clear the box while a
       search is out: nothing comes back. Check RuneLite's log holds nothing that was typed.
 - [ ] **Route on a clue.** With *Your account* off, read a coordinate clue and a beginner map: the
-      clue card appears under *Now* with Route, and Route fills the destination's card. A step that
+      clue card appears under *Now* with Route, and Route fills the destination's card. The
+      coordinate's card reads *Coordinate · Route finds the dig spot*, with the tile in the line's
+      tooltip and nowhere on the card; read another kind of clue and the tooltip is gone. A step that
       is words, an anagram or an emote, shows its words and Route: the card is named after the place
       the map reads from them, and an emote's way goes by its STASH unit first. Carry a medium or
       hard map: before and after opening it, the card says *Map · Route finds where it shows* with
@@ -427,20 +456,29 @@ The website plan's second session, once the routes in the game are built: a memb
       the pin's tooltip say it, *Near Lumbridge Castle*; where it names none, *Picked on the world map*.
       Between the press and the answer the spot has a faded amber pin, *Planning the way here…*,
       which stays put when the map is panned away and goes with the answer or the chat box's refusal.
-- [ ] **Route on a star and a meetup.** In Stars, press a precise site: Route and Pin open in its
-      own card, under the star, and a second press folds them away; an approximate one shows Open
-      website. Far down the list, the card scrolls so both buttons are in view. Press Route: the
-      star heads the tab as *Pinned destination* with its steps, the tab scrolls up to it, Stars
-      stays the tab, and under the steps are two buttons, Reroute and Unpin. Reroute acts as
-      Home's does while you walk and hop; Unpin clears the star and Home's card together and the
-      star is a plain row again. Pause the route from Home, from the box over the game or with its
-      key: Follow appears beside Reroute on Stars, and goes again once pressed. With one star pinned, press another: the pinned
-      one keeps the head of the tab and the other opens its own Route and Pin. A meetup's Route
+- [ ] **A press on a star, and Route on a meetup.** In Stars, press a precise site: at once the
+      star heads the tab as *Pinned destination*, the tab scrolls up to it, the world map has its
+      pin and the arrow points at it, and beside Unpin a greyed button reads *Planning…*. Within a
+      second or two its way is drawn under it, chips and steps, with two buttons under them,
+      Reroute and Unpin, and the step box over the game names the first step: the way is followed
+      without a press. Stars stays the tab. The star's own card has no buttons, and its border is
+      gold. Press the pinned star again: nothing changes. Press a site whose spot is approximate:
+      nothing is pinned, its card opens on Open website and its note, and a second press folds it
+      away; far down the list, the card scrolls so the button is in view. A depleted star, with
+      *Depleted stars* shown, does nothing when pressed. Reroute acts as Home's does while you
+      walk and hop; Unpin clears the star and Home's card together and the star is a plain row
+      again. Pause the route from Home, from the box over the game or with its key: Follow appears
+      beside Reroute on Stars, and goes again once pressed. With one star pinned, press another:
+      it takes the head of the tab and the first is a plain row again. A meetup's Route
       prints its world and its day and clock in the destination's line, with no countdown, and
       nobody in the group is told. Pressed on Group, a meetup's or a friend's Route turns the
       sidebar to Home once its way lands, with the card in view; a refusal stays under the button.
 - [ ] **Friends.** With two characters in one group and the group layer off, the other appears
-      under Group with their disc, presence dot, *near* and news. World map draws only them; Route
+      under Group with their disc, presence dot, their world, *near* and news. The world leads the
+      line, *W302 · near Lumbridge Castle · Near you*, which settles that the map's roster carries
+      a world for a friend who is online. It is green while you are on that world and grey after
+      either of you hops, within a second or two; a friend who shares a world and no place has
+      the world alone, with no Route. World map draws only them; Route
       asks for their position, then fills the destination's card once and does not follow them.
       Pressed again it reads Reroute. Route to a friend in a raid: nothing is planned, and their row
       says they are inside an instance and that Route works once they are out.
@@ -543,6 +581,131 @@ The website plan's second session, once the routes in the game are built: a memb
 - [ ] Leave two group members standing still for two minutes with group dots enabled, then Route
       to the other member. It must start immediately from the held position. Disconnect the stream
       and confirm its old positions are not used on a replacement connection before a new frame.
+
+## The review after 1.9.0
+
+Built and tested, and none of it seen in a client yet. The
+route strip, the step box's count, the search rows' distances, a friend's world, the star fold's
+arrow and the coordinate clue's line are in *The routes session* and *Still to verify* above,
+under the entries they changed.
+
+- [ ] **An ordinary session (`CompanionLoop`, which now holds the tick, the logout and the
+      resume the plugin class held).** Turn the plugin on: RuneLite's log shows no injection
+      error for it. Log in with every sharing switch on and play for a few minutes: the status
+      card's dot is green beside the group's name, your dot follows you on the website, and
+      a level, a kill and a clue step reach the map as they did. Hop: nothing is sent for fifteen
+      seconds, then the same character is back under the same member, once on the roster. Log out:
+      the card says *Logged out*, the dot on the website goes quiet and the world map's pins go.
+      Log in again: all of it resumes without a press. Turn the plugin off: its sidebar, overlays
+      and pins go and no request follows. Turn it on: it connects as the same member, and the
+      destination, the run and the Tasks cards come back as the map and the game give them.
+- [ ] **What each way a session ends forgets.** With a Slayer task, port tasks, a clue, a death
+      under an hour old and a boat's pin all showing, hop: the Slayer card keeps its task and the
+      Port tasks card its tasks until the new world settles, the boat's pin and the group's dots
+      stay, and the death card stays. Log out and in: the Slayer, clue and Port tasks cards go
+      until they are read again, the pins go and come back, and the death card is still there.
+      Log out and in as another character: nothing of the first one's task, clue, port tasks,
+      pins or death shows for the second, and nothing of it is sent. Turn the plugin off and on
+      while logged in: no death card, and note whether the boats' pins come back before a hop or
+      a step onto a deck.
+- [ ] **A death is not handed to the next character.** Die, turn the plugin off in RuneLite's
+      plugin list, log out, log in as another character and turn the plugin on, all inside the
+      hour: no death card under *Now*, **Show what's sent** carries no death, and the map draws
+      none for that character. Off and on as the same character loses the marker too.
+- [ ] **No search after the plugin is off.** Against a local map, with its request log open: stop
+      the map, type three letters in the search and see *The map could not be reached.* Type one
+      letter more, which waits out the ten seconds a failure asks for, turn the plugin off inside
+      them and start the map: no `/api/companion/search` request arrives when the ten seconds
+      end, or after. The pause after the last key is a third of a second, too short to catch by
+      hand; this wait is the same timer.
+- [ ] **Route keys with the sidebar closed.** With *Reroute key* and *Follow and pause key* set,
+      close the sidebar and have a friend send a place to everyone: the Follow key puts the step
+      box over the game, though the card arrived while the sidebar was closed. Do the same with
+      another plugin's panel in front. Press Reroute in the sidebar, close the sidebar while the
+      button is still greyed by the wait, and press the Reroute key ten seconds later: the route
+      is planned again from where you stand. The step box's Shift-right-click entries act the
+      same way with the sidebar closed.
+- [ ] **The sidebar lays out only what changed.** With the sidebar open, let a destination
+      arrive and dismiss it, start and end a farm run, log out and in so the search box goes and
+      comes back, open a monster under Drop luck, and turn to Group, Stars, Settings and back:
+      after each, every card below the change sits where it should, with no gap left where a
+      card was and nothing overlapping or cut at its old height.
+- [ ] **A press on a star asks for one route.** With the map's log in view, press three stars one
+      after another, less than half a second apart: each heads the tab in turn and the world map's
+      pin moves with it, and the map logs one `POST /api/companion/route`, for the last, about
+      0.7 seconds after its press. Press a star and Unpin at once: no request. Press a star and,
+      inside the dwell, send a place from the website: the place stays and no request is made for
+      the star. Press a star, wait for its way, then press another within five seconds: it is
+      pinned at once, reads *Planning…*, and its request arrives when the five seconds are over,
+      not before. Press a star and, while it reads *Planning…* and before its way lands, press
+      another: the first star's way never replaces the second, and the second's way arrives after
+      the wait. Press a star, turn to Home inside the dwell: the way still arrives, on Home's
+      card. Press a star and close the sidebar inside the dwell: the step box appears over the
+      game all the same. Press a star in a site folded over several worlds, by its row: that
+      world is the one pinned, and its row is the darker one.
+- [ ] **A star's refusal is said once.** Make the map refuse a route (press stars until it answers
+      429, or stop the map): the star stays pinned, a pink line under it says why with the wait
+      counting down, **Route** beside Unpin is greyed for the wait, and the map's log shows no
+      second request for that star however long the tab is left open. When the wait ends, Route
+      can be pressed and asks once more. Press another star while the line shows: it is pinned
+      with no line under it. Press a star during a hop, before the new world loads: it is pinned,
+      nothing is said, no request is made, and Route beside Unpin is there once the hop ends.
+- [ ] **Stars holds still.** On Stars with a full list, watch a minute turn over: a star's time
+      left, a world's age and a row's *reported … ago* tooltip change in place, and no row jumps
+      or loses the pointer's hover. Stay on Home for two minutes and turn to Stars: the list is
+      current at once. Pin a star on Stars, dismiss it from Home and turn back: it is a plain row.
+- [ ] **Port tasks follow the game.** With tasks held and no run, the Port tasks card changes
+      when a crate is collected, when one is delivered and when a task is handed in or abandoned,
+      within a second, and stays as it is between those.
+- [ ] **An idle port task's count.** Take a courier task: its name's row ends *0/3* and the line
+      under it reads *Collect at Brimhaven for Port Khazard* (its own ports). Collect one crate:
+      *1/3*. Collect the rest: the count starts again as crates delivered, *0/3*, over *Deliver to
+      Port Khazard*, and rises to *3/3* over *Delivered*, greyed, if the slot holds the task that
+      long. Take a bounty: *0/15* over *Osprey feather · hand in at Brimhaven*, rising as parts
+      drop. Note any task whose count reads *N left* or is missing: the game gave no total for it.
+      A long task name wraps beside its count, and the counts end on one edge down the card.
+- [ ] **A farm stop's length and the tiles left.** Start *Ready now* or a herb run: each stop
+      still ahead has its length, *29t*, at the right of its name, with its way on the line
+      below, and the line under the bar ends *· N tiles left*, the sum of those lengths. Note
+      whether a birdhouse stop and the bank at the end have a length: one stop ahead without one
+      and the line gives no total. Finish a stop: its length goes with its struck line and the
+      total drops by it. A long stop name wraps beside its length.
+- [ ] **A long stop name in the sidebar itself.** On a Sea charting run and a port-task run, in
+      the sidebar at its real width: a task longer than one line, *Find the wreck of the
+      Pandemonium III west of the Kharidian Bandit Camp*, wraps beside its length with every
+      letter drawn, and no name runs under the *71t* at its right.
+- [ ] **The destination's world.** Pin a star on another world: the card's second line, *W302 ·
+      T7 · 16m left*, is all grey. Hop to that world: *W302* turns green within a second or two
+      and the rest of the line stays grey. Hop away, and log out: grey again.
+- [ ] **Group at the login screen.** Start RuneLite with a group saved and stay at the login
+      screen: the Group tab's first line is *Log in to see your group.*, over the Meetups
+      heading. Log in: the line goes and the friends arrive. Log out: the friends stay listed
+      with their presses greyed, and the line does not come back.
+- [ ] **Two tooltips.** Hover **Route** on a Slayer place: *Plan the way to this spot from where
+      you stand*. Hover the farm card's **Start run**: *Ask the map for the run chosen above,
+      starting from where you stand*. Logged out, Route says *Log in to plan a route.*, and within
+      the map's wait either says how long is left.
+- [ ] **A spell's outline, found once a tick.** Follow a route whose step casts a spell: the
+      outline appears the frame the spellbook opens, goes the frame another tab is opened, and
+      sits on the icon after the client is resized. Turn a spellbook filter off so the spell
+      comes into the open book: it is outlined within a tick.
+- [ ] **What a run's player carries.** On a farm run whose *Before you leave* names a teleport
+      you do not carry, withdraw it at the bank, then wear it: the count and the bank's outline
+      follow within a tick each time. Hop and log back in mid-run: the list is right again once
+      the inventory has loaded.
+- [ ] **Small things done once a tick.** Carry a clue scroll, drop it and pick up one of another
+      tier: the clue card follows within a tick. Dismiss a destination and pin another: its pin
+      on the world map follows at once. With more than forty monsters in the kill log, **Show
+      what's sent** lists forty, the pinned one and then the most recently killed first, and says
+      the list was cut.
+- [ ] **A map address that redirects.** Connected to a local map, put a proxy in front of it
+      that answers every request with a 302 and set *Map address* to the proxy. Answer a meetup,
+      press Meet here and type in the search: each says *This map address redirects. Check Map
+      address in RuneLite's settings for this plugin.*, and the map's log shows no second request
+      from any of them for five minutes. Route, a run's Start and Stars say the same. Put the
+      address right and note how long a meetup's answer and the search still wait. Then stop the
+      map: Route, a run, a meetup, the search and Stars each say they could not reach it in the
+      words they used before, and ask again after their own wait.
 
 ## Farming procedure
 

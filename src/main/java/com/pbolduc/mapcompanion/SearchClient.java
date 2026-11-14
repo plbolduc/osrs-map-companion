@@ -28,10 +28,10 @@ package com.pbolduc.mapcompanion;
 import com.google.gson.Gson;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.function.BooleanSupplier;
+import java.util.function.ObjLongConsumer;
 import javax.annotation.Nullable;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
@@ -40,7 +40,6 @@ import okhttp3.Call;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.Response;
 import static com.pbolduc.mapcompanion.RouteWire.text;
 
 /**
@@ -128,14 +127,15 @@ final class SearchClient
 	{
 		final String id;
 		final String name;
-		/** The grey line under the name, in the website's words. */
+		/** The grey line under the name, in the website's words; a pick writes it under the destination's name too. */
 		final String line;
 		/**
-		 * What a pick writes under the destination's name: the line without the effort. That was
-		 * measured from where the search was typed and stops being true as the player walks, while
-		 * the route's own way line under it gives the length from where they stood at the press.
+		 * "~210t": the effort the map measured, drawn at the right edge of the row and nowhere else;
+		 * null where it measured none. It was measured from where the search was typed and stops being
+		 * true as the player walks, so a pick's card leaves it to the route's own way line.
 		 */
-		final String note;
+		@Nullable
+		final String far;
 		/** "Sold at", "Dropped by" or {@link #ITEMS}; null for the ordinary rows. */
 		@Nullable
 		final String section;
@@ -157,7 +157,7 @@ final class SearchClient
 		Hit(String id, String name, String line, @Nullable String section, @Nullable int[] tile,
 			@Nullable String kind, @Nullable Integer itemId)
 		{
-			this(id, name, line, line, section, tile, kind, itemId);
+			this(id, name, line, null, section, tile, kind, itemId);
 		}
 	}
 
@@ -193,6 +193,15 @@ final class SearchClient
 		Runnable schedule(Runnable action, long delayMs);
 	}
 
+	/** Swing's timer, run once: the client's {@link Debouncer}, for the search box and a pressed star's dwell. */
+	static final Debouncer SWING = (action, delayMs) ->
+	{
+		Timer timer = new Timer((int) delayMs, e -> action.run());
+		timer.setRepeats(false);
+		timer.start();
+		return timer::stop;
+	};
+
 	/** The credentials a search is asked with, read when it goes. Null when there are none to ask with. */
 	interface Credentials
 	{
@@ -227,13 +236,7 @@ final class SearchClient
 	@Inject
 	SearchClient(OkHttpClient http, Gson gson, Pairing pairing, MemberIdentity identity)
 	{
-		this(http, gson, () -> pairing.signed(identity.id()), () -> identity.id() != null, (action, delayMs) ->
-		{
-			Timer timer = new Timer((int) delayMs, e -> action.run());
-			timer.setRepeats(false);
-			timer.start();
-			return timer::stop;
-		}, SwingUtilities::invokeLater);
+		this(http, gson, () -> pairing.signed(identity.id()), () -> identity.id() != null, SWING, SwingUtilities::invokeLater);
 	}
 
 	/** A search with a character always there to ask as, for a test that is not about logging in. */
@@ -389,42 +392,19 @@ final class SearchClient
 		show(new Result(query, result.hits, null, null, true));
 		Call call = http.newCall(request);
 		inFlight = call;
-		CompanionHttp.enqueue(call,
-			(failed, error) -> swing.execute(() -> landed(call, asked, query, null, UNREACHABLE, System.currentTimeMillis() + FAILURE_GAP_MS)),
-			(completed, response) ->
+		ObjLongConsumer<String> refused = (why, gap) ->
+			swing.execute(() -> landed(call, asked, query, null, why, System.currentTimeMillis() + gap));
+		CompanionHttp.ask(call, FAILURE_GAP_MS, UNREACHABLE, UNREADABLE, reply ->
+		{
+			if (!reply.isSuccessful())
 			{
-				Answer answer = null;
-				String why = null;
-				long next;
-				try (Response close = response)
-				{
-					if (!close.isSuccessful())
-					{
-						/* A busy map is asked nothing again until the player types or presses Enter; the line counts the wait down. */
-						next = System.currentTimeMillis() + MapWait.after(close, FAILURE_GAP_MS);
-						why = MapWait.why(close.code(), FAILED);
-					}
-					else
-					{
-						next = 0L;
-						answer = gson.fromJson(CompanionHttp.readBounded(close.body()), Answer.class);
-						if (answer == null)
-						{
-							why = UNREADABLE;
-						}
-					}
-				}
-				catch (IOException | RuntimeException unreadable)
-				{
-					next = System.currentTimeMillis() + FAILURE_GAP_MS;
-					answer = null;
-					why = UNREADABLE;
-				}
-				Answer read = answer;
-				String said = why;
-				long allowed = next;
-				swing.execute(() -> landed(call, asked, query, read, said, allowed));
-			});
+				/* A busy map is asked nothing again until the player types or presses Enter; the line counts the wait down. */
+				refused.accept(MapWait.why(reply.code(), FAILED), MapWait.after(reply, FAILURE_GAP_MS));
+				return;
+			}
+			Answer answer = gson.fromJson(CompanionHttp.readBounded(reply.body()), Answer.class);
+			swing.execute(() -> landed(call, asked, query, answer, answer == null ? UNREADABLE : null, 0L));
+		}, refused);
 	}
 
 	/** Swing: the answer to {@code query}, or why there is none. */
@@ -495,7 +475,7 @@ final class SearchClient
 				boolean onMap = row.x > 0 && row.y > 0 && row.x <= 16_383 && row.y <= 16_383 && plane >= 0 && plane <= 3;
 				String section = "Places".equals(row.section) ? null : text(row.section, 20);
 				String kind = text(row.kind, 20);
-				hits.add(new Hit(id, name, rowLine(row), placeLine(row), section, onMap ? new int[]{row.x, row.y, plane} : null, kind, null));
+				hits.add(new Hit(id, name, placeLine(row), far(row), section, onMap ? new int[]{row.x, row.y, plane} : null, kind, null));
 			}
 		}
 		if (answer.items != null)
@@ -517,26 +497,18 @@ final class SearchClient
 		return hits;
 	}
 
-	/** "Character · Shilo Village": the website's own subtitle, without the effort; see {@link Hit#note}. */
+	/** "Character · Shilo Village": the website's own subtitle, without the effort; see {@link Hit#far}. */
 	static String placeLine(Row row)
 	{
 		String line = text(row.line, 120);
 		return line == null ? "" : line;
 	}
 
-	/** "Character · Shilo Village · ~15 tiles": the website's own subtitle, then the effort it measured. */
-	static String rowLine(Row row)
+	/** "~15t": the effort the map measured, short enough to stand at the row's right edge; null where it measured none. */
+	@Nullable
+	static String far(Row row)
 	{
-		StringBuilder sb = new StringBuilder(placeLine(row));
-		if (row.effortTiles != null && row.effortTiles >= 0)
-		{
-			if (sb.length() > 0)
-			{
-				sb.append(" · ");
-			}
-			sb.append('~').append(row.effortTiles).append(" tiles");
-		}
-		return sb.toString();
+		return row.effortTiles != null && row.effortTiles >= 0 ? "~" + row.effortTiles + "t" : null;
 	}
 
 	/**

@@ -101,10 +101,11 @@ final class GroupPanel extends JPanel
 	/** How long before its start a meetup's countdown turns amber; see {@link #imminent}. */
 	static final long IMMINENT_MS = 15 * 60_000L;
 	/**
-	 * A meetup's world while this client is on it: the green the website's friends list gives the
-	 * player's own world, after the game's own friends list. On any other world it keeps the line's grey.
+	 * A friend's or a meetup's world while this client is on it: the green the website's friends list
+	 * gives the player's own world, after the game's own friends list. On any other world it keeps the
+	 * line's grey.
 	 */
-	private static final String HERE = "#34d399";
+	static final String HERE = "#34d399";
 	/** A friend's button for the game's own world map; "Show on world map" does not fit beside Route. */
 	static final String WORLD_MAP = "World map";
 	private static final String MEETUP_ROUTE_TIP = Words.of("meetup.routeTip");
@@ -138,6 +139,12 @@ final class GroupPanel extends JPanel
 	private final GameSprites sprites;
 
 	private final JPanel friends = column(DARK_GRAY_COLOR);
+	/**
+	 * Where the friends would be while nobody is logged in and no roster is held: the friends come
+	 * with a character, so the tab says what it waits for, as Stars does, where it drew only the
+	 * Meetups heading. Logged in with no roster yet it stays hidden, since the roster is on its way.
+	 */
+	private final JLabel logIn = new JLabel();
 	private final JLabel meetupsHead = MapCompanionPanel.sectionHead("Meetups");
 	/**
 	 * Under the Meetups heading while Destinations and meetups is off. The map's meetups are taken only
@@ -200,6 +207,10 @@ final class GroupPanel extends JPanel
 		column(this, DARK_GRAY_COLOR);
 		setName("companionGroup");
 		add(friends);
+		/* Under the friends' column, which is empty whenever this shows, so it is the tab's first line. */
+		logIn.setName("group.logIn");
+		add(line(logIn));
+		setWrapped(logIn, Words.of("group.logIn"), WIDTH + 16);
 		meetHere.setName("group.meetHere");
 		meetHere.setForeground(ColorScheme.BRAND_ORANGE);
 		meetHere.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
@@ -397,6 +408,7 @@ final class GroupPanel extends JPanel
 		List<RosterRow> roster = destinations.getRoster();
 		List<Meetup> events = destinations.getEvents();
 		String destinationKey = DestinationRoute.keyOf(destinations.getDestination());
+		logIn.setVisible(roster == null && !loggedIn);
 
 		Said meet = meetups.said("meet");
 		/* Meet here's answer to a press made since the form was last opened or put away. */
@@ -495,7 +507,7 @@ final class GroupPanel extends JPanel
 		{
 			for (RosterRow row : roster)
 			{
-				sb.append(row.id).append(row.name).append(row.colour).append(row.presence).append(row.near)
+				sb.append(row.id).append(row.name).append(row.colour).append(row.presence).append(row.world).append(row.near)
 					.append(row.nearYou).append(row.routable).append(row.news == null ? "" : row.news.title + row.news.atMs)
 					.append(group.shown(row.id)).append(group.finding(row.id, now)).append(group.lost(row.id));
 				sb.append(group.inside(row.id));
@@ -658,7 +670,10 @@ final class GroupPanel extends JPanel
 		String where = whereLine(row);
 		if (where != null)
 		{
-			top.add(left(MapCompanionPanel.wrapped(where, 11f, LIGHT_GRAY_COLOR, room)));
+			/* The world leads, so it is read in one place down the rows, and is green on the player's own. */
+			JLabel line = label(11f, LIGHT_GRAY_COLOR);
+			line.setText(markup(where, onWorld(row.world) ? "W" + row.world : null, HERE, room));
+			top.add(left(line));
 		}
 		card.add(left(buttons.length == 0 ? top : beside(top, buttons)));
 		if (row.news != null)
@@ -799,7 +814,7 @@ final class GroupPanel extends JPanel
 		if (!where.isEmpty())
 		{
 			JLabel line = label(11f, LIGHT_GRAY_COLOR);
-			setMarkup(line, markup(where, onItsWorld(meetup) ? "W" + meetup.world : null, HERE, WIDTH));
+			setMarkup(line, markup(where, onWorld(meetup.world) ? "W" + meetup.world : null, HERE, WIDTH));
 			card.add(line);
 		}
 		if (!rollUp(meetup.who).isEmpty())
@@ -876,7 +891,7 @@ final class GroupPanel extends JPanel
 		JButton line = MapCompanionPanel.linkButton("");
 		line.setName("group.meetupFold." + meetup.id);
 		/* Wrapped as a label is, since the title is whatever the group typed and a button's own text would widen the tab. */
-		line.setText(markup(words, onItsWorld(meetup) ? "W" + meetup.world : null, HERE, WIDTH + 16));
+		line.setText(markup(words, onWorld(meetup.world) ? "W" + meetup.world : null, HERE, WIDTH + 16));
 		line.setToolTipText(open ? "Fold this meetup to its line" : Words.of("group.openMeetupTip"));
 		line.addActionListener(e ->
 		{
@@ -889,10 +904,10 @@ final class GroupPanel extends JPanel
 		return line;
 	}
 
-	/** Whether this client is on the meetup's world now, so its world is drawn green. */
-	private boolean onItsWorld(Meetup meetup)
+	/** Whether this client is on that world now, so a friend's or a meetup's world is drawn green. */
+	private boolean onWorld(@Nullable Integer world)
 	{
-		return meetup.world != null && here > 0 && meetup.world == here;
+		return world != null && here > 0 && world == here;
 	}
 
 	static String source(Meetup meetup)
@@ -900,12 +915,17 @@ final class GroupPanel extends JPanel
 		return "meetup:" + meetup.id;
 	}
 
-	/** "near Lumbridge Castle · Near you", or null for a friend who shares no position. */
+	/**
+	 * "W302 · near Lumbridge Castle · Near you": the world first, where every row has it in one place,
+	 * then where in words. The world alone for a friend who shares one and no place, and null for a
+	 * friend who shares neither.
+	 */
 	@Nullable
 	static String whereLine(RosterRow row)
 	{
-		boolean nearYou = Boolean.TRUE.equals(row.nearYou);
-		return row.near == null && !nearYou ? null : dotted(row.near, nearYou ? "Near you" : null);
+		String where = dotted(row.world == null ? null : "W" + row.world, row.near,
+			Boolean.TRUE.equals(row.nearYou) ? "Near you" : null);
+		return where.isEmpty() ? null : where;
 	}
 
 	/** The parts there are, between dots. */
@@ -1044,13 +1064,14 @@ final class GroupPanel extends JPanel
 	}
 
 	/**
-	 * A line wrapped as {@link MapCompanionPanel#setWrapped} wraps it, with one part, its last
-	 * occurrence, in a colour of its own; without the part, exactly what setWrapped would set. Every
-	 * word is escaped, since some of these lines carry what somebody in the group typed.
+	 * A line wrapped as {@link MapCompanionPanel#setWrapped} wraps it, with one part in a colour of its
+	 * own: where the line leads with it, as a friend's does with their world, else its last occurrence,
+	 * as a meetup's world or countdown ends its line. Without the part, exactly what setWrapped would
+	 * set. Every word is escaped, since some of these lines carry what somebody in the group typed.
 	 */
 	static String markup(String line, @Nullable String part, String colour, int width)
 	{
-		int at = part == null ? -1 : line.lastIndexOf(part);
+		int at = part == null ? -1 : line.startsWith(part) ? 0 : line.lastIndexOf(part);
 		String words = at < 0 ? escape(line)
 			: escape(line.substring(0, at)) + "<font color='" + colour + "'>" + escape(part)
 				+ "</font>" + escape(line.substring(at + part.length()));
@@ -1058,7 +1079,7 @@ final class GroupPanel extends JPanel
 	}
 
 	/** Set a label's markup only when it changed: the same text set again still repaints it. */
-	private static void setMarkup(JLabel label, String html)
+	static void setMarkup(JLabel label, String html)
 	{
 		if (!html.equals(label.getText()))
 		{

@@ -99,18 +99,25 @@ public class RouteNotesTest
 				route, null, null, null, rerouting -> null, () -> { }));
 			service.model.accept(new Gson().fromJson(new InputStreamReader(RouteNotesTest.class.getResourceAsStream(
 				"/companion-stars.sample.json"), StandardCharsets.UTF_8), StarsModel.Feed.class));
+			/* One press pins the star and, its dwell over, asks the way; Pin and then Route were pressed for these. */
+			Runnable[] dwell = new Runnable[1];
+			stars.get().dwell = (action, delayMs) ->
+			{
+				dwell[0] = action;
+				return () -> { };
+			};
 			stars.get().refresh();
 			((AbstractButton) named(stars.get(), "stars.site.tile:2974,3241")).doClick();
-			((AbstractButton) named(stars.get(), "stars.pin")).doClick();
 			assertEquals(Integer.valueOf(302), destinations.getDestination().world);
 			assertNull("the pin's card says its world and nothing that ages", destinations.getDestination().note);
 
-			((AbstractButton) named(stars.get(), "stars.route")).doClick();
+			dwell[0].run();
 		});
 		settle(press, StarsPanel.SOURCE);
 		RelayResponse.Destination answered = destinations.getDestination();
 		assertEquals("Rimmington mine", answered.name);
 		assertEquals(Integer.valueOf(302), answered.world);
+		assertNotNull("the way landed", answered.route);
 		assertNull("nor does the route's", answered.note);
 	}
 
@@ -166,7 +173,7 @@ public class RouteNotesTest
 		assertEquals("now.quest.route", routes.get(1).getName());
 	}
 
-	/** The row keeps the distance it measured; the card under it carries the route's own length instead. */
+	/** The row keeps the distance it measured, at its right edge; the card under it carries the route's own length instead. */
 	@Test
 	public void aSearchPickWritesTheRowsWordsWithoutItsDistance() throws Exception
 	{
@@ -176,7 +183,9 @@ public class RouteNotesTest
 			+ "\"name\":\"Lumbridge Castle bank\",\"line\":\"Bank · Lumbridge Castle · 2nd floor\",\"x\":3208,\"y\":3220,"
 			+ "\"plane\":2,\"effortTiles\":40}]}", SearchClient.Answer.class);
 		SearchClient.Hit hit = SearchClient.normalize(answer).get(0);
-		assertEquals("the row still says how far", "Bank · Lumbridge Castle · 2nd floor · ~40 tiles", hit.line);
+		/* The row says how far beside its name now, not at the end of its grey line. */
+		assertEquals("the row still says how far", "~40t", hit.far);
+		assertEquals("Bank · Lumbridge Castle · 2nd floor", hit.line);
 		SwingUtilities.invokeAndWait(() -> new SearchPanel(new SearchClient(new OkHttpClient(), new Gson(), pairing, identity), press, null)
 			.pick(hit));
 		settle(press, SearchPanel.SOURCE);

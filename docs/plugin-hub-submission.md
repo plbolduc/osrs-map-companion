@@ -172,7 +172,11 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RoutePress`, `SearchClien
   with its tier and scroll item id alone.
   A clue or death that is not shared leaves only in that request. Same
   one-at-a-time rule and wait; the answer becomes the destination. Nothing is walked. **Route here**
-  on a right-click of the world map sends it too, with the clicked tile as the target.
+  on a right-click of the world map sends it too, with the clicked tile as the target. On Stars, a
+  press on a star pins it in the client and, once it has stayed pinned for 0.7 seconds, sends this
+  request once with the star's tile as the target and no further press: one request for the star
+  stopped on and none for stars pressed past, never repeated on its own, under the same
+  one-at-a-time rule and waits; the README says a press sends the two tiles.
 - **PUT /api/companion/event/answer** — one press of a meetup's answer (**Going**, **Maybe**,
   **Can't**, **On my way**). JSON is the meetup's id and the answer. Headers:
   `X-Companion-Code`, `X-Companion-Member`, `X-Companion-Member-Secret`.
@@ -263,7 +267,8 @@ screenshot tools are outside `src/main`. Bundled third-party notices accompany t
 ## Changes since the approved submission
 
 What the next Hub update brings. Its description names each in a few words; the detail here is for
-answering a reviewer. Since 1.9.0:
+answering a reviewer. Since 1.9.0, for 1.10.0, in review in
+[runelite/plugin-hub#20645](https://github.com/runelite/plugin-hub/pull/20645):
 
 - **Drop rates for thirteen more bosses:** the bundled `unique-rates.json` grows from 341 rates to
   374, with Commander Zilyana, the Corporeal Beast, Phantom Muspah, the Dagannoth Kings, Spindel,
@@ -278,8 +283,34 @@ answering a reviewer. Since 1.9.0:
   only the kills the plugin recorded. The existing *Drop luck in chat* setting governs it.
 - **Description and tags:** the manifest and the `@PluginDescriptor` name Drop luck, with the tags
   `loot`, `drops`, `luck` and `dry`.
+- **The ways as chips:** a route's ways are a strip of chips over its steps, each with its first
+  teleport's picture and the name the map gives it. The route reply gains one optional string per
+  way, `face`, bounded as the label is and read only; a reply without it shows the label. Picking a
+  chip, and keeping it through a Reroute before the player sets off, happen in the client and send
+  nothing. A walk, a boarding, a sail, a dock, a way in and a way down are drawn with the client's own
+  sprites by id; nothing is downloaded.
+- **One press on a star:** a press on a star in the Stars tab pins it and then asks the way, where it
+  opened Route and Pin to choose between. The request is Route's own, listed under Network requests,
+  with the tile the player stands on as Route sends it: sent once, 0.7 seconds after the press if
+  the star is still pinned, through the gate every route shares, and not repeated after a refusal.
+  The star list's own request and its once-a-minute schedule are unchanged.
+- **A farm run keeps Route's wait on a busy map:** after a 429 or 503 a run waits the `Retry-After`
+  it names, held between five seconds and five minutes, as Route does, where it waited at least
+  half a minute; the two share one gate. Asking again is still the player's press.
+- **A redirecting map address** keeps search and meetups quiet for five minutes, as Route already
+  did. Turning the plugin off cancels a search still waiting to be sent and forgets where the
+  character died.
+- **Less work each tick and frame:** the sidebar, the star list and the Port tasks card are drawn
+  again only when what they show has changed, and the tick's own checks run once where they ran
+  several times. Nothing about what is read or sent changes.
+- **Words and layout:** a friend's row leads with their world, distances sit in a column at the
+  right, the step box says how far through the route it is, and a few controls gained tooltips.
+  Nothing is sent for any of it.
+- **One reply handler and one way to end a session:** internal; every request, header and wait is
+  the one it was.
 
-No request, field, setting or warning is added.
+No setting or warning is added. The one new field, `face`, arrives in a reply, and the one new send
+is the route request a star press makes, which is Route's own.
 
 ## Before submission
 

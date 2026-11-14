@@ -534,12 +534,28 @@ Status: **built**, on `claude/where-to-go`, and not yet seen in a real client. I
 of `docs/plan-where-to-go-for-a-task.md` in `osrs-stars-map`.
 
 - **Under the destination's name**, when the map sent a route: the way being followed and its
-  length in run tiles, then its steps in the card's own words. The way's name is left out where the
-  first step already says it, so *52 tiles* sits over *Cast Lumbridge Home Teleport*, while a voyage
-  keeps *Docking point · 1340 tiles* over its walk to the boat. The steps are
+  length in run tiles, then its steps in the card's own words. With one way, its name is left out
+  where the first step already says it, so *52 tiles* sits over *Cast Lumbridge Home Teleport*,
+  while a voyage keeps *Docking point · 1340 tiles* over its walk to the boat. The steps are
   numbered as the website numbers them, each with the detail and notes the card prints under it.
   The numbers stand in a column of their own, 14px and right-aligned, as the website's journey row
   puts them, and a wrapped title and the lines under it start under the title's first letter.
+- **The ways**, when the map offered more than one, are a strip of chips over the steps, one for
+  every way and the one being followed among them, so they are compared and picked in one place.
+  A chip is drawn as the website draws its own: the picture of what the way makes you use, the
+  ring or the tablet, a boat for a voyage and a boot for a walk, then its name. The name is the
+  map's `face` for the way, where a teleport lands or what a ride is dialled to, *Ferox Enclave*
+  on a ring of dueling's chip, and the way's label where the map sends none. The chosen chip is
+  filled with the website's orange, and a press on another shows that way's steps instead. The
+  order is the map's and never follows the choice, the ways the account cannot take yet last with
+  their pictures faded, so a press changes which chip is filled and moves nothing under the
+  pointer. The line under the strip is the chosen way's length and how many tiles more than the
+  best it is, *80 tiles · 28 more than best*. The best way's line is its length alone: *best* is
+  in its chip's tip, beside the way's whole label, *Lumbridge Home Teleport · 52 tiles · best*. A
+  way not open yet still shows its steps when pressed, under *You can't take this way yet.* on a
+  line of its own in the refusal pink. The strip starts a new row before a chip would pass the
+  card's edge, and a name wider than the card is cut to it, with the whole name in the tip. A
+  route with one way, a run's leg and an arrival show no strip.
 - **A teleport step's picture** sits between its number and its words: the item's sprite or the
   spell's icon, at 16px, as the card's sprite for that row. The map sends the game's id for it and
   the client's own cache draws it; a walk, a ride, or a teleport the map has no id for stays words
@@ -553,20 +569,22 @@ of `docs/plan-where-to-go-for-a-task.md` in `osrs-stars-map`.
   its pin is, so what is done stops pushing the step being walked down the card. ▸ and ▾ open folds
   and mark nothing else. The step moves on when you stand within four tiles of where it ends, on its
   floor. Inside a raid's rooms nothing moves, because the tile there is not a place.
-- **On arrival** the card changes shape rather than greying a route still drawn: the way, its steps
-  and the other ways go, and one amber line, *Arrived*, takes the way line's place. Reroute and
+- **On arrival** the card changes shape rather than greying a route still drawn: the strip, the
+  way and its steps go, and one amber line, *Arrived*, takes the way line's place. Reroute and
   Dismiss stay, Reroute because an arrival read wrongly still needs its way out. A run's leg goes
   whole, since the stop it led to already says *You're here*.
-- **The other ways** fold behind one line, *▸ 2 other ways*, as the card's closed row folds them.
-  Pressing one shows its steps instead; the best one says so. Each starts with the picture of the
-  first of its steps that has one, the ring or the tablet, as the website's route chip leads with
-  its teleport; a way not open yet is grey, its picture faded, and still shows its steps.
 - **Reroute** sits beside **Dismiss**, and plans again from where you stand. While the answer is
   on its way the card says *Planning from where you stand…*, and a refusal is one sentence under
-  the steps, in the refusal pink. A route ranked from no position says so above the steps. A destination with no
-  way yet, a star pinned on Stars or a place the map sent bare, has **Route** in Reroute's cell
-  instead: it asks by the destination's own tile, as a star's Route does, so the card that shows a
-  place can always lead there.
+  the steps, in the refusal pink. A way picked over the best is kept through a Reroute while its
+  first step is still the current one, where the answer still offers that way and the account can
+  take it: a player who picked the ring because the home teleport was cooling down, and rerouted
+  before leaving, keeps the ring. One who has already travelled gets the best way from where they
+  now stand, and a new destination always starts on its best way. The pick is matched by the
+  way's id, since a new answer is free to reorder its ways.
+  A route ranked from no position says so above the steps. A destination with no
+  way yet, a star pinned on Stars whose way has not landed or a place the map sent bare, has
+  **Route** in Reroute's cell instead: it asks by the destination's own tile, as a star's Route
+  does, so the card that shows a place can always lead there.
 - **On the world map** each step's end has a pin with the step's number. The current one is amber
   and holds the map's edge, the ones behind it fade, and the last step leaves the destination's
   own pin uncovered. The game's arrow points at the current step's end once it is loaded.
@@ -586,7 +604,9 @@ of `docs/plan-where-to-go-for-a-task.md` in `osrs-stars-map`.
 
 Step 6 of the same plan. A box at the top of Overview while connected, as the drop-luck list's own
 box is drawn, and under it up to eight places in the website's order, each with the website's
-grey line and the effort it measured, *Bank · 2nd floor · ~40 tiles*. An item's sources carry the
+grey line, *Bank · 2nd floor*, and the effort it measured at the right edge of its name's line,
+*~40t*, so the rows' distances end on one edge and are compared by looking down it. A row the map
+measured no distance for has none, and its name keeps the whole width. An item's sources carry the
 website's *Sold at* or *Dropped by* heading, and a name a partial query could mean is a row of its
 own, *Item · dropped by 3*. A misspelling is one button, *Did you mean abyssal whip?*, which searches
 for it. A pick plans the way and fills the destination's card, so the list folds once that answer
@@ -600,9 +620,13 @@ the way there…* or the map's refusal with the row's name, *Al Kharid bank: …
 
 Step 8. Each card under *Now* that names a place gains the way there, planned from where you stand:
 **Route back** beside the death's *Show on map*, **Route** on the meetup's card, and a clue card,
-*Hard clue* over *Coordinate · dig at 2896, 3119*, whose Route appears when the step names a tile.
-In Stars, Route sits beside *Pin destination* for a precise site; an approximate one has **Open on
-map** there instead. While the map answers the button reads *Planning…*, and a refusal is one line
+*Hard clue* over *Coordinate · Route finds the dig spot*, whose Route appears when the step names a
+tile. The tile itself is the line's tooltip, as the death's is: there is nowhere in the game to
+type a pair of numbers, and Route already goes to the spot.
+In Stars, Route sat beside *Pin destination* for a precise site, and an approximate one had **Open on
+map** there instead. Since 13 November a press on a precise site's star is the pin and the question
+at once (*One press on a star* below), and Route is only beside Unpin, for a pinned star with no
+way. While the map answers the button reads *Planning…*, and a refusal is one line
 under it in the refusal pink, in the map's own words when it gives them, as it does for a clue step
 it cannot place.
 The answer fills the destination's card, as a pick from Search does, and a star's is drawn under the
@@ -628,9 +652,11 @@ card is about; otherwise the card says only how long ago, as before. Nothing abo
 
 Step 9, from `plan-companion-social.md`. Under the Group heading, one card per other member: their
 disc as the world map draws it, their map colour with their initials, so two friends of one colour
-are told apart by their letters, and presence as a dot in its corner, never as words; *near Lumbridge
-Castle · Near you*; their newest news, *Woodcutting 80 · 5m ago*; then **Route** and **Show on map**
-for a friend whose position the map draws. A friend sharing no position is a name and a dot. Route
+are told apart by their letters, and presence as a dot in its corner, never as words; *W302 · near
+Lumbridge Castle · Near you*, the world first so it sits in one place down the rows, and green
+while you are on it, as a meetup's is; their newest news, *Woodcutting 80 · 5m ago*; then **Route**
+and **Show on map** for a friend whose position the map draws. A friend who shares a world and no
+place has the world alone, and one sharing neither is a name and a dot. Route
 reads *Finding…* while their position is asked for, *Planning…*, then *Reroute*. A friend inside an
 instance has no tile the map can plan to, so Route asks nothing and the row says *Cara is inside an
 instance. Route works once they're out.* With the group
@@ -764,7 +790,7 @@ not fit beside Route), *Hide on map* once pressed, and *On world map* while the 
 on.
 
 Slayer's button beside Route says **Pin**. It said *World map*, but it makes the place this client's
-destination, as Stars' *Pin destination* does: Home's card, the arrow and the world map's pin. A
+destination, as a press on a star does on Stars: Home's card, the arrow and the world map's pin. A
 friend's *World map* draws only that friend's dot, so the one word named two acts.
 
 ### The group's buttons
@@ -832,8 +858,10 @@ At the login screen the status card's *Logged out* is said once, and the presses
 as a member wait for a character, greyed, since a member is a character: Reroute, Route back, the
 clue's Route, a friend's and a meetup's Route, the answers, Meet here, Copy invite, the run picker
 and Start run, a run's Reroute, Port tasks' Start run and Slayer's Route. A Route's tooltip says
-*Log in to plan a route.* The search box goes, as it does before a group is joined, and Stars says
-*Log in to see stars.* Each had stayed pressable and answered with a fix for a connection nothing
+*Log in to plan a route.* The search box goes, as it does before a group is joined, Stars says
+*Log in to see stars.*, and Group, while it holds no friends to list, says *Log in to see your
+group.* over the Meetups heading; friends kept through a logout stay listed.
+Each press had stayed pressable and answered with a fix for a connection nothing
 was wrong with, *Connect to your map to plan a route.*, on a page with no Connect button, and a
 friend's Route waited half a minute for a position the logout had stopped, then said the friend
 shared none; a friend's Route still *Finding…* at the logout now stops and says to log in. What
@@ -896,7 +924,9 @@ line says what it hides: *For Mining 72: up to T7 · worlds up to 1620 total*. *
 website* has since been removed: the filters and favourite sites stay on this machine. *Selected world*
 stays at the top, once the player picks one: nothing is picked for them, so the tab opens on the
 list, a pick goes when its star leaves the feed rather than moving to another, and a pick the
-filters hide is not offered until they show it again.
+filters hide is not offered until they show it again. (The head of the tab has since become the
+pinned star's, and since 13 November only a star whose spot is approximate is picked: *One press
+on a star* below.)
 
 Once a star's Route is answered, its way is drawn under the star, in a card between the star's
 live line and its buttons: the steps Home's destination card draws, read from the same route, with
@@ -904,7 +934,8 @@ Home's own Follow and Reroute, offered and pressable exactly when Home's are, an
 button where Home has Dismiss. Star hunters hop from this tab, and steps a tab away cost them their
 place in the list; Home's card still shows the same route, and nothing switches tabs. A star pinned
 with no way yet keeps **Route** beside Unpin, so the way there is one press rather than Unpin, then
-Route.
+Route. Since 13 November that is a star whose own question came to nothing, and the button is the
+way to ask again.
 
 A star's tier is drawn in the map's own colour for it, the dark ramp of `lib/tier-color.ts`, so T7
 is one pink here and in the map's list; its time left keeps the line's ink until it is under twenty
@@ -1139,8 +1170,8 @@ words of eight lines. What a leg says besides its length, *ashore at The Onyx Cr
 the task in grey. A stop the map sends only words for keeps its line of words: a first leg that
 boards somewhere other than the run's own mooring, which the map has no one length for.
 
-The length is printed in the margin the card's text leaves at its right, so the task keeps the
-width it had beside a picture.
+The task gives up the length's width and wraps beside it. The card's own margin is narrower than
+a length, so a task wrapped at the card's full text width lost its last letters under the length.
 
 ### How far through
 
@@ -1154,7 +1185,7 @@ A stop behind the player was its whole name struck through, three lines of a sen
 done. A name too long for the card is now cut to share one line with its word, *1. Use your
 spyglass to ad… · Charted*. A farm stop's name fits and is as it was.
 
-The same eight tasks paint 533px.
+The same eight tasks paint 572px.
 
 ### Proposed and not built
 
@@ -1176,16 +1207,23 @@ names no picture for is drawn by its kind: the minimap's walking boot for a walk
 Sailing interface a boat for boarding and docking and a ship at sea for the sail. They are the
 game's own sprites, by the client's constants.
 
-Only the list of steps draws them. A stop's picture in a run and the box over the game stay the
-step's own item or spell, so a leg that starts with a walk still leads with its teleport, and a leg
-that is all walking leads with nothing. The picture's column, kept on every step once one has a
-picture, is now on nearly every route.
+The list of steps draws them, and so does a way's chip when the way has no teleport to lead with:
+a boot for a walk and a boat for a voyage, whose first step is the walk to the boat. A stop's
+picture in a run and the box over the game stay the step's own item or spell, so a leg that starts
+with a walk still leads with its teleport, and a leg that is all walking leads with nothing. The
+picture's column, kept on every step once one has a picture, is now on nearly every route.
 
 ### The bar on every run
 
 A farm run said *2 of 3 tracked done* and a port-task run *1 of 4 stops done* in words. Both have
 the charting run's bar over that line, counting what the line counts: the stops something can
 witness, or every stop where nothing can.
+
+A farm run has the charting run's column too. A stop still ahead that the map priced has its
+length, *29t*, at the right edge of its name's row, with no *walk* or *sail* under it because its
+way is the line below, and the count ends *· 55 tiles left* when every stop ahead has a length:
+*1 of 3 tracked done · 55 tiles left*. One stop the map did not price and no total is given, since
+a total of some stops would read as the whole. A stop behind the player keeps its one struck line.
 
 ### A port-task run's legs in a column
 
@@ -1284,3 +1322,133 @@ were. A player who does not share their position, or who pressed *Not now*, is n
 switch only part of which is on shows a dash and says the part in the fewer words, *Not shared:
 Where you died* for one. A player who hid their name keeps it hidden, and no switch in Settings
 turns it on.
+
+## Ways as chips, and a number at the right, 13 November 2026
+
+A review of the sidebar as released asked where a player read a sentence to find one number, and
+where one mark meant two things. Built, and not yet seen in a real client: `docs/live-checks.md`
+lists what to look at.
+
+### The ways to a destination
+
+The ways the map offered were a fold under the steps, *▸ 2 other ways*, opening a table of the
+ways not being followed. A press took the pressed row out of the table and put the way left
+behind in, so the rows moved under the pointer; and the chosen way's length was over the steps
+while the others' were under them behind the fold, so they were never compared in one place.
+Every way is a chip in a strip over the steps now, and Reroute keeps a pick until the player sets
+off, where it always went back to the best way. *The way there, step by step* above says how
+each is drawn.
+
+### One edge to look down
+
+Four lists said a number inside a sentence, at a different place in every row. Each now has it at
+the right edge of the row's first line, in the line's grey, where the charting run's lengths
+already made a column, and the name gives up the number's width so the two fit the card however
+long the name is:
+
+- **A search result's distance**, *~210t*, where the grey line ended *· ~210 tiles* and often
+  wrapped it onto a third line.
+- **A farm stop's length**, *29t*, with the tiles left in the count, as *Runs and steps to scan*
+  says above.
+- **An idle port task's progress**, where each task said it inside a sentence under its name,
+  *Collect 3 crates at Brimhaven for Port Khazard*. The count is crates taken of those asked while
+  any is still to collect, *0/3*, then crates delivered, up to *3/3*, and a bounty's parts had of
+  those asked, *6/15*. The line under the name says only where: *Collect at Brimhaven for Port
+  Khazard*, *Deliver to Port Khazard*, *Delivered*, *Osprey feather · hand in at Brimhaven*. A
+  courier's one count changes meaning from taken to delivered, and the line under it says which.
+  A bounty counts what is had and not what is owed, so every count fills the same way; where the
+  game gave no total it says *9 left*, and a courier whose crates were not counted has no count.
+  A running port-task run's stops are as they were.
+- **How far through a route the step box is.** The box over the game named the step as *2. Walk
+  to the castle's staircase*, with no word on how many steps there were, and a run's leg gave its
+  step no number at all. The step is its words alone now, with *2/3* at the right of its line in
+  the map's amber: the step's number, the one its pin has on the world map, of the steps in the
+  way followed. A run's leg counts its own steps the same way, under the stop's number in the
+  title. RuneLite's line keeps a third of the box for a right-hand text once the two do not fit
+  on one line, so a step too long to sit beside the count wraps in the other two thirds.
+
+### A world that says whether to hop
+
+A friend's world was only in the tooltip of their dot on the game's world map, so finding which
+world to hop to meant hovering each dot. It leads their row under Group now, as *Friends and
+meetups under Group* says above. The destination card's second line, *W302 · T7 · 16m left*,
+printed its world in the line's grey whatever world the player was on; that world is green while
+the player is on it, and only the world, the note after it keeping the grey. A friend's row, a
+meetup's line, a star's world and the destination's card now say the same thing the same way.
+
+### One mark, one meaning
+
+A star site with several worlds folded them behind *+2 ▾* and read *+2 ▴* once open, while
+everywhere else in the sidebar ▾ means open and ▸ closed. The site's button reads *+2 ▸* closed
+and *+2 ▾* open.
+
+Every Route says in its tooltip what it plans, and a Slayer spot's said nothing; Port tasks'
+*Start run* says what it asks the map, and the farm card's said nothing. They say *Plan the way to
+this spot from where you stand* and *Ask the map for the run chosen above, starting from where you
+stand*. Logged out, Route still says to log in, and while the map's wait greys either button its
+tooltip still says how long is left.
+
+### Pressed from the game
+
+The Reroute and Follow keys and the step box's menu press the sidebar's own buttons, and which
+buttons a card offers is written by a refresh that stops while the sidebar is closed or another
+plugin's panel is in front. A press from the game brings every card up to date first, so it acts
+on a destination that arrived since the sidebar closed, and on a Reroute whose wait has ended.
+The refresh asks the map nothing.
+
+### A map address that redirects
+
+A redirect is not followed, so every request to that address gets the same answer until the
+player changes Map address. Under a Route, a run and the star list the sidebar said so, *This map
+address redirects. Check Map address in RuneLite's settings for this plugin.*, and waited five
+minutes; under a meetup's answer, Meet here and the search it read as any failure, and was asked
+again within half a minute. All five say it now and wait the five minutes, read in the one place
+their replies from the map go through. Connect, Join, Rename and the status card's own line are
+as they were.
+
+## One press on a star, 13 November 2026
+
+A press on a star picked it, and its card opened on **Route** and **Pin** to choose between: Route
+asked the map the way and its answer pinned the star, Pin set the pin alone. Picking a search
+result was already one press, and so is a star now. Built, and not yet seen in a real client:
+`docs/live-checks.md` lists what to look at.
+
+- **The press pins.** A star with a tile of its own and time left becomes the destination on the
+  press, as Pin made it: the world map's pin, the arrow, Home's card, and *Pinned destination* at
+  the head of the tab, which scrolls up to it. It replaces whatever was pinned. The pin is this
+  client's own, so it is made at once and for every star pressed, and nothing is sent for it.
+- **Then it asks the way.** Beside Unpin a greyed button reads *Planning…*, the word a pressed
+  Route has always shown, from the press until the map has answered. The answer lands as a pressed
+  Route's did: the chips and the steps under the star, followed from the start.
+- **Asked sparingly.** A route is one of the member's on the map, a few in a row and then one every
+  five seconds, so the question waits until the star has stayed the destination for 0.7 seconds,
+  and until the gate every Route, Reroute and run shares is open. Pressing down the list pins each
+  star and asks for the one stopped on. A press ends the wait of the press before it, so one
+  question at most is waiting. If the destination is something else when the wait ends, another
+  star, a place from the website, nothing, the question is dropped. With the gate shut then, by a
+  wait or by another question still out, the same question waits again; that is a timer in this
+  client and asks the map nothing.
+- **The press was the asking.** Once pressed, the question goes whichever tab is showing and with
+  the sidebar closed, and its way arrives on Home's card and in the box over the game all the same.
+- **A late answer does not move the pin.** The question belongs to the pin it was asked for. A
+  player who presses another star while the first is still being planned keeps the second: the
+  first one's answer is dropped and nothing is said of it. Route beside Unpin is bound to its pin
+  the same way.
+- **No retry.** A refusal or a failure is one pink line under the pinned star, with the wait
+  counting down, and the star stays pinned. Nothing asks again. **Route** beside Unpin, greyed for
+  the wait, is the player's own press. The line is not carried to the next star pressed.
+- **Where nobody can be asked as,** nobody logged in or no member the map takes, which on this tab
+  is a press during a hop, the star is pinned and nothing is sent or said: nobody pressed Route,
+  so there is no refusal to read. *Planning…* shows for the dwell and then gives way to Route.
+- **Other presses.** The pinned star pressed again does nothing; Unpin is at the head. A star whose
+  spot is approximate has no tile to pin, so it is still picked: its card opens on **Open website**
+  and its note, and a second press folds it away. A star with no time left is not a press. A
+  world's row under a fold pins that world, and the pinned world's row is the darker one, as a
+  picked row was.
+
+The star's own card has no buttons now, so it is the same height pressed as not. The head of the
+tab is new when the first star is pinned, and the list moves down by its height; from one pinned
+star to the next it keeps its height until a way lands.
+
+`SidebarPolishShot` paints the two states: `stars-busy-pressed` is a star just pressed, pinned at
+the head with *Planning…*, and `stars-busy-ways` the same star with its way drawn.

@@ -9,7 +9,7 @@ connect.unreachable=The map could not be reached. Try again in a moment.
 connect.busy=The map is busy. Try again in a minute.
 connect.failed=The map could not make that just now. Try again in a moment.
 
-# RoutePress: Route, Reroute and Search's picks; StarsClient says map.redirects too.
+# RoutePress: Route, Reroute and Search's picks; map.redirects is said by every client that asks the map.
 route.notConnected=Not connected to the group yet. The top of the sidebar says why.
 route.needsTile=Reroute can't see where you are inside an instance. Press it again once you're out.
 route.noWay=The map found no way there from here.
@@ -129,6 +129,7 @@ group.meetHereTip=Make a meetup where you stand, on this world, and copy its lin
 group.titleTip=The meetup's title, up to sixty characters. Everybody in the group sees it.
 group.makeTip=Make the meetup at the tile and world you are on, and copy its link
 group.alone=Just you so far. Send a friend an invite.
+group.logIn=Log in to see your group.
 group.routeFriendTip= stands now. Nothing follows them; press again to ask again.
 group.allOnMapTip=Your whole group is on the world map already
 group.drawOneTip='s dot on the game's world map, without the rest of the group
@@ -137,7 +138,7 @@ group.openMeetupTip=Open this meetup: who is coming, Route and your answer
 
 # StarsPanel: the Stars tab.
 stars.routeTip=Plan the way to this star from where you stand. The world is in the steps.
-stars.pinTip=Pin this star on the world map and point the game's arrow at it, without planning a route.
+stars.pressTip=: press to pin it and plan the way there
 stars.safeTip=Hide Wilderness, PvP, high-risk and Deadman
 stars.noWorldList=World list unavailable: PvP and Deadman filters cannot be checked.
 stars.openTip=Show the possible spots on osrs-map.com in your browser
@@ -155,6 +156,7 @@ slayer.orderTip=Rank potential with an area attack, or one target at a time
 slayer.wikiTip=Open this task's source page in your browser
 slayer.licenceTip=The licence for the Wiki's locations and rates
 slayer.pinTip=Pin this spot as your destination: world map, arrow and Home
+slayer.routeTip=Plan the way to this spot from where you stand
 slayer.rankingSingle=Ranking again for one target at a time…
 slayer.rankingSafe=Ranking again without Wilderness places…
 slayer.rankingAll=Ranking again with Wilderness places…
@@ -172,6 +174,7 @@ farm.needsPatches=Ready now reads your patches. Turn on Your account in Settings
 farm.needsContract=Turn on Your account in Settings to plan your contract.
 farm.needsSeaCharts=A charting run plans what you have not charted. Turn on Your account in Settings.
 farm.kindTip=Choose a run the map can build from your character's shared readings
+farm.startTip=Ask the map for the run chosen above, starting from where you stand
 port.needsBoats=Turn on Your account in Settings, which shares your boats, to plan these as one run.
 port.boardOnce=Board your boat once so the run knows its hold.
 port.startTip=Ask the map for one run over every task you hold, starting from your boat
@@ -183,11 +186,12 @@ run.unfollowTip=Keep this run and stop following it until you press Follow
 steps.noOrigin=Planned without your position. Reroute plans from where you stand.
 steps.drawing=Shortest Path is drawing the walk for step
 steps.drawsEach=Shortest Path draws each walk when you reach it.
-steps.notYet=You can't take these yet:
+steps.blocked=You can't take this way yet.
+steps.blockedTip=You can't take this way yet. Press to see its steps.
 path.takenOver=Shortest Path was given another path, so this route stopped drawing there. Follow draws it again.
 search.held=The map plans one route at a time, a few seconds apart. Pick again in a moment.
 search.boxTip=Search the map: a place, a character, a monster or an item. A pick plans the way there.
 
 # UpdateNotice: the one chat line an update says, on the first login after it. Every release writes
 # it again for what that release changed, and moves CompanionVersion.LINE_VERSION with it.
-update.line=Drop luck has odds for thirteen more bosses, the Dagannoth Kings, Zilyana and the Corporeal Beast among them, and a monster with many drops is no longer marked Dry for one of them.
+update.line=Each way to a place is now a chip with its teleport's picture, and pressing a star takes you there. Drop luck has odds for thirteen more bosses, the Dagannoth Kings, Zilyana and the Corporeal Beast among them.

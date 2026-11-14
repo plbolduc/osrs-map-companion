@@ -29,15 +29,16 @@ import java.util.Arrays;
 import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 /**
  * What the sidebar's Port tasks section says for each slot, in the order the task is done.
  *
- * <p>The words a player plans by: crates still to collect and where they go, then crates to
- * deliver; parts still owed and where to hand them in. And the two absences said apart — an
- * unreadable slot is never counted among the free ones.
+ * <p>The words a player plans by: where the crates wait and where they go, then where to deliver
+ * them; a bounty's part and where to hand it in; and beside each, how far along it is as a count.
+ * And the two absences said apart — an unreadable slot is never counted among the free ones.
  */
 public class PortTasksPanelTest
 {
@@ -53,20 +54,52 @@ public class PortTasksPanelTest
 			15, 0, 0, remaining, "Tern feather");
 	}
 
+	/**
+	 * These lines carried the numbers in a sentence, "Collect 1 crate at Catherby for Port Sarim",
+	 * "All 3 crates delivered". The number is a count beside the task's name now, taken of asked
+	 * while any crate is still to collect and delivered of asked after, and the line says only where.
+	 */
 	@Test
 	public void aCourierSaysWhatItStillAsksInOrder()
 	{
-		assertEquals("Collect 3 crates at Catherby for Port Sarim", PortTasksPanel.next(courier(3, 0, 0)));
-		assertEquals("Collect 1 crate at Catherby for Port Sarim", PortTasksPanel.next(courier(3, 2, 0)));
-		assertEquals("Deliver 2 crates to Port Sarim", PortTasksPanel.next(courier(3, 3, 1)));
-		assertEquals("All 3 crates delivered", PortTasksPanel.next(courier(3, 3, 3)));
+		assertEquals("Collect at Catherby for Port Sarim", PortTasksPanel.next(courier(3, 0, 0)));
+		assertEquals("0/3", PortTasksPanel.count(courier(3, 0, 0)));
+		assertEquals("Collect at Catherby for Port Sarim", PortTasksPanel.next(courier(3, 2, 0)));
+		assertEquals("crates taken, of those asked", "2/3", PortTasksPanel.count(courier(3, 2, 0)));
+		assertEquals("Deliver to Port Sarim", PortTasksPanel.next(courier(3, 3, 1)));
+		assertEquals("crates delivered, once all are aboard", "1/3", PortTasksPanel.count(courier(3, 3, 1)));
+		assertEquals("Delivered", PortTasksPanel.next(courier(3, 3, 3)));
+		assertEquals("3/3", PortTasksPanel.count(courier(3, 3, 3)));
 	}
 
+	/**
+	 * A bounty's line said "9 of 15 still owed" between its part and its board. Its count is the
+	 * parts had of those asked, beside its name, and reads whole once all are collected; the line is
+	 * the part and where it is handed in either way.
+	 */
 	@Test
-	public void aBountySaysThePartsStillOwedAndWhereTheyGo()
+	public void aBountySaysThePartsHadAndWhereTheyGo()
 	{
-		assertEquals("Tern feather · 9 of 15 still owed · hand in at Port Sarim", PortTasksPanel.next(bounty(9)));
-		assertEquals("Tern feather · all collected · hand in at Port Sarim", PortTasksPanel.next(bounty(0)));
+		assertEquals("Tern feather · hand in at Port Sarim", PortTasksPanel.next(bounty(9)));
+		assertEquals("6/15", PortTasksPanel.count(bounty(9)));
+		assertEquals("Tern feather · hand in at Port Sarim", PortTasksPanel.next(bounty(0)));
+		assertEquals("all collected", "15/15", PortTasksPanel.count(bounty(0)));
+	}
+
+	/** What the client's tables did not name is still said around: no port to collect at, no board, no part, no total. */
+	@Test
+	public void aTaskTheTablesHalfNamedKeepsItsGuards()
+	{
+		PortTaskReader.Slot nowhere = new PortTaskReader.Slot(0, PortTaskReader.COURIER, 6, null, null, null, 3, 1, 0, 0, null);
+		assertEquals("Collect for the board", PortTasksPanel.next(nowhere));
+		assertEquals("1/3", PortTasksPanel.count(nowhere));
+		PortTaskReader.Slot uncounted = new PortTaskReader.Slot(0, PortTaskReader.COURIER, 6, null, "Catherby", null, 0, 0, 0, 0, null);
+		assertEquals("Deliver to the board", PortTasksPanel.next(uncounted));
+		assertNull("crates the game did not count have no count", PortTasksPanel.count(uncounted));
+		PortTaskReader.Slot parts = new PortTaskReader.Slot(1, PortTaskReader.BOUNTY, 438, null, null, null, 0, 0, 0, 9, null);
+		assertEquals("Parts · hand in at the board", PortTasksPanel.next(parts));
+		assertEquals("no total to count against, so what is owed", "9 left", PortTasksPanel.count(parts));
+		assertEquals("never fewer had than none", "0/15", PortTasksPanel.count(bounty(20)));
 	}
 
 	/**

@@ -30,6 +30,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
 import java.util.function.Consumer;
+import java.util.function.ObjLongConsumer;
 import javax.annotation.Nullable;
 import javax.swing.JLabel;
 import lombok.AccessLevel;
@@ -74,6 +75,12 @@ import okhttp3.Response;
  * <p><b>How often.</b> One question at a time and none before the map's own wait, shared with
  * Reroute through {@link DestinationRoute#beginPress}, since the map counts both against one
  * member. A press is never repeated on its own.
+ *
+ * <p><b>A pin's question</b> is the Stars tab's: a press there pins the star at once, and the way to
+ * it is asked a moment later ({@link #follow}). It belongs to that pin ({@link Target#pinned}): it
+ * is sent, and its reply shown or said, only while the pin is still the destination, so a player
+ * who has pressed on to another star is not brought back to this one. And nobody pressed Route for
+ * it, so where it cannot be sent it says nothing.
  *
  * <p><b>Threads.</b> The press is Swing's; the tile and the credentials are read on the client
  * thread; the call is OkHttp's. What a press said is one immutable value behind a volatile field,
@@ -137,26 +144,35 @@ final class RoutePress
 		/** What the row that asked drew beside it, for the destination's card; never sent. */
 		@Nullable
 		final Picture picture;
+		/** The destination this is the way to, where the press pinned it before asking; never sent. */
+		@Nullable
+		final RelayResponse.Destination pin;
 
 		static Target place(String source, String id, String name, @Nullable WorldPoint stood, @Nullable String note)
 		{
-			return new Target(source, id, stood, name, null, note, null, null);
+			return new Target(source, id, stood, name, null, note, null, null, null);
 		}
 
 		static Target tile(String source, WorldPoint tile, String name, @Nullable Integer world, @Nullable String note)
 		{
-			return new Target(source, null, tile, name, world, note, null, null);
+			return new Target(source, null, tile, name, world, note, null, null, null);
 		}
 
 		static Target clue(String source, CompanionSnapshot.Clue clue, String name, @Nullable String note)
 		{
-			return new Target(source, null, null, name, null, note, clue, null);
+			return new Target(source, null, null, name, null, note, clue, null, null);
 		}
 
 		/** The same target, with the picture the destination's card draws beside the answer. */
 		Target showing(@Nullable Picture shown)
 		{
-			return new Target(source, id, tile, name, world, note, clue, shown);
+			return new Target(source, id, tile, name, world, note, clue, shown, pin);
+		}
+
+		/** The same target, as the way to a destination already pinned: asked and answered only while it stands. */
+		Target pinned(RelayResponse.Destination pinned)
+		{
+			return new Target(source, id, tile, name, world, note, clue, picture, pinned);
 		}
 	}
 
@@ -294,7 +310,24 @@ final class RoutePress
 	/** The press. Any thread; the work happens on the client thread and OkHttp's. */
 	void press(Target target)
 	{
-		clientThread.invokeLater(() -> start(target));
+		clientThread.invokeLater(() -> start(target, false));
+	}
+
+	/**
+	 * The way to a place a press has already pinned, asked after it with no press of Route: see the
+	 * class comment. Planning is said from here, so the pinned star's head says it without a gap.
+	 * Any thread.
+	 */
+	void follow(Target target)
+	{
+		said = new Said(target.source, true, null, null, destinations.generation());
+		clientThread.invokeLater(() -> start(target, true));
+	}
+
+	/** Whether the pin a question is the way to has been replaced, unpinned or cleared since. */
+	private boolean moved(Target target)
+	{
+		return target.pin != null && !DestinationRoute.keyOf(target.pin).equals(DestinationRoute.keyOf(destinations.getDestination()));
 	}
 
 	/** Reroute, pressed under the destination's steps. Any thread, as {@link #press} is. */
@@ -365,21 +398,27 @@ final class RoutePress
 			&& now.key.equals(DestinationRoute.keyOf(destination)) ? now.picture : null;
 	}
 
-	/** Client thread: the credentials, the tile, then the call. */
-	private void start(Target target)
+	/**
+	 * Client thread: the credentials, the tile, then the call.
+	 *
+	 * @param quiet nobody pressed Route, so one that is not sent says nothing
+	 */
+	private void start(Target target, boolean quiet)
 	{
-		Pairing.Signed signed = signed(why -> refuse(target.source, why));
+		long asked = destinations.generation();
+		Consumer<String> refuse = why -> said = new Said(target.source, false, quiet ? null : why, null, asked);
+		Pairing.Signed signed = signed(refuse);
 		if (signed == null || (target.id == null && target.tile == null && target.clue == null))
 		{
 			return;
 		}
 		/* Null inside a raid's rooms: the map then ranks from the shared position, or from nowhere. */
 		WorldPoint from = DestinationRoute.standing(client);
-		long asked = destinations.generation();
-		String refused = route.beginPress(System.currentTimeMillis());
-		if (refused != null)
+		/* A pin since replaced has no question left to ask, and that is no refusal to say. */
+		String refused = moved(target) ? null : route.beginPress(System.currentTimeMillis());
+		if (refused != null || moved(target))
 		{
-			said = new Said(target.source, false, refused, null, asked);
+			refuse.accept(refused);
 			return;
 		}
 		said = new Said(target.source, true, null, null, asked);
@@ -450,29 +489,22 @@ final class RoutePress
 	 */
 	void read(Response response, Landing landing)
 	{
-		try (Response close = response)
+		ObjLongConsumer<String> refused = (why, wait) -> landing.land(null, why, System.currentTimeMillis() + wait);
+		CompanionHttp.read(response, FAILURE_GAP_MS, UNREADABLE, reply ->
 		{
-			long now = System.currentTimeMillis();
-			int status = close.code();
-			if (close.isRedirect())
+			int status = reply.code();
+			if (!reply.isSuccessful())
 			{
-				landing.land(null, REDIRECTS, now + 300_000L);
-			}
-			else if (!close.isSuccessful())
-			{
-				landing.land(null, status == 404 ? notFound(close) : MapWait.why(status, FAILED),
-					now + MapWait.after(close, status == 404 ? MIN_GAP_MS : FAILURE_GAP_MS));
+				refused.accept(status == 404 ? notFound(reply) : MapWait.why(status, FAILED),
+					MapWait.after(reply, status == 404 ? MIN_GAP_MS : FAILURE_GAP_MS));
 			}
 			else
 			{
-				landing.land(gson.fromJson(CompanionHttp.readBounded(close.body()), Answer.class),
-					null, now + MapWait.after(close, MIN_GAP_MS));
+				long now = System.currentTimeMillis();
+				landing.land(gson.fromJson(CompanionHttp.readBounded(reply.body()), Answer.class),
+					null, now + MapWait.after(reply, MIN_GAP_MS));
 			}
-		}
-		catch (IOException | RuntimeException unreadable)
-		{
-			landing.land(null, UNREADABLE, System.currentTimeMillis() + FAILURE_GAP_MS);
-		}
+		}, refused);
 	}
 
 	/** Read a press's reply into a destination or a sentence. Package-private for its test; OkHttp's thread. */
@@ -487,18 +519,19 @@ final class RoutePress
 		{
 			RelayResponse.Route ways = RouteWire.normalize(answer);
 			RelayResponse.Destination destination = ways == null ? null : destination(target, answer.target, ways);
-			if (destination == null)
-			{
-				finish(asked, target, why != null ? why : NO_WAY, next);
-				return;
-			}
 			route.finishPress(next);
 			/*
 			 * Checked and shown under the destinations' own lock, so a group left between the check
-			 * and the pin cannot keep the old group's route.
+			 * and the pin cannot keep the old group's route, and a pin replaced meanwhile stays replaced.
 			 */
 			synchronized (destinations)
 			{
+				if (destination == null || moved(target))
+				{
+					/* A reply about a pin since replaced is about a place nobody is going to, and says nothing. */
+					said = new Said(target.source, false, moved(target) ? null : why != null ? why : NO_WAY, null, asked);
+					return;
+				}
 				if (asked != destinations.generation())
 				{
 					return;
@@ -539,12 +572,6 @@ final class RoutePress
 		{
 			return NOT_FOUND;
 		}
-	}
-
-	private void finish(long asked, Target target, String why, long nextAllowedMs)
-	{
-		route.finishPress(nextAllowedMs);
-		said = new Said(target.source, false, why, null, asked);
 	}
 
 	/**

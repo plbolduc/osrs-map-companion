@@ -48,13 +48,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 /**
- * The top of the Stars tab is the pinned star and the filters a player changes daily, and a picked
- * star's buttons are in its own card. The levels the list is measured by are read once, so they
- * wait in More filters; the filters stay on this machine, with no switch that sends them anywhere.
+ * The top of the Stars tab is the pinned star and the filters a player changes daily. A press on a
+ * star pins it there, and only a star whose tile is a guess opens a card of its own. The levels the
+ * list is measured by are read once, so they wait in More filters; the filters stay on this
+ * machine, with no switch that sends them anywhere. What a press asks the map, and when, is
+ * {@link StarsPressTest}'s.
  */
 public class StarsPanelTest
 {
@@ -105,54 +108,56 @@ public class StarsPanelTest
 	}
 
 	/**
-	 * Route and Pin sit in the card of the star they act on, so they are offered for a world the player
-	 * picked, never one picked for them, and never one their own filters have just hidden from the
-	 * list. This used to assert a Selected world block at the head of the tab: it repeated the row
-	 * above the filters to carry the two buttons, a scroll away from the star that was pressed.
+	 * A press on a star with a tile of its own pins it, so the star heads the tab and nothing opens in
+	 * its card. Only a star whose tile is a guess is picked: its card opens on the website, for a world
+	 * the player picked, never one picked for them, and never one their own filters have just hidden
+	 * from the list.
+	 *
+	 * <p>This asserted Route and Pin in the picked star's card. One press is the pin and the question
+	 * now, so a star with a tile has neither button to find; what is kept of the old rule is the card
+	 * a guess still opens.
 	 */
 	@Test
-	public void aPickedStarsButtonsAreInItsOwnCardWhileTheFiltersShowIt() throws Exception
+	public void aPressPinsAStarAndOnlyAGuessOpensACardWhileTheFiltersShowIt() throws Exception
 	{
 		SwingUtilities.invokeAndWait(() ->
 		{
-			HarnessStore store = new HarnessStore();
-			Pairing pairing = new Pairing(store, new Gson());
-			MemberIdentity identity = new MemberIdentity(store);
-			StarsClient service = new StarsClient(new OkHttpClient(), new Gson(), null, new ClientThread(),
-				new HarnessConfig(store, MapCompanionConfig.DEFAULT_MAP_URL), pairing, identity, store);
-			DestinationState destinations = new DestinationState(new Gson());
-			RoutePress press = new RoutePress(new OkHttpClient(), new Gson(), null, new ClientThread(), pairing, identity,
-				new DestinationRoute(), destinations, new TestDestinationMarker());
-			StarsPanel stars = new StarsPanel(service, destinations, new ClientThread(), new TestDestinationMarker(), press,
-				() -> MapCompanionConfig.DEFAULT_MAP_URL, new DestinationRoute(), null, null, null, rerouting -> null, () -> { });
-			service.model.accept(feed());
-			service.model.miningLevel = 72;
-			stars.refresh();
-			assertNull("a list arriving picks nothing", named(stars, "stars.pin"));
+			Tab tab = new Tab();
+			assertNull("a list arriving pins nothing", tab.destinations.getDestination());
+			assertNull("and picks nothing", named(tab.stars, "stars.open"));
 
-			((AbstractButton) named(stars, "stars.site.tile:2974,3241")).doClick();
-			assertNotNull("a press picks", named(stars, "stars.pin"));
-			assertTrue("in the star's own card", SwingUtilities.isDescendingFrom(named(stars, "stars.pin"),
-				named(stars, "stars.site.tile:2974,3241").getParent().getParent().getParent()));
-			assertEquals("Route first, since it pins as well", "stars.route", named(stars, "stars.pin").getParent().getComponent(0).getName());
-			assertFalse("and nothing heads the tab for a pick", words(stars).contains("Selected world"));
+			tab.pick();
+			assertEquals("a press pins", Integer.valueOf(302), tab.destinations.getDestination().world);
+			assertTrue(words(tab.stars).contains("Pinned destination"));
+			assertNull("with no Pin left to press", named(tab.stars, "stars.pin"));
+			assertNull("and no Route in the star's own card", named(card(tab.stars, RIMMINGTON), "stars.route"));
+			assertNull("a star with a tile is pinned, not picked", tab.service.model.selected);
 
-			JComboBox<?> tier = (JComboBox<?>) named(stars, "stars.tier");
+			((AbstractButton) named(tab.stars, GUILD)).doClick();
+			assertNotNull("a press picks a guess", named(tab.stars, "stars.open"));
+			assertTrue("and opens its own card", SwingUtilities.isDescendingFrom(named(tab.stars, "stars.open"), card(tab.stars, GUILD)));
+			assertEquals("the pin stays where it was", Integer.valueOf(302), tab.destinations.getDestination().world);
+			assertFalse("and nothing heads the tab for a pick", words(tab.stars).contains("Selected world"));
+
+			JComboBox<?> tier = (JComboBox<?>) named(tab.stars, "stars.tier");
 			tier.setSelectedIndex(8);
-			assertNull("T9+ hides the T7 picked, so it is not offered", named(stars, "stars.pin"));
-			assertEquals("but it is still the pick", "302|rimmington mine", service.model.selected);
+			assertNull("T9+ hides the T6 picked, so it is not offered", named(tab.stars, "stars.open"));
+			assertEquals("but it is still the pick", "416|mining guild", tab.service.model.selected);
 			tier.setSelectedIndex(0);
-			assertNotNull("and shows again when the filter lets it", named(stars, "stars.pin"));
+			assertNotNull("and shows again when the filter lets it", named(tab.stars, "stars.open"));
 
-			((AbstractButton) named(stars, "stars.site.tile:2974,3241")).doClick();
-			assertNull("a second press lets it go", service.model.selected);
-			assertNull(named(stars, "stars.pin"));
+			((AbstractButton) named(tab.stars, GUILD)).doClick();
+			assertNull("a second press lets it go", tab.service.model.selected);
+			assertNull(named(tab.stars, "stars.open"));
 		});
 	}
 
 	/**
-	 * A folded card names its first world alone, so folding it lets go of a pick of another: Route and
-	 * Pin never act on a world the card is not showing. A pick of the first world stays.
+	 * A folded card names its first world alone, so folding it lets go of a pick of another: the card
+	 * never opens on a world it is not showing. A pick of the first world stays.
+	 *
+	 * <p>This picked Rimmington mine's worlds. A press there pins now, so the pick is one of the
+	 * Mining Guild's, whose tile is a guess.
 	 */
 	@Test
 	public void foldingASiteLetsGoOfAWorldItNoLongerShows() throws Exception
@@ -160,24 +165,25 @@ public class StarsPanelTest
 		SwingUtilities.invokeAndWait(() ->
 		{
 			Tab tab = new Tab();
-			AbstractButton expand = (AbstractButton) named(tab.stars, "stars.expand.tile:2974,3241");
-			expand.doClick();
-			((AbstractButton) named(tab.stars, "stars.world.330|rimmington mine")).doClick();
-			assertNotNull(named(tab.stars, "stars.pin"));
-			((AbstractButton) named(tab.stars, "stars.expand.tile:2974,3241")).doClick();
+			String fold = "stars.expand.label:mining guild";
+			((AbstractButton) named(tab.stars, fold)).doClick();
+			((AbstractButton) named(tab.stars, "stars.world.421|mining guild")).doClick();
+			assertNotNull(named(tab.stars, "stars.open"));
+			((AbstractButton) named(tab.stars, fold)).doClick();
 			assertNull(tab.service.model.selected);
-			assertNull(named(tab.stars, "stars.pin"));
+			assertNull(named(tab.stars, "stars.open"));
 
-			tab.pick();
-			((AbstractButton) named(tab.stars, "stars.expand.tile:2974,3241")).doClick();
-			((AbstractButton) named(tab.stars, "stars.expand.tile:2974,3241")).doClick();
-			assertEquals("the first world is still on the card", "302|rimmington mine", tab.service.model.selected);
+			((AbstractButton) named(tab.stars, GUILD)).doClick();
+			((AbstractButton) named(tab.stars, fold)).doClick();
+			((AbstractButton) named(tab.stars, fold)).doClick();
+			assertEquals("the first world is still on the card", "416|mining guild", tab.service.model.selected);
 		});
 	}
 
 	/**
 	 * The pinned star is the one being walked to, so it heads the tab whatever is picked since and
-	 * whatever the filters hide, with Unpin always in reach.
+	 * whatever the filters hide, with Unpin always in reach. The pick since is a guess's now: a press
+	 * on another star with a tile would pin that one instead.
 	 */
 	@Test
 	public void thePinnedStarHeadsTheTabWhateverIsPickedOrFiltered() throws Exception
@@ -186,12 +192,11 @@ public class StarsPanelTest
 		{
 			Tab tab = new Tab();
 			tab.pick();
-			((AbstractButton) named(tab.stars, "stars.pin")).doClick();
-			((AbstractButton) named(tab.stars, "stars.site.tile:3296,3298")).doClick();
-			assertEquals("another star picked", "306|al kharid mine", tab.service.model.selected);
+			((AbstractButton) named(tab.stars, GUILD)).doClick();
+			assertEquals("another star picked", "416|mining guild", tab.service.model.selected);
 			assertTrue(words(tab.stars).contains("Pinned destination"));
 			assertTrue(words(tab.stars).toString(), words(tab.stars).stream().anyMatch(line -> line.startsWith("W302")));
-			assertNotNull("with its own Route and Pin", named(tab.stars, "stars.pin"));
+			assertNotNull("with its own card", named(tab.stars, "stars.open"));
 
 			((JComboBox<?>) named(tab.stars, "stars.tier")).setSelectedIndex(8);
 			assertTrue("T9+ hides the T7 from the list, not from the head", words(tab.stars).contains("Pinned destination"));
@@ -200,11 +205,12 @@ public class StarsPanelTest
 	}
 
 	/**
-	 * A pick ends with its pin. Reached, the plugin dismisses the destination; the star then goes back
-	 * to a plain row rather than opening on Route and Pin for the place the player is standing at.
+	 * A pin that ends leaves a plain row. Reached, the plugin dismisses the destination; the head goes
+	 * and the star's card opens on nothing. This asserted that the pick ended with its pin, when a
+	 * pinned star was also the picked one; a star with a tile is never picked now.
 	 */
 	@Test
-	public void aPickEndsWithItsPin() throws Exception
+	public void aPinThatEndsLeavesAPlainRow() throws Exception
 	{
 		SwingUtilities.invokeAndWait(() ->
 		{
@@ -218,14 +224,117 @@ public class StarsPanelTest
 			tab.stars.refresh();
 			assertFalse(words(tab.stars).contains("Pinned destination"));
 			assertNull(tab.service.model.selected);
-			assertNull(named(tab.stars, "stars.pin"));
+			assertNull(named(tab.stars, "stars.unpin"));
+			assertNull(named(tab.stars, "stars.route"));
 		});
 	}
 
 	/**
-	 * The buttons are in the star's card, which can be far down the list, and the pinned star's way
-	 * is at the head of the tab: pinning one brings the head into view, where the way would otherwise
-	 * arrive off the top of the sidebar.
+	 * The sidebar refreshes every card once a second whichever tab is showing. Open on Home or Group,
+	 * the list is not drawn at all, since nobody can see it; the turn back to Stars draws it.
+	 */
+	@Test
+	public void openOnAnotherTabTheListIsNotDrawnUntilTheTurnBack() throws Exception
+	{
+		SwingUtilities.invokeAndWait(() ->
+		{
+			Tab tab = new Tab();
+			Component row = named(tab.stars, RIMMINGTON);
+			tab.stars.active(true);
+
+			/* A pick is the cheapest thing that makes the list draw again: it opens a guess's card. */
+			tab.service.model.selected = "416|mining guild";
+			tab.stars.refresh();
+			assertSame("no row is built while another tab shows", row, named(tab.stars, RIMMINGTON));
+			assertNull(named(tab.stars, "stars.open"));
+
+			tab.stars.selected(true);
+			assertNotNull("the turn to Stars draws the list as it is now", named(tab.stars, "stars.open"));
+		});
+	}
+
+	/**
+	 * The pin is followed on another tab too: one that ended there, reached or dismissed from Home, is
+	 * a plain row at the turn back. This asserted the pick let go with it, which there no longer is.
+	 */
+	@Test
+	public void aPinThatEndsOnAnotherTabIsAPlainRowAtTheTurnBack() throws Exception
+	{
+		SwingUtilities.invokeAndWait(() ->
+		{
+			Tab tab = new Tab();
+			tab.pick();
+			tab.routeTo(302);
+			tab.stars.refresh();
+			tab.stars.active(true);
+
+			tab.destinations.dismiss();
+			tab.stars.refresh();
+			tab.stars.selected(true);
+			assertFalse(words(tab.stars).contains("Pinned destination"));
+			assertNull(tab.service.model.selected);
+			assertNull(named(tab.stars, "stars.unpin"));
+		});
+	}
+
+	/**
+	 * Every star's time left turns over a minute at a second of its own, so a list drawn again for
+	 * each was drawn again most seconds. The rows stand, and the minute is written into them.
+	 */
+	@Test
+	public void aMinuteTurningOverIsWrittenIntoTheRowsThatStand() throws Exception
+	{
+		SwingUtilities.invokeAndWait(() ->
+		{
+			Tab tab = new Tab();
+			/* Half a minute over 46, so the 45 seconds below turn its minute and no star's tier. */
+			tab.accept(30_000L);
+			Component row = named(tab.stars, RIMMINGTON);
+			assertEquals("~47m left", left(tab));
+
+			tab.later(45_000L);
+			tab.stars.refresh();
+			assertSame("the row is the one already drawn", row, named(tab.stars, RIMMINGTON));
+			assertEquals("~46m left", left(tab));
+		});
+	}
+
+	/** A new list has its own stars and its own clock, so the rows are drawn from it rather than kept. */
+	@Test
+	public void aNewListIsDrawnEvenWhenItsStarsLookTheSame() throws Exception
+	{
+		SwingUtilities.invokeAndWait(() ->
+		{
+			Tab tab = new Tab();
+			tab.accept(30_000L);
+			assertEquals("~47m left", left(tab));
+
+			/* The same nine stars at the same tiers, ten minutes on as the map counts them. */
+			tab.accept(30_000L - 600_000L);
+			assertEquals("~37m left", left(tab));
+		});
+	}
+
+	private static final String RIMMINGTON = "stars.site.tile:2974,3241";
+	/** A site whose tile is a guess, with two worlds: its card opens on the website. */
+	private static final String GUILD = "stars.site.label:mining guild";
+
+	/** A site's card: the press on it, and whatever opened under it. */
+	private static Container card(Container stars, String site)
+	{
+		return named(stars, site).getParent().getParent().getParent();
+	}
+
+	/** The time left on Rimmington mine's card, which is its first world's, W302. */
+	private static String left(Tab tab)
+	{
+		return ((JLabel) named((Container) named(tab.stars, RIMMINGTON), "star.left")).getText();
+	}
+
+	/**
+	 * A star can be far down the list, and the pinned star and its way are at the head of the tab:
+	 * the press that pins one brings the head into view, where the way would otherwise arrive off the
+	 * top of the sidebar. The press was Pin's, in the star's card; it is the press on the star now.
 	 */
 	@Test
 	public void pinningAStarFromDownTheListBringsTheHeadOfTheTabIntoView() throws Exception
@@ -239,11 +348,10 @@ public class StarsPanelTest
 			tab.stars.selected(true);
 			pane[0] = new javax.swing.JScrollPane(tab.stars);
 			pane[0].setSize(225, 120);
-			tab.pick();
 			layout(pane[0]);
 			pane[0].getViewport().setViewPosition(new java.awt.Point(0, 60));
 			assertEquals(60, pane[0].getViewport().getViewPosition().y);
-			((AbstractButton) named(tab.stars, "stars.pin")).doClick();
+			tab.pick();
 			layout(pane[0]);
 		});
 		SwingUtilities.invokeAndWait(() ->
@@ -263,43 +371,50 @@ public class StarsPanelTest
 		}
 	}
 
-	/** What a press of Route said is drawn under the buttons of the star it was pressed for, in its card. */
+	/**
+	 * What the map said of the way to a star is drawn under that star's buttons at the head of the
+	 * tab, and not under the next star pressed. It was drawn in the picked star's card, under the
+	 * Route pressed there; the question is the press's own now, and the pinned star is where it is.
+	 */
 	@Test
-	public void whatAPressSaidIsUnderTheStarItWasPressedFor() throws Exception
+	public void whatTheMapSaidIsUnderTheStarItWasAskedAbout() throws Exception
 	{
 		SwingUtilities.invokeAndWait(() ->
 		{
 			Tab tab = new Tab();
 			tab.pick();
-			((AbstractButton) named(tab.stars, "stars.route")).doClick();
+			tab.dwell();
 			tab.press.refuse(StarsPanel.SOURCE, "The map could not be reached.");
 			tab.stars.refresh();
-			Component card = named(tab.stars, "stars.site.tile:2974,3241").getParent().getParent().getParent();
-			assertTrue(words((Container) card).toString(), words((Container) card).contains("The map could not be reached."));
+			Container head = (Container) tab.stars.getComponent(0);
+			assertTrue(words(head).toString(), words(head).contains("The map could not be reached."));
 
 			((AbstractButton) named(tab.stars, "stars.site.tile:3296,3298")).doClick();
-			assertFalse("another star's card does not say it", words(tab.stars).contains("The map could not be reached."));
+			assertEquals(Integer.valueOf(306), tab.destinations.getDestination().world);
+			assertFalse("another star does not say it", words(tab.stars).contains("The map could not be reached."));
 		});
 	}
 
 	/**
-	 * One loud button a page: Pin destination is as plain as Route beside it, not the brown Group gives
-	 * an answer already chosen. A filter chip that is on says so with an orange outline, not by a fill a
-	 * few shades lighter alone, and it is the same size on as off.
+	 * One loud button a page: Unpin is as plain as Route beside it, not the brown Group gives an answer
+	 * already chosen. This compared Pin with Route in a picked star's card; the two buttons a star has
+	 * now are the pinned one's. A filter chip that is on says so with an orange outline, not by a fill
+	 * a few shades lighter alone, and it is the same size on as off.
 	 */
 	@Test
-	public void pinIsAsPlainAsRouteAndAChipThatIsOnIsOutlined() throws Exception
+	public void unpinIsAsPlainAsRouteAndAChipThatIsOnIsOutlined() throws Exception
 	{
 		SwingUtilities.invokeAndWait(() ->
 		{
 			Tab tab = new Tab();
 			tab.pick();
-			AbstractButton pin = (AbstractButton) named(tab.stars, "stars.pin");
+			AbstractButton unpin = (AbstractButton) named(tab.stars, "stars.unpin");
 			AbstractButton route = (AbstractButton) named(tab.stars, "stars.route");
-			assertEquals(route.getFont(), pin.getFont());
-			assertEquals(route.getBackground(), pin.getBackground());
-			assertEquals(route.getForeground(), pin.getForeground());
-			assertEquals(route.getMargin(), pin.getMargin());
+			assertSame("side by side", route.getParent(), unpin.getParent());
+			assertEquals(route.getFont(), unpin.getFont());
+			assertEquals(route.getBackground(), unpin.getBackground());
+			assertEquals(route.getForeground(), unpin.getForeground());
+			assertEquals(route.getMargin(), unpin.getMargin());
 
 			JToggleButton members = (JToggleButton) named(tab.stars, "stars.members");
 			JToggleButton free = (JToggleButton) named(tab.stars, "stars.free");
@@ -324,7 +439,7 @@ public class StarsPanelTest
 	}
 
 	/**
-	 * A star hunter stays on Stars while they hop, so the way to the picked star is drawn under it
+	 * A star hunter stays on Stars while they hop, so the way to the pinned star is drawn under it
 	 * once the map answers: the steps Home's card draws, and Home's own Reroute as Home offers it,
 	 * pressed through rather than copied, so Stars never offers a press Home would not.
 	 *
@@ -333,7 +448,7 @@ public class StarsPanelTest
 	 * Paused from Home, the box over the game or a key, the way back is Home's Follow, offered here.
 	 */
 	@Test
-	public void theWayToThePickedStarShowsUnderItWithHomesOwnButtons() throws Exception
+	public void theWayToThePinnedStarShowsUnderItWithHomesOwnButtons() throws Exception
 	{
 		SwingUtilities.invokeAndWait(() ->
 		{
@@ -373,26 +488,32 @@ public class StarsPanelTest
 
 	/**
 	 * The same mine on another world is another star. The one pinned heads the tab with its way, and
-	 * the pick keeps Route and Pin in its own card. This used to assert the pick heading the tab with
-	 * no steps: the head was the pick's then, and is the pinned star's now.
+	 * the mine's card, which is its first world, offers nothing of its own; a press on it pins that
+	 * world in the other's place. This asserted Route and Pin in the card for the world not pinned,
+	 * and before that the pick heading the tab with no steps.
 	 */
 	@Test
-	public void aStarPinnedOnAnotherWorldLeavesThePickItsOwnButtons() throws Exception
+	public void aStarPinnedOnAnotherWorldIsReplacedByAPressOnThisOne() throws Exception
 	{
 		SwingUtilities.invokeAndWait(() ->
 		{
 			Tab tab = new Tab();
-			tab.pick();
 			tab.routeTo(330);
 			tab.offer(tab.follow, tab.reroute);
 			tab.stars.refresh();
 
-			assertEquals("302|rimmington mine", tab.service.model.selected);
 			assertTrue(words(tab.stars).toString(), words(tab.stars).stream().anyMatch(line -> line.startsWith("W330")));
 			assertTrue("W330's steps", stepsShowing(tab.stars));
 			assertNotNull(named(tab.stars, "stars.unpin"));
-			assertNotNull("W302's own", named(tab.stars, "stars.pin"));
-			assertNotNull(named(tab.stars, "stars.route"));
+			assertNull("W302's card has no buttons", named(card(tab.stars, RIMMINGTON), "stars.route"));
+			assertNull(named(tab.stars, "stars.pin"));
+
+			tab.pick();
+			assertEquals("W302 is the destination now", Integer.valueOf(302), tab.destinations.getDestination().world);
+			Container head = (Container) tab.stars.getComponent(0);
+			assertTrue(words(head).toString(), words(head).contains("W302"));
+			assertFalse("with no way yet", stepsShowing(tab.stars));
+			assertEquals("being asked for", "Planning…", ((AbstractButton) named(head, "stars.route")).getText());
 		});
 	}
 
@@ -413,12 +534,17 @@ public class StarsPanelTest
 			assertNull(tab.destinations.getDestination());
 			assertFalse(words(tab.stars).contains("Pinned destination"));
 			assertFalse("no steps", stepsShowing(tab.stars));
-			/* It used to fall back to Selected world with Pin destination; the pick now ends with its pin. */
-			assertNull("the star is a plain row again", named(tab.stars, "stars.pin"));
+			/* It used to fall back to Selected world with Pin destination, and then asserted no Pin in the card. */
+			assertNull("the star is a plain row again", named(tab.stars, "stars.route"));
+			assertNull(tab.service.model.selected);
 		});
 	}
 
-	/** Pin, then the way there, at the head of the tab: a star pinned with no way yet keeps its Route. */
+	/**
+	 * A star pinned with no way drawn keeps Route beside Unpin. While the press's own question is
+	 * waiting or out it reads Planning… and cannot be pressed; once that has come to nothing it is
+	 * the way to ask again. This pinned with Pin, which asked nothing, and found Route ready at once.
+	 */
 	@Test
 	public void aStarPinnedWithNoWayYetOffersRoute() throws Exception
 	{
@@ -426,15 +552,26 @@ public class StarsPanelTest
 		{
 			Tab tab = new Tab();
 			tab.pick();
-			((AbstractButton) named(tab.stars, "stars.pin")).doClick();
 
 			assertTrue(words(tab.stars).contains("Pinned destination"));
 			AbstractButton route = (AbstractButton) named(tab.stars, "stars.route");
 			assertNotNull("Route stays beside Unpin", route);
-			assertTrue(route.isEnabled());
+			assertEquals("Planning…", route.getText());
+			assertFalse("the question is the press's own, and is on its way", route.isEnabled());
 			assertNotNull(named(tab.stars, "stars.unpin"));
-			assertNull(named(tab.stars, "stars.pin"));
 			assertFalse("no steps", stepsShowing(tab.stars));
+
+			/* Handed to the client thread, which never runs here: it reads Planning… from the hand-over, with no gap. */
+			tab.dwell();
+			route = (AbstractButton) named(tab.stars, "stars.route");
+			assertEquals("Planning…", route.getText());
+			assertFalse(route.isEnabled());
+
+			tab.press.refuse(StarsPanel.SOURCE, "The map could not be reached.");
+			tab.stars.refresh();
+			route = (AbstractButton) named(tab.stars, "stars.route");
+			assertEquals("Route", route.getText());
+			assertTrue("the player's own retry", route.isEnabled());
 		});
 	}
 
@@ -478,6 +615,8 @@ public class StarsPanelTest
 			service.model.accept(feed);
 			service.model.miningLevel = 72;
 			service.model.preferences.filters.hideDepleted = false;
+			/* The press below pins; what it would ask the map is not this test's, so its dwell never ends. */
+			stars.dwell = (action, delayMs) -> () -> { };
 			stars.refresh();
 
 			Container rimmington = (Container) named(stars, "stars.site.tile:2974,3241");
@@ -494,8 +633,10 @@ public class StarsPanelTest
 			assertEquals("~3m left", fact(alKharid, "left").getText());
 			assertEquals(StarsPanel.DYING_TONE, fact(alKharid, "left").getForeground());
 
-			assertEquals("the worlds besides the one printed", "+2 ▾", ((AbstractButton) named(stars, "stars.expand.tile:2974,3241")).getText());
+			/* Closed points right and open points down, as every other fold's arrow does: this read ▾ closed and ▴ open. */
+			assertEquals("the worlds besides the one printed", "+2 ▸", ((AbstractButton) named(stars, "stars.expand.tile:2974,3241")).getText());
 			((AbstractButton) named(stars, "stars.expand.tile:2974,3241")).doClick();
+			assertEquals("open, the arrow points at what it opened", "+2 ▾", ((AbstractButton) named(stars, "stars.expand.tile:2974,3241")).getText());
 			/* It listed W302 again under its own card, as the first of three rows; the fold opens the other two. */
 			assertNull("the card is its first world, so the list does not repeat it", named(stars, "stars.world.302|rimmington mine"));
 			assertEquals(StarsPanel.TIERS[4], fact(row(stars, "330|rimmington mine"), "tier").getForeground());
@@ -504,9 +645,9 @@ public class StarsPanelTest
 			assertEquals(ColorScheme.MEDIUM_GRAY_COLOR, fact(row(stars, "444|rimmington mine"), "left").getForeground());
 
 			service.model.feed.rows.stream().filter(star -> star.world == 330).findFirst().get().remainingMs = 15 * 60_000L;
+			/* The press on the row pins W330; it used to pick it, and Pin in its card was pressed after. */
 			((AbstractButton) named(stars, "stars.world.330|rimmington mine")).doClick();
 			assertEquals("under twenty minutes", StarsPanel.FADING_TONE, fact(row(stars, "330|rimmington mine"), "left").getForeground());
-			((AbstractButton) named(stars, "stars.pin")).doClick();
 			Container head = (Container) stars.getComponent(0);
 			assertTrue(words(head).toString(), words(head).containsAll(Arrays.asList("Pinned destination", "T5", "W330", "~15m left")));
 		});
@@ -636,6 +777,8 @@ public class StarsPanelTest
 		final JButton reroute = new JButton("Reroute");
 		final AtomicInteger followed = new AtomicInteger();
 		final List<JButton> offered = new ArrayList<>();
+		/** The dwells waiting after a press, run by {@link #dwell}: Swing's timer is not this test's. */
+		final List<Runnable> dwells = new ArrayList<>();
 		final StarsClient service;
 		final StarsPanel stars;
 		final RoutePress press;
@@ -656,15 +799,30 @@ public class StarsPanelTest
 					JButton own = rerouting ? reroute : follow;
 					return offered.contains(own) ? own : null;
 				}, () -> { });
+			stars.dwell = (action, delayMs) ->
+			{
+				dwells.add(action);
+				return () -> dwells.remove(action);
+			};
 			service.model.accept(feed());
 			service.model.miningLevel = 72;
 			stars.refresh();
 		}
 
-		/** Rimmington mine's first world, W302, picked by a press as a player picks it. */
+		/** Rimmington mine's first world, W302, pressed as a player presses it: pinned, its way to be asked for. */
 		void pick()
 		{
 			((AbstractButton) named(stars, "stars.site.tile:2974,3241")).doClick();
+		}
+
+		/** The dwell's time is up. The press's client thread never runs here, so the question stays on its way. */
+		void dwell()
+		{
+			for (Runnable waiting : new ArrayList<>(dwells))
+			{
+				dwells.remove(waiting);
+				waiting.run();
+			}
 		}
 
 		/** A Route's answer as RoutePress lands it: Rimmington mine on that world, with the reply fixture's way. */
@@ -686,6 +844,30 @@ public class StarsPanelTest
 		{
 			offered.clear();
 			offered.addAll(Arrays.asList(home));
+		}
+
+		/** The feed again as a new answer from the map, with W302 at Rimmington mine given {@code more} to live. */
+		void accept(long more)
+		{
+			StarsModel.Feed next = feed();
+			next.rows.get(0).remainingMs += more;
+			service.model.accept(next);
+			stars.refresh();
+		}
+
+		/** As if the list had been received {@code ms} earlier than it was, which is how a model tells the time. */
+		void later(long ms)
+		{
+			try
+			{
+				java.lang.reflect.Field received = StarsModel.class.getDeclaredField("receivedNanos");
+				received.setAccessible(true);
+				received.setLong(service.model, received.getLong(service.model) - ms * 1_000_000L);
+			}
+			catch (ReflectiveOperationException e)
+			{
+				throw new AssertionError(e);
+			}
 		}
 	}
 

@@ -81,6 +81,7 @@ public class FarmRunClientTest
 			sent.add(chain.request());
 			calls.add(chain.call());
 			if (entered != null) entered.countDown();
+			if (status.get() == 0) throw new java.io.IOException("no route to host");
 			if (release != null)
 			{
 				try
@@ -320,6 +321,53 @@ public class FarmRunClientTest
 			settled(client);
 			assertFalse(reply[0] + " " + reply[1] + " backs off",
 				held.pressReady(System.currentTimeMillis() + RoutePress.FAILURE_GAP_MS - 5_000));
+		}
+	}
+
+	/**
+	 * How long each kind of reply keeps every Route, Reroute and run waiting, and what the card says.
+	 * A busy map is waited on for exactly what it asks, as Route waits on it: the two share one gate,
+	 * so a run that waited longer would keep Route shut past the map's own word. A refusal the map
+	 * words has its own test above.
+	 */
+	@Test
+	public void eachKindOfReplyKeepsItsOwnWaitAndWords() throws Exception
+	{
+		connect();
+		String worded = "{\"error\":\"Please wait for this run.\"}";
+		String notPrepared = Words.of("farm.notPrepared");
+		Object[][] cases = {
+			{429, "7", "{}", MapWait.BUSY, 7_000L},
+			{503, "7", "{}", MapWait.BUSY, 7_000L},
+			{429, "90", "{}", MapWait.BUSY, 90_000L},
+			{429, null, worded, "Please wait for this run.", 30_000L},
+			{503, null, "{}", MapWait.BUSY, 30_000L},
+			{403, null, "{}", RoutePress.NOT_CONNECTED, 30_000L},
+			{409, null, "{}", notPrepared, 30_000L},
+			{500, "7", "oops", notPrepared, 30_000L},
+			{500, "60", "oops", notPrepared, 60_000L},
+			/* A redirect is the address's fault and no retry changes it: five minutes, whatever it names. */
+			{302, null, "", RoutePress.REDIRECTS, 300_000L},
+			{302, "7", "", RoutePress.REDIRECTS, 300_000L},
+			/* No reply at all. */
+			{0, null, "", RoutePress.UNREACHABLE, 30_000L},
+			{200, null, "not json at all", RoutePress.UNREADABLE, 30_000L},
+			{200, null, "{}", "The map returned no readable run.", 5_000L},
+			{200, "20", "{}", "The map returned no readable run.", 20_000L},
+		};
+		for (Object[] c : cases)
+		{
+			DestinationRoute held = new DestinationRoute();
+			status.set((Integer) c[0]);
+			retry.set((String) c[1]);
+			answer.set((String) c[2]);
+			FarmRunClient client = client(held);
+			long before = System.currentTimeMillis();
+			client.start("birdhouses");
+			settled(client);
+			String name = "HTTP " + c[0] + ", Retry-After " + c[1];
+			assertEquals(name, c[3], client.said().message);
+			RoutePressTest.assertWait(name, (long) c[4], held.pressWait(before));
 		}
 	}
 

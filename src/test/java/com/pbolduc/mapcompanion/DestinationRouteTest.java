@@ -290,6 +290,108 @@ public class DestinationRouteTest
 		assertEquals("the destination's own route is the old answer", "walk", route.view().way().id);
 	}
 
+	/** The home teleport as the best way and the ring of dueling as the other, as a Reroute might answer. */
+	private static RelayResponse.Route homeOrRing()
+	{
+		RelayResponse.Route ways = route("spell:home-teleport", Arrays.asList(step("method", "Lumbridge Home Teleport", false, 3222, 3218, 0),
+			step("arrival-walk", "Walk 140 tiles", true, 3310, 3200, 1)));
+		RelayResponse.RouteOption ring = route("item:ring-of-dueling", alKharid()).options.get(0);
+		ring.best = false;
+		ways.options.add(ring);
+		return ways;
+	}
+
+	/** Reroute once, answered with {@code answer}. */
+	private static void reroute(DestinationRoute route, RelayResponse.Route answer)
+	{
+		route.finishReroute(route.beginReroute(0L), answer, null, 0L);
+	}
+
+	/**
+	 * A Reroute went back to the best way whatever the player had picked. A player who picked the
+	 * ring because the home teleport is cooling down, and rerouted before leaving, got the home
+	 * teleport back. The pick is kept, by its id, until the player sets off.
+	 */
+	@Test
+	public void aPickIsKeptThroughARerouteUntilThePlayerSetsOff()
+	{
+		DestinationRoute route = new DestinationRoute();
+		route.sync(destination("Al Kharid bank", homeOrRing()), null);
+		assertEquals("the best way first", "spell:home-teleport", route.view().way().id);
+		route.choose(1);
+		/* The answer lists the ring first, so it is the id that is kept and not its place in the list. */
+		RelayResponse.Route answer = homeOrRing();
+		answer.options.add(0, answer.options.remove(1));
+		reroute(route, answer);
+		assertEquals("item:ring-of-dueling", route.view().way().id);
+		assertEquals(0, route.view().chosen);
+		assertEquals(0, route.view().step);
+		assertTrue(route.view().rerouted);
+
+		reroute(route, homeOrRing());
+		assertEquals("and through the next one", "item:ring-of-dueling", route.view().way().id);
+	}
+
+	/** One who has already travelled gets the best way from where they now stand. */
+	@Test
+	public void aRerouteAfterSettingOffStartsOnTheBestWay()
+	{
+		DestinationRoute route = new DestinationRoute();
+		route.sync(destination("Al Kharid bank", homeOrRing()), null);
+		route.choose(1);
+		assertTrue("the ring's teleport is done", route.advance(new WorldPoint(3293, 3184, 0), DestinationRoute.Sailing.ASHORE_UNKNOWN));
+		reroute(route, homeOrRing());
+		assertEquals("spell:home-teleport", route.view().way().id);
+		assertEquals(0, route.view().step);
+	}
+
+	/** A pick the answer no longer offers, or offers as a way the account cannot take, is not kept. */
+	@Test
+	public void aPickTheAnswerCannotHonourGivesWayToTheBest()
+	{
+		DestinationRoute route = new DestinationRoute();
+		route.sync(destination("Al Kharid bank", homeOrRing()), null);
+		route.choose(1);
+		RelayResponse.Route blocked = homeOrRing();
+		blocked.options.get(1).blocked = true;
+		reroute(route, blocked);
+		assertEquals("the ring is there, and cannot be taken", "spell:home-teleport", route.view().way().id);
+
+		route.choose(1);
+		assertEquals("item:ring-of-dueling", route.view().way().id);
+		RelayResponse.Route gone = homeOrRing();
+		gone.options.get(1).id = "item:amulet-of-glory";
+		reroute(route, gone);
+		assertEquals("the ring is not among the ways any more", "spell:home-teleport", route.view().way().id);
+
+		reroute(route, homeOrRing());
+		assertEquals("and the best way, never picked over, stays the best", "spell:home-teleport", route.view().way().id);
+	}
+
+	/**
+	 * The map's newer route for the same place keeps a pick as a Reroute's answer does, and a new
+	 * place starts on its best way though it offers a way of the same id.
+	 */
+	@Test
+	public void aPickIsKeptForTheSamePlaceAndNotForANewOne()
+	{
+		DestinationRoute route = new DestinationRoute();
+		route.sync(destination("Al Kharid bank", homeOrRing()), null);
+		route.choose(1);
+		RelayResponse.Route newer = homeOrRing();
+		newer.options.get(0).steps.get(1).title = "Walk 139 tiles";
+		route.sync(destination("Al Kharid bank", newer), null);
+		assertEquals("the same place, its route sent again with a step reworded", "item:ring-of-dueling", route.view().way().id);
+		assertEquals("Walk 139 tiles", route.view().ways.get(0).steps.get(1).title);
+
+		route.sync(destination("Shantay Pass", homeOrRing()), null);
+		assertEquals("spell:home-teleport", route.view().way().id);
+
+		route.choose(1);
+		route.adoptPressed(destination("Duel Arena", homeOrRing()));
+		assertEquals("a place routed by a press here is a new place too", "spell:home-teleport", route.view().way().id);
+	}
+
 	@Test
 	public void anAnswerForAPlaceSinceReplacedIsThrownAwayButItsWaitIsKept()
 	{

@@ -42,21 +42,21 @@ public class HealthTest
 	@Test
 	public void waitsUntilAPostHasLanded()
 	{
-		assertEquals(Health.WAITING, MapCompanionPlugin.healthFor(false, 0, null));
-		assertEquals(Health.WAITING, MapCompanionPlugin.healthFor(false, 3, null));
+		assertEquals(Health.WAITING, CompanionLoop.healthFor(false, 0, null));
+		assertEquals(Health.WAITING, CompanionLoop.healthFor(false, 3, null));
 	}
 
 	@Test
 	public void isLiveOnlyAfterASuccessWithNothingOutstanding()
 	{
-		assertEquals(Health.LIVE, MapCompanionPlugin.healthFor(true, 0, null));
+		assertEquals(Health.LIVE, CompanionLoop.healthFor(true, 0, null));
 	}
 
 	@Test
 	public void degradesWhenALiveConnectionMisses()
 	{
-		assertEquals(Health.DEGRADED, MapCompanionPlugin.healthFor(true, 1, null));
-		assertEquals(Health.DEGRADED, MapCompanionPlugin.healthFor(true, 8, null));
+		assertEquals(Health.DEGRADED, CompanionLoop.healthFor(true, 1, null));
+		assertEquals(Health.DEGRADED, CompanionLoop.healthFor(true, 8, null));
 	}
 
 	/**
@@ -68,11 +68,11 @@ public class HealthTest
 	public void aMapThatNeverAnsweredSaysWhyOnceAPostHasFailed()
 	{
 		String connected = "Connected to osrs-map.com";
-		assertEquals("Connecting…", MapCompanionPlugin.healthSentence(false, 0, null, connected));
-		assertEquals(RelayClient.UNREACHABLE, MapCompanionPlugin.healthSentence(false, 1, RelayClient.UNREACHABLE, connected));
-		assertEquals(Health.WAITING, MapCompanionPlugin.healthFor(false, 1, null));
-		assertEquals(RelayClient.HAVING_TROUBLE, MapCompanionPlugin.healthSentence(true, 2, RelayClient.HAVING_TROUBLE, connected));
-		assertEquals(connected, MapCompanionPlugin.healthSentence(true, 0, null, connected));
+		assertEquals("Connecting…", CompanionLoop.healthSentence(false, 0, null, connected));
+		assertEquals(RelayClient.UNREACHABLE, CompanionLoop.healthSentence(false, 1, RelayClient.UNREACHABLE, connected));
+		assertEquals(Health.WAITING, CompanionLoop.healthFor(false, 1, null));
+		assertEquals(RelayClient.HAVING_TROUBLE, CompanionLoop.healthSentence(true, 2, RelayClient.HAVING_TROUBLE, connected));
+		assertEquals(connected, CompanionLoop.healthSentence(true, 0, null, connected));
 	}
 
 	/**
@@ -91,7 +91,7 @@ public class HealthTest
 	@Test
 	public void errorsOnAFatalRefusal()
 	{
-		assertEquals(Health.ERROR, MapCompanionPlugin.healthFor(true, 0, "That group is full."));
-		assertEquals(Health.ERROR, MapCompanionPlugin.healthFor(false, 0, "That pairing code isn't the right shape — check it on the map's Companion panel."));
+		assertEquals(Health.ERROR, CompanionLoop.healthFor(true, 0, "That group is full."));
+		assertEquals(Health.ERROR, CompanionLoop.healthFor(false, 0, "That pairing code isn't the right shape — check it on the map's Companion panel."));
 	}
 }

@@ -40,10 +40,11 @@ import static com.pbolduc.mapcompanion.PortTaskReader.Slot;
  *
  * <p>The tasks are read in this client and drawn from the reading alone ({@link PortTaskReader}):
  * no table and no request. The Hub's Sailing plugins already draw the tasks over the game, so this
- * says the one line each that a player plans by — the crates still to collect and where, or the
- * parts still owed and where they go. Shown while the choice is on and something is held or
- * unreadable, through a hop from the reading before it; a slot the client could not read is said,
- * never folded into the free ones.
+ * says the one line each that a player plans by — where the crates wait and where they go, or a
+ * bounty's part and the board it goes back to — with how far along the task is as a count at the
+ * right of its name, so the counts are read down one edge. Shown while the choice is on and
+ * something is held or unreadable, through a hop from the reading before it; a slot the client
+ * could not read is said, never folded into the free ones.
  *
  * <p>What those plugins do not draw is the order. <b>Start run</b> asks the map for it — the
  * couriers as one run within the hold, then each bounty out and back — and the run is followed
@@ -143,13 +144,11 @@ final class PortTasksPanel extends JPanel
 		{
 			shown = null;
 			body.setVisible(false);
-			revalidate();
-			repaint();
 			return;
 		}
 		body.setVisible(true);
 		Integer hold = reader.shownHold();
-		if (slots == shown && Objects.equals(hold, shownHold) && running == shownRunning)
+		if (slots.equals(shown) && Objects.equals(hold, shownHold) && running == shownRunning)
 		{
 			return;
 		}
@@ -165,9 +164,22 @@ final class PortTasksPanel extends JPanel
 			}
 			/* A courier with every crate in is finished, and greyed as a finished stop on a run is. */
 			boolean finished = delivered(slot);
+			/*
+			 * How far along the task is, as a count at the right edge of its name's row, where the
+			 * tasks' counts make a column; the name gives up the count's width, so the two fit the card.
+			 */
+			String count = count(slot);
+			JLabel tally = MapCompanionPanel.label(11f, finished ? ColorScheme.MEDIUM_GRAY_COLOR : MUTED);
+			tally.setName("port.count");
+			tally.setText(count);
+			tally.setVerticalAlignment(JLabel.TOP);
+			JLabel name = MapCompanionPanel.wrapped(title(slot), 12f, finished ? ColorScheme.MEDIUM_GRAY_COLOR : Color.WHITE,
+				count == null ? WIDTH : WIDTH - tally.getPreferredSize().width - 4);
+			JPanel head = MapCompanionPanel.left(MapCompanionPanel.bar(4, null, null, name, count == null ? null : tally));
+			head.setOpaque(false);
+			head.setBorder(new EmptyBorder(4, 0, 0, 0));
 			/* A hairline between tasks, so two lines of one do not run on into the next one's name. */
-			JLabel name = line(title(slot), finished ? ColorScheme.MEDIUM_GRAY_COLOR : Color.WHITE, 12f, 4);
-			body.add(body.getComponentCount() == 0 ? name : MapCompanionPanel.ruled(name, 5, 3));
+			body.add(MapCompanionPanel.capped(body.getComponentCount() == 0 ? head : MapCompanionPanel.ruled(head, 5, 3)));
 			body.add(line(next(slot), finished ? ColorScheme.MEDIUM_GRAY_COLOR : MUTED, 11f, 0));
 		}
 		body.add(line(footer(slots, hold), MUTED, 11f, running ? 4 : 6));
@@ -181,7 +193,7 @@ final class PortTasksPanel extends JPanel
 		return slots != null && slots.stream().anyMatch(Slot::held);
 	}
 
-	/** A courier whose every crate is delivered: what {@link #next} says as "All 3 crates delivered". */
+	/** A courier whose every crate is delivered: what {@link #next} says as "Delivered". */
 	static boolean delivered(Slot slot)
 	{
 		return PortTaskReader.COURIER.equals(slot.state) && slot.needed > 0 && slot.delivered >= slot.needed;
@@ -198,34 +210,42 @@ final class PortTasksPanel extends JPanel
 	}
 
 	/**
-	 * What the task still asks, in the order it is done: the crates to collect and where they go,
-	 * then the crates aboard to deliver; the parts still owed, then the board they go back to.
+	 * What the task asks next, in the order it is done, under its name: the crates' port and where
+	 * they go, then where to deliver them; a bounty's part and the board it goes back to. How many is
+	 * {@link #count}'s to say, beside the name.
 	 */
 	static String next(Slot slot)
 	{
 		String to = slot.to == null ? "the board" : slot.to;
 		if (PortTaskReader.COURIER.equals(slot.state))
 		{
-			int collect = Math.max(0, slot.needed - slot.taken);
-			int deliver = Math.max(0, slot.needed - slot.delivered);
-			if (slot.needed > 0 && deliver == 0)
+			if (delivered(slot))
 			{
-				return "All " + crates(slot.needed) + " delivered";
+				return "Delivered";
 			}
-			if (collect > 0)
-			{
-				return "Collect " + crates(collect) + (slot.from == null ? "" : " at " + slot.from) + " for " + to;
-			}
-			return "Deliver " + crates(deliver) + " to " + to;
+			return slot.taken < slot.needed ? "Collect" + (slot.from == null ? "" : " at " + slot.from) + " for " + to
+				: "Deliver to " + to;
 		}
 		/* The part's own name, unpluralised: "Orca teeth" and "Narwhal blubber" have no plural to add. */
-		String part = slot.part == null ? "Parts" : slot.part;
-		if (slot.remaining <= 0)
+		return (slot.part == null ? "Parts" : slot.part) + " · hand in at " + to;
+	}
+
+	/**
+	 * How far along the task is, as a count: a courier's crates taken of those asked while any is
+	 * still to collect, "0/3", then delivered of those asked, up to "3/3"; a bounty's parts had of
+	 * those asked, "6/15", or the parts still owed, "9 left", where the game gave no total. Null for
+	 * a courier whose crates were not counted.
+	 */
+	@Nullable
+	static String count(Slot slot)
+	{
+		if (PortTaskReader.COURIER.equals(slot.state))
 		{
-			return part + " · all collected · hand in at " + to;
+			return slot.needed <= 0 ? null
+				: (delivered(slot) ? slot.needed : slot.taken < slot.needed ? slot.taken : slot.delivered) + "/" + slot.needed;
 		}
-		String of = slot.needed > 0 ? slot.remaining + " of " + slot.needed : String.valueOf(slot.remaining);
-		return part + " · " + of + " still owed · hand in at " + to;
+		int owed = Math.max(0, slot.remaining);
+		return slot.needed > 0 ? Math.max(0, slot.needed - owed) + "/" + slot.needed : owed + " left";
 	}
 
 	/**
@@ -253,11 +273,6 @@ final class PortTasksPanel extends JPanel
 		String line = String.join(" · ", said);
 		line = line.isEmpty() ? "" : Character.toUpperCase(line.charAt(0)) + line.substring(1) + ".";
 		return hold != null ? line : (line.isEmpty() ? "" : line + " ") + BOARD_ONCE;
-	}
-
-	private static String crates(int n)
-	{
-		return n + (n == 1 ? " crate" : " crates");
 	}
 
 	private static JLabel line(String text, Color color, float size, int top)

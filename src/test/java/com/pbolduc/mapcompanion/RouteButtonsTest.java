@@ -53,7 +53,8 @@ public class RouteButtonsTest
 		coordinate.coordTile = ClueReader.parseCoordinate(coordinate.text);
 		assertSame(coordinate.coordTile, ClueReader.routeTile(coordinate));
 		assertEquals("Hard clue", NowCards.clueTitle(coordinate.tier));
-		assertEquals("Coordinate · dig at 2896, 3119", NowCards.clueDetail(coordinate));
+		/* The tile left the line for its tooltip: Route is what a player does with a dig spot, not read two numbers. */
+		assertEquals("Coordinate · Route finds the dig spot", NowCards.clueDetail(coordinate));
 
 		CompanionSnapshot.Clue picture = new CompanionSnapshot.Clue();
 		picture.tier = "beginner";

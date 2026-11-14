@@ -27,6 +27,7 @@ package com.pbolduc.mapcompanion;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -34,7 +35,7 @@ import java.security.SecureRandom;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import net.runelite.client.config.ConfigManager;
 
 /**
@@ -69,7 +70,7 @@ import net.runelite.client.config.ConfigManager;
  * map each is a member of its own, which is what its installation key already made it.
  */
 @Singleton
-@AllArgsConstructor(access = AccessLevel.PACKAGE)
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public class MemberIdentity
 {
 	private static final String KEY = "memberId";
@@ -177,21 +178,30 @@ public class MemberIdentity
 	 * Enough to tell a key from its replacement, and nothing a reader of the settings file could
 	 * turn back into the key.
 	 */
-	private static String tag(String key)
+	private String tag(String key)
 	{
+		if (key.equals(taggedKey))
+		{
+			return tag;
+		}
 		try
 		{
 			byte[] digest = MessageDigest.getInstance("SHA-256").digest(key.getBytes(StandardCharsets.UTF_8));
-			StringBuilder hex = new StringBuilder(8);
-			for (int i = 0; i < 4; i++)
-			{
-				hex.append(String.format("%02x", digest[i] & 0xff));
-			}
-			return hex.toString();
+			/* The digest's first four bytes, as the eight digits they are in order. */
+			tag = String.format("%08x", ByteBuffer.wrap(digest).getInt());
+			taggedKey = key;
+			return tag;
 		}
 		catch (NoSuchAlgorithmException e)
 		{
 			throw new IllegalStateException("SHA-256 is required of every Java runtime", e);
 		}
 	}
+
+	/**
+	 * The last key tagged and its tag. The id is asked for several times a game tick and by every
+	 * sidebar refresh, each asking for the tag of a key that changes only when it is forgotten.
+	 * Read and written under this object's lock, as {@link #id} and {@link #forget} hold it.
+	 */
+	private String taggedKey, tag;
 }

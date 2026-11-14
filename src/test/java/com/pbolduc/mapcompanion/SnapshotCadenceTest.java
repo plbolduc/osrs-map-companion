@@ -61,14 +61,14 @@ public class SnapshotCadenceTest
 	private final HarnessConfig config = new HarnessConfig(store, MapCompanionConfig.DEFAULT_MAP_URL);
 	private final AtomicInteger builds = new AtomicInteger();
 	private final AtomicInteger posts = new AtomicInteger();
-	private final MapCompanionPlugin plugin = new MapCompanionPlugin()
+	private final MapCompanionPlugin plugin = TestLoop.in(new MapCompanionPlugin()
 	{
 		@Override
 		ConfigStore settings()
 		{
 			return store;
 		}
-	};
+	});
 	private final RelayClient relay = new RelayClient(new OkHttpClient.Builder().addInterceptor(chain ->
 	{
 		posts.incrementAndGet();
@@ -90,11 +90,11 @@ public class SnapshotCadenceTest
 				return super.id();
 			}
 		};
-		plugin.pairing = new Pairing(store, gson);
-		plugin.pairing.connect(JoinCode.parse("ABC234"), () -> true);
-		server = plugin.pairing.serverUrl();
-		plugin.milestones = new MilestoneOutbox();
-		plugin.destinationState = new DestinationState(gson);
+		plugin.loop.pairing = new Pairing(store, gson);
+		plugin.loop.pairing.connect(JoinCode.parse("ABC234"), () -> true);
+		server = plugin.loop.pairing.serverUrl();
+		plugin.loop.milestones = new MilestoneOutbox();
+		plugin.loop.destinationState = new DestinationState(gson);
 		plugin.destinationMarker = new TestDestinationMarker();
 		TestFarmRuns.attach(plugin);
 		set("config", config);
@@ -166,7 +166,7 @@ public class SnapshotCadenceTest
 	private void tick(long at) throws Exception
 	{
 		set("dirty", true);
-		plugin.postIfDue(START + at, server, "ABC234");
+		plugin.loop.postIfDue(START + at, server, "ABC234");
 		long deadline = System.currentTimeMillis() + 5_000L;
 		while (!relay.isReady(START + at))
 		{
@@ -177,8 +177,6 @@ public class SnapshotCadenceTest
 
 	private void set(String name, Object value) throws Exception
 	{
-		Field field = MapCompanionPlugin.class.getDeclaredField(name);
-		field.setAccessible(true);
-		field.set(plugin, value);
+		TestLoop.set(plugin, name, value);
 	}
 }

@@ -53,7 +53,7 @@ public class CompletionAnnouncementTest
 	private final HarnessGame game = new HarnessGame();
 	private final HarnessStore store = new HarnessStore();
 	private final HarnessConfig config = new HarnessConfig(store, "http://localhost");
-	private final MapCompanionPlugin plugin = new MapCompanionPlugin();
+	private final MapCompanionPlugin plugin = TestLoop.in(new MapCompanionPlugin());
 	private final QuestReader quests = new QuestReader(game.client());
 	private final DiaryReader diaries;
 	private long now = 1_000_000L;
@@ -74,13 +74,13 @@ public class CompletionAnnouncementTest
 		diaries = construct(DiaryReader.class, game.client());
 		RewardTestClient definitions = new RewardTestClient();
 		CollectionItemCatalog catalog = definitions.catalog();
-		plugin.milestones = new MilestoneOutbox();
-		plugin.pairing = new Pairing(store, new Gson());
-		plugin.destinationState = new DestinationState(new Gson());
+		plugin.loop.milestones = new MilestoneOutbox();
+		plugin.loop.pairing = new Pairing(store, new Gson());
+		plugin.loop.destinationState = new DestinationState(new Gson());
 		plugin.destinationMarker = new TestDestinationMarker();
 		plugin.groupMarkers = new GroupMarkers(null, null);
 		plugin.boatPins = new BoatPins(null, null);
-		plugin.rewardObserver = new RewardObserver(definitions.client, catalog, catalog::contains, () -> 1000L);
+		plugin.loop.rewardObserver = new RewardObserver(definitions.client, catalog, catalog::contains, () -> 1000L);
 		TestFarmRuns.attach(plugin);
 		set("client", game.client());
 		set("config", config);
@@ -104,7 +104,7 @@ public class CompletionAnnouncementTest
 		set("deathWatcher", construct(DeathWatcher.class, game.client()));
 		set("lootLog", new LootLog(game.client(), store, new Gson()));
 		set("directiveStream", new DirectiveStream(new okhttp3.OkHttpClient(), new Gson(), (action, delay) -> null));
-		set("groupState", new GroupState(plugin.destinationState));
+		set("groupState", new GroupState(plugin.loop.destinationState));
 	}
 
 	@Test
@@ -115,7 +115,7 @@ public class CompletionAnnouncementTest
 		game.setVarbit(VarbitIds.DIARY_VARROCK[1], 1);
 		readAgain();
 
-		List<CompanionSnapshot.Milestone> sent = plugin.milestones.take(now);
+		List<CompanionSnapshot.Milestone> sent = plugin.loop.milestones.take(now);
 		assertEquals(2, sent.size());
 		assertEquals("quest", sent.get(0).kind);
 		assertEquals("Dragon Slayer I", sent.get(0).quest);
@@ -124,10 +124,10 @@ public class CompletionAnnouncementTest
 		assertEquals("medium", sent.get(1).tier);
 
 		readAgain();
-		assertEquals("watching on does not announce them again", 2, plugin.milestones.pendingCount());
-		plugin.milestones.acknowledge(Arrays.asList(sent.get(0).id, sent.get(1).id));
+		assertEquals("watching on does not announce them again", 2, plugin.loop.milestones.pendingCount());
+		plugin.loop.milestones.acknowledge(Arrays.asList(sent.get(0).id, sent.get(1).id));
 		readAgain();
-		assertTrue(plugin.milestones.take(now).isEmpty());
+		assertTrue(plugin.loop.milestones.take(now).isEmpty());
 	}
 
 	@Test
@@ -136,7 +136,7 @@ public class CompletionAnnouncementTest
 		settleThenWatch();
 		readAgain();
 		assertEquals("Cook's Assistant and Varrock easy were done before anybody watched", 0,
-			plugin.milestones.pendingCount());
+			plugin.loop.milestones.pendingCount());
 	}
 
 	@Test
@@ -148,7 +148,7 @@ public class CompletionAnnouncementTest
 		game.setVarbit(VarbitIds.DIARY_VARROCK[1], 1);
 		settleThenWatch();
 		readAgain();
-		assertEquals(0, plugin.milestones.pendingCount());
+		assertEquals(0, plugin.loop.milestones.pendingCount());
 	}
 
 	@Test
@@ -159,7 +159,7 @@ public class CompletionAnnouncementTest
 		game.setQuest(Quest.DRAGON_SLAYER_I, QuestState.FINISHED);
 		settleThenWatch();
 		readAgain();
-		assertEquals(0, plugin.milestones.pendingCount());
+		assertEquals(0, plugin.loop.milestones.pendingCount());
 	}
 
 	@Test
@@ -172,7 +172,7 @@ public class CompletionAnnouncementTest
 		/* Nothing ended the readers' session, so they answer at once: only the watcher can refuse. */
 		readAgain();
 		readAgain();
-		assertEquals(0, plugin.milestones.pendingCount());
+		assertEquals(0, plugin.loop.milestones.pendingCount());
 	}
 
 	@Test
@@ -183,7 +183,7 @@ public class CompletionAnnouncementTest
 		game.setQuest(Quest.DRAGON_SLAYER_I, QuestState.FINISHED);
 		readAgain();
 		assertEquals("a quest handed in just before a teleport is still watched", 1,
-			plugin.milestones.pendingCount());
+			plugin.loop.milestones.pendingCount());
 	}
 
 	@Test
@@ -196,7 +196,7 @@ public class CompletionAnnouncementTest
 		game.setVarbit(VarbitIds.DIARY_VARROCK[1], 1);
 		settleThenWatch();
 		readAgain();
-		assertEquals(0, plugin.milestones.pendingCount());
+		assertEquals(0, plugin.loop.milestones.pendingCount());
 	}
 
 	@Test
@@ -211,7 +211,7 @@ public class CompletionAnnouncementTest
 		toggle(MapCompanionConfig.KEY_SHARE_MILESTONES, true);
 		readAgain();
 		readAgain();
-		assertEquals(0, plugin.milestones.pendingCount());
+		assertEquals(0, plugin.loop.milestones.pendingCount());
 	}
 
 	@Test
@@ -224,14 +224,14 @@ public class CompletionAnnouncementTest
 		game.setQuest(Quest.DRAGON_SLAYER_I, QuestState.FINISHED);
 		game.setVarbit(VarbitIds.DIARY_VARROCK[1], 1);
 		readAgain();
-		assertEquals("neither is watched with its choice off", 0, plugin.milestones.pendingCount());
+		assertEquals("neither is watched with its choice off", 0, plugin.loop.milestones.pendingCount());
 		config.set("shareQuestLog", true);
 		toggle("shareQuests", true);
 		toggle("shareDiaries", true);
 		readAgain();
 		readAgain();
 		assertEquals("and what was done meanwhile is not news when they come back", 0,
-			plugin.milestones.pendingCount());
+			plugin.loop.milestones.pendingCount());
 	}
 
 	/**
@@ -247,7 +247,7 @@ public class CompletionAnnouncementTest
 		toggle("shareDiaries", true);
 		readAgain();
 		readAgain();
-		assertEquals(0, plugin.milestones.pendingCount());
+		assertEquals(0, plugin.loop.milestones.pendingCount());
 	}
 
 	@Test
@@ -259,7 +259,7 @@ public class CompletionAnnouncementTest
 		game.setQuest(Quest.PRIEST_IN_PERIL, QuestState.FINISHED);
 		game.setQuest(Quest.DRAGON_SLAYER_I, QuestState.FINISHED);
 		readAgain();
-		List<CompanionSnapshot.Milestone> sent = plugin.milestones.take(now);
+		List<CompanionSnapshot.Milestone> sent = plugin.loop.milestones.take(now);
 		assertEquals("only the quest that choice shares", 1, sent.size());
 		assertEquals("Priest in Peril", sent.get(0).quest);
 	}
@@ -273,7 +273,7 @@ public class CompletionAnnouncementTest
 		readAgain();
 		store.set(MapCompanionConfig.KEY_PAIRING_CODE, "ABC234");
 		readAgain();
-		assertEquals(0, plugin.milestones.pendingCount());
+		assertEquals(0, plugin.loop.milestones.pendingCount());
 	}
 
 	/** The half of {@code observeGameState} the readers need: the client is up, so start settling. */
@@ -286,14 +286,14 @@ public class CompletionAnnouncementTest
 		quests.onSessionResumed(now);
 		diaries.onSessionResumed(now);
 		now += 15_000L;
-		plugin.announceCompletions(now);
+		plugin.loop.announceCompletions(now);
 	}
 
 	/** A tick past the quest readers' thirty-second cache, so the next reading is a new one. */
 	private void readAgain()
 	{
 		now += 30_000L;
-		plugin.announceCompletions(now);
+		plugin.loop.announceCompletions(now);
 	}
 
 	private void toggle(String key, boolean on)
@@ -326,8 +326,6 @@ public class CompletionAnnouncementTest
 
 	private void set(String name, Object value) throws Exception
 	{
-		Field field = MapCompanionPlugin.class.getDeclaredField(name);
-		field.setAccessible(true);
-		field.set(plugin, value);
+		TestLoop.set(plugin, name, value);
 	}
 }

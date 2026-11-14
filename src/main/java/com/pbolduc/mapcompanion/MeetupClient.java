@@ -28,7 +28,6 @@ package com.pbolduc.mapcompanion;
 import com.google.gson.Gson;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.io.IOException;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
@@ -297,17 +296,18 @@ final class MeetupClient
 	/** One reply into a sentence, and for Meet here the link. Package-private for its test; OkHttp's. */
 	void handle(String source, long asked, boolean making, @Nullable Runnable onAnswered, String server, Response response)
 	{
-		try (Response close = response)
+		/* A Meet here that cannot be read was still made, so it is said as made, without its link. */
+		CompanionHttp.read(response, FAILURE_GAP_MS, making ? MADE_NO_LINK : FAILED, reply ->
 		{
 			long now = System.currentTimeMillis();
-			int status = close.code();
-			if (!close.isSuccessful())
+			int status = reply.code();
+			if (!reply.isSuccessful())
 			{
 				finish(source, asked, MapWait.why(status, status == 404 && !making ? GONE : status == 400 && making ? REFUSED : FAILED),
-					now + MapWait.after(close, FAILURE_GAP_MS));
+					now + MapWait.after(reply, FAILURE_GAP_MS));
 				return;
 			}
-			String text = CompanionHttp.readBounded(close.body());
+			String text = CompanionHttp.readBounded(reply.body());
 			if (!making)
 			{
 				if (asked == destinations.generation() && onAnswered != null)
@@ -324,11 +324,7 @@ final class MeetupClient
 				copy.accept(link);
 			}
 			finish(source, asked, link != null ? MADE : MADE_NO_LINK, now + MIN_GAP_MS);
-		}
-		catch (IOException | RuntimeException unreadable)
-		{
-			finish(source, asked, making ? MADE_NO_LINK : FAILED, System.currentTimeMillis() + FAILURE_GAP_MS);
-		}
+		}, (why, wait) -> finish(source, asked, why, System.currentTimeMillis() + wait));
 	}
 
 	private void finish(String source, long asked, @Nullable String why, long nextAllowed)

@@ -253,6 +253,11 @@ public class SlayerCardTest
 		AbstractButton pin = button(panel, "Pin");
 		assertNotNull(card.toString(), pin);
 		assertEquals("Pin this spot as your destination: world map, arrow and Home", pin.getToolTipText());
+		/* Route had no tooltip here, where every other Route says what it plans; logged out it says to log in, as before. */
+		assertEquals("Plan the way to this spot from where you stand", button(panel, "Route").getToolTipText());
+		SwingUtilities.invokeAndWait(() -> panel.refresh(true, false));
+		assertEquals(RoutePress.LOG_IN, button(panel, "Route").getToolTipText());
+		refresh();
 
 		press("Pin");
 		assertTrue(destinations.hasLocalDestination());

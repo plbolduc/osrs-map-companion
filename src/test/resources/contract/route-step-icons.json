@@ -170,6 +170,7 @@
     "lumbridge home teleport": [356, "Magicon2.LUMBRIDGE_HOME_TELEPORT"],
     "lumbridge teleport": [30, "Magicon.LUMBRIDGE_TELEPORT"],
     "mind altar teleport": [1256, "MagicNecroOn.MIND_ALTAR_TELEPORT"],
+    "minigame teleport": [1053, "SideiconsInterface.MINIGAMES"],
     "moonclan teleport": [544, "LunarMagicOn.MOONCLAN_TELEPORT"],
     "ourania teleport": [586, "LunarMagicOn.OURANIA_TELEPORT"],
     "paddewwa teleport": [341, "Magicon2.PADDEWWA_TELEPORT"],

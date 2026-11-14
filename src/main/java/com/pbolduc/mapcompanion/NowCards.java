@@ -27,6 +27,7 @@ package com.pbolduc.mapcompanion;
 
 import java.awt.Dimension;
 import java.util.ArrayList;
+import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -84,6 +85,8 @@ final class NowCards extends JPanel
 	@Nullable
 	private RoutePress.Picture shownPicture;
 	private final JLabel destinationDetail = detail();
+	/** The world this client is on, or zero: the sidebar's, once it has one to give. See {@link #world}. */
+	private IntSupplier world = () -> 0;
 	private final JPanel destinationActions = row(DARKER_GRAY_COLOR);
 	private List<JButton> shownDestinationActions = new ArrayList<>();
 	/*
@@ -250,6 +253,8 @@ final class NowCards extends JPanel
 		deathRouteButton.setName("now.death.route");
 		deathSaid.setName("now.death.said");
 		clueRouteButton.setName("now.clue.route");
+		clueDetail.setName("now.clue.detail");
+		destinationDetail.setName("now.destination.detail");
 		clueRouteButton.setToolTipText(CLUE_ROUTE_TIP);
 		rerouteButton.setToolTipText(REROUTE_TIP);
 		rerouteButton.addActionListener(e ->
@@ -425,13 +430,14 @@ final class NowCards extends JPanel
 	 * The step in a few words: where a Route goes, or the scroll's own words cut to two lines. A step
 	 * that is words is routed by those words, so the card shows them and Route under them. A map
 	 * above beginner is known by its scroll before and after it is opened, so the card says Route
-	 * finds the place rather than asking for a scroll the player has just read.
+	 * finds the place rather than asking for a scroll the player has just read. A coordinate says the
+	 * same of its dig spot: the tile is two numbers nobody can act on, kept for the line's tooltip.
 	 */
 	static String clueDetail(Clue clue)
 	{
 		if (clue.coordTile != null)
 		{
-			return "Coordinate · dig at " + clue.coordTile.x + ", " + clue.coordTile.y;
+			return "Coordinate · Route finds the dig spot";
 		}
 		if (clue.mapTile != null)
 		{
@@ -566,7 +572,10 @@ final class NowCards extends JPanel
 				picture != null ? CARD_TEXT_WIDTH - DESTINATION_PICTURE - DESTINATION_PICTURE_GAP : CARD_TEXT_WIDTH);
 			String detail = destinationDetail(destination);
 			destinationDetail.setVisible(!detail.isEmpty());
-			setWrapped(destinationDetail, detail, CARD_TEXT_WIDTH);
+			/* The world green while the player is on it, as a friend's and a meetup's is under Group. */
+			boolean here = destination.world != null && destination.world == world.getAsInt();
+			GroupPanel.setMarkup(destinationDetail,
+				GroupPanel.markup(detail, here ? "W" + destination.world : null, GroupPanel.HERE, CARD_TEXT_WIDTH));
 		}
 		/* Only the route of the destination on the card: for a tick after a change they can differ. */
 		DestinationRoute.View route = destinationRoute.view();
@@ -662,6 +671,9 @@ final class NowCards extends JPanel
 			}
 			setWrapped(clueTitle, clueTitle(clue.tier), scroll != null ? CARD_TEXT_WIDTH - CLUE_PICTURE - 6 : CARD_TEXT_WIDTH);
 			setWrapped(clueDetail, clueDetail(clue), CARD_TEXT_WIDTH);
+			/* A coordinate's dig spot, a hover away as the death's tile is. */
+			clueDetail.setToolTipText(clue.coordTile == null ? null
+				: deathTile(clue.coordTile.x, clue.coordTile.y, clue.coordTile.plane));
 			boolean routable = ClueReader.routeTile(clue) != null || ClueReader.routesByClue(clue);
 			clueActions.setVisible(routable);
 			routeState(clueRouteButton, clueSaid, "clue", "Route", asks && routable, loggedIn ? CLUE_ROUTE_TIP : RoutePress.LOG_IN, now);
@@ -684,6 +696,12 @@ final class NowCards extends JPanel
 		}
 		/** The heading goes with the last card under it, rather than naming nothing. */
 		setVisible((destination != null && !farmDestination) || death != null || (clue != null && paired) || questSlot.isVisible());
+	}
+
+	/** Where the card reads the world the player is on, so the destination's world is green while it is that one. */
+	void world(IntSupplier world)
+	{
+		this.world = world;
 	}
 
 	/**

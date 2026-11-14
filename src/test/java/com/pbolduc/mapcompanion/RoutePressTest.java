@@ -27,6 +27,7 @@ package com.pbolduc.mapcompanion;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import java.io.IOException;
 import java.lang.reflect.Proxy;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -393,11 +394,103 @@ public class RoutePressTest
 		}
 	}
 
+	/**
+	 * How long each kind of reply keeps the next Route, Reroute and run waiting, and what it says
+	 * under the press. A busy map is waited on for exactly what it asks, a 404 and an answer keep the
+	 * five seconds between presses, and everything else that is no answer keeps the half minute; a
+	 * wait the map names stands wherever it is the longer.
+	 */
+	@Test
+	public void eachKindOfReplyKeepsItsOwnWaitAndWords() throws Exception
+	{
+		connect();
+		Object[][] cases = {
+			{429, "7", "{}", MapWait.BUSY, 7_000L},
+			{429, null, "{}", MapWait.BUSY, 30_000L},
+			{503, "120", "{}", MapWait.BUSY, 120_000L},
+			{403, null, "{}", RoutePress.NOT_CONNECTED, 30_000L},
+			{410, "60", "{}", RoutePress.NOT_CONNECTED, 60_000L},
+			{404, null, "{}", RoutePress.NOT_FOUND, 5_000L},
+			{404, "20", "{}", RoutePress.NOT_FOUND, 20_000L},
+			{500, null, "oops", RoutePress.FAILED, 30_000L},
+			{500, "7", "oops", RoutePress.FAILED, 30_000L},
+			{500, "60", "oops", RoutePress.FAILED, 60_000L},
+			/* A redirect is the address's fault and no retry changes it: five minutes, whatever it names. */
+			{302, null, "", RoutePress.REDIRECTS, 300_000L},
+			{307, "7", "", RoutePress.REDIRECTS, 300_000L},
+			{200, null, "not json at all", RoutePress.UNREADABLE, 30_000L},
+			{200, null, "{\"options\":[]}", RoutePress.NO_WAY, 5_000L},
+			{200, "20", "{\"options\":[]}", RoutePress.NO_WAY, 20_000L},
+			{200, null, ANSWER, null, 5_000L},
+		};
+		RoutePress.Target target = RoutePress.Target.place("search", "bank:lumbridge", "Lumbridge bank", null, null);
+		for (Object[] c : cases)
+		{
+			DestinationRoute gate = new DestinationRoute();
+			RoutePress press = press(new OkHttpClient(), gate);
+			long before = System.currentTimeMillis();
+			press.handle(destinations.generation(), target, reply((int) c[0], (String) c[2], (String) c[1]));
+			String name = "HTTP " + c[0] + ", Retry-After " + c[1];
+			assertEquals(name, c[3], press.said("search").message);
+			assertWait(name, (long) c[4], gate.pressWait(before));
+		}
+
+		/* No reply at all. */
+		DestinationRoute gate = new DestinationRoute();
+		RoutePress press = press(new OkHttpClient.Builder().addInterceptor(chain ->
+		{
+			throw new IOException("no route to host");
+		}).build(), gate);
+		long before = System.currentTimeMillis();
+		press.press(target);
+		settle(press, "search");
+		assertEquals(RoutePress.UNREACHABLE, press.said("search").message);
+		assertWait("unreachable", 30_000L, gate.pressWait(before));
+	}
+
+	/** A press with a gate of its own, so one case's wait is not the next one's. */
+	private RoutePress press(OkHttpClient http, DestinationRoute gate)
+	{
+		return new RoutePress(http, new Gson(), game(), new ClientThread()
+		{
+			@Override
+			public void invokeLater(Runnable r)
+			{
+				r.run();
+			}
+		}, pairing, identity, gate, destinations, new DestinationMarker(null, null, null, null, null, null)
+		{
+			@Override
+			void sync()
+			{
+			}
+		});
+	}
+
+	/**
+	 * A wait of {@code expected}, measured from a moment before the reply was read: at least that
+	 * long, and no more than the few seconds a slow machine could add.
+	 */
+	static void assertWait(String name, long expected, long held)
+	{
+		assertTrue(name + " waits " + expected + "ms, and held " + held + "ms", held >= expected && held < expected + 3_000L);
+	}
+
 	static Response reply(int status, String body)
 	{
-		return new Response.Builder()
+		return reply(status, body, null);
+	}
+
+	static Response reply(int status, String body, @Nullable String retryAfter)
+	{
+		Response.Builder reply = new Response.Builder()
 			.request(new Request.Builder().url("https://example.invalid/api/companion/route").build())
-			.protocol(Protocol.HTTP_1_1).code(status).message("").body(ResponseBody.create(JSON, body)).build();
+			.protocol(Protocol.HTTP_1_1).code(status).message("").body(ResponseBody.create(JSON, body));
+		if (retryAfter != null)
+		{
+			reply.header("Retry-After", retryAfter);
+		}
+		return reply.build();
 	}
 
 	/** Logged in at Lumbridge, outside any instance. */

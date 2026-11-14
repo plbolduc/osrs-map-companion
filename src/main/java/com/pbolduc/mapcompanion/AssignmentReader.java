@@ -53,7 +53,7 @@ import net.runelite.client.util.Text;
  * login settling window; no regional patch state is used to infer the current assignment.
  */
 @Singleton
-public class AssignmentReader
+public class AssignmentReader extends SettlingReader
 {
 	private static final long MAX_AGE_MS = 2 * 60 * 60_000L;
 	private static final List<String> RUMOURS = names("assignment-rumours.txt");
@@ -66,7 +66,6 @@ public class AssignmentReader
 	private static final Pattern HOME_FINISHED = Pattern.compile("You have completed [\\d,]+ contracts with a total of [\\d,]+ points?\\.");
 	private final Client client;
 	private final ConfigStore settings;
-	private final SessionSettle settle = new SessionSettle(15_000L);
 	private CompanionSnapshot.Assignment rumour;
 	private CompanionSnapshot.Assignment home;
 	private long rumourAt;
@@ -80,9 +79,10 @@ public class AssignmentReader
 		this.settings = settings;
 	}
 
-	void onSessionEnded()
+	@Override
+	public void onSessionEnded()
 	{
-		settle.ended();
+		super.onSessionEnded();
 		rumour = null;
 		home = null;
 		lastHomeDialog = null;

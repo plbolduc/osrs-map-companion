@@ -218,6 +218,7 @@ public class MapCompanionPanel extends PluginPanel
 		});
 		this.nowCards = new NowCards(config, destinationState, deathWatcher, destinationMarker, destinationRoute,
 			shortestPath, routePress, clueReader, farmRunRoute, sprites, this::refresh, this::mapUrl);
+		nowCards.world(groupState::world);
 		this.dropLuck = new DropLuckPanel(lootLog, DropLuckPanel.Pictures.of(itemManager));
 		this.starsPanel = new StarsPanel(starsClient, destinationState, clientThread, destinationMarker, routePress, this::mapUrl,
 			destinationRoute, shortestPath, config, sprites,
@@ -310,10 +311,16 @@ public class MapCompanionPanel extends PluginPanel
 		timer.stop();
 	}
 
-	/** Also called when the plugin shuts down, in case the sidebar was never opened or closed. */
+	/**
+	 * The plugin shutting down. The timer stops here in case the sidebar was never opened or closed.
+	 * The search is forgotten because it keeps a timer of its own, for the pause after typing or the
+	 * wait the map asked for, and that one would still fire and ask the map as this member with the
+	 * plugin off. EDT, which is where the search's state lives.
+	 */
 	void stopRefreshing()
 	{
 		onDeactivate();
+		searchPanel.search.clear();
 	}
 
 	/**
@@ -654,93 +661,110 @@ public class MapCompanionPanel extends PluginPanel
 
 	private void refresh()
 	{
-		SwingUtilities.invokeLater(() ->
+		SwingUtilities.invokeLater(this::refreshNow);
+	}
+
+	/**
+	 * Every card as of now: what each says, which buttons it offers and which can be pressed. EDT.
+	 * Queued by {@link #refresh} once a second while the sidebar is open, and run outright by
+	 * {@link #act}, which presses those buttons while it may be closed.
+	 */
+	private void refreshNow()
+	{
+		Health health = plugin.getHealth();
+		String code = pairingCode();
+		boolean paired = !code.isEmpty();
+		boolean ready = paired && pairing.hasServerConsent();
+
+		connectCard.refreshStatus(health, code, paired, ready);
+		/*
+		 * At the login screen the status card says Logged out, the one true thing to say, and the
+		 * presses that ask the map as a member wait for a character, greyed, rather than each
+		 * answering a press with a fix for a connection nothing is wrong with. What acts here or as
+		 * the player stays: Follow, Pause, Dismiss, End run, World map, Pin, Open the map, Switch ▾
+		 * and Rename group….
+		 */
+		boolean loggedIn = plugin.loggedIn();
+
+		/*
+		 * The search is the map's, asked as a member, and a member is a character: a box that could
+		 * only say "connect" or "log in" is not shown.
+		 */
+		boolean searching = ready && loggedIn;
+		searchPanel.setVisible(searching);
+		searchGap.setVisible(searching);
+		farmRunPanel.refresh(ready, loggedIn);
+		slayerPanel.refresh(ready, loggedIn);
+		portTasksPanel.refresh(ready, loggedIn);
+		/* Each card decides its own visibility; its slot follows, so a hidden card leaves no gap. */
+		boolean anyTask = false;
+		for (JComponent card : new JComponent[] {farmRunPanel, slayerPanel, portTasksPanel})
 		{
-			Health health = plugin.getHealth();
-			String code = pairingCode();
-			boolean paired = !code.isEmpty();
-			boolean ready = paired && pairing.hasServerConsent();
+			card.getParent().setVisible(card.isVisible());
+			anyTask |= card.isVisible();
+		}
+		tasks.setVisible(anyTask);
+		if (searching)
+		{
+			searchPanel.refresh();
+		}
 
-			connectCard.refreshStatus(health, code, paired, ready);
-			/*
-			 * At the login screen the status card says Logged out, the one true thing to say, and the
-			 * presses that ask the map as a member wait for a character, greyed, rather than each
-			 * answering a press with a fix for a connection nothing is wrong with. What acts here or as
-			 * the player stays: Follow, Pause, Dismiss, End run, World map, Pin, Open the map, Switch ▾
-			 * and Rename group….
-			 */
-			boolean loggedIn = plugin.loggedIn();
+		nowCards.refresh(paired, ready, loggedIn);
+		/* After Now: under a routed star, Stars offers the destination card's own buttons as they stand. */
+		starsPanel.refresh();
 
-			/*
-			 * The search is the map's, asked as a member, and a member is a character: a box that could
-			 * only say "connect" or "log in" is not shown.
-			 */
-			boolean searching = ready && loggedIn;
-			searchPanel.setVisible(searching);
-			searchGap.setVisible(searching);
-			farmRunPanel.refresh(ready, loggedIn);
-			slayerPanel.refresh(ready, loggedIn);
-			portTasksPanel.refresh(ready, loggedIn);
-			/* Each card decides its own visibility; its slot follows, so a hidden card leaves no gap. */
-			boolean anyTask = false;
-			for (JComponent card : new JComponent[] {farmRunPanel, slayerPanel, portTasksPanel})
-			{
-				card.getParent().setVisible(card.isVisible());
-				anyTask |= card.isVisible();
-			}
-			tasks.setVisible(anyTask);
-			if (searching)
-			{
-				searchPanel.refresh();
-			}
+		/* Redraws only when its words change, so a click or a search is never painted over. */
+		boolean paused = LootLog.PAUSED.equals(lootLog.summary());
+		dropLuck.refresh();
+		dropLuckPaused.setVisible(paused);
+		boolean headed = !paused && dropLuck.namesItself();
+		dryHeading.setVisible(!headed);
+		dryHeadingGap.setVisible(!headed);
+		drySection.setVisible(paused || dropLuck.hasContent());
 
-			nowCards.refresh(paired, ready, loggedIn);
-			/* After Now: under a routed star, Stars offers the destination card's own buttons as they stand. */
-			starsPanel.refresh();
+		/*
+		 * The group. In one: its invite beside the groups menu, which also joins another, over the
+		 * tabs. In none: the join field outright, and the remembered groups under it.
+		 */
+		List<String> known = pairing.knownCodes();
+		/*
+		 * The tabs are a member's: before a group is joined, Home is the whole page. While the step
+		 * after a first Connect is up it is the page, with nothing under it to scroll past.
+		 */
+		views.tabsShown(ready);
+		views.setVisible(!recommendedSharing.isVisible());
+		/* A friend's or a meetup's way, landed while Group still shows: Home, once, with the card in view. */
+		if (views.showAnswer(routePress.last()))
+		{
+			SwingUtilities.invokeLater(this::showNow);
+		}
+		List<RelayResponse.RosterRow> roster = destinationState.getRoster();
+		views.groupCount(ready && roster != null ? roster.size() : 0);
+		groupPanel.setVisible(ready);
+		if (ready)
+		{
+			groupPanel.refresh(true, loggedIn, System.currentTimeMillis());
+		}
+		connectCard.refreshButtons(paired, ready, loggedIn, known, System.currentTimeMillis());
+		/* With the tabs: before a group there are none, and the step after a first Connect is the page. */
+		groupRow.setVisible(ready && views.isVisible());
+		/* Offered for the group just joined; leaving it, or a changed map, takes the offer away. */
+		if (!ready)
+		{
+			recommendedSharing.withdraw();
+		}
 
-			/* Redraws only when its words change, so a click or a search is never painted over. */
-			boolean paused = LootLog.PAUSED.equals(lootLog.summary());
-			dropLuck.refresh();
-			dropLuckPaused.setVisible(paused);
-			boolean headed = !paused && dropLuck.namesItself();
-			dryHeading.setVisible(!headed);
-			dryHeadingGap.setVisible(!headed);
-			drySection.setVisible(paused || dropLuck.hasContent());
-
-			/*
-			 * The group. In one: its invite beside the groups menu, which also joins another, over the
-			 * tabs. In none: the join field outright, and the remembered groups under it.
-			 */
-			List<String> known = pairing.knownCodes();
-			/*
-			 * The tabs are a member's: before a group is joined, Home is the whole page. While the step
-			 * after a first Connect is up it is the page, with nothing under it to scroll past.
-			 */
-			views.tabsShown(ready);
-			views.setVisible(!recommendedSharing.isVisible());
-			/* A friend's or a meetup's way, landed while Group still shows: Home, once, with the card in view. */
-			if (views.showAnswer(routePress.last()))
-			{
-				SwingUtilities.invokeLater(this::showNow);
-			}
-			List<RelayResponse.RosterRow> roster = destinationState.getRoster();
-			views.groupCount(ready && roster != null ? roster.size() : 0);
-			groupPanel.setVisible(ready);
-			if (ready)
-			{
-				groupPanel.refresh(true, loggedIn, System.currentTimeMillis());
-			}
-			connectCard.refreshButtons(paired, ready, loggedIn, known, System.currentTimeMillis());
-			/* With the tabs: before a group there are none, and the step after a first Connect is the page. */
-			groupRow.setVisible(ready && views.isVisible());
-			/* Offered for the group just joined; leaving it, or a changed map, takes the offer away. */
-			if (!ready)
-			{
-				recommendedSharing.withdraw();
-			}
-
-			settingsPage.refresh(paired);
-		});
+		settingsPage.refresh(paired);
+		/*
+		 * The cards above hide and show their parts, and hiding one marks the layout stale without
+		 * asking for a new one. So it is asked for here, once for all of them, and only when
+		 * something was marked: a second in which nothing changed lays out and paints nothing.
+		 */
+		if (!isValid())
+		{
+			revalidate();
+			repaint();
+		}
 	}
 
 	/**
@@ -778,6 +802,13 @@ public class MapCompanionPanel extends PluginPanel
 	 */
 	void act(Act act)
 	{
+		/*
+		 * The cards are redrawn by a timer that stops with the sidebar closed or behind another
+		 * plugin's panel, and a key is pressed in the game, where it usually is. Without this the press
+		 * would meet the buttons as they stood then: none for a destination that came since, and a
+		 * Reroute still greyed by a wait long over.
+		 */
+		refreshNow();
 		JButton button = farmRunPanel.actButton(act);
 		if (button == null)
 		{

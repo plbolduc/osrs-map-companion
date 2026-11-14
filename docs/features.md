@@ -7,6 +7,11 @@ lines. This is the rest: every control and rule a player might ask about, in the
 
 Send a place from the website or pick a search result, and the sidebar lists the way there; a
 place sent from the website says so in the chat box.
+When the map offers more than one way, each is a chip above the steps: the picture of what it
+uses, then where its teleport lands or the way's name, with the one you are on filled in orange.
+Press another chip to see that way's steps instead; the line under the chips says how long the
+chosen way is and how many tiles more than the best. A way your account cannot take yet comes
+last, faded, and still shows its steps.
 A teleport step shows what to click: the item's sprite or the spell's icon, from the game. While
 you follow the route, that item is outlined in your inventory or worn items, and that spell in
 your spellbook.
@@ -14,15 +19,18 @@ Each step gets a numbered pin on the game's world map, and the step you are on i
 in both; the game's arrow points at it when it is in the loaded area. Drag the world map away from
 that step and its pin stays on the map's edge, pointing the way and naming the step.
 
-Press **Follow** to show the step you're on in a small box over the game, with its notes, such as
-a warning that it lands in the Wilderness; with **Shortest Path** installed, it also draws each
+Press **Follow** to show the step you're on in a small box over the game, with how far through
+the route it is, such as 2/3, and its notes, such as a warning that it lands in the
+Wilderness; with **Shortest Path** installed, it also draws each
 walking step as you reach it. A route you ask for yourself is followed from the start, whether you
 pick it here or press **Send to RuneLite** on the website, and **Pause** stops following it. A place
 a friend sends to everyone shows its way without taking over the box or Shortest Path until you
 press **Follow**. With the box over the game, the sidebar can stay closed: hold Shift and
 right-click the box for **Pause**, **Reroute** and **Dismiss**, or **End run** on a run.
-**Reroute** plans again from where you stand, and RuneLite's settings for the plugin can give
-Reroute and Follow a key of your own. When you reach the place, on its world if it names one, its
+**Reroute** plans again from where you stand, and keeps a way you picked yourself until you set
+off on it. RuneLite's settings for the plugin can give Reroute and Follow a key of your own,
+which work with the sidebar closed. A destination on a world of its own says which, in green
+once you are on it. When you reach the place, on its world if it names one, its
 pin, arrow and card go on their own; a farm run moves on to its next stop instead. The website uses what you share under **Progress and
 travel** to suggest routes around your account's quests, diaries, items and transport unlocks.
 
@@ -46,7 +54,8 @@ your own client with nothing sent, so the pins need no Connect. Two boats at one
 
 Search for banks, shops, NPCs, monsters and items from **Home**. An item can show the monsters
 that drop it and the shops that sell it. Pick a place, monster or shop to plan the way there.
-Results use the game's map icons and item sprites.
+Results use the game's map icons and item sprites, and each place the map measured says how far
+it is at the right of its row.
 
 ## Slayer in RuneLite
 
@@ -78,7 +87,9 @@ Build a run on the website and press **Send run to RuneLite**, or choose a prese
 the choice steps aside while the run is going, so a stray press cannot replace it.
 The sidebar lists your stops and how to reach each one, with the steps to the next stop under it
 as **This leg**; a finished stop folds to one line. A bar under the run's name shows how much
-of it is done. Each step has a picture: a teleport's item or spell, a boot for a walk, and a boat
+of it is done, a stop still ahead says how far it is at the right of its row, and the line
+under the bar adds the tiles left when every stop ahead has a length.
+Each step has a picture: a teleport's item or spell, a boot for a walk, and a boat
 for boarding, sailing and docking. On a Sea charting run each task shows the
 tool it takes, with the length of its sail or walk at the right, and a bar and the tiles left
 under the run's name. **Before you leave** is a bank checklist:
@@ -96,8 +107,11 @@ can make a new one in the same client session.
 
 ## Port tasks in RuneLite
 
-With **Your account** shared, Home lists the port tasks you hold: the crates still to collect
-and where they go, or the bounty parts still owed and the board to hand them in at. **Start run**
+With **Your account** shared, Home lists the port tasks you hold. Each has a count at the right
+of its name: a courier's crates collected, then delivered, of those it asks for, such as 2/3, and
+a bounty's parts in hand of those it asks for, such as 6/15. Under the name is where to go next:
+where to collect the crates and who they are for, where to deliver them, or the board a bounty's
+parts go back to. **Start run**
 turns them into one run, from where your boats are: every
 pickup and drop-off in the order that fits your boat's hold, then each bounty out to its creature
 and back to its board. Each stop's voyage starts where your boat docked last, draws on the world
@@ -119,16 +133,22 @@ green when you are already on that world; a
 site with stars on several worlds shows the one with the most time left and how many more there
 are. Filter by tier and world type, and save favourite sites; your filters and favourites stay on
 your computer.
-Press a star to open **Route** and **Pin** under it: Route plans the way there and pins the star,
-and Pin only marks it on the world map. The pinned star stays at the top of the tab with its steps,
-as on Home, so you can stay on Stars while you hop.
+Press a star to go there. It is pinned at once, on the world map and with the game's arrow, in
+place of whatever was pinned, and a moment later the map is asked the way. The pinned star stays at
+the top of the tab with its ways and steps, as on Home, so you can stay on Stars while you hop.
+Pressing down the list pins each star you press and plans only for the one you stop on. If the map
+cannot answer, the star stays pinned and says why, and **Route** beside **Unpin** asks again. A
+star whose spot is approximate opens **Open website** instead, and a star with no time left
+cannot be pinned.
 
 To change worlds, type `::hop` and the world, for example `::hop 444`.
 
 ## Friends and meetups
 
 **Group** shows your friends' locations and their latest news: a level, a drop, a quest or an
-achievement diary. Friends who share their position appear on the website and, if you enable it,
+achievement diary. A friend's row starts with the world they are on, in green when it is yours,
+so you can see who needs a hop to reach.
+Friends who share their position appear on the website and, if you enable it,
 on RuneLite's world map in the same colours. **Route** plans the way to a friend's current position.
 
 If you made the group or own it, right-click a friend and choose **Remove from group…** to take them out;

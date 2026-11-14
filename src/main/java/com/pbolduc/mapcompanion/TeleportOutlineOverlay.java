@@ -66,6 +66,10 @@ class TeleportOutlineOverlay extends WidgetItemOverlay
 	private final Map<Integer, Boolean> marked = new HashMap<>();
 	private Integer markedFor;
 	private CapabilityEvaluator.ItemTest test;
+	/** The spell's icon in the open spellbook, for the sprite and on the game tick it was looked for; see {@link #drawSpell}. */
+	@Nullable
+	private Widget spell;
+	private int spellSprite, spellTick;
 
 	@Inject
 	TeleportOutlineOverlay(Client client, MapCompanionConfig config, DestinationRoute route, ItemManager items)
@@ -133,8 +137,21 @@ class TeleportOutlineOverlay extends WidgetItemOverlay
 	 */
 	void drawSpell(Graphics2D graphics, int spriteId)
 	{
-		Widget spell = showing(client.getWidget(InterfaceID.MagicSpellbook.UNIVERSE), spriteId);
-		if (spell != null)
+		/*
+		 * This draws every frame and the book is a few hundred widgets, so an icon found is looked
+		 * for again only on the next game tick, which is as often as the game changes what the book
+		 * shows. Between ticks the widget found is asked where it is and whether it still shows,
+		 * which a closed book answers too. With none found the book is asked each frame, so the
+		 * outline is there the frame the book opens; a closed book answers that at once.
+		 */
+		int tick = client.getTickCount();
+		if (spell == null || tick != spellTick || spriteId != spellSprite)
+		{
+			spellTick = tick;
+			spellSprite = spriteId;
+			spell = showing(client.getWidget(InterfaceID.MagicSpellbook.UNIVERSE), spriteId);
+		}
+		if (spell != null && !spell.isHidden())
 		{
 			Stroke before = graphics.getStroke();
 			graphics.setColor(MapPin.AMBER);

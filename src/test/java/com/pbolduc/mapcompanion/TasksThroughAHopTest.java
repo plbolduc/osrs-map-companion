@@ -74,7 +74,7 @@ public class TasksThroughAHopTest
 	private final HarnessStore store = new HarnessStore();
 	private final HarnessConfig config = new HarnessConfig(store, MapCompanionConfig.DEFAULT_MAP_URL);
 	private final Gson gson = new Gson();
-	private final MapCompanionPlugin plugin = new MapCompanionPlugin();
+	private final MapCompanionPlugin plugin = TestLoop.in(new MapCompanionPlugin());
 	private final MemberIdentity identity = new MemberIdentity(store);
 	private final QuestReader quests = new QuestReader(game.client());
 	private final CargoHolds holds = new CargoHolds();
@@ -134,13 +134,13 @@ public class TasksThroughAHopTest
 		/* The plugin's game-state and profile handlers, as CompletionAnnouncementTest assembles them. */
 		RewardTestClient definitions = new RewardTestClient();
 		CollectionItemCatalog catalog = definitions.catalog();
-		plugin.milestones = new MilestoneOutbox();
-		plugin.pairing = new Pairing(store, gson);
-		plugin.destinationState = new DestinationState(gson);
+		plugin.loop.milestones = new MilestoneOutbox();
+		plugin.loop.pairing = new Pairing(store, gson);
+		plugin.loop.destinationState = new DestinationState(gson);
 		plugin.destinationMarker = new TestDestinationMarker();
 		plugin.groupMarkers = new GroupMarkers(null, null);
 		plugin.boatPins = new BoatPins(null, null);
-		plugin.rewardObserver = new RewardObserver(definitions.client, catalog, catalog::contains, () -> 1000L);
+		plugin.loop.rewardObserver = new RewardObserver(definitions.client, catalog, catalog::contains, () -> 1000L);
 		TestFarmRuns.attach(plugin);
 		set("slayerState", slayer);
 		set("client", game.client());
@@ -164,7 +164,7 @@ public class TasksThroughAHopTest
 		set("deathWatcher", construct(DeathWatcher.class));
 		set("lootLog", new LootLog(game.client(), store, gson));
 		set("directiveStream", new DirectiveStream(new OkHttpClient(), gson, (action, delay) -> null));
-		set("groupState", new GroupState(plugin.destinationState));
+		set("groupState", new GroupState(plugin.loop.destinationState));
 
 		DestinationState destinations = new DestinationState(gson);
 		DestinationRoute route = new DestinationRoute();
@@ -416,8 +416,6 @@ public class TasksThroughAHopTest
 
 	private void set(String name, Object value) throws Exception
 	{
-		Field field = MapCompanionPlugin.class.getDeclaredField(name);
-		field.setAccessible(true);
-		field.set(plugin, value);
+		TestLoop.set(plugin, name, value);
 	}
 }

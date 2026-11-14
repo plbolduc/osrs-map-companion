@@ -74,12 +74,15 @@ public class RouteStepOverlayTest
 		route.follow(true);
 		RouteStepOverlay.Box box = RouteStepOverlay.box(route.view(), destination.name);
 		assertEquals("Lumbridge", box.title);
-		assertEquals("1. Lumbridge Home Teleport", box.step);
+		/* The step's number left its words for the count at the right, where it says how many there are too. */
+		assertEquals("Lumbridge Home Teleport", box.step);
+		assertEquals("1/2", box.count);
 		assertEquals("Standard spellbook", box.detail);
 
 		route.advance(new WorldPoint(3222, 3218, 0), DestinationRoute.Sailing.ASHORE_UNKNOWN);
 		box = RouteStepOverlay.box(route.view(), destination.name);
-		assertEquals("2. Walk 12 tiles to the bank", box.step);
+		assertEquals("Walk 12 tiles to the bank", box.step);
+		assertEquals("2/2", box.count);
 		assertNull("a walk with no detail has no second line", box.detail);
 
 		route.advance(new WorldPoint(3208, 3220, 2), DestinationRoute.Sailing.ASHORE_UNKNOWN);
@@ -134,29 +137,74 @@ public class RouteStepOverlayTest
 	}
 
 	/**
-	 * A run's leg has no step pins on the world map, and its stop's number, which the stop's own pin
-	 * carries, heads the box; the step under it is its words alone. Any other route's step keeps the
-	 * number its pin carries.
+	 * A run's leg has its stop's number, which the stop's own pin carries, heading the box, and under
+	 * it the step's words with how far through the leg at the right, as any other route's step has
+	 * how far through its way. This held a leg's step to its words alone and gave any other step its
+	 * pin's number before them; the count is on both now, so a leg says how many steps it has left.
 	 */
 	@Test
-	public void aRunsLegNumbersItsStopAndNotItsStep() throws IOException
+	public void aRunsLegNumbersItsStopAndCountsItsSteps() throws IOException
 	{
 		DestinationState destinations = new DestinationState(new Gson());
 		FarmRunState farm = new FarmRunState();
 		FarmRunRoute run = new FarmRunRoute(farm, destinations, route, new ClientThread());
-		RouteStepOverlay overlay = new RouteStepOverlay(null, null, destinations, route, run, null);
 		String json = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "contract", "farm-run.json")), StandardCharsets.UTF_8);
 		farm.accept(new Gson().fromJson(json, RelayResponse.FarmRun.class), 1, 1_000);
 		run.sync();
-		RouteStepOverlay.Box box = overlay.box(destinations.getDestination());
+		RouteStepOverlay.Box box = RouteStepOverlay.box(route.view(), destinations.getDestination().name);
 		assertEquals("1. Falador farm", box.title);
 		assertEquals("Use Explorer's ring 2: Teleport", box.step);
+		assertEquals("the leg's first step of its two", "1/2", box.count);
 
-		/* A place picked instead of the run's next stop: its steps have pins, and so their numbers. */
+		/* A place picked instead of the run's next stop: its steps are counted the same way. */
 		RelayResponse.Destination place = received();
 		destinations.selectLocal(place);
 		route.follow(true);
-		assertEquals("1. Lumbridge Home Teleport", overlay.box(destinations.getDestination()).step);
+		box = RouteStepOverlay.box(route.view(), destinations.getDestination().name);
+		assertEquals("Lumbridge Home Teleport", box.step);
+		assertEquals("1/2", box.count);
+	}
+
+	/**
+	 * How far through is drawn in the map's amber at the box's right edge, on the step's line, in a
+	 * box with a picture and in one without. A step too long for its line still wraps inside the box
+	 * beside the count, under the picture's column as well.
+	 */
+	@Test
+	public void howFarThroughIsAmberAtTheRightAndALongStepStillWraps() throws IOException
+	{
+		RelayResponse.Destination destination = received();
+		route.follow(true);
+		Dimension pictured = drawn(destination);
+		assertTrue("the count is drawn", amberPixels > 0);
+		assertTrue("at the box's right edge: " + amberRight + " in " + pictured.width,
+			amberRight >= 200 + pictured.width - 8 && amberRight < 200 + pictured.width);
+		assertTrue("on the step's line, right of its words", amberLeft > wordsRightOnAmberRows);
+
+		route.advance(new WorldPoint(3222, 3218, 0), DestinationRoute.Sailing.ASHORE_UNKNOWN);
+		Dimension walk = drawn(destination);
+		assertTrue("a walk, with no picture, has it too", amberPixels > 0);
+		assertTrue(amberRight >= 200 + walk.width - 8 && amberRight < 200 + walk.width);
+
+		Dimension oneLine = drawn(cast("Cast Home Teleport"));
+		Dimension wrapped = drawn(cast("Cast Lumbridge Home Teleport from the standard spellbook and wait out the cast"));
+		assertEquals("no letter is drawn outside the box", 0, lettersOutside);
+		assertTrue("the step took more lines rather than being cut", wrapped.height > oneLine.height);
+		assertEquals("the box is no wider for it", oneLine.width, wrapped.width);
+		assertTrue("the count keeps the right edge", amberRight >= 200 + wrapped.width - 8 && amberRight < 200 + wrapped.width);
+		assertTrue("and the words stop short of it", amberLeft > wordsRightOnAmberRows);
+	}
+
+	/** A followed route whose first step is a pictured cast with these words, and a walk after it. */
+	private RelayResponse.Destination cast(String words)
+	{
+		RelayResponse.RouteStep cast = DestinationRouteTest.step("method", words, false, 3222, 3218, 0);
+		cast.spriteId = 356;
+		RelayResponse.Destination destination = DestinationRouteTest.destination("Lumbridge", DestinationRouteTest.route("Home",
+			Arrays.asList(cast, DestinationRouteTest.step("arrival-walk", "Walk to the bank", true, 3208, 3220, 2))));
+		route.sync(destination, null);
+		route.follow(true);
+		return destination;
 	}
 
 	/** The tile's one line cuts a long name short; the box, which wraps, keeps it whole, up to a bound. */
@@ -300,6 +348,11 @@ public class RouteStepOverlayTest
 	private int picturePixels;
 	private int pictureRight;
 	private int wordsLeft;
+	/** The count's amber pixels in the last {@link #drawn}, their left and right edges, and the right-most letter on their rows. */
+	private int amberPixels;
+	private int amberLeft;
+	private int amberRight;
+	private int wordsRightOnAmberRows;
 
 	/** The box as the game draws it, twice, because a panel sizes its background from the frame before. */
 	private Dimension drawn(RelayResponse.Destination destination)
@@ -334,22 +387,36 @@ public class RouteStepOverlayTest
 		picturePixels = 0;
 		pictureRight = -1;
 		wordsLeft = Integer.MAX_VALUE;
+		amberPixels = 0;
+		amberLeft = Integer.MAX_VALUE;
+		amberRight = -1;
+		wordsRightOnAmberRows = -1;
 		for (int y = 0; y < image.getHeight(); y++)
 		{
 			boolean pictureRow = false;
+			boolean amberRow = false;
 			int firstLetter = Integer.MAX_VALUE;
+			int lastLetter = -1;
 			for (int x = 0; x < image.getWidth(); x++)
 			{
 				int pixel = image.getRGB(x, y);
 				if (pixel == Color.WHITE.getRGB())
 				{
 					firstLetter = Math.min(firstLetter, x);
+					lastLetter = x;
 					if (x < left || x >= left + size.width)
 					{
 						lettersOutside++;
 					}
 				}
 				pinkPixels += pixel == MapCompanionPanel.REFUSED.getRGB() ? 1 : 0;
+				if (pixel == MapPin.AMBER.getRGB())
+				{
+					amberPixels++;
+					amberLeft = Math.min(amberLeft, x);
+					amberRight = Math.max(amberRight, x);
+					amberRow = true;
+				}
 				if (pixel == Color.MAGENTA.getRGB())
 				{
 					picturePixels++;
@@ -360,6 +427,10 @@ public class RouteStepOverlayTest
 			if (pictureRow)
 			{
 				wordsLeft = Math.min(wordsLeft, firstLetter);
+			}
+			if (amberRow)
+			{
+				wordsRightOnAmberRows = Math.max(wordsRightOnAmberRows, lastLetter);
 			}
 		}
 		return size;

@@ -27,6 +27,7 @@ package com.pbolduc.mapcompanion;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
@@ -56,7 +57,9 @@ import okhttp3.ResponseBody;
 import okio.Buffer;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
@@ -367,6 +370,9 @@ public class RunCardsTest
 	 * Pausing changed one word, on the button, and a search pick or a friend's destination paused the
 	 * run with no word on its card at all. The count says the run is paused now, and while the
 	 * destination that paused it is shown, the card names it and the way back.
+	 *
+	 * <p>The count ends with how far is left now, as a charting run's does: the two stops ahead are
+	 * 26 and 29 tiles, so the lines this pinned read "· 55 tiles left" after the words they had.
 	 */
 	@Test
 	public void aPausedRunSaysSoAndNamesTheRouteThatPausedIt() throws Exception
@@ -374,12 +380,12 @@ public class RunCardsTest
 		state.acceptFor(identity.id(), EPOCH, run("/contract/farm-run.json"), 1, System.currentTimeMillis());
 		follower.sync();
 		refresh();
-		assertTrue(shown(farm).toString(), shown(farm).contains("1 of 3 tracked done"));
+		assertTrue(shown(farm).toString(), shown(farm).contains("1 of 3 tracked done · 55 tiles left"));
 
 		press(farm, "Pause");
 		refresh();
 		List<String> paused = shown(farm);
-		assertTrue(paused.toString(), paused.contains("Paused · 1 of 3 tracked done"));
+		assertTrue(paused.toString(), paused.contains("Paused · 1 of 3 tracked done · 55 tiles left"));
 		assertFalse("the player paused it: nothing else to name", paused.contains(RunView.pausedLine("1. Falador farm")));
 
 		press(farm, "Follow");
@@ -388,13 +394,13 @@ public class RunCardsTest
 		follower.sync();
 		refresh();
 		List<String> detour = shown(farm);
-		assertTrue(detour.toString(), detour.contains("Paused · 1 of 3 tracked done"));
+		assertTrue(detour.toString(), detour.contains("Paused · 1 of 3 tracked done · 55 tiles left"));
 		assertTrue(detour.toString(), detour.contains(RunView.pausedLine("Lumbridge Castle bank")));
 
 		destinations.dismiss();
 		refresh();
 		List<String> dismissed = shown(farm);
-		assertTrue("still paused, as the README says", dismissed.contains("Paused · 1 of 3 tracked done"));
+		assertTrue("still paused, as the README says", dismissed.contains("Paused · 1 of 3 tracked done · 55 tiles left"));
 		assertFalse("but no longer for a destination gone from the screen",
 			dismissed.contains(RunView.pausedLine("Lumbridge Castle bank")));
 	}
@@ -548,6 +554,79 @@ public class RunCardsTest
 		assertEquals(words.toString(), 1, Collections.frequency(words, "Explorer's ring 2: Teleport"));
 		assertFalse(words.toString(), words.contains("Explorer's ring 2: Teleport · 26 tiles"));
 		assertEquals("This leg", RunView.legHeading(null));
+	}
+
+	/**
+	 * A farm stop said how far its way was only while it was the leg being walked, in This leg's
+	 * heading, so the stops ahead could not be compared. A stop still ahead that the map priced has
+	 * its length at the right edge of its name's row, in the column a charting run's lengths make,
+	 * with no word under it since its way is the line below; and the count under the bar says how far
+	 * is left. A stop behind the player keeps its one struck line.
+	 */
+	@Test
+	public void aFarmStopAheadSaysItsLengthAtTheRightAndTheCountWhatIsLeft() throws Exception
+	{
+		state.acceptFor(identity.id(), EPOCH, run("/contract/farm-run.json"), 1, System.currentTimeMillis());
+		refresh();
+		List<String> words = shown(farm);
+		assertTrue(words.toString(), words.contains("1 of 3 tracked done · 55 tiles left"));
+		int falador = words.indexOf("1. Falador farm");
+		assertEquals("the length follows the name it is beside: " + words, "26t", words.get(falador + 1));
+		assertEquals("and the stop's way is still the line under it", "Explorer's ring 2: Teleport", words.get(falador + 2));
+		assertEquals("29t", words.get(words.indexOf("2. Catherby") + 1));
+		assertFalse("a stop behind the player says no length: " + words, words.contains("140t") || words.contains("128t"));
+		assertFalse("no word under a farm stop's length", raw(farm, "26t").contains("<br>"));
+		SwingUtilities.invokeAndWait(() ->
+		{
+			JLabel length = label(farm, "26t");
+			JLabel name = label(farm, "1. Falador farm");
+			assertSame("on the name's row", name.getParent(), length.getParent());
+			assertEquals("at its right edge", BorderLayout.EAST,
+				((BorderLayout) length.getParent().getLayout()).getConstraints(length));
+			assertEquals("on its first line", JLabel.TOP, length.getVerticalAlignment());
+			assertTrue("the name gives up the length's width, so a long one wraps beside it and is not cut: " + name.getText(),
+				name.getText().contains("width='" + (MapCompanionPanel.CARD_TEXT_WIDTH - length.getPreferredSize().width - 4) + "'"));
+			assertTrue("a stop with no length keeps the whole width",
+				label(farm, "4. My bank · Visited").getText().contains("width='" + MapCompanionPanel.CARD_TEXT_WIDTH + "'"));
+			assertEquals("in the grey a charting run's length has", ColorScheme.LIGHT_GRAY_COLOR, length.getForeground());
+		});
+
+		replant("falador-herb");
+		refresh();
+		words = shown(farm);
+		assertTrue(words.toString(), words.contains("2 of 3 tracked done · 29 tiles left"));
+		assertFalse("a done stop's length is spent with its way: " + words, words.contains("26t"));
+	}
+
+	/**
+	 * A stop the map priced nothing for has no length, and then there is no total to give: one stop
+	 * in words alone would make "tiles left" a part of the way called the whole. A voyage's stop has
+	 * none either, since its Sail step says the distance sailed, and no number is too long for the row.
+	 */
+	@Test
+	public void aFarmStopTheMapDidNotPriceHasNoLengthAndTheCountNoTotal() throws Exception
+	{
+		RelayResponse.FarmRun herbs = run("/contract/farm-run.json");
+		herbs.stops.get(1).costTiles = 0;
+		state.acceptFor(identity.id(), EPOCH, herbs, 1, System.currentTimeMillis());
+		refresh();
+		List<String> words = shown(farm);
+		assertTrue(words.toString(), words.contains("1 of 3 tracked done"));
+		assertEquals("the priced stop still says its own", "26t", words.get(words.indexOf("1. Falador farm") + 1));
+		assertEquals("the other is as it was", "Catherby tablet", words.get(words.indexOf("2. Catherby") + 1));
+
+		RelayResponse.FarmStop stop = new RelayResponse.FarmStop();
+		assertEquals(-1, RunView.tiles(stop));
+		stop.costTiles = 29;
+		assertEquals(29, RunView.tiles(stop));
+		stop.costTiles = 100_001;
+		assertEquals("bounded as a leg's length is", -1, RunView.tiles(stop));
+		stop.costTiles = 29;
+		stop.voyage = new RelayResponse.Voyage();
+		assertEquals("a voyage's stop is priced by its Sail step", -1, RunView.tiles(stop));
+		stop.leg = new RelayResponse.FarmLeg();
+		stop.leg.tiles = 0;
+		assertEquals("a leg in numbers is the length, nought included", 0, RunView.tiles(stop));
 	}
 
 	/**
@@ -719,6 +798,14 @@ public class RunCardsTest
 		assertTrue("a leg's length over its way: " + words, words.contains("71tsail") && words.contains("20twalk"));
 		assertFalse("and not the line it replaced", words.contains("Sail 71 tiles"));
 		assertTrue("the charted stop is cut to one line with its word", words.contains("… · Charted"));
+		/* The card's margin is narrower than a length, so a name wrapped at the card's width was cut by it. */
+		SwingUtilities.invokeAndWait(() ->
+		{
+			JLabel length = label(card[0], "71tsail");
+			JLabel name = (JLabel) ((BorderLayout) length.getParent().getLayout()).getLayoutComponent(BorderLayout.CENTER);
+			assertTrue("the task gives up its picture's and its length's width, so it wraps beside them: " + name.getText(),
+				name.getText().contains("width='" + (MapCompanionPanel.CARD_TEXT_WIDTH - 20 - length.getPreferredSize().width - 4) + "'"));
+		});
 	}
 
 	/**
@@ -886,6 +973,95 @@ public class RunCardsTest
 		});
 		assertEquals(ColorScheme.MEDIUM_GRAY_COLOR, colours[0]);
 		assertEquals("a task still to do stays white", Color.WHITE, colours[1]);
+	}
+
+	/**
+	 * The game is read into a new list of slots on every tick, so a card that asked whether the list
+	 * was the same object drew a held task again each second. It asks whether the reading differs.
+	 */
+	@Test
+	public void theSameTasksReadAgainAreNotDrawnAgain() throws Exception
+	{
+		int[] collected = {0};
+		PortTaskReader ticking = new PortTaskReader(game.client(), new CargoHolds())
+		{
+			@Override
+			List<Slot> latest()
+			{
+				return Arrays.asList(
+					new PortTaskReader.Slot(0, PortTaskReader.COURIER, 6, HONEY, "Catherby", "Port Sarim", 3, collected[0], 0, 0, null),
+					PortTaskReader.Slot.plain(1, PortTaskReader.EMPTY));
+			}
+
+			@Override
+			Integer latestHold()
+			{
+				return 30;
+			}
+		};
+		SwingUtilities.invokeAndWait(() ->
+		{
+			PortTasksPanel card = new PortTasksPanel(ticking, config, store, sprites, state, client, follower, route, shortest);
+			card.refresh(true);
+			JLabel drawn = label(card, HONEY);
+			card.refresh(true);
+			assertSame("a second reading of the same tasks leaves the rows as they are", drawn, label(card, HONEY));
+
+			collected[0] = 1;
+			card.refresh(true);
+			assertNotSame("a crate collected is a different reading, and is drawn", drawn, label(card, HONEY));
+			assertTrue(label(card, "1/3") != null);
+		});
+	}
+
+	/**
+	 * An idle task said how far along it was inside a sentence under its name. It is a count at the
+	 * right edge of the name's row now, top-aligned, so the tasks' counts are read down one edge; the
+	 * name gives up the count's width, the line under it keeps the card's, and a finished courier's
+	 * count is greyed with its name.
+	 */
+	@Test
+	public void anIdleTasksProgressIsACountAtTheRightOfItsName() throws Exception
+	{
+		PortTaskReader held = new PortTaskReader(game.client(), new CargoHolds())
+		{
+			@Override
+			List<Slot> latest()
+			{
+				return Arrays.asList(
+					new PortTaskReader.Slot(0, PortTaskReader.COURIER, 6, HONEY, "Catherby", "Port Sarim", 3, 3, 3, 0, null),
+					new PortTaskReader.Slot(1, PortTaskReader.COURIER, 7, "Port Khazard fruit delivery", "Brimhaven", "Port Khazard", 3, 1, 0, 0, null),
+					new PortTaskReader.Slot(2, PortTaskReader.BOUNTY, 438, "Port Sarim tern bounty", null, "Port Sarim", 15, 0, 0, 9, "Tern feather"));
+			}
+
+			@Override
+			Integer latestHold()
+			{
+				return 30;
+			}
+		};
+		SwingUtilities.invokeAndWait(() ->
+		{
+			PortTasksPanel card = new PortTasksPanel(held, config, store, sprites, state, client, follower, route, shortest);
+			card.refresh(true);
+			List<String> words = shown(card);
+			assertEquals("each count follows its task's name, before the line under it: " + words,
+				Arrays.asList(HONEY, "3/3", "Delivered", "Port Khazard fruit delivery", "1/3", "Collect at Brimhaven for Port Khazard",
+					"Port Sarim tern bounty", "6/15", "Tern feather · hand in at Port Sarim"),
+				words.subList(words.indexOf(HONEY), words.indexOf(HONEY) + 9));
+			JLabel count = label(card, "1/3");
+			JLabel name = label(card, "Port Khazard fruit delivery");
+			assertSame("on the name's row", name.getParent(), count.getParent());
+			assertEquals("at its right edge", BorderLayout.EAST, ((BorderLayout) count.getParent().getLayout()).getConstraints(count));
+			assertEquals("on its first line", JLabel.TOP, count.getVerticalAlignment());
+			assertTrue("the name gives up the count's width: " + name.getText(),
+				name.getText().contains("width='" + (MapCompanionPanel.CARD_TEXT_WIDTH - count.getPreferredSize().width - 4) + "'"));
+			assertTrue("the line under it keeps the card's", label(card, "Collect at Brimhaven for Port Khazard").getText()
+				.contains("width='" + MapCompanionPanel.CARD_TEXT_WIDTH + "'"));
+			assertEquals("a finished courier's count is greyed with its name", ColorScheme.MEDIUM_GRAY_COLOR,
+				label(card, "3/3").getForeground());
+			assertEquals(ColorScheme.LIGHT_GRAY_COLOR, count.getForeground());
+		});
 	}
 
 	/** The raw text of the shown label whose words are these, tags and all. */
@@ -1099,6 +1275,20 @@ public class RunCardsTest
 		assertTrue(tip(farm), tip(farm).startsWith("The map asked to wait: "));
 		assertFalse(enabled(ports, "Start run"));
 		assertTrue(tip(ports), tip(ports).startsWith("The map asked to wait: "));
+	}
+
+	/**
+	 * The farm card's Start run had no tooltip, where Port tasks' says what its press asks the map. It
+	 * says the same of its own; the wait between presses still takes the tooltip over, as above.
+	 */
+	@Test
+	public void theFarmCardsStartRunSaysWhatItAsks() throws Exception
+	{
+		/* A preset, which needs no sharing choice, so the button is a press and not held back by one. */
+		choose("Herb run");
+		refresh();
+		assertTrue(enabled(farm, "Start run"));
+		assertEquals("Ask the map for the run chosen above, starting from where you stand", tip(farm));
 	}
 
 	/** Start run's tooltip on a card, or "" with none. */

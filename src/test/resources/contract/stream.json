@@ -65,6 +65,7 @@
         {
           "id": "teleport_item:3221,3218,0",
           "label": "Lumbridge tablet",
+          "face": "Lumbridge Castle",
           "best": false,
           "blocked": false,
           "tiles": 58,

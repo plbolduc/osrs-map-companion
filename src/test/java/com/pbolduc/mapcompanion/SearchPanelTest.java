@@ -301,6 +301,104 @@ public class SearchPanelTest
 	}
 
 	/**
+	 * How far a row is stands at the right edge of its name's line, top-aligned, so the distances make
+	 * a column to compare down, and the grey line under the name no longer ends with it. A row the map
+	 * measured no distance for has no right text, and its name keeps the row's whole width.
+	 */
+	@Test
+	public void aRowsDistanceIsAtItsRightEdgeAndNotInItsSentence() throws Exception
+	{
+		RoutePress press = press(200, RoutePressTest.ANSWER);
+		SearchPanel panel = listed(press, "{\"rows\":["
+			+ "{\"id\":\"npc:demon\",\"kind\":\"monster\",\"name\":\"Abyssal demon\",\"line\":\"Slayer Tower · nearest of 6\","
+			+ "\"x\":3420,\"y\":3570,\"plane\":2,\"effortTiles\":210,\"section\":\"Places\"},"
+			+ "{\"id\":\"npc:sire\",\"kind\":\"monster\",\"name\":\"Abyssal Sire\",\"line\":\"Abyssal Nexus\","
+			+ "\"x\":3039,\"y\":4770,\"plane\":0,\"effortTiles\":1380,\"section\":\"Places\"},"
+			+ "{\"id\":\"bank:al-kharid\",\"kind\":\"bank\",\"name\":\"Al Kharid bank\",\"line\":\"Bank\","
+			+ "\"x\":3269,\"y\":3167,\"plane\":0,\"section\":\"Places\"}],\"items\":[]}");
+		List<Component> rows = named(panel, "search.row");
+		assertEquals(3, rows.size());
+		List<Component> fars = named(panel, "search.far");
+		assertEquals("only the rows the map measured", 2, fars.size());
+		assertEquals("~210t", ((JLabel) fars.get(0)).getText());
+		assertEquals("~1380t", ((JLabel) fars.get(1)).getText());
+		assertEquals(ColorScheme.LIGHT_GRAY_COLOR, fars.get(0).getForeground());
+		for (Component row : rows)
+		{
+			for (Component label : labels((Container) row))
+			{
+				String words = ((JLabel) label).getText();
+				assertFalse("no distance in a sentence: " + words, words != null && words.contains("tiles"));
+			}
+		}
+		assertTrue("the grey line is the website's words alone",
+			labels((Container) rows.get(0)).stream().anyMatch(label -> ((JLabel) label).getText().contains(">Slayer Tower · nearest of 6<")));
+
+		panel.setSize(panel.getPreferredSize());
+		layout(panel);
+		int[] rightEdges = new int[2];
+		for (int i = 0; i < 2; i++)
+		{
+			JLabel far = (JLabel) fars.get(i);
+			JLabel name = (JLabel) named((Container) rows.get(i), "search.name").get(0);
+			assertSame("beside the name, on its line", name.getParent(), far.getParent());
+			assertEquals("at the top, so on the first line of a name that wraps", javax.swing.SwingConstants.TOP, far.getVerticalAlignment());
+			assertEquals(name.getY(), far.getY());
+			assertTrue("right of the name", far.getX() >= name.getX() + name.getWidth());
+			rightEdges[i] = javax.swing.SwingUtilities.convertPoint(far, far.getWidth(), 0, panel).x;
+		}
+		assertEquals("two distances of different lengths end on one edge", rightEdges[0], rightEdges[1]);
+		Component greyLine = labels((Container) rows.get(0)).stream()
+			.filter(label -> ((JLabel) label).getText().contains("Slayer Tower")).findFirst().get();
+		assertTrue("which is the row's own right edge, where its grey line may reach",
+			rightEdges[0] >= javax.swing.SwingUtilities.convertPoint(greyLine, greyLine.getWidth(), 0, panel).x);
+
+		JLabel measured = (JLabel) named((Container) rows.get(0), "search.name").get(0);
+		JLabel unmeasured = (JLabel) named((Container) rows.get(2), "search.name").get(0);
+		assertTrue("a row with no distance keeps the whole width for its name: " + unmeasured.getText(),
+			wrapWidth(unmeasured) > wrapWidth(measured));
+		assertEquals("as wide as its grey line", wrapWidth(unmeasured), wrapWidth((JLabel) greyLine));
+	}
+
+	/** The width a wrapped label's markup asks for. */
+	private static int wrapWidth(JLabel label)
+	{
+		java.util.regex.Matcher width = java.util.regex.Pattern.compile("width='([0-9]+)'").matcher(label.getText());
+		assertTrue(label.getText(), width.find());
+		return Integer.parseInt(width.group(1));
+	}
+
+	private static List<Component> labels(Container root)
+	{
+		List<Component> found = new ArrayList<>();
+		for (Component child : root.getComponents())
+		{
+			if (child instanceof JLabel && ((JLabel) child).getText() != null)
+			{
+				found.add(child);
+			}
+			if (child instanceof Container)
+			{
+				found.addAll(labels((Container) child));
+			}
+		}
+		return found;
+	}
+
+	/** Lay a detached tree out as a window would, so each part has its place. */
+	private static void layout(Container root)
+	{
+		root.doLayout();
+		for (Component child : root.getComponents())
+		{
+			if (child instanceof Container)
+			{
+				layout((Container) child);
+			}
+		}
+	}
+
+	/**
 	 * While another card's route plans, a row takes no pick: one would only be refused, and its
 	 * refusal would replace that card's Planning…. The rows say so by drawing their names greyed.
 	 */
