@@ -121,6 +121,27 @@ public class ClueObservationTest
 		game.carry(1);
 		assertNull(reader.read().text);
 	}
+
+	/**
+	 * Star hunters hop to free worlds with a clue in the bag. There the scroll's plain name has
+	 * " (Members)" after it, and an item's tier is kept for the session, so a tier read from that name
+	 * would lose the clue on every world after.
+	 */
+	@Test
+	public void aClueCarriedOntoAFreeWorldIsStillAClueBackOnAMembersWorld()
+	{
+		game.define(1, "Clue scroll (hard)", false);
+		game.carry(1);
+		game.freeWorld(true);
+		assertEquals("hard", reader.read().tier);
+
+		game.freeWorld(false);
+		CompanionSnapshot.Clue clue = reader.read();
+		assertNotNull(clue);
+		assertEquals("hard", clue.tier);
+		assertEquals(1, clue.itemId.intValue());
+	}
+
 	/**
 	 * The beginner pictures are told apart by a class of RuneLite's own clue plugin, asked on every
 	 * interface that loads. A RuneLite that changed it would fail the call with a linkage error, which

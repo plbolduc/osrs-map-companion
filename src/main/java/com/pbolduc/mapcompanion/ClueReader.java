@@ -349,6 +349,11 @@ public class ClueReader
 	 * Each item's tier once the client has named it, and "" for one that is no scroll. The whole
 	 * inventory is asked on every tick, and an item's name does not change. An item the client could
 	 * not name is not kept, so it is asked again. Client thread, as every caller of {@link #tierOf} is.
+	 *
+	 * <p>The name read is the members name, because the plain one does change: on a free world the
+	 * client calls every members item "Clue scroll (hard) (Members)". Matched against that, a clue
+	 * carried onto a free world would be kept as no scroll, and stay so back on a members world. Not
+	 * cleared by {@link #reset}, which runs on every tick no clue is carried.
 	 */
 	private final Map<Integer, String> tiers = new HashMap<>();
 
@@ -368,7 +373,7 @@ public class ClueReader
 			if (tier == null)
 			{
 				/* No composition, or one with no name, throws here: unanswered, and not kept. */
-				Matcher m = SCROLL_NAME.matcher(client.getItemDefinition(itemId).getName().toLowerCase().trim());
+				Matcher m = SCROLL_NAME.matcher(client.getItemDefinition(itemId).getMembersName().toLowerCase().trim());
 				tier = m.matches() ? m.group(1) : "";
 				tiers.put(itemId, tier);
 			}

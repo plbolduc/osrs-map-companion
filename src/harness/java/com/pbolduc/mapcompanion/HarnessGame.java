@@ -357,6 +357,7 @@ final class HarnessGame
 		}
 		Map<String, Function<Object[], Object>> answers = new HashMap<>();
 		answers.put("getName", ignored -> name);
+		answers.put("getMembersName", ignored -> name);
 		answers.put("getId", ignored -> id);
 		return proxy(ItemComposition.class, answers);
 	}
