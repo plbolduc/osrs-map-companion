@@ -122,8 +122,8 @@ class WorldMapRouteHere
 				return;
 			}
 		}
-		/* Meetups are drawn only with the group's destinations on, so one is offered only then. */
-		if (meet != null && config.showDestination())
+		/* Meetups are drawn only with the group's destinations on, and made only once the map said yes. */
+		if (meet != null && config.showDestination() && pairing.hasServerConsent())
 		{
 			entry(MEET, meet);
 		}
