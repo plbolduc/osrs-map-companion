@@ -191,6 +191,10 @@ often. A clean run is now 443 tests with no failures or skips.
 - [ ] Drop luck at Scurrius with another player: the shared kill is not counted at all.
 - [ ] Drop luck at Yama with a contract: the contract leaves the inventory when the fight starts,
       and that kill is not counted; the next one, without a contract, is.
+- [ ] Drop luck at Barrows: a chest after all six brothers counts; one after five does not. The
+      six killed varbits must still be set when the chest's reward appears; no build has seen it.
+- [ ] Drop luck at the Doom of Mokhaiotl: claiming a run counts it once, at the delve the loot
+      tracker reports (its event's metadata); a run lost to death counts nothing.
 - [ ] Drop luck at Araxxor: destroy a corpse, then harvest one. The destroyed kill is not counted;
       the harvested one is, and a noxious piece counts under *Noxious halberd piece*.
 - [ ] Drop luck at the Alchemical Hydra: a ring piece counts under *Brimstone ring piece*, drawn
