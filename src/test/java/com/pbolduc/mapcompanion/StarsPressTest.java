@@ -293,7 +293,7 @@ public class StarsPressTest
 		{
 			RoutePress.Target star = RoutePress.Target.tile(StarsPanel.SOURCE, new WorldPoint(2974, 3241, 0), "Rimmington mine", 302, null);
 			RelayResponse.Destination gone = RoutePress.destination(star, null, null);
-			tab.press.follow(star.pinned(gone));
+			tab.press.follow(star.pinned(gone), () -> { });
 			assertTrue(tab.sent.isEmpty());
 			assertFalse("and it is not left planning", tab.press.said(StarsPanel.SOURCE).planning);
 			assertNull(tab.press.said(StarsPanel.SOURCE).message);
@@ -303,7 +303,7 @@ public class StarsPressTest
 
 			/* The same question while the pin stands is sent. */
 			tab.destinations.selectLocal(gone);
-			tab.press.follow(star.pinned(gone));
+			tab.press.follow(star.pinned(gone), () -> { });
 		});
 		tab.answered();
 		edt(() -> assertEquals(1, tab.sent.size()));
@@ -708,6 +708,72 @@ public class StarsPressTest
 		edt(() -> assertEquals("asked once, for the world stopped on", 1, tab.sent.size()));
 	}
 
+	/**
+	 * Star hunters press the next star while the last hop is still loading. There is no character to
+	 * ask as then, and the question waits for the world instead of going as nobody's and leaving the
+	 * star pinned with no way.
+	 */
+	@Test
+	public void aStarPressedDuringAHopIsAskedAboutOnceTheWorldHasLoaded() throws Exception
+	{
+		Tab tab = tab();
+		tab.state = GameState.HOPPING;
+		edt(() ->
+		{
+			tab.press(RIMMINGTON);
+			tab.dwell();
+		});
+		edt(() ->
+		{
+			assertTrue("nothing left the machine", tab.sent.isEmpty());
+			assertEquals("the question waits again", 1, tab.dwells.size());
+			tab.stars.refresh();
+			assertEquals("still planning", "Planning…", ((AbstractButton) named(head(tab), "stars.route")).getText());
+			tab.state = GameState.LOADING;
+			tab.dwell();
+		});
+		edt(() ->
+		{
+			assertTrue(tab.sent.isEmpty());
+			assertEquals(1, tab.dwells.size());
+			tab.state = GameState.LOGGED_IN;
+			tab.dwell();
+		});
+		tab.answered();
+		edt(() ->
+		{
+			assertEquals("asked once, on the world", 1, tab.sent.size());
+			assertNotNull("and its answer is the way", tab.destinations.getDestination().route);
+			assertTrue("nothing waits to ask again", tab.dwells.isEmpty());
+		});
+	}
+
+	/** A question handed back by a hop is the old pin's: a star pressed before it returns keeps its own. */
+	@Test
+	public void aQuestionHandedBackByAHopDoesNotTakeOverAStarPressedSince() throws Exception
+	{
+		Tab tab = tab();
+		tab.state = GameState.HOPPING;
+		edt(() ->
+		{
+			tab.press(RIMMINGTON);
+			tab.dwell();
+			tab.press(CRAFTING);
+		});
+		edt(() ->
+		{
+			assertEquals("Crafting guild's question alone waits", 1, tab.dwells.size());
+			tab.state = GameState.LOGGED_IN;
+			tab.dwell();
+		});
+		tab.answered();
+		edt(() ->
+		{
+			assertEquals(1, tab.sent.size());
+			assertEquals("{\"x\":2940,\"y\":3280,\"plane\":0}", body(tab.sent.get(0)).get("target").toString());
+		});
+	}
+
 	/** The tab showing, over the fixture feed, with a map that answers {@link #body}. */
 	private final class Tab
 	{
@@ -722,6 +788,8 @@ public class StarsPressTest
 		volatile String retryAfter;
 		/** When set, the map's reply waits for the test to let it go. */
 		volatile CountDownLatch hold;
+		/** What the game says it is doing: a hop or a loading screen is set by the test that needs one. */
+		volatile GameState state;
 		final StarsClient service;
 		final RoutePress press;
 		final StarsPanel stars;
@@ -780,8 +848,9 @@ public class StarsPressTest
 				}
 			};
 			Client in = RoutePressTest.game();
-			Client game = loggedIn ? in : (Client) Proxy.newProxyInstance(Client.class.getClassLoader(), new Class<?>[]{Client.class},
-				(proxy, method, args) -> "getGameState".equals(method.getName()) ? GameState.LOGIN_SCREEN : method.invoke(in, args));
+			state = loggedIn ? GameState.LOGGED_IN : GameState.LOGIN_SCREEN;
+			Client game = (Client) Proxy.newProxyInstance(Client.class.getClassLoader(), new Class<?>[]{Client.class},
+				(proxy, method, args) -> "getGameState".equals(method.getName()) ? state : method.invoke(in, args));
 			/* The list's own client thread never runs: the feed is put in by hand, and is not what is counted. */
 			service = new StarsClient(new OkHttpClient(), new Gson(), null, new ClientThread(),
 				new HarnessConfig(store, MapCompanionConfig.DEFAULT_MAP_URL), pairing, identity, store);
