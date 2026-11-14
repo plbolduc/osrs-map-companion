@@ -477,14 +477,27 @@ public class LootLog
 	private int lastSharedTick;
 	private Map<String, Double> lastSharedCredit = new HashMap<>();
 
-	/** The kill a pet message is counted against: the last one, if it was this tick or the last. */
-	@Nullable
-	private String lastKillNpc;
-	private int lastKillTick = Integer.MIN_VALUE;
-	private boolean lastKillPetted;
+	/**
+	 * The kills a pet message may belong to: this tick's and the last's, oldest first. A chinchompa
+	 * kills Kree'arra and a Flight Kilisa on one tick, in either order, so the message goes to the
+	 * latest kill with a pet row rather than the latest kill. One the log saw and did not count is
+	 * here too, counting no pet, so its pet is not handed to the kill beside it.
+	 */
+	private final Deque<RecentKill> recentKills = new ArrayDeque<>();
 	/** A pet message that came before its kill's loot, waiting a tick for it. */
 	@Nullable
 	private Integer petPendingAt;
+
+	@AllArgsConstructor
+	private static final class RecentKill
+	{
+		final String npc;
+		final int tick;
+		final boolean petRow;
+		/** The pet rows this kill counted towards, which a pet on it is counted under. */
+		final Set<String> counts;
+		boolean petted;
+	}
 
 	/**
 	 * The game says a pet arrived: "You have a funny feeling like you're being followed.", or that
@@ -494,25 +507,45 @@ public class LootLog
 	 */
 	public synchronized List<Notable> onPetMessage(int tick)
 	{
-		if (lastKillNpc != null && !lastKillPetted && tick - lastKillTick <= 1)
+		recentKills.removeIf(kill -> tick - kill.tick > 1);
+		for (Iterator<RecentKill> it = recentKills.descendingIterator(); it.hasNext();)
 		{
-			lastKillPetted = true;
-			return pet(lastKillNpc);
+			RecentKill kill = it.next();
+			if (kill.petRow && !kill.petted)
+			{
+				kill.petted = true;
+				return pet(kill);
+			}
 		}
 		petPendingAt = tick;
 		return emptyList();
 	}
 
-	private List<Notable> pet(String npc)
+	/** A kill seen, counted or not, which a pet message waiting for its kill can now take. */
+	private List<Notable> noteKill(String npc, List<Rate> watched, Set<String> counts, int tick)
 	{
-		Tally tally = tallies.get(npc);
+		RecentKill kill = new RecentKill(npc, tick, watched.stream().anyMatch(rate -> Boolean.TRUE.equals(rate.pet)), counts, false);
+		recentKills.removeIf(old -> tick - old.tick > 1);
+		recentKills.add(kill);
+		if (!kill.petRow || petPendingAt == null || tick - petPendingAt > 1)
+		{
+			return emptyList();
+		}
+		petPendingAt = null;
+		kill.petted = true;
+		return pet(kill);
+	}
+
+	private List<Notable> pet(RecentKill kill)
+	{
+		Tally tally = tallies.get(kill.npc);
 		if (tally == null)
 		{
 			return emptyList();
 		}
-		for (Rate rate : tracked.getOrDefault(key(npc), emptyList()))
+		for (Rate rate : tracked.getOrDefault(key(kill.npc), emptyList()))
 		{
-			if (Boolean.TRUE.equals(rate.pet))
+			if (Boolean.TRUE.equals(rate.pet) && kill.counts.contains(rate.item))
 			{
 				int wait = tally.kills - baseline(tally, rate.item);
 				double[] waitShared = sharedSince(tally, rate, tally.sharedAtLast.get(rate.item));
@@ -522,7 +555,7 @@ public class LootLog
 				tally.sharedAtLast.put(rate.item, sharedNow(tally, rate.item));
 				unsaved = true;
 				saveIfDue();
-				return Collections.singletonList(new Notable(npc, rate.item, -1, 1, rate.oneIn, wait, 0, null, null, first,
+				return Collections.singletonList(new Notable(kill.npc, rate.item, -1, 1, rate.oneIn, wait, 0, null, null, first,
 					(int) waitShared[0], waitShared[1]));
 			}
 		}
@@ -732,13 +765,13 @@ public class LootLog
 		{
 			/* The fight a contract was spent on: its reward was guaranteed, so the kill is not counted. */
 			contractSpent = false;
-			return emptyList();
+			return noteKill(name, watched, Collections.emptySet(), tick);
 		}
 		boolean sharedRows = anyRow(watched, "kills", "shared");
 		if (othersHit && !sharedRows && anyRow(watched, "kills", "solo"))
 		{
 			/* Shared by damage, on a boss whose odds are a player's alone: not counted at all. */
-			return emptyList();
+			return noteKill(name, watched, Collections.emptySet(), tick);
 		}
 		/*
 		 * Shared by damage, on a boss that hands its drops out by it: the player's share of a kill.
@@ -749,7 +782,7 @@ public class LootLog
 		if (anyRow(watched, "where", "outside-instances") && WorldTiles.isInstance(client))
 		{
 			/* The Chambers of Xeric's shaman shares the name and not the table. */
-			return emptyList();
+			return noteKill(name, watched, Collections.emptySet(), tick);
 		}
 		/* A row counted alone takes nothing of a shared kill; an MVP row not the player's, its share over the bonus. */
 		lastSharedCredit = new HashMap<>();
@@ -829,9 +862,14 @@ public class LootLog
 		}
 		tally.kills++;
 		tally.lastKillMs = clock.getAsLong();
+		Set<String> pets = new HashSet<>();
 		for (Rate rate : watched)
 		{
 			double w = worth.applyAsDouble(rate);
+			if (Boolean.TRUE.equals(rate.pet))
+			{
+				pets.add(rate.item);
+			}
 			if (w != 1)
 			{
 				double[] counted = tally.weighted.computeIfAbsent(rate.item, k -> new double[2]);
@@ -956,15 +994,7 @@ public class LootLog
 				notable.add(new Notable(name, item, stack.getId(), stack.getQuantity(), null, wait, 0, null, null, false, 0, 0));
 			}
 		}
-		lastKillNpc = name;
-		lastKillTick = tick;
-		lastKillPetted = false;
-		if (petPendingAt != null && tick - petPendingAt <= 1)
-		{
-			lastKillPetted = true;
-			notable.addAll(pet(name));
-		}
-		petPendingAt = null;
+		notable.addAll(noteKill(name, watched, pets, tick));
 		unsaved = true;
 		saveIfDue();
 		return notable;
