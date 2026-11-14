@@ -1802,7 +1802,7 @@ public class LootLog
 		if (!Objects.equals(scope, loadedScope))
 		{
 			/* Still the old character's: write it there before it is dropped, and start a new window. */
-			reload();
+			dropTallies();
 			loadedScope = scope;
 		}
 		if (scope == null)
@@ -1927,8 +1927,28 @@ public class LootLog
 		}
 	}
 
-	/** Invalidate the cache on login/logout too; another character may use the same settings. */
+	/**
+	 * Invalidate the cache on login/logout too; another character may use the same settings. What
+	 * the last session saw happening goes with it, or B logging in with no contracts after A held two
+	 * would read as a contract spent, and B's first Yama kill would go uncounted.
+	 */
 	public synchronized void reload()
+	{
+		dropTallies();
+		contracts = null;
+		contractSpent = false;
+		fights.clear();
+		mvpAt = null;
+		lastShared = null;
+		recentKills.clear();
+		petPendingAt = null;
+	}
+
+	/**
+	 * The tallies alone, where the character's save changes under a kill. Not the session's state: the
+	 * first kill after a login lands here, and a contract spent since the login belongs to that kill.
+	 */
+	private void dropTallies()
 	{
 		/* A relog lands here, and a kill still inside the save window belongs to the log it re-reads. */
 		flush();
