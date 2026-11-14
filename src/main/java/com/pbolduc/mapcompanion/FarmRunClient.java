@@ -390,6 +390,7 @@ final class FarmRunClient
 		if (ticket.holdsGate)
 		{
 			gate.finishPress(next);
+			gate.redirected(RoutePress.REDIRECTS.equals(why));
 		}
 		if (ticket.lifetime != destinations.generation())
 		{

@@ -155,6 +155,8 @@ public class DestinationRoute
 	/** Whether {@link #message} says a Reroute did not happen, rather than a notice such as Shortest Path's. */
 	private boolean refused;
 	private long nextRerouteMs;
+	/** Whether {@link #nextRerouteMs} is a redirect's: see {@link #addressChanged}. */
+	private boolean redirected;
 	/**
 	 * The player asked to follow this route: pressed Follow or Reroute, pressed Route here, or sent
 	 * the place to their own RuneLite from the website. Only then is Shortest Path drawn on, because a
@@ -553,6 +555,25 @@ public class DestinationRoute
 	{
 		pressing = false;
 		nextRerouteMs = Math.max(nextRerouteMs, nextAllowedMs);
+	}
+
+	/** Whether the reply a press, Reroute or run just finished with was a redirect. */
+	synchronized void redirected(boolean redirect)
+	{
+		redirected = redirect;
+	}
+
+	/**
+	 * Map address was changed. A redirect's wait is the old address's, which answers the same way
+	 * until it is changed, so it is lifted; a wait the map named is the member's and stays.
+	 */
+	synchronized void addressChanged()
+	{
+		if (redirected)
+		{
+			nextRerouteMs = 0;
+			redirected = false;
+		}
 	}
 
 	/** Whether a press of Route would be sent now, for enabling its button. */

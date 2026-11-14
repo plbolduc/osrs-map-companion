@@ -165,6 +165,8 @@ final class MeetupClient
 	private volatile Said said;
 	private boolean busy;
 	private long nextAllowedMs;
+	/** Whether {@link #nextAllowedMs} is a redirect's: see {@link DestinationRoute#addressChanged}. */
+	private boolean redirected;
 
 	@Inject
 	MeetupClient(OkHttpClient http, Gson gson, Client client, ClientThread clientThread, Pairing pairing,
@@ -207,6 +209,16 @@ final class MeetupClient
 	synchronized long waitMs(long now)
 	{
 		return Math.max(0L, nextAllowedMs - now);
+	}
+
+	/** Map address was changed: a redirect's wait goes with it, as Route's does. */
+	synchronized void addressChanged()
+	{
+		if (redirected)
+		{
+			nextAllowedMs = 0;
+			redirected = false;
+		}
 	}
 
 	/** What a write said, as it is drawn at {@code now}: a wait it met counts down; see {@link MapWait}. */
@@ -333,6 +345,7 @@ final class MeetupClient
 		{
 			busy = false;
 			nextAllowedMs = Math.max(nextAllowedMs, nextAllowed);
+			redirected = RoutePress.REDIRECTS.equals(why);
 		}
 		said = new Said(source, false, why, asked);
 	}
