@@ -152,7 +152,7 @@ dailies you have collected left out of a dailies run.
 ## Drop luck
 
 <p>
-  <img src="docs/mockups/sidebar-drop-luck.png" width="300" alt="Drop luck for Nex after 212 recorded kills: Any unique first, 1 in 43 plus 10% as MVP, three had and marked Dry, then each unique at the wiki's rate, the vambraces, the horn and the platelegs had once and each Normal, and the pet at 1 in 500; under them Dry, overall and now: had 3 where about 5.4 is usual, 75 kills since the last, drier than 86% of players, and a 93% chance in the next 100 kills">
+  <img src="docs/mockups/sidebar-drop-luck.png" width="273" alt="Drop luck for Nex after 212 recorded kills: Any unique first, 1 in 43 plus 10% as MVP, three had and marked Dry, then each unique at the wiki's rate, the vambraces, the horn and the platelegs had once and each Normal, and the pet at 1 in 500; under them Dry, overall and now: had 3 where about 5.4 is usual, 75 kills since the last, drier than 86% of players, and a 93% chance in the next 100 kills">
 </p>
 
 See how lucky or dry you are on the monster you are killing, with sourced drop odds and the chance
