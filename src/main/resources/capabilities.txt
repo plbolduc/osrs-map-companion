@@ -1,0 +1,49 @@
+# The teleport items the plugin recognises, one a line: the flag the map knows it by, a tab, and
+# the pattern its item names must match, case-insensitive. Kept here rather than in
+# CapabilityEvaluator.java so the Hub's size count leaves it out; the map's contract test reads
+# this file for the vocabulary.
+#
+# Prefixes cover variants of items that disappear when spent. Jewellery that remains when empty
+# instead requires a positive charge suffix. Every match starts at the item's own name.
+
+achievementDiaryCape	^achievement diary cape
+maxCape	^max cape
+masterScrollBook	^master scroll book
+slayerRing	^slayer ring
+amuletOfGlory	^(?:amulet of glory\s*\(t?[1-9][0-9]*\)|amulet of eternal glory)$
+# The game shortens it: "Construct. cape", and "Construct. cape(t)" trimmed.
+constructionCape	^construct(?:ion|\.) cape
+skillsNecklace	^skills necklace\s*\([1-9][0-9]*\)$
+pendantOfAtes	^pendant of ates
+radasBlessing	^rada'?s blessing
+gamesNecklace	^games necklace
+kharedstMemoirs	^kharedst'?s memoirs
+bookOfTheDead	^book of the dead
+xericsTalisman	^xeric'?s talisman
+ringOfShadows	^ring of shadows
+ardougneCloak	^ardougne cloak
+morytaniaLegs	^morytania legs
+fremennikSeaBoots	^fremennik sea boots
+ringOfDueling	^ring of dueling
+combatBracelet	^combat bracelet\s*\([1-9][0-9]*\)$
+ringOfWealth	^ring of wealth\s*\(i?[1-9][0-9]*\)$
+enchantedLyre	^enchanted lyre
+pharaohsSceptre	^pharaoh'?s sceptre
+# The empty ring is named exactly as the charged one.
+ringOfTheElements	^ring of the elements
+digsitePendant	^digsite pendant
+necklaceOfPassage	^necklace of passage
+burningAmulet	^burning amulet
+hunterCape	^hunter cape
+fishingCape	^fishing cape
+drakansMedallion	^drakan'?s medallion
+giantsoulAmulet	^giantsoul amulet
+sailorsAmulet	^sailors'? amulet
+desertAmulet	^desert amulet
+teleportCrystal	^(eternal )?teleport crystal
+camulet	^camulet
+stonyBasalt	^stony basalt
+karamjaGloves	^karamja gloves
+quetzalWhistle	^(perfected |basic |enhanced )?quetzal whistle
+royalSeedPod	^royal seed pod
+dramenStaff	^(dramen|lunar) staff
