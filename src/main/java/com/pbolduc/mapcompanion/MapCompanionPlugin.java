@@ -1079,8 +1079,9 @@ public class MapCompanionPlugin extends Plugin implements CompanionLoop.Surface
 
 	/**
 	 * What is drawn of a session, taken down where {@link CompanionLoop#end} asks: the route's marks
-	 * with the lifetime, the boats' pins unless it was a hop, and with the lifetime whether this
-	 * member may rename its group, which is the plugin's to hold because the sidebar reads it.
+	 * with the lifetime or the character, the boats' pins unless it was a hop, and with the lifetime
+	 * whether this member may rename its group, which is the plugin's to hold because the sidebar
+	 * reads it.
 	 */
 	@Override
 	public void ended(SessionEnd end)
@@ -1089,17 +1090,17 @@ public class MapCompanionPlugin extends Plugin implements CompanionLoop.Surface
 		if (off)
 		{
 			shortestPath.shutDown();
+			runsGroup = null;
+		}
+		if (off || end == SessionEnd.SWITCH)
+		{
 			destinationMarker.remove();
+			destinationArrow.clear();
 		}
 		if (end != SessionEnd.HOP)
 		{
 			/* Another character's boats are not this one's. A hop is the same character, whose pins stay until the next reading settles. */
 			boatPins.clear();
-		}
-		if (off)
-		{
-			destinationArrow.clear();
-			runsGroup = null;
 		}
 	}
 
