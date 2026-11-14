@@ -114,7 +114,8 @@ final class DropLuckView
 	static final String ANY = "Any unique";
 
 	/**
-	 * "Any unique": every rated drop but the pet, as one drop. Nex's six add up to the wiki's own
+	 * "Any unique": the monster's own table as one drop — every rated drop but the pet and the
+	 * tertiaries, the jar or curved bone each rolled apart from it. Nex's six add up to the wiki's own
 	 * 1/43, so the row is the roll the page describes. Three in 212 kills is dry while each item
 	 * alone is normal, and only this row can say so.
 	 *
@@ -129,7 +130,7 @@ final class DropLuckView
 		List<Drop> of = new ArrayList<>();
 		for (Drop drop : monster.drops)
 		{
-			if (drop.oneIn != null && !drop.pet)
+			if (adds(drop))
 			{
 				of.add(drop);
 			}
@@ -154,7 +155,13 @@ final class DropLuckView
 			latest = drop.sinceLast < latest.sinceLast ? drop : latest;
 		}
 		return new Drop(ANY, -1, obtained, latest.sinceLast, first.watched, 0, 0, 1 / p, null, null,
-			latest.sharedSinceLast, latest.shareSinceLast, first.sharedWatched, first.shareWatched, first.mvp, false);
+			latest.sharedSinceLast, latest.shareSinceLast, first.sharedWatched, first.shareWatched, first.mvp, false, false);
+	}
+
+	/** Whether "Any unique" adds this drop up: a rated drop of the monster's own table. */
+	static boolean adds(Drop drop)
+	{
+		return drop.oneIn != null && !drop.pet && !drop.tertiary;
 	}
 
 	/**
