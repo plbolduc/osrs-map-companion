@@ -99,11 +99,26 @@ final class DropOdds
 	{
 		final long ordinary;
 		final long boosted;
+		/** Kills shared with other players, each worth only the player's share of one. */
+		final long shared;
+		/**
+		 * The sum of those shares: a kill where the player did 40% of the damage is 0.4 of a kill at
+		 * the drop's rate. Priced as that many kills, which is exact for the wait — (1 − 1/r)^0.4 is the
+		 * share still waiting after it — and, for a rare drop, as near exact as a printed percent shows.
+		 */
+		final double share;
 
 		Kills(long ordinary, long boosted)
 		{
+			this(ordinary, boosted, 0, 0);
+		}
+
+		Kills(long ordinary, long boosted, long shared, double share)
+		{
 			this.ordinary = Math.max(0, ordinary);
 			this.boosted = Math.max(0, boosted);
+			this.shared = Math.max(0, shared);
+			this.share = Double.isFinite(share) ? Math.max(0, Math.min(this.shared, share)) : 0;
 		}
 
 		static Kills of(long kills)
@@ -113,7 +128,7 @@ final class DropOdds
 
 		long total()
 		{
-			return ordinary + boosted;
+			return ordinary + boosted + shared;
 		}
 	}
 
@@ -130,7 +145,8 @@ final class DropOdds
 		{
 			return 1;
 		}
-		double share = Math.exp(kills.ordinary * Math.log1p(-1 / rate.oneIn) + kills.boosted * Math.log1p(-1 / rate.boosted()));
+		double share = Math.exp((kills.ordinary + kills.share) * Math.log1p(-1 / rate.oneIn)
+			+ kills.boosted * Math.log1p(-1 / rate.boosted()));
 		/* An underflow is not a certainty: with any rate short of 1 in 1, somebody is still waiting. */
 		return share == 0 && Math.min(rate.oneIn, rate.boosted()) > 1 ? Double.MIN_VALUE : share;
 	}
@@ -169,7 +185,9 @@ final class DropOdds
 	 * P(X ≥ k) where X is the sum of two binomials, one per kind of kill.
 	 *
 	 * <p>Convolved below {@code k} rather than approximated: the drops that matter here are a
-	 * handful, so the two short mass arrays are all there is to multiply.
+	 * handful, so the two short mass arrays are all there is to multiply. Shared kills join the
+	 * ordinary ones as the nearest whole number of kills their shares add up to: the wait prices them
+	 * exactly, and the overall tail of a rare drop moves by less than a printed percent for it.
 	 */
 	static double atLeast(int k, Kills kills, double pOrdinary, double pBoosted)
 	{
@@ -181,12 +199,13 @@ final class DropOdds
 		{
 			return 0;
 		}
-		double mean = kills.ordinary * pOrdinary + kills.boosted * pBoosted;
+		long ordinary = kills.ordinary + Math.round(kills.share);
+		double mean = ordinary * pOrdinary + kills.boosted * pBoosted;
 		if (k > EXACT_LIMIT || mean > EXACT_LIMIT)
 		{
-			return normalAtLeast(k, mean, kills.ordinary * pOrdinary * (1 - pOrdinary) + kills.boosted * pBoosted * (1 - pBoosted));
+			return normalAtLeast(k, mean, ordinary * pOrdinary * (1 - pOrdinary) + kills.boosted * pBoosted * (1 - pBoosted));
 		}
-		double[] a = masses(k, kills.ordinary, pOrdinary);
+		double[] a = masses(k, ordinary, pOrdinary);
 		double[] b = masses(k, kills.boosted, pBoosted);
 		double below = 0;
 		for (int i = 0; i < k; i++)
@@ -309,7 +328,7 @@ final class DropOdds
 	{
 		double pOrdinary = 1 / rate.oneIn;
 		double pBoosted = 1 / rate.boosted();
-		double mean = kills.ordinary * pOrdinary + kills.boosted * pBoosted;
+		double mean = (kills.ordinary + kills.share) * pOrdinary + kills.boosted * pBoosted;
 		if (kills.total() <= 0 || (obtained == 0 && mean < TOO_EARLY_MEAN))
 		{
 			return Luck.NONE;
@@ -409,7 +428,7 @@ final class DropOdds
 	 */
 	static String expectation(Kills kills, Rate rate, boolean boostedNow)
 	{
-		double mean = kills.ordinary / rate.oneIn + kills.boosted / rate.boosted();
+		double mean = (kills.ordinary + kills.share) / rate.oneIn + kills.boosted / rate.boosted();
 		if (mean >= TOO_EARLY_MEAN)
 		{
 			return "~" + (mean < 10 ? trim(oneDecimal(mean)) : count(Math.round(mean)))

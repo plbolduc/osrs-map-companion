@@ -220,7 +220,8 @@ public class NetworkDisclosureTest
 					 + "detailsTruncated, diaries, diaryRewards, farming, farmingContract, house, hunterRumour, idleMs, instanceLayout, instanced, loot, mahoganyHome, member, "
 					 + "milestones, mortimerOffer, portTasks, pos, questLog, questStates, questsCompleted, runReceiverVersion, seaCharts, sentAtMs, skills, slayer, slayerPreferences, stashUnits, travelUnlocks, v, world, worldFlags");
 		expected.put("Death", "msAgo, tile");
-		expected.put("Drop", "boostedSinceLast, boostedWatched, item, killsAtLast, obtained, trackedSinceKill");
+		expected.put("Drop", "boostedSinceLast, boostedWatched, item, killsAtLast, obtained, shareSinceLast, shareWatched, "
+					 + "sharedSinceLast, sharedWatched, trackedSinceKill");
 		expected.put("Farming", "patches, progressVersion");
 		expected.put("Loot", "current, currentOnTask, npcs, pinned");
 		expected.put("Member", "characterName, id, nick");

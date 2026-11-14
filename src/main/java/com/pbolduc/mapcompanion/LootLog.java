@@ -280,6 +280,19 @@ public class LootLog
 		Map<String, Integer> boostedAtLast = new LinkedHashMap<>();
 		/** Per boosted item, the same counter where its watching began. */
 		Map<String, Integer> boostedAtStart = new LinkedHashMap<>();
+		/** Kills shared with other players, ever, on a monster that counts them; see {@link Rate#kills}. */
+		int sharedKills;
+		/** The sum of the player's shares of those kills. */
+		double shareSum;
+		/** The same with the MVP's bonus taken out where the player was not the MVP; see {@link Rate#mvp}. */
+		double shareSumMvp;
+		/**
+		 * Per rated item, the three counters above at its last drop or reset, and where its watching
+		 * began — as {@link #boostedAtLast} and {@link #boostedAtStart} are for a boost. Absent is all
+		 * zeroes, which is what a log from before shared kills were counted always had.
+		 */
+		Map<String, double[]> sharedAtLast = new LinkedHashMap<>();
+		Map<String, double[]> sharedAtStart = new LinkedHashMap<>();
 	}
 
 	/** One row of the bundled table. Gson fills these by field name. */
@@ -302,8 +315,20 @@ public class LootLog
 		 * with ({@link #onPetMessage}).
 		 */
 		Boolean pet;
-		/** {@code "solo"}: a team boss priced for a player alone, whose shared kills are not counted. */
+		/**
+		 * Which kills count for this row, where not every one alone does. {@code "solo"}: only kills no
+		 * other player hit. {@code "shared"}: a kill others hit too counts as the player's share of one,
+		 * their damage over everyone's — the boss hands its drop out weighted by damage.
+		 */
 		String kills;
+		/**
+		 * The MVP's bonus the row's rate already holds, or null. Nex's uniques are priced for a player
+		 * alone, who is always her MVP; a shared kill the player was not MVP of is worth its share
+		 * divided by this.
+		 */
+		Double mvp;
+		/** Other monsters whose damage counts towards this one's share: Nex's minions and reavers. */
+		List<String> fight;
 		/** {@code "outside-instances"}: a name an instanced monster shares, whose kills there are not counted. */
 		String where;
 		/**
@@ -328,6 +353,25 @@ public class LootLog
 		return byLevel == null ? game : byLevel.get(npc.getCombatLevel());
 	}
 
+	/** The tally's shared counters as they stand: kills, share, share for an MVP row. */
+	private static double[] sharedNow(Tally tally)
+	{
+		return new double[] {tally.sharedKills, tally.shareSum, tally.shareSumMvp};
+	}
+
+	/**
+	 * The shared kills and the share of them since a baseline, absent being all zeroes: [count, share].
+	 * A baseline past the counters — a hand-edited or corrupt log — comes out negative, which the
+	 * odds' {@link DropOdds.Kills} reads as none.
+	 */
+	private static double[] sharedSince(Tally tally, @Nullable Rate rate, @Nullable double[] base)
+	{
+		double[] now = sharedNow(tally);
+		/* Which share prices the row: the MVP's, the plain one, or none for a row counted alone. */
+		int i = rate == null || "solo".equals(rate.kills) ? -1 : rate.mvp != null ? 2 : 1;
+		return i < 0 ? new double[2] : new double[] {now[0] - (base == null ? 0 : base[0]), now[i] - (base == null ? 0 : base[i])};
+	}
+
 	/** Whether any of a monster's rows says its kills count only under {@code value}. */
 	private static boolean anyRow(List<Rate> watched, String field, String value)
 	{
@@ -342,22 +386,61 @@ public class LootLog
 	}
 
 	/**
-	 * How long before a team boss dies another player's hit on it still makes the kill shared: a
-	 * minute of ticks. A group hits until the end, so a shared kill has one near its death; a fight
-	 * alone after a group left has none.
+	 * How long a fight's damage is kept without a hit landing: a minute of ticks. A group hits until
+	 * the end, so a shared kill has hits near its death; a fight alone after a group left has none,
+	 * and starts again from the player's own.
 	 */
 	static final int SHARED_TICKS = 100;
-	/** Per monster name, the tick another player's hit last landed on it. */
-	private final Map<String, Integer> othersHitAt = new HashMap<>();
+	/**
+	 * Per monster name — a boss's minions under the boss's — the fight going on: the player's
+	 * damage, everyone else's, and the tick the last hit landed.
+	 */
+	private final Map<String, long[]> fights = new HashMap<>();
+	/** Per minion name, the boss whose share its damage counts towards; see {@link Rate#fight}. */
+	private final Map<String, String> fightOf = new HashMap<>();
+	/** The tick the game last said the player was the MVP of a fight. */
+	@Nullable
+	private Integer mvpAt;
 
-	/** A hitsplat on a monster: only another player's matters, and only on a boss priced alone. */
-	public synchronized void onHitsplat(@Nullable String npc, boolean others, int tick)
+	/**
+	 * A hitsplat on a monster: whose it was and how much. The player's own and other players' hits
+	 * are kept per fight, which is all a share is; a hit from neither (a poison, a thrall) is not.
+	 */
+	public synchronized void onHitsplat(@Nullable String npc, boolean mine, boolean others, int amount, int tick)
 	{
-		if (others && npc != null)
+		if (npc == null || (!mine && !others) || amount < 0)
 		{
-			othersHitAt.put(key(npc), tick);
+			return;
+		}
+		/* A stale fight is a new one; stale ones go as one starts, so the map holds a minute's at most. */
+		fights.values().removeIf(f -> tick - f[2] > SHARED_TICKS);
+		long[] fight = fights.computeIfAbsent(fightOf.getOrDefault(key(npc), key(npc)), k -> new long[3]);
+		fight[mine ? 0 : 1] += amount;
+		fight[2] = tick;
+	}
+
+	/**
+	 * The game's "You were the MVP for this fight." The line and the loot come within a tick or two
+	 * of each other in either order, so it is kept for the kill to come and, if the kill came first,
+	 * credited to it.
+	 */
+	public synchronized void onMvpMessage(int tick)
+	{
+		Tally tally = lastShared == null || tick - lastSharedTick > 2 ? null : tallies.get(lastShared);
+		mvpAt = tally == null ? tick : null;
+		if (tally != null)
+		{
+			tally.shareSumMvp += lastSharedCredit;
+			lastShared = null;
+			unsaved = true;
 		}
 	}
+
+	/** The last shared kill the player was not yet named MVP of, and what naming them would add. */
+	@Nullable
+	private String lastShared;
+	private int lastSharedTick;
+	private double lastSharedCredit;
 
 	/** The kill a pet message is counted against: the last one, if it was this tick or the last. */
 	@Nullable
@@ -397,12 +480,15 @@ public class LootLog
 			if (Boolean.TRUE.equals(rate.pet))
 			{
 				int wait = tally.kills - baseline(tally, rate.item);
+				double[] waitShared = sharedSince(tally, rate, tally.sharedAtLast.get(rate.item));
 				boolean first = tally.obtained.getOrDefault(rate.item, 0) == 0;
 				tally.obtained.put(rate.item, (int) Math.min(MAX_COUNT, (long) tally.obtained.getOrDefault(rate.item, 0) + 1));
 				tally.killsAtLast.put(rate.item, tally.kills);
+				tally.sharedAtLast.put(rate.item, sharedNow(tally));
 				unsaved = true;
 				saveIfDue();
-				return Collections.singletonList(new Notable(npc, rate.item, -1, 1, rate.oneIn, wait, 0, null, null, first));
+				return Collections.singletonList(new Notable(npc, rate.item, -1, 1, rate.oneIn, wait, 0, null, null, first,
+					(int) waitShared[0], waitShared[1]));
 			}
 		}
 		return emptyList();
@@ -487,6 +573,10 @@ public class LootLog
 					continue;
 				}
 				tracked.computeIfAbsent(key(rate.npc), k -> new ArrayList<>()).add(rate);
+				for (String minion : rate.fight == null ? Collections.<String>emptyList() : rate.fight)
+				{
+					fightOf.put(key(minion), key(rate.npc));
+				}
 				if (rate.level != null)
 				{
 					versions.computeIfAbsent(key(rate.game != null ? rate.game : rate.npc), k -> new HashMap<>())
@@ -534,12 +624,21 @@ public class LootLog
 		 * kills before that were never seen, so the wait is the least it can have been.
 		 */
 		public final boolean first;
+		/** How many of {@link #wait} were shared with other players, and the player's share of them. */
+		public final int waitShared;
+		public final double waitShare;
 
 		/** The rate this drop is priced by, or null with none. */
 		@Nullable
 		DropOdds.Rate rate()
 		{
 			return oneIn == null ? null : new DropOdds.Rate(oneIn, boostOneIn, boostLabel);
+		}
+
+		/** {@link #wait}, split by how each kill was priced. */
+		DropOdds.Kills waitKills()
+		{
+			return new DropOdds.Kills(wait - waitBoosted - waitShared, waitBoosted, waitShared, waitShare);
 		}
 	}
 
@@ -581,7 +680,11 @@ public class LootLog
 		{
 			return emptyList();
 		}
-		Integer othersAt = othersHitAt.remove(key(game));
+		int tick = client.getTickCount();
+		long[] fight = fights.remove(key(game));
+		boolean othersHit = fight != null && fight[1] > 0 && tick - fight[2] <= SHARED_TICKS;
+		boolean mvp = mvpAt != null && tick - mvpAt <= 2;
+		mvpAt = null;
 		String name = versionOf(game, event.getComposition());
 		if (name == null)
 		{
@@ -589,12 +692,18 @@ public class LootLog
 			return emptyList();
 		}
 		List<Rate> watched = tracked.getOrDefault(key(name), emptyList());
-		int tick = client.getTickCount();
-		if (anyRow(watched, "kills", "solo") && othersAt != null && tick - othersAt <= SHARED_TICKS)
+		boolean sharedRows = anyRow(watched, "kills", "shared");
+		if (othersHit && !sharedRows && anyRow(watched, "kills", "solo"))
 		{
-			/* Shared by damage: its odds were not the player's alone, so it is not counted. */
+			/* Shared by damage, on a boss whose odds are a player's alone: not counted at all. */
 			return emptyList();
 		}
+		/*
+		 * Shared by damage, on a boss that hands its drops out by it: the player's share of a kill.
+		 * A fight with no hit of the player's seen is not a share of nothing — the loot says the
+		 * player was there — so it is counted at the share the hits that were seen give it.
+		 */
+		double share = !othersHit || !sharedRows ? 1 : (double) fight[0] / (fight[0] + fight[1]);
 		if (anyRow(watched, "where", "outside-instances") && WorldTiles.isInstance(client))
 		{
 			/* The Chambers of Xeric's shaman shares the name and not the table. */
@@ -616,6 +725,21 @@ public class LootLog
 		}
 		tally.kills++;
 		tally.lastKillMs = clock.getAsLong();
+		if (share < 1)
+		{
+			double bonus = 1;
+			for (Rate rate : watched)
+			{
+				bonus = rate.mvp != null ? rate.mvp : bonus;
+			}
+			double unnamed = share / bonus;
+			tally.sharedKills++;
+			tally.shareSum += share;
+			tally.shareSumMvp += mvp ? share : unnamed;
+			lastShared = mvp ? null : name;
+			lastSharedTick = tick;
+			lastSharedCredit = share - unnamed;
+		}
 		kourendEasy = kourendEasy(kourendEasy);
 		/*
 		 * Which rate priced this kill, per condition its drops are boosted under. Counted before the
@@ -705,14 +829,17 @@ public class LootLog
 				}
 				int wait = tally.kills - baseline(tally, rate.item);
 				int waitBoosted = rate.boost == null ? 0 : boosted(tally, rate) - tally.boostedAtLast.getOrDefault(rate.item, 0);
+				double[] waitShared = sharedSince(tally, rate, tally.sharedAtLast.get(rate.item));
 				boolean first = tally.obtained.getOrDefault(rate.item, 0) == 0;
 				count(tally, rate.item, stack);
 				if (rate.boost != null)
 				{
 					tally.boostedAtLast.put(rate.item, boosted(tally, rate));
 				}
+				tally.sharedAtLast.put(rate.item, sharedNow(tally));
 				notable.add(new Notable(name, rate.item, stack.getId(), stack.getQuantity(), rate.oneIn, wait,
-					waitBoosted, rate.boost == null ? null : rate.boost.oneIn, rate.boost == null ? null : boostLabel(rate.boost.when), first));
+					waitBoosted, rate.boost == null ? null : rate.boost.oneIn, rate.boost == null ? null : boostLabel(rate.boost.when), first,
+					(int) waitShared[0], waitShared[1]));
 			}
 			else if (judged && notables.notable(stack.getId()) && !notables.pet(stack.getId()))
 			{
@@ -727,7 +854,7 @@ public class LootLog
 				int wait = tally.kills - baseline(tally, item);
 				count(tally, item, stack);
 				tally.collection.add(item);
-				notable.add(new Notable(name, item, stack.getId(), stack.getQuantity(), null, wait, 0, null, null, false));
+				notable.add(new Notable(name, item, stack.getId(), stack.getQuantity(), null, wait, 0, null, null, false, 0, 0));
 			}
 		}
 		lastKillNpc = name;
@@ -1009,6 +1136,8 @@ public class LootLog
 					: boosted(tally, rated) - tally.boostedAtLast.getOrDefault(item, 0);
 				Integer boostedWatched = rated == null || rated.boost == null ? null
 					: boosted(tally, rated) - tally.boostedAtStart.getOrDefault(item, 0);
+				double[] sharedSinceLast = sharedSince(tally, rated, tally.sharedAtLast.get(item));
+				double[] sharedWatched = sharedSince(tally, rated, tally.sharedAtStart.get(item));
 				/**
 				 * "Never dropped, watched from the first kill" is the default this monster's rates
 				 * already imply, and it is most of the rows. Sending it cost more than the whole
@@ -1023,7 +1152,7 @@ public class LootLog
 				 * always travels.
 				 */
 				if (obtained == 0 && last == null && since != null && since == 0
-					&& (boostedWatched == null || boostedWatched == 0))
+					&& (boostedWatched == null || boostedWatched == 0) && sharedWatched[0] == 0)
 				{
 					continue;
 				}
@@ -1034,6 +1163,15 @@ public class LootLog
 				d.trackedSinceKill = since;
 				d.boostedSinceLast = boostedSinceLast;
 				d.boostedWatched = boostedWatched;
+				/* Only where there were any: a monster nobody fought in a group sends what it always did. */
+				if (sharedWatched[0] > 0)
+				{
+					d.sharedSinceLast = (int) sharedSinceLast[0];
+					/* To the thousandth: finer than any percent the map prints, and the snapshot stays short. */
+					d.shareSinceLast = Math.round(sharedSinceLast[1] * 1000) / 1000.0;
+					d.sharedWatched = (int) sharedWatched[0];
+					d.shareWatched = Math.round(sharedWatched[1] * 1000) / 1000.0;
+				}
 				npc.drops.add(d);
 			}
 			loot.npcs.add(npc);
@@ -1274,14 +1412,18 @@ public class LootLog
 				}
 				Integer since = tally.trackedSince.get(item);
 				boolean boost = rate != null && rate.boost != null;
+				double[] sharedSinceLast = sharedSince(tally, rate, tally.sharedAtLast.get(item));
+				double[] sharedWatched = sharedSince(tally, rate, tally.sharedAtStart.get(item));
 				drops.add(new Drop(item, id == null ? -1 : id, tally.obtained.getOrDefault(item, 0),
 					tally.kills - baseline(tally, item), tally.kills - (since == null ? 0 : since),
 					boost ? boosted(tally, rate) - tally.boostedAtLast.getOrDefault(item, 0) : 0,
 					boost ? boosted(tally, rate) - tally.boostedAtStart.getOrDefault(item, 0) : 0,
 					rate == null ? null : rate.oneIn,
-					boost ? rate.boost.oneIn : null, boost ? rate.boost.when : null));
+					boost ? rate.boost.oneIn : null, boost ? rate.boost.when : null,
+					(int) sharedSinceLast[0], sharedSinceLast[1], (int) sharedWatched[0], sharedWatched[1]));
 			}
-			out.add(new Monster(entry.getKey(), tally.kills, tally.lastKillMs, drops, anyRow(watched, "kills", "solo")));
+			out.add(new Monster(entry.getKey(), tally.kills, tally.lastKillMs, drops,
+				anyRow(watched, "kills", "solo") && !anyRow(watched, "kills", "shared")));
 		}
 		return out;
 	}
@@ -1339,6 +1481,11 @@ public class LootLog
 		/** "slayer-task", "kourend-easy-diary", or null. */
 		@Nullable
 		public final String boostWhen;
+		/** Of {@link #sinceLast} and {@link #watched}, the kills shared with others, and the player's share of each. */
+		public final int sharedSinceLast;
+		public final double shareSinceLast;
+		public final int sharedWatched;
+		public final double shareWatched;
 
 		/** The rate pair, or null for a collection item with no rate. */
 		@Nullable
@@ -1349,12 +1496,12 @@ public class LootLog
 
 		DropOdds.Kills sinceKills()
 		{
-			return new DropOdds.Kills(sinceLast - boostedSinceLast, boostedSinceLast);
+			return new DropOdds.Kills(sinceLast - boostedSinceLast - sharedSinceLast, boostedSinceLast, sharedSinceLast, shareSinceLast);
 		}
 
 		DropOdds.Kills watchedKills()
 		{
-			return new DropOdds.Kills(watched - boostedWatched, boostedWatched);
+			return new DropOdds.Kills(watched - boostedWatched - sharedWatched, boostedWatched, sharedWatched, shareWatched);
 		}
 	}
 
@@ -1631,6 +1778,8 @@ public class LootLog
 		tally.trackedSince.put(item, tally.kills);
 		tally.obtained.put(item, 0);
 		tally.killsAtLast.remove(item);
+		tally.sharedAtLast.put(item, sharedNow(tally));
+		tally.sharedAtStart.put(item, sharedNow(tally));
 	}
 
 	/**
@@ -1690,6 +1839,8 @@ public class LootLog
 		tally.itemIds.keySet().retainAll(kept);
 		tally.boostedAtLast.keySet().retainAll(rated);
 		tally.boostedAtStart.keySet().retainAll(rated);
+		tally.sharedAtLast.keySet().retainAll(rated);
+		tally.sharedAtStart.keySet().retainAll(rated);
 		for (Rate rate : watched)
 		{
 			Integer since = tally.trackedSince.get(rate.item);

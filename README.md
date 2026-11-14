@@ -157,8 +157,8 @@ dailies you have collected left out of a dailies run.
 
 See how lucky or dry you are on the monster you are killing, with sourced drop odds and the chance
 over your next kills. **All monsters** lists everything you have killed, driest first if you like,
-and a chat line says how lucky a rare drop was when it lands. Pets count too, a boss fought in
-groups counts the kills you make alone, and an awakened Desert Treasure II boss is its own monster.
+and a chat line says how lucky a rare drop was when it lands. Pets count too, a boss fought in a
+group counts your share of each kill, and an awakened Desert Treasure II boss is its own monster.
 It works without connecting to the website.
 
 Every control and rule, feature by feature, is in [docs/features.md](docs/features.md). The
@@ -225,7 +225,8 @@ turns on, or off, everything it can send:
   request your own sidebar list through the existing connection. They add no poll.
 - **Loot and milestones:** observed loot kills for every monster, how long ago each was last killed,
   notable drop counts and observation baselines, kills since a drop, slayer-task/diary rate
-  conditions, the monster currently being killed and your pinned drop. Completeness flags identify
+  conditions, how many of those kills were shared with other players and your share of them, the
+  monster currently being killed and your pinned drop. Completeness flags identify
   omitted history. It also sends an announcement of a notable reward, a real level gained, or a quest or
   achievement diary tier finished while the plugin watched, with observed item name/id, quantity,
   NPC/activity source and optional pet/collection badge, or the quest's name or the diary's region
@@ -319,8 +320,9 @@ settings for the plugin.
 
 - Drop luck counts the kills the plugin has seen on normal members worlds, not your lifetime kill
   count, and only drops with a sourced rate get odds. At Callisto, Venenatis, Vet'ion, the
-  Nightmare, the Hueycoatl, Scurrius, Nex and Zalcano it counts only kills nobody else hit, at Araxxor only
-  harvested corpses, and the Desert Treasure II bosses outside the quest. Activity rewards need RuneLite's
+  Hueycoatl and Nex a kill shared with others counts as your share of the damage; at the Nightmare,
+  Scurrius and Zalcano it counts only kills nobody else hit. Araxxor counts only harvested corpses,
+  and the Desert Treasure II bosses only fights outside the quest. Activity rewards need RuneLite's
   **Loot Tracker** plugin. **Forget kill log** clears the current character's counts.
 - Birdhouses need RuneLite's **Time Tracking** plugin. Farm timers are estimates; disease and later
   visits can change them.

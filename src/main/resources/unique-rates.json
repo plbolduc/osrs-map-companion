@@ -416,35 +416,35 @@
       "item": "Claws of Callisto",
       "oneIn": 196,
       "page": "Callisto",
-      "kills": "solo"
+      "kills": "shared"
     },
     {
       "npc": "Callisto",
       "item": "Dragon 2h sword",
       "oneIn": 256,
       "page": "Callisto",
-      "kills": "solo"
+      "kills": "shared"
     },
     {
       "npc": "Callisto",
       "item": "Dragon pickaxe",
       "oneIn": 256,
       "page": "Callisto",
-      "kills": "solo"
+      "kills": "shared"
     },
     {
       "npc": "Callisto",
       "item": "Tyrannical ring",
       "oneIn": 512,
       "page": "Callisto",
-      "kills": "solo"
+      "kills": "shared"
     },
     {
       "npc": "Callisto",
       "item": "Voidwaker hilt",
       "oneIn": 360,
       "page": "Callisto",
-      "kills": "solo"
+      "kills": "shared"
     },
     {
       "npc": "Calvar'ion",
@@ -1713,7 +1713,15 @@
       "item": "Ancient hilt",
       "oneIn": 469.09090909090907,
       "page": "Nex",
-      "kills": "solo"
+      "kills": "shared",
+      "mvp": 1.1,
+      "fight": [
+        "Fumus",
+        "Umbra",
+        "Cruor",
+        "Glacies",
+        "Blood Reaver"
+      ]
     },
     {
       "npc": "Nex",
@@ -1721,42 +1729,89 @@
       "oneIn": 500,
       "page": "Nex",
       "pet": true,
-      "kills": "solo"
+      "kills": "shared",
+      "fight": [
+        "Fumus",
+        "Umbra",
+        "Cruor",
+        "Glacies",
+        "Blood Reaver"
+      ]
     },
     {
       "npc": "Nex",
       "item": "Nihil horn",
       "oneIn": 234.54545454545453,
       "page": "Nex",
-      "kills": "solo"
+      "kills": "shared",
+      "mvp": 1.1,
+      "fight": [
+        "Fumus",
+        "Umbra",
+        "Cruor",
+        "Glacies",
+        "Blood Reaver"
+      ]
     },
     {
       "npc": "Nex",
       "item": "Torva full helm (damaged)",
       "oneIn": 234.54545454545453,
       "page": "Nex",
-      "kills": "solo"
+      "kills": "shared",
+      "mvp": 1.1,
+      "fight": [
+        "Fumus",
+        "Umbra",
+        "Cruor",
+        "Glacies",
+        "Blood Reaver"
+      ]
     },
     {
       "npc": "Nex",
       "item": "Torva platebody (damaged)",
       "oneIn": 234.54545454545453,
       "page": "Nex",
-      "kills": "solo"
+      "kills": "shared",
+      "mvp": 1.1,
+      "fight": [
+        "Fumus",
+        "Umbra",
+        "Cruor",
+        "Glacies",
+        "Blood Reaver"
+      ]
     },
     {
       "npc": "Nex",
       "item": "Torva platelegs (damaged)",
       "oneIn": 234.54545454545453,
       "page": "Nex",
-      "kills": "solo"
+      "kills": "shared",
+      "mvp": 1.1,
+      "fight": [
+        "Fumus",
+        "Umbra",
+        "Cruor",
+        "Glacies",
+        "Blood Reaver"
+      ]
     },
     {
       "npc": "Nex",
       "item": "Zaryte vambraces",
       "oneIn": 156.36363636363635,
       "page": "Nex",
-      "kills": "solo"
+      "kills": "shared",
+      "mvp": 1.1,
+      "fight": [
+        "Fumus",
+        "Umbra",
+        "Cruor",
+        "Glacies",
+        "Blood Reaver"
+      ]
     },
     {
       "npc": "Ogre",
@@ -2262,7 +2317,7 @@
       "item": "Dragon hunter wand",
       "oneIn": 105,
       "page": "The Hueycoatl",
-      "kills": "solo"
+      "kills": "shared"
     },
     {
       "npc": "The Hueycoatl",
@@ -2270,7 +2325,7 @@
       "oneIn": 400,
       "page": "The Hueycoatl",
       "pet": true,
-      "kills": "solo"
+      "kills": "shared"
     },
     {
       "npc": "The Leviathan",
@@ -2895,28 +2950,28 @@
       "item": "Dragon 2h sword",
       "oneIn": 256,
       "page": "Venenatis",
-      "kills": "solo"
+      "kills": "shared"
     },
     {
       "npc": "Venenatis",
       "item": "Dragon pickaxe",
       "oneIn": 256,
       "page": "Venenatis",
-      "kills": "solo"
+      "kills": "shared"
     },
     {
       "npc": "Venenatis",
       "item": "Fangs of Venenatis",
       "oneIn": 196,
       "page": "Venenatis",
-      "kills": "solo"
+      "kills": "shared"
     },
     {
       "npc": "Venenatis",
       "item": "Treasonous ring",
       "oneIn": 512,
       "page": "Venenatis",
-      "kills": "solo"
+      "kills": "shared"
     },
     {
       "npc": "Venenatis",
@@ -2931,35 +2986,35 @@
       "item": "Voidwaker gem",
       "oneIn": 360,
       "page": "Venenatis",
-      "kills": "solo"
+      "kills": "shared"
     },
     {
       "npc": "Vet'ion",
       "item": "Dragon 2h sword",
       "oneIn": 256,
       "page": "Vet'ion",
-      "kills": "solo"
+      "kills": "shared"
     },
     {
       "npc": "Vet'ion",
       "item": "Dragon pickaxe",
       "oneIn": 256,
       "page": "Vet'ion",
-      "kills": "solo"
+      "kills": "shared"
     },
     {
       "npc": "Vet'ion",
       "item": "Ring of the gods",
       "oneIn": 512,
       "page": "Vet'ion",
-      "kills": "solo"
+      "kills": "shared"
     },
     {
       "npc": "Vet'ion",
       "item": "Skull of Vet'ion",
       "oneIn": 196,
       "page": "Vet'ion",
-      "kills": "solo"
+      "kills": "shared"
     },
     {
       "npc": "Vet'ion",
@@ -2974,7 +3029,7 @@
       "item": "Voidwaker blade",
       "oneIn": 360,
       "page": "Vet'ion",
-      "kills": "solo"
+      "kills": "shared"
     },
     {
       "npc": "Vorkath",

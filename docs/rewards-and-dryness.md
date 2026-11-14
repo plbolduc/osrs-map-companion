@@ -152,6 +152,15 @@ How Drop luck counts:
   split as `boostedSinceLast` and `boostedWatched`, and `ratedKey` fingerprints which rated drops
   this table watches, so a map with a newer table reads a missing row as unknown rather than zero.
   Overall luck is priced over the kills each drop was watched for, not every kill.
+- **Shared kills, priced by share.** A row marked `kills: "shared"` counts a kill other players hit
+  too as the player's share of it: their own damage over everyone's, from `HitsplatApplied`
+  (`isMine()` and `isOthers()`, amounts only, per fight; Nex's minions and reavers count towards
+  hers through `fight`). Nex's uniques hold her MVP's bonus (`mvp`), so a shared kill the game did
+  not name the player MVP of ("You were the MVP for this fight", a tick either side of the loot) is
+  worth its share over 1.1. A drop's shared kills and their summed share are kept beside its boost
+  baselines and sent as `sharedSinceLast`/`shareSinceLast` and `sharedWatched`/`shareWatched`, only
+  where there were any. The odds price the share as that many kills: exact for the wait, and a
+  Poisson count for the overall tail, which for a rare drop is the same to the printed percent.
 - **What a review of the build found**, each fixed with a test: a diary reading the game had not
   yet given (the fifteen seconds after every login and hop) restarted the talisman's count, so the
   last real reading is now kept per character and stands in; a finished task still counted as "on

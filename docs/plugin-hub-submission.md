@@ -278,12 +278,16 @@ answering a reviewer. Since 1.9.0, for 1.10.0, in review in
   these drops too.
 - **Pets, sets, team bosses alone and awakened bosses:** the table grows on to 506 rates across 193
   monsters. A pet is counted from the game's own pet line in chat, against the kill beside it; a
-  set that drops a piece at a time counts as one drop. Callisto, Venenatis, Vet'ion, the Nightmare,
-  the Hueycoatl, Scurrius, Nex and Zalcano count only kills where no other player's hitsplat
-  (`HitsplatApplied`, `isOthers()`) landed in the minute before; the lizardman shaman counts none
+  set that drops a piece at a time counts as one drop. Callisto, Venenatis, Vet'ion, the Hueycoatl
+  and Nex count a kill other players hit as the player's share of it: their own damage over
+  everyone's, from `HitsplatApplied` (`isMine()`, `isOthers()` and the amount, kept per fight for a
+  minute), with Nex's MVP read from the game's "You were the MVP for this fight". The Nightmare,
+  Scurrius and Zalcano count only kills no other player hit. The lizardman shaman counts none
   in an instance; Araxxor counts no destroyed corpse; and the Desert Treasure II bosses are told
   from their awakened fights by the loot NPC's combat level. All of it is read from events the
-  plugin already receives or from the loot itself; nothing new is sent.
+  plugin already receives or from the loot itself. Each drop's report gains four fields — how many
+  of its kills were shared, and the summed share, since its last drop and since watching began —
+  disclosed under *Loot and milestones*, and sent only where there were any.
 - **A fairer Dry in All monsters:** a monster's chip and its place under *Driest* weigh its driest
   wait against how many of its drops could be that dry, and the drop the chip is about is outlined.
   Arithmetic on local counts; nothing is sent.
