@@ -173,7 +173,7 @@ See how lucky or dry you are on the monster you are killing, with sourced drop o
 comparison and the chance over your next kills. Each drop shows its rate as the wiki prints it, and
 **Any unique** adds them up, the pet apart: Nex's six uniques are 1 in 43, plus 10% as her MVP. The
 card opens on it, since a dry spell at a boss is felt across its whole table. **All monsters** opens your recorded history.
-There, a **Dry** chip is about the drop outlined in its colour, and a monster with several drops
+There, a **Dry now** chip is about the drop outlined in its colour, and a monster with several drops
 needs a longer wait to earn one. Pin a drop and its monster is judged on that drop alone.
 A pet counts from the game's own message, against the kill it came with. A set that falls a piece
 at a time — the brimstone ring, the noxious halberd — is one row, whichever piece fell. A boss

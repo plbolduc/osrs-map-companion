@@ -235,6 +235,33 @@ public class DropLuckPanelTest
 	}
 
 	/**
+	 * The list chip says it is about the wait, as the website's does, and stays on its row in the real
+	 * column: the gorilla's six drops filled the line, and the row's flow put a chip that passed the
+	 * edge on a second line the row had no height for, so it was laid out and never seen.
+	 */
+	@Test
+	public void theListsDryChipSaysNowAndStaysOnItsRow() throws Exception
+	{
+		for (int i = 0; i < 3000; i++)
+		{
+			kill("Demonic gorilla", 995);
+		}
+		panel.refresh();
+		assertTrue(words(), SidebarWords.press(panel, "All monsters ›"));
+		List<JLabel> chips = labels(panel, Arrays.asList("Dry now", "Very dry now"), new ArrayList<>());
+		assertEquals(words(), 1, chips.size());
+		JLabel chip = chips.get(0);
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.setSize(PluginPanel.PANEL_WIDTH - 20, 2000);
+			layout(panel);
+		});
+		Container row = chip.getParent();
+		assertTrue("the chip at " + chip.getBounds() + " in a row of " + row.getSize(),
+			chip.getX() + chip.getWidth() <= row.getWidth() && chip.getY() + chip.getHeight() <= row.getHeight());
+	}
+
+	/**
 	 * The strip is the website's LuckStrip (osrs-stars-map's DropLuckSection.tsx), colours and stops:
 	 * #4ade80 at 0, #71717a from 35 to 65%, #f59e0b at 85% and #f87171 at the end. It went from the
 	 * grey straight to the red, so a wait in the Dry band sat on grey-pink beside an amber chip.
