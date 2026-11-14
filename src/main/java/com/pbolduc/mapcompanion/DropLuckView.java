@@ -252,10 +252,10 @@ final class DropLuckView
 		final String verdict;
 		final String sinceLabel;
 		final String sinceValue;
-		/** "drier than 75% of players", or null with no rate. */
+		/** "drier than 75% of players", "it came with the last kill" with no wait yet, or null with no rate. */
 		@Nullable
 		final String sinceComparison;
-		/** Where the strip's dot sits, 0–1; negative with no rate, and the strip is not drawn. */
+		/** Where the strip's dot sits, 0–1; negative with no rate or no wait yet, and the strip is not drawn. */
 		final double drierThan;
 		@Nullable
 		final String aheadLabel;
@@ -315,7 +315,15 @@ final class DropLuckView
 		boolean taskAhead = taskLeft != null && taskLeft > 0;
 		boolean boostAhead = LootLog.SLAYER_TASK.equals(drop.boostWhen) ? taskAhead || boostedNow : boostedNow;
 		double ahead = boostAhead ? rate.boosted() : rate.oneIn;
-		double drierThan = DropOdds.within(rate, drop.sinceKills());
+		/*
+		 * A wait of none — the drop came on the last kill — has nothing to compare: "100% of players
+		 * would still be waiting too" is true of every wait at zero, and the strip's dot would sit on
+		 * Lucky. The line says what happened instead, and the strip comes back with the next kill.
+		 */
+		boolean noWait = drop.sinceLast == 0;
+		double drierThan = noWait ? -1 : DropOdds.within(rate, drop.sinceKills());
+		String comparison = !noWait ? DropOdds.waitSoFar(drop.sinceKills(), rate)
+			: drop.obtained > 0 ? "it came with the last " + monster.unit : "no " + monster.unit + "s counted for it yet";
 		String boost = ahead != rate.oneIn ? " " + rate.boostLabel : "";
 		String aheadLabel = taskAhead ? "Rest of this Slayer task (" + count(taskLeft) + " kills)"
 			: "Next " + units(monster, 100) + boost;
@@ -323,8 +331,7 @@ final class DropLuckView
 			: DropOdds.within(DropOdds.Rate.of(ahead), new DropOdds.Kills(0, 0, 100, 100 * worthPerKill(drop)))) + "% chance";
 		return new Detail(
 			DropOdds.verdict(drop.obtained, drop.watchedKills(), drop.sinceKills(), rate),
-			sinceLabel, sinceValue,
-			DropOdds.waitSoFar(drop.sinceKills(), rate),
+			sinceLabel, sinceValue, comparison,
 			drierThan, aheadLabel, aheadValue,
 			count(drop.obtained) + " (usual " + DropOdds.usual(drop.watchedKills(), rate) + ")");
 	}
