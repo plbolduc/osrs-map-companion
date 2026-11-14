@@ -628,6 +628,12 @@ public class DestinationRoute
 		return route != null;
 	}
 
+	/** Whether the way followed sails: only a voyage's rows read the boats, a database look-up a port. */
+	synchronized boolean sails()
+	{
+		return route != null && route.options.get(chosen).voyage != null;
+	}
+
 	/** The route as it stands, or null when the destination being shown has none. */
 	@Nullable
 	synchronized View view()

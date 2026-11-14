@@ -136,6 +136,20 @@ public class VoyageStepsTest
 		assertEquals("on the deck, the sail is next", 2, route.view().step);
 	}
 
+	/**
+	 * The boats are read every tick a route is followed only while its way sails: each reading looks
+	 * a moored boat's port up in the game's database, and a walk to the bank has nothing to ask it.
+	 */
+	@Test
+	public void onlyAWayThatSailsAsksForTheBoats()
+	{
+		assertTrue(following(0).sails());
+		DestinationRoute walk = new DestinationRoute();
+		walk.sync(destination(steps(0), null), null);
+		assertFalse(walk.sails());
+		assertFalse(new DestinationRoute().sails());
+	}
+
 	@Test
 	public void theSailEndsAboardWithinReachOfTheMooring()
 	{

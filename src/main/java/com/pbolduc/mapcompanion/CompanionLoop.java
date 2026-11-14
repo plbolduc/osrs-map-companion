@@ -626,9 +626,9 @@ class CompanionLoop
 		destinationRoute.sync(shown, shown != null && shown.targetMemberId != null ? identity.id() : null);
 		if (destinationRoute.hasRoute())
 		{
-			/* A voyage's rows are ticked by the deck and the boats' ports, read here and never sent. */
+			/* A voyage's rows are ticked by the deck and the boats' ports, read here, for a way that sails, and never sent. */
 			destinationRoute.advance(standing(client),
-				DestinationRoute.Sailing.of(WorldTiles.aboard(client), boatReader.read(now)));
+				DestinationRoute.Sailing.of(WorldTiles.aboard(client), destinationRoute.sails() ? boatReader.read(now) : null));
 		}
 		/* Reached, the place has no more to say; a run's stop is the run's to move on from. */
 		if (shown != null && !farmRunRoute.owns(shown) && destinationRoute.reaches(standing(client),
