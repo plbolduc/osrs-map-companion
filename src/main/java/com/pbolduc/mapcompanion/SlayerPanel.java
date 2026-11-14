@@ -38,8 +38,7 @@ import net.runelite.api.gameval.SpriteID;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.util.LinkBrowser;
-import static com.pbolduc.mapcompanion.MapCompanionPanel.linkButton;
-import static com.pbolduc.mapcompanion.MapCompanionPanel.refont;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.*;
 
 /**
  * The website's ranked places in the sidebar, with one local remaining count.
@@ -48,7 +47,7 @@ import static com.pbolduc.mapcompanion.MapCompanionPanel.refont;
  */
 final class SlayerPanel extends JPanel
 {
-	private static final int WIDTH = MapCompanionPanel.CARD_TEXT_WIDTH;
+	private static final int WIDTH = CARD_TEXT_WIDTH;
 	private static final Color MUTED = ColorScheme.LIGHT_GRAY_COLOR;
 	private static final Color GOLD = new Color(237, 189, 100);
 	static final String NO_TASK = "No Slayer task";
@@ -96,7 +95,7 @@ final class SlayerPanel extends JPanel
 		this.marker = marker;
 		this.clientThread = clientThread;
 		this.sprites = sprites;
-		JPanel card = MapCompanionPanel.taskCard(this, "slayer", "Slayer", sprites, "Slayer", settings);
+		JPanel card = taskCard(this, "slayer", "Slayer", sprites, "Slayer", settings);
 		/* The task and its count stay on a folded card: they are what a glance at it is for. */
 		add(task, 1);
 		card.add(status);
@@ -178,7 +177,7 @@ final class SlayerPanel extends JPanel
 			String text = said == null || said.planning || said.message == null ? null : routes.words(said, now);
 			MapCompanionPanel.show(label, text, WIDTH);
 			/* Pink, so a Route that did not happen does not read as the card's next note. */
-			MapCompanionPanel.tone(label, text != null);
+			tone(label, text != null);
 		}
 	}
 
@@ -251,7 +250,7 @@ final class SlayerPanel extends JPanel
 				order.setName("slayer.order");
 				order.setToolTipText(Words.of("slayer.orderTip"));
 				order.addActionListener(e -> choose(order.getSelectedIndex() == 1 ? "single" : "best", config.slayerHideWilderness()));
-				body.add(MapCompanionPanel.left(order));
+				body.add(left(order));
 				JCheckBox wilderness = new JCheckBox("Hide Wilderness", shownHide);
 				wilderness.setName("slayer.hideWilderness");
 				wilderness.setOpaque(false);
@@ -311,9 +310,9 @@ final class SlayerPanel extends JPanel
 				license.setToolTipText(Words.of("slayer.licenceTip"));
 				license.addActionListener(e -> LinkBrowser.browse("https://creativecommons.org/licenses/by-nc-sa/3.0/"));
 			}
-			JPanel source = MapCompanionPanel.bar(0, null, wiki, null, license);
+			JPanel source = bar(0, null, wiki, null, license);
 			source.setOpaque(false);
-			body.add(MapCompanionPanel.left(MapCompanionPanel.capped(source)));
+			body.add(left(capped(source)));
 		}
 		body.revalidate();
 		body.repaint();
@@ -370,18 +369,18 @@ final class SlayerPanel extends JPanel
 			String words = (unmet ? "Needs " : unknown ? "Unconfirmed: " : "✓ ") + ask.text;
 			if (ask.skill == null)
 			{
-				lines.add(line(words, unmet ? MapCompanionPanel.REFUSED : MUTED));
+				lines.add(line(words, unmet ? REFUSED : MUTED));
 				continue;
 			}
 			JLabel chip = pill(ask.text.replace(" " + ask.skill, "") + (unmet ? " ✗" : unknown ? " ?" : " ✓"),
-				unmet ? MapCompanionPanel.REFUSED : unknown ? MUTED : ColorScheme.PROGRESS_COMPLETE_COLOR, words);
+				unmet ? REFUSED : unknown ? MUTED : ColorScheme.PROGRESS_COMPLETE_COLOR, words);
 			sprites.skill(chip, ask.skill, 14);
 			row.add(Box.createHorizontalStrut(3));
 			row.add(chip);
 		}
 		if (row.getComponentCount() > 1)
 		{
-			body.add(MapCompanionPanel.left(row));
+			body.add(left(row));
 		}
 		lines.forEach(body::add);
 		if (opened)
@@ -414,7 +413,7 @@ final class SlayerPanel extends JPanel
 			{
 				continue;
 			}
-			JLabel chip = pill(word, "Wilderness".equals(word) ? MapCompanionPanel.REFUSED : MUTED, label);
+			JLabel chip = pill(word, "Wilderness".equals(word) ? REFUSED : MUTED, label);
 			chip.addPropertyChangeListener("icon", e -> chip.setText(label.contains(" · ") ? "" : label.substring(word.length()).trim()));
 			if ("Multi".equals(word))
 			{
@@ -437,7 +436,7 @@ final class SlayerPanel extends JPanel
 	/** A chip: a few words or a picture on the lighter grey, with what it means as its tip. */
 	private static JLabel pill(String text, Color ink, String tip)
 	{
-		JLabel chip = MapCompanionPanel.label(11f, ink);
+		JLabel chip = label(11f, ink);
 		chip.setText(text);
 		chip.setToolTipText(tip);
 		chip.setOpaque(true);
@@ -457,16 +456,16 @@ final class SlayerPanel extends JPanel
 		int cut = name.lastIndexOf(' ', name.lastIndexOf(' ') - 1);
 		if (cut < 0 || metrics.stringWidth(name) < WIDTH)
 		{
-			return MapCompanionPanel.html(name, WIDTH);
+			return html(name, WIDTH);
 		}
-		return "<html><body width='" + WIDTH + "'>" + MapCompanionPanel.escape(name.substring(0, cut))
-			+ "<br>" + MapCompanionPanel.escape(name.substring(cut + 1)) + "</body></html>";
+		return "<html><body width='" + WIDTH + "'>" + escape(name.substring(0, cut))
+			+ "<br>" + escape(name.substring(cut + 1)) + "</body></html>";
 	}
 
 	/** A hairline between two places, and between the places, the options and the sources. */
 	private static JLabel rule()
 	{
-		return MapCompanionPanel.capped(MapCompanionPanel.ruled(new JLabel(), 6, 4));
+		return capped(ruled(new JLabel(), 6, 4));
 	}
 
 	private void actions(String source, String id, RelayResponse.RouteTile tile, String name)
@@ -479,13 +478,13 @@ final class SlayerPanel extends JPanel
 		JPanel actions = new JPanel(new GridLayout(1, 0, 4, 0));
 		actions.setOpaque(false);
 		actions.setBorder(BorderFactory.createEmptyBorder(3, 0, 1, 0));
-		JButton route = MapCompanionPanel.smallButton("Route");
+		JButton route = smallButton("Route");
 		route.setName(source);
 		WorldPoint at = new WorldPoint(tile.x, tile.y, tile.plane);
 		route.addActionListener(e -> { routes.press(id == null ? RoutePress.Target.tile(source, at, name, null, null) : RoutePress.Target.place(source, id, name, at, null)); refresh(connected); });
 		routeButtons.add(route);
 		actions.add(route);
-		JButton pin = MapCompanionPanel.smallButton("Pin");
+		JButton pin = smallButton("Pin");
 		pin.setToolTipText(Words.of("slayer.pinTip"));
 		pin.setName(source + ".map");
 		pin.addActionListener(e ->
@@ -496,8 +495,8 @@ final class SlayerPanel extends JPanel
 		});
 		pinButtons.add(pin);
 		actions.add(pin);
-		MapCompanionPanel.capped(actions);
-		body.add(MapCompanionPanel.left(actions));
+		capped(actions);
+		body.add(left(actions));
 		JLabel feedback = line("", MUTED);
 		feedback.setName(source);
 		feedback.setVisible(false);
@@ -544,13 +543,13 @@ final class SlayerPanel extends JPanel
 
 	private static JLabel line(String text, Color color)
 	{
-		return MapCompanionPanel.wrapped(text, 11f, color, WIDTH);
+		return wrapped(text, 11f, color, WIDTH);
 	}
 	private static JPanel column()
 	{
 		JPanel panel = new JPanel();
 		panel.setOpaque(false);
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-		return MapCompanionPanel.left(panel);
+		return left(panel);
 	}
 }

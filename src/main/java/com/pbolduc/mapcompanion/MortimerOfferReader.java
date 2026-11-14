@@ -34,6 +34,7 @@ import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.gameval.VarPlayerID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.util.Text;
+import static com.pbolduc.mapcompanion.CompanionSnapshot.MortimerTask;
 
 /**
  * The two or three tasks Mortimer offers while the player chooses, each with its mortifier.
@@ -57,7 +58,7 @@ public class MortimerOfferReader extends SettlingReader
 
 	private final Client client;
 	private int[] heldState;
-	private List<CompanionSnapshot.MortimerTask> held;
+	private List<MortimerTask> held;
 
 	@Inject
 	MortimerOfferReader(Client client)
@@ -109,16 +110,16 @@ public class MortimerOfferReader extends SettlingReader
 	}
 
 	@Nullable
-	public List<CompanionSnapshot.MortimerTask> offer()
+	public List<MortimerTask> offer()
 	{
 		return held;
 	}
 
 	/** The offer, or null unless both first slots hold a task named on the interface and nothing is a boss. */
 	@Nullable
-	private List<CompanionSnapshot.MortimerTask> decode(int[] state, String shown)
+	private List<MortimerTask> decode(int[] state, String shown)
 	{
-		List<CompanionSnapshot.MortimerTask> offer = new ArrayList<>();
+		List<MortimerTask> offer = new ArrayList<>();
 		for (int slot = 0; slot < SLOTS.size(); slot++)
 		{
 			int task = state[slot * 5];
@@ -137,7 +138,7 @@ public class MortimerOfferReader extends SettlingReader
 			{
 				return null;
 			}
-			CompanionSnapshot.MortimerTask offered = new CompanionSnapshot.MortimerTask();
+			MortimerTask offered = new MortimerTask();
 			offered.taskId = task;
 			offered.taskName = name;
 			offered.mortifier = modifier;

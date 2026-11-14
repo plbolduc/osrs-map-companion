@@ -44,6 +44,7 @@ import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import static com.pbolduc.mapcompanion.RelayResponse.Destination;
 
 /**
  * Route, pressed beside something in the sidebar: a search result, a clue, a death, a star, a
@@ -148,7 +149,7 @@ final class RoutePress
 		final Picture picture;
 		/** The destination this is the way to, where the press pinned it before asking; never sent. */
 		@Nullable
-		final RelayResponse.Destination pin;
+		final Destination pin;
 
 		static Target place(String source, String id, String name, @Nullable WorldPoint stood, @Nullable String note)
 		{
@@ -172,7 +173,7 @@ final class RoutePress
 		}
 
 		/** The same target, as the way to a destination already pinned: asked and answered only while it stands. */
-		Target pinned(RelayResponse.Destination pinned)
+		Target pinned(Destination pinned)
 		{
 			return new Target(source, id, tile, name, world, note, clue, picture, pinned);
 		}
@@ -413,7 +414,7 @@ final class RoutePress
 	 * a destination sent since, or a press that drew nothing, shows no picture.
 	 */
 	@Nullable
-	Picture picture(@Nullable RelayResponse.Destination destination)
+	Picture picture(@Nullable Destination destination)
 	{
 		Shown now = shown;
 		return now != null && destination != null && now.generation == destinations.generation()
@@ -541,7 +542,7 @@ final class RoutePress
 		return (answer, why, next) ->
 		{
 			RelayResponse.Route ways = RouteWire.normalize(answer);
-			RelayResponse.Destination destination = ways == null ? null : destination(target, answer.target, ways);
+			Destination destination = ways == null ? null : destination(target, answer.target, ways);
 			route.finishPress(next);
 			route.redirected(REDIRECTS.equals(why));
 			/*
@@ -606,9 +607,9 @@ final class RoutePress
 	 * answer nor the press names a tile on the map.
 	 */
 	@Nullable
-	static RelayResponse.Destination destination(Target target, @Nullable AnswerTarget planned, RelayResponse.Route ways)
+	static Destination destination(Target target, @Nullable AnswerTarget planned, RelayResponse.Route ways)
 	{
-		RelayResponse.Destination destination = new RelayResponse.Destination();
+		Destination destination = new Destination();
 		if (planned != null && planned.x > 0 && planned.y > 0 && planned.x <= MAX_COORDINATE && planned.y <= MAX_COORDINATE
 			&& (planned.plane == null || (planned.plane >= 0 && planned.plane <= 3)))
 		{

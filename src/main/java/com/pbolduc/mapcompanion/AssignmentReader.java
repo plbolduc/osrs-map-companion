@@ -41,6 +41,7 @@ import net.runelite.api.gameval.VarbitID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.plugins.timetracking.farming.Produce;
 import net.runelite.client.util.Text;
+import static com.pbolduc.mapcompanion.CompanionSnapshot.Assignment;
 
 /**
  * Only an observed assignment leaves the client, never the dialogue it was read from.
@@ -66,8 +67,8 @@ public class AssignmentReader extends SettlingReader
 	private static final Pattern HOME_FINISHED = Pattern.compile("You have completed [\\d,]+ contracts with a total of [\\d,]+ points?\\.");
 	private final Client client;
 	private final ConfigStore settings;
-	private CompanionSnapshot.Assignment rumour;
-	private CompanionSnapshot.Assignment home;
+	private Assignment rumour;
+	private Assignment home;
 	private long rumourAt;
 	private long homeAt;
 	private String lastHomeDialog;
@@ -200,19 +201,19 @@ public class AssignmentReader extends SettlingReader
 	}
 
 	@Nullable
-	CompanionSnapshot.Assignment rumour(long now)
+	Assignment rumour(long now)
 	{
 		return settings.on("shareHunterRumours") ? aged(rumour, rumourAt, now) : null;
 	}
 
 	@Nullable
-	CompanionSnapshot.Assignment home(long now)
+	Assignment home(long now)
 	{
 		return settings.on("shareMahoganyHomes") ? aged(home, homeAt, now) : null;
 	}
 
 	@Nullable
-	CompanionSnapshot.Assignment farming(long now)
+	Assignment farming(long now)
 	{
 		if (!settings.on("shareFarmingContracts") || !settle.settled(now))
 		{
@@ -235,7 +236,7 @@ public class AssignmentReader extends SettlingReader
 				if (produce.getContractVarbitValue() == value)
 				{
 					String crop = String.valueOf(produce.getPatchImplementation()).toLowerCase(Locale.ROOT).replace('_', ' ');
-					CompanionSnapshot.Assignment contract = assignment(produce.getName(), crop);
+					Assignment contract = assignment(produce.getName(), crop);
 					// The shared assignment vocabulary calls work ready to hand in "return".
 					contract.state = complete == 1 ? "return" : "active";
 					return contract;
@@ -256,22 +257,22 @@ public class AssignmentReader extends SettlingReader
 			&& tile.getY() >= 9449 && tile.getY() <= 9464;
 	}
 
-	static CompanionSnapshot.Assignment assignment(String name, String detail)
+	static Assignment assignment(String name, String detail)
 	{
-		CompanionSnapshot.Assignment result = new CompanionSnapshot.Assignment();
+		Assignment result = new Assignment();
 		result.name = name;
 		result.detail = detail;
 		result.state = "active";
 		return result;
 	}
 
-	private static CompanionSnapshot.Assignment aged(CompanionSnapshot.Assignment source, long at, long now)
+	private static Assignment aged(Assignment source, long at, long now)
 	{
 		if (source == null || now < at || now - at > MAX_AGE_MS)
 		{
 			return null;
 		}
-		CompanionSnapshot.Assignment result = assignment(source.name, source.detail);
+		Assignment result = assignment(source.name, source.detail);
 		result.state = source.state;
 		result.observedMsAgo = now - at;
 		return result;

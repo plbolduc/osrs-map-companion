@@ -31,6 +31,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import javax.swing.*;
 import net.runelite.client.ui.ColorScheme;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.*;
 
 /**
  * One ordered farm run: the runs the map can build, and the run being followed ({@link RunView}).
@@ -59,9 +60,9 @@ final class FarmRunPanel extends JPanel
 	private final ConfigStore settings;
 	private final JComboBox<String> kind = new JComboBox<>();
 	/* A button under the picker, the picker's width: it acts, and a link is a fold's own opener. */
-	private final JButton start = MapCompanionPanel.smallButton("Start run");
+	private final JButton start = smallButton("Start run");
 	/* Under Start run while the kind chosen plans from a sharing choice that is off. */
-	private final JLabel needs = MapCompanionPanel.label(11f, ColorScheme.LIGHT_GRAY_COLOR);
+	private final JLabel needs = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
 	/** Connected and free to press, as of the last refresh: a new pick of kind is offered by it. EDT. */
 	private boolean ready;
 	/** The wait every Route shares, as that refresh found it: what Start run says while it is greyed. EDT. */
@@ -73,8 +74,8 @@ final class FarmRunPanel extends JPanel
 	 */
 	private final JPanel picker = new JPanel(new BorderLayout(0, 4));
 	/* Where the picker was while the Port tasks card's run is going, so its absence is explained. */
-	private final JLabel waiting = MapCompanionPanel.wrapped(AFTER_PORT_RUN, 11f, ColorScheme.LIGHT_GRAY_COLOR,
-		MapCompanionPanel.CARD_TEXT_WIDTH);
+	private final JLabel waiting = wrapped(AFTER_PORT_RUN, 11f, ColorScheme.LIGHT_GRAY_COLOR,
+		CARD_TEXT_WIDTH);
 	private final RunView run;
 
 	@Inject
@@ -85,13 +86,13 @@ final class FarmRunPanel extends JPanel
 		this.routes = routes;
 		this.settings = settings;
 		this.run = new RunView(false, state, client, follower, routes, shortest, sprites, config);
-		JPanel card = MapCompanionPanel.taskCard(this, "farmRun", "Farm run", sprites, "Farming", settings);
+		JPanel card = taskCard(this, "farmRun", "Farm run", sprites, "Farming", settings);
 		picker.setBackground(getBackground());
 		for (String choice : STARTS)
 		{
 			kind.addItem(choice.split("\\|")[1]);
 		}
-		MapCompanionPanel.refont(kind, 11f);
+		refont(kind, 11f);
 		kind.setToolTipText(Words.of("farm.kindTip"));
 		/* Closed, the picker names what it picks: "Ready now" alone reads as a status. The list stays plain. */
 		ListCellRenderer<? super String> rows = kind.getRenderer();
@@ -100,7 +101,7 @@ final class FarmRunPanel extends JPanel
 		picker.add(kind, BorderLayout.CENTER);
 		picker.add(start, BorderLayout.SOUTH);
 		picker.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
-		card.add(MapCompanionPanel.left(picker));
+		card.add(left(picker));
 		needs.setVisible(false);
 		card.add(needs);
 		waiting.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
@@ -162,12 +163,12 @@ final class FarmRunPanel extends JPanel
 		/* Greyed by the wait alone, it says how long is left; a choice that is off has the line under it. Else what the press asks. */
 		MapWait.tip(start, Words.of("farm.startTip"), missing == null ? wait : 0L);
 		needs.setVisible(picker.isVisible() && missing != null);
-		MapCompanionPanel.setWrapped(needs, missing == null ? "" : missing, MapCompanionPanel.CARD_TEXT_WIDTH);
+		setWrapped(needs, missing == null ? "" : missing, CARD_TEXT_WIDTH);
 	}
 
 	/** The button a press from the game presses on this card's run, or null with none shown here. EDT. */
 	@Nullable
-	JButton actButton(MapCompanionPanel.Act act)
+	JButton actButton(Act act)
 	{
 		return isVisible() ? run.actButton(act) : null;
 	}

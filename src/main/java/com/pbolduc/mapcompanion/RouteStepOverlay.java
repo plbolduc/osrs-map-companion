@@ -46,6 +46,7 @@ import net.runelite.client.ui.overlay.components.LineComponent;
 import net.runelite.client.ui.overlay.components.SplitComponent;
 import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.Text;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.*;
 
 /**
  * The step being walked, in a small box over the game, so a followed route can be walked with the
@@ -111,7 +112,7 @@ class RouteStepOverlay extends OverlayPanel
 	 */
 	private final Map<String, BufferedImage> pictures = new HashMap<>();
 	/** Where a menu entry's press goes: the plugin's, once the sidebar exists. */
-	private Consumer<MapCompanionPanel.Act> press = act -> {};
+	private Consumer<Act> press = act -> {};
 	/** What the menu's last entry says now, the card's own word for its button. Client thread. */
 	private String endWord;
 
@@ -129,7 +130,7 @@ class RouteStepOverlay extends OverlayPanel
 		menu(false);
 	}
 
-	void pressWith(Consumer<MapCompanionPanel.Act> press)
+	void pressWith(Consumer<Act> press)
 	{
 		this.press = press;
 	}
@@ -143,13 +144,13 @@ class RouteStepOverlay extends OverlayPanel
 			return;
 		}
 		getMenuEntries().clear();
-		entry("Pause", MapCompanionPanel.Act.FOLLOW);
-		entry("Reroute", MapCompanionPanel.Act.REROUTE);
-		entry(end, MapCompanionPanel.Act.END);
+		entry("Pause", Act.FOLLOW);
+		entry("Reroute", Act.REROUTE);
+		entry(end, Act.END);
 		endWord = end;
 	}
 
-	private void entry(String option, MapCompanionPanel.Act act)
+	private void entry(String option, Act act)
 	{
 		addMenuEntry(MenuAction.RUNELITE_OVERLAY, option, "", e -> press.accept(act));
 	}
@@ -196,7 +197,7 @@ class RouteStepOverlay extends OverlayPanel
 		for (String note : box.notes)
 		{
 			words.add(LineComponent.builder().left(note)
-				.leftColor(note.contains("Wilderness") ? MapCompanionPanel.REFUSED : Color.LIGHT_GRAY).build());
+				.leftColor(note.contains("Wilderness") ? REFUSED : Color.LIGHT_GRAY).build());
 		}
 		if (pictured)
 		{

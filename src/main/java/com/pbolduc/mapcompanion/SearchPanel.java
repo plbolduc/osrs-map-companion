@@ -36,7 +36,7 @@ import javax.swing.border.EmptyBorder;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.gameval.SpriteID;
 import net.runelite.client.ui.ColorScheme;
-import static com.pbolduc.mapcompanion.MapCompanionPanel.label;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.*;
 import static com.pbolduc.mapcompanion.RoutePress.Said;
 
 /**
@@ -72,7 +72,7 @@ import static com.pbolduc.mapcompanion.RoutePress.Said;
  */
 final class SearchPanel extends JPanel
 {
-	private static final int WIDTH = MapCompanionPanel.CARD_TEXT_WIDTH;
+	private static final int WIDTH = CARD_TEXT_WIDTH;
 	static final String SOURCE = "search";
 
 	/** A row's picture column: the widest sprite it holds, an item's, fitted to this square. */
@@ -85,7 +85,7 @@ final class SearchPanel extends JPanel
 	@Nullable
 	private final GameSprites sprites;
 	private final JTextField box = new JTextField();
-	private final JPanel rows = MapCompanionPanel.column(ColorScheme.DARK_GRAY_COLOR);
+	private final JPanel rows = column(ColorScheme.DARK_GRAY_COLOR);
 	private final JLabel status = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
 	/** The list is folded once a pick's answer has filled the destination's card; typing or Enter opens it again. */
 	private boolean folded;
@@ -112,18 +112,18 @@ final class SearchPanel extends JPanel
 		this.search = search;
 		this.press = press;
 		this.sprites = sprites;
-		MapCompanionPanel.column(this, ColorScheme.DARK_GRAY_COLOR);
+		column(this, ColorScheme.DARK_GRAY_COLOR);
 		setName("companionSearch");
 		box.setName("search.box");
 		box.putClientProperty("JTextField.placeholderText", PLACEHOLDER);
 		box.putClientProperty("JTextField.leadingIcon", SidebarIcons.magnifier());
 		box.putClientProperty("JTextField.showClearButton", true);
 		box.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-		box.setPreferredSize(new Dimension(MapCompanionPanel.CARD_TEXT_WIDTH + 16, 28));
+		box.setPreferredSize(new Dimension(CARD_TEXT_WIDTH + 16, 28));
 		box.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28));
 		box.setToolTipText(Words.of("search.boxTip"));
-		MapCompanionPanel.left(box);
-		MapCompanionPanel.onEdit(box.getDocument(), this::changed);
+		left(box);
+		onEdit(box.getDocument(), this::changed);
 		box.addActionListener(e ->
 		{
 			movedOn();
@@ -182,8 +182,8 @@ final class SearchPanel extends JPanel
 		boolean refused = shown != null && (shown.planning || shown.message != null) ? shown.refused()
 			: !result.searching && result.refused;
 		/* Drawn on every refresh rather than with the rows: a wait it says counts its seconds down. */
-		MapCompanionPanel.showKeeping(status, line, WIDTH + 16);
-		MapCompanionPanel.tone(status, refused);
+		showKeeping(status, line, WIDTH + 16);
+		tone(status, refused);
 		boolean live = press.ready();
 		String words = folded + "|" + live + "|" + result.query + "|" + result.suggestion + "|"
 			+ result.hits.size() + "|" + hitsKey(result);
@@ -202,7 +202,7 @@ final class SearchPanel extends JPanel
 			{
 				if (hit.section != null && !hit.section.equals(section))
 				{
-					JLabel head = MapCompanionPanel.wrapped(hit.section, 11f, ColorScheme.LIGHT_GRAY_COLOR, WIDTH);
+					JLabel head = wrapped(hit.section, 11f, ColorScheme.LIGHT_GRAY_COLOR, WIDTH);
 					head.setFont(head.getFont().deriveFont(java.awt.Font.BOLD));
 					head.setBorder(new EmptyBorder(4, 0, 1, 0));
 					rows.add(head);
@@ -214,16 +214,16 @@ final class SearchPanel extends JPanel
 			{
 				String suggestion = result.suggestion;
 				/* A search it will run, so a button: as grey link text it read as one more status line. */
-				JButton mean = MapCompanionPanel.smallButton("Did you mean " + suggestion + "?");
+				JButton mean = smallButton("Did you mean " + suggestion + "?");
 				mean.setName("search.suggestion");
 				mean.addActionListener(e ->
 				{
 					box.setText(suggestion);
 					search.enter(suggestion);
 				});
-				JPanel holder = MapCompanionPanel.fill(mean, ColorScheme.DARK_GRAY_COLOR);
+				JPanel holder = fill(mean, ColorScheme.DARK_GRAY_COLOR);
 				holder.setBorder(new EmptyBorder(3, 0, 0, 0));
-				MapCompanionPanel.capped(holder);
+				capped(holder);
 				rows.add(holder);
 			}
 		}
@@ -322,14 +322,14 @@ final class SearchPanel extends JPanel
 		picture.setVerticalAlignment(SwingConstants.TOP);
 		picture.setPreferredSize(new Dimension(PICTURE, PICTURE));
 		picture(picture, hit, PICTURE);
-		JPanel words = MapCompanionPanel.column(ColorScheme.DARKER_GRAY_COLOR);
+		JPanel words = column(ColorScheme.DARKER_GRAY_COLOR);
 		words.setOpaque(false);
 		int width = WIDTH - PICTURE - 6;
-		JLabel far = MapCompanionPanel.label(11f, ColorScheme.LIGHT_GRAY_COLOR);
+		JLabel far = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
 		far.setName("search.far");
 		far.setText(hit.far);
 		far.setVerticalAlignment(SwingConstants.TOP);
-		JLabel name = MapCompanionPanel.wrapped(hit.name, 12f, live ? Color.WHITE : greyed(),
+		JLabel name = wrapped(hit.name, 12f, live ? Color.WHITE : greyed(),
 			hit.far == null ? width : width - far.getPreferredSize().width - 4);
 		name.setName("search.name");
 		if (hit.far == null)
@@ -338,16 +338,16 @@ final class SearchPanel extends JPanel
 		}
 		else
 		{
-			JPanel first = MapCompanionPanel.bar(4, ColorScheme.DARKER_GRAY_COLOR, null, name, far);
+			JPanel first = bar(4, ColorScheme.DARKER_GRAY_COLOR, null, name, far);
 			first.setOpaque(false);
 			/* Capped, or a row with no grey line stretches it to the picture's height and centres the name under the distance. */
-			words.add(MapCompanionPanel.left(MapCompanionPanel.capped(first)));
+			words.add(left(capped(first)));
 		}
 		if (!hit.line.isEmpty())
 		{
-			words.add(MapCompanionPanel.wrapped(hit.line, 11f, ColorScheme.LIGHT_GRAY_COLOR, width));
+			words.add(wrapped(hit.line, 11f, ColorScheme.LIGHT_GRAY_COLOR, width));
 		}
-		JPanel row = MapCompanionPanel.bar(6, ColorScheme.DARKER_GRAY_COLOR, picture, words, null);
+		JPanel row = bar(6, ColorScheme.DARKER_GRAY_COLOR, picture, words, null);
 		row.setName("search.row");
 		row.setBorder(new EmptyBorder(4, 8, 4, 8));
 		if (!live)
@@ -364,8 +364,8 @@ final class SearchPanel extends JPanel
 		slot.setBackground(ColorScheme.DARK_GRAY_COLOR);
 		slot.setBorder(new EmptyBorder(0, 0, 2, 0));
 		slot.add(row);
-		MapCompanionPanel.capped(slot);
-		return MapCompanionPanel.left(slot);
+		capped(slot);
+		return left(slot);
 	}
 
 	/** The colour a disabled button's words are drawn in, so a row that takes no pick reads as one. */

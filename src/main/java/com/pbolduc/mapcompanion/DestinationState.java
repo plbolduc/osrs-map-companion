@@ -30,6 +30,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import javax.annotation.Nullable;
 import lombok.Getter;
+import static com.pbolduc.mapcompanion.RelayResponse.Destination;
 
 /**
  * Whatever the map last asked this client to show.
@@ -54,7 +55,7 @@ public class DestinationState
 	private final Gson gson;
 
 	@Getter
-	private volatile RelayResponse.Destination destination;
+	private volatile Destination destination;
 
 	/**
 	 * The group's other members and its week of meetups, from the same directive, soonest meetup
@@ -68,7 +69,7 @@ public class DestinationState
 	/** Gson of the destination the player hid. Null when nothing is dismissed. */
 	private volatile String dismissedFingerprint;
 	/** A pin chosen here survives unchanged group heartbeats; a new map destination replaces it. */
-	private volatile RelayResponse.Destination localDestination;
+	private volatile Destination localDestination;
 	private volatile String lastRemoteFingerprint;
 	/**
 	 * The last place from the map the chat box was told of, and one it is still to be told of. Unlike
@@ -77,7 +78,7 @@ public class DestinationState
 	 */
 	private String announced;
 	@Nullable
-	private RelayResponse.Destination arrival;
+	private Destination arrival;
 	/**
 	 * Counts {@link #clear}s: a group left, a lifetime ended. A route asked for before one is the old
 	 * group's answer, and {@link RoutePress} drops it by this.
@@ -91,7 +92,7 @@ public class DestinationState
 	 */
 	private volatile long pins;
 
-	public synchronized void selectLocal(RelayResponse.Destination selected)
+	public synchronized void selectLocal(Destination selected)
 	{
 		localDestination = selected;
 		destination = selected;
@@ -99,7 +100,7 @@ public class DestinationState
 	}
 
 	/** A place the player pinned by pressing it, with no question to the map: see {@link #pins}. */
-	synchronized void pin(RelayResponse.Destination selected)
+	synchronized void pin(Destination selected)
 	{
 		selectLocal(selected);
 		pins++;
@@ -155,9 +156,9 @@ public class DestinationState
 
 	/** A place from the map not yet said in the chat box, once; null when there is none. */
 	@Nullable
-	synchronized RelayResponse.Destination takeArrival()
+	synchronized Destination takeArrival()
 	{
-		RelayResponse.Destination taken = arrival;
+		Destination taken = arrival;
 		arrival = null;
 		return taken;
 	}
@@ -199,7 +200,7 @@ public class DestinationState
 	 */
 	public synchronized void dismiss()
 	{
-		RelayResponse.Destination current = destination;
+		Destination current = destination;
 		if (current == null)
 		{
 			return;
@@ -227,9 +228,9 @@ public class DestinationState
 	 * destination arrives first bare and then with steps; counted as two, the second would bring
 	 * back a destination the player dismissed and replace a star they had just pinned.
 	 */
-	private String fingerprint(RelayResponse.Destination dest)
+	private String fingerprint(Destination dest)
 	{
-		RelayResponse.Destination place = new RelayResponse.Destination();
+		Destination place = new Destination();
 		place.x = dest.x;
 		place.y = dest.y;
 		place.plane = dest.plane;

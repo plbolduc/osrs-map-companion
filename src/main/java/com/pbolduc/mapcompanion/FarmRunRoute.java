@@ -33,6 +33,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import net.runelite.client.callback.ClientThread;
 import static com.pbolduc.mapcompanion.DestinationRoute.keyOf;
+import static com.pbolduc.mapcompanion.RelayResponse.Destination;
 
 /**
  * Give the run's current leg to the existing destination follower and Shortest Path bridge.
@@ -56,7 +57,7 @@ final class FarmRunRoute
 	private long selectedRevision;
 	/** The destination whose arrival paused the run, so the card can name it; see {@link #pausedFor}. */
 	@Nullable
-	private volatile RelayResponse.Destination detour;
+	private volatile Destination detour;
 
 	void follow(boolean on)
 	{
@@ -138,7 +139,7 @@ final class FarmRunRoute
 			selectedKey = null;
 			return;
 		}
-		RelayResponse.Destination destination = destination(view, next);
+		Destination destination = destination(view, next);
 		String key = keyOf(destination);
 		if (key.equals(selectedKey) && selectedRevision == view.revision)
 		{
@@ -168,7 +169,7 @@ final class FarmRunRoute
 		}
 	}
 
-	boolean owns(@Nullable RelayResponse.Destination destination)
+	boolean owns(@Nullable Destination destination)
 	{
 		return selectedKey != null && selectedLifetime == destinations.generation()
 			   && selectedKey.equals(keyOf(destination));
@@ -188,7 +189,7 @@ final class FarmRunRoute
 	@Nullable
 	String pausedFor()
 	{
-		RelayResponse.Destination other = detour;
+		Destination other = detour;
 		FarmRunState.View view = state.view();
 		if (other == null || view == null || view.following)
 		{
@@ -204,9 +205,9 @@ final class FarmRunRoute
 		return state.view();
 	}
 
-	static RelayResponse.Destination destination(FarmRunState.View view, RelayResponse.FarmStop stop)
+	static Destination destination(FarmRunState.View view, RelayResponse.FarmStop stop)
 	{
-		RelayResponse.Destination destination = new RelayResponse.Destination();
+		Destination destination = new Destination();
 		destination.name = stop.n + ". " + stop.name;
 		destination.note = view.run.name;
 		destination.x = stop.tile.x;

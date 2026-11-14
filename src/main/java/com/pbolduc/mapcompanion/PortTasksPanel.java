@@ -33,6 +33,7 @@ import javax.annotation.Nullable;
 import javax.swing.border.EmptyBorder;
 import javax.swing.*;
 import net.runelite.client.ui.ColorScheme;
+import static com.pbolduc.mapcompanion.MapCompanionPanel.*;
 import static com.pbolduc.mapcompanion.PortTaskReader.Slot;
 
 /**
@@ -59,7 +60,7 @@ import static com.pbolduc.mapcompanion.PortTaskReader.Slot;
  */
 final class PortTasksPanel extends JPanel
 {
-	private static final int WIDTH = MapCompanionPanel.CARD_TEXT_WIDTH;
+	private static final int WIDTH = CARD_TEXT_WIDTH;
 	private static final Color MUTED = ColorScheme.LIGHT_GRAY_COLOR;
 	static final String NEEDS_BOATS = Words.of("port.needsBoats");
 	static final String AFTER_FARM_RUN = "Start run after the farm run ends.";
@@ -71,7 +72,7 @@ final class PortTasksPanel extends JPanel
 	private final DestinationRoute routes;
 	private final JPanel body = new JPanel();
 	/* The card's width, as the farm run's Start run is: it acts, so it is a button and not a link. */
-	private final JButton start = MapCompanionPanel.smallButton("Start run");
+	private final JButton start = smallButton("Start run");
 	private final JLabel hint = MapCompanionPanel.label(11f, MUTED);
 	private final JPanel starter = new JPanel(new GridLayout(1, 1));
 	private final RunView run;
@@ -88,16 +89,16 @@ final class PortTasksPanel extends JPanel
 		this.client = client;
 		this.routes = routes;
 		this.run = new RunView(true, state, client, follower, routes, shortest, sprites, config);
-		JPanel card = MapCompanionPanel.taskCard(this, "portTasks", "Port tasks", sprites, "Sailing", settings);
+		JPanel card = taskCard(this, "portTasks", "Port tasks", sprites, "Sailing", settings);
 		body.setOpaque(false);
 		body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
-		card.add(MapCompanionPanel.left(body));
+		card.add(left(body));
 		starter.setOpaque(false);
 		starter.setBorder(new EmptyBorder(4, 0, 0, 0));
 		start.setToolTipText(START_TIP);
 		starter.add(start);
-		MapCompanionPanel.capped(starter);
-		card.add(MapCompanionPanel.left(starter));
+		capped(starter);
+		card.add(left(starter));
 		card.add(hint);
 		card.add(run);
 		start.addActionListener(e -> client.start(FarmRunWire.PORT_TASKS));
@@ -106,7 +107,7 @@ final class PortTasksPanel extends JPanel
 
 	/** The button a press from the game presses on this card's run, or null with none shown here. EDT. */
 	@Nullable
-	JButton actButton(MapCompanionPanel.Act act)
+	JButton actButton(Act act)
 	{
 		return isVisible() ? run.actButton(act) : null;
 	}
@@ -139,7 +140,7 @@ final class PortTasksPanel extends JPanel
 		/* Greyed by the wait every Route shares, it says how long is left. A hop's window is not that wait. */
 		MapWait.tip(start, START_TIP, kept ? 0L : routes.pressWait(System.currentTimeMillis()));
 		hint.setVisible(offer && (!settings.on("shareBoats") || after));
-		MapCompanionPanel.setWrapped(hint, after ? AFTER_FARM_RUN : NEEDS_BOATS, WIDTH);
+		setWrapped(hint, after ? AFTER_FARM_RUN : NEEDS_BOATS, WIDTH);
 		if (!worth)
 		{
 			shown = null;
@@ -173,13 +174,13 @@ final class PortTasksPanel extends JPanel
 			tally.setName("port.count");
 			tally.setText(count);
 			tally.setVerticalAlignment(JLabel.TOP);
-			JLabel name = MapCompanionPanel.wrapped(title(slot), 12f, finished ? ColorScheme.MEDIUM_GRAY_COLOR : Color.WHITE,
+			JLabel name = wrapped(title(slot), 12f, finished ? ColorScheme.MEDIUM_GRAY_COLOR : Color.WHITE,
 				count == null ? WIDTH : WIDTH - tally.getPreferredSize().width - 4);
-			JPanel head = MapCompanionPanel.left(MapCompanionPanel.bar(4, null, null, name, count == null ? null : tally));
+			JPanel head = left(bar(4, null, null, name, count == null ? null : tally));
 			head.setOpaque(false);
 			head.setBorder(new EmptyBorder(4, 0, 0, 0));
 			/* A hairline between tasks, so two lines of one do not run on into the next one's name. */
-			body.add(MapCompanionPanel.capped(body.getComponentCount() == 0 ? head : MapCompanionPanel.ruled(head, 5, 3)));
+			body.add(capped(body.getComponentCount() == 0 ? head : ruled(head, 5, 3)));
 			body.add(line(next(slot), finished ? ColorScheme.MEDIUM_GRAY_COLOR : MUTED, 11f, 0));
 		}
 		body.add(line(footer(slots, hold), MUTED, 11f, running ? 4 : 6));
@@ -277,7 +278,7 @@ final class PortTasksPanel extends JPanel
 
 	private static JLabel line(String text, Color color, float size, int top)
 	{
-		JLabel label = MapCompanionPanel.wrapped(text, size, color, WIDTH);
+		JLabel label = wrapped(text, size, color, WIDTH);
 		label.setBorder(new EmptyBorder(top, 0, 0, 0));
 		return label;
 	}

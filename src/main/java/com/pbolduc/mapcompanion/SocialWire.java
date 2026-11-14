@@ -36,6 +36,8 @@ import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
+import static com.pbolduc.mapcompanion.RelayResponse.Meetup;
+import static com.pbolduc.mapcompanion.RelayResponse.RosterRow;
 import static com.pbolduc.mapcompanion.RouteWire.text;
 
 /**
@@ -80,7 +82,7 @@ final class SocialWire
 		@Override
 		public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type)
 		{
-			return list(gson, RelayResponse.RosterRow.class, SocialWire::row);
+			return list(gson, RosterRow.class, SocialWire::row);
 		}
 	}
 
@@ -90,7 +92,7 @@ final class SocialWire
 		@Override
 		public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type)
 		{
-			return list(gson, RelayResponse.Meetup.class, SocialWire::meetup);
+			return list(gson, Meetup.class, SocialWire::meetup);
 		}
 	}
 
@@ -146,7 +148,7 @@ final class SocialWire
 	{
 		TypeAdapter<R> rows = gson.getAdapter(rowType);
 		TypeAdapter<JsonElement> whole = gson.getAdapter(JsonElement.class);
-		int cap = rowType == RelayResponse.RosterRow.class ? MAX_ROSTER : MAX_MEETUPS;
+		int cap = rowType == RosterRow.class ? MAX_ROSTER : MAX_MEETUPS;
 		return (TypeAdapter<T>) new TypeAdapter<List<R>>()
 		{
 			@Override
@@ -199,7 +201,7 @@ final class SocialWire
 	}
 
 	@Nullable
-	static RelayResponse.RosterRow row(@Nullable RelayResponse.RosterRow row)
+	static RosterRow row(@Nullable RosterRow row)
 	{
 		if (row == null)
 		{
@@ -210,7 +212,7 @@ final class SocialWire
 		{
 			return null;
 		}
-		RelayResponse.RosterRow clean = new RelayResponse.RosterRow();
+		RosterRow clean = new RosterRow();
 		clean.id = id;
 		String name = text(row.name, MAX_NAME);
 		clean.name = name == null ? "Member" : name;
@@ -238,7 +240,7 @@ final class SocialWire
 	}
 
 	@Nullable
-	static RelayResponse.Meetup meetup(@Nullable RelayResponse.Meetup meetup)
+	static Meetup meetup(@Nullable Meetup meetup)
 	{
 		if (meetup == null)
 		{
@@ -252,7 +254,7 @@ final class SocialWire
 		{
 			return null;
 		}
-		RelayResponse.Meetup clean = new RelayResponse.Meetup();
+		Meetup clean = new Meetup();
 		clean.id = id;
 		clean.title = title;
 		clean.x = meetup.x;
