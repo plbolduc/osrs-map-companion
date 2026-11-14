@@ -74,6 +74,11 @@ final class StarsClient
 	 */
 	String message;
 	private boolean active, eligible;
+	/**
+	 * Whether the game has been asked since the tab was turned to. The tab is drawn at the turn,
+	 * before it has, and "not eligible" then means "not asked yet" rather than "log in".
+	 */
+	private boolean known;
 	private long generation;
 	/** When the list may next be asked for. Its test reads the wait a reply left here. */
 	long nextFeed;
@@ -101,8 +106,14 @@ final class StarsClient
 
 	void active(boolean on)
 	{
+		/* The tab pressed while it shows: nothing has changed, and the call out is still wanted. */
+		if (on && active)
+		{
+			return;
+		}
 		active = on;
 		eligible = false;
+		known = false;
 		cancel();
 		if (on)
 		{
@@ -118,6 +129,12 @@ final class StarsClient
 	boolean eligible()
 	{
 		return eligible;
+	}
+
+	/** Whether {@link #eligible} has been read from the game since the tab was turned to: see {@link #known}. */
+	boolean known()
+	{
+		return known;
 	}
 
 	private void cancel()
@@ -174,6 +191,7 @@ final class StarsClient
 	private void update(String server, String code, String profile, boolean allowed, boolean between, Integer mining, Integer total, String game, Integer world)
 	{
 		if (!active) return;
+		known = true;
 		/* The list is a character's: none until RuneLite names the one logged in. */
 		String member = allowed || between ? identity.id() : null;
 		if (member == null)

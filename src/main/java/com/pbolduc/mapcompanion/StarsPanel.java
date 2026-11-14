@@ -388,7 +388,7 @@ final class StarsPanel extends JPanel
 		List<StarsModel.Site> sites = model.sites();
 		long elapsed = model.elapsed();
 		int stars = 0, locations = 0;
-		boolean loggedOut = !service.eligible() && active;
+		boolean loggedOut = !service.eligible() && service.known() && active;
 		boolean empty = model.feed != null && model.feed.rows.isEmpty();
 		StringBuilder signature = new StringBuilder().append(model.feed != null).append(loggedOut).append(empty).append(service.message)
 			.append(model.playerGame).append(model.playerWorld);
