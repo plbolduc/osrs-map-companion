@@ -202,6 +202,27 @@ public class SearchClientTest
 		assertEquals("", search.result().query);
 	}
 
+	/**
+	 * Typing over a selection empties the box for a moment, which cancels the search that is out.
+	 * OkHttp reports that cancel as a failure, and it is no reason to wait ten seconds, silently,
+	 * before the next search: nobody refused anything.
+	 */
+	@Test
+	public void aSearchClearedAwayLeavesNoWaitBehind() throws Exception
+	{
+		CountDownLatch gate = new CountDownLatch(1);
+		SearchClient search = client(200, BANKS, null, gate);
+		search.enter("lumb");
+		until(() -> sent.size() == 1);
+		search.typed("");
+		gate.countDown();
+		Thread.sleep(300);
+		assertEquals("no wait was kept", 0L, search.waitMs(System.currentTimeMillis()));
+		search.typed("varrock");
+		assertEquals(1, waiting.size());
+		assertEquals("the next search goes after the usual pause", SearchClient.DEBOUNCE_MS, (long) waiting.get(0)[1]);
+	}
+
 	@Test
 	public void oneSearchAtATimeAndTheOldAnswerIsDroppedWhenTheBoxMovedOn() throws Exception
 	{
