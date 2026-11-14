@@ -202,7 +202,9 @@ How Drop luck counts:
   elite clue, the coagulated venom or a Konar key is a destroyed corpse and not a kill, and a Royal
   Titan's holding only desiccated pages and clues is "Take pages" and not one either. A row's
   `fight` names the monsters whose damage pools with its own, so both titans are one fight. None of this
-  sends anything new: the counts travel as every rated row's do.
+  sends anything new: the counts travel as every rated row's do, except that a pet row goes only
+  with *Include pet rewards* under *Notable drops and levels*. Without it every pet row stays home,
+  had or not, and the monster's list says it is not whole, so the map abstains on the pet alone.
 
 ## Validation and limits
 
