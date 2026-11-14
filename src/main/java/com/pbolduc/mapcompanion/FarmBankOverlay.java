@@ -30,6 +30,7 @@ import java.awt.Rectangle;
 import java.util.*;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import net.runelite.api.ItemComposition;
 import net.runelite.api.widgets.WidgetItem;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.overlay.WidgetItemOverlay;
@@ -80,7 +81,7 @@ class FarmBankOverlay extends WidgetItemOverlay
 		Boolean hit = marked.get(itemId);
 		if (hit == null)
 		{
-			hit = grants(wanted, itemId, items.getItemComposition(itemId).getName());
+			hit = marks(wanted, itemId, items.getItemComposition(itemId));
 			marked.put(itemId, hit);
 		}
 		if (hit)
@@ -112,6 +113,12 @@ class FarmBankOverlay extends WidgetItemOverlay
 			}
 		}
 		return tests;
+	}
+
+	/** A bank placeholder carries its item's name, and is no teleport to take out. */
+	static boolean marks(List<ItemTest> tests, int itemId, ItemComposition item)
+	{
+		return item.getPlaceholderTemplateId() == -1 && grants(tests, itemId, item.getName());
 	}
 
 	static boolean grants(List<ItemTest> tests, int itemId, @Nullable String name)
