@@ -591,9 +591,12 @@ final class DropLuckPanel extends JPanel
 		Luck dry = DropLuckView.dryNow(standing);
 		/*
 		 * The chip is about one drop, so that drop is outlined in the chip's colour and always among
-		 * the six drawn: a chip beside six sprites said "Dry" without saying of what.
+		 * those drawn: a chip beside six sprites said "Dry" without saying of what. Five beside a
+		 * chip, since the row is one line and its flow puts what passes the column's edge on a second
+		 * line the row has no height for: six sprites leave "Very dry now" no room in 205px.
 		 */
-		List<Drop> drawn = new ArrayList<>(monster.drops.subList(0, Math.min(6, monster.drops.size())));
+		int room = dry == Luck.NONE ? 6 : 5;
+		List<Drop> drawn = new ArrayList<>(monster.drops.subList(0, Math.min(room, monster.drops.size())));
 		if (dry != Luck.NONE && !drawn.contains(standing.drop))
 		{
 			drawn.set(drawn.size() - 1, standing.drop);
@@ -611,6 +614,7 @@ final class DropLuckPanel extends JPanel
 		if (dry != Luck.NONE)
 		{
 			JLabel chip = chip(dry);
+			chip.setText(DropLuckView.nowWord(dry));
 			chip.setToolTipText(DropLuckView.standingNote(standing, monster));
 			icons.add(chip);
 		}

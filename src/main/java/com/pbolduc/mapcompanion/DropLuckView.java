@@ -444,7 +444,20 @@ final class DropLuckView
 		return standing == null ? 0 : standing.drierThan;
 	}
 
-	/** The list row's chip: "Dry" or "Very dry" when the monster's standing earns it. */
+	/**
+	 * The list chip's words, which say "now" where the card's chips do not: the website's
+	 * {@code NOW_WORD}. The card's chips are overall luck and the list's is the current wait, in the
+	 * same colours, so four whips in a thousand kills read "Lucky" on the card and, 700 kills into
+	 * the next, "Dry" on the list: both true, and with the difference only in a tooltip, the two
+	 * looked to disagree. Null where {@link #dryNow} draws no chip.
+	 */
+	@Nullable
+	static String nowWord(DropOdds.Luck luck)
+	{
+		return luck == DropOdds.Luck.VERY_DRY ? "Very dry now" : luck == DropOdds.Luck.DRY ? "Dry now" : null;
+	}
+
+	/** The list row's chip, worded by {@link #nowWord}: dry or very dry when the monster's standing earns it. */
 	static DropOdds.Luck dryNow(@Nullable Standing standing)
 	{
 		int shown = standing == null ? 0 : DropOdds.shown(standing.drierThan);

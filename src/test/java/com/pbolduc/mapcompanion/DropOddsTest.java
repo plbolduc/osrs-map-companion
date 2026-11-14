@@ -284,6 +284,7 @@ public class DropOddsTest
 		assertEquals("Primordial crystal", cerberus.drop.item);
 		assertEquals("97", DropOdds.percent(cerberus.drierThan));
 		assertEquals(DropOdds.Luck.VERY_DRY, DropLuckView.dryNow(cerberus));
+		assertEquals("Very dry now", DropLuckView.nowWord(DropLuckView.dryNow(cerberus)));
 		assertEquals("Primordial crystal: 2,600 kills since the last", DropLuckView.standingNote(cerberus, CERBERUS));
 	}
 
@@ -304,6 +305,8 @@ public class DropOddsTest
 		assertEquals("Abyssal whip", demon.drop.item);
 		assertEquals("75", DropOdds.percent(demon.drierThan));
 		assertEquals(DropOdds.Luck.DRY, DropLuckView.dryNow(demon));
+		/* The list's word is about the wait, since the card's chip beside the same whip is overall luck. */
+		assertEquals("Dry now", DropLuckView.nowWord(DropLuckView.dryNow(demon)));
 	}
 
 	/** Pinned is chosen before looking, so it is judged on its own wait and nothing else is. */
