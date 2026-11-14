@@ -54,14 +54,16 @@ Extra region/floor/boundary tests check slot reuse; the new readers still need a
 visit as listed in [Live checks](live-checks.md#farming-procedure).
 
 OSRS Map Companion shares selected character state with a private group on osrs-map.com, supports
-map destinations and shooting stars, and keeps local drop-luck counts. It reads only the local
-character's game state. Other members' positions come from their consenting installations via the map.
+map destinations and shooting stars, and keeps local drop-luck counts. It reads the local
+character's game state; of other players it reads only how much their hits did to a monster the
+player is fighting too, for Drop luck's share of a kill. Other members' positions come from their
+consenting installations via the map.
 
 Three things reviewers ask about first:
 
-- **Other players' locations.** The plugin reads no other player from the game. A friend's dot on
-  the world map is that friend's own installation sharing their own position, opted into per
-  category, to a group both joined with a code; the same consent shape as RuneLite's Party.
+- **Other players' locations.** The plugin reads no other player's position from the game. A
+  friend's dot on the world map is that friend's own installation sharing their own position, opted
+  into per category, to a group both joined with a code; the same consent shape as RuneLite's Party.
   Nothing is crowdsourced and no position is published outside the group. The same answers the
   rule against exposing player information over HTTP: only the logged-in character's own state is
   sent, each field only once the player has chosen it, and only to the group the player joined.
@@ -278,20 +280,23 @@ answering a reviewer. Since 1.9.0, for 1.10.0, in review in
   these drops too.
 - **Pets, sets, team bosses and awakened bosses:** the table grows on to 542 rates across 198
   monsters. A pet is counted from the game's own pet line in chat, against the kill beside it; a
-  set that drops a piece at a time counts as one drop. Callisto, Venenatis, Vet'ion, the Hueycoatl
-  and Nex count a kill other players hit as the player's share of it: their own damage over
-  everyone's, from `HitsplatApplied` (`isMine()`, `isOthers()` and the amount, kept per fight for a
-  minute), with Nex's MVP read from the game's "You were the MVP for this fight". The Nightmare,
-  Scurrius and Zalcano count only kills no other player hit. A Yama kill after an item named
+  set that drops a piece at a time counts as one drop. Callisto, Venenatis, Vet'ion, the Hueycoatl,
+  Nex, Yama and the Royal Titans' crowns count a kill other players hit as the player's share of
+  it: their own damage over everyone's, from `HitsplatApplied` on NPCs (`isMine()`, `isOthers()`
+  and the amount, with no player's name, kept per fight until a minute passes with no hit; Nex's
+  minions and both titans pool into one fight), with Nex's MVP read from the game's "You were the
+  MVP for this fight". Their pets, but for Nexling and Huberte, count only kills nobody else hit,
+  as the Nightmare, Scurrius and Zalcano do for every drop. A Yama kill after an item named
   "Contract of …" left the inventory is not counted; only the inventory's item names and counts are
   read, on the client, for that. The Barrows chest and the Doom of Mokhaiotl's claimed run are read
   from RuneLite's own `LootReceived` events, the chest only with the six `BARROWS_KILLED_*` varbits
   set and the run at the delve the event carries. The lizardman shaman counts none
   in an instance; Araxxor counts no destroyed corpse; and the Desert Treasure II bosses are told
-  from their awakened fights by the loot NPC's combat level. All of it is read from events the
-  plugin already receives or from the loot itself. Each drop's report gains four fields — how many
-  of its kills were shared, and the summed share, since its last drop and since watching began —
-  disclosed under *Loot and milestones*, and sent only where there were any.
+  from their awakened fights by the loot NPC's combat level. `HitsplatApplied` is the one new
+  subscription; the rest is read from events the plugin already receives or from the loot itself.
+  Each drop's report gains four fields — how many of its kills were shared, and the summed share,
+  since its last drop and since watching began — disclosed under *Loot and milestones*, and sent
+  only where there were any.
 - **A fairer Dry in All monsters:** a monster's chip and its place under *Driest* weigh its driest
   wait against how many of its drops could be that dry, and the drop the chip is about is outlined.
   Arithmetic on local counts; nothing is sent.
@@ -308,7 +313,8 @@ answering a reviewer. Since 1.9.0, for 1.10.0, in review in
 - **One press on a star:** a press on a star in the Stars tab pins it and then asks the way, where it
   opened Route and Pin to choose between. The request is Route's own, listed under Network requests,
   with the tile the player stands on as Route sends it: sent once, 0.7 seconds after the press if
-  the star is still pinned, through the gate every route shares, and not repeated after a refusal.
+  the star is still pinned (pressed during a hop or a loading screen, once the player is on a
+  world), through the gate every route shares, and not repeated after a refusal.
   The star list's own request and its once-a-minute schedule are unchanged.
 - **A farm run keeps Route's wait on a busy map:** after a 429 or 503 a run waits the `Retry-After`
   it names, held between five seconds and five minutes, as Route does, where it waited at least
@@ -325,8 +331,9 @@ answering a reviewer. Since 1.9.0, for 1.10.0, in review in
 - **One reply handler and one way to end a session:** internal; every request, header and wait is
   the one it was.
 
-No setting or warning is added. The one new field, `face`, arrives in a reply, and the one new send
-is the route request a star press makes, which is Route's own.
+No setting or warning is added. One new field, `face`, arrives in a reply; four optional fields join
+each drop's report under *Loot and milestones*; and the one new request is the route request a
+star press makes, which is Route's own.
 
 ## Before submission
 
