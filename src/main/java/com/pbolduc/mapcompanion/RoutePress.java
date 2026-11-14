@@ -81,7 +81,8 @@ import okhttp3.Response;
  * it is asked a moment later ({@link #follow}). It belongs to that pin ({@link Target#pinned}): it
  * is sent, and its reply shown or said, only while the pin is still the destination, so a player
  * who has pressed on to another star is not brought back to this one. And nobody pressed Route for
- * it, so where it cannot be sent it says nothing.
+ * it, so where it cannot be sent it says nothing. The same holds the other way: a pin made while
+ * any press is out is the later choice, and that press's answer is dropped rather than shown over it.
  *
  * <p><b>Threads.</b> The press is Swing's; the tile and the credentials are read on the client
  * thread; the call is OkHttp's. What a press said is one immutable value behind a volatile field,
@@ -311,7 +312,8 @@ final class RoutePress
 	/** The press. Any thread; the work happens on the client thread and OkHttp's. */
 	void press(Target target)
 	{
-		clientThread.invokeLater(() -> start(target, false));
+		long pinned = destinations.pins();
+		clientThread.invokeLater(() -> start(target, false, pinned));
 	}
 
 	/**
@@ -327,6 +329,7 @@ final class RoutePress
 	void follow(Target target, Runnable notYet)
 	{
 		said = new Said(target.source, true, null, null, destinations.generation());
+		long pinned = destinations.pins();
 		clientThread.invokeLater(() ->
 		{
 			if (StarsClient.betweenWorlds(client.getGameState()))
@@ -334,14 +337,19 @@ final class RoutePress
 				SwingUtilities.invokeLater(notYet);
 				return;
 			}
-			start(target, true);
+			start(target, true, pinned);
 		});
 	}
 
-	/** Whether the pin a question is the way to has been replaced, unpinned or cleared since. */
-	private boolean moved(Target target)
+	/**
+	 * Whether the pin a question is the way to has been replaced, unpinned or cleared since, or, for
+	 * any question, whether something was pinned after it was asked ({@link DestinationState#pins}
+	 * was {@code pinned} then): a star pressed while a search's Route is out is the later press.
+	 */
+	private boolean moved(Target target, long pinned)
 	{
-		return target.pin != null && !DestinationRoute.keyOf(target.pin).equals(DestinationRoute.keyOf(destinations.getDestination()));
+		return destinations.pins() != pinned
+			|| target.pin != null && !DestinationRoute.keyOf(target.pin).equals(DestinationRoute.keyOf(destinations.getDestination()));
 	}
 
 	/** Reroute, pressed under the destination's steps. Any thread, as {@link #press} is. */
@@ -416,8 +424,9 @@ final class RoutePress
 	 * Client thread: the credentials, the tile, then the call.
 	 *
 	 * @param quiet nobody pressed Route, so one that is not sent says nothing
+	 * @param pinned {@link DestinationState#pins} when it was asked
 	 */
-	private void start(Target target, boolean quiet)
+	private void start(Target target, boolean quiet, long pinned)
 	{
 		long asked = destinations.generation();
 		Consumer<String> refuse = why -> said = new Said(target.source, false, quiet ? null : why, null, asked);
@@ -429,14 +438,14 @@ final class RoutePress
 		/* Null inside a raid's rooms: the map then ranks from the shared position, or from nowhere. */
 		WorldPoint from = DestinationRoute.standing(client);
 		/* A pin since replaced has no question left to ask, and that is no refusal to say. */
-		String refused = moved(target) ? null : route.beginPress(System.currentTimeMillis());
-		if (refused != null || moved(target))
+		String refused = moved(target, pinned) ? null : route.beginPress(System.currentTimeMillis());
+		if (refused != null || moved(target, pinned))
 		{
 			refuse.accept(refused);
 			return;
 		}
 		said = new Said(target.source, true, null, null, asked);
-		send(signed, target, from, pressed(asked, target));
+		send(signed, target, from, pressed(asked, pinned, target));
 	}
 
 	/** Client thread: as a press, but from the tile the player stands on or not at all, and about the destination shown. */
@@ -524,10 +533,10 @@ final class RoutePress
 	/** Read a press's reply into a destination or a sentence. Package-private for its test; OkHttp's thread. */
 	void handle(long asked, Target target, Response response)
 	{
-		read(response, pressed(asked, target));
+		read(response, pressed(asked, destinations.pins(), target));
 	}
 
-	private Landing pressed(long asked, Target target)
+	private Landing pressed(long asked, long pinned, Target target)
 	{
 		return (answer, why, next) ->
 		{
@@ -540,10 +549,10 @@ final class RoutePress
 			 */
 			synchronized (destinations)
 			{
-				if (destination == null || moved(target))
+				if (destination == null || moved(target, pinned))
 				{
 					/* A reply about a pin since replaced is about a place nobody is going to, and says nothing. */
-					said = new Said(target.source, false, moved(target) ? null : why != null ? why : NO_WAY, null, asked);
+					said = new Said(target.source, false, moved(target, pinned) ? null : why != null ? why : NO_WAY, null, asked);
 					return;
 				}
 				if (asked != destinations.generation())

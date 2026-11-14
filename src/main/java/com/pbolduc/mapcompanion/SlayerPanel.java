@@ -492,7 +492,7 @@ final class SlayerPanel extends JPanel
 		{
 			RelayResponse.Destination next = new RelayResponse.Destination();
 			next.x = tile.x; next.y = tile.y; next.plane = tile.plane; next.name = name;
-			destinations.selectLocal(next); clientThread.invokeLater(marker::sync);
+			destinations.pin(next); clientThread.invokeLater(marker::sync);
 		});
 		pinButtons.add(pin);
 		actions.add(pin);

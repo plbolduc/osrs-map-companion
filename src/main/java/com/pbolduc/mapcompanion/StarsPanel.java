@@ -793,7 +793,7 @@ final class StarsPanel extends JPanel
 		 * printed from its own field, and this tab keeps the star's line live.
 		 */
 		RelayResponse.Destination pin = RoutePress.destination(target(star), null, null);
-		destinations.selectLocal(pin);
+		destinations.pin(pin);
 		clientThread.invokeLater(marker::sync);
 		service.model.selected = null;
 		ask(star, pin);

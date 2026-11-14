@@ -683,6 +683,71 @@ public class StarsPressTest
 		});
 	}
 
+	/**
+	 * A Route press anywhere else, a search result's, say, still out when the player presses a star: the
+	 * star is the later choice, and the answer about the search result does not replace it.
+	 */
+	@Test
+	public void anEarlierRoutePressDoesNotReplaceAStarPressedWhileItIsOut() throws Exception
+	{
+		Tab tab = tab();
+		tab.hold = new CountDownLatch(1);
+		edt(() -> tab.press.press(RoutePress.Target.tile("search", new WorldPoint(2974, 3241, 0), "Rimmington", null, null)));
+		until(() -> tab.sent.size() == 1);
+		RelayResponse.Destination[] crafting = new RelayResponse.Destination[1];
+		edt(() ->
+		{
+			tab.press(CRAFTING);
+			crafting[0] = tab.destinations.getDestination();
+		});
+		tab.hold.countDown();
+		tab.hold = null;
+		until(() ->
+		{
+			RoutePress.Said said = tab.press.last();
+			return said != null && !said.planning;
+		});
+		edt(() ->
+		{
+			tab.stars.refresh();
+			assertSame("Crafting guild is still the pin", crafting[0], tab.destinations.getDestination());
+			assertFalse("the search result's way was not adopted", tab.route.hasRoute());
+			assertNull("and nothing is said of it", tab.press.last().message);
+			assertEquals("Crafting guild's own question still waits", 1, tab.dwells.size());
+		});
+	}
+
+	/**
+	 * A farm run moving on to its next stop is not a press. A Route press still out then is the
+	 * player's last choice, and its answer is shown rather than dropped without a word.
+	 */
+	@Test
+	public void aFarmRunMovingOnDoesNotDropARoutePressStillOut() throws Exception
+	{
+		Tab tab = tab();
+		tab.hold = new CountDownLatch(1);
+		edt(() -> tab.press.press(RoutePress.Target.tile("search", new WorldPoint(2974, 3241, 0), "Rimmington", null, null)));
+		until(() -> tab.sent.size() == 1);
+		RelayResponse.Destination stop = new RelayResponse.Destination();
+		stop.x = 3058;
+		stop.y = 3311;
+		stop.plane = 0;
+		stop.name = "Falador allotment";
+		tab.destinations.selectLocal(stop);
+		tab.hold.countDown();
+		tab.hold = null;
+		until(() ->
+		{
+			RoutePress.Said said = tab.press.last();
+			return said != null && !said.planning;
+		});
+		edt(() ->
+		{
+			assertNotSame("the press's answer replaced the stop", stop, tab.destinations.getDestination());
+			assertTrue("and its way is drawn", tab.route.hasRoute());
+		});
+	}
+
 	/** A site folded over several worlds: the card pins its first world, and a row under the fold pins its own. */
 	@Test
 	public void aWorldsRowUnderAFoldPinsThatWorld() throws Exception
