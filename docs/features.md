@@ -178,5 +178,7 @@ at a time — the brimstone ring, the noxious halberd — is one row, whichever 
 fought in groups counts only the kills nobody else hit, a destroyed Araxxor corpse is not a kill,
 and a lizardman shaman in the Chambers of Xeric is not counted. An awakened Desert Treasure II
 boss is its own monster, at three times the unique odds, and a fight in the quest is not counted.
+A vestige counts each of the three steps the game shows — a gold ring, two, then the vestige — as
+one drop of its progress.
 Optional chat lines report your luck when a drop lands. Drop luck also works without connecting
 to the website.

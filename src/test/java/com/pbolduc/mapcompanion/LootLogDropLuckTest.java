@@ -58,6 +58,7 @@ public class LootLogDropLuckTest
 	private static final int VENOM = 90_004;
 	private static final int SHARK = 90_005;
 	private static final int AXE_HEAD = 90_006;
+	private static final int GOLD_RING = 90_007;
 
 	private final HarnessGame game = new HarnessGame();
 	private final HarnessStore store = new HarnessStore();
@@ -104,6 +105,7 @@ public class LootLogDropLuckTest
 		game.nameItem(VENOM, "Coagulated venom");
 		game.nameItem(SHARK, "Raw shark");
 		game.nameItem(AXE_HEAD, "Executioner's axe head");
+		game.nameItem(GOLD_RING, "Gold ring");
 		log.clock(() -> now);
 	}
 
@@ -144,17 +146,17 @@ public class LootLogDropLuckTest
 	}
 
 	/**
-	 * Zalcano has no rate on file, because its chance moves with a player's points; a collection item it drops is
-	 * counted. These tests named the Corporeal Beast until its sigils got rates.
+	 * Yama has no rate on file, because a contract fight hands out its uniques; a collection item it
+	 * drops is counted. These tests named the Corporeal Beast, then Nex and Zalcano, until each got rates.
 	 */
 	@Test
 	public void aCollectionItemFromAnUnratedMonsterIsKeptWithItsWait()
 	{
-		kill("Zalcano", BONES);
-		kill("Zalcano", BONES);
-		kill("Zalcano", VISAGE);
-		kill("Zalcano", BONES);
-		LootLog.Drop visage = monster("Zalcano").drops.get(0);
+		kill("Yama", BONES);
+		kill("Yama", BONES);
+		kill("Yama", VISAGE);
+		kill("Yama", BONES);
+		LootLog.Drop visage = monster("Yama").drops.get(0);
 		assertEquals("Draconic visage", visage.item);
 		assertEquals(1, visage.obtained);
 		assertEquals(1, visage.sinceLast);
@@ -165,8 +167,8 @@ public class LootLogDropLuckTest
 	@Test
 	public void aPetIsNotCountedBecauseItsArrivalIsNotReliablySeen()
 	{
-		kill("Zalcano", VORKI);
-		assertTrue(monster("Zalcano").drops.isEmpty());
+		kill("Yama", VORKI);
+		assertTrue(monster("Yama").drops.isEmpty());
 	}
 
 	/** A kill the vocabulary could not judge moves the window rather than inventing a drought. */
@@ -174,11 +176,11 @@ public class LootLogDropLuckTest
 	public void killsTheCatalogCouldNotJudgeAreNotWatchedForCollectionItems()
 	{
 		catalogReady = false;
-		kill("Zalcano", VISAGE);
-		assertTrue("not judged, so not counted", monster("Zalcano").drops.isEmpty());
+		kill("Yama", VISAGE);
+		assertTrue("not judged, so not counted", monster("Yama").drops.isEmpty());
 		catalogReady = true;
-		kill("Zalcano", VISAGE);
-		LootLog.Drop visage = monster("Zalcano").drops.get(0);
+		kill("Yama", VISAGE);
+		LootLog.Drop visage = monster("Yama").drops.get(0);
 		assertEquals(1, visage.obtained);
 	}
 
@@ -404,7 +406,7 @@ public class LootLogDropLuckTest
 		assertEquals("a wait between two drops is a whole wait, and is said plainly",
 			"Abyssal whip after 780 kills — drier than 78% of players.", DropLuckView.chatLine(second.get(0)));
 
-		List<LootLog.Notable> visage = log.record(new ServerNpcLoot(game.npc("Zalcano"),
+		List<LootLog.Notable> visage = log.record(new ServerNpcLoot(game.npc("Yama"),
 			Collections.singletonList(new ItemStack(VISAGE, 1))));
 		assertNull("the game prints its own line for a collection item", DropLuckView.chatLine(visage.get(0)));
 	}
@@ -552,6 +554,17 @@ public class LootLogDropLuckTest
 		LootLog.Drop axe = drop("Vardorvis (awakened)", "Executioner's axe head");
 		assertEquals(1, axe.obtained);
 		assertEquals(1088 / 3.0, axe.oneIn, 1e-9);
+	}
+
+	/** A vestige is three steps the game shows, a gold ring first; each step is one drop of its progress. */
+	@Test
+	public void aGoldRingIsAStepOfTheVestige()
+	{
+		log.record(new ServerNpcLoot(RewardTestClient.npc("Vardorvis", 784), Arrays.asList(new ItemStack(GOLD_RING, 1))));
+		log.record(new ServerNpcLoot(RewardTestClient.npc("Vardorvis", 784), Arrays.asList(new ItemStack(GOLD_RING, 2))));
+		LootLog.Drop progress = drop("Vardorvis", "Ultor vestige progress");
+		assertEquals(2, progress.obtained);
+		assertEquals(1088 / 3.0, progress.oneIn, 1e-9);
 	}
 
 	/** Outside an instance the canyon shaman is counted, warhammer and all. */

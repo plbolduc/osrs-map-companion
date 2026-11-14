@@ -319,7 +319,7 @@ settings for the plugin.
 
 - Drop luck counts the kills the plugin has seen on normal members worlds, not your lifetime kill
   count, and only drops with a sourced rate get odds. At Callisto, Venenatis, Vet'ion, the
-  Nightmare, the Hueycoatl, Scurrius and Nex it counts only kills nobody else hit, at Araxxor only
+  Nightmare, the Hueycoatl, Scurrius, Nex and Zalcano it counts only kills nobody else hit, at Araxxor only
   harvested corpses, and the Desert Treasure II bosses outside the quest. Activity rewards need RuneLite's
   **Loot Tracker** plugin. **Forget kill log** clears the current character's counts.
 - Birdhouses need RuneLite's **Time Tracking** plugin. Farm timers are estimates; disease and later

@@ -193,6 +193,10 @@ often. A clean run is now 443 tests with no failures or skips.
 - [ ] Drop luck at a Desert Treasure II boss: an ordinary kill counts under its name and an awakened
       one under *(awakened)*. Both are told apart by `getCombatLevel()` on the loot's NPC (784 and
       1136 for Vardorvis, from the wiki's infobox); no build has read an awakened one yet.
+- [ ] Drop luck's vestige progress: a gold ring from a Desert Treasure II boss counts one step of
+      its vestige's progress, as two gold rings and the vestige itself do.
+- [ ] Drop luck at Zalcano: a kill alone counts, and its loot arrives as the NPC's loot (no build
+      has seen Zalcano's yet); a kill where another player hit it does not.
 - [ ] Paste a full RuneLite code (with its suffix) into a fresh install; the first post is
       accepted and the map links the dot to the browser without a second paste.
 
