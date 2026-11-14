@@ -356,6 +356,10 @@ public class WireContractTest
 		whip.trackedSinceKill = 3;
 		whip.boostedSinceLast = 12;
 		whip.boostedWatched = 40;
+		whip.sharedSinceLast = 4;
+		whip.shareSinceLast = 1.5;
+		whip.sharedWatched = 10;
+		whip.shareWatched = 4.25;
 		CompanionSnapshot.Npc demon = new CompanionSnapshot.Npc();
 		demon.npc = "Abyssal demon";
 		demon.kills = 120;

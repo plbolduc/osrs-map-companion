@@ -513,28 +513,73 @@ public class LootLogDropLuckTest
 	}
 
 	/**
-	 * Callisto's uniques are shared by damage in a group. A kill where another player's hit landed
-	 * in the last minute is not the player's alone, and is not counted; one alone is.
+	 * Callisto hands its unique to one player by damage, so a kill others shared is the player's
+	 * share of one: 30 of 100 damage is 0.3 of a kill at the claws' rate. Its pet is counted alone,
+	 * and a shared kill leaves it where it was. A monster priced per kill pays no attention.
 	 */
 	@Test
-	public void aTeamBossIsCountedOnlyWhenKilledAlone()
+	public void aTeamBossCountsASharedKillAsTheShareOfIt()
 	{
-		log.onHitsplat("Callisto", true, game.client().getTickCount());
+		int tick = game.client().getTickCount();
+		log.onHitsplat("Callisto", true, false, 30, tick);
+		log.onHitsplat("Callisto", false, true, 70, tick);
 		kill("Callisto", BONES);
-		assertNull("shared, so not counted", DropLuckView.find(log.monsters(), "Callisto"));
-		log.onHitsplat("Callisto", true, game.client().getTickCount());
+		assertEquals(1, monster("Callisto").kills);
+
+		assertFalse(monster("Callisto").solo);
+		LootLog.Drop claws = drop("Callisto", "Claws of Callisto");
+		assertEquals(1, claws.sharedWatched);
+		assertEquals(0.3, claws.shareWatched, 1e-9);
+		assertEquals(0, claws.watchedKills().ordinary);
+		LootLog.Drop cub = drop("Callisto", "Callisto cub");
+		assertEquals("a pet counted alone takes no share", 0, cub.shareWatched, 1e-9);
+		kill("Callisto", BONES);
+		assertEquals("a kill with nobody else's hit is a whole one", 1, drop("Callisto", "Claws of Callisto").watchedKills().ordinary);
+		log.onHitsplat("Abyssal demon", false, true, 50, game.client().getTickCount());
+		kill("Abyssal demon", BONES);
+		assertEquals("another player's hit means nothing on a monster priced per kill", 1, monster("Abyssal demon").kills);
+	}
+
+	/** Scurrius's pet is the top damage's alone, so a kill another player hit is not counted at all. */
+	@Test
+	public void aBossPricedAloneSkipsAKillOthersHit()
+	{
+		log.onHitsplat("Scurrius", false, true, 10, game.client().getTickCount());
+		kill("Scurrius", BONES);
+		assertNull("shared, so not counted", DropLuckView.find(log.monsters(), "Scurrius"));
 		for (int i = 0; i <= LootLog.SHARED_TICKS; i++)
 		{
 			game.tick();
 		}
-		kill("Callisto", BONES);
-		kill("Callisto", BONES);
-		assertEquals(2, monster("Callisto").kills);
-		assertTrue(monster("Callisto").solo);
-		assertTrue(DropLuckView.context(monster("Callisto"), false, null, now).endsWith("2 solo kills"));
-		log.onHitsplat("Abyssal demon", true, game.client().getTickCount());
-		kill("Abyssal demon", BONES);
-		assertEquals("another player's hit means nothing on a monster priced per kill", 1, monster("Abyssal demon").kills);
+		kill("Scurrius", BONES);
+		assertEquals("a fight goes stale after a minute without a hit", 1, monster("Scurrius").kills);
+		assertTrue(monster("Scurrius").solo);
+		assertTrue(DropLuckView.context(monster("Scurrius"), false, null, now).endsWith("1 solo kill"));
+	}
+
+	/**
+	 * Nex's uniques are priced for a player alone, who is her MVP. A shared kill counts its share,
+	 * and loses the MVP's 10% where the game did not name the player MVP — before the loot or just
+	 * after it. Her minions' damage is hers.
+	 */
+	@Test
+	public void nexWeighsAShareByTheMvpLine()
+	{
+		int tick = game.client().getTickCount();
+		log.onHitsplat("Nex", true, false, 40, tick);
+		log.onHitsplat("Fumus", true, false, 10, tick);
+		log.onHitsplat("Nex", false, true, 50, tick);
+		kill("Nex", BONES);
+		assertEquals(0.5 / 1.1, drop("Nex", "Ancient hilt").shareWatched, 1e-9);
+		assertEquals("the pet holds no MVP bonus", 0.5, drop("Nex", "Nexling").shareWatched, 1e-9);
+		log.onMvpMessage(game.client().getTickCount());
+		assertEquals("named MVP just after the loot", 0.5, drop("Nex", "Ancient hilt").shareWatched, 1e-9);
+		game.tick();
+		log.onMvpMessage(game.client().getTickCount());
+		log.onHitsplat("Nex", true, false, 25, game.client().getTickCount());
+		log.onHitsplat("Nex", false, true, 75, game.client().getTickCount());
+		kill("Nex", BONES);
+		assertEquals("named MVP just before it", 0.75, drop("Nex", "Ancient hilt").shareWatched, 1e-9);
 	}
 
 	/**

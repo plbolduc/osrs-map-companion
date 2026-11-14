@@ -183,7 +183,7 @@ public class DropOddsTest
 	@Test
 	public void aDiaryRateHoldsForTheRestOfASlayerTask()
 	{
-		LootLog.Drop talisman = new LootLog.Drop("Xeric's talisman (inert)", -1, 0, 50, 50, 50, 50, 250.0, 125.0, LootLog.KOUREND_EASY_DIARY);
+		LootLog.Drop talisman = new LootLog.Drop("Xeric's talisman (inert)", -1, 0, 50, 50, 50, 50, 250.0, 125.0, LootLog.KOUREND_EASY_DIARY, 0, 0, 0, 0);
 		LootLog.Monster lizardman = new LootLog.Monster("Lizardman", 50, 0, java.util.Collections.singletonList(talisman));
 		DropLuckView.Detail detail = DropLuckView.detail(lizardman, talisman, 100, true);
 		assertEquals(DropOdds.percent(DropOdds.within(125, 100)) + "% chance of one", detail.aheadValue);
@@ -205,7 +205,7 @@ public class DropOddsTest
 		{
 			int since = (int) drop[2];
 			out.add(new LootLog.Drop((String) drop[0], -1, since == kills ? 0 : 1, since, kills, 0, 0,
-				((Number) drop[1]).doubleValue(), null, null));
+				((Number) drop[1]).doubleValue(), null, null, 0, 0, 0, 0));
 		}
 		return new LootLog.Monster(npc, kills, 0, out);
 	}
@@ -278,5 +278,20 @@ public class DropOddsTest
 		assertNull("a monster with no rated drop has no standing",
 			DropLuckView.standing(new LootLog.Monster("Hill Giant", 40, 0, new ArrayList<>()), null));
 		assertEquals(DropOdds.Luck.NONE, DropLuckView.dryNow(null));
+	}
+
+	/**
+	 * A shared kill is the player's share of one: two kills at 0.5 each leave as many still waiting
+	 * as one kill alone, and expect as many drops.
+	 */
+	@Test
+	public void aSharedKillIsPricedAsTheShareOfOne()
+	{
+		DropOdds.Rate rate = DropOdds.Rate.of(100);
+		DropOdds.Kills shared = new DropOdds.Kills(3, 0, 2, 1.0);
+		assertEquals(DropOdds.stillWaiting(100, 4), DropOdds.stillWaiting(rate, shared), 1e-12);
+		assertEquals(5, shared.total());
+		assertEquals("a share is never more than its kills", 2.0, new DropOdds.Kills(0, 0, 2, 7.0).share, 0);
+		assertEquals(DropOdds.atLeast(1, 4, 0.01), DropOdds.atLeast(1, shared, 0.01, 0.01), 1e-12);
 	}
 }

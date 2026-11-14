@@ -432,6 +432,6 @@ final class DropLuckView
 			return null;
 		}
 		return drop.item + " after " + count(drop.wait) + (drop.first ? " recorded" : "") + (drop.wait == 1 ? " kill" : " kills")
-			+ " — " + DropOdds.waitComparison(new DropOdds.Kills(drop.wait - drop.waitBoosted, drop.waitBoosted), drop.rate()) + ".";
+			+ " — " + DropOdds.waitComparison(drop.waitKills(), drop.rate()) + ".";
 	}
 }

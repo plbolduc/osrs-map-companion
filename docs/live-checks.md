@@ -182,8 +182,13 @@ often. A clean run is now 443 tests with no failures or skips.
       row counts one, against that kill. The game's line and the loot come within a tick of each
       other in the harness; until a real one is seen, which comes first is a guess.
 - [ ] Drop luck's team bosses: kill Callisto with another player hitting it, then alone. The
-      shared kill is not counted and the solo one is, and the card says "solo kills". Other
-      players' hitsplats are read as `isOthers()`; no build has seen one on a boss yet.
+      shared kill counts as your share of the damage and the solo one as a whole kill. Your hits
+      are read as `isMine()` and other players' as `isOthers()`, amounts and all; no build has seen
+      a shared boss yet, nor whether any of the other players' hits go unseen.
+- [ ] Drop luck at Nex in a team: the kill counts your share, damage to Fumus, Umbra, Cruor, Glacies
+      and the Blood Reavers included, and "You were the MVP for this fight" restores the 10% bonus
+      whether it comes before the loot or just after.
+- [ ] Drop luck at Scurrius with another player: the shared kill is not counted at all.
 - [ ] Drop luck at Araxxor: destroy a corpse, then harvest one. The destroyed kill is not counted;
       the harvested one is, and a noxious piece counts under *Noxious halberd piece*.
 - [ ] Drop luck at the Alchemical Hydra: a ring piece counts under *Brimstone ring piece*, drawn

@@ -413,6 +413,15 @@ public class CompanionSnapshot
 		 */
 		public Integer boostedSinceLast;
 		public Integer boostedWatched;
+		/**
+		 * Of the same two windows, the kills shared with other players and the player's share of
+		 * them, to the thousandth. Sent only where there were any; absent means every kill was the
+		 * player's own, which is what an older plugin's report always meant.
+		 */
+		public Integer sharedSinceLast;
+		public Double shareSinceLast;
+		public Integer sharedWatched;
+		public Double shareWatched;
 	}
 
 	/**

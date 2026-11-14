@@ -255,7 +255,11 @@
             "killsAtLast": 100,
             "trackedSinceKill": 3,
             "boostedSinceLast": 12,
-            "boostedWatched": 40
+            "boostedWatched": 40,
+            "sharedSinceLast": 4,
+            "shareSinceLast": 1.5,
+            "sharedWatched": 10,
+            "shareWatched": 4.25
           }
         ],
         "dropsComplete": true

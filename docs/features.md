@@ -175,7 +175,9 @@ There, a **Dry** chip is about the drop outlined in its colour, and a monster wi
 needs a longer wait to earn one. Pin a drop and its monster is judged on that drop alone.
 A pet counts from the game's own message, against the kill it came with. A set that falls a piece
 at a time — the brimstone ring, the noxious halberd — is one row, whichever piece fell. A boss
-fought in groups counts only the kills nobody else hit, a destroyed Araxxor corpse is not a kill,
+that hands its drops out by damage — Callisto, Venenatis, Vet'ion, the Hueycoatl, Nex — counts a
+kill shared with others as your share of it, your damage over everyone's, and Nex's MVP keeps her
+10% bonus; other group bosses count only the kills nobody else hit. A destroyed Araxxor corpse is not a kill,
 and a lizardman shaman in the Chambers of Xeric is not counted. An awakened Desert Treasure II
 boss is its own monster, at three times the unique odds, and a fight in the quest is not counted.
 A vestige counts each of the three steps the game shows — a gold ring, two, then the vestige — as

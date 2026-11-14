@@ -602,6 +602,10 @@ public class MapCompanionPlugin extends Plugin implements CompanionLoop.Surface
 	{
 		loop.onChatMessage(event);
 		String message = event.getMessage();
+		if (event.getType() == ChatMessageType.GAMEMESSAGE && message != null && message.contains("You were the MVP for this fight"))
+		{
+			loop.lootLog.onMvpMessage(client.getTickCount());
+		}
 		if (event.getType() == ChatMessageType.GAMEMESSAGE && RewardObserver.isPetMessage(message))
 		{
 			List<LootLog.Notable> pets = loop.lootLog.onPetMessage(client.getTickCount());
@@ -614,15 +618,17 @@ public class MapCompanionPlugin extends Plugin implements CompanionLoop.Surface
 	}
 
 	/**
-	 * Another player's hit on a monster makes its kill shared, which a team boss's solo odds do not
-	 * describe; see {@link LootLog#onHitsplat}. Only the name and whose hit it was are read.
+	 * Whose hits land on a monster, and how hard: a team boss hands its drop out by damage, so a kill
+	 * others shared is the player's share of one; see {@link LootLog#onHitsplat}. Only the monster's
+	 * name, whose hit it was and its amount are read.
 	 */
 	@Subscribe
 	public void onHitsplatApplied(HitsplatApplied event)
 	{
-		if (event.getActor() instanceof net.runelite.api.NPC && event.getHitsplat() != null && event.getHitsplat().isOthers())
+		if (event.getActor() instanceof net.runelite.api.NPC && event.getHitsplat() != null)
 		{
-			loop.lootLog.onHitsplat(event.getActor().getName(), true, client.getTickCount());
+			loop.lootLog.onHitsplat(event.getActor().getName(), event.getHitsplat().isMine(), event.getHitsplat().isOthers(),
+				event.getHitsplat().getAmount(), client.getTickCount());
 		}
 	}
 
