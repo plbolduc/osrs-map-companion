@@ -62,13 +62,6 @@
       "page": "Adamant dragon"
     },
     {
-      "npc": "Afflicted",
-      "item": "Zombie champion scroll",
-      "oneIn": 5000,
-      "page": "Afflicted",
-      "tertiary": true
-    },
-    {
       "npc": "Alchemical Hydra",
       "item": "Alchemical hydra heads",
       "oneIn": 256,
@@ -214,13 +207,6 @@
       "page": "Araxyte"
     },
     {
-      "npc": "Armoured zombie",
-      "item": "Zombie champion scroll",
-      "oneIn": 5000,
-      "page": "Armoured zombie (Defender of Varrock)",
-      "tertiary": true
-    },
-    {
       "npc": "Artio",
       "item": "Callisto cub",
       "oneIn": 2800,
@@ -251,13 +237,6 @@
       "item": "Voidwaker hilt",
       "oneIn": 912,
       "page": "Artio"
-    },
-    {
-      "npc": "Baby blue dragon",
-      "item": "Tooth half of key (moon key)",
-      "oneIn": 1066,
-      "page": "Baby blue dragon",
-      "tertiary": true
     },
     {
       "npc": "Balfrug Kreeyath",
@@ -718,27 +697,6 @@
       "item": "Voidwaker blade",
       "oneIn": 912,
       "page": "Calvar'ion"
-    },
-    {
-      "npc": "Cave crawler",
-      "item": "Tooth half of key (moon key)",
-      "oneIn": 1024,
-      "page": "Cave crawler",
-      "tertiary": true
-    },
-    {
-      "npc": "Cave goblin",
-      "item": "Goblin champion scroll",
-      "oneIn": 5000,
-      "page": "Cave goblin (monster)",
-      "tertiary": true
-    },
-    {
-      "npc": "Cave goblin guard",
-      "item": "Goblin champion scroll",
-      "oneIn": 5000,
-      "page": "Cave goblin guard",
-      "tertiary": true
     },
     {
       "npc": "Cave horror",
@@ -1307,13 +1265,6 @@
       "page": "Dust devil"
     },
     {
-      "npc": "Earth warrior",
-      "item": "Earth warrior champion scroll",
-      "oneIn": 5000,
-      "page": "Earth warrior",
-      "tertiary": true
-    },
-    {
       "npc": "Earthen Nagua",
       "item": "Earthbound tecpatl",
       "oneIn": 400,
@@ -1379,13 +1330,6 @@
       "npc": "Fire giant",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Fire giant",
-      "tertiary": true
-    },
-    {
-      "npc": "Fire giant",
-      "item": "Giant champion scroll",
-      "oneIn": 5000,
       "page": "Fire giant",
       "tertiary": true
     },
@@ -1583,13 +1527,6 @@
       "pet": true
     },
     {
-      "npc": "Ghoul",
-      "item": "Ghoul champion scroll",
-      "oneIn": 5000,
-      "page": "Ghoul",
-      "tertiary": true
-    },
-    {
       "npc": "Giant frog",
       "item": "Curved bone",
       "oneIn": 5012.5,
@@ -1608,20 +1545,6 @@
       "item": "Curved bone",
       "oneIn": 5012.5,
       "page": "Giant Mole",
-      "tertiary": true
-    },
-    {
-      "npc": "Giant skeleton",
-      "item": "Skeleton champion scroll",
-      "oneIn": 5000,
-      "page": "Giant skeleton (Shadow Dungeon)",
-      "tertiary": true
-    },
-    {
-      "npc": "Goblin",
-      "item": "Goblin champion scroll",
-      "oneIn": 5000,
-      "page": "Goblin",
       "tertiary": true
     },
     {
@@ -1693,13 +1616,6 @@
       "tertiary": true
     },
     {
-      "npc": "Hill Giant",
-      "item": "Giant champion scroll",
-      "oneIn": 5000,
-      "page": "Hill Giant",
-      "tertiary": true
-    },
-    {
       "npc": "Hydra",
       "item": "Dragon knife",
       "oneIn": 10001,
@@ -1733,13 +1649,6 @@
       "npc": "Ice giant",
       "item": "Curved bone",
       "oneIn": 5012.5,
-      "page": "Ice giant",
-      "tertiary": true
-    },
-    {
-      "npc": "Ice giant",
-      "item": "Giant champion scroll",
-      "oneIn": 5000,
       "page": "Ice giant",
       "tertiary": true
     },
@@ -1779,24 +1688,10 @@
       "tertiary": true
     },
     {
-      "npc": "Icefiend",
-      "item": "Tooth half of key (moon key)",
-      "oneIn": 1373,
-      "page": "Icefiend",
-      "tertiary": true
-    },
-    {
       "npc": "Icelord",
       "item": "Curved bone",
       "oneIn": 5012.5,
       "page": "Icelord",
-      "tertiary": true
-    },
-    {
-      "npc": "Imp",
-      "item": "Imp champion scroll",
-      "oneIn": 5000,
-      "page": "Imp",
       "tertiary": true
     },
     {
@@ -1816,13 +1711,6 @@
       "item": "Mystic hat (dark)",
       "oneIn": 512,
       "page": "Infernal Mage"
-    },
-    {
-      "npc": "Jogre",
-      "item": "Jogre champion scroll",
-      "oneIn": 5000,
-      "page": "Jogre",
-      "tertiary": true
     },
     {
       "npc": "K'ril Tsutsaroth",
@@ -2170,13 +2058,6 @@
       "item": "Dragon full helm",
       "oneIn": 32768,
       "page": "Mithril dragon"
-    },
-    {
-      "npc": "Monkey Zombie",
-      "item": "Zombie champion scroll",
-      "oneIn": 5000,
-      "page": "Monkey Zombie",
-      "tertiary": true
     },
     {
       "npc": "Moonlight Cockatrice",
@@ -2536,13 +2417,6 @@
     },
     {
       "npc": "Sergeant Grimspike",
-      "item": "Goblin champion scroll",
-      "oneIn": 5000,
-      "page": "Sergeant Grimspike",
-      "tertiary": true
-    },
-    {
-      "npc": "Sergeant Grimspike",
       "item": "Godsword shard 1",
       "oneIn": 1524,
       "page": "Sergeant Grimspike"
@@ -2579,13 +2453,6 @@
     },
     {
       "npc": "Sergeant Steelwill",
-      "item": "Goblin champion scroll",
-      "oneIn": 5000,
-      "page": "Sergeant Steelwill",
-      "tertiary": true
-    },
-    {
-      "npc": "Sergeant Steelwill",
       "item": "Godsword shard 1",
       "oneIn": 1524,
       "page": "Sergeant Steelwill"
@@ -2619,13 +2486,6 @@
       "item": "Bandos tassets",
       "oneIn": 16256,
       "page": "Sergeant Strongstack"
-    },
-    {
-      "npc": "Sergeant Strongstack",
-      "item": "Goblin champion scroll",
-      "oneIn": 5000,
-      "page": "Sergeant Strongstack",
-      "tertiary": true
     },
     {
       "npc": "Sergeant Strongstack",
@@ -2658,48 +2518,6 @@
       "page": "Skeletal Wyvern"
     },
     {
-      "npc": "Skeleton brute",
-      "item": "Skeleton champion scroll",
-      "oneIn": 5000,
-      "page": "Skeleton brute",
-      "tertiary": true
-    },
-    {
-      "npc": "Skeleton Mage",
-      "item": "Skeleton champion scroll",
-      "oneIn": 5000,
-      "page": "Skeleton Mage",
-      "tertiary": true
-    },
-    {
-      "npc": "Skeleton thug",
-      "item": "Skeleton champion scroll",
-      "oneIn": 5000,
-      "page": "Skeleton thug",
-      "tertiary": true
-    },
-    {
-      "npc": "Skeleton warlord",
-      "item": "Skeleton champion scroll",
-      "oneIn": 5000,
-      "page": "Skeleton warlord",
-      "tertiary": true
-    },
-    {
-      "npc": "Skogre",
-      "item": "Skeleton champion scroll",
-      "oneIn": 5000,
-      "page": "Skogre",
-      "tertiary": true
-    },
-    {
-      "npc": "Skogre",
-      "item": "Zombie champion scroll",
-      "oneIn": 5000,
-      "page": "Skogre",
-      "tertiary": true
-    },
-    {
       "npc": "Skotizo",
       "item": "Uncut onyx",
       "oneIn": 1000,
@@ -2716,13 +2534,6 @@
       "item": "Occult necklace",
       "oneIn": 512,
       "page": "Smoke devil"
-    },
-    {
-      "npc": "Sorebones",
-      "item": "Zombie champion scroll",
-      "oneIn": 5000,
-      "page": "Sorebones",
-      "tertiary": true
     },
     {
       "npc": "Spindel",
@@ -3400,39 +3211,6 @@
       "page": "Undead Druid"
     },
     {
-      "npc": "Undead Druid",
-      "item": "Zombie champion scroll",
-      "oneIn": 5000,
-      "page": "Undead Druid",
-      "tertiary": true
-    },
-    {
-      "npc": "Undead one",
-      "item": "Skeleton champion scroll",
-      "oneIn": 5000,
-      "page": "Undead one",
-      "tertiary": true
-    },
-    {
-      "npc": "Undead one",
-      "item": "Zombie champion scroll",
-      "oneIn": 5000,
-      "page": "Undead one",
-      "tertiary": true
-    },
-    {
-      "npc": "Vampyre Juvinate",
-      "item": "Staff of air",
-      "oneIn": 256,
-      "page": "Vampyre Juvinate"
-    },
-    {
-      "npc": "Vampyre Juvinate",
-      "item": "Staff of earth",
-      "oneIn": 256,
-      "page": "Vampyre Juvinate"
-    },
-    {
       "npc": "Vardorvis",
       "item": "Butch",
       "oneIn": 3000,
@@ -3880,13 +3658,6 @@
     },
     {
       "npc": "Zakl'n Gritch",
-      "item": "Lesser demon champion scroll",
-      "oneIn": 5000,
-      "page": "Zakl'n Gritch",
-      "tertiary": true
-    },
-    {
-      "npc": "Zakl'n Gritch",
       "item": "Zamorakian spear",
       "oneIn": 5376.333333333333,
       "page": "Zakl'n Gritch"
@@ -3912,27 +3683,6 @@
       "oneIn": 8000,
       "page": "Zalcano",
       "kills": "solo"
-    },
-    {
-      "npc": "Zogre",
-      "item": "Zombie champion scroll",
-      "oneIn": 5000,
-      "page": "Zogre",
-      "tertiary": true
-    },
-    {
-      "npc": "Zombie pirate",
-      "item": "Zombie champion scroll",
-      "oneIn": 5000,
-      "page": "Zombie pirate",
-      "tertiary": true
-    },
-    {
-      "npc": "Zombie swab",
-      "item": "Zombie champion scroll",
-      "oneIn": 5000,
-      "page": "Zombie swab",
-      "tertiary": true
     },
     {
       "npc": "Zulrah",
