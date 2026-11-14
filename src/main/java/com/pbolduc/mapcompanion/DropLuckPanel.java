@@ -597,8 +597,9 @@ final class DropLuckPanel extends JPanel
 		}
 		JPanel words = column(ColorScheme.DARKER_GRAY_HOVER_COLOR);
 		words.add(wrapped(drop.item, textWidth, 12f, BRAND_ORANGE));
-		words.add(wrapped(monster.npc + " · " + DropLuckView.units(monster, drop.sinceLast) + " since last",
-			textWidth, 11f, LIGHT_GRAY_COLOR));
+		/* As the list chip's tooltip says it: a drop never had has no last one to count from. */
+		words.add(wrapped(monster.npc + " · " + DropLuckView.units(monster, drop.sinceLast)
+			+ (drop.obtained > 0 ? " since last" : " without one"), textWidth, 11f, LIGHT_GRAY_COLOR));
 		row.add(words, BorderLayout.CENTER);
 		if (side != null)
 		{

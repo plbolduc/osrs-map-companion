@@ -312,6 +312,23 @@ public class DropLuckPanelTest
 	}
 
 	/**
+	 * Pinned before it ever dropped, the drop has no last one: the row says so as the list chip's
+	 * tooltip does, where it said "1 kill since last".
+	 */
+	@Test
+	public void aPinnedDropNeverHadIsCountedWithoutOne()
+	{
+		kill("Abyssal demon", 995);
+		panel.refresh();
+		assertTrue(words(), SidebarWords.press(panel, "Abyssal head"));
+		assertTrue(words(), SidebarWords.press(panel, "Pin"));
+		assertTrue(words(), SidebarWords.press(panel, "All monsters ›"));
+		String list = words();
+		assertTrue(list, list.contains("Pinned | Abyssal head | Abyssal demon · 1 kill without one"));
+		assertFalse(list, list.contains("since last"));
+	}
+
+	/**
 	 * Any unique's picture is four of its drops at half size, across and then down. With two rated
 	 * drops, the Lizardman shaman's, a grid with its rows set gave them one column, one over the other.
 	 */
