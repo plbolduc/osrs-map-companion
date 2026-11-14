@@ -127,7 +127,7 @@ per-item baseline and print **<1%** for a nonzero probability that rounds below 
 
 How Drop luck counts:
 
-- **Every monster is counted**, not only the 196 with a rate. Beside the rated rows, a monster keeps
+- **Every monster is counted**, not only the 198 with a rate. Beside the rated rows, a monster keeps
   any collection-log item that actually fell, read from the same cache vocabulary the announcements
   use; pets are left out for the reason above. A collection row is a count of what was seen and
   never the basis of a probability, so a kill the vocabulary could not judge moves its window
@@ -195,7 +195,9 @@ How Drop luck counts:
   counted by the combat level of the NPC whose loot it is, under the row's `npc` at that level —
   *Vardorvis* at 784, *Vardorvis (awakened)* at 1136 — and not at all at a level no row names, such
   as the quest's fight; the level is read for those names only. An Araxxor receipt holding only the
-  elite clue, the coagulated venom or a Konar key is a destroyed corpse and not a kill. None of this
+  elite clue, the coagulated venom or a Konar key is a destroyed corpse and not a kill, and a Royal
+  Titan's holding only desiccated pages and clues is "Take pages" and not one either. A row's
+  `fight` names the monsters whose damage pools with its own, so both titans are one fight. None of this
   sends anything new: the counts travel as every rated row's do.
 
 ## Validation and limits
