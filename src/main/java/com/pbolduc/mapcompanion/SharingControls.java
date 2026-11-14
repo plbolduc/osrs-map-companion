@@ -128,6 +128,8 @@ final class SharingControls extends JPanel
 		nicknameHint.setText("Leave it empty to show as Member.");
 		nameBox.add(nicknameHint);
 		nameLink.setName("sharing.nameLink");
+		/* In the orange and with the chevron every other pressable line here has: grey, it read as the status above it. */
+		nameLink.setForeground(ColorScheme.BRAND_ORANGE);
 		nameLink.addActionListener(e ->
 		{
 			store.set(SharingFields.NAME.key, Boolean.toString(!config.shareName()));
@@ -229,7 +231,7 @@ final class SharingControls extends JPanel
 		}
 		boolean ownName = !config.shareName();
 		nicknameLabel.setText(ownName ? "Name to show instead" : "Shown as your character name");
-		nameLink.setText(ownName ? "Use my character name" : "Use another name");
+		nameLink.setText(ownName ? "Use my character name ›" : "Use another name ›");
 		nickname.setVisible(ownName);
 		nicknameHint.setVisible(ownName);
 	}
