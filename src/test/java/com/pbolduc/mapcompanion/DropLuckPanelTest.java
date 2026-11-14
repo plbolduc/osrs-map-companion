@@ -369,6 +369,14 @@ public class DropLuckPanelTest
 		assertTrue("the second right of the first", second.getX() > first.getX());
 	}
 
+	/** The words stay the website's, but a bracket goes down a line whole. */
+	@Test
+	public void aFactsBracketsWrapWhole()
+	{
+		assertEquals("Rest of this Slayer task (37\u00a0kills)", DropLuckPanel.bracketsWhole("Rest of this Slayer task (37 kills)"));
+		assertEquals("Next 100 kills", DropLuckPanel.bracketsWhole("Next 100 kills"));
+	}
+
 	private void assertFits(String what) throws Exception
 	{
 		SwingUtilities.invokeAndWait(() ->

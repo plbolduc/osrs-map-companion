@@ -428,7 +428,19 @@ final class DropLuckPanel extends JPanel
 	{
 		JLabel number = label(value, 13f, Color.WHITE);
 		return MapCompanionPanel.fill(MapCompanionPanel.bar(6, DARKER_GRAY_COLOR, null,
-			wrapped(label, TEXT_WIDTH - number.getPreferredSize().width - 6, 11f, LIGHT_GRAY_COLOR), number), DARKER_GRAY_COLOR);
+			wrapped(bracketsWhole(label), TEXT_WIDTH - number.getPreferredSize().width - 6, 11f, LIGHT_GRAY_COLOR), number),
+			DARKER_GRAY_COLOR);
+	}
+
+	/**
+	 * A label's bracketed part kept on one line: "Rest of this Slayer task (37 kills)" is wider than the
+	 * room beside its chance, and would break inside the brackets, a count on one line and "kills)" on
+	 * the next. The spaces in the brackets become non-breaking, so the brackets go down a line whole.
+	 * The words stay the website's; only where they may break changes.
+	 */
+	static String bracketsWhole(String label)
+	{
+		return label.replaceAll(" (?=[^(]*\\))", String.valueOf((char) 0xa0));
 	}
 
 	private void buildDetail(JPanel card, Monster monster, Drop drop, boolean pinned, @Nullable Integer taskLeft)
