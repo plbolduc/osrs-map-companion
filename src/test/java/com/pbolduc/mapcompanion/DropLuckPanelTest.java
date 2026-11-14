@@ -311,6 +311,30 @@ public class DropLuckPanelTest
 		assertFits("the list");
 	}
 
+	/**
+	 * Any unique's picture is four of its drops at half size, across and then down. With two rated
+	 * drops, the Lizardman shaman's, a grid with its rows set gave them one column, one over the other.
+	 */
+	@Test
+	public void anyUniquesTwoPicturesSitSideBySide() throws Exception
+	{
+		kill("Lizardman shaman", 995);
+		panel.refresh();
+		assertTrue(words(), words().contains("Any unique"));
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.setSize(PluginPanel.PANEL_WIDTH - 20, panel.getPreferredSize().height);
+			layout(panel);
+		});
+		Container grid = gridOf(panel);
+		assertTrue("Any unique's picture", grid != null);
+		assertEquals(4, grid.getComponentCount());
+		Component first = grid.getComponent(0);
+		Component second = grid.getComponent(1);
+		assertEquals("the two pictures on one line", first.getY(), second.getY());
+		assertTrue("the second right of the first", second.getX() > first.getX());
+	}
+
 	private void assertFits(String what) throws Exception
 	{
 		SwingUtilities.invokeAndWait(() ->
@@ -345,6 +369,28 @@ public class DropLuckPanelTest
 			}
 		}
 		return found;
+	}
+
+	/** The first panel laid out as a grid of pictures: Any unique's. */
+	private static Container gridOf(Container parent)
+	{
+		for (Component child : parent.getComponents())
+		{
+			if (child instanceof JPanel && ((JPanel) child).getLayout() instanceof java.awt.GridLayout
+				&& ((JPanel) child).getComponentCount() > 0 && !(((JPanel) child).getComponent(0) instanceof JPanel))
+			{
+				return (Container) child;
+			}
+			if (child instanceof Container)
+			{
+				Container found = gridOf((Container) child);
+				if (found != null)
+				{
+					return found;
+				}
+			}
+		}
+		return null;
 	}
 
 	/** Each stack holding a spacer, squeezed 4px under its height and laid out; how many spacers held. */

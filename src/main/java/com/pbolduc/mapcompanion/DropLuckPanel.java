@@ -407,6 +407,16 @@ final class DropLuckPanel extends JPanel
 				grid.add(new Picture(drop.itemId, 16, true, -1));
 			}
 		}
+		/*
+		 * Filled to four, so the pictures read across and then down as the website's grid does: a grid
+		 * with rows set works out its own columns, and gave two pictures one column, one over the other.
+		 */
+		while (grid.getComponentCount() < 4)
+		{
+			JPanel blank = new JPanel();
+			blank.setBackground(background);
+			grid.add(blank);
+		}
 		Dimension d = new Dimension(ROW_PICTURE, 32);
 		grid.setPreferredSize(d);
 		grid.setMaximumSize(d);
