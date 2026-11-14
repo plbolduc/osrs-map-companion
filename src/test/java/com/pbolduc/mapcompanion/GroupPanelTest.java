@@ -834,6 +834,43 @@ public class GroupPanelTest
 	}
 
 	/**
+	 * Meet here refused while the map was busy said "The map is busy." under the form for the whole
+	 * wait and after it, while Make meetup sat greyed with nothing to say why. Both now count the
+	 * wait down as every Route does. The button's own words name the spot the form is for: the one
+	 * picked on the world map, not the tile the player stands on.
+	 */
+	@Test
+	public void aBusyMeetHereCountsItsWaitDownOnTheFormAndItsButton() throws Exception
+	{
+		OkHttpClient busy = new OkHttpClient.Builder().addInterceptor(chain ->
+			new Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1).code(429).message("")
+				.header("Retry-After", "20").body(ResponseBody.create(JSON, "{\"reason\":\"busy\"}")).build()).build();
+		AtomicReference<GroupPanel> panel = new AtomicReference<>();
+		SwingUtilities.invokeAndWait(() -> panel.set(panel(busy)));
+		social();
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.get().refresh(true);
+			panel.get().meetAt(new net.runelite.api.coords.WorldPoint(3565, 3288, 0));
+			panel.get().refresh(true);
+			assertEquals(Words.of("group.makeSpotTip"), named(panel.get(), "group.meetMake").getToolTipText());
+			panel.get().title().setText("Barrows run");
+			named(panel.get(), "group.meetMake").doClick();
+		});
+		until(() -> meetups.said("meet") != null && !meetups.said("meet").sending);
+		long now = System.currentTimeMillis();
+		long opens = now + meetups.waitMs(now);
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.get().refresh(true, opens - 12_000L);
+			assertNotNull(words(panel.get()), saying(panel.get(), "The map is busy. Try again in 12s."));
+			assertEquals("The map asked to wait: 12s", named(panel.get(), "group.meetMake").getToolTipText());
+			panel.get().refresh(true, opens);
+			assertNotNull(words(panel.get()), saying(panel.get(), "The map was busy."));
+		});
+	}
+
+	/**
 	 * At the login screen the Group tab's presses that ask the map as a member wait for a character:
 	 * a friend's Route, a meetup's answers and Meet here, where each answered "Connect to your map…".
 	 * World map, which draws here, stays. A friend's Route pressed then says to log in, where it waited
