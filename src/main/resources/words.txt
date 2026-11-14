@@ -137,6 +137,7 @@ group.meetupsOff=Meetups show here with Group in RuneLite on (Settings → In yo
 group.meetHereTip=Make a meetup where you stand, on this world, and copy its link for your clan chat or Discord
 group.titleTip=The meetup's title, up to sixty characters. Everybody in the group sees it.
 group.makeTip=Make the meetup at the tile and world you are on, and copy its link
+group.makeSpotTip=Make the meetup at the spot you picked, on the world you are on, and copy its link
 group.alone=Just you so far. Send a friend an invite.
 group.logIn=Log in to see your group.
 group.routeFriendTip= stands now. Nothing follows them; press again to ask again.

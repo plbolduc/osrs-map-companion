@@ -259,7 +259,6 @@ final class GroupPanel extends JPanel
 		form.add(fill(actions(hour, minute)));
 		form.add(gap(6));
 		make.setName("group.meetMake");
-		make.setToolTipText(Words.of("group.makeTip"));
 		make.addActionListener(e -> makeMeetup());
 		JButton cancel = smallButton("Cancel");
 		cancel.addActionListener(e -> openForm(false));
@@ -420,16 +419,18 @@ final class GroupPanel extends JPanel
 		}
 		if (formOpen && fresh != null && fresh.message != null)
 		{
-			refuse(formSaid, fresh.message);
+			refuse(formSaid, meetups.words(fresh, now));
 		}
 		boolean showMeet = !formOpen && fresh != null && fresh.shown(now);
 		meetSaid.setVisible(showMeet);
 		if (showMeet)
 		{
-			setWrapped(meetSaid, fresh.message, WIDTH + 16);
+			setWrapped(meetSaid, meetups.words(fresh, now), WIDTH + 16);
 			tone(meetSaid, fresh.refused());
 		}
 		make.setEnabled(asks && meetups.ready() && (meet == null || !meet.sending));
+		/* A wait the map asked for counts down on the greyed button, as Route's does; the spot is the one the form names. */
+		MapWait.tip(make, spot == null ? Words.of("group.makeTip") : Words.of("group.makeSpotTip"), meetups.waitMs(now));
 		meetHere.setEnabled(asks);
 		meetupsOff.setVisible(events == null && !config.showDestination());
 		if (events != null)
