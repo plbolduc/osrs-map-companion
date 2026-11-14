@@ -201,6 +201,9 @@ often. A clean run is now 443 tests with no failures or skips.
       and that kill is not counted; the next one, without a contract, is.
 - [ ] Drop luck at the Royal Titans: looting one counts it under that titan's name; "Take pages"
       and sacrificing do not. In a duo the crown counts your share of the damage to both titans.
+      Every fight alone, looted at either titan or for its pages, is one kill of *Royal Titans* for
+      Bran; a sacrifice hands over nothing or only a clue and is not counted. Unseen: whether a
+      sacrifice posts a loot event at all, and whether the pet's line comes before or after it.
 - [ ] Drop luck at Barrows: a chest after all six brothers counts; one after five does not. The
       six killed varbits must still be set when the chest's reward appears; no build has seen it.
 - [ ] Drop luck at the Doom of Mokhaiotl: claiming a run counts it once, at the delve the loot

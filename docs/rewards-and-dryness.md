@@ -207,7 +207,11 @@ How Drop luck counts:
   fight; the level is read for those names only. An Araxxor receipt holding only the elite clue,
   the coagulated venom or a Konar key is a destroyed corpse and not a kill, and a Royal Titan's
   holding only desiccated pages and clues is "Take pages" and not one either. A row's `fight` names
-  the monsters whose damage pools with its own, so both titans are one fight. None of this sends
+  the monsters whose damage pools with its own, so both titans are one fight. A row's `from` names
+  the monsters a kill of its own is: Bran, rolled once a Royal Titans fight at whichever titan is
+  looted, is the row of *Royal Titans*, which counts one kill for every fight no other player hit,
+  looted or with its pages taken, and none for a receipt with nothing but a clue, which may be a
+  "Sacrifice" at twice the pet's rate. That monster is never the one being killed now; the titan is. None of this sends
   anything new: the counts travel as every rated row's do, except that a pet row goes only
   with *Include pet rewards* under *Notable drops and levels*. Without it every pet row stays home,
   had or not, and the monster's list says it is not whole, so the map abstains on the pet alone.

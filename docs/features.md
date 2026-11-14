@@ -184,7 +184,10 @@ kill shared with others as your share of it, your damage over everyone's, and Ne
 10% bonus; their pets, but for Nexling and Huberte, and every drop at other group bosses count
 only the kills nobody else hit. A Yama fight a contract was
 spent on is not counted, since its reward was guaranteed. A Royal Titan counts when you loot it,
-not when you take pages or sacrifice, and its crown counts your share of a duo. A Barrows chest
+not when you take pages or sacrifice, and its crown counts your share of a duo. Bran is rolled once
+a fight, whichever titan you loot, so it is its own monster, **Royal Titans**, counting every fight
+you fought alone and looted or took pages from. A fight you sacrifice is not counted: it doubles
+the pet's chance, and the plugin cannot tell it from the rest. A Barrows chest
 counts when all six brothers died first, and a Doom of Mokhaiotl run counts when you claim it, worth every delve it went
 through. A destroyed Araxxor corpse is not a kill,
 and a lizardman shaman in the Chambers of Xeric is not counted. An awakened Desert Treasure II

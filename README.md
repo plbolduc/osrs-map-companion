@@ -325,7 +325,8 @@ settings for the plugin.
   your share of the damage. Their pets, except Nexling and Huberte, count only kills nobody else
   hit, as every drop does at the Nightmare, Scurrius and Zalcano. A Yama fight you spent a contract
   on is not counted. Araxxor counts only harvested corpses, the Desert Treasure II bosses only
-  fights outside the quest, the Royal Titans only kills you loot, the Barrows chest only with all
+  fights outside the quest, a Royal Titan's crown only kills you loot, its pet Bran every fight you
+  loot or take pages from but none you sacrifice, the Barrows chest only with all
   six brothers killed, and the Doom of Mokhaiotl each claimed run by how deep it went. Activity
   rewards need RuneLite's **Loot Tracker** plugin. **Forget kill log** clears the current character's counts.
 - Birdhouses need RuneLite's **Time Tracking** plugin. Farm timers are estimates; disease and later
