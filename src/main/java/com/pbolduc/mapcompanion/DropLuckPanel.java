@@ -141,7 +141,7 @@ final class DropLuckPanel extends JPanel
 		search.setPreferredSize(new Dimension(WIDTH, 28));
 		search.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28));
 		search.setAlignmentX(Component.LEFT_ALIGNMENT);
-		MapCompanionPanel.onEdit(search.getDocument(), this::redrawResults);
+		onEdit(search.getDocument(), this::redrawResults);
 	}
 
 	/**
@@ -285,8 +285,8 @@ final class DropLuckPanel extends JPanel
 		 * without an ellipsis, and "Duke Sucellus (awakened)" would lose the word that tells its log apart.
 		 */
 		int width = WIDTH - 14 - ROW_GAP - back.getPreferredSize().width;
-		JPanel bar = MapCompanionPanel.bar(ROW_GAP, new Color(0x3a2e1a), null, small("<html><body width='" + width
-			+ "'>Now killing <font color='#ffffff'>" + MapCompanionPanel.escape(monster.npc) + "</font></body></html>",
+		JPanel bar = bar(ROW_GAP, new Color(0x3a2e1a), null, small("<html><body width='" + width
+			+ "'>Now killing <font color='#ffffff'>" + escape(monster.npc) + "</font></body></html>",
 			LIGHT_GRAY_COLOR), back);
 		bar.setBorder(new CompoundBorder(
 			BorderFactory.createLineBorder(new Color(0x7a5410)), new EmptyBorder(3, 6, 3, 6)));
@@ -305,7 +305,7 @@ final class DropLuckPanel extends JPanel
 		{
 			refont(left, Font.BOLD, 11f);
 		}
-		add(fill(MapCompanionPanel.bar(0, DARK_GRAY_COLOR, left, null,
+		add(fill(bar(0, DARK_GRAY_COLOR, left, null,
 			link(opened != null ? "‹ All monsters" : "All monsters ›", () ->
 		{
 			view = View.LIST;
@@ -381,12 +381,12 @@ final class DropLuckPanel extends JPanel
 		words.add(wrapped(drop.item, textWidth, 12f, pinned ? BRAND_ORANGE : Color.WHITE));
 		words.add(wrapped(DropLuckView.rowDetail(monster, drop, log.boostedNow(monster.npc, drop.boostWhen)),
 			textWidth, 11f, LIGHT_GRAY_COLOR));
-		JPanel row = MapCompanionPanel.bar(ROW_GAP, background, DropLuckView.ANY.equals(drop.item) ? anyPicture(monster, background)
+		JPanel row = bar(ROW_GAP, background, DropLuckView.ANY.equals(drop.item) ? anyPicture(monster, background)
 			: new Picture(drop.itemId, 32, drop.obtained > 0 || drop.oneIn != null, -1), words, count);
 		row.setBorder(new CompoundBorder(
 			new MatteBorder(0, 2, 0, 0, selected ? BRAND_ORANGE : background),
 			new EmptyBorder(3, 4, 3, 2)));
-		left(MapCompanionPanel.capped(row));
+		left(capped(row));
 		clickable(row, () ->
 		{
 			chosen.put(monster.npc, drop.item);
@@ -427,7 +427,7 @@ final class DropLuckPanel extends JPanel
 	private static JComponent fact(String label, String value)
 	{
 		JLabel number = label(value, 13f, Color.WHITE);
-		return MapCompanionPanel.fill(MapCompanionPanel.bar(6, DARKER_GRAY_COLOR, null,
+		return MapCompanionPanel.fill(bar(6, DARKER_GRAY_COLOR, null,
 			wrapped(bracketsWhole(label), TEXT_WIDTH - number.getPreferredSize().width - 6, 11f, LIGHT_GRAY_COLOR), number),
 			DARKER_GRAY_COLOR);
 	}
@@ -448,7 +448,7 @@ final class DropLuckPanel extends JPanel
 		DropLuckView.Detail detail = DropLuckView.detail(monster, drop, taskLeft, log.boostedNow(monster.npc, drop.boostWhen));
 		/* The pin is a drop's name on the wire, and no item is called "Any unique": it has none. */
 		boolean pinnable = !DropLuckView.ANY.equals(drop.item);
-		JButton pin = MapCompanionPanel.smallButton(pinned ? "Pinned" : "Pin");
+		JButton pin = smallButton(pinned ? "Pinned" : "Pin");
 		pin.setFocusable(false);
 		if (pinned)
 		{
@@ -474,7 +474,7 @@ final class DropLuckPanel extends JPanel
 		JPanel pinAtTop = new JPanel(new BorderLayout());
 		pinAtTop.setBackground(DARKER_GRAY_COLOR);
 		pinAtTop.add(pin, BorderLayout.NORTH);
-		card.add(MapCompanionPanel.fill(MapCompanionPanel.bar(6, DARKER_GRAY_COLOR, null,
+		card.add(MapCompanionPanel.fill(bar(6, DARKER_GRAY_COLOR, null,
 			wrapped(detail.verdict, TEXT_WIDTH - (pinnable ? pin.getPreferredSize().width + 6 : 0), 13f, Color.WHITE),
 			pinnable ? pinAtTop : null), DARKER_GRAY_COLOR));
 		card.add(inset(5));
@@ -514,7 +514,7 @@ final class DropLuckPanel extends JPanel
 	private void buildList(List<Monster> monsters, @Nullable String[] pin, long now)
 	{
 		/* The sidebar's own heading says "Drop luck" over the list, so this row names only the list, as the website's does. */
-		add(fill(MapCompanionPanel.bar(0, DARK_GRAY_COLOR, small("Your monsters", LIGHT_GRAY_COLOR),
+		add(fill(bar(0, DARK_GRAY_COLOR, small("Your monsters", LIGHT_GRAY_COLOR),
 			null, link("Close", () -> open(null, null)))));
 		add(space(4));
 		add(search);
@@ -618,7 +618,7 @@ final class DropLuckPanel extends JPanel
 		{
 			row.add(side, BorderLayout.EAST);
 		}
-		left(MapCompanionPanel.capped(row));
+		left(capped(row));
 		clickable(row, () -> open(monster.npc, drop.item));
 		return row;
 	}
@@ -635,7 +635,7 @@ final class DropLuckPanel extends JPanel
 		 */
 		JLabel meta = small(DropLuckView.listMeta(monster, now), LIGHT_GRAY_COLOR);
 		meta.setVerticalAlignment(SwingConstants.TOP);
-		row.add(MapCompanionPanel.fill(MapCompanionPanel.bar(4, DARK_GRAY_COLOR, null,
+		row.add(MapCompanionPanel.fill(bar(4, DARK_GRAY_COLOR, null,
 			wrapped(monster.npc, WIDTH - 4 - 4 - meta.getPreferredSize().width, 12f, Color.WHITE), meta),
 			DARK_GRAY_COLOR));
 		JPanel icons = new JPanel(new FlowLayout(FlowLayout.LEFT, 3, 3));
@@ -676,7 +676,7 @@ final class DropLuckPanel extends JPanel
 			icons.add(small("No notable drops yet", LIGHT_GRAY_COLOR));
 		}
 		row.add(MapCompanionPanel.fill(icons, DARK_GRAY_COLOR));
-		MapCompanionPanel.capped(row);
+		capped(row);
 		clickable(row, () -> open(monster.npc, null));
 		return row;
 	}

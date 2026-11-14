@@ -28,6 +28,7 @@ package com.pbolduc.mapcompanion;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
 import net.runelite.api.Client;
@@ -36,36 +37,22 @@ import net.runelite.api.Client;
  * Permanent route answers from the client's variables, after the login settling window.
  * Unreadable flags are omitted: the map must preserve manual answers outside our coverage.
  *
- * <p>Ids and predicates follow the shortest-path table at 57590582992c32baf7da71b912819244441ae80b
- * and RuneLite's generated gameval definitions. Kastori and Nemus statues are deliberately
- * absent: that table's 11179/11180 now name agility failures. Weiss's fire is likewise unproven.
- * The house numbers are the same table's teleportation_items.tsv outside-house destinations.
+ * <p>The routes, the quetzal landings and the house locations are game-reads.txt's travel, quetzal
+ * and house rows, which say where each id and predicate came from; GameReadsTest holds every
+ * travel varbit to the gameval constant its row names.
  */
 @Singleton
 public class TravelUnlockReader extends SettlingReader
 {
 	private final Client client;
-	private static final String[] HOUSES = {
-		null, "rimmington", "taverley", "pollnivneach", "rellekka", "brimhaven",
-		"yanille", "hosidius", "prifddinas", "aldarin"
-	};
-	private static final String[] FLAGS = {
-		"balloon-castle-wars", "balloon-grand-tree", "balloon-crafting-guild", "balloon-varrock",
-		"ates-darkfrost", "ates-twilight-temple", "ates-ralos-rise", "ates-north-aldarin",
-		"sailors-marker-port-roberts", "sailors-marker-red-rock", "sailors-marker-deepfin-point",
-		"rowboat-vatrachos-island", "rowboat-anglers-retreat", "rowboat-tear-of-the-soul",
-		"rowboat-ynysdail", "rowboat-buccaneers-haven", "necropolis-obelisk"
-	};
-	static final int[] BITS = {
-		2869, 2870, 2871, 2872, 11175, 11176, 11177, 11178, 19540, 19541, 19543,
-		18351, 18355, 18356, 18370, 18371, 13839
-	};
-	private static final String[] QUETZALS = {
-		"quetzal-fortis-colosseum", "quetzal-kastori", "quetzal-outer-fortis",
-		"quetzal-colossal-wyrm-remains", "quetzal-cam-torum", "quetzal-salvager-overlook"
-	};
-	private static final int[] MASKS = {256, 16384, 128, 64, 32, 2048};
-	/** The quetzal landings unlocked, one bit per landing in {@code MASKS}. */
+	/** A house location's id, row n - 1 for the varbit's n. */
+	private static final List<String[]> HOUSES = GameReads.rows("house");
+	/** A route's id and the varbit that reads 1 once it is unlocked, in the order the map is sent them. */
+	private static final List<String[]> FLAGS = GameReads.rows("travel");
+	static final int[] BITS = FLAGS.stream().mapToInt(row -> GameReads.ids(row[1])[0]).toArray();
+	/** A landing's id and its bit in {@code QUETZALS_UNLOCKED_VARP}. */
+	private static final List<String[]> QUETZALS = GameReads.rows("quetzal");
+	/** The quetzal landings unlocked, one bit per landing in {@code QUETZALS}. */
 	static final int QUETZALS_UNLOCKED_VARP = 4182;
 	/** Hero is rank 9 or higher. The client's gameval names this {@code COLOSSEUM_HIGHEST_WAVE}. */
 	static final int COLOSSEUM_GLORY_VARBIT = 11410;
@@ -87,12 +74,12 @@ public class TravelUnlockReader extends SettlingReader
 			return null;
 		}
 		Map<String, Boolean> out = new LinkedHashMap<>();
-		for (int i = 0; i < FLAGS.length; i++)
+		for (int i = 0; i < BITS.length; i++)
 		{
 			int value = bit(BITS[i]);
 			if (value == 0 || value == 1)
 			{
-				out.put(FLAGS[i], value == 1);
+				out.put(FLAGS.get(i)[0], value == 1);
 			}
 		}
 		int quetzals;
@@ -106,9 +93,9 @@ public class TravelUnlockReader extends SettlingReader
 		}
 		if (quetzals >= 0)
 		{
-			for (int i = 0; i < QUETZALS.length; i++)
+			for (String[] landing : QUETZALS)
 			{
-				out.put(QUETZALS[i], (quetzals & MASKS[i]) != 0);
+				out.put(landing[0], (quetzals & Integer.parseInt(landing[1])) != 0);
 			}
 		}
 		int hero = bit(COLOSSEUM_GLORY_VARBIT);
@@ -133,7 +120,7 @@ public class TravelUnlockReader extends SettlingReader
 	@Nullable
 	static String houseFrom(int value)
 	{
-		return value > 0 && value < HOUSES.length ? HOUSES[value] : null;
+		return value > 0 && value <= HOUSES.size() ? HOUSES.get(value - 1)[0] : null;
 	}
 
 	private int bit(int id)

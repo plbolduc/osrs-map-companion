@@ -112,7 +112,7 @@ final class ConnectCard extends JPanel
 	 * says so beside the name, and the link goes once the group has one. A link, as Meet here… is.
 	 */
 	private final JButton nameLink = linkButton(RENAME);
-	private final JLabel sharingLabel = MapCompanionPanel.label(11f, ColorScheme.LIGHT_GRAY_COLOR);
+	private final JLabel sharingLabel = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
 	/** Settings, as a page in place of this one. See {@link SidebarPages}. */
 	private final JButton gearButton = new JButton(SidebarIcons.gear());
 
@@ -209,7 +209,7 @@ final class ConnectCard extends JPanel
 	 */
 	private final JLabel joinHeading = sectionHead("Have an invite?");
 	/** Under Paste and Join while the map refuses the group: what to put in the field. See {@link #refusedNextStep}. */
-	private final JLabel nextStep = MapCompanionPanel.label(11f, ColorScheme.LIGHT_GRAY_COLOR);
+	private final JLabel nextStep = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
 	private final JPanel refusedGap = gap(8, DARK_GRAY_COLOR);
 
 	/**
@@ -242,8 +242,8 @@ final class ConnectCard extends JPanel
 
 		/* The status card. Dot beside the sentence, so the state reads at a glance and again in words. */
 		JPanel status = card();
-		MapCompanionPanel.refont(dot, 12f);
-		MapCompanionPanel.refont(statusLabel, 12f);
+		refont(dot, 12f);
+		refont(statusLabel, 12f);
 		/*
 		 * The dot, the words and the gear keep to the first line, so a sentence that wraps does not
 		 * draw the other two beside its middle, where they read as belonging to the group's name. The
@@ -259,10 +259,10 @@ final class ConnectCard extends JPanel
 		gearButton.setName("companion.settings");
 		gearButton.setToolTipText(Words.of("connect.settingsTip"));
 		gearButton.getAccessibleContext().setAccessibleName("Settings");
-		MapCompanionPanel.bare(gearButton, 0, 4, 0).setFocusPainted(false);
+		bare(gearButton, 0, 4, 0).setFocusPainted(false);
 		gearButton.setVerticalAlignment(SwingConstants.TOP);
-		status.add(left(MapCompanionPanel.bar(6, ColorScheme.DARKER_GRAY_COLOR, dot, statusLabel, gearButton)));
-		MapCompanionPanel.refont(groupLabel, 12f);
+		status.add(left(bar(6, ColorScheme.DARKER_GRAY_COLOR, dot, statusLabel, gearButton)));
+		refont(groupLabel, 12f);
 		status.add(groupLabel);
 		status.add(sharingLabel);
 		nameLink.setName("companion.rename");
@@ -296,7 +296,7 @@ final class ConnectCard extends JPanel
 		add(refusedGap);
 		knownGroupsRow = row(DARK_GRAY_COLOR, knownGroupsButton);
 		knownGroupsRow.setBorder(new EmptyBorder(4, 0, 0, 0));
-		MapCompanionPanel.capped(knownGroupsRow);
+		capped(knownGroupsRow);
 		add(left(knownGroupsRow));
 
 		groupActions.add(left(groupButtons));
@@ -337,7 +337,7 @@ final class ConnectCard extends JPanel
 		joinField.putClientProperty("JTextField.placeholderText", JOIN_PLACEHOLDER);
 		joinField.addActionListener(e -> joinFromField());
 		/* Connect joins an invite in the field, so its tooltip follows a paste or a keystroke at once. */
-		MapCompanionPanel.onEdit(joinField.getDocument(), refresh);
+		onEdit(joinField.getDocument(), refresh);
 		block.add(fill(joinField, DARK_GRAY_COLOR));
 		block.add(gap(4, DARK_GRAY_COLOR));
 		block.add(left(row(DARK_GRAY_COLOR, pasteButton, joinButton)));
@@ -793,7 +793,7 @@ final class ConnectCard extends JPanel
 		{
 			confirmedAtMs = confirmed ? System.currentTimeMillis() : 0L;
 			setWrapped(this, message, width);
-			MapCompanionPanel.tone(this, refused);
+			tone(this, refused);
 			setVisible(true);
 		}
 
@@ -1229,7 +1229,7 @@ final class ConnectCard extends JPanel
 		switch (refusal)
 		{
 			case NEEDS_INVITE:
-				return "Ask someone in " + group + " for an invite and paste it here.";
+				return "Ask someone in " + group + Words.of("connect.askInvite");
 			case FULL:
 				return "Ask someone in " + group + Words.of("connect.makeRoom");
 			case BAD_CODE:
@@ -1278,11 +1278,11 @@ final class ConnectCard extends JPanel
 		setWrapped(statusLabel, refused == null
 			? statusWords(paired, ready, asking, connectFailed, health, plugin.getStatus(), group)
 			: asking ? "Connecting…" : refusedWords(refused), CARD_TEXT_WIDTH - 18 - SidebarIcons.SIZE - 4);
-		statusLabel.setForeground(paired && shown == Health.ERROR ? MapCompanionPanel.REFUSED : statusInk);
+		statusLabel.setForeground(paired && shown == Health.ERROR ? REFUSED : statusInk);
 		statusLabel.setToolTipText(live ? "Group code " + JoinCode.forDisplay(code) + " · " + dot.getToolTipText()
 			: dot.getToolTipText());
 		/* Before a group, no second line: the map's address is in Settings, and is not news. */
-		MapCompanionPanel.showKeeping(groupLabel, paired && !live ? group : null, CARD_TEXT_WIDTH);
+		showKeeping(groupLabel, paired && !live ? group : null, CARD_TEXT_WIDTH);
 		groupLabel.setToolTipText(paired ? "Group code " + JoinCode.forDisplay(code) : null);
 		/* Not under a group that refuses the player: the map would refuse the rename too. */
 		nameLink.setVisible(refused == null
@@ -1292,7 +1292,7 @@ final class ConnectCard extends JPanel
 		 * Character fields are separate from membership: all opt-ins off still sends the latter
 		 * after Connect. The tooltip and Advanced preview keep the precise disclosure reachable.
 		 */
-		MapCompanionPanel.showKeeping(sharingLabel, live ? SharingSummary.line(config, settings) : null, CARD_TEXT_WIDTH);
+		showKeeping(sharingLabel, live ? SharingSummary.line(config, settings) : null, CARD_TEXT_WIDTH);
 		sharingLabel.setToolTipText(paired ? SharingSummary.list(config, settings) : null);
 	}
 
@@ -1348,7 +1348,7 @@ final class ConnectCard extends JPanel
 		/* "Have an invite?" says which way in the field is; once in a group it is only Join another. */
 		joinHeading.setVisible(!paired || step != null);
 		refusedGap.setVisible(step != null);
-		MapCompanionPanel.showKeeping(nextStep, step, CARD_TEXT_WIDTH + 16);
+		showKeeping(nextStep, step, CARD_TEXT_WIDTH + 16);
 		/* A line about a field that has folded away has nothing to point at. */
 		if (!joinBlock.isVisible())
 		{
@@ -1363,7 +1363,7 @@ final class ConnectCard extends JPanel
 			? "Open " + pairing.serverLabel() + Words.of("connect.openTip")
 			: pasted != null ? "Join the group this " + (pasted.invite != null ? "invite" : "code") + " is for"
 			: paired ? "Connect to this group again"
-			: "Make a group for you on " + pairing.serverLabel() + ". Play alone, or invite friends to it.");
+			: "Make a group for you on " + pairing.serverLabel() + Words.of("connect.playAlone"));
 		/* While the step after Connect is up, its press has the orange and this waits, plain, by name. */
 		RecommendedSharing.orange(openMapButton, !recommendedSharing.isVisible());
 	}

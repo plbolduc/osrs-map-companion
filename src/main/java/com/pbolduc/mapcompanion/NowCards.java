@@ -102,7 +102,7 @@ final class NowCards extends JPanel
 	 */
 	private final JLabel graveLabel = detail();
 	private final ThinProgressBar graveBar = new ThinProgressBar();
-	private final JPanel grave = MapCompanionPanel.column(DARKER_GRAY_COLOR);
+	private final JPanel grave = column(DARKER_GRAY_COLOR);
 	/**
 	 * The map at the tile where you died, which is the question the line above it raises.
 	 *
@@ -203,7 +203,7 @@ final class NowCards extends JPanel
 			destinationRoute.choose(way);
 			refresh.run();
 		}, sprites);
-		MapCompanionPanel.column(this, ColorScheme.DARK_GRAY_COLOR);
+		column(this, ColorScheme.DARK_GRAY_COLOR);
 
 		/*
 		 * Now: a destination with its dismiss, a death, a clue. "From the map" named only the first —
@@ -219,7 +219,7 @@ final class NowCards extends JPanel
 		destinationPicture.setPreferredSize(square);
 		destinationPicture.setMinimumSize(square);
 		destinationPicture.setVisible(false);
-		destinationSlot = nowCard(destinationActions, destinationSaid, MapCompanionPanel.bar(DESTINATION_PICTURE_GAP,
+		destinationSlot = nowCard(destinationActions, destinationSaid, bar(DESTINATION_PICTURE_GAP,
 			DARKER_GRAY_COLOR, destinationPicture, destinationName, null), destinationDetail, routeSteps);
 		graveLabel.setName("now.death.grave");
 		grave.add(graveLabel);
@@ -281,13 +281,13 @@ final class NowCards extends JPanel
 
 	/** The destination card's button for a press from the game, while the card shows it; else null. EDT. */
 	@Nullable
-	JButton actButton(MapCompanionPanel.Act act)
+	JButton actButton(Act act)
 	{
 		if (!destinationSlot.isVisible())
 		{
 			return null;
 		}
-		JButton own = act == MapCompanionPanel.Act.REROUTE ? rerouteButton : act == MapCompanionPanel.Act.FOLLOW ? followButton : dismissButton;
+		JButton own = act == Act.REROUTE ? rerouteButton : act == Act.FOLLOW ? followButton : dismissButton;
 		return shownDestinationActions.contains(own) ? own : null;
 	}
 
@@ -360,7 +360,7 @@ final class NowCards extends JPanel
 		if (message != null)
 		{
 			setWrapped(line, routePress.words(said, now), CARD_TEXT_WIDTH);
-			MapCompanionPanel.tone(line, said.refused());
+			tone(line, said.refused());
 		}
 	}
 
@@ -394,7 +394,7 @@ final class NowCards extends JPanel
 	private static JLabel sized(float size)
 	{
 		JLabel label = new JLabel();
-		MapCompanionPanel.refont(label, size);
+		refont(label, size);
 		return label;
 	}
 
@@ -409,7 +409,7 @@ final class NowCards extends JPanel
 	/** The line a press's refusal is said in, under the buttons it came from, in the refusal pink. */
 	static JLabel said(JLabel line)
 	{
-		MapCompanionPanel.refont(line, 11f);
+		refont(line, 11f);
 		line.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
 		line.setBorder(new EmptyBorder(4, 0, 0, 0));
 		line.setVisible(false);
@@ -437,11 +437,11 @@ final class NowCards extends JPanel
 	{
 		if (clue.coordTile != null)
 		{
-			return "Coordinate · Route finds the dig spot";
+			return Words.of("now.clueCoordinate");
 		}
 		if (clue.mapTile != null)
 		{
-			return "Beginner map · dig where it shows";
+			return Words.of("now.clueBeginnerMap");
 		}
 		if (clue.text != null && !clue.text.isEmpty())
 		{
@@ -449,9 +449,9 @@ final class NowCards extends JPanel
 		}
 		if (ClueReader.mapScroll(clue))
 		{
-			return "Map · Route finds where it shows";
+			return Words.of("now.clueMap");
 		}
-		return "Read the scroll to see its step";
+		return Words.of("now.clueUnread");
 	}
 
 	/**

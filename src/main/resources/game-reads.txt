@@ -34,3 +34,45 @@ mortifier|2|quantity
 mortifier|3|clue
 mortifier|4|superior
 mortifier|5|xp
+#
+# travel|the map's route id|the varbit that reads 1 once the route is unlocked and 0 before it
+# Ids and predicates follow the shortest-path table at 57590582992c32baf7da71b912819244441ae80b.
+# Kastori and Nemus statues are deliberately absent: that table's 11179/11180 now name agility
+# failures. Weiss's fire is likewise unproven. The order here is the order the map is sent them in.
+travel|balloon-castle-wars|ZEP_MULTI_CAST=2869
+travel|balloon-grand-tree|ZEP_MULTI_GNO=2870
+travel|balloon-crafting-guild|ZEP_MULTI_CRAFT=2871
+travel|balloon-varrock|ZEP_MULTI_VARR=2872
+travel|ates-darkfrost|PENDANT_OF_ATES_DARKFROST_FOUND=11175
+travel|ates-twilight-temple|PENDANT_OF_ATES_TWILIGHT_FOUND=11176
+travel|ates-ralos-rise|PENDANT_OF_ATES_RALOS_FOUND=11177
+travel|ates-north-aldarin|PENDANT_OF_ATES_ALDARIN_FOUND=11178
+travel|sailors-marker-port-roberts|SAILORS_AMULET_ROBERTS=19540
+travel|sailors-marker-red-rock|SAILORS_AMULET_REDROCK=19541
+travel|sailors-marker-deepfin-point|SAILORS_AMULET_DEEPFIN=19543
+travel|rowboat-vatrachos-island|AMENITY_ROWBOAT_VATRACHOS=18351
+travel|rowboat-anglers-retreat|AMENITY_ROWBOAT_ANGLERS=18355
+travel|rowboat-tear-of-the-soul|AMENITY_ROWBOAT_SOUL_TEAR=18356
+travel|rowboat-ynysdail|AMENITY_ROWBOAT_YNYSDAIL=18370
+travel|rowboat-buccaneers-haven|AMENITY_ROWBOAT_BUCCANEERS=18371
+travel|necropolis-obelisk|PHARAOHS_SCEPTRE_NECROPOLIS=13839
+#
+# quetzal|the map's landing id|its bit in the QUETZALS_UNLOCKED varp (4182), set once it is unlocked
+quetzal|quetzal-fortis-colosseum|256
+quetzal|quetzal-kastori|16384
+quetzal|quetzal-outer-fortis|128
+quetzal|quetzal-colossal-wyrm-remains|64
+quetzal|quetzal-cam-torum|32
+quetzal|quetzal-salvager-overlook|2048
+#
+# house|the map's id for a house location, in the order POH_HOUSE_LOCATION (2187) numbers them from
+# 1: the same table's teleportation_items.tsv outside-house destinations.
+house|rimmington
+house|taverley
+house|pollnivneach
+house|rellekka
+house|brimhaven
+house|yanille
+house|hosidius
+house|prifddinas
+house|aldarin

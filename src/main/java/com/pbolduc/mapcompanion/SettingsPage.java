@@ -123,7 +123,7 @@ final class SettingsPage extends JPanel
 		add(whatsNew);
 		add(gap(4, DARK_GRAY_COLOR));
 		add(sectionHead("What you share"));
-		add(MapCompanionPanel.wrapped(Words.of("settings.shareSub"), 11f, ColorScheme.LIGHT_GRAY_COLOR, MapCompanionPanel.CARD_TEXT_WIDTH + 16));
+		add(wrapped(Words.of("settings.shareSub"), 11f, ColorScheme.LIGHT_GRAY_COLOR, CARD_TEXT_WIDTH + 16));
 		add(sharingControls);
 		/*
 		 * The foot: the three presses that are about trust or about leaving, none a setting. The map
@@ -318,7 +318,7 @@ final class SettingsPage extends JPanel
 				others++;
 			}
 		}
-		if (!MapCompanionPanel.confirm(SwingUtilities.getWindowAncestor(this), leaveMessage(others),
+		if (!confirm(SwingUtilities.getWindowAncestor(this), leaveMessage(others),
 			"Leave " + ConnectCard.statusGroup(code, pairing.name(code)) + "?", "Leave group"))
 		{
 			return;
@@ -357,7 +357,7 @@ final class SettingsPage extends JPanel
 	 */
 	private boolean confirmForgetKillLog()
 	{
-		return MapCompanionPanel.confirm(SwingUtilities.getWindowAncestor(this),
+		return confirm(SwingUtilities.getWindowAncestor(this),
 			Words.of("settings.forgetLoot"), "Forget kill log", "Forget kill log");
 	}
 

@@ -337,9 +337,8 @@ final class DropLuckView
 		String sinceValue = units(monster, drop.sinceLast);
 		if (drop.oneIn == null)
 		{
-			return new Detail(drop.obtained > 0
-				? count(drop.obtained) + Words.of("luck.recordedNoRate")
-				: "No drop rate on file, so no odds.", sinceLabel, sinceValue, null, -1, null, null, null);
+			return new Detail((drop.obtained > 0 ? count(drop.obtained) + " recorded. " : "") + Words.of("luck.noRate"),
+				sinceLabel, sinceValue, null, -1, null, null, null);
 		}
 		DropOdds.Rate rate = drop.rate();
 		/* The rest of a task is task kills by definition; otherwise the rate that applies next. */
