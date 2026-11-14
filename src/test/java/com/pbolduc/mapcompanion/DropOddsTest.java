@@ -202,6 +202,24 @@ public class DropOddsTest
 		assertEquals("Rest of this Slayer task (100 kills)", detail.aheadLabel);
 	}
 
+	/** The map's lib/drop-luck.test.ts pins the same: a wait of none says what happened, with no strip. */
+	@Test
+	public void aDropOnTheLastKillSaysSoRatherThanComparingAWaitOfNone()
+	{
+		LootLog.Drop whip = new LootLog.Drop("Abyssal whip", -1, 4, 0, 1024, 0, 0, WHIP, null, null, 0, 0, 0, 0, 1, false);
+		LootLog.Monster demon = new LootLog.Monster("Abyssal demon", 1024, 0, java.util.Collections.singletonList(whip));
+		DropLuckView.Detail detail = DropLuckView.detail(demon, whip, null);
+		assertEquals("0 kills", detail.sinceValue);
+		assertEquals("it came with the last kill", detail.sinceComparison);
+		assertTrue("no strip", detail.drierThan < 0);
+		assertEquals("Lucky overall, fine right now.", detail.verdict);
+		LootLog.Drop fresh = new LootLog.Drop("Avernic treads", -1, 0, 0, 0, 0, 0, 540.0, null, null, 0, 0, 0, 0, 1, false);
+		LootLog.Monster doom = new LootLog.Monster("Doom of Mokhaiotl", 3, 0, java.util.Collections.singletonList(fresh), false, "run", 0);
+		DropLuckView.Detail none = DropLuckView.detail(doom, fresh, null);
+		assertEquals("no runs counted for it yet", none.sinceComparison);
+		assertTrue(none.drierThan < 0);
+	}
+
 	@Test
 	public void noneObtainedFarBelowTheMeanIsDry()
 	{
