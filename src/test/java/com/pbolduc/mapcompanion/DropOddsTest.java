@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -206,7 +207,7 @@ public class DropOddsTest
 	public void aDiaryRateHoldsForTheRestOfASlayerTask()
 	{
 		LootLog.Drop talisman = new LootLog.Drop("Xeric's talisman (inert)", -1, 0, 50, 50, 50, 50, 250.0, 125.0, LootLog.KOUREND_EASY_DIARY,
-			0, 0, 0, 0, 1, false, false);
+			0, 0, 0, 0, 1, true);
 		LootLog.Monster lizardman = new LootLog.Monster("Lizardman", 50, 0, java.util.Collections.singletonList(talisman));
 		DropLuckView.Detail detail = DropLuckView.detail(lizardman, talisman, 100, true);
 		assertEquals(DropOdds.percent(DropOdds.within(125, 100)) + "% chance", detail.aheadValue);
@@ -217,14 +218,14 @@ public class DropOddsTest
 	@Test
 	public void aDropOnTheLastKillSaysSoRatherThanComparingAWaitOfNone()
 	{
-		LootLog.Drop whip = new LootLog.Drop("Abyssal whip", -1, 4, 0, 1024, 0, 0, WHIP, null, null, 0, 0, 0, 0, 1, false, false);
+		LootLog.Drop whip = new LootLog.Drop("Abyssal whip", -1, 4, 0, 1024, 0, 0, WHIP, null, null, 0, 0, 0, 0, 1, true);
 		LootLog.Monster demon = new LootLog.Monster("Abyssal demon", 1024, 0, java.util.Collections.singletonList(whip));
 		DropLuckView.Detail detail = DropLuckView.detail(demon, whip, null);
 		assertEquals("0 kills", detail.sinceValue);
 		assertEquals("it came with the last kill", detail.sinceComparison);
 		assertTrue("no strip", detail.drierThan < 0);
 		assertEquals("Lucky overall, fine right now.", detail.verdict);
-		LootLog.Drop fresh = new LootLog.Drop("Avernic treads", -1, 0, 0, 0, 0, 0, 540.0, null, null, 0, 0, 0, 0, 1, false, false);
+		LootLog.Drop fresh = new LootLog.Drop("Avernic treads", -1, 0, 0, 0, 0, 0, 540.0, null, null, 0, 0, 0, 0, 1, true);
 		LootLog.Monster doom = new LootLog.Monster("Doom of Mokhaiotl", 3, 0, java.util.Collections.singletonList(fresh), false, "run", 0);
 		DropLuckView.Detail none = DropLuckView.detail(doom, fresh, null);
 		assertEquals("no runs counted for it yet", none.sinceComparison);
@@ -238,7 +239,7 @@ public class DropOddsTest
 		assertEquals(DropOdds.Luck.NORMAL, DropOdds.luck(2, 1024, WHIP));
 	}
 
-	/** A monster killed {@code kills} times, each drop as {name, 1 in, kills since the last}. */
+	/** A monster killed {@code kills} times, each drop a unique as {name, 1 in, kills since the last}. */
 	private static LootLog.Monster monster(String npc, int kills, Object[]... drops)
 	{
 		List<LootLog.Drop> out = new ArrayList<>();
@@ -246,7 +247,7 @@ public class DropOddsTest
 		{
 			int since = (int) drop[2];
 			out.add(new LootLog.Drop((String) drop[0], -1, since == kills ? 0 : 1, since, kills, 0, 0,
-				((Number) drop[1]).doubleValue(), null, null, 0, 0, 0, 0, 1, false, false));
+				((Number) drop[1]).doubleValue(), null, null, 0, 0, 0, 0, 1, true));
 		}
 		return new LootLog.Monster(npc, kills, 0, out);
 	}
@@ -292,7 +293,7 @@ public class DropOddsTest
 	@Test
 	public void theChipsTooltipCountsChestsAtBarrows()
 	{
-		LootLog.Drop helm = new LootLog.Drop("Dharok's helm", -1, 1, 300, 400, 0, 0, 350.14, null, null, 0, 0, 0, 0, 1, false, false);
+		LootLog.Drop helm = new LootLog.Drop("Dharok's helm", -1, 1, 300, 400, 0, 0, 350.14, null, null, 0, 0, 0, 0, 1, true);
 		LootLog.Monster barrows = new LootLog.Monster("Barrows", 400, 0, java.util.Collections.singletonList(helm), false, "chest", 0);
 		assertEquals("Dharok's helm: 300 chests since the last", DropLuckView.standingNote(DropLuckView.standing(barrows, null), barrows));
 	}
@@ -356,13 +357,13 @@ public class DropOddsTest
 	public void theNextHundredArePricedAtWhatThePlayersOwnKillsHaveBeenWorth()
 	{
 		/* 22 kills alone and 190 at a quarter of the damage: about a third of a kill each, not one. */
-		LootLog.Drop team = new LootLog.Drop("Any", -1, 0, 212, 212, 0, 0, 43 / 1.1, null, null, 190, 47.5, 190, 47.5, 1, false, false);
+		LootLog.Drop team = new LootLog.Drop("Any", -1, 0, 212, 212, 0, 0, 43 / 1.1, null, null, 190, 47.5, 190, 47.5, 1, true);
 		LootLog.Monster nex = new LootLog.Monster("Nex", 212, 0, java.util.Collections.singletonList(team));
 		DropLuckView.Detail detail = DropLuckView.detail(nex, team, null);
 		assertEquals("Next 100 kills", detail.aheadLabel);
 		assertEquals("57% chance", detail.aheadValue);
 		/* Three runs worth thirty delve-9 kills: a run is ten, and a hundred runs a thousand. */
-		LootLog.Drop treads = new LootLog.Drop("Any", -1, 0, 3, 3, 0, 0, 540.0, null, null, 3, 30, 3, 30, 1, false, false);
+		LootLog.Drop treads = new LootLog.Drop("Any", -1, 0, 3, 3, 0, 0, 540.0, null, null, 3, 30, 3, 30, 1, true);
 		LootLog.Monster doom = new LootLog.Monster("Doom of Mokhaiotl", 3, 0, java.util.Collections.singletonList(treads), false, "run", 0);
 		DropLuckView.Detail run = DropLuckView.detail(doom, treads, null);
 		assertEquals("Next 100 runs", run.aheadLabel);
@@ -431,8 +432,8 @@ public class DropOddsTest
 	private static LootLog.Monster twoRows(int obtained, int sinceLast)
 	{
 		return new LootLog.Monster("Monster", 300, 0, Arrays.asList(
-			new LootLog.Drop("New", -1, 0, 100, 100, 0, 0, 500.0, null, null, 0, 0, 0, 0, 1, false, false),
-			new LootLog.Drop("Old", -1, obtained, sinceLast, 300, 0, 0, 500.0, null, null, 0, 0, 0, 0, 1, false, false)));
+			new LootLog.Drop("New", -1, 0, 100, 100, 0, 0, 500.0, null, null, 0, 0, 0, 0, 1, true),
+			new LootLog.Drop("Old", -1, obtained, sinceLast, 300, 0, 0, 500.0, null, null, 0, 0, 0, 0, 1, true)));
 	}
 
 	/**
@@ -445,37 +446,76 @@ public class DropOddsTest
 	{
 		assertNull(DropLuckView.anyUnique(monster("Abyssal demon", 100, new Object[] {"Abyssal whip", 512, 100})));
 		List<LootLog.Drop> drake = Arrays.asList(
-			new LootLog.Drop("Drake's tooth", -1, 0, 10, 10, 0, 0, 2560.0, 512.0, LootLog.SLAYER_TASK, 0, 0, 0, 0, 1, false, false),
-			new LootLog.Drop("Drake's claw", -1, 0, 10, 10, 0, 0, 2560.0, 512.0, LootLog.SLAYER_TASK, 0, 0, 0, 0, 1, false, false));
+			new LootLog.Drop("Drake's tooth", -1, 0, 10, 10, 0, 0, 2560.0, 512.0, LootLog.SLAYER_TASK, 0, 0, 0, 0, 1, true),
+			new LootLog.Drop("Drake's claw", -1, 0, 10, 10, 0, 0, 2560.0, 512.0, LootLog.SLAYER_TASK, 0, 0, 0, 0, 1, true));
 		assertNull("a task's rate", DropLuckView.anyUnique(new LootLog.Monster("Drake", 10, 0, drake)));
 		LootLog.Monster doom = new LootLog.Monster("Doom of Mokhaiotl", 10, 0, monster("Doom of Mokhaiotl", 10,
 			new Object[] {"Mokhaiotl cloth", 540, 10}, new Object[] {"Avernic treads", 540, 10}).drops, false, "run", 0);
 		assertNull("a Doom run", DropLuckView.anyUnique(doom));
 		assertNotNull("the same rows counted per kill add up", DropLuckView.anyUnique(new LootLog.Monster("Doom of Mokhaiotl", 10, 0, doom.drops)));
+		/* Rated rows the table does not call uniques add up to nothing, however many there are. */
+		assertNull("no uniques", DropLuckView.anyUnique(new LootLog.Monster("Abyssal demon", 100, 0, Arrays.asList(
+			new LootLog.Drop("Abyssal whip", -1, 0, 100, 100, 0, 0, 512.0, null, null, 0, 0, 0, 0, 1, false),
+			new LootLog.Drop("Abyssal head", -1, 0, 100, 100, 0, 0, 6000.0, null, null, 0, 0, 0, 0, 1, false)))));
 	}
 
 	/**
-	 * A tertiary is a row of its own and no part of the monster's table: the Kraken's jar, on a roll
-	 * apart, would make 1/400 + 1/512 + 1/1000 a number no page gives. Read from the bundled table
-	 * through a real log; the map's lib/drop-luck.test.ts pins the same Kraken.
+	 * Only what the wiki lists as uniques, read from the bundled table through a real log. The
+	 * Tormented demon's page files its claw and synapse under "Unique" and the Magic longbow (u) under
+	 * "Other": added in, the longbow made the row 1 in 126 for the page's 1 in 250. The Kraken's page
+	 * lists no uniques, so it has no Any unique and opens on a drop; this test once added its tentacle
+	 * and trident up to 1 in 225, its jar apart. The map's lib/drop-luck.test.ts pins the same two.
 	 */
 	@Test
-	public void anyUniqueAddsUpTheMonstersOwnTableAndLeavesItsTertiariesTheirRows()
+	public void anyUniqueAddsUpOnlyTheUniquesThePageListsAndAbstainsWhereItListsNone()
 	{
 		HarnessGame game = new HarnessGame();
 		game.nameItem(995, "Coins");
 		LootLog log = new LootLog(game.client(), new HarnessStore(), new com.google.gson.Gson());
-		log.record(new net.runelite.client.events.ServerNpcLoot(game.npc("Kraken"),
-			java.util.Collections.singletonList(new net.runelite.client.game.ItemStack(995, 1))));
-		LootLog.Monster kraken = DropLuckView.find(log.monsters(), "Kraken");
-		LootLog.Drop jar = null;
-		for (LootLog.Drop drop : kraken.drops)
+		for (String npc : new String[] {"Tormented Demon", "Kraken"})
 		{
-			jar = "Jar of Dirt".equals(drop.item) ? drop : jar;
+			log.record(new net.runelite.client.events.ServerNpcLoot(game.npc(npc),
+				java.util.Collections.singletonList(new net.runelite.client.game.ItemStack(995, 1))));
 		}
-		assertTrue("the jar is a tertiary", jar.tertiary);
-		assertEquals("1 in 1,000", DropLuckView.rowDetail(kraken, jar, false));
-		assertEquals("1 in 225", DropLuckView.rowDetail(kraken, DropLuckView.anyUnique(kraken), false));
+		LootLog.Monster demon = DropLuckView.find(log.monsters(), "Tormented Demon");
+		assertEquals("1 in 250", DropLuckView.rowDetail(demon, DropLuckView.anyUnique(demon), false));
+		LootLog.Drop longbow = null;
+		for (LootLog.Drop drop : demon.drops)
+		{
+			longbow = "Magic longbow (u)".equals(drop.item) ? drop : longbow;
+		}
+		assertFalse("the longbow is no unique", longbow.unique);
+		assertEquals("1 in 255", DropLuckView.rowDetail(demon, longbow, false));
+		LootLog.Monster kraken = DropLuckView.find(log.monsters(), "Kraken");
+		assertNull(DropLuckView.anyUnique(kraken));
+		assertEquals("Kraken tentacle", DropLuckView.selected(kraken, null, null).item);
+	}
+
+	/**
+	 * A God Wars minion's page lists its general's armour under "Unique table" and the godsword shards
+	 * under "Godsword shard table", and both are what it is farmed for: Flight Kilisa's three Armadyl
+	 * pieces and three shards, Zakl'n Gritch's spear and the same shards, each about 1 in 464. The
+	 * map's lib/drop-luck.test.ts pins the same two.
+	 */
+	@Test
+	public void anyUniqueAtAGodWarsMinionAddsUpItsArmourAndItsShards()
+	{
+		HarnessGame game = new HarnessGame();
+		game.nameItem(995, "Coins");
+		LootLog log = new LootLog(game.client(), new HarnessStore(), new com.google.gson.Gson());
+		for (String npc : new String[] {"Flight Kilisa", "Zakl'n Gritch"})
+		{
+			log.record(new net.runelite.client.events.ServerNpcLoot(game.npc(npc),
+				java.util.Collections.singletonList(new net.runelite.client.game.ItemStack(995, 1))));
+			LootLog.Monster minion = DropLuckView.find(log.monsters(), npc);
+			int adds = 0;
+			for (LootLog.Drop drop : minion.drops)
+			{
+				adds += DropLuckView.adds(drop) ? 1 : 0;
+			}
+			assertEquals(npc, "Flight Kilisa".equals(npc) ? 6 : 4, adds);
+			assertEquals(npc, "1 in 464", DropLuckView.rowDetail(minion, DropLuckView.anyUnique(minion), false));
+		}
 	}
 
 	/** Nex alone, 212 kills: the platelegs at kill 64, the horn at 120, the vambraces at 137. */
@@ -491,9 +531,9 @@ public class DropOddsTest
 			Integer at = (Integer) row[2];
 			int watched = "Ancient hilt".equals(row[0]) ? 212 - hiltWatchedFrom : 212;
 			out.add(new LootLog.Drop((String) row[0], -1, at == null ? 0 : 1, at == null ? watched : 212 - at, watched, 0, 0,
-				(Integer) row[1] / 1.1, null, null, 0, 0, 0, 0, 1.1, false, false));
+				(Integer) row[1] / 1.1, null, null, 0, 0, 0, 0, 1.1, true));
 		}
-		out.add(new LootLog.Drop("Nexling", -1, 0, 212, 212, 0, 0, 500.0, null, null, 0, 0, 0, 0, 1, true, false));
+		out.add(new LootLog.Drop("Nexling", -1, 0, 212, 212, 0, 0, 500.0, null, null, 0, 0, 0, 0, 1, false));
 		return new LootLog.Monster("Nex", 212, 0, out);
 	}
 }

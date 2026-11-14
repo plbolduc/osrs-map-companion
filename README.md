@@ -156,7 +156,7 @@ dailies you have collected left out of a dailies run.
 </p>
 
 See how lucky or dry you are on the monster you are killing, with sourced drop odds and the chance
-over your next kills. **Any unique** shows how you are doing across a boss's whole unique table.
+over your next kills. **Any unique** shows how you are doing across the uniques a boss's wiki page lists.
 **All monsters** lists everything you have killed, driest first if you like,
 and a chat line says how lucky a rare drop was when it lands. Pets count too, a boss fought in a
 group counts your share of each kill, and an awakened Desert Treasure II boss is its own monster.

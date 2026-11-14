@@ -35,7 +35,8 @@
       "npc": "Abyssal Sire",
       "item": "Unsired",
       "oneIn": 100,
-      "page": "Abyssal Sire"
+      "page": "Abyssal Sire",
+      "unique": true
     },
     {
       "npc": "Abyssal walker",
@@ -65,7 +66,8 @@
       "npc": "Alchemical Hydra",
       "item": "Alchemical hydra heads",
       "oneIn": 256,
-      "page": "Alchemical Hydra"
+      "page": "Alchemical Hydra",
+      "unique": true
     },
     {
       "npc": "Alchemical Hydra",
@@ -76,37 +78,43 @@
         "Hydra's eye",
         "Hydra's fang",
         "Hydra's heart"
-      ]
+      ],
+      "unique": true
     },
     {
       "npc": "Alchemical Hydra",
       "item": "Dragon knife",
       "oneIn": 2001.000500250125,
-      "page": "Alchemical Hydra"
+      "page": "Alchemical Hydra",
+      "unique": true
     },
     {
       "npc": "Alchemical Hydra",
       "item": "Dragon thrownaxe",
       "oneIn": 2000,
-      "page": "Alchemical Hydra"
+      "page": "Alchemical Hydra",
+      "unique": true
     },
     {
       "npc": "Alchemical Hydra",
       "item": "Hydra leather",
       "oneIn": 514.0293732855242,
-      "page": "Alchemical Hydra"
+      "page": "Alchemical Hydra",
+      "unique": true
     },
     {
       "npc": "Alchemical Hydra",
       "item": "Hydra tail",
       "oneIn": 513.0254096658259,
-      "page": "Alchemical Hydra"
+      "page": "Alchemical Hydra",
+      "unique": true
     },
     {
       "npc": "Alchemical Hydra",
       "item": "Hydra's claw",
       "oneIn": 1001.0007505003126,
-      "page": "Alchemical Hydra"
+      "page": "Alchemical Hydra",
+      "unique": true
     },
     {
       "npc": "Alchemical Hydra",
@@ -126,7 +134,8 @@
       "npc": "Amoxliatl",
       "item": "Glacial temotli",
       "oneIn": 100,
-      "page": "Amoxliatl"
+      "page": "Amoxliatl",
+      "unique": true
     },
     {
       "npc": "Amoxliatl",
@@ -158,6 +167,7 @@
       "item": "Aquanite tendon",
       "oneIn": 3500,
       "page": "Aquanite",
+      "unique": true,
       "boost": {
         "when": "slayer-task",
         "oneIn": 750
@@ -174,13 +184,15 @@
       "npc": "Araxxor",
       "item": "Araxyte fang",
       "oneIn": 600,
-      "page": "Araxxor"
+      "page": "Araxxor",
+      "unique": true
     },
     {
       "npc": "Araxxor",
       "item": "Araxyte head",
       "oneIn": 250,
-      "page": "Araxxor"
+      "page": "Araxxor",
+      "unique": true
     },
     {
       "npc": "Araxxor",
@@ -198,7 +210,8 @@
         "Noxious pommel",
         "Noxious point",
         "Noxious blade"
-      ]
+      ],
+      "unique": true
     },
     {
       "npc": "Araxyte",
@@ -217,7 +230,8 @@
       "npc": "Artio",
       "item": "Claws of Callisto",
       "oneIn": 618,
-      "page": "Artio"
+      "page": "Artio",
+      "unique": true
     },
     {
       "npc": "Artio",
@@ -230,37 +244,43 @@
       "npc": "Artio",
       "item": "Tyrannical ring",
       "oneIn": 716,
-      "page": "Artio"
+      "page": "Artio",
+      "unique": true
     },
     {
       "npc": "Artio",
       "item": "Voidwaker hilt",
       "oneIn": 912,
-      "page": "Artio"
+      "page": "Artio",
+      "unique": true
     },
     {
       "npc": "Balfrug Kreeyath",
       "item": "Godsword shard 1",
       "oneIn": 1524,
-      "page": "Balfrug Kreeyath"
+      "page": "Balfrug Kreeyath",
+      "unique": true
     },
     {
       "npc": "Balfrug Kreeyath",
       "item": "Godsword shard 2",
       "oneIn": 1524,
-      "page": "Balfrug Kreeyath"
+      "page": "Balfrug Kreeyath",
+      "unique": true
     },
     {
       "npc": "Balfrug Kreeyath",
       "item": "Godsword shard 3",
       "oneIn": 1524,
-      "page": "Balfrug Kreeyath"
+      "page": "Balfrug Kreeyath",
+      "unique": true
     },
     {
       "npc": "Balfrug Kreeyath",
       "item": "Zamorakian spear",
       "oneIn": 5376.333333333333,
-      "page": "Balfrug Kreeyath"
+      "page": "Balfrug Kreeyath",
+      "unique": true
     },
     {
       "npc": "Banshee",
@@ -275,7 +295,8 @@
       "page": "Chest (Barrows)",
       "rolls": 7,
       "perRollOneIn": 2448,
-      "needs": "all-brothers"
+      "needs": "all-brothers",
+      "unique": true
     },
     {
       "npc": "Barrows",
@@ -284,7 +305,8 @@
       "page": "Chest (Barrows)",
       "rolls": 7,
       "perRollOneIn": 2448,
-      "needs": "all-brothers"
+      "needs": "all-brothers",
+      "unique": true
     },
     {
       "npc": "Barrows",
@@ -293,7 +315,8 @@
       "page": "Chest (Barrows)",
       "rolls": 7,
       "perRollOneIn": 2448,
-      "needs": "all-brothers"
+      "needs": "all-brothers",
+      "unique": true
     },
     {
       "npc": "Barrows",
@@ -302,7 +325,8 @@
       "page": "Chest (Barrows)",
       "rolls": 7,
       "perRollOneIn": 2448,
-      "needs": "all-brothers"
+      "needs": "all-brothers",
+      "unique": true
     },
     {
       "npc": "Barrows",
@@ -311,7 +335,8 @@
       "page": "Chest (Barrows)",
       "rolls": 7,
       "perRollOneIn": 2448,
-      "needs": "all-brothers"
+      "needs": "all-brothers",
+      "unique": true
     },
     {
       "npc": "Barrows",
@@ -320,7 +345,8 @@
       "page": "Chest (Barrows)",
       "rolls": 7,
       "perRollOneIn": 2448,
-      "needs": "all-brothers"
+      "needs": "all-brothers",
+      "unique": true
     },
     {
       "npc": "Barrows",
@@ -329,7 +355,8 @@
       "page": "Chest (Barrows)",
       "rolls": 7,
       "perRollOneIn": 2448,
-      "needs": "all-brothers"
+      "needs": "all-brothers",
+      "unique": true
     },
     {
       "npc": "Barrows",
@@ -338,7 +365,8 @@
       "page": "Chest (Barrows)",
       "rolls": 7,
       "perRollOneIn": 2448,
-      "needs": "all-brothers"
+      "needs": "all-brothers",
+      "unique": true
     },
     {
       "npc": "Barrows",
@@ -347,7 +375,8 @@
       "page": "Chest (Barrows)",
       "rolls": 7,
       "perRollOneIn": 2448,
-      "needs": "all-brothers"
+      "needs": "all-brothers",
+      "unique": true
     },
     {
       "npc": "Barrows",
@@ -356,7 +385,8 @@
       "page": "Chest (Barrows)",
       "rolls": 7,
       "perRollOneIn": 2448,
-      "needs": "all-brothers"
+      "needs": "all-brothers",
+      "unique": true
     },
     {
       "npc": "Barrows",
@@ -365,7 +395,8 @@
       "page": "Chest (Barrows)",
       "rolls": 7,
       "perRollOneIn": 2448,
-      "needs": "all-brothers"
+      "needs": "all-brothers",
+      "unique": true
     },
     {
       "npc": "Barrows",
@@ -374,7 +405,8 @@
       "page": "Chest (Barrows)",
       "rolls": 7,
       "perRollOneIn": 2448,
-      "needs": "all-brothers"
+      "needs": "all-brothers",
+      "unique": true
     },
     {
       "npc": "Barrows",
@@ -383,7 +415,8 @@
       "page": "Chest (Barrows)",
       "rolls": 7,
       "perRollOneIn": 2448,
-      "needs": "all-brothers"
+      "needs": "all-brothers",
+      "unique": true
     },
     {
       "npc": "Barrows",
@@ -392,7 +425,8 @@
       "page": "Chest (Barrows)",
       "rolls": 7,
       "perRollOneIn": 2448,
-      "needs": "all-brothers"
+      "needs": "all-brothers",
+      "unique": true
     },
     {
       "npc": "Barrows",
@@ -401,7 +435,8 @@
       "page": "Chest (Barrows)",
       "rolls": 7,
       "perRollOneIn": 2448,
-      "needs": "all-brothers"
+      "needs": "all-brothers",
+      "unique": true
     },
     {
       "npc": "Barrows",
@@ -410,7 +445,8 @@
       "page": "Chest (Barrows)",
       "rolls": 7,
       "perRollOneIn": 2448,
-      "needs": "all-brothers"
+      "needs": "all-brothers",
+      "unique": true
     },
     {
       "npc": "Barrows",
@@ -419,7 +455,8 @@
       "page": "Chest (Barrows)",
       "rolls": 7,
       "perRollOneIn": 2448,
-      "needs": "all-brothers"
+      "needs": "all-brothers",
+      "unique": true
     },
     {
       "npc": "Barrows",
@@ -428,7 +465,8 @@
       "page": "Chest (Barrows)",
       "rolls": 7,
       "perRollOneIn": 2448,
-      "needs": "all-brothers"
+      "needs": "all-brothers",
+      "unique": true
     },
     {
       "npc": "Barrows",
@@ -437,7 +475,8 @@
       "page": "Chest (Barrows)",
       "rolls": 7,
       "perRollOneIn": 2448,
-      "needs": "all-brothers"
+      "needs": "all-brothers",
+      "unique": true
     },
     {
       "npc": "Barrows",
@@ -446,7 +485,8 @@
       "page": "Chest (Barrows)",
       "rolls": 7,
       "perRollOneIn": 2448,
-      "needs": "all-brothers"
+      "needs": "all-brothers",
+      "unique": true
     },
     {
       "npc": "Barrows",
@@ -455,7 +495,8 @@
       "page": "Chest (Barrows)",
       "rolls": 7,
       "perRollOneIn": 2448,
-      "needs": "all-brothers"
+      "needs": "all-brothers",
+      "unique": true
     },
     {
       "npc": "Barrows",
@@ -464,7 +505,8 @@
       "page": "Chest (Barrows)",
       "rolls": 7,
       "perRollOneIn": 2448,
-      "needs": "all-brothers"
+      "needs": "all-brothers",
+      "unique": true
     },
     {
       "npc": "Barrows",
@@ -473,7 +515,8 @@
       "page": "Chest (Barrows)",
       "rolls": 7,
       "perRollOneIn": 2448,
-      "needs": "all-brothers"
+      "needs": "all-brothers",
+      "unique": true
     },
     {
       "npc": "Barrows",
@@ -482,7 +525,8 @@
       "page": "Chest (Barrows)",
       "rolls": 7,
       "perRollOneIn": 2448,
-      "needs": "all-brothers"
+      "needs": "all-brothers",
+      "unique": true
     },
     {
       "npc": "Basilisk",
@@ -500,13 +544,15 @@
       "npc": "Basilisk Knight",
       "item": "Basilisk head",
       "oneIn": 1000,
-      "page": "Basilisk Knight"
+      "page": "Basilisk Knight",
+      "unique": true
     },
     {
       "npc": "Basilisk Knight",
       "item": "Basilisk jaw",
       "oneIn": 5000,
       "page": "Basilisk Knight",
+      "unique": true,
       "boost": {
         "when": "slayer-task",
         "oneIn": 1000
@@ -523,7 +569,8 @@
       "npc": "Basilisk Knight",
       "item": "Mystic hat (light)",
       "oneIn": 256,
-      "page": "Basilisk Knight"
+      "page": "Basilisk Knight",
+      "unique": true
     },
     {
       "npc": "Berry",
@@ -581,6 +628,7 @@
       "item": "Fire element staff crown",
       "oneIn": 75,
       "page": "Branda the Fire Queen",
+      "unique": true,
       "kills": "shared",
       "fight": [
         "Branda the Fire Queen",
@@ -603,13 +651,15 @@
       "npc": "Brutal black dragon",
       "item": "Dragon spear",
       "oneIn": 512,
-      "page": "Brutal black dragon"
+      "page": "Brutal black dragon",
+      "unique": true
     },
     {
       "npc": "Brutal black dragon",
       "item": "Uncut dragonstone",
       "oneIn": 512,
-      "page": "Brutal black dragon"
+      "page": "Brutal black dragon",
+      "unique": true
     },
     {
       "npc": "Brutal blue dragon",
@@ -643,6 +693,7 @@
       "item": "Claws of Callisto",
       "oneIn": 196,
       "page": "Callisto",
+      "unique": true,
       "kills": "shared"
     },
     {
@@ -650,6 +701,7 @@
       "item": "Dragon 2h sword",
       "oneIn": 256,
       "page": "Callisto",
+      "unique": true,
       "kills": "shared"
     },
     {
@@ -657,6 +709,7 @@
       "item": "Dragon pickaxe",
       "oneIn": 256,
       "page": "Callisto",
+      "unique": true,
       "kills": "shared"
     },
     {
@@ -664,6 +717,7 @@
       "item": "Tyrannical ring",
       "oneIn": 512,
       "page": "Callisto",
+      "unique": true,
       "kills": "shared"
     },
     {
@@ -671,19 +725,22 @@
       "item": "Voidwaker hilt",
       "oneIn": 360,
       "page": "Callisto",
+      "unique": true,
       "kills": "shared"
     },
     {
       "npc": "Calvar'ion",
       "item": "Ring of the gods",
       "oneIn": 716,
-      "page": "Calvar'ion"
+      "page": "Calvar'ion",
+      "unique": true
     },
     {
       "npc": "Calvar'ion",
       "item": "Skull of Vet'ion",
       "oneIn": 618,
-      "page": "Calvar'ion"
+      "page": "Calvar'ion",
+      "unique": true
     },
     {
       "npc": "Calvar'ion",
@@ -696,7 +753,8 @@
       "npc": "Calvar'ion",
       "item": "Voidwaker blade",
       "oneIn": 912,
-      "page": "Calvar'ion"
+      "page": "Calvar'ion",
+      "unique": true
     },
     {
       "npc": "Cave horror",
@@ -721,7 +779,8 @@
       "npc": "Cerberus",
       "item": "Eternal crystal",
       "oneIn": 520,
-      "page": "Cerberus"
+      "page": "Cerberus",
+      "unique": true
     },
     {
       "npc": "Cerberus",
@@ -741,25 +800,29 @@
       "npc": "Cerberus",
       "item": "Pegasian crystal",
       "oneIn": 520,
-      "page": "Cerberus"
+      "page": "Cerberus",
+      "unique": true
     },
     {
       "npc": "Cerberus",
       "item": "Primordial crystal",
       "oneIn": 520,
-      "page": "Cerberus"
+      "page": "Cerberus",
+      "unique": true
     },
     {
       "npc": "Cerberus",
       "item": "Smouldering stone",
       "oneIn": 520,
-      "page": "Cerberus"
+      "page": "Cerberus",
+      "unique": true
     },
     {
       "npc": "Chaos Elemental",
       "item": "Dragon pickaxe",
       "oneIn": 256,
-      "page": "Chaos Elemental"
+      "page": "Chaos Elemental",
+      "unique": true
     },
     {
       "npc": "Chaos Elemental",
@@ -810,25 +873,29 @@
       "npc": "Commander Zilyana",
       "item": "Armadyl crossbow",
       "oneIn": 508,
-      "page": "Commander Zilyana"
+      "page": "Commander Zilyana",
+      "unique": true
     },
     {
       "npc": "Commander Zilyana",
       "item": "Godsword shard 1",
       "oneIn": 762,
-      "page": "Commander Zilyana"
+      "page": "Commander Zilyana",
+      "unique": true
     },
     {
       "npc": "Commander Zilyana",
       "item": "Godsword shard 2",
       "oneIn": 762,
-      "page": "Commander Zilyana"
+      "page": "Commander Zilyana",
+      "unique": true
     },
     {
       "npc": "Commander Zilyana",
       "item": "Godsword shard 3",
       "oneIn": 762,
-      "page": "Commander Zilyana"
+      "page": "Commander Zilyana",
+      "unique": true
     },
     {
       "npc": "Commander Zilyana",
@@ -841,37 +908,43 @@
       "npc": "Commander Zilyana",
       "item": "Saradomin hilt",
       "oneIn": 508,
-      "page": "Commander Zilyana"
+      "page": "Commander Zilyana",
+      "unique": true
     },
     {
       "npc": "Commander Zilyana",
       "item": "Saradomin sword",
       "oneIn": 127,
-      "page": "Commander Zilyana"
+      "page": "Commander Zilyana",
+      "unique": true
     },
     {
       "npc": "Commander Zilyana",
       "item": "Saradomin's light",
       "oneIn": 254,
-      "page": "Commander Zilyana"
+      "page": "Commander Zilyana",
+      "unique": true
     },
     {
       "npc": "Corporeal Beast",
       "item": "Arcane sigil",
       "oneIn": 1365,
-      "page": "Corporeal Beast"
+      "page": "Corporeal Beast",
+      "unique": true
     },
     {
       "npc": "Corporeal Beast",
       "item": "Elysian sigil",
       "oneIn": 4095,
-      "page": "Corporeal Beast"
+      "page": "Corporeal Beast",
+      "unique": true
     },
     {
       "npc": "Corporeal Beast",
       "item": "Holy elixir",
       "oneIn": 170.66666666666666,
-      "page": "Corporeal Beast"
+      "page": "Corporeal Beast",
+      "unique": true
     },
     {
       "npc": "Corporeal Beast",
@@ -891,7 +964,8 @@
       "npc": "Corporeal Beast",
       "item": "Spectral sigil",
       "oneIn": 1365,
-      "page": "Corporeal Beast"
+      "page": "Corporeal Beast",
+      "unique": true
     },
     {
       "npc": "Crawling Hand",
@@ -929,13 +1003,15 @@
       "npc": "Dagannoth Prime",
       "item": "Dragon axe",
       "oneIn": 128,
-      "page": "Dagannoth Prime"
+      "page": "Dagannoth Prime",
+      "unique": true
     },
     {
       "npc": "Dagannoth Prime",
       "item": "Mud battlestaff",
       "oneIn": 128,
-      "page": "Dagannoth Prime"
+      "page": "Dagannoth Prime",
+      "unique": true
     },
     {
       "npc": "Dagannoth Prime",
@@ -948,19 +1024,22 @@
       "npc": "Dagannoth Prime",
       "item": "Seers ring",
       "oneIn": 128,
-      "page": "Dagannoth Prime"
+      "page": "Dagannoth Prime",
+      "unique": true
     },
     {
       "npc": "Dagannoth Rex",
       "item": "Berserker ring",
       "oneIn": 128,
-      "page": "Dagannoth Rex"
+      "page": "Dagannoth Rex",
+      "unique": true
     },
     {
       "npc": "Dagannoth Rex",
       "item": "Dragon axe",
       "oneIn": 128,
-      "page": "Dagannoth Rex"
+      "page": "Dagannoth Rex",
+      "unique": true
     },
     {
       "npc": "Dagannoth Rex",
@@ -973,19 +1052,22 @@
       "npc": "Dagannoth Rex",
       "item": "Warrior ring",
       "oneIn": 128,
-      "page": "Dagannoth Rex"
+      "page": "Dagannoth Rex",
+      "unique": true
     },
     {
       "npc": "Dagannoth Supreme",
       "item": "Archers ring",
       "oneIn": 128,
-      "page": "Dagannoth Supreme"
+      "page": "Dagannoth Supreme",
+      "unique": true
     },
     {
       "npc": "Dagannoth Supreme",
       "item": "Dragon axe",
       "oneIn": 128,
-      "page": "Dagannoth Supreme"
+      "page": "Dagannoth Supreme",
+      "unique": true
     },
     {
       "npc": "Dagannoth Supreme",
@@ -998,7 +1080,8 @@
       "npc": "Dagannoth Supreme",
       "item": "Seercull",
       "oneIn": 128,
-      "page": "Dagannoth Supreme"
+      "page": "Dagannoth Supreme",
+      "unique": true
     },
     {
       "npc": "Dark beast",
@@ -1017,37 +1100,43 @@
       "npc": "Demonic gorilla",
       "item": "Ballista limbs",
       "oneIn": 500,
-      "page": "Demonic gorilla"
+      "page": "Demonic gorilla",
+      "unique": true
     },
     {
       "npc": "Demonic gorilla",
       "item": "Ballista spring",
       "oneIn": 500,
-      "page": "Demonic gorilla"
+      "page": "Demonic gorilla",
+      "unique": true
     },
     {
       "npc": "Demonic gorilla",
       "item": "Heavy frame",
       "oneIn": 1500,
-      "page": "Demonic gorilla"
+      "page": "Demonic gorilla",
+      "unique": true
     },
     {
       "npc": "Demonic gorilla",
       "item": "Light frame",
       "oneIn": 750,
-      "page": "Demonic gorilla"
+      "page": "Demonic gorilla",
+      "unique": true
     },
     {
       "npc": "Demonic gorilla",
       "item": "Monkey tail",
       "oneIn": 1500,
-      "page": "Demonic gorilla"
+      "page": "Demonic gorilla",
+      "unique": true
     },
     {
       "npc": "Demonic gorilla",
       "item": "Zenyte shard",
       "oneIn": 300,
-      "page": "Demonic gorilla"
+      "page": "Demonic gorilla",
+      "unique": true
     },
     {
       "npc": "Deviant spectre",
@@ -1069,7 +1158,8 @@
         720,
         630,
         540
-      ]
+      ],
+      "unique": true
     },
     {
       "npc": "Doom of Mokhaiotl",
@@ -1085,7 +1175,8 @@
         720,
         630,
         540
-      ]
+      ],
+      "unique": true
     },
     {
       "npc": "Doom of Mokhaiotl",
@@ -1101,13 +1192,15 @@
         720,
         630,
         540
-      ]
+      ],
+      "unique": true
     },
     {
       "npc": "Drake",
       "item": "Dragon knife",
       "oneIn": 10000,
       "page": "Drake",
+      "unique": true,
       "boost": {
         "when": "slayer-task",
         "oneIn": 2000
@@ -1118,6 +1211,7 @@
       "item": "Dragon thrownaxe",
       "oneIn": 10000,
       "page": "Drake",
+      "unique": true,
       "boost": {
         "when": "slayer-task",
         "oneIn": 2000
@@ -1128,6 +1222,7 @@
       "item": "Drake's claw",
       "oneIn": 2560,
       "page": "Drake",
+      "unique": true,
       "boost": {
         "when": "slayer-task",
         "oneIn": 512
@@ -1138,6 +1233,7 @@
       "item": "Drake's tooth",
       "oneIn": 2560,
       "page": "Drake",
+      "unique": true,
       "boost": {
         "when": "slayer-task",
         "oneIn": 512
@@ -1156,6 +1252,7 @@
       "item": "Chromium ingot",
       "oneIn": 240,
       "page": "Duke Sucellus",
+      "unique": true,
       "level": 758
     },
     {
@@ -1163,6 +1260,7 @@
       "item": "Eye of the Duke",
       "oneIn": 720,
       "page": "Duke Sucellus",
+      "unique": true,
       "level": 758
     },
     {
@@ -1174,6 +1272,7 @@
         "Gold ring",
         "Magus vestige"
       ],
+      "unique": true,
       "level": 758
     },
     {
@@ -1181,6 +1280,7 @@
       "item": "Virtus mask",
       "oneIn": 2160,
       "page": "Duke Sucellus",
+      "unique": true,
       "level": 758
     },
     {
@@ -1188,6 +1288,7 @@
       "item": "Virtus robe bottom",
       "oneIn": 2160,
       "page": "Duke Sucellus",
+      "unique": true,
       "level": 758
     },
     {
@@ -1195,6 +1296,7 @@
       "item": "Virtus robe top",
       "oneIn": 2160,
       "page": "Duke Sucellus",
+      "unique": true,
       "level": 758
     },
     {
@@ -1211,6 +1313,7 @@
       "item": "Chromium ingot",
       "oneIn": 80,
       "page": "Duke Sucellus",
+      "unique": true,
       "level": 1099,
       "game": "Duke Sucellus"
     },
@@ -1219,6 +1322,7 @@
       "item": "Eye of the Duke",
       "oneIn": 240,
       "page": "Duke Sucellus",
+      "unique": true,
       "level": 1099,
       "game": "Duke Sucellus"
     },
@@ -1231,6 +1335,7 @@
         "Gold ring",
         "Magus vestige"
       ],
+      "unique": true,
       "level": 1099,
       "game": "Duke Sucellus"
     },
@@ -1239,6 +1344,7 @@
       "item": "Virtus mask",
       "oneIn": 720,
       "page": "Duke Sucellus",
+      "unique": true,
       "level": 1099,
       "game": "Duke Sucellus"
     },
@@ -1247,6 +1353,7 @@
       "item": "Virtus robe bottom",
       "oneIn": 720,
       "page": "Duke Sucellus",
+      "unique": true,
       "level": 1099,
       "game": "Duke Sucellus"
     },
@@ -1255,6 +1362,7 @@
       "item": "Virtus robe top",
       "oneIn": 720,
       "page": "Duke Sucellus",
+      "unique": true,
       "level": 1099,
       "game": "Duke Sucellus"
     },
@@ -1313,6 +1421,7 @@
       "item": "Ice element staff crown",
       "oneIn": 75,
       "page": "Eldric the Ice King",
+      "unique": true,
       "kills": "shared",
       "fight": [
         "Branda the Fire Queen",
@@ -1343,73 +1452,85 @@
       "npc": "Flight Kilisa",
       "item": "Armadyl chainskirt",
       "oneIn": 16129,
-      "page": "Flight Kilisa"
+      "page": "Flight Kilisa",
+      "unique": true
     },
     {
       "npc": "Flight Kilisa",
       "item": "Armadyl chestplate",
       "oneIn": 16129,
-      "page": "Flight Kilisa"
+      "page": "Flight Kilisa",
+      "unique": true
     },
     {
       "npc": "Flight Kilisa",
       "item": "Armadyl helmet",
       "oneIn": 16129,
-      "page": "Flight Kilisa"
+      "page": "Flight Kilisa",
+      "unique": true
     },
     {
       "npc": "Flight Kilisa",
       "item": "Godsword shard 1",
       "oneIn": 1524,
-      "page": "Flight Kilisa"
+      "page": "Flight Kilisa",
+      "unique": true
     },
     {
       "npc": "Flight Kilisa",
       "item": "Godsword shard 2",
       "oneIn": 1524,
-      "page": "Flight Kilisa"
+      "page": "Flight Kilisa",
+      "unique": true
     },
     {
       "npc": "Flight Kilisa",
       "item": "Godsword shard 3",
       "oneIn": 1524,
-      "page": "Flight Kilisa"
+      "page": "Flight Kilisa",
+      "unique": true
     },
     {
       "npc": "Flockleader Geerin",
       "item": "Armadyl chainskirt",
       "oneIn": 16129,
-      "page": "Flockleader Geerin"
+      "page": "Flockleader Geerin",
+      "unique": true
     },
     {
       "npc": "Flockleader Geerin",
       "item": "Armadyl chestplate",
       "oneIn": 16129,
-      "page": "Flockleader Geerin"
+      "page": "Flockleader Geerin",
+      "unique": true
     },
     {
       "npc": "Flockleader Geerin",
       "item": "Armadyl helmet",
       "oneIn": 16129,
-      "page": "Flockleader Geerin"
+      "page": "Flockleader Geerin",
+      "unique": true
     },
     {
       "npc": "Flockleader Geerin",
       "item": "Godsword shard 1",
       "oneIn": 1524,
-      "page": "Flockleader Geerin"
+      "page": "Flockleader Geerin",
+      "unique": true
     },
     {
       "npc": "Flockleader Geerin",
       "item": "Godsword shard 2",
       "oneIn": 1524,
-      "page": "Flockleader Geerin"
+      "page": "Flockleader Geerin",
+      "unique": true
     },
     {
       "npc": "Flockleader Geerin",
       "item": "Godsword shard 3",
       "oneIn": 1524,
-      "page": "Flockleader Geerin"
+      "page": "Flockleader Geerin",
+      "unique": true
     },
     {
       "npc": "Frenzied ice troll female",
@@ -1474,25 +1595,29 @@
       "npc": "General Graardor",
       "item": "Bandos boots",
       "oneIn": 381,
-      "page": "General Graardor"
+      "page": "General Graardor",
+      "unique": true
     },
     {
       "npc": "General Graardor",
       "item": "Bandos chestplate",
       "oneIn": 381,
-      "page": "General Graardor"
+      "page": "General Graardor",
+      "unique": true
     },
     {
       "npc": "General Graardor",
       "item": "Bandos hilt",
       "oneIn": 508,
-      "page": "General Graardor"
+      "page": "General Graardor",
+      "unique": true
     },
     {
       "npc": "General Graardor",
       "item": "Bandos tassets",
       "oneIn": 381,
-      "page": "General Graardor"
+      "page": "General Graardor",
+      "unique": true
     },
     {
       "npc": "General Graardor",
@@ -1505,19 +1630,22 @@
       "npc": "General Graardor",
       "item": "Godsword shard 1",
       "oneIn": 762,
-      "page": "General Graardor"
+      "page": "General Graardor",
+      "unique": true
     },
     {
       "npc": "General Graardor",
       "item": "Godsword shard 2",
       "oneIn": 762,
-      "page": "General Graardor"
+      "page": "General Graardor",
+      "unique": true
     },
     {
       "npc": "General Graardor",
       "item": "Godsword shard 3",
       "oneIn": 762,
-      "page": "General Graardor"
+      "page": "General Graardor",
+      "unique": true
     },
     {
       "npc": "General Graardor",
@@ -1565,31 +1693,36 @@
       "npc": "Growler",
       "item": "Godsword shard 1",
       "oneIn": 1524,
-      "page": "Growler"
+      "page": "Growler",
+      "unique": true
     },
     {
       "npc": "Growler",
       "item": "Godsword shard 2",
       "oneIn": 1524,
-      "page": "Growler"
+      "page": "Growler",
+      "unique": true
     },
     {
       "npc": "Growler",
       "item": "Godsword shard 3",
       "oneIn": 1524,
-      "page": "Growler"
+      "page": "Growler",
+      "unique": true
     },
     {
       "npc": "Growler",
       "item": "Saradomin sword",
       "oneIn": 5376.333333333333,
-      "page": "Growler"
+      "page": "Growler",
+      "unique": true
     },
     {
       "npc": "Gryphon",
       "item": "Horn of Plenty (empty)",
       "oneIn": 2500,
       "page": "Gryphon",
+      "unique": true,
       "boost": {
         "when": "slayer-task",
         "oneIn": 1000
@@ -1620,6 +1753,7 @@
       "item": "Dragon knife",
       "oneIn": 10001,
       "page": "Hydra",
+      "unique": true,
       "boost": {
         "when": "slayer-task",
         "oneIn": 2001
@@ -1630,6 +1764,7 @@
       "item": "Dragon thrownaxe",
       "oneIn": 10000,
       "page": "Hydra",
+      "unique": true,
       "boost": {
         "when": "slayer-task",
         "oneIn": 2000
@@ -1640,6 +1775,7 @@
       "item": "Hydra tail",
       "oneIn": 5001,
       "page": "Hydra",
+      "unique": true,
       "boost": {
         "when": "slayer-task",
         "oneIn": 1001
@@ -1716,19 +1852,22 @@
       "npc": "K'ril Tsutsaroth",
       "item": "Godsword shard 1",
       "oneIn": 762,
-      "page": "K'ril Tsutsaroth"
+      "page": "K'ril Tsutsaroth",
+      "unique": true
     },
     {
       "npc": "K'ril Tsutsaroth",
       "item": "Godsword shard 2",
       "oneIn": 762,
-      "page": "K'ril Tsutsaroth"
+      "page": "K'ril Tsutsaroth",
+      "unique": true
     },
     {
       "npc": "K'ril Tsutsaroth",
       "item": "Godsword shard 3",
       "oneIn": 762,
-      "page": "K'ril Tsutsaroth"
+      "page": "K'ril Tsutsaroth",
+      "unique": true
     },
     {
       "npc": "K'ril Tsutsaroth",
@@ -1741,43 +1880,50 @@
       "npc": "K'ril Tsutsaroth",
       "item": "Staff of the Dead",
       "oneIn": 508,
-      "page": "K'ril Tsutsaroth"
+      "page": "K'ril Tsutsaroth",
+      "unique": true
     },
     {
       "npc": "K'ril Tsutsaroth",
       "item": "Steam battlestaff",
       "oneIn": 127,
-      "page": "K'ril Tsutsaroth"
+      "page": "K'ril Tsutsaroth",
+      "unique": true
     },
     {
       "npc": "K'ril Tsutsaroth",
       "item": "Zamorak hilt",
       "oneIn": 508,
-      "page": "K'ril Tsutsaroth"
+      "page": "K'ril Tsutsaroth",
+      "unique": true
     },
     {
       "npc": "K'ril Tsutsaroth",
       "item": "Zamorakian spear",
       "oneIn": 127,
-      "page": "K'ril Tsutsaroth"
+      "page": "K'ril Tsutsaroth",
+      "unique": true
     },
     {
       "npc": "Kalphite Queen",
       "item": "Dragon 2h sword",
       "oneIn": 256,
-      "page": "Kalphite Queen"
+      "page": "Kalphite Queen",
+      "unique": true
     },
     {
       "npc": "Kalphite Queen",
       "item": "Dragon chainbody",
       "oneIn": 128,
-      "page": "Kalphite Queen"
+      "page": "Kalphite Queen",
+      "unique": true
     },
     {
       "npc": "Kalphite Queen",
       "item": "Dragon pickaxe",
       "oneIn": 400,
-      "page": "Kalphite Queen"
+      "page": "Kalphite Queen",
+      "unique": true
     },
     {
       "npc": "Kalphite Queen",
@@ -1797,7 +1943,8 @@
       "npc": "Kalphite Queen",
       "item": "Kq head",
       "oneIn": 128,
-      "page": "Kalphite Queen"
+      "page": "Kalphite Queen",
+      "unique": true
     },
     {
       "npc": "Kalphite Worker",
@@ -1874,25 +2021,29 @@
       "npc": "Kree'arra",
       "item": "Armadyl chainskirt",
       "oneIn": 381,
-      "page": "Kree'arra"
+      "page": "Kree'arra",
+      "unique": true
     },
     {
       "npc": "Kree'arra",
       "item": "Armadyl chestplate",
       "oneIn": 381,
-      "page": "Kree'arra"
+      "page": "Kree'arra",
+      "unique": true
     },
     {
       "npc": "Kree'arra",
       "item": "Armadyl helmet",
       "oneIn": 381,
-      "page": "Kree'arra"
+      "page": "Kree'arra",
+      "unique": true
     },
     {
       "npc": "Kree'arra",
       "item": "Armadyl hilt",
       "oneIn": 508,
-      "page": "Kree'arra"
+      "page": "Kree'arra",
+      "unique": true
     },
     {
       "npc": "Kree'arra",
@@ -1905,19 +2056,22 @@
       "npc": "Kree'arra",
       "item": "Godsword shard 1",
       "oneIn": 762,
-      "page": "Kree'arra"
+      "page": "Kree'arra",
+      "unique": true
     },
     {
       "npc": "Kree'arra",
       "item": "Godsword shard 2",
       "oneIn": 762,
-      "page": "Kree'arra"
+      "page": "Kree'arra",
+      "unique": true
     },
     {
       "npc": "Kree'arra",
       "item": "Godsword shard 3",
       "oneIn": 762,
-      "page": "Kree'arra"
+      "page": "Kree'arra",
+      "unique": true
     },
     {
       "npc": "Kree'arra",
@@ -1968,6 +2122,7 @@
       "item": "Xeric's talisman (inert)",
       "oneIn": 250,
       "page": "Lizardman",
+      "unique": true,
       "boost": {
         "when": "kourend-easy-diary",
         "oneIn": 125
@@ -1978,6 +2133,7 @@
       "item": "Xeric's talisman (inert)",
       "oneIn": 250,
       "page": "Lizardman brute",
+      "unique": true,
       "boost": {
         "when": "kourend-easy-diary",
         "oneIn": 125
@@ -1996,6 +2152,7 @@
       "item": "Dragon warhammer",
       "oneIn": 3000,
       "page": "Lizardman shaman",
+      "unique": true,
       "where": "outside-instances"
     },
     {
@@ -2090,6 +2247,7 @@
       "item": "Ancient hilt",
       "oneIn": 469.09090909090907,
       "page": "Nex",
+      "unique": true,
       "kills": "shared",
       "mvp": 1.1,
       "fight": [
@@ -2120,6 +2278,7 @@
       "item": "Nihil horn",
       "oneIn": 234.54545454545453,
       "page": "Nex",
+      "unique": true,
       "kills": "shared",
       "mvp": 1.1,
       "fight": [
@@ -2135,6 +2294,7 @@
       "item": "Torva full helm (damaged)",
       "oneIn": 234.54545454545453,
       "page": "Nex",
+      "unique": true,
       "kills": "shared",
       "mvp": 1.1,
       "fight": [
@@ -2150,6 +2310,7 @@
       "item": "Torva platebody (damaged)",
       "oneIn": 234.54545454545453,
       "page": "Nex",
+      "unique": true,
       "kills": "shared",
       "mvp": 1.1,
       "fight": [
@@ -2165,6 +2326,7 @@
       "item": "Torva platelegs (damaged)",
       "oneIn": 234.54545454545453,
       "page": "Nex",
+      "unique": true,
       "kills": "shared",
       "mvp": 1.1,
       "fight": [
@@ -2180,6 +2342,7 @@
       "item": "Zaryte vambraces",
       "oneIn": 156.36363636363635,
       "page": "Nex",
+      "unique": true,
       "kills": "shared",
       "mvp": 1.1,
       "fight": [
@@ -2248,43 +2411,50 @@
       "npc": "Phantom Muspah",
       "item": "Venator shard",
       "oneIn": 100,
-      "page": "Phantom Muspah"
+      "page": "Phantom Muspah",
+      "unique": true
     },
     {
       "npc": "Phosani's Nightmare",
       "item": "Eldritch orb",
       "oneIn": 1600,
-      "page": "Phosani's Nightmare"
+      "page": "Phosani's Nightmare",
+      "unique": true
     },
     {
       "npc": "Phosani's Nightmare",
       "item": "Harmonised orb",
       "oneIn": 1600,
-      "page": "Phosani's Nightmare"
+      "page": "Phosani's Nightmare",
+      "unique": true
     },
     {
       "npc": "Phosani's Nightmare",
       "item": "Inquisitor's great helm",
       "oneIn": 700,
-      "page": "Phosani's Nightmare"
+      "page": "Phosani's Nightmare",
+      "unique": true
     },
     {
       "npc": "Phosani's Nightmare",
       "item": "Inquisitor's hauberk",
       "oneIn": 700,
-      "page": "Phosani's Nightmare"
+      "page": "Phosani's Nightmare",
+      "unique": true
     },
     {
       "npc": "Phosani's Nightmare",
       "item": "Inquisitor's mace",
       "oneIn": 1129.032258064516,
-      "page": "Phosani's Nightmare"
+      "page": "Phosani's Nightmare",
+      "unique": true
     },
     {
       "npc": "Phosani's Nightmare",
       "item": "Inquisitor's plateskirt",
       "oneIn": 700,
-      "page": "Phosani's Nightmare"
+      "page": "Phosani's Nightmare",
+      "unique": true
     },
     {
       "npc": "Phosani's Nightmare",
@@ -2304,19 +2474,22 @@
       "npc": "Phosani's Nightmare",
       "item": "Nightmare staff",
       "oneIn": 507.2463768115942,
-      "page": "Phosani's Nightmare"
+      "page": "Phosani's Nightmare",
+      "unique": true
     },
     {
       "npc": "Phosani's Nightmare",
       "item": "Parasitic egg",
       "oneIn": 200,
-      "page": "Phosani's Nightmare"
+      "page": "Phosani's Nightmare",
+      "unique": true
     },
     {
       "npc": "Phosani's Nightmare",
       "item": "Volatile orb",
       "oneIn": 1600,
-      "page": "Phosani's Nightmare"
+      "page": "Phosani's Nightmare",
+      "unique": true
     },
     {
       "npc": "Rock",
@@ -2401,109 +2574,127 @@
       "npc": "Sergeant Grimspike",
       "item": "Bandos boots",
       "oneIn": 16256,
-      "page": "Sergeant Grimspike"
+      "page": "Sergeant Grimspike",
+      "unique": true
     },
     {
       "npc": "Sergeant Grimspike",
       "item": "Bandos chestplate",
       "oneIn": 16256,
-      "page": "Sergeant Grimspike"
+      "page": "Sergeant Grimspike",
+      "unique": true
     },
     {
       "npc": "Sergeant Grimspike",
       "item": "Bandos tassets",
       "oneIn": 16256,
-      "page": "Sergeant Grimspike"
+      "page": "Sergeant Grimspike",
+      "unique": true
     },
     {
       "npc": "Sergeant Grimspike",
       "item": "Godsword shard 1",
       "oneIn": 1524,
-      "page": "Sergeant Grimspike"
+      "page": "Sergeant Grimspike",
+      "unique": true
     },
     {
       "npc": "Sergeant Grimspike",
       "item": "Godsword shard 2",
       "oneIn": 1524,
-      "page": "Sergeant Grimspike"
+      "page": "Sergeant Grimspike",
+      "unique": true
     },
     {
       "npc": "Sergeant Grimspike",
       "item": "Godsword shard 3",
       "oneIn": 1524,
-      "page": "Sergeant Grimspike"
+      "page": "Sergeant Grimspike",
+      "unique": true
     },
     {
       "npc": "Sergeant Steelwill",
       "item": "Bandos boots",
       "oneIn": 16256,
-      "page": "Sergeant Steelwill"
+      "page": "Sergeant Steelwill",
+      "unique": true
     },
     {
       "npc": "Sergeant Steelwill",
       "item": "Bandos chestplate",
       "oneIn": 16256,
-      "page": "Sergeant Steelwill"
+      "page": "Sergeant Steelwill",
+      "unique": true
     },
     {
       "npc": "Sergeant Steelwill",
       "item": "Bandos tassets",
       "oneIn": 16256,
-      "page": "Sergeant Steelwill"
+      "page": "Sergeant Steelwill",
+      "unique": true
     },
     {
       "npc": "Sergeant Steelwill",
       "item": "Godsword shard 1",
       "oneIn": 1524,
-      "page": "Sergeant Steelwill"
+      "page": "Sergeant Steelwill",
+      "unique": true
     },
     {
       "npc": "Sergeant Steelwill",
       "item": "Godsword shard 2",
       "oneIn": 1524,
-      "page": "Sergeant Steelwill"
+      "page": "Sergeant Steelwill",
+      "unique": true
     },
     {
       "npc": "Sergeant Steelwill",
       "item": "Godsword shard 3",
       "oneIn": 1524,
-      "page": "Sergeant Steelwill"
+      "page": "Sergeant Steelwill",
+      "unique": true
     },
     {
       "npc": "Sergeant Strongstack",
       "item": "Bandos boots",
       "oneIn": 16256,
-      "page": "Sergeant Strongstack"
+      "page": "Sergeant Strongstack",
+      "unique": true
     },
     {
       "npc": "Sergeant Strongstack",
       "item": "Bandos chestplate",
       "oneIn": 16256,
-      "page": "Sergeant Strongstack"
+      "page": "Sergeant Strongstack",
+      "unique": true
     },
     {
       "npc": "Sergeant Strongstack",
       "item": "Bandos tassets",
       "oneIn": 16256,
-      "page": "Sergeant Strongstack"
+      "page": "Sergeant Strongstack",
+      "unique": true
     },
     {
       "npc": "Sergeant Strongstack",
       "item": "Godsword shard 1",
       "oneIn": 1524,
-      "page": "Sergeant Strongstack"
+      "page": "Sergeant Strongstack",
+      "unique": true
     },
     {
       "npc": "Sergeant Strongstack",
       "item": "Godsword shard 2",
       "oneIn": 1524,
-      "page": "Sergeant Strongstack"
+      "page": "Sergeant Strongstack",
+      "unique": true
     },
     {
       "npc": "Sergeant Strongstack",
       "item": "Godsword shard 3",
       "oneIn": 1524,
-      "page": "Sergeant Strongstack"
+      "page": "Sergeant Strongstack",
+      "unique": true
     },
     {
       "npc": "Skeletal Wyvern",
@@ -2539,13 +2730,15 @@
       "npc": "Spindel",
       "item": "Fangs of Venenatis",
       "oneIn": 618,
-      "page": "Spindel"
+      "page": "Spindel",
+      "unique": true
     },
     {
       "npc": "Spindel",
       "item": "Treasonous ring",
       "oneIn": 716,
-      "page": "Spindel"
+      "page": "Spindel",
+      "unique": true
     },
     {
       "npc": "Spindel",
@@ -2558,7 +2751,8 @@
       "npc": "Spindel",
       "item": "Voidwaker gem",
       "oneIn": 912,
-      "page": "Spindel"
+      "page": "Spindel",
+      "unique": true
     },
     {
       "npc": "Spitting Wyvern",
@@ -2582,25 +2776,29 @@
       "npc": "Starlight",
       "item": "Godsword shard 1",
       "oneIn": 1524,
-      "page": "Starlight"
+      "page": "Starlight",
+      "unique": true
     },
     {
       "npc": "Starlight",
       "item": "Godsword shard 2",
       "oneIn": 1524,
-      "page": "Starlight"
+      "page": "Starlight",
+      "unique": true
     },
     {
       "npc": "Starlight",
       "item": "Godsword shard 3",
       "oneIn": 1524,
-      "page": "Starlight"
+      "page": "Starlight",
+      "unique": true
     },
     {
       "npc": "Starlight",
       "item": "Saradomin sword",
       "oneIn": 5376.333333333333,
-      "page": "Starlight"
+      "page": "Starlight",
+      "unique": true
     },
     {
       "npc": "Stick",
@@ -2645,6 +2843,7 @@
       "item": "Dragon hunter wand",
       "oneIn": 105,
       "page": "The Hueycoatl",
+      "unique": true,
       "kills": "shared"
     },
     {
@@ -2660,6 +2859,7 @@
       "item": "Chromium ingot",
       "oneIn": 256,
       "page": "The Leviathan",
+      "unique": true,
       "level": 798
     },
     {
@@ -2667,6 +2867,7 @@
       "item": "Leviathan's lure",
       "oneIn": 768,
       "page": "The Leviathan",
+      "unique": true,
       "level": 798
     },
     {
@@ -2686,6 +2887,7 @@
         "Gold ring",
         "Venator vestige"
       ],
+      "unique": true,
       "level": 798
     },
     {
@@ -2693,6 +2895,7 @@
       "item": "Virtus mask",
       "oneIn": 2304,
       "page": "The Leviathan",
+      "unique": true,
       "level": 798
     },
     {
@@ -2700,6 +2903,7 @@
       "item": "Virtus robe bottom",
       "oneIn": 2304,
       "page": "The Leviathan",
+      "unique": true,
       "level": 798
     },
     {
@@ -2707,6 +2911,7 @@
       "item": "Virtus robe top",
       "oneIn": 2304,
       "page": "The Leviathan",
+      "unique": true,
       "level": 798
     },
     {
@@ -2714,6 +2919,7 @@
       "item": "Chromium ingot",
       "oneIn": 85.33333333333333,
       "page": "The Leviathan",
+      "unique": true,
       "level": 1157,
       "game": "The Leviathan"
     },
@@ -2722,6 +2928,7 @@
       "item": "Leviathan's lure",
       "oneIn": 256,
       "page": "The Leviathan",
+      "unique": true,
       "level": 1157,
       "game": "The Leviathan"
     },
@@ -2743,6 +2950,7 @@
         "Gold ring",
         "Venator vestige"
       ],
+      "unique": true,
       "level": 1157,
       "game": "The Leviathan"
     },
@@ -2751,6 +2959,7 @@
       "item": "Virtus mask",
       "oneIn": 768,
       "page": "The Leviathan",
+      "unique": true,
       "level": 1157,
       "game": "The Leviathan"
     },
@@ -2759,6 +2968,7 @@
       "item": "Virtus robe bottom",
       "oneIn": 768,
       "page": "The Leviathan",
+      "unique": true,
       "level": 1157,
       "game": "The Leviathan"
     },
@@ -2767,6 +2977,7 @@
       "item": "Virtus robe top",
       "oneIn": 768,
       "page": "The Leviathan",
+      "unique": true,
       "level": 1157,
       "game": "The Leviathan"
     },
@@ -2775,6 +2986,7 @@
       "item": "Eldritch orb",
       "oneIn": 960,
       "page": "The Nightmare",
+      "unique": true,
       "kills": "solo"
     },
     {
@@ -2782,6 +2994,7 @@
       "item": "Harmonised orb",
       "oneIn": 960,
       "page": "The Nightmare",
+      "unique": true,
       "kills": "solo"
     },
     {
@@ -2789,6 +3002,7 @@
       "item": "Inquisitor's great helm",
       "oneIn": 420,
       "page": "The Nightmare",
+      "unique": true,
       "kills": "solo"
     },
     {
@@ -2796,6 +3010,7 @@
       "item": "Inquisitor's hauberk",
       "oneIn": 420,
       "page": "The Nightmare",
+      "unique": true,
       "kills": "solo"
     },
     {
@@ -2803,6 +3018,7 @@
       "item": "Inquisitor's mace",
       "oneIn": 750,
       "page": "The Nightmare",
+      "unique": true,
       "kills": "solo"
     },
     {
@@ -2810,6 +3026,7 @@
       "item": "Inquisitor's plateskirt",
       "oneIn": 420,
       "page": "The Nightmare",
+      "unique": true,
       "kills": "solo"
     },
     {
@@ -2833,6 +3050,7 @@
       "item": "Nightmare staff",
       "oneIn": 300,
       "page": "The Nightmare",
+      "unique": true,
       "kills": "solo"
     },
     {
@@ -2840,6 +3058,7 @@
       "item": "Volatile orb",
       "oneIn": 960,
       "page": "The Nightmare",
+      "unique": true,
       "kills": "solo"
     },
     {
@@ -2851,6 +3070,7 @@
         "Gold ring",
         "Bellator vestige"
       ],
+      "unique": true,
       "level": 791
     },
     {
@@ -2858,6 +3078,7 @@
       "item": "Chromium ingot",
       "oneIn": 170.66666666666666,
       "page": "The Whisperer",
+      "unique": true,
       "level": 791
     },
     {
@@ -2865,6 +3086,7 @@
       "item": "Siren's staff",
       "oneIn": 512,
       "page": "The Whisperer",
+      "unique": true,
       "level": 791
     },
     {
@@ -2872,6 +3094,7 @@
       "item": "Virtus mask",
       "oneIn": 1536,
       "page": "The Whisperer",
+      "unique": true,
       "level": 791
     },
     {
@@ -2879,6 +3102,7 @@
       "item": "Virtus robe bottom",
       "oneIn": 1536,
       "page": "The Whisperer",
+      "unique": true,
       "level": 791
     },
     {
@@ -2886,6 +3110,7 @@
       "item": "Virtus robe top",
       "oneIn": 1536,
       "page": "The Whisperer",
+      "unique": true,
       "level": 791
     },
     {
@@ -2905,6 +3130,7 @@
         "Gold ring",
         "Bellator vestige"
       ],
+      "unique": true,
       "level": 1146,
       "game": "The Whisperer"
     },
@@ -2913,6 +3139,7 @@
       "item": "Chromium ingot",
       "oneIn": 56.888888888888886,
       "page": "The Whisperer",
+      "unique": true,
       "level": 1146,
       "game": "The Whisperer"
     },
@@ -2921,6 +3148,7 @@
       "item": "Siren's staff",
       "oneIn": 170.66666666666666,
       "page": "The Whisperer",
+      "unique": true,
       "level": 1146,
       "game": "The Whisperer"
     },
@@ -2929,6 +3157,7 @@
       "item": "Virtus mask",
       "oneIn": 512,
       "page": "The Whisperer",
+      "unique": true,
       "level": 1146,
       "game": "The Whisperer"
     },
@@ -2937,6 +3166,7 @@
       "item": "Virtus robe bottom",
       "oneIn": 512,
       "page": "The Whisperer",
+      "unique": true,
       "level": 1146,
       "game": "The Whisperer"
     },
@@ -2945,6 +3175,7 @@
       "item": "Virtus robe top",
       "oneIn": 512,
       "page": "The Whisperer",
+      "unique": true,
       "level": 1146,
       "game": "The Whisperer"
     },
@@ -3006,7 +3237,8 @@
       "npc": "Tormented Demon",
       "item": "Burning claw",
       "oneIn": 501.00200400801606,
-      "page": "Tormented Demon"
+      "page": "Tormented Demon",
+      "unique": true
     },
     {
       "npc": "Tormented Demon",
@@ -3018,19 +3250,22 @@
       "npc": "Tormented Demon",
       "item": "Tormented synapse",
       "oneIn": 500,
-      "page": "Tormented Demon"
+      "page": "Tormented Demon",
+      "unique": true
     },
     {
       "npc": "Tortured gorilla",
       "item": "Ballista limbs",
       "oneIn": 5000,
-      "page": "Tortured gorilla"
+      "page": "Tortured gorilla",
+      "unique": true
     },
     {
       "npc": "Tortured gorilla",
       "item": "Ballista spring",
       "oneIn": 5000,
-      "page": "Tortured gorilla"
+      "page": "Tortured gorilla",
+      "unique": true
     },
     {
       "npc": "Tortured gorilla",
@@ -3043,25 +3278,29 @@
       "npc": "Tortured gorilla",
       "item": "Heavy frame",
       "oneIn": 15000,
-      "page": "Tortured gorilla"
+      "page": "Tortured gorilla",
+      "unique": true
     },
     {
       "npc": "Tortured gorilla",
       "item": "Light frame",
       "oneIn": 7500,
-      "page": "Tortured gorilla"
+      "page": "Tortured gorilla",
+      "unique": true
     },
     {
       "npc": "Tortured gorilla",
       "item": "Monkey tail",
       "oneIn": 15000,
-      "page": "Tortured gorilla"
+      "page": "Tortured gorilla",
+      "unique": true
     },
     {
       "npc": "Tortured gorilla",
       "item": "Zenyte shard",
       "oneIn": 3000,
-      "page": "Tortured gorilla"
+      "page": "Tortured gorilla",
+      "unique": true
     },
     {
       "npc": "Troll general",
@@ -3081,25 +3320,29 @@
       "npc": "Tstanon Karlak",
       "item": "Godsword shard 1",
       "oneIn": 1524,
-      "page": "Tstanon Karlak"
+      "page": "Tstanon Karlak",
+      "unique": true
     },
     {
       "npc": "Tstanon Karlak",
       "item": "Godsword shard 2",
       "oneIn": 1524,
-      "page": "Tstanon Karlak"
+      "page": "Tstanon Karlak",
+      "unique": true
     },
     {
       "npc": "Tstanon Karlak",
       "item": "Godsword shard 3",
       "oneIn": 1524,
-      "page": "Tstanon Karlak"
+      "page": "Tstanon Karlak",
+      "unique": true
     },
     {
       "npc": "Tstanon Karlak",
       "item": "Zamorakian spear",
       "oneIn": 5376.333333333333,
-      "page": "Tstanon Karlak"
+      "page": "Tstanon Karlak",
+      "unique": true
     },
     {
       "npc": "Turoth",
@@ -3223,6 +3466,7 @@
       "item": "Chromium ingot",
       "oneIn": 362.6666666666667,
       "page": "Vardorvis",
+      "unique": true,
       "level": 784
     },
     {
@@ -3230,6 +3474,7 @@
       "item": "Executioner's axe head",
       "oneIn": 1088,
       "page": "Vardorvis",
+      "unique": true,
       "level": 784
     },
     {
@@ -3241,6 +3486,7 @@
         "Gold ring",
         "Ultor vestige"
       ],
+      "unique": true,
       "level": 784
     },
     {
@@ -3248,6 +3494,7 @@
       "item": "Virtus mask",
       "oneIn": 3264,
       "page": "Vardorvis",
+      "unique": true,
       "level": 784
     },
     {
@@ -3255,6 +3502,7 @@
       "item": "Virtus robe bottom",
       "oneIn": 3264,
       "page": "Vardorvis",
+      "unique": true,
       "level": 784
     },
     {
@@ -3262,6 +3510,7 @@
       "item": "Virtus robe top",
       "oneIn": 3264,
       "page": "Vardorvis",
+      "unique": true,
       "level": 784
     },
     {
@@ -3278,6 +3527,7 @@
       "item": "Chromium ingot",
       "oneIn": 120.8888888888889,
       "page": "Vardorvis",
+      "unique": true,
       "level": 1136,
       "game": "Vardorvis"
     },
@@ -3286,6 +3536,7 @@
       "item": "Executioner's axe head",
       "oneIn": 362.6666666666667,
       "page": "Vardorvis",
+      "unique": true,
       "level": 1136,
       "game": "Vardorvis"
     },
@@ -3298,6 +3549,7 @@
         "Gold ring",
         "Ultor vestige"
       ],
+      "unique": true,
       "level": 1136,
       "game": "Vardorvis"
     },
@@ -3306,6 +3558,7 @@
       "item": "Virtus mask",
       "oneIn": 1088,
       "page": "Vardorvis",
+      "unique": true,
       "level": 1136,
       "game": "Vardorvis"
     },
@@ -3314,6 +3567,7 @@
       "item": "Virtus robe bottom",
       "oneIn": 1088,
       "page": "Vardorvis",
+      "unique": true,
       "level": 1136,
       "game": "Vardorvis"
     },
@@ -3322,6 +3576,7 @@
       "item": "Virtus robe top",
       "oneIn": 1088,
       "page": "Vardorvis",
+      "unique": true,
       "level": 1136,
       "game": "Vardorvis"
     },
@@ -3330,6 +3585,7 @@
       "item": "Dragon 2h sword",
       "oneIn": 256,
       "page": "Venenatis",
+      "unique": true,
       "kills": "shared"
     },
     {
@@ -3337,6 +3593,7 @@
       "item": "Dragon pickaxe",
       "oneIn": 256,
       "page": "Venenatis",
+      "unique": true,
       "kills": "shared"
     },
     {
@@ -3344,6 +3601,7 @@
       "item": "Fangs of Venenatis",
       "oneIn": 196,
       "page": "Venenatis",
+      "unique": true,
       "kills": "shared"
     },
     {
@@ -3351,6 +3609,7 @@
       "item": "Treasonous ring",
       "oneIn": 512,
       "page": "Venenatis",
+      "unique": true,
       "kills": "shared"
     },
     {
@@ -3366,6 +3625,7 @@
       "item": "Voidwaker gem",
       "oneIn": 360,
       "page": "Venenatis",
+      "unique": true,
       "kills": "shared"
     },
     {
@@ -3373,6 +3633,7 @@
       "item": "Dragon 2h sword",
       "oneIn": 256,
       "page": "Vet'ion",
+      "unique": true,
       "kills": "shared"
     },
     {
@@ -3380,6 +3641,7 @@
       "item": "Dragon pickaxe",
       "oneIn": 256,
       "page": "Vet'ion",
+      "unique": true,
       "kills": "shared"
     },
     {
@@ -3387,6 +3649,7 @@
       "item": "Ring of the gods",
       "oneIn": 512,
       "page": "Vet'ion",
+      "unique": true,
       "kills": "shared"
     },
     {
@@ -3394,6 +3657,7 @@
       "item": "Skull of Vet'ion",
       "oneIn": 196,
       "page": "Vet'ion",
+      "unique": true,
       "kills": "shared"
     },
     {
@@ -3409,19 +3673,22 @@
       "item": "Voidwaker blade",
       "oneIn": 360,
       "page": "Vet'ion",
+      "unique": true,
       "kills": "shared"
     },
     {
       "npc": "Vorkath",
       "item": "Draconic visage",
       "oneIn": 5000,
-      "page": "Vorkath"
+      "page": "Vorkath",
+      "unique": true
     },
     {
       "npc": "Vorkath",
       "item": "Dragonbone necklace",
       "oneIn": 1000,
-      "page": "Vorkath"
+      "page": "Vorkath",
+      "unique": true
     },
     {
       "npc": "Vorkath",
@@ -3434,7 +3701,8 @@
       "npc": "Vorkath",
       "item": "Skeletal visage",
       "oneIn": 5000,
-      "page": "Vorkath"
+      "page": "Vorkath",
+      "unique": true
     },
     {
       "npc": "Vorkath",
@@ -3477,7 +3745,8 @@
       "npc": "Vyrewatch Sentinel",
       "item": "Blood shard",
       "oneIn": 1500,
-      "page": "Vyrewatch Sentinel"
+      "page": "Vyrewatch Sentinel",
+      "unique": true
     },
     {
       "npc": "Vyrewatch Sentinel",
@@ -3525,43 +3794,50 @@
       "npc": "Wingman Skree",
       "item": "Armadyl chainskirt",
       "oneIn": 16129,
-      "page": "Wingman Skree"
+      "page": "Wingman Skree",
+      "unique": true
     },
     {
       "npc": "Wingman Skree",
       "item": "Armadyl chestplate",
       "oneIn": 16129,
-      "page": "Wingman Skree"
+      "page": "Wingman Skree",
+      "unique": true
     },
     {
       "npc": "Wingman Skree",
       "item": "Armadyl helmet",
       "oneIn": 16129,
-      "page": "Wingman Skree"
+      "page": "Wingman Skree",
+      "unique": true
     },
     {
       "npc": "Wingman Skree",
       "item": "Godsword shard 1",
       "oneIn": 1524,
-      "page": "Wingman Skree"
+      "page": "Wingman Skree",
+      "unique": true
     },
     {
       "npc": "Wingman Skree",
       "item": "Godsword shard 2",
       "oneIn": 1524,
-      "page": "Wingman Skree"
+      "page": "Wingman Skree",
+      "unique": true
     },
     {
       "npc": "Wingman Skree",
       "item": "Godsword shard 3",
       "oneIn": 1524,
-      "page": "Wingman Skree"
+      "page": "Wingman Skree",
+      "unique": true
     },
     {
       "npc": "Wyrm",
       "item": "Dragon harpoon",
       "oneIn": 10000,
       "page": "Wyrm",
+      "unique": true,
       "boost": {
         "when": "slayer-task",
         "oneIn": 2000
@@ -3572,6 +3848,7 @@
       "item": "Dragon knife",
       "oneIn": 10000,
       "page": "Wyrm",
+      "unique": true,
       "boost": {
         "when": "slayer-task",
         "oneIn": 2000
@@ -3582,6 +3859,7 @@
       "item": "Dragon shortsword",
       "oneIn": 10000,
       "page": "Wyrm",
+      "unique": true,
       "boost": {
         "when": "slayer-task",
         "oneIn": 2000
@@ -3592,6 +3870,7 @@
       "item": "Dragon thrownaxe",
       "oneIn": 10000,
       "page": "Wyrm",
+      "unique": true,
       "boost": {
         "when": "slayer-task",
         "oneIn": 2000
@@ -3602,6 +3881,7 @@
       "item": "Oathplate chest",
       "oneIn": 600,
       "page": "Yama",
+      "unique": true,
       "kills": "shared",
       "unless": "contract"
     },
@@ -3610,6 +3890,7 @@
       "item": "Oathplate helm",
       "oneIn": 600,
       "page": "Yama",
+      "unique": true,
       "kills": "shared",
       "unless": "contract"
     },
@@ -3618,6 +3899,7 @@
       "item": "Oathplate legs",
       "oneIn": 600,
       "page": "Yama",
+      "unique": true,
       "kills": "shared",
       "unless": "contract"
     },
@@ -3626,6 +3908,7 @@
       "item": "Soulflame horn",
       "oneIn": 300,
       "page": "Yama",
+      "unique": true,
       "kills": "shared",
       "unless": "contract"
     },
@@ -3642,31 +3925,36 @@
       "npc": "Zakl'n Gritch",
       "item": "Godsword shard 1",
       "oneIn": 1524,
-      "page": "Zakl'n Gritch"
+      "page": "Zakl'n Gritch",
+      "unique": true
     },
     {
       "npc": "Zakl'n Gritch",
       "item": "Godsword shard 2",
       "oneIn": 1524,
-      "page": "Zakl'n Gritch"
+      "page": "Zakl'n Gritch",
+      "unique": true
     },
     {
       "npc": "Zakl'n Gritch",
       "item": "Godsword shard 3",
       "oneIn": 1524,
-      "page": "Zakl'n Gritch"
+      "page": "Zakl'n Gritch",
+      "unique": true
     },
     {
       "npc": "Zakl'n Gritch",
       "item": "Zamorakian spear",
       "oneIn": 5376.333333333333,
-      "page": "Zakl'n Gritch"
+      "page": "Zakl'n Gritch",
+      "unique": true
     },
     {
       "npc": "Zalcano",
       "item": "Crystal tool seed",
       "oneIn": 205.12820512820514,
       "page": "Zalcano",
+      "unique": true,
       "kills": "solo"
     },
     {
@@ -3682,6 +3970,7 @@
       "item": "Uncut onyx",
       "oneIn": 8000,
       "page": "Zalcano",
+      "unique": true,
       "kills": "solo"
     },
     {
@@ -3696,6 +3985,7 @@
       "item": "Magic fang",
       "oneIn": 512.2501221299462,
       "page": "Zulrah",
+      "unique": true,
       "rolls": 2,
       "perRollOneIn": 1024
     },
@@ -3704,6 +3994,7 @@
       "item": "Magma mutagen",
       "oneIn": 6553.7500095371015,
       "page": "Zulrah",
+      "unique": true,
       "rolls": 2,
       "perRollOneIn": 13107
     },
@@ -3719,6 +4010,7 @@
       "item": "Serpentine visage",
       "oneIn": 512.2501221299462,
       "page": "Zulrah",
+      "unique": true,
       "rolls": 2,
       "perRollOneIn": 1024
     },
@@ -3727,6 +4019,7 @@
       "item": "Tanzanite fang",
       "oneIn": 512.2501221299462,
       "page": "Zulrah",
+      "unique": true,
       "rolls": 2,
       "perRollOneIn": 1024
     },
@@ -3735,6 +4028,7 @@
       "item": "Tanzanite mutagen",
       "oneIn": 6553.7500095371015,
       "page": "Zulrah",
+      "unique": true,
       "rolls": 2,
       "perRollOneIn": 13107
     },
@@ -3743,6 +4037,7 @@
       "item": "Uncut onyx",
       "oneIn": 512.2501221299462,
       "page": "Zulrah",
+      "unique": true,
       "rolls": 2,
       "perRollOneIn": 1024
     }
