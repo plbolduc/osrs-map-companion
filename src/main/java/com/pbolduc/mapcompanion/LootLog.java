@@ -417,9 +417,9 @@ public class LootLog
 	}
 
 	/**
-	 * How long a fight's damage is kept without a hit landing: a minute of ticks. A group hits until
-	 * the end, so a shared kill has hits near its death; a fight alone after a group left has none,
-	 * and starts again from the player's own.
+	 * How long a fight's damage is kept without a hit landing: a minute of ticks. Anyone's hit keeps
+	 * it, the player's own included, so another player's damage stays in the fight it landed in
+	 * however long the player fights on alone; only a minute with no hit at all starts a new fight.
 	 */
 	static final int SHARED_TICKS = 100;
 	/**
