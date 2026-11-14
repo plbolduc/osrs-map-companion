@@ -777,6 +777,21 @@ public class LootLogDropLuckTest
 	}
 
 	/**
+	 * The awakened fight rolls the pet as the ordinary one does, after the whole table, so its pet
+	 * line counts under the awakened version, at the ordinary rate.
+	 */
+	@Test
+	public void anAwakenedBossesPetCountsUnderTheAwakenedVersion()
+	{
+		log.record(new ServerNpcLoot(RewardTestClient.npc("Vardorvis", 1136), Arrays.asList(new ItemStack(BONES, 1))));
+		log.onPetMessage(game.client().getTickCount());
+		LootLog.Drop butch = drop("Vardorvis (awakened)", "Butch");
+		assertEquals(1, butch.obtained);
+		assertEquals(3000, butch.oneIn, 1e-9);
+		assertEquals(1088 / 9.0, drop("Vardorvis (awakened)", "Chromium ingot").oneIn, 1e-9);
+	}
+
+	/**
 	 * A vestige is three steps the game shows, a gold ring first; each step is one drop of its
 	 * progress, and the row is drawn with the vestige.
 	 */
