@@ -391,6 +391,12 @@ public class LootLog
 	}
 
 	/** An item's weighted kills as they stand: [count, worth]. */
+	/** A map an older blob may predate: empty rather than null, so nothing reading it dereferences null. */
+	private static <V> Map<String, V> orEmpty(@Nullable Map<String, V> stored)
+	{
+		return stored == null ? new LinkedHashMap<>() : stored;
+	}
+
 	private static double[] sharedNow(Tally tally, String item)
 	{
 		return tally.weighted.getOrDefault(item, new double[2]).clone();
@@ -583,20 +589,14 @@ public class LootLog
 		{
 			return emptyList();
 		}
-		for (Rate rate : tracked.getOrDefault(key(kill.npc), emptyList()))
+		for (Rate rate : rates(kill.npc))
 		{
 			if (Boolean.TRUE.equals(rate.pet) && kill.counts.contains(rate.item))
 			{
-				int wait = tally.kills - baseline(tally, rate.item);
-				double[] waitShared = sharedSince(tally, rate, tally.sharedAtLast.get(rate.item));
-				boolean first = tally.obtained.getOrDefault(rate.item, 0) == 0;
-				tally.obtained.put(rate.item, (int) Math.min(MAX_COUNT, (long) tally.obtained.getOrDefault(rate.item, 0) + 1));
-				tally.killsAtLast.put(rate.item, tally.kills);
-				tally.sharedAtLast.put(rate.item, sharedNow(tally, rate.item));
+				Notable pet = rated(tally, kill.npc, rate, null);
 				unsaved = true;
 				saveIfDue();
-				return Collections.singletonList(new Notable(kill.npc, rate.item, -1, 1, rate.oneIn, wait, 0, null, null, first,
-					(int) waitShared[0], waitShared[1]));
+				return Collections.singletonList(pet);
 			}
 		}
 		return emptyList();
@@ -807,7 +807,7 @@ public class LootLog
 			: countKill(whole, tracked.get(key(whole)), emptyList(), rate -> 1, null, tick));
 		if (lootForfeited(game, event.getItems()))
 		{
-			return with(notable, noteKill(game, tracked.getOrDefault(key(game), emptyList()), emptySet(), tick));
+			return with(notable, noteKill(game, rates(game), emptySet(), tick));
 		}
 		String name = versionOf(game, event.getComposition());
 		if (name == null)
@@ -815,7 +815,7 @@ public class LootLog
 			/* A version of this monster the table does not price, such as the quest's fight. */
 			return notable;
 		}
-		List<Rate> watched = tracked.getOrDefault(key(name), emptyList());
+		List<Rate> watched = rates(name);
 		if (anyRow(watched, "unless", "contract") && contractSpent)
 		{
 			/* The fight a contract was spent on: its reward was guaranteed, so the kill is not counted. */
@@ -961,8 +961,7 @@ public class LootLog
 				{
 					if (rate.boost != null && when.equals(rate.boost.when))
 					{
-						resetHistory(tally, rate.item);
-						resetBoost(tally, rate);
+						restart(tally, rate);
 					}
 				}
 			}
@@ -991,8 +990,7 @@ public class LootLog
 			/* A failed lookup may conceal a reset. Resume complete evidence from this receipt. */
 			for (Rate rate : watched)
 			{
-				resetHistory(tally, rate.item);
-				resetBoost(tally, rate);
+				restart(tally, rate);
 			}
 		}
 		/*
@@ -1036,19 +1034,7 @@ public class LootLog
 				{
 					continue;
 				}
-				int wait = tally.kills - baseline(tally, rate.item);
-				int waitBoosted = rate.boost == null ? 0 : boosted(tally, rate) - tally.boostedAtLast.getOrDefault(rate.item, 0);
-				double[] waitShared = sharedSince(tally, rate, tally.sharedAtLast.get(rate.item));
-				boolean first = tally.obtained.getOrDefault(rate.item, 0) == 0;
-				count(tally, rate.item, stack);
-				if (rate.boost != null)
-				{
-					tally.boostedAtLast.put(rate.item, boosted(tally, rate));
-				}
-				tally.sharedAtLast.put(rate.item, sharedNow(tally, rate.item));
-				notable.add(new Notable(name, rate.item, stack.getId(), stack.getQuantity(), rate.oneIn, wait,
-					waitBoosted, rate.boost == null ? null : rate.boost.oneIn, rate.boost == null ? null : boostLabel(rate.boost.when), first,
-					(int) waitShared[0], waitShared[1]));
+				notable.add(rated(tally, name, rate, stack));
 			}
 			else if (judged && notables.notable(stack.getId()) && !notables.pet(stack.getId()))
 			{
@@ -1217,9 +1203,10 @@ public class LootLog
 		return rate.boost == null ? 0 : tally.boostedKills.getOrDefault(rate.boost.when, 0);
 	}
 
-	/** A boosted item's two baselines, both at the counter's current value. */
-	private static void resetBoost(Tally tally, Rate rate)
+	/** A rated row started again from now, a boosted item's two baselines with it, at the counter's current value. */
+	private static void restart(Tally tally, Rate rate)
 	{
+		resetHistory(tally, rate.item);
 		if (rate.boost == null)
 		{
 			tally.boostedAtLast.remove(rate.item);
@@ -1231,11 +1218,37 @@ public class LootLog
 		tally.boostedAtStart.put(rate.item, now);
 	}
 
-	private static void count(Tally tally, String item, ItemStack stack)
+	/**
+	 * A rated drop counted: how long it was waited for, then its row moved on to now. A pet is told
+	 * by its chat line rather than by a stack, so it comes with none: one of it, no item id to keep,
+	 * and its kills priced at the one rate, never a boosted one.
+	 */
+	private static Notable rated(Tally tally, String npc, Rate rate, @Nullable ItemStack stack)
+	{
+		Boost boost = stack == null ? null : rate.boost;
+		int wait = tally.kills - baseline(tally, rate.item);
+		int waitBoosted = boost == null ? 0 : boosted(tally, rate) - tally.boostedAtLast.getOrDefault(rate.item, 0);
+		double[] waitShared = sharedSince(tally, rate, tally.sharedAtLast.get(rate.item));
+		boolean first = tally.obtained.getOrDefault(rate.item, 0) == 0;
+		count(tally, rate.item, stack);
+		if (boost != null)
+		{
+			tally.boostedAtLast.put(rate.item, boosted(tally, rate));
+		}
+		tally.sharedAtLast.put(rate.item, sharedNow(tally, rate.item));
+		return new Notable(npc, rate.item, stack == null ? -1 : stack.getId(), stack == null ? 1 : stack.getQuantity(),
+			rate.oneIn, wait, waitBoosted, boost == null ? null : boost.oneIn, boost == null ? null : boostLabel(boost.when),
+			first, (int) waitShared[0], waitShared[1]);
+	}
+
+	private static void count(Tally tally, String item, @Nullable ItemStack stack)
 	{
 		tally.obtained.put(item, (int) Math.min(MAX_COUNT, (long) tally.obtained.getOrDefault(item, 0) + 1));
 		tally.killsAtLast.put(item, tally.kills);
-		tally.itemIds.put(item, stack.getId());
+		if (stack != null)
+		{
+			tally.itemIds.put(item, stack.getId());
+		}
 	}
 
 	/**
@@ -1331,7 +1344,7 @@ public class LootLog
 		for (Map.Entry<String, Tally> entry : ordered(pinnedNpc))
 		{
 			Tally tally = entry.getValue();
-			List<Rate> watched = tracked.getOrDefault(key(entry.getKey()), emptyList());
+			List<Rate> watched = rates(entry.getKey());
 			/* For every monster, since it repairs the tally it is given; the row is what can be spared. */
 			ensureTracked(tally, watched);
 			/*
@@ -1563,7 +1576,7 @@ public class LootLog
 	/** Whether any of this monster's rated drops is boosted under {@code when}. */
 	public boolean boosts(String npc, String when)
 	{
-		return conditions(tracked.getOrDefault(key(npc), emptyList())).contains(when);
+		return conditions(rates(npc)).contains(when);
 	}
 
 	/** Whether a drop's boost applies to the next kill of this monster, as far as is known now. */
@@ -1636,7 +1649,7 @@ public class LootLog
 		for (Map.Entry<String, Tally> entry : ordered(pinnedNpc()))
 		{
 			Tally tally = entry.getValue();
-			List<Rate> watched = tracked.getOrDefault(key(entry.getKey()), emptyList());
+			List<Rate> watched = rates(entry.getKey());
 			ensureTracked(tally, watched);
 			List<Drop> drops = new ArrayList<>();
 			for (String item : dropOrder(tally, watched, false))
@@ -1940,38 +1953,17 @@ public class LootLog
 						&& tally.kills >= 0 && tally.kills <= MAX_COUNT)
 					{
 						/** An older blob may predate a field; empty maps beat null dereferences. */
-						if (tally.obtained == null)
-						{
-							tally.obtained = new LinkedHashMap<>();
-						}
-						if (tally.killsAtLast == null)
-						{
-							tally.killsAtLast = new LinkedHashMap<>();
-						}
-						if (tally.trackedSince == null)
-						{
-							tally.trackedSince = new LinkedHashMap<>();
-						}
-						if (tally.itemIds == null)
-						{
-							tally.itemIds = new LinkedHashMap<>();
-						}
+						tally.obtained = orEmpty(tally.obtained);
+						tally.killsAtLast = orEmpty(tally.killsAtLast);
+						tally.trackedSince = orEmpty(tally.trackedSince);
+						tally.itemIds = orEmpty(tally.itemIds);
 						if (tally.collection == null)
 						{
 							tally.collection = new LinkedHashSet<>();
 						}
-						if (tally.boostedKills == null)
-						{
-							tally.boostedKills = new LinkedHashMap<>();
-						}
-						if (tally.boostedAtLast == null)
-						{
-							tally.boostedAtLast = new LinkedHashMap<>();
-						}
-						if (tally.boostedAtStart == null)
-						{
-							tally.boostedAtStart = new LinkedHashMap<>();
-						}
+						tally.boostedKills = orEmpty(tally.boostedKills);
+						tally.boostedAtLast = orEmpty(tally.boostedAtLast);
+						tally.boostedAtStart = orEmpty(tally.boostedAtStart);
 						/* The shared counters too, and a pair that is not one: either would throw and lose every monster. */
 						tally.weighted = pairs(tally.weighted);
 						tally.sharedAtLast = pairs(tally.sharedAtLast);
@@ -1984,7 +1976,7 @@ public class LootLog
 						{
 							tally.collectionSince = tally.kills;
 						}
-						ensureTracked(tally, tracked.getOrDefault(key(name), emptyList()));
+						ensureTracked(tally, rates(name));
 						tallies.put(name, tally);
 					}
 				});
@@ -2070,6 +2062,12 @@ public class LootLog
 		loaded = false;
 	}
 
+	/** The rated rows a monster has, none for one the table does not rate. */
+	private List<Rate> rates(String npc)
+	{
+		return tracked.getOrDefault(key(npc), emptyList());
+	}
+
 	private static String key(String npc)
 	{
 		return npc.toLowerCase().trim();
@@ -2127,23 +2125,16 @@ public class LootLog
 			if (!tally.collection.contains(item) || obtained == null || obtained <= 0 || obtained > MAX_COUNT
 				|| at == null || since == null || since < 0 || at < since || at > tally.kills)
 			{
+				/* Its other rows go below, with every row that is neither obtained nor rated. */
 				tally.obtained.remove(item);
-				tally.killsAtLast.remove(item);
-				tally.trackedSince.remove(item);
-				tally.itemIds.remove(item);
 			}
 		}
 		tally.collection.retainAll(tally.obtained.keySet());
 		Set<String> kept = new HashSet<>(tally.obtained.keySet());
 		kept.addAll(rated);
-		tally.killsAtLast.keySet().retainAll(kept);
-		tally.trackedSince.keySet().retainAll(kept);
-		tally.itemIds.keySet().retainAll(kept);
-		tally.boostedAtLast.keySet().retainAll(rated);
-		tally.boostedAtStart.keySet().retainAll(rated);
-		tally.sharedAtLast.keySet().retainAll(rated);
-		tally.sharedAtStart.keySet().retainAll(rated);
-		tally.weighted.keySet().retainAll(rated);
+		Arrays.asList(tally.killsAtLast, tally.trackedSince, tally.itemIds).forEach(rows -> rows.keySet().retainAll(kept));
+		Arrays.asList(tally.boostedAtLast, tally.boostedAtStart, tally.sharedAtLast, tally.sharedAtStart, tally.weighted)
+			.forEach(rows -> rows.keySet().retainAll(rated));
 		for (Rate rate : watched)
 		{
 			Integer since = tally.trackedSince.get(rate.item);
@@ -2154,8 +2145,7 @@ public class LootLog
 				|| (obtained > 0 && (at == null || at < since || at > tally.kills))
 				|| !boostConsistent(tally, rate))
 			{
-				resetHistory(tally, rate.item);
-				resetBoost(tally, rate);
+				restart(tally, rate);
 			}
 		}
 	}
