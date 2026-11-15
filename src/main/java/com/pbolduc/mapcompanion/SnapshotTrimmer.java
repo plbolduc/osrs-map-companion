@@ -31,6 +31,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.IntConsumer;
 import java.util.stream.Collectors;
+import com.pbolduc.mapcompanion.CompanionSnapshot.*;
 
 /**
  * Making a snapshot fit, and saying so when something had to go.
@@ -119,7 +120,7 @@ public class SnapshotTrimmer
 	 * two clients holding the same knowledge dropped different halves of it, and one client dropped
 	 * a different half between two posts as its own map reordered itself while filling up.
 	 */
-	private static final Comparator<CompanionSnapshot.Patch> BY_AGE_THEN_ID = (a, b) ->
+	private static final Comparator<Patch> BY_AGE_THEN_ID = (a, b) ->
 	{
 		int byAge = Long.compare(a.observedMsAgo, b.observedMsAgo);
 		return byAge != 0 ? byAge : String.valueOf(a.id).compareTo(String.valueOf(b.id));
@@ -143,10 +144,10 @@ public class SnapshotTrimmer
 		}
 		Map<String, String> questLog = s.questLog;
 		Map<Integer, Boolean> stash = s.stashUnits;
-		List<CompanionSnapshot.Patch> patches = s.farming == null ? new ArrayList<>() : s.farming.patches;
-		List<CompanionSnapshot.Npc> npcs = s.loot == null ? new ArrayList<>() : s.loot.npcs;
-		List<CompanionSnapshot.Patch> byAge = new ArrayList<>(patches);
-		List<CompanionSnapshot.Npc> log = new ArrayList<>(npcs);
+		List<Patch> patches = s.farming == null ? new ArrayList<>() : s.farming.patches;
+		List<Npc> npcs = s.loot == null ? new ArrayList<>() : s.loot.npcs;
+		List<Patch> byAge = new ArrayList<>(patches);
+		List<Npc> log = new ArrayList<>(npcs);
 		byAge.sort(BY_AGE_THEN_ID);
 		patches.clear();
 		npcs.clear();
@@ -183,9 +184,9 @@ public class SnapshotTrimmer
 		 * and a collection row has no rate, so the map never reads its absence, which makes the 40th
 		 * monster's rated rows worth more than the 1st's collection rows.
 		 */
-		List<List<CompanionSnapshot.Drop>> whole = new ArrayList<>();
-		List<List<CompanionSnapshot.Drop>> rated = new ArrayList<>();
-		for (CompanionSnapshot.Npc npc : log)
+		List<List<Drop>> whole = new ArrayList<>();
+		List<List<Drop>> rated = new ArrayList<>();
+		for (Npc npc : log)
 		{
 			whole.add(npc.drops);
 			rated.add(npc.drops = npc.drops == null ? null
@@ -279,7 +280,7 @@ public class SnapshotTrimmer
 			snapshot.detailsTruncated = true;
 		}
 		trimTo(snapshot.loot.npcs, MAX_LOOT_NPCS);
-		for (CompanionSnapshot.Npc npc : snapshot.loot.npcs)
+		for (Npc npc : snapshot.loot.npcs)
 		{
 			if (npc.drops == null || npc.drops.size() <= MAX_DROPS_PER_NPC)
 			{

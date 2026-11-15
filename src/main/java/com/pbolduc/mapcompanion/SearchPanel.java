@@ -35,6 +35,7 @@ import javax.swing.border.EmptyBorder;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.gameval.SpriteID;
 import net.runelite.client.ui.ColorScheme;
+import com.pbolduc.mapcompanion.SearchClient.*;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.*;
 import static com.pbolduc.mapcompanion.RoutePress.Said;
 
@@ -94,7 +95,7 @@ final class SearchPanel extends JPanel
 	private static final String HELD = Words.of("search.held");
 	/** The row whose pick is out or was refused, so a refusal can name it; null once answered or typed past. */
 	@Nullable
-	private SearchClient.Hit picked;
+	private Hit picked;
 	/** The press's last word this list has acted on, so each answer folds or opens it once. */
 	@Nullable
 	private Said heard;
@@ -168,7 +169,7 @@ final class SearchPanel extends JPanel
 	void refresh()
 	{
 		search.checkScope();
-		SearchClient.Result result = search.result();
+		Result result = search.result();
 		Said said = press.said(SOURCE);
 		heard(said);
 		Said shown = said == quiet ? null : said;
@@ -197,7 +198,7 @@ final class SearchPanel extends JPanel
 		if (!folded)
 		{
 			String section = null;
-			for (SearchClient.Hit hit : result.hits)
+			for (Hit hit : result.hits)
 			{
 				if (hit.section != null && !hit.section.equals(section))
 				{
@@ -237,7 +238,7 @@ final class SearchPanel extends JPanel
 	 * the wait says when the search goes by itself. Either is the search's own wait, not the routes'.
 	 */
 	@Nullable
-	private String searchLine(SearchClient.Result result, long now)
+	private String searchLine(Result result, long now)
 	{
 		if (!MapWait.waits(result.message))
 		{
@@ -295,10 +296,10 @@ final class SearchPanel extends JPanel
 		return picked == null ? message : picked.name + ": " + message;
 	}
 
-	private static String hitsKey(SearchClient.Result result)
+	private static String hitsKey(Result result)
 	{
 		StringBuilder sb = new StringBuilder();
-		for (SearchClient.Hit hit : result.hits)
+		for (Hit hit : result.hits)
 		{
 			sb.append(hit.id).append('|').append(hit.line).append('|').append(hit.far).append(';');
 		}
@@ -313,7 +314,7 @@ final class SearchPanel extends JPanel
 	 * read down one edge and are compared without reading a sentence. The name gives up that much
 	 * width; the grey line and a row with no distance keep all of it.
 	 */
-	private JPanel row(SearchClient.Hit hit, boolean live)
+	private JPanel row(Hit hit, boolean live)
 	{
 		JLabel picture = new JLabel();
 		picture.setName("search.picture");
@@ -375,7 +376,7 @@ final class SearchPanel extends JPanel
 	}
 
 	/** Hover and the press, for a row that takes a pick. */
-	private MouseAdapter rowPresses(JPanel row, SearchClient.Hit hit)
+	private MouseAdapter rowPresses(JPanel row, Hit hit)
 	{
 		return new MouseAdapter()
 		{
@@ -403,7 +404,7 @@ final class SearchPanel extends JPanel
 	 * The row's picture, from the game: an item's sprite, a world-map icon, or the character dot,
 	 * fitted to {@code box}. The destination's card draws the same one beside a pick's answer.
 	 */
-	private void picture(JLabel picture, SearchClient.Hit hit, int box)
+	private void picture(JLabel picture, Hit hit, int box)
 	{
 		if ("npc".equals(hit.kind))
 		{
@@ -468,7 +469,7 @@ final class SearchPanel extends JPanel
 	 * A pick: the way there, by the row's id, which the map resolves as its own search did. Nothing
 	 * while a press would not go, and the list stays up until the answer lands ({@link #heard}).
 	 */
-	void pick(SearchClient.Hit hit)
+	void pick(Hit hit)
 	{
 		if (!press.ready())
 		{
@@ -490,7 +491,7 @@ final class SearchPanel extends JPanel
 	 * was typed: the card's line is written once, and the way line under it gives the route's own.
 	 */
 	@Nullable
-	static String note(SearchClient.Hit hit)
+	static String note(Hit hit)
 	{
 		if (SearchClient.ITEMS.equals(hit.section))
 		{

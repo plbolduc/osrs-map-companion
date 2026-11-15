@@ -34,6 +34,7 @@ import javax.swing.*;
 import javax.swing.border.*;
 import net.runelite.api.gameval.SpriteID;
 import net.runelite.client.ui.ColorScheme;
+import com.pbolduc.mapcompanion.DestinationRoute.*;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.*;
 import static com.pbolduc.mapcompanion.RelayResponse.RouteOption;
 import static com.pbolduc.mapcompanion.RelayResponse.RouteStep;
@@ -123,7 +124,7 @@ final class RouteStepsView extends JPanel
 	@Nullable
 	private String said;
 	@Nullable
-	private DestinationRoute.View shown;
+	private View shown;
 
 	/** @param choose shows another of the ways, by its place in the map's list */
 	RouteStepsView(IntConsumer choose)
@@ -155,7 +156,7 @@ final class RouteStepsView extends JPanel
 	}
 
 	/** Say this route, or nothing. */
-	void show(@Nullable DestinationRoute.View view)
+	void show(@Nullable View view)
 	{
 		show(view, null);
 	}
@@ -165,7 +166,7 @@ final class RouteStepsView extends JPanel
 	 * inapplicable. Its way line goes too: the stop's own line just above names the same way, and
 	 * the leg's length is This leg's heading's to say, from {@link #tiles}.
 	 */
-	void showRunLeg(@Nullable DestinationRoute.View view, @Nullable String shortestPath)
+	void showRunLeg(@Nullable View view, @Nullable String shortestPath)
 	{
 		show(view, shortestPath);
 		origin.setVisible(false);
@@ -189,7 +190,7 @@ final class RouteStepsView extends JPanel
 	}
 
 	/** @param shortestPath what Shortest Path is drawing for it, in words, or null */
-	void show(@Nullable DestinationRoute.View view, @Nullable String shortestPath)
+	void show(@Nullable View view, @Nullable String shortestPath)
 	{
 		String words = view == null ? null : words(view) + "|" + shortestPath;
 		if (words != null && words.equals(said))
@@ -258,7 +259,7 @@ final class RouteStepsView extends JPanel
 	 * it met counted down from the map's wait the view carries. A Reroute refused in pink; its
 	 * Planning… and Shortest Path's notices in the line's grey.
 	 */
-	private void sayMessage(DestinationRoute.View view)
+	private void sayMessage(View view)
 	{
 		String status = view.rerouting ? "Planning from where you stand…"
 			: MapWait.words(view.message, view.nextRerouteMs - System.currentTimeMillis());
@@ -356,7 +357,7 @@ final class RouteStepsView extends JPanel
 	 * how tall it has become. The ways the account can take, then the ones it cannot yet, each in the
 	 * map's own order, whichever is chosen.
 	 */
-	private void chips(DestinationRoute.View view)
+	private void chips(View view)
 	{
 		JPanel row = null;
 		int used = 0;
@@ -613,7 +614,7 @@ final class RouteStepsView extends JPanel
 	 * draws walks only, so the line promised something that never came.
 	 */
 	@Nullable
-	static String shortestPathLine(DestinationRoute.View view, boolean available, int drawing)
+	static String shortestPathLine(View view, boolean available, int drawing)
 	{
 		if (!view.following || !available || view.arrived() || !walkLeft(view.steps(), view.step))
 		{
@@ -640,7 +641,7 @@ final class RouteStepsView extends JPanel
 	}
 
 	/** Everything this view would say, so an unchanged second does not rebuild it. */
-	private String words(DestinationRoute.View view)
+	private String words(View view)
 	{
 		StringBuilder sb = new StringBuilder(view.key).append('|').append(view.chosen).append('|').append(view.step)
 			.append('|').append(view.origin).append('|').append(view.rerouted).append('|').append(view.rerouting)

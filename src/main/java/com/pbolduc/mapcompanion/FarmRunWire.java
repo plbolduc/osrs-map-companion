@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
+import com.pbolduc.mapcompanion.RelayResponse.*;
 import static com.pbolduc.mapcompanion.RelayResponse.FarmRun;
 import static com.pbolduc.mapcompanion.RelayResponse.FarmStop;
 import static com.pbolduc.mapcompanion.RouteWire.text;
@@ -168,7 +169,7 @@ final class FarmRunWire
 		clean.bring = new ArrayList<>();
 		if (run.bring != null)
 		{
-			for (RelayResponse.FarmBring line : run.bring.subList(0, Math.min(24, run.bring.size())))
+			for (FarmBring line : run.bring.subList(0, Math.min(24, run.bring.size())))
 			{
 				if (line == null || !Arrays.asList("teleport", "supply").contains(line.kind))
 				{
@@ -179,7 +180,7 @@ final class FarmRunWire
 				{
 					continue;
 				}
-				RelayResponse.FarmBring kept = new RelayResponse.FarmBring();
+				FarmBring kept = new FarmBring();
 				kept.kind = line.kind;
 				kept.name = item;
 				kept.note = text(line.note, 120);
@@ -198,7 +199,7 @@ final class FarmRunWire
 			return null;
 		}
 		String name = text(stop.name, MAX_STOP_NAME);
-		RelayResponse.RouteTile tile = RouteWire.tile(stop.tile);
+		RouteTile tile = RouteWire.tile(stop.tile);
 		if (name == null || tile == null)
 		{
 			return null;
@@ -240,7 +241,7 @@ final class FarmRunWire
 	}
 
 	@Nullable
-	private static RelayResponse.RunTask tick(@Nullable RelayResponse.RunTask tick)
+	private static RunTask tick(@Nullable RunTask tick)
 	{
 		String text = tick == null ? null : text(tick.text, 120);
 		if (text == null || tick.slot < 0 || tick.slot >= PortTaskReader.SLOT_IDS.length || tick.taskId <= 0 || tick.taskId > 100_000
@@ -248,7 +249,7 @@ final class FarmRunWire
 		{
 			return null;
 		}
-		RelayResponse.RunTask clean = new RelayResponse.RunTask();
+		RunTask clean = new RunTask();
 		clean.slot = tick.slot;
 		clean.taskId = tick.taskId;
 		clean.counter = tick.counter;

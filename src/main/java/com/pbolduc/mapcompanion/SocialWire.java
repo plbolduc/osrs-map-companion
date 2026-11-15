@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
+import com.pbolduc.mapcompanion.RelayResponse.*;
 import static com.pbolduc.mapcompanion.RelayResponse.Meetup;
 import static com.pbolduc.mapcompanion.RelayResponse.RosterRow;
 import static com.pbolduc.mapcompanion.RouteWire.text;
@@ -223,7 +224,7 @@ final class SocialWire
 			String title = text(row.news.title, MAX_NEWS);
 			if (title != null && row.news.atMs > 0)
 			{
-				RelayResponse.News news = new RelayResponse.News();
+				News news = new News();
 				news.kind = text(row.news.kind, 20);
 				news.title = title;
 				news.atMs = row.news.atMs;
@@ -260,16 +261,16 @@ final class SocialWire
 		clean.startsAtMs = meetup.startsAtMs;
 		clean.near = text(meetup.near, MAX_NEAR);
 		clean.mine = meetup.mine != null && ANSWERS.contains(meetup.mine) ? meetup.mine : null;
-		List<RelayResponse.MeetupAnswer> who = new ArrayList<>();
+		List<MeetupAnswer> who = new ArrayList<>();
 		if (meetup.who != null)
 		{
-			for (RelayResponse.MeetupAnswer face : meetup.who)
+			for (MeetupAnswer face : meetup.who)
 			{
 				if (face == null || face.answer == null || !ROLL_UP.contains(face.answer) || who.size() >= MAX_ROSTER + 1)
 				{
 					continue;
 				}
-				RelayResponse.MeetupAnswer kept = new RelayResponse.MeetupAnswer();
+				MeetupAnswer kept = new MeetupAnswer();
 				String name = text(face.name, MAX_NAME);
 				kept.name = name == null ? "Member" : name;
 				kept.colour = colour(face.colour);

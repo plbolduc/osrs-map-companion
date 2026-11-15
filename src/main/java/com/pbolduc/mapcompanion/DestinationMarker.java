@@ -34,6 +34,7 @@ import lombok.*;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.ui.overlay.worldmap.WorldMapPointManager;
+import com.pbolduc.mapcompanion.RelayResponse.*;
 
 /**
  * The world-map markers for what the map sent: the destination, and the next meetup.
@@ -149,7 +150,7 @@ public class DestinationMarker
 	/** @param stepLeads whether the current step's pin is drawn, holding the map's edge */
 	private void syncDestination(boolean stepLeads)
 	{
-		RelayResponse.Destination destination =
+		Destination destination =
 			config.showDestination() || state.hasLocalDestination() ? state.getDestination() : null;
 		if (destination == null || (farming != null && farming.owns(destination)))
 		{
@@ -184,8 +185,8 @@ public class DestinationMarker
 	 */
 	private void syncMeetup()
 	{
-		List<RelayResponse.Meetup> events = config.showDestination() ? state.getEvents() : null;
-		RelayResponse.Meetup event = events == null || events.isEmpty() ? null : events.get(0);
+		List<Meetup> events = config.showDestination() ? state.getEvents() : null;
+		Meetup event = events == null || events.isEmpty() ? null : events.get(0);
 		if (event == null || (event.x == 0 && event.y == 0))
 		{
 			removeMeetup();
@@ -219,7 +220,7 @@ public class DestinationMarker
 		{
 			return new ArrayList<>();
 		}
-		RelayResponse.Destination destination =
+		Destination destination =
 			config.showDestination() || state.hasLocalDestination() ? state.getDestination() : null;
 		DestinationRoute.View view = destination == null ? null : route.view();
 		return view == null || !view.key.equals(DestinationRoute.keyOf(destination))
@@ -312,10 +313,10 @@ public class DestinationMarker
 		{
 			return pins;
 		}
-		List<RelayResponse.RouteStep> list = view.steps();
+		List<RouteStep> list = view.steps();
 		for (int i = 0; i < list.size(); i++)
 		{
-			RelayResponse.RouteTile at = list.get(i).at;
+			RouteTile at = list.get(i).at;
 			if (at == null)
 			{
 				continue;
@@ -357,14 +358,14 @@ public class DestinationMarker
 		{
 			return;
 		}
-		RelayResponse.FarmStop next = view.next();
-		List<RelayResponse.FarmStop> ordered = new ArrayList<>(view.run.stops);
+		FarmStop next = view.next();
+		List<FarmStop> ordered = new ArrayList<>(view.run.stops);
 		if (next != null)
 		{
 			ordered.remove(next);
 			ordered.add(next); // The current stop draws over another stop on the same tile.
 		}
-		for (RelayResponse.FarmStop stop : ordered)
+		for (FarmStop stop : ordered)
 		{
 			boolean done = view.done.contains(stop.n);
 			boolean visited = view.visited.contains(stop.n);

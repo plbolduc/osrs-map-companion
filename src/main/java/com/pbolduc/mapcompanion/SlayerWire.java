@@ -29,6 +29,7 @@ import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import java.util.*;
 import javax.annotation.Nullable;
+import com.pbolduc.mapcompanion.RelayResponse.*;
 import static com.pbolduc.mapcompanion.RouteWire.text;
 
 /** The site's ranked answer, bounded and cleaned independently of the surrounding reply. */
@@ -42,12 +43,12 @@ final class SlayerWire
 		@Override
 		public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type)
 		{
-			return type.getRawType() != RelayResponse.SlayerOptions.class ? null : SocialWire.object(gson, RelayResponse.SlayerOptions.class, SlayerWire::normalize);
+			return type.getRawType() != SlayerOptions.class ? null : SocialWire.object(gson, SlayerOptions.class, SlayerWire::normalize);
 		}
 	}
 
 	@Nullable
-	static RelayResponse.SlayerOptions normalize(@Nullable RelayResponse.SlayerOptions value)
+	static SlayerOptions normalize(@Nullable SlayerOptions value)
 	{
 		if (value == null || text(value.taskName, 100) == null || value.rows == null
 			|| !Arrays.asList("best", "single").contains(value.order))
@@ -56,9 +57,9 @@ final class SlayerWire
 		}
 		value.taskName = text(value.taskName, 100);
 		value.areaName = text(value.areaName, 100);
-		List<RelayResponse.SlayerSpot> rows = new ArrayList<>();
+		List<SlayerSpot> rows = new ArrayList<>();
 		Set<String> ids = new HashSet<>();
-		for (RelayResponse.SlayerSpot row : RouteWire.first(value.rows, MAX_SPOTS))
+		for (SlayerSpot row : RouteWire.first(value.rows, MAX_SPOTS))
 		{
 			if (row == null || row.id == null || row.id.length() > 200
 				|| !row.id.matches("slayer:[^<>\\r\\n]{1,160}#[0-9]+:[0-9]+,[0-9]+,[0-3]")
@@ -79,8 +80,8 @@ final class SlayerWire
 			row.tier = tier(row.tier);
 			row.kinds = words(row.kinds, 32, 100);
 			row.labels = words(row.labels, 12, 160);
-			List<RelayResponse.SlayerAsk> asks = new ArrayList<>();
-			for (RelayResponse.SlayerAsk ask : RouteWire.first(row.asks, 24))
+			List<SlayerAsk> asks = new ArrayList<>();
+			for (SlayerAsk ask : RouteWire.first(row.asks, 24))
 			{
 				if (ask == null || (ask.text = text(ask.text, 200)) == null)
 				{
@@ -100,8 +101,8 @@ final class SlayerWire
 		value.page = text(value.page, 160);
 		value.note = text(value.note, 300);
 		value.notes = words(value.notes, 12, 300);
-		List<RelayResponse.SlayerKind> kinds = new ArrayList<>();
-		for (RelayResponse.SlayerKind kind : RouteWire.first(value.kinds, MAX_KINDS))
+		List<SlayerKind> kinds = new ArrayList<>();
+		for (SlayerKind kind : RouteWire.first(value.kinds, MAX_KINDS))
 		{
 			if (kind == null || (kind.name = text(kind.name, 100)) == null)
 			{
@@ -112,8 +113,8 @@ final class SlayerWire
 			kinds.add(kind);
 		}
 		value.kinds = kinds;
-		List<RelayResponse.SlayerBoss> bosses = new ArrayList<>();
-		for (RelayResponse.SlayerBoss boss : RouteWire.first(value.bosses, 32))
+		List<SlayerBoss> bosses = new ArrayList<>();
+		for (SlayerBoss boss : RouteWire.first(value.bosses, 32))
 		{
 			if (boss == null || (boss.name = text(boss.name, 100)) == null)
 			{
