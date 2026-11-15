@@ -33,8 +33,6 @@ import java.util.*;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import com.pbolduc.mapcompanion.RelayResponse.*;
-import static com.pbolduc.mapcompanion.RelayResponse.FarmRun;
-import static com.pbolduc.mapcompanion.RelayResponse.FarmStop;
 import static com.pbolduc.mapcompanion.RouteWire.text;
 
 /**
