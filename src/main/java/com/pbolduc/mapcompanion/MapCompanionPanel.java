@@ -607,25 +607,10 @@ public class MapCompanionPanel extends PluginPanel
 	 */
 	static String meetupWhen(long startsAtMs, long nowMs, ZoneId zone, Locale locale, @Nullable Integer world)
 	{
-		long minutes = Math.round((startsAtMs - nowMs) / 60_000.0);
-		String when;
-		if (minutes <= 0)
-		{
-			when = "Meetup now";
-		}
-		else if (minutes < 60)
-		{
-			when = "Meetup in " + minutes + "m";
-		}
-		else if (minutes < 12 * 60)
-		{
-			long rest = minutes % 60;
-			when = "Meetup in " + (minutes / 60) + "h" + (rest == 0 ? "" : " " + rest + "m");
-		}
-		else
-		{
-			when = "Meetup " + startsOn(startsAtMs, nowMs, zone, locale, "today", "tomorrow", "EEE");
-		}
+		/* GroupPanel's countdown, which a meetup card's when line ends with; one already started is now here too. */
+		String countdown = GroupPanel.countdown(startsAtMs, nowMs);
+		String when = "Meetup " + (countdown == null ? startsOn(startsAtMs, nowMs, zone, locale, "today", "tomorrow", "EEE")
+			: "started".equals(countdown) ? "now" : countdown);
 		return world == null ? when : when + " · W" + world;
 	}
 
