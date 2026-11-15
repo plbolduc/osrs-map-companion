@@ -362,9 +362,7 @@ final class DropLuckPanel extends JPanel
 		Luck luck = DropLuckView.rowLuck(monster, drop);
 		if (luck.word != null)
 		{
-			JLabel chip = chip(luck);
-			chip.setAlignmentX(Component.RIGHT_ALIGNMENT);
-			count.add(chip);
+			count.add(chip(luck));
 		}
 		/*
 		 * The words take what the picture, the count and the row's edges leave, as fact() does. A markup
@@ -599,9 +597,7 @@ final class DropLuckPanel extends JPanel
 			Luck luck = shown >= DropOdds.VERY ? Luck.VERY_DRY : shown >= DropOdds.NOTABLE ? Luck.DRY : Luck.NORMAL;
 			/* In a column of its own, so the chip keeps its height rather than filling the row's. */
 			side = column(ColorScheme.DARKER_GRAY_HOVER_COLOR);
-			JLabel chip = chip(luck);
-			chip.setAlignmentX(Component.RIGHT_ALIGNMENT);
-			side.add(chip);
+			side.add(chip(luck));
 			textWidth -= ROW_GAP + side.getPreferredSize().width;
 		}
 		JPanel words = column(ColorScheme.DARKER_GRAY_HOVER_COLOR);
@@ -631,9 +627,8 @@ final class DropLuckPanel extends JPanel
 		 */
 		JLabel meta = small(DropLuckView.listMeta(monster, now), LIGHT_GRAY_COLOR);
 		meta.setVerticalAlignment(SwingConstants.TOP);
-		row.add(MapCompanionPanel.fill(bar(4, DARK_GRAY_COLOR, null,
-			wrapped(monster.npc, WIDTH - 4 - 4 - meta.getPreferredSize().width, 12f, Color.WHITE), meta),
-			DARK_GRAY_COLOR));
+		row.add(fill(bar(4, DARK_GRAY_COLOR, null,
+			wrapped(monster.npc, WIDTH - 4 - 4 - meta.getPreferredSize().width, 12f, Color.WHITE), meta)));
 		JPanel icons = new JPanel(new FlowLayout(FlowLayout.LEFT, 3, 3));
 		icons.setBackground(DARK_GRAY_COLOR);
 		Standing standing = DropLuckView.standing(monster, pin);
@@ -671,7 +666,7 @@ final class DropLuckPanel extends JPanel
 		{
 			icons.add(small("No notable drops yet", LIGHT_GRAY_COLOR));
 		}
-		row.add(MapCompanionPanel.fill(icons, DARK_GRAY_COLOR));
+		row.add(fill(icons));
 		capped(row);
 		clickable(row, () -> open(monster.npc, null));
 		return row;
@@ -833,6 +828,8 @@ final class DropLuckPanel extends JPanel
 		Color background = luck.lucky() ? LUCKY : luck == Luck.VERY_DRY ? VERY_DRY : luck.dry() ? DRY : NORMAL;
 		chip.setBackground(background);
 		chip.setForeground(new Color(0x18181b));
+		/* Against a column's right edge where it sits in one; a flow of pictures ignores it. */
+		chip.setAlignmentX(Component.RIGHT_ALIGNMENT);
 		return chip;
 	}
 
