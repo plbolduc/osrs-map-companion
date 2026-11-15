@@ -466,14 +466,15 @@ public class PortTaskReader extends SettlingReader
 		return item == null ? null : item.getName();
 	}
 
+	/** A database field's first value, which SlayerTaskNames reads its rows by too. */
 	@Nullable
-	private static Object first(@Nullable Object[] values)
+	static Object first(@Nullable Object[] values)
 	{
 		return values == null || values.length == 0 ? null : values[0];
 	}
 
 	@Nullable
-	private static String string(@Nullable Object[] values)
+	static String string(@Nullable Object[] values)
 	{
 		Object value = first(values);
 		return value instanceof String ? (String) value : null;
