@@ -26,23 +26,14 @@
 package com.pbolduc.mapcompanion;
 
 import javax.annotation.Nullable;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import net.runelite.api.ChatMessageType;
-import net.runelite.api.Client;
-import net.runelite.api.MenuAction;
-import net.runelite.api.MenuEntry;
-import net.runelite.api.Point;
+import lombok.*;
+import javax.inject.*;
+import net.runelite.api.*;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.worldmap.WorldMap;
-import net.runelite.client.chat.ChatColorType;
-import net.runelite.client.chat.ChatMessageBuilder;
-import net.runelite.client.chat.ChatMessageManager;
-import net.runelite.client.chat.QueuedMessage;
+import net.runelite.client.chat.*;
 import net.runelite.client.ui.overlay.worldmap.WorldMapOverlay;
 import static com.pbolduc.mapcompanion.RoutePress.Said;
 

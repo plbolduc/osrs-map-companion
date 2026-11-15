@@ -26,22 +26,14 @@
 package com.pbolduc.mapcompanion;
 
 import com.google.gson.Gson;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import com.google.inject.*;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.EnumSet;
+import java.util.*;
 import javax.swing.SwingUtilities;
-import net.runelite.api.Client;
-import net.runelite.api.GameState;
-import net.runelite.api.Skill;
-import net.runelite.api.WorldType;
+import net.runelite.api.*;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
-import okhttp3.Call;
-import okhttp3.HttpUrl;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
+import okhttp3.*;
 
 /**
  * Reads only this installation's approved map server, while Stars is visible and logged in.

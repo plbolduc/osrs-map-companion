@@ -26,8 +26,7 @@
 package com.pbolduc.mapcompanion;
 
 import java.util.*;
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import javax.inject.*;
 
 /**
  * Which repeated reward receipts deserve an announcement, independently of drop-rate coverage.

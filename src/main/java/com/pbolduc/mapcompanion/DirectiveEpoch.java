@@ -25,16 +25,11 @@
  */
 package com.pbolduc.mapcompanion;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.TypeAdapter;
-import com.google.gson.TypeAdapterFactory;
+import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
+import com.google.gson.stream.*;
 import java.io.IOException;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 

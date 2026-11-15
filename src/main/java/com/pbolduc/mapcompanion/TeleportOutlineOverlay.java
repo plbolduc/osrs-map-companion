@@ -26,16 +26,12 @@
 package com.pbolduc.mapcompanion;
 
 import java.awt.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
-import net.runelite.api.Client;
+import net.runelite.api.*;
 import net.runelite.api.gameval.InterfaceID;
-import net.runelite.api.ItemComposition;
-import net.runelite.api.widgets.Widget;
-import net.runelite.api.widgets.WidgetItem;
-import net.runelite.api.WorldView;
+import net.runelite.api.widgets.*;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.overlay.WidgetItemOverlay;
 

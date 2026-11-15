@@ -28,14 +28,12 @@ package com.pbolduc.mapcompanion;
 import java.awt.*;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
-import net.runelite.api.Client;
+import net.runelite.api.*;
 import net.runelite.api.Point;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.widgets.Widget;
-import net.runelite.client.ui.overlay.Overlay;
-import net.runelite.client.ui.overlay.OverlayLayer;
-import net.runelite.client.ui.overlay.OverlayPosition;
+import net.runelite.client.ui.overlay.*;
 import net.runelite.client.ui.overlay.worldmap.WorldMapOverlay;
 
 /**

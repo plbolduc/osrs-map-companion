@@ -26,14 +26,12 @@
 package com.pbolduc.mapcompanion;
 
 import java.awt.*;
+import java.util.*;
 import java.util.List;
-import java.util.Locale;
 import java.util.function.IntConsumer;
 import javax.annotation.Nullable;
 import javax.swing.*;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
+import javax.swing.border.*;
 import net.runelite.api.gameval.SpriteID;
 import net.runelite.client.ui.ColorScheme;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.*;

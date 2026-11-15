@@ -25,8 +25,7 @@
  */
 package com.pbolduc.mapcompanion;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import lombok.AllArgsConstructor;
 
 /**

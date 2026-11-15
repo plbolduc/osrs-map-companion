@@ -25,22 +25,17 @@
  */
 package com.pbolduc.mapcompanion;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import com.google.inject.*;
 import java.awt.image.BufferedImage;
 import java.util.Locale;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import javax.swing.*;
 import net.runelite.api.Skill;
 import net.runelite.api.gameval.ItemID;
-import net.runelite.client.game.ItemManager;
-import net.runelite.client.game.SkillIconManager;
-import net.runelite.client.game.SpriteManager;
-import net.runelite.client.util.AsyncBufferedImage;
-import net.runelite.client.util.ImageUtil;
+import net.runelite.client.game.*;
+import net.runelite.client.util.*;
 import net.runelite.http.api.item.ItemPrice;
 
 /**

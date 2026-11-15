@@ -25,20 +25,13 @@
  */
 package com.pbolduc.mapcompanion;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import com.google.gson.*;
+import com.google.inject.*;
 import java.io.IOException;
-import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.function.*;
 import javax.annotation.Nullable;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import okhttp3.HttpUrl;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import lombok.*;
+import okhttp3.*;
 
 /**
  * The plugin's own way into a group, its way out to the map as the player, and the group's name:

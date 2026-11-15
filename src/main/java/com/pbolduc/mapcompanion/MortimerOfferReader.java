@@ -25,13 +25,11 @@
  */
 package com.pbolduc.mapcompanion;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import com.google.inject.*;
 import java.util.*;
 import javax.annotation.Nullable;
 import net.runelite.api.Client;
-import net.runelite.api.gameval.InterfaceID;
-import net.runelite.api.gameval.VarPlayerID;
+import net.runelite.api.gameval.*;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.util.Text;
 import static com.pbolduc.mapcompanion.CompanionSnapshot.MortimerTask;

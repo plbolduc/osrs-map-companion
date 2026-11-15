@@ -26,8 +26,7 @@
 package com.pbolduc.mapcompanion;
 
 import com.google.gson.Gson;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import com.google.inject.*;
 import javax.annotation.Nullable;
 import lombok.Getter;
 import static com.pbolduc.mapcompanion.RelayResponse.Destination;

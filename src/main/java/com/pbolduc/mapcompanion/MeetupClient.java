@@ -26,20 +26,15 @@
 package com.pbolduc.mapcompanion;
 
 import com.google.gson.Gson;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import com.google.inject.*;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import lombok.AllArgsConstructor;
-import net.runelite.api.Client;
-import net.runelite.api.GameState;
+import net.runelite.api.*;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.callback.ClientThread;
-import okhttp3.HttpUrl;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import okhttp3.*;
 
 /**
  * A meetup's answer from the game, and <i>Meet here</i>: the two writes the sidebar makes.

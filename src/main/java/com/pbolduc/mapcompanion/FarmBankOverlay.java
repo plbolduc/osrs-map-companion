@@ -25,9 +25,9 @@
  */
 package com.pbolduc.mapcompanion;
 
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import net.runelite.api.ItemComposition;

@@ -25,18 +25,14 @@
  */
 package com.pbolduc.mapcompanion;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonParseException;
+import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import com.google.inject.*;
 import java.lang.reflect.Type;
 import java.util.*;
-import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
+import java.util.function.*;
 import javax.annotation.Nullable;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
+import lombok.*;
 import net.runelite.client.config.ConfigManager;
 import okhttp3.HttpUrl;
 

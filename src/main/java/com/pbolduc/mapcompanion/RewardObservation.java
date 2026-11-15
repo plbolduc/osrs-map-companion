@@ -26,8 +26,7 @@
 package com.pbolduc.mapcompanion;
 
 import javax.annotation.Nullable;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
+import lombok.*;
 
 /**
  * One reward after the game's overlapping loot, pet and collection messages have settled.

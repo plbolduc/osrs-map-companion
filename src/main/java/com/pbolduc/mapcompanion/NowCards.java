@@ -26,10 +26,8 @@
 package com.pbolduc.mapcompanion;
 
 import java.awt.Dimension;
-import java.util.ArrayList;
-import java.util.function.IntSupplier;
-import java.util.function.Supplier;
-import java.util.List;
+import java.util.*;
+import java.util.function.*;
 import javax.annotation.Nullable;
 import javax.swing.border.EmptyBorder;
 import javax.swing.*;

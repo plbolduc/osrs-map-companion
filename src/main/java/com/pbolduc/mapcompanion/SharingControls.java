@@ -26,16 +26,14 @@
 package com.pbolduc.mapcompanion;
 
 import java.awt.*;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import java.util.ArrayList;
+import java.awt.event.*;
+import java.util.*;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 import javax.swing.border.EmptyBorder;
 import javax.swing.*;
 import lombok.AllArgsConstructor;
-import net.runelite.client.ui.ColorScheme;
-import net.runelite.client.ui.PluginPanel;
+import net.runelite.client.ui.*;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.*;
 import static com.pbolduc.mapcompanion.SharingFields.Field;
 import static net.runelite.client.ui.ColorScheme.LIGHT_GRAY_COLOR;

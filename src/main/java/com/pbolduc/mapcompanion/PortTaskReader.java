@@ -25,18 +25,12 @@
  */
 package com.pbolduc.mapcompanion;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import com.google.inject.*;
 import java.util.*;
 import javax.annotation.Nullable;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import net.runelite.api.Client;
-import net.runelite.api.ItemComposition;
-import net.runelite.api.Player;
-import net.runelite.api.WorldView;
-import net.runelite.api.gameval.DBTableID;
-import net.runelite.api.gameval.VarbitID;
+import lombok.*;
+import net.runelite.api.*;
+import net.runelite.api.gameval.*;
 
 /**
  * The five Sailing port task slots, and how far each task has got.

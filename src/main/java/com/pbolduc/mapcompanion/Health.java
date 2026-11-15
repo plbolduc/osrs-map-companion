@@ -26,8 +26,7 @@
 package com.pbolduc.mapcompanion;
 
 import java.awt.Color;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import net.runelite.client.ui.ColorScheme;
 
 /**
