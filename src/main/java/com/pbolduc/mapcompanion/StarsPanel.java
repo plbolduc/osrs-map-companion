@@ -37,7 +37,6 @@ import net.runelite.client.callback.ClientThread;
 import net.runelite.client.ui.*;
 import com.pbolduc.mapcompanion.StarsModel.*;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.*;
-import static com.pbolduc.mapcompanion.StarsModel.Star;
 
 /**
  * One native, narrow list of landing sites, with their worlds underneath and favourites first.

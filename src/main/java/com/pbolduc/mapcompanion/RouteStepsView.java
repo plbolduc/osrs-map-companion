@@ -35,9 +35,8 @@ import javax.swing.border.*;
 import net.runelite.api.gameval.SpriteID;
 import net.runelite.client.ui.ColorScheme;
 import com.pbolduc.mapcompanion.DestinationRoute.*;
+import com.pbolduc.mapcompanion.RelayResponse.*;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.*;
-import static com.pbolduc.mapcompanion.RelayResponse.RouteOption;
-import static com.pbolduc.mapcompanion.RelayResponse.RouteStep;
 import static net.runelite.client.ui.ColorScheme.DARKER_GRAY_COLOR;
 
 /**
@@ -278,7 +277,7 @@ final class RouteStepsView extends JPanel
 	 * @param gates a voyage's docking gates, under the row that sails, or null
 	 */
 	private static JComponent step(int index, RouteStep step, int place, boolean slot,
-		@Nullable GameSprites sprites, @Nullable List<RelayResponse.Gate> gates)
+		@Nullable GameSprites sprites, @Nullable List<Gate> gates)
 	{
 		/* The digit alone, in the amber of the current step's pin on the world map. */
 		JLabel number = label(12f, place == 0 ? MapPin.AMBER : place < 0 ? DONE : AHEAD);
@@ -330,7 +329,7 @@ final class RouteStepsView extends JPanel
 		}
 		if (place >= 0 && gates != null)
 		{
-			for (RelayResponse.Gate gate : gates)
+			for (Gate gate : gates)
 			{
 				JLabel said = under(gateLine(gate), width);
 				if ("unmet".equals(gate.tier))
@@ -547,7 +546,7 @@ final class RouteStepsView extends JPanel
 	}
 
 	/** One docking gate in its tier's words: "Needs 76 Sailing", "Unconfirmed: Swan Song", "✓ 20 Sailing". */
-	static String gateLine(RelayResponse.Gate gate)
+	static String gateLine(Gate gate)
 	{
 		return ("unmet".equals(gate.tier) ? "Needs " : "unknown".equals(gate.tier) ? "Unconfirmed: " : "✓ ") + gate.text;
 	}
@@ -657,7 +656,7 @@ final class RouteStepsView extends JPanel
 			}
 			if (option.voyage != null && option.voyage.gates != null)
 			{
-				for (RelayResponse.Gate gate : option.voyage.gates)
+				for (Gate gate : option.voyage.gates)
 				{
 					sb.append(gate.tier).append(':').append(gate.text).append(';');
 				}

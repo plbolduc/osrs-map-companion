@@ -37,7 +37,6 @@ import net.runelite.client.util.ImageUtil;
 import com.pbolduc.mapcompanion.FarmRunState.*;
 import com.pbolduc.mapcompanion.RelayResponse.*;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.*;
-import static com.pbolduc.mapcompanion.RelayResponse.FarmStop;
 import static net.runelite.client.ui.ColorScheme.LIGHT_GRAY_COLOR;
 
 /**
@@ -183,7 +182,7 @@ final class RunView extends JPanel
 	}
 
 	/** Whether a run is one this card shows. */
-	boolean ours(RelayResponse.FarmRun run)
+	boolean ours(FarmRun run)
 	{
 		return port == FarmRunWire.PORT_TASKS.equals(run.kind);
 	}
@@ -470,7 +469,7 @@ final class RunView extends JPanel
 	{
 		bring.removeAll();
 		missing = 0;
-		for (RelayResponse.FarmBring line : view.run.bring)
+		for (FarmBring line : view.run.bring)
 		{
 			Boolean carrying = line.kind.equals("teleport") ? CapabilityEvaluator.carrying(line.name, view.carried) : null;
 			boolean absent = Boolean.FALSE.equals(carrying);
@@ -499,7 +498,7 @@ final class RunView extends JPanel
 	 * the stop's item as the checklist names it, else the item by name; for a supply, the item by its
 	 * exact name, so "Rake" has one and "4 herb seeds" none.
 	 */
-	private void bringPicture(JLabel picture, RelayResponse.FarmBring line, RelayResponse.FarmRun run)
+	private void bringPicture(JLabel picture, FarmBring line, FarmRun run)
 	{
 		if (!line.kind.equals("teleport"))
 		{
@@ -604,7 +603,7 @@ final class RunView extends JPanel
 			row.add(left(method));
 			if (stop.tasks != null)
 			{
-				for (RelayResponse.RunTask task : stop.tasks)
+				for (RunTask task : stop.tasks)
 				{
 					row.add(wrapped(task.text, 11f, LIGHT_GRAY_COLOR, WIDTH));
 				}
@@ -645,7 +644,7 @@ final class RunView extends JPanel
 	 */
 	private void picture(JLabel icon, FarmStop stop)
 	{
-		RelayResponse.RouteStep step = RouteStepsView.firstPictured(stop.steps);
+		RouteStep step = RouteStepsView.firstPictured(stop.steps);
 		/* A charting stop's picture is its task's tool, whatever its leg rides: the task is what the row is about. */
 		if (stop.tool != null)
 		{
