@@ -560,6 +560,21 @@ final class ConnectCard extends JPanel
 	}
 
 	/**
+	 * What a press that acts as the player is signed with: a member of this RuneLite the group has
+	 * issued a secret to, preferring the one logged in ({@link Pairing#memberWithSecret}), or null
+	 * when it holds none, which is also the answer with no map address.
+	 */
+	@Nullable
+	private Pairing.Signed asPlayer()
+	{
+		String server = pairing.serverUrl();
+		String code = pairingCode();
+		String member = pairing.memberWithSecret(server, code, identity.id());
+		String secret = pairing.secret(server, code, member);
+		return secret == null ? null : new Pairing.Signed(server, code, member, secret);
+	}
+
+	/**
 	 * Open the map: the website, already in the group as this player.
 	 *
 	 * <p>The map is asked for a one-time link ({@link ConnectClient#link}) and the browser opens it;
@@ -570,18 +585,15 @@ final class ConnectCard extends JPanel
 	 */
 	private void openMap()
 	{
-		String server = pairing.serverUrl();
-		String code = pairingCode();
-		String member = pairing.memberWithSecret(server, code, identity.id());
-		String secret = member == null ? null : pairing.secret(server, code, member);
-		if (asking || server == null || member == null || secret == null)
+		Pairing.Signed as = asPlayer();
+		if (asking || as == null)
 		{
 			LinkBrowser.browse(mapUrl.get() + "/map?task=companion");
 			return;
 		}
 		asking = true;
 		refresh.run();
-		connectClient.link(server, code, member, secret, url -> invokeLater(() ->
+		connectClient.link(as.server, as.code, as.member, as.secret, url -> invokeLater(() ->
 		{
 			asking = false;
 			LinkBrowser.browse(url != null ? url : mapUrl.get() + "/map?task=companion");
@@ -921,16 +933,13 @@ final class ConnectCard extends JPanel
 	void renameGroup(boolean fromCard)
 	{
 		Said line = fromCard ? cardMessage : groupMessage;
-		String server = pairing.serverUrl();
-		String code = pairingCode();
-		String member = pairing.memberWithSecret(server, code, identity.id());
-		String secret = member == null ? null : pairing.secret(server, code, member);
-		if (server == null || member == null || secret == null)
+		Pairing.Signed as = asPlayer();
+		if (as == null)
 		{
 			under(line, Words.of("connect.renameLogIn"), true, false);
 			return;
 		}
-		JTextField typed = nameField(pairing.name(code));
+		JTextField typed = nameField(pairing.name(as.code));
 		Object[] choices = {"Rename", "Cancel"};
 		JOptionPane question = new JOptionPane(new Object[]{RENAME_PROMPT, typed}, JOptionPane.PLAIN_MESSAGE,
 			JOptionPane.OK_CANCEL_OPTION, null, choices, choices[0])
@@ -955,11 +964,11 @@ final class ConnectCard extends JPanel
 			return;
 		}
 		under(line, "Renaming…", false, false);
-		connectClient.rename(server, code, member, secret, name, outcome -> invokeLater(() ->
+		connectClient.rename(as.server, as.code, as.member, as.secret, name, outcome -> invokeLater(() ->
 		{
-			if (outcome.name != null && server.equals(pairing.serverUrl()) && code.equalsIgnoreCase(pairingCode()))
+			if (outcome.name != null && as.server.equals(pairing.serverUrl()) && as.code.equalsIgnoreCase(pairingCode()))
 			{
-				pairing.rememberName(code, outcome.name);
+				pairing.rememberName(as.code, outcome.name);
 				under(line, "Renamed to " + outcome.name + ".", false, true);
 			}
 			else
@@ -993,25 +1002,22 @@ final class ConnectCard extends JPanel
 	 */
 	void removeMember(String friendId, String friendName)
 	{
-		String server = pairing.serverUrl();
-		String code = pairingCode();
-		String member = pairing.memberWithSecret(server, code, identity.id());
-		String secret = member == null ? null : pairing.secret(server, code, member);
-		if (server == null || member == null || secret == null)
+		Pairing.Signed as = asPlayer();
+		if (as == null)
 		{
 			under(groupMessage, Words.of("connect.removeLogIn"), true, false);
 			return;
 		}
 		String name = MapPin.safe(friendName);
-		if (!MapCompanionPanel.confirm(sidebar, removeQuestion(name, MapPin.safe(pairing.name(code))), "Remove from group",
+		if (!MapCompanionPanel.confirm(sidebar, removeQuestion(name, MapPin.safe(pairing.name(as.code))), "Remove from group",
 			"Remove"))
 		{
 			return;
 		}
 		under(groupMessage, "Removing " + name + "…", false, false);
-		connectClient.remove(server, code, member, secret, friendId, outcome -> invokeLater(() ->
+		connectClient.remove(as.server, as.code, as.member, as.secret, friendId, outcome -> invokeLater(() ->
 		{
-			if (!server.equals(pairing.serverUrl()) || !code.equalsIgnoreCase(pairingCode()))
+			if (!as.server.equals(pairing.serverUrl()) || !as.code.equalsIgnoreCase(pairingCode()))
 			{
 				return;
 			}
