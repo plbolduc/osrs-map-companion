@@ -163,8 +163,7 @@ final class SharingControls extends JPanel
 		 */
 		JPanel lower = fold(CLIENT_TITLE, client);
 		lower.add(line(Words.of("client.sub"), LIGHT_GRAY_COLOR, 0), 1);
-		lower.setBorder(new javax.swing.border.CompoundBorder(new EmptyBorder(6, 0, 0, 0),
-			BorderFactory.createMatteBorder(1, 0, 0, 0, ColorScheme.MEDIUM_GRAY_COLOR)));
+		ruled(lower, 6, 0);
 		add(lower);
 		refresh();
 	}

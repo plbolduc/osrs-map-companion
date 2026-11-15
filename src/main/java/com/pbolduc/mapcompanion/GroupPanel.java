@@ -1258,8 +1258,7 @@ final class GroupPanel extends JPanel
 		@Override
 		public void paintIcon(Component c, Graphics g, int x, int y)
 		{
-			Graphics2D g2 = (Graphics2D) g.create();
-			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+			Graphics2D g2 = SidebarIcons.smooth(g);
 			g2.drawImage(disc, x, y, null);
 			int dx = x + DOT_AT;
 			int dy = y + DOT_AT;
@@ -1340,7 +1339,7 @@ final class GroupPanel extends JPanel
 			Dimension size = new Dimension(width, y + STEP);
 			setPreferredSize(size);
 			setMinimumSize(size);
-			setMaximumSize(new Dimension(Integer.MAX_VALUE, size.height));
+			capped(this);
 			getAccessibleContext().setAccessibleName(rollUpWords(who));
 		}
 	}

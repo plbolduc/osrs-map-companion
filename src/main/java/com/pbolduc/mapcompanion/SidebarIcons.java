@@ -47,6 +47,14 @@ final class SidebarIcons
 
 	static final int SIZE = 16;
 
+	/** A copy of {@code g} that antialiases, for a mark to draw on and then dispose. */
+	static Graphics2D smooth(Graphics g)
+	{
+		Graphics2D g2 = (Graphics2D) g.create();
+		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		return g2;
+	}
+
 	/** Eight teeth around a ring: the shape every client uses for "settings". */
 	static Icon gear()
 	{
@@ -112,8 +120,7 @@ final class SidebarIcons
 			@Override
 			public void paintIcon(Component c, Graphics g, int x, int y)
 			{
-				Graphics2D g2 = (Graphics2D) g.create();
-				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+				Graphics2D g2 = smooth(g);
 				g2.setColor(Color.BLACK);
 				g2.fillOval(x + 3, y + 3, 10, 10);
 				g2.setColor(new Color(0xFF, 0xFF, 0x00));
@@ -145,8 +152,7 @@ final class SidebarIcons
 		@Override
 		public void paintIcon(Component c, Graphics g, int x, int y)
 		{
-			Graphics2D g2 = (Graphics2D) g.create();
-			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+			Graphics2D g2 = smooth(g);
 			g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
 			g2.translate(x, y);
 			g2.setColor(c != null && !c.isEnabled() ? INK.darker() : INK);
