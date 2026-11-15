@@ -123,7 +123,7 @@ final class DropLuckPanel extends JPanel
 	private Sort sort = Sort.RECENT;
 	/** Kept across rebuilds so typing is never interrupted; only the results under it are rebuilt. */
 	private final IconTextField search = new IconTextField();
-	private final JPanel results = column(DARK_GRAY_COLOR);
+	private final JPanel results = column();
 	private String drawn = "";
 
 	DropLuckPanel(LootLog log, @Nullable Pictures pictures)
@@ -617,7 +617,7 @@ final class DropLuckPanel extends JPanel
 
 	private JComponent monsterRow(Monster monster, @Nullable String[] pin, long now)
 	{
-		JPanel row = column(DARK_GRAY_COLOR);
+		JPanel row = column();
 		row.setBorder(new CompoundBorder(
 			new MatteBorder(1, 0, 0, 0, DARKER_GRAY_COLOR), new EmptyBorder(5, 2, 5, 2)));
 		/*

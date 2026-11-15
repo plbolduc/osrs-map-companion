@@ -313,11 +313,6 @@ final class SharingControls extends JPanel
 		return tip.append("</table></html>").toString();
 	}
 
-	static JPanel column()
-	{
-		return MapCompanionPanel.column(ColorScheme.DARK_GRAY_COLOR);
-	}
-
 	/** RuneLite-style disclosure arrows; a header controls visibility alone. */
 	static JPanel fold(String title, JPanel contents)
 	{

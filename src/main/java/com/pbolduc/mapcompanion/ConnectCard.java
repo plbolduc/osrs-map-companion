@@ -136,7 +136,7 @@ final class ConnectCard extends JPanel
 	 * invite is wanted from any of them, and under a list of friends and meetups the row had no fixed
 	 * place. Each press is answered under itself, where the player is looking.
 	 */
-	final JPanel groupActions = column(DARK_GRAY_COLOR);
+	final JPanel groupActions = column();
 	private final JPanel groupButtons = row(DARK_GRAY_COLOR);
 	private List<JButton> shownGroupActions = new ArrayList<>();
 	/** What Copy invite and the menu's Rename group… said, under the row they are pressed in. */
@@ -180,9 +180,9 @@ final class ConnectCard extends JPanel
 	 * offers a way in; and under Copy invite and Switch ▾, over the tabs, while the menu that opened
 	 * it is what the player pressed.
 	 */
-	private final JPanel field = column(DARK_GRAY_COLOR);
-	private final JPanel fieldAbove = column(DARK_GRAY_COLOR);
-	private final JPanel fieldBelow = column(DARK_GRAY_COLOR);
+	private final JPanel field = column();
+	private final JPanel fieldAbove = column();
+	private final JPanel fieldBelow = column();
 
 	/**
 	 * The join field, and what it says back.
@@ -203,7 +203,7 @@ final class ConnectCard extends JPanel
 	private final JLabel joinHeading = sectionHead("Have an invite?");
 	/** Under Paste and Join while the map refuses the group: what to put in the field. See {@link #refusedNextStep}. */
 	private final JLabel nextStep = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
-	private final JPanel refusedGap = gap(8, DARK_GRAY_COLOR);
+	private final JPanel refusedGap = gap(8);
 
 	/**
 	 * True while the map is being asked for an invite link.
@@ -266,7 +266,7 @@ final class ConnectCard extends JPanel
 		status.add(nameLink);
 		status.add(cardMessage);
 		add(status);
-		add(gap(6, DARK_GRAY_COLOR));
+		add(gap(6));
 
 		/*
 		 * The one button that matters, in the brand's colour, and the only filled one. It was the
@@ -276,7 +276,7 @@ final class ConnectCard extends JPanel
 		openMapButton.setBackground(ColorScheme.BRAND_ORANGE);
 		openMapButton.setForeground(Color.WHITE);
 		add(fill(openMapButton, DARK_GRAY_COLOR));
-		add(gap(10, DARK_GRAY_COLOR));
+		add(gap(10));
 
 		/* The connection is reachable from every tab, including after changing the server. */
 		joinBlock = buildJoinBlock();
@@ -320,9 +320,9 @@ final class ConnectCard extends JPanel
 	 */
 	private JPanel buildJoinBlock()
 	{
-		JPanel block = column(DARK_GRAY_COLOR);
+		JPanel block = column();
 		block.add(joinHeading);
-		block.add(gap(3, DARK_GRAY_COLOR));
+		block.add(gap(3));
 		joinField.setName("join.field");
 		joinField.setToolTipText(Words.of("connect.joinFieldTip"));
 		joinButton.setName("join.button");
@@ -332,7 +332,7 @@ final class ConnectCard extends JPanel
 		/* Connect joins an invite in the field, so its tooltip follows a paste or a keystroke at once. */
 		onEdit(joinField.getDocument(), refresh);
 		block.add(fill(joinField, DARK_GRAY_COLOR));
-		block.add(gap(4, DARK_GRAY_COLOR));
+		block.add(gap(4));
 		block.add(left(row(DARK_GRAY_COLOR, pasteButton, joinButton)));
 		nextStep.setVisible(false);
 		block.add(nextStep);

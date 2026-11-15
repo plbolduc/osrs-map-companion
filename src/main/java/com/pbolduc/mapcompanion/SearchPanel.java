@@ -85,7 +85,7 @@ final class SearchPanel extends JPanel
 	@Nullable
 	private final GameSprites sprites;
 	private final JTextField box = new JTextField();
-	private final JPanel rows = column(ColorScheme.DARK_GRAY_COLOR);
+	private final JPanel rows = column();
 	private final JLabel status = label(11f, ColorScheme.LIGHT_GRAY_COLOR);
 	/** The list is folded once a pick's answer has filled the destination's card; typing or Enter opens it again. */
 	private boolean folded;
