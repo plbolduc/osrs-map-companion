@@ -131,7 +131,7 @@ final class SlayerPanel extends JPanel
 		 */
 		String title = reading.task == null ? reading.settled ? NO_TASK : null
 					   : reading.task + (reading.remaining == null ? "" : reading.remaining == 0 ? " · Complete" : " · " + reading.remaining + " left");
-		MapCompanionPanel.show(task, title, WIDTH);
+		showLine(task, title, WIDTH);
 		/*
 		 * Nothing left to kill: the card folds to its row and the step that changes it until the next
 		 * task is read, since a place and its Route are no use to a finished task.
@@ -141,7 +141,7 @@ final class SlayerPanel extends JPanel
 						 : finished ? NEXT_TASK
 						 : waiting ? rankingAgain(view.previous, view.order, view.hideWilderness)
 						 : view.options == null ? "Waiting for places from the map…" : view.stale ? Words.of("slayer.stale") : reading.area;
-		MapCompanionPanel.show(status, message, WIDTH);
+		showLine(status, message, WIDTH);
 		if (!Objects.equals(shownTask, reading.task))
 		{
 			expanded = false;
@@ -174,7 +174,7 @@ final class SlayerPanel extends JPanel
 		{
 			RoutePress.Said said = routes.said(label.getName());
 			String text = said == null || said.planning || said.message == null ? null : routes.words(said, now);
-			MapCompanionPanel.show(label, text, WIDTH);
+			showLine(label, text, WIDTH);
 			/* Pink, so a Route that did not happen does not read as the card's next note. */
 			tone(label, text != null);
 		}

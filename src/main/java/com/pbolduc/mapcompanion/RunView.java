@@ -325,9 +325,9 @@ final class RunView extends JPanel
 		}
 		legEnd.setVisible(steps.isVisible());
 		String detour = left && !view.following ? follower.pausedFor() : null;
-		MapCompanionPanel.show(paused, detour == null ? null : pausedLine(detour), WIDTH);
+		showLine(paused, detour == null ? null : pausedLine(detour), WIDTH);
 		boolean speaks = mine && said.shown(now);
-		MapCompanionPanel.show(message, speaks ? client.words(said, now) : null, WIDTH);
+		showLine(message, speaks ? client.words(said, now) : null, WIDTH);
 		/* A refusal in pink; Planning…, Ending run… and Run ended. in the line's grey. */
 		tone(message, speaks && said.refused());
 		return active || speaks || planning || ending;

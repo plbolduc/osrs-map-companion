@@ -218,7 +218,7 @@ final class RouteStepsView extends JPanel
 		String line = many ? chosenWayLine(view.ways, current) : currentWayLine(current, view.steps());
 		way.setVisible(!there && !line.isEmpty());
 		setWrapped(way, line, WIDTH);
-		MapCompanionPanel.show(cannot, many && current.blocked ? Words.of("steps.blocked") : null, WIDTH);
+		showLine(cannot, many && current.blocked ? Words.of("steps.blocked") : null, WIDTH);
 
 		boolean nowhere = view.origin == null && !view.rerouted;
 		origin.setVisible(nowhere && !there);
@@ -240,12 +240,12 @@ final class RouteStepsView extends JPanel
 			steps.add(step(i, list.get(i), place, slot, sprites, i == sails ? current.voyage.gates : null));
 		}
 
-		MapCompanionPanel.show(boat, view.boatAway == null ? null : boatAwayLine(view.boatAway), WIDTH);
+		showLine(boat, view.boatAway == null ? null : boatAwayLine(view.boatAway), WIDTH);
 
 		arrived.setVisible(there);
 		setWrapped(arrived, "Arrived", WIDTH);
 
-		MapCompanionPanel.show(drawn, shortestPath, WIDTH);
+		showLine(drawn, shortestPath, WIDTH);
 
 		sayMessage(view);
 
@@ -262,7 +262,7 @@ final class RouteStepsView extends JPanel
 	{
 		String status = view.rerouting ? "Planning from where you stand…"
 			: MapWait.words(view.message, view.nextRerouteMs - System.currentTimeMillis());
-		MapCompanionPanel.show(message, status, WIDTH);
+		showLine(message, status, WIDTH);
 		tone(message, !view.rerouting && view.refused);
 	}
 
