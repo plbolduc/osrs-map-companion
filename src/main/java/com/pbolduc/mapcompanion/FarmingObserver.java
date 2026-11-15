@@ -27,16 +27,13 @@ package com.pbolduc.mapcompanion;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import com.google.inject.*;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.IntUnaryOperator;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.Client;
+import net.runelite.api.*;
 import net.runelite.api.coords.WorldPoint;
-import net.runelite.api.GameState;
-import net.runelite.api.WidgetNode;
 import net.runelite.api.widgets.WidgetModalMode;
 import net.runelite.client.config.ConfigManager;
 

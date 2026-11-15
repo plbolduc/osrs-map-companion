@@ -25,13 +25,10 @@
  */
 package com.pbolduc.mapcompanion;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import com.google.inject.*;
+import java.util.*;
 import javax.annotation.Nullable;
-import net.runelite.api.Client;
-import net.runelite.api.ScriptID;
+import net.runelite.api.*;
 import net.runelite.client.plugins.cluescrolls.clues.emote.STASHUnit;
 
 /**

@@ -26,24 +26,16 @@
 package com.pbolduc.mapcompanion;
 
 import com.google.gson.Gson;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import com.google.inject.*;
 import java.io.IOException;
-import java.util.function.Consumer;
-import java.util.function.ObjLongConsumer;
+import java.util.function.*;
 import javax.annotation.Nullable;
-import javax.swing.JLabel;
-import javax.swing.SwingUtilities;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import net.runelite.api.Client;
-import net.runelite.api.GameState;
+import javax.swing.*;
+import lombok.*;
+import net.runelite.api.*;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.callback.ClientThread;
-import okhttp3.HttpUrl;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import okhttp3.*;
 import static com.pbolduc.mapcompanion.RelayResponse.Destination;
 
 /**

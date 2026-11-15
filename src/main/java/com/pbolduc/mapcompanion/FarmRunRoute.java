@@ -25,12 +25,10 @@
  */
 package com.pbolduc.mapcompanion;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import com.google.inject.*;
 import java.util.Collections;
 import javax.annotation.Nullable;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import net.runelite.client.callback.ClientThread;
 import static com.pbolduc.mapcompanion.DestinationRoute.keyOf;
 import static com.pbolduc.mapcompanion.RelayResponse.Destination;

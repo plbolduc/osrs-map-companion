@@ -26,9 +26,7 @@
 package com.pbolduc.mapcompanion;
 
 import javax.annotation.Nullable;
-import net.runelite.client.config.ConfigManager;
-import net.runelite.client.config.Notification;
-import net.runelite.client.config.RuneLiteConfig;
+import net.runelite.client.config.*;
 
 /**
  * A RuneLite notification setting turned on or off by a box in the sidebar.

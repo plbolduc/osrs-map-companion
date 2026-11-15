@@ -25,13 +25,9 @@
  */
 package com.pbolduc.mapcompanion;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import java.util.ArrayList;
-import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-import java.util.List;
+import com.google.gson.*;
+import java.util.*;
+import java.util.function.*;
 import javax.annotation.Nullable;
 import javax.swing.*;
 import lombok.extern.slf4j.Slf4j;

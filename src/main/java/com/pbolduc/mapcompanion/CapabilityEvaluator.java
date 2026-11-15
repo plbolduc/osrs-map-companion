@@ -25,19 +25,15 @@
  */
 package com.pbolduc.mapcompanion;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import com.google.inject.*;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.regex.*;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import net.runelite.api.Client;
-import net.runelite.api.gameval.InventoryID;
+import net.runelite.api.*;
+import net.runelite.api.gameval.*;
 import net.runelite.api.gameval.ItemID;
-import net.runelite.api.Item;
-import net.runelite.api.ItemComposition;
-import net.runelite.api.ItemContainer;
+import net.runelite.api.gameval.InventoryID;
 import net.runelite.client.game.ItemVariationMapping;
 
 /**

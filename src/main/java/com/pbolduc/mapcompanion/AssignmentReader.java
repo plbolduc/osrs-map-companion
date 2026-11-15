@@ -25,19 +25,14 @@
  */
 package com.pbolduc.mapcompanion;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import com.google.inject.*;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.regex.*;
 import javax.annotation.Nullable;
-import net.runelite.api.ChatMessageType;
-import net.runelite.api.Client;
-import net.runelite.api.GameState;
+import net.runelite.api.*;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.ChatMessage;
-import net.runelite.api.gameval.InterfaceID;
-import net.runelite.api.gameval.VarbitID;
+import net.runelite.api.gameval.*;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.plugins.timetracking.farming.Produce;
 import net.runelite.client.util.Text;

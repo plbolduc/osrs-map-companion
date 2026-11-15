@@ -26,12 +26,7 @@
 package com.pbolduc.mapcompanion;
 
 import java.awt.*;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Area;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Line2D;
-import java.awt.geom.Path2D;
-import java.awt.geom.Rectangle2D;
+import java.awt.geom.*;
 import javax.swing.Icon;
 import net.runelite.client.ui.ColorScheme;
 

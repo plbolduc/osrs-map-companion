@@ -26,6 +26,7 @@
 package com.pbolduc.mapcompanion;
 
 import java.awt.*;
+import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.List;
@@ -33,19 +34,12 @@ import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import lombok.AllArgsConstructor;
-import net.runelite.api.Client;
-import net.runelite.api.MenuAction;
-import net.runelite.api.WorldView;
+import net.runelite.api.*;
 import net.runelite.client.ui.FontManager;
-import net.runelite.client.ui.overlay.OverlayPanel;
-import net.runelite.client.ui.overlay.OverlayPosition;
+import net.runelite.client.ui.overlay.*;
+import net.runelite.client.ui.overlay.components.*;
 import net.runelite.client.ui.overlay.components.ComponentOrientation;
-import net.runelite.client.ui.overlay.components.ImageComponent;
-import net.runelite.client.ui.overlay.components.LayoutableRenderableEntity;
-import net.runelite.client.ui.overlay.components.LineComponent;
-import net.runelite.client.ui.overlay.components.SplitComponent;
-import net.runelite.client.util.ImageUtil;
-import net.runelite.client.util.Text;
+import net.runelite.client.util.*;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.*;
 
 /**

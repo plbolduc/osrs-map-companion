@@ -27,13 +27,8 @@ package com.pbolduc.mapcompanion;
 
 import java.util.*;
 import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import net.runelite.api.Client;
-import net.runelite.api.EnumComposition;
-import net.runelite.api.GameState;
-import net.runelite.api.ItemComposition;
-import net.runelite.api.StructComposition;
+import javax.inject.*;
+import net.runelite.api.*;
 import net.runelite.client.util.Text;
 
 /**

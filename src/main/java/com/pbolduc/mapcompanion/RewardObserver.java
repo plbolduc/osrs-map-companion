@@ -26,18 +26,12 @@
 package com.pbolduc.mapcompanion;
 
 import java.util.*;
-import java.util.function.LongSupplier;
-import java.util.function.Predicate;
+import java.util.function.*;
 import java.util.regex.Pattern;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import net.runelite.api.ChatMessageType;
-import net.runelite.api.Client;
-import net.runelite.api.events.ChatMessage;
-import net.runelite.api.events.ScriptPreFired;
-import net.runelite.api.gameval.VarbitID;
-import net.runelite.api.gameval.VarClientID;
-import net.runelite.api.ScriptID;
+import javax.inject.*;
+import net.runelite.api.*;
+import net.runelite.api.events.*;
+import net.runelite.api.gameval.*;
 import net.runelite.client.events.ServerNpcLoot;
 import net.runelite.client.game.ItemStack;
 import net.runelite.client.plugins.loottracker.LootReceived;

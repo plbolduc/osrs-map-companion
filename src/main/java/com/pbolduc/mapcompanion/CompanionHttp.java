@@ -25,25 +25,12 @@
  */
 package com.pbolduc.mapcompanion;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import com.google.gson.*;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.function.BiConsumer;
-import java.util.function.ObjLongConsumer;
+import java.util.function.*;
 import javax.annotation.Nullable;
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.HttpUrl;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
+import okhttp3.*;
 
 /**
  * The one way this plugin derives an HTTP client from RuneLite's.

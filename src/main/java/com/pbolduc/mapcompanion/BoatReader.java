@@ -25,14 +25,11 @@
  */
 package com.pbolduc.mapcompanion;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import java.util.ArrayList;
-import java.util.List;
+import com.google.inject.*;
+import java.util.*;
 import javax.annotation.Nullable;
 import net.runelite.api.Client;
-import net.runelite.api.gameval.DBTableID;
-import net.runelite.api.gameval.VarbitID;
+import net.runelite.api.gameval.*;
 
 /**
  * Where each of the player's boats is moored, and what teleport focus it carries.

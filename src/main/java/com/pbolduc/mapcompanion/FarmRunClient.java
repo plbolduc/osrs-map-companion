@@ -26,23 +26,16 @@
 package com.pbolduc.mapcompanion;
 
 import com.google.gson.Gson;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import com.google.inject.*;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import lombok.AllArgsConstructor;
-import net.runelite.api.Client;
-import net.runelite.api.GameState;
+import net.runelite.api.*;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.callback.ClientThread;
-import okhttp3.Call;
-import okhttp3.HttpUrl;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import okhttp3.*;
 
 /**
  * Explicit Start run, Reroute and End run presses, with no automatic planning requests.

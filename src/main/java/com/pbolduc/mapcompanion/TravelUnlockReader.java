@@ -25,11 +25,8 @@
  */
 package com.pbolduc.mapcompanion;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import com.google.inject.*;
+import java.util.*;
 import javax.annotation.Nullable;
 import net.runelite.api.Client;
 

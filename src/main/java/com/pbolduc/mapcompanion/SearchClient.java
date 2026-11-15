@@ -26,20 +26,15 @@
 package com.pbolduc.mapcompanion;
 
 import com.google.gson.Gson;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import com.google.inject.*;
 import java.util.*;
 import java.util.concurrent.Executor;
-import java.util.function.BooleanSupplier;
-import java.util.function.ObjLongConsumer;
+import java.util.function.*;
 import javax.annotation.Nullable;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.Timer;
 import lombok.AllArgsConstructor;
-import okhttp3.Call;
-import okhttp3.HttpUrl;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
+import okhttp3.*;
 import static com.pbolduc.mapcompanion.RouteWire.text;
 
 /**

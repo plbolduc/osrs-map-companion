@@ -25,12 +25,9 @@
  */
 package com.pbolduc.mapcompanion;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import com.google.inject.*;
 import java.util.*;
-import net.runelite.api.Client;
-import net.runelite.api.Quest;
-import net.runelite.api.QuestState;
+import net.runelite.api.*;
 
 /**
  * Travel quests and the separately opted-in full quest log use the same public RuneLite API.

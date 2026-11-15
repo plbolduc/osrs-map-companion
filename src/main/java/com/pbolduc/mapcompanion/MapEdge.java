@@ -27,10 +27,8 @@ package com.pbolduc.mapcompanion;
 
 import java.awt.Rectangle;
 import java.util.function.ToDoubleFunction;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import net.runelite.api.Client;
-import net.runelite.api.Point;
+import javax.inject.*;
+import net.runelite.api.*;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.widgets.Widget;

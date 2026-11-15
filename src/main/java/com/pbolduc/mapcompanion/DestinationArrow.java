@@ -26,12 +26,9 @@
 package com.pbolduc.mapcompanion;
 
 import javax.annotation.Nullable;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import net.runelite.api.Client;
-import net.runelite.api.WorldView;
+import lombok.*;
+import javax.inject.*;
+import net.runelite.api.*;
 import net.runelite.api.coords.WorldPoint;
 
 /**

@@ -26,22 +26,17 @@
 package com.pbolduc.mapcompanion;
 
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.List;
 import javax.annotation.Nullable;
-import javax.swing.border.CompoundBorder;
+import javax.swing.border.*;
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.MatteBorder;
 import net.runelite.client.game.ItemManager;
-import net.runelite.client.ui.ColorScheme;
-import net.runelite.client.ui.PluginPanel;
+import net.runelite.client.ui.*;
 import net.runelite.client.ui.components.IconTextField;
-import net.runelite.client.util.AsyncBufferedImage;
-import net.runelite.client.util.ImageUtil;
+import net.runelite.client.util.*;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.*;
 import static com.pbolduc.mapcompanion.DropOdds.Luck;
 import static com.pbolduc.mapcompanion.LootLog.Drop;

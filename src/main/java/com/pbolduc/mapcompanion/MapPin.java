@@ -26,13 +26,9 @@
 package com.pbolduc.mapcompanion;
 
 import java.awt.*;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Arc2D;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Path2D;
+import java.awt.geom.*;
 import java.awt.image.BufferedImage;
-import java.util.function.Supplier;
-import java.util.function.ToDoubleFunction;
+import java.util.function.*;
 import javax.annotation.Nullable;
 import net.runelite.api.Point;
 import net.runelite.api.coords.WorldPoint;

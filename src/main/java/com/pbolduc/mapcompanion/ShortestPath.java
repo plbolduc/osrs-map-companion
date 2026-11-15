@@ -25,11 +25,9 @@
  */
 package com.pbolduc.mapcompanion;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import com.google.inject.*;
 import java.util.*;
-import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
+import java.util.function.*;
 import javax.annotation.Nullable;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.callback.ClientThread;

@@ -26,8 +26,7 @@
 package com.pbolduc.mapcompanion;
 
 import com.google.gson.Gson;
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import javax.inject.*;
 
 /**
  * Whether two snapshots say the same thing about the player, ignoring clocks.

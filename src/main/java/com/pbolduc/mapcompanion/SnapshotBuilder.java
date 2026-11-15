@@ -25,19 +25,13 @@
  */
 package com.pbolduc.mapcompanion;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import com.google.inject.*;
 import java.util.*;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import net.runelite.api.Client;
+import lombok.*;
+import net.runelite.api.*;
 import net.runelite.api.coords.WorldPoint;
-import net.runelite.api.GameState;
-import net.runelite.api.Player;
-import net.runelite.api.Skill;
-import net.runelite.api.WorldType;
 
 /**
  * Assembling one snapshot — and the only place that decides what leaves this client.

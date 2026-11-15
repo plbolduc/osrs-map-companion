@@ -26,11 +26,9 @@
 package com.pbolduc.mapcompanion;
 
 import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.regex.*;
 import javax.annotation.Nullable;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
+import lombok.*;
 
 /**
  * Finding a group code inside whatever the player actually pasted.

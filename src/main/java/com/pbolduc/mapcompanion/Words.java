@@ -25,8 +25,7 @@
  */
 package com.pbolduc.mapcompanion;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * The longer things the plugin says to a player, by key, from words.txt:

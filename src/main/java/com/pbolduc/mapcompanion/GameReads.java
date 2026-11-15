@@ -25,8 +25,7 @@
  */
 package com.pbolduc.mapcompanion;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * The rows of game-reads.txt, the table of game variables the progress readers read.

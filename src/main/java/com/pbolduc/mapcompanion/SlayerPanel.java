@@ -27,14 +27,12 @@ package com.pbolduc.mapcompanion;
 
 import com.google.inject.Inject;
 import java.awt.*;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.*;
 import java.util.*;
 import java.util.List;
 import javax.swing.*;
 import net.runelite.api.coords.WorldPoint;
-import net.runelite.api.gameval.ItemID;
-import net.runelite.api.gameval.SpriteID;
+import net.runelite.api.gameval.*;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.util.LinkBrowser;

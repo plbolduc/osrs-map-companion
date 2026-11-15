@@ -26,9 +26,9 @@
 package com.pbolduc.mapcompanion;
 
 import com.google.inject.Inject;
-import java.awt.Color;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 import javax.annotation.Nullable;
 import javax.swing.border.EmptyBorder;
 import javax.swing.*;

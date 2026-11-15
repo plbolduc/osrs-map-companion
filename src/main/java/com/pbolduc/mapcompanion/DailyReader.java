@@ -25,8 +25,7 @@
  */
 package com.pbolduc.mapcompanion;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import com.google.inject.*;
 import java.util.*;
 import javax.annotation.Nullable;
 import net.runelite.api.Client;
