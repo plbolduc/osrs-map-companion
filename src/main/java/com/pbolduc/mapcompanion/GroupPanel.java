@@ -133,7 +133,7 @@ final class GroupPanel extends JPanel
 	private final MapCompanionConfig config;
 	private final GameSprites sprites;
 
-	private final JPanel friends = column(DARK_GRAY_COLOR);
+	private final JPanel friends = column();
 	/**
 	 * Where the friends would be while nobody is logged in and no roster is held: the friends come
 	 * with a character, so the tab says what it waits for, as Stars does, where it drew only the
@@ -148,7 +148,7 @@ final class GroupPanel extends JPanel
 	 */
 	static final String MEETUPS_OFF = Words.of("group.meetupsOff");
 	private final JLabel meetupsOff = new JLabel();
-	private final JPanel meetupCards = column(DARK_GRAY_COLOR);
+	private final JPanel meetupCards = column();
 	private final JButton meetHere = linkButton("Meet here…");
 	private final JLabel meetSaid = new JLabel();
 	private final JPanel form = column(DARKER_GRAY_COLOR);

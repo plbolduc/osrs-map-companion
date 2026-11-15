@@ -210,7 +210,7 @@ final class NowCards extends JPanel
 		 * than where from, which is true of all of them.
 		 */
 		add(sectionHead("Now"));
-		add(gap(3, ColorScheme.DARK_GRAY_COLOR));
+		add(gap(3));
 		destinationPicture.setName("now.destination.picture");
 		destinationPicture.setHorizontalAlignment(SwingConstants.CENTER);
 		destinationPicture.setVerticalAlignment(SwingConstants.TOP);
@@ -244,7 +244,7 @@ final class NowCards extends JPanel
 			}
 			refresh.run();
 		});
-		add(gap(7, ColorScheme.DARK_GRAY_COLOR));
+		add(gap(7));
 
 		deathMapButton.addActionListener(e -> showDeathOnMap());
 		deathRouteButton.addActionListener(e -> routeToDeath());

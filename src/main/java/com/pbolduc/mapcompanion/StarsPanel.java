@@ -1030,11 +1030,6 @@ final class StarsPanel extends JPanel
 		return ms < 60_000 ? "just now" : ms / 60_000 + "m ago";
 	}
 
-	private static JPanel column()
-	{
-		return MapCompanionPanel.column(ColorScheme.DARK_GRAY_COLOR);
-	}
-
 	/** One component the full width of the column, at its own height. */
 	private static JComponent fill(JComponent component)
 	{

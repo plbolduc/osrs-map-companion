@@ -117,7 +117,7 @@ final class SettingsPage extends JPanel
 		whatsNew.setToolTipText(Words.of("settings.whatsNewTip"));
 		whatsNew.addActionListener(e -> LinkBrowser.browse(mapUrl.get() + "/whats-new"));
 		add(whatsNew);
-		add(gap(4, DARK_GRAY_COLOR));
+		add(gap(4));
 		add(sectionHead("What you share"));
 		add(wrapped(Words.of("settings.shareSub"), 11f, ColorScheme.LIGHT_GRAY_COLOR, CARD_TEXT_WIDTH + 16));
 		add(sharingControls);
@@ -125,9 +125,9 @@ final class SettingsPage extends JPanel
 		 * The foot: the three presses that are about trust or about leaving, none a setting. The map
 		 * address is in RuneLite's own list alone: only somebody running a map of their own changes it.
 		 */
-		add(gap(8, DARK_GRAY_COLOR));
+		add(gap(8));
 		add(hug(previewButton, DARK_GRAY_COLOR));
-		add(gap(8, DARK_GRAY_COLOR));
+		add(gap(8));
 		add(left(foot));
 
 		previewButton.setToolTipText(Words.of("settings.previewTip"));

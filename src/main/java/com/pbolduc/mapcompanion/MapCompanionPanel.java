@@ -99,7 +99,7 @@ public class MapCompanionPanel extends PluginPanel
 	 * What there is to start, under what is happening: the farm run, Slayer and port tasks. Each card
 	 * hides while it has nothing to offer, and the heading goes with the last of them.
 	 */
-	private final JPanel tasks = column(DARK_GRAY_COLOR);
+	private final JPanel tasks = column();
 	/**
 	 * Every button that opens the browser says so. "Show on map" opened the website here and drew on
 	 * the game's world map on a friend's card, one label for two maps; the game's map is "World map".
@@ -115,12 +115,12 @@ public class MapCompanionPanel extends PluginPanel
 	private final GroupPanel groupPanel;
 
 	/* Drop luck: one monster's card, or every monster tracked. See {@link DropLuckPanel}. */
-	private final JPanel drySection = column(DARK_GRAY_COLOR);
+	private final JPanel drySection = column();
 	private final DropLuckPanel dropLuck;
 	private final JLabel dropLuckPaused = wrapped(LootLog.PAUSED, 11f, ColorScheme.LIGHT_GRAY_COLOR, TEXT_WIDTH);
 	/** Drop luck's heading, given up while the card's own first row says it (see DropLuckPanel.namesItself). */
 	private final JLabel dryHeading = sectionHead(DropLuckPanel.HEADING);
-	private final JPanel dryHeadingGap = gap(3, DARK_GRAY_COLOR);
+	private final JPanel dryHeadingGap = gap(3);
 
 	/** The status card, the orange button, the join field and the group's buttons. See {@link ConnectCard}. */
 	private final ConnectCard connectCard;
@@ -130,9 +130,9 @@ public class MapCompanionPanel extends PluginPanel
 	 * them, and the next thing on Home, Drop luck's heading for most, would sit 2px under them; in a
 	 * group it ends on the orange button's own 10px, and the group's row follows.
 	 */
-	private final JPanel connectFoot = gap(8, DARK_GRAY_COLOR);
+	private final JPanel connectFoot = gap(8);
 	/** Copy invite and Switch ▾, between the orange button and the tabs. */
-	private final JPanel groupRow = column(DARK_GRAY_COLOR);
+	private final JPanel groupRow = column();
 	private final SidebarPages pages;
 	private final StarsPanel starsPanel;
 	/** Route, pressed anywhere in the sidebar; read here only to bring Home forward for its answer. */
@@ -232,7 +232,7 @@ public class MapCompanionPanel extends PluginPanel
 		 * No title. RuneLite's sidebar button already names the plugin, and the row it took is the
 		 * one the status card now starts on.
 		 */
-		JPanel body = column(DARK_GRAY_COLOR);
+		JPanel body = column();
 		body.setName("companionDaily");
 
 		body.add(connectCard);
@@ -242,15 +242,15 @@ public class MapCompanionPanel extends PluginPanel
 		 * The group's buttons, over the tabs. An invite is wanted from any tab, and at the foot of the
 		 * Group tab every friend and every meetup put Copy invite a card further down.
 		 */
-		groupRow.add(gap(4, DARK_GRAY_COLOR));
+		groupRow.add(gap(4));
 		groupRow.add(left(connectCard.groupActions));
-		groupRow.add(gap(4, DARK_GRAY_COLOR));
+		groupRow.add(gap(4));
 		body.add(groupRow);
-		JPanel overview = column(DARK_GRAY_COLOR);
+		JPanel overview = column();
 		overview.setName("companionHome");
 		/* First, because "where is it and how do I get there" is the question the map answers best. */
 		overview.add(searchPanel);
-		searchGap = gap(8, DARK_GRAY_COLOR);
+		searchGap = gap(8);
 		overview.add(searchGap);
 
 		overview.add(nowCards);
@@ -261,11 +261,11 @@ public class MapCompanionPanel extends PluginPanel
 		 * with two Start runs in it.
 		 */
 		tasks.add(sectionHead("Tasks"));
-		tasks.add(gap(3, DARK_GRAY_COLOR));
+		tasks.add(gap(3));
 		tasks.add(slot(farmRunPanel, 8));
 		tasks.add(slot(slayerPanel, 8));
 		tasks.add(slot(portTasksPanel, 8));
-		tasks.add(gap(2, DARK_GRAY_COLOR));
+		tasks.add(gap(2));
 		overview.add(tasks);
 
 		/* Drop luck works with no pairing code set, so it sits above everything the group needs. */
@@ -273,10 +273,10 @@ public class MapCompanionPanel extends PluginPanel
 		drySection.add(dryHeadingGap);
 		drySection.add(dropLuckPaused);
 		drySection.add(dropLuck);
-		drySection.add(gap(10, DARK_GRAY_COLOR));
+		drySection.add(gap(10));
 		overview.add(drySection);
 
-		JPanel group = column(DARK_GRAY_COLOR);
+		JPanel group = column();
 		group.setName("companionGroupView");
 		group.add(groupPanel);
 		views = new CompanionViews(overview, group, starsPanel, starsPanel::selected);
@@ -337,15 +337,26 @@ public class MapCompanionPanel extends PluginPanel
 		return component;
 	}
 
+	/** A gap on the sidebar's own grey, the one most of them are on. */
+	static JPanel gap(int height)
+	{
+		return gap(height, DARK_GRAY_COLOR);
+	}
+
 	static JPanel gap(int height, Color background)
 	{
 		JPanel spacer = new JPanel();
 		spacer.setBackground(background);
 		spacer.setPreferredSize(new Dimension(1, height));
-		spacer.setMaximumSize(new Dimension(Integer.MAX_VALUE, height));
 		/* A plain panel's FlowLayout asks for 10px at least, and a squeezed column grows a gap to that. */
 		spacer.setMinimumSize(new Dimension(0, height));
-		return left(spacer);
+		return left(capped(spacer));
+	}
+
+	/** A vertical stack on the sidebar's own grey, the one most of them are on. */
+	static JPanel column()
+	{
+		return column(DARK_GRAY_COLOR);
 	}
 
 	/** A vertical stack whose children keep the left margin — see {@link #left}. */
@@ -385,10 +396,8 @@ public class MapCompanionPanel extends PluginPanel
 	/** The same with {@code under} pixels beneath it: the task cards are long, and stand further apart. */
 	static JComponent slot(JPanel card, int under)
 	{
-		JPanel slot = new JPanel(new BorderLayout());
-		slot.setBackground(DARK_GRAY_COLOR);
+		JPanel slot = bar(0, DARK_GRAY_COLOR, null, card, null);
 		slot.setBorder(new EmptyBorder(0, 0, under, 0));
-		slot.add(card, BorderLayout.CENTER);
 		return left(slot);
 	}
 
@@ -444,10 +453,7 @@ public class MapCompanionPanel extends PluginPanel
 	/** One component at its own width, on the left. */
 	static JPanel hug(JComponent component, Color background)
 	{
-		JPanel holder = new JPanel(new BorderLayout());
-		holder.setBackground(background);
-		holder.add(component, BorderLayout.WEST);
-		return left(capped(holder));
+		return left(capped(bar(0, background, component, null, null)));
 	}
 
 	/**

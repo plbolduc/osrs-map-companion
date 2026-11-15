@@ -47,7 +47,7 @@ final class SidebarPages extends JPanel
 	{
 		this.daily = daily;
 		MapCompanionPanel.column(this, ColorScheme.DARK_GRAY_COLOR);
-		settings = MapCompanionPanel.column(ColorScheme.DARK_GRAY_COLOR);
+		settings = MapCompanionPanel.column();
 		settings.setName("companionSettings");
 		JButton back = new JButton("Settings", SidebarIcons.back());
 		back.setName("settings.back");
