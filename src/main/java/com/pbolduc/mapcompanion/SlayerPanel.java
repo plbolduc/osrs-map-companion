@@ -36,6 +36,7 @@ import net.runelite.api.gameval.*;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.util.LinkBrowser;
+import com.pbolduc.mapcompanion.RelayResponse.*;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.*;
 
 /**
@@ -66,7 +67,7 @@ final class SlayerPanel extends JPanel
 	private final List<JButton> routeButtons = new ArrayList<>();
 	private final List<JButton> pinButtons = new ArrayList<>();
 	private final List<JLabel> routeMessages = new ArrayList<>();
-	private RelayResponse.SlayerOptions shown;
+	private SlayerOptions shown;
 	/* Whether the places drawn are the ones a new choice hid, waiting for the map to rank again. */
 	private boolean shownWaiting;
 	/* The choice the picker and the Wilderness box were drawn with: the state's, not the drawn list's. */
@@ -123,7 +124,7 @@ final class SlayerPanel extends JPanel
 		 * again: the picker stays under the pointer, and the card never empties itself on a slow map.
 		 */
 		boolean waiting = view.options == null && view.previous != null;
-		RelayResponse.SlayerOptions places = waiting ? view.previous : view.options;
+		SlayerOptions places = waiting ? view.previous : view.options;
 		/*
 		 * "No Slayer task" only once the game has said so. Before it settles, or for a task this
 		 * client cannot name, the card claims nothing: a player with a task is never told to get one.
@@ -262,7 +263,7 @@ final class SlayerPanel extends JPanel
 				body.add(kinds);
 				if (kindsOpen)
 				{
-					for (RelayResponse.SlayerKind kind : shown.kinds)
+					for (SlayerKind kind : shown.kinds)
 					{
 						body.add(line(kind.name, Color.WHITE));
 						if (kind.facts != null)
@@ -278,7 +279,7 @@ final class SlayerPanel extends JPanel
 					{
 						body.add(line("Boss versions", GOLD));
 					}
-					for (RelayResponse.SlayerBoss boss : shown.bosses)
+					for (SlayerBoss boss : shown.bosses)
 					{
 						body.add(line(boss.name + (boss.where == null ? "" : " · " + boss.where), Color.WHITE));
 						if (boss.entrance != null)
@@ -316,7 +317,7 @@ final class SlayerPanel extends JPanel
 		body.repaint();
 	}
 
-	private void spot(RelayResponse.SlayerSpot spot)
+	private void spot(SlayerSpot spot)
 	{
 		boolean blocked = "unmet".equals(spot.tier);
 		boolean opened = spot.id.equals(open);
@@ -356,7 +357,7 @@ final class SlayerPanel extends JPanel
 		 */
 		row.add(Box.createHorizontalGlue());
 		List<JLabel> lines = new ArrayList<>();
-		for (RelayResponse.SlayerAsk ask : spot.asks)
+		for (SlayerAsk ask : spot.asks)
 		{
 			boolean unmet = "unmet".equals(ask.tier);
 			boolean unknown = "unknown".equals(ask.tier);
@@ -466,7 +467,7 @@ final class SlayerPanel extends JPanel
 		return capped(ruled(new JLabel(), 6, 4));
 	}
 
-	private void actions(String source, String id, RelayResponse.RouteTile tile, String name)
+	private void actions(String source, String id, RouteTile tile, String name)
 	{
 		/*
 		 * Route and Pin side by side, as on a friend's card: they act, so they are buttons. Pin does
@@ -487,7 +488,7 @@ final class SlayerPanel extends JPanel
 		pin.setName(source + ".map");
 		pin.addActionListener(e ->
 		{
-			RelayResponse.Destination next = new RelayResponse.Destination();
+			Destination next = new Destination();
 			next.x = tile.x; next.y = tile.y; next.plane = tile.plane; next.name = name;
 			destinations.pin(next); clientThread.invokeLater(marker::sync);
 		});
@@ -514,7 +515,7 @@ final class SlayerPanel extends JPanel
 	 * What the card says while the places a choice hid wait for their replacement: the choice in the
 	 * picker's own words, and, where the old places already fit it, simply that the map is awaited.
 	 */
-	static String rankingAgain(RelayResponse.SlayerOptions previous, String order, boolean hide)
+	static String rankingAgain(SlayerOptions previous, String order, boolean hide)
 	{
 		if (!Objects.equals(previous.order, order))
 		{

@@ -32,6 +32,7 @@ import javax.annotation.Nullable;
 import lombok.*;
 import net.runelite.api.*;
 import net.runelite.api.coords.WorldPoint;
+import com.pbolduc.mapcompanion.CompanionSnapshot.*;
 
 /**
  * Assembling one snapshot — and the only place that decides what leaves this client.
@@ -93,7 +94,7 @@ public class SnapshotBuilder
 		}
 
 		CompanionSnapshot snapshot = new CompanionSnapshot();
-		snapshot.member = new CompanionSnapshot.Member(identity.id(), nickname());
+		snapshot.member = new Member(identity.id(), nickname());
 		snapshot.sentAtMs = nowMs;
 		if (config.showDestination())
 		{
@@ -262,10 +263,10 @@ public class SnapshotBuilder
 
 		if (settings.on("shareFarming"))
 		{
-			List<CompanionSnapshot.Patch> patches = farming.observations(nowMs);
+			List<Patch> patches = farming.observations(nowMs);
 			if (!patches.isEmpty())
 			{
-				CompanionSnapshot.Farming f = new CompanionSnapshot.Farming();
+				Farming f = new Farming();
 				f.patches = patches;
 				/*
 				 * Stated by the sender rather than inferred by the receiver from a field being
@@ -297,7 +298,7 @@ public class SnapshotBuilder
 		 */
 		if (settings.on(MapCompanionConfig.KEY_SHARE_MILESTONES))
 		{
-			List<CompanionSnapshot.Milestone> batch = milestones.take(nowMs);
+			List<Milestone> batch = milestones.take(nowMs);
 			if (!batch.isEmpty())
 			{
 				snapshot.milestones = batch;

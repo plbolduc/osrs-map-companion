@@ -37,6 +37,7 @@ import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.*;
 import net.runelite.client.ui.components.IconTextField;
 import net.runelite.client.util.*;
+import com.pbolduc.mapcompanion.DropLuckView.*;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.*;
 import static com.pbolduc.mapcompanion.DropOdds.Luck;
 import static com.pbolduc.mapcompanion.LootLog.Drop;
@@ -119,7 +120,7 @@ final class DropLuckPanel extends JPanel
 	private String opened;
 	/** The drop chosen on the card, per monster shown. */
 	private final Map<String, String> chosen = new HashMap<>();
-	private DropLuckView.Sort sort = DropLuckView.Sort.RECENT;
+	private Sort sort = Sort.RECENT;
 	/** Kept across rebuilds so typing is never interrupted; only the results under it are rebuilt. */
 	private final IconTextField search = new IconTextField();
 	private final JPanel results = column(DARK_GRAY_COLOR);
@@ -440,7 +441,7 @@ final class DropLuckPanel extends JPanel
 
 	private void buildDetail(JPanel card, Monster monster, Drop drop, boolean pinned, @Nullable Integer taskLeft)
 	{
-		DropLuckView.Detail detail = DropLuckView.detail(monster, drop, taskLeft, log.boostedNow(monster.npc, drop.boostWhen));
+		Detail detail = DropLuckView.detail(monster, drop, taskLeft, log.boostedNow(monster.npc, drop.boostWhen));
 		/* The pin is a drop's name on the wire, and no item is called "Any unique": it has none. */
 		boolean pinnable = !DropLuckView.ANY.equals(drop.item);
 		JButton pin = smallButton(pinned ? "Pinned" : "Pin");
@@ -516,7 +517,7 @@ final class DropLuckPanel extends JPanel
 		add(space(4));
 		JPanel sorts = new JPanel(new GridLayout(1, 3, 2, 0));
 		sorts.setBackground(DARK_GRAY_COLOR);
-		for (DropLuckView.Sort option : DropLuckView.Sort.values())
+		for (Sort option : Sort.values())
 		{
 			JButton button = new JButton(option.label);
 			refont(button, 11f);
@@ -635,7 +636,7 @@ final class DropLuckPanel extends JPanel
 			DARK_GRAY_COLOR));
 		JPanel icons = new JPanel(new FlowLayout(FlowLayout.LEFT, 3, 3));
 		icons.setBackground(DARK_GRAY_COLOR);
-		DropLuckView.Standing standing = DropLuckView.standing(monster, pin);
+		Standing standing = DropLuckView.standing(monster, pin);
 		Luck dry = DropLuckView.dryNow(standing);
 		/*
 		 * The chip is about one drop, so that drop is outlined in the chip's colour and always among

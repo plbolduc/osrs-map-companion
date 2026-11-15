@@ -34,6 +34,8 @@ import javax.swing.border.*;
 import javax.swing.*;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.util.ImageUtil;
+import com.pbolduc.mapcompanion.FarmRunState.*;
+import com.pbolduc.mapcompanion.RelayResponse.*;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.*;
 import static com.pbolduc.mapcompanion.RelayResponse.FarmStop;
 import static net.runelite.client.ui.ColorScheme.LIGHT_GRAY_COLOR;
@@ -167,7 +169,7 @@ final class RunView extends JPanel
 		end.addActionListener(e -> client.end());
 		follow.addActionListener(e ->
 		{
-			FarmRunState.View view = state.view();
+			View view = state.view();
 			if (view != null)
 			{
 				follower.follow(!view.following);
@@ -245,8 +247,8 @@ final class RunView extends JPanel
 	 */
 	boolean refresh(boolean connected, boolean loggedIn, long now)
 	{
-		FarmRunState.View any = state.view();
-		FarmRunState.View view = any != null && ours(any.run) ? any : null;
+		View any = state.view();
+		View view = any != null && ours(any.run) ? any : null;
 		boolean active = view != null;
 		FarmRunClient.Said said = client.said();
 		boolean mine = said != null && said.port == port;
@@ -346,7 +348,7 @@ final class RunView extends JPanel
 	 * route changes nothing else on the card; a finished one says what it came to, done and visited
 	 * kept apart as the stops keep them.
 	 */
-	static String progressLine(FarmRunState.View view)
+	static String progressLine(View view)
 	{
 		if (view.next() == null)
 		{
@@ -412,7 +414,7 @@ final class RunView extends JPanel
 	}
 
 	/** What a stop ticked without a replant came to: charted on a sea charting run, else visited. */
-	static String reached(FarmRunState.View view)
+	static String reached(View view)
 	{
 		return FarmRunWire.SEA_CHARTS.equals(view.run.kind) ? "charted" : "visited";
 	}
@@ -436,7 +438,7 @@ final class RunView extends JPanel
 	 * What a stop says it is at: done, visited, or under the player. The next stop says it by its
 	 * number, amber as its pin is on the world map, rather than by a line of its own.
 	 */
-	static String status(FarmRunState.View view, FarmStop stop)
+	static String status(View view, FarmStop stop)
 	{
 		if (view.done.contains(stop.n))
 		{
@@ -464,7 +466,7 @@ final class RunView extends JPanel
 	 * amber, the colour the bank overlay outlines it in, beside its picture greyed; one carried, or
 	 * one nothing here can check, is drawn as it is, since no claim is made about it.
 	 */
-	private void showBringList(FarmRunState.View view)
+	private void showBringList(View view)
 	{
 		bring.removeAll();
 		missing = 0;
@@ -515,7 +517,7 @@ final class RunView extends JPanel
 		sprites.farmTravelItem(picture, line.name, PICTURE);
 	}
 
-	private void showStops(FarmRunState.View view)
+	private void showStops(View view)
 	{
 		stops.removeAll();
 		FarmStop next = view.next();

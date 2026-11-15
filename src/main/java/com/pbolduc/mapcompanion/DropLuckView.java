@@ -28,6 +28,7 @@ package com.pbolduc.mapcompanion;
 import java.util.*;
 import javax.annotation.Nullable;
 import lombok.AllArgsConstructor;
+import com.pbolduc.mapcompanion.DropOdds.*;
 import static com.pbolduc.mapcompanion.DropOdds.count;
 import static com.pbolduc.mapcompanion.LootLog.Drop;
 import static com.pbolduc.mapcompanion.LootLog.Monster;
@@ -270,10 +271,10 @@ final class DropLuckView
 	}
 
 	/** The chip beside a drop's count, or NONE where there is no rate or nothing to say yet. */
-	static DropOdds.Luck rowLuck(Monster monster, Drop drop)
+	static Luck rowLuck(Monster monster, Drop drop)
 	{
 		/* Over the kills this drop was watched for, never every kill: see LootLog.Drop#watched. */
-		return drop.oneIn == null ? DropOdds.Luck.NONE : DropOdds.luck(drop.obtained, drop.watchedKills(), drop.rate());
+		return drop.oneIn == null ? Luck.NONE : DropOdds.luck(drop.obtained, drop.watchedKills(), drop.rate());
 	}
 
 	/** The details under the rows, for one drop. */
@@ -304,7 +305,7 @@ final class DropLuckView
 	 */
 	static double worthPerKill(Drop drop)
 	{
-		DropOdds.Kills watched = drop.watchedKills();
+		Kills watched = drop.watchedKills();
 		long kills = watched.ordinary + watched.shared;
 		return kills > 0 ? (watched.ordinary + watched.share) / kills : 1;
 	}
@@ -340,7 +341,7 @@ final class DropLuckView
 			return new Detail((drop.obtained > 0 ? count(drop.obtained) + " recorded. " : "") + Words.of("luck.noRate"),
 				sinceLabel, sinceValue, null, -1, null, null, null);
 		}
-		DropOdds.Rate rate = drop.rate();
+		Rate rate = drop.rate();
 		/* The rest of a task is task kills by definition; otherwise the rate that applies next. */
 		boolean taskAhead = taskLeft != null && taskLeft > 0;
 		boolean boostAhead = LootLog.SLAYER_TASK.equals(drop.boostWhen) ? taskAhead || boostedNow : boostedNow;
@@ -358,7 +359,7 @@ final class DropLuckView
 		String aheadLabel = taskAhead ? "Rest of this Slayer task (" + count(taskLeft) + " kills)"
 			: "Next " + units(monster, 100) + boost;
 		String aheadValue = DropOdds.percent(taskAhead ? DropOdds.within(ahead, taskLeft)
-			: DropOdds.within(DropOdds.Rate.of(ahead), new DropOdds.Kills(0, 0, 100, 100 * worthPerKill(drop)))) + "% chance";
+			: DropOdds.within(Rate.of(ahead), new Kills(0, 0, 100, 100 * worthPerKill(drop)))) + "% chance";
 		return new Detail(
 			DropOdds.verdict(drop.obtained, drop.watchedKills(), drop.sinceKills(), rate),
 			sinceLabel, sinceValue, comparison,
@@ -482,16 +483,16 @@ final class DropLuckView
 	 * looked to disagree. Null where {@link #dryNow} draws no chip.
 	 */
 	@Nullable
-	static String nowWord(DropOdds.Luck luck)
+	static String nowWord(Luck luck)
 	{
-		return luck == DropOdds.Luck.VERY_DRY ? "Very dry now" : luck == DropOdds.Luck.DRY ? "Dry now" : null;
+		return luck == Luck.VERY_DRY ? "Very dry now" : luck == Luck.DRY ? "Dry now" : null;
 	}
 
 	/** The list row's chip, worded by {@link #nowWord}: dry or very dry when the monster's standing earns it. */
-	static DropOdds.Luck dryNow(@Nullable Standing standing)
+	static Luck dryNow(@Nullable Standing standing)
 	{
 		int shown = standing == null ? 0 : DropOdds.shown(standing.drierThan);
-		return shown >= DropOdds.VERY ? DropOdds.Luck.VERY_DRY : shown >= DropOdds.NOTABLE ? DropOdds.Luck.DRY : DropOdds.Luck.NONE;
+		return shown >= DropOdds.VERY ? Luck.VERY_DRY : shown >= DropOdds.NOTABLE ? Luck.DRY : Luck.NONE;
 	}
 
 	/**

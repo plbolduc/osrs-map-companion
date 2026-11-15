@@ -35,6 +35,7 @@ import javax.swing.*;
 import net.runelite.api.gameval.SpriteID;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.ui.*;
+import com.pbolduc.mapcompanion.StarsModel.*;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.*;
 import static com.pbolduc.mapcompanion.StarsModel.Star;
 
@@ -154,7 +155,7 @@ final class StarsPanel extends JPanel
 	private boolean selected, active, updating;
 	private String rendered;
 	/** The feed the rows were drawn from: its stars are the ones the rows and their {@link #clocks} hold. */
-	private StarsModel.Feed drawn;
+	private Feed drawn;
 	/**
 	 * Route beside Unpin and the line the map's last answer left, while they are drawn: a wait counts
 	 * down in them on every refresh, where rebuilding the list each second would eat a press.
@@ -284,12 +285,12 @@ final class StarsPanel extends JPanel
 
 		tier.addActionListener(e -> change(() -> service.model.preferences.filters.minTier = tier.getSelectedIndex() + 1));
 		members.addActionListener(e -> change(() -> {
-			StarsModel.Filters f = service.model.preferences.filters;
+			Filters f = service.model.preferences.filters;
 			f.showMembers = members.isSelected();
 			if (!f.showMembers && !f.showFreeToPlay) f.showFreeToPlay = true;
 		}));
 		free.addActionListener(e -> change(() -> {
-			StarsModel.Filters f = service.model.preferences.filters;
+			Filters f = service.model.preferences.filters;
 			f.showFreeToPlay = free.isSelected();
 			if (!f.showMembers && !f.showFreeToPlay) f.showMembers = true;
 		}));
@@ -360,7 +361,7 @@ final class StarsPanel extends JPanel
 		{
 			return;
 		}
-		StarsModel.Filters f = model.preferences.filters;
+		Filters f = model.preferences.filters;
 		updating = true;
 		tier.setSelectedIndex(Math.max(0, Math.min(8, f.minTier - 1)));
 		members.setSelected(f.showMembers);
@@ -378,14 +379,14 @@ final class StarsPanel extends JPanel
 		game.setText(gameName == null ? "" : gameName);
 		game.setVisible(gameName != null && model.feed != null);
 		setWrapped(levels, levelsLine(model.miningLevel, model.skillTotal), TEXT);
-		List<StarsModel.Site> sites = model.sites();
+		List<Site> sites = model.sites();
 		long elapsed = model.elapsed();
 		int stars = 0, locations = 0;
 		boolean loggedOut = !service.eligible() && service.known() && active;
 		boolean empty = model.feed != null && model.feed.rows.isEmpty();
 		StringBuilder signature = new StringBuilder().append(model.feed != null).append(loggedOut).append(empty).append(service.message)
 			.append(model.playerGame).append(model.playerWorld);
-		for (StarsModel.Site site : sites)
+		for (Site site : sites)
 		{
 			stars += site.worlds.size();
 			if (!site.worlds.isEmpty()) locations++;
@@ -453,7 +454,7 @@ final class StarsPanel extends JPanel
 			return;
 		}
 		boolean favoritesHeading = false, restHeading = false;
-		for (StarsModel.Site site : sites)
+		for (Site site : sites)
 		{
 			if (site.favorite && !favoritesHeading)
 			{
@@ -536,7 +537,7 @@ final class StarsPanel extends JPanel
 		return own == null ? "|" : "|" + own.getText() + own.isEnabled();
 	}
 
-	private JComponent site(StarsModel.Site site, long elapsed, @Nullable Star pinned)
+	private JComponent site(Site site, long elapsed, @Nullable Star pinned)
 	{
 		boolean open = expanded.contains(site.key);
 		Star primary = site.worlds.isEmpty() ? null : site.worlds.get(0);
@@ -634,7 +635,7 @@ final class StarsPanel extends JPanel
 	}
 
 	/** One world under its site: the card's own line for it, with its age where a card says Wilderness. */
-	private JButton world(StarsModel.Site site, Star star, long elapsed, Color background, boolean pinned)
+	private JButton world(Site site, Star star, long elapsed, Color background, boolean pinned)
 	{
 		/* The pinned world is marked as a picked one is, since under a fold nothing else says which was pressed. */
 		boolean picked = pinned || star.id.equals(service.model.selected);
@@ -1160,7 +1161,7 @@ final class StarsPanel extends JPanel
 	}
 
 	/** A filter's box, which sets its own one of the filters when it is pressed. */
-	private JCheckBox check(String text, BiConsumer<StarsModel.Filters, Boolean> set)
+	private JCheckBox check(String text, BiConsumer<Filters, Boolean> set)
 	{
 		JCheckBox check = new JCheckBox(text);
 		refont(check, 11f);

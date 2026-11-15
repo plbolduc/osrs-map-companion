@@ -27,6 +27,7 @@ package com.pbolduc.mapcompanion;
 
 import com.google.gson.Gson;
 import javax.inject.*;
+import com.pbolduc.mapcompanion.CompanionSnapshot.*;
 
 /**
  * Whether two snapshots say the same thing about the player, ignoring clocks.
@@ -74,7 +75,7 @@ public class SnapshotFingerprint
 		}
 		if (copy.farming != null && copy.farming.patches != null)
 		{
-			for (CompanionSnapshot.Patch patch : copy.farming.patches)
+			for (Patch patch : copy.farming.patches)
 			{
 				patch.observedMsAgo = 0L;
 				/**
@@ -91,9 +92,9 @@ public class SnapshotFingerprint
 		}
 		if (copy.birdhouses != null)
 		{
-			for (CompanionSnapshot.Birdhouse house : copy.birdhouses) house.observedMsAgo = 0L;
+			for (Birdhouse house : copy.birdhouses) house.observedMsAgo = 0L;
 		}
-		for (CompanionSnapshot.Assignment assignment : new CompanionSnapshot.Assignment[] {copy.hunterRumour, copy.mahoganyHome, copy.farmingContract})
+		for (Assignment assignment : new Assignment[] {copy.hunterRumour, copy.mahoganyHome, copy.farmingContract})
 		{
 			if (assignment != null)
 			{
@@ -102,7 +103,7 @@ public class SnapshotFingerprint
 		}
 		if (copy.milestones != null)
 		{
-			for (CompanionSnapshot.Milestone milestone : copy.milestones)
+			for (Milestone milestone : copy.milestones)
 			{
 				/**
 				 * The id is the content: a new event changes this fingerprint and gets posted at
@@ -119,7 +120,7 @@ public class SnapshotFingerprint
 		/* A new kill changes its count, which is posted at once; the age since the last only counts up. */
 		if (copy.loot != null && copy.loot.npcs != null)
 		{
-			for (CompanionSnapshot.Npc npc : copy.loot.npcs) npc.lastKillMsAgo = npc.lastKillMsAgo == null ? null : 0L;
+			for (Npc npc : copy.loot.npcs) npc.lastKillMsAgo = npc.lastKillMsAgo == null ? null : 0L;
 		}
 		return gson.toJson(copy);
 	}

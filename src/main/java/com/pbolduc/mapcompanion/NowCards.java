@@ -37,6 +37,7 @@ import net.runelite.client.config.Keybind;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.components.ThinProgressBar;
 import net.runelite.client.util.LinkBrowser;
+import com.pbolduc.mapcompanion.RoutePress.*;
 import static com.pbolduc.mapcompanion.MapCompanionPanel.*;
 import static com.pbolduc.mapcompanion.CompanionSnapshot.Clue;
 import static net.runelite.client.ui.ColorScheme.DARKER_GRAY_COLOR;
@@ -81,7 +82,7 @@ final class NowCards extends JPanel
 	 */
 	private final JLabel destinationPicture = new JLabel();
 	@Nullable
-	private RoutePress.Picture shownPicture;
+	private Picture shownPicture;
 	private final JLabel destinationDetail = detail();
 	/** The world this client is on, or zero: the sidebar's, once it has one to give. See {@link #world}. */
 	private IntSupplier world = () -> 0;
@@ -238,7 +239,7 @@ final class NowCards extends JPanel
 			if (step != null)
 			{
 				/* Each step is its own source, so Reroute is offered only while Quest Helper is still on it. */
-				routePress.press(RoutePress.Target.tile("quest" + step, step, questTitle.getText(), null, null)
+				routePress.press(Target.tile("quest" + step, step, questTitle.getText(), null, null)
 					.showing((label, box) -> sprites.sprite(label, SpriteID.Mapfunction.QUEST_START, 15)));
 			}
 			refresh.run();
@@ -348,7 +349,7 @@ final class NowCards extends JPanel
 	 */
 	private void routeState(JButton button, JLabel line, String source, String label, boolean ready, String tip, long now)
 	{
-		RoutePress.Said said = routePress.said(source);
+		Said said = routePress.said(source);
 		boolean planning = said != null && said.planning;
 		button.setText(planning ? "Planning…" : answeredHere(source) ? "Reroute" : label);
 		button.setEnabled(ready && !planning && routePress.ready());
@@ -365,7 +366,7 @@ final class NowCards extends JPanel
 	/** Whether the destination on Home is the answer the last press from {@code source} made. */
 	private boolean answeredHere(String source)
 	{
-		RoutePress.Said said = routePress.said(source);
+		Said said = routePress.said(source);
 		return said != null && said.key != null && said.key.equals(DestinationRoute.keyOf(destinationState.getDestination()));
 	}
 
@@ -463,12 +464,12 @@ final class NowCards extends JPanel
 		CompanionSnapshot.Tile tile = ClueReader.routeTile(clue);
 		if (tile != null)
 		{
-			routePress.press(RoutePress.Target.tile("clue", new WorldPoint(tile.x, tile.y, tile.plane),
+			routePress.press(Target.tile("clue", new WorldPoint(tile.x, tile.y, tile.plane),
 				clueTitle(clue.tier), null, clue.coordTile != null ? "Coordinate" : "Beginner map").showing(scroll(clue)));
 		}
 		else if (ClueReader.routesByClue(clue))
 		{
-			routePress.press(RoutePress.Target.clue("clue", clue, clueTitle(clue.tier), clueTitle(clue.tier))
+			routePress.press(Target.clue("clue", clue, clueTitle(clue.tier), clueTitle(clue.tier))
 				.showing(scroll(clue)));
 		}
 		refresh.run();
@@ -476,7 +477,7 @@ final class NowCards extends JPanel
 
 	/** The clue's scroll, as its own card draws it, for the destination's card beside the answer. */
 	@Nullable
-	private RoutePress.Picture scroll(Clue clue)
+	private Picture scroll(Clue clue)
 	{
 		Integer itemId = clue.itemId != null && clue.itemId > 0 ? clue.itemId : null;
 		return itemId == null ? null : (label, box) -> sprites.item(label, itemId, box);
@@ -493,7 +494,7 @@ final class NowCards extends JPanel
 		CompanionSnapshot.Death death = deathWatcher.snapshot(now);
 		if (death != null)
 		{
-			routePress.press(RoutePress.Target.tile("death", new WorldPoint(death.tile.x, death.tile.y, death.tile.plane),
+			routePress.press(Target.tile("death", new WorldPoint(death.tile.x, death.tile.y, death.tile.plane),
 				"Where you died", null, null));
 		}
 		refresh.run();
@@ -508,7 +509,7 @@ final class NowCards extends JPanel
 		RelayResponse.Destination destination = destinationState.getDestination();
 		if (destination != null && destination.route == null)
 		{
-			routePress.press(RoutePress.Target.tile(DESTINATION, new WorldPoint(destination.x, destination.y, destination.plane),
+			routePress.press(Target.tile(DESTINATION, new WorldPoint(destination.x, destination.y, destination.plane),
 				destination.name, destination.world, destination.note));
 		}
 		refresh.run();
@@ -555,7 +556,7 @@ final class NowCards extends JPanel
 		if (destination != null)
 		{
 			/* Drawn once per press's answer rather than every second, and gone with another destination. */
-			RoutePress.Picture picture = routePress.picture(destination);
+			Picture picture = routePress.picture(destination);
 			if (picture != shownPicture)
 			{
 				shownPicture = picture;

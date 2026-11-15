@@ -31,6 +31,7 @@ import java.util.*;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
+import com.pbolduc.mapcompanion.RelayResponse.*;
 import static com.pbolduc.mapcompanion.RelayResponse.Gate;
 import static com.pbolduc.mapcompanion.RelayResponse.Route;
 import static com.pbolduc.mapcompanion.RelayResponse.RouteOption;
@@ -216,14 +217,14 @@ final class RouteWire
 	 * is not one of the three goes, because a tier this cannot draw is one it would draw wrong.
 	 */
 	@Nullable
-	static RelayResponse.Voyage voyage(@Nullable RelayResponse.Voyage voyage)
+	static Voyage voyage(@Nullable Voyage voyage)
 	{
 		String from = voyage == null ? null : text(voyage.from, MAX_PORT);
 		if (from == null)
 		{
 			return null;
 		}
-		RelayResponse.Voyage clean = new RelayResponse.Voyage();
+		Voyage clean = new Voyage();
 		clean.from = from;
 		clean.to = text(voyage.to, MAX_PORT);
 		List<int[]> points = new ArrayList<>();
@@ -295,14 +296,14 @@ final class RouteWire
 
 	/** A step's end on the map and on one of the four floors, or null: the words stay, the pin goes. */
 	@Nullable
-	static RelayResponse.RouteTile tile(@Nullable RelayResponse.RouteTile at)
+	static RouteTile tile(@Nullable RouteTile at)
 	{
 		if (at == null || at.x <= 0 || at.y <= 0 || at.x > MAX_COORDINATE || at.y > MAX_COORDINATE
 			|| (at.plane != null && (at.plane < 0 || at.plane > 3)))
 		{
 			return null;
 		}
-		RelayResponse.RouteTile clean = new RelayResponse.RouteTile();
+		RouteTile clean = new RouteTile();
 		clean.x = at.x;
 		clean.y = at.y;
 		clean.plane = at.plane;

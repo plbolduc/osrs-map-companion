@@ -31,6 +31,7 @@ import javax.annotation.Nullable;
 import lombok.*;
 import net.runelite.api.*;
 import net.runelite.api.gameval.*;
+import com.pbolduc.mapcompanion.CompanionSnapshot.*;
 
 /**
  * The five Sailing port task slots, and how far each task has got.
@@ -304,18 +305,18 @@ public class PortTaskReader extends SettlingReader
 
 	/** What the snapshot carries: each slot's state, task id and counters. Client thread only. */
 	@Nullable
-	public CompanionSnapshot.PortTasks wire(long nowMs)
+	public PortTasks wire(long nowMs)
 	{
 		List<Slot> slots = read(nowMs);
 		if (slots == null)
 		{
 			return null;
 		}
-		CompanionSnapshot.PortTasks out = new CompanionSnapshot.PortTasks();
+		PortTasks out = new PortTasks();
 		out.slots = new ArrayList<>(slots.size());
 		for (Slot slot : slots)
 		{
-			CompanionSnapshot.PortTaskSlot w = new CompanionSnapshot.PortTaskSlot();
+			PortTaskSlot w = new PortTaskSlot();
 			w.slot = slot.slot;
 			w.state = slot.state;
 			if (COURIER.equals(slot.state))

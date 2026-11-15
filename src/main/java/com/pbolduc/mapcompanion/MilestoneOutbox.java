@@ -27,6 +27,7 @@ package com.pbolduc.mapcompanion;
 
 import com.google.inject.Singleton;
 import java.util.*;
+import com.pbolduc.mapcompanion.CompanionSnapshot.*;
 
 /**
  * The things worth telling a group about as they happen, held until the map says it heard.
@@ -235,17 +236,17 @@ public class MilestoneOutbox
 	}
 
 	/** What to put on the next post, oldest first, or an empty list when there is nothing. */
-	public synchronized List<CompanionSnapshot.Milestone> take(long nowMs)
+	public synchronized List<Milestone> take(long nowMs)
 	{
 		sweep(nowMs);
-		List<CompanionSnapshot.Milestone> batch = new ArrayList<>();
+		List<Milestone> batch = new ArrayList<>();
 		for (Pending event : pending)
 		{
 			if (batch.size() >= MAX_BATCH)
 			{
 				break;
 			}
-			CompanionSnapshot.Milestone wire = new CompanionSnapshot.Milestone();
+			Milestone wire = new Milestone();
 			wire.id = event.id;
 			wire.session = session;
 			wire.sequence = event.sequence;
@@ -260,7 +261,7 @@ public class MilestoneOutbox
 			wire.collectionNew = event.collectionNew;
 			if (event.sourceKind != null)
 			{
-				wire.source = new CompanionSnapshot.RewardSource();
+				wire.source = new RewardSource();
 				wire.source.kind = event.sourceKind;
 				wire.source.name = event.sourceName;
 			}

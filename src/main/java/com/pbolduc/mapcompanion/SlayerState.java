@@ -29,6 +29,7 @@ import com.google.inject.Singleton;
 import java.util.Objects;
 import javax.annotation.Nullable;
 import lombok.AllArgsConstructor;
+import com.pbolduc.mapcompanion.CompanionSnapshot.*;
 import static com.pbolduc.mapcompanion.RelayResponse.SlayerOptions;
 
 /**
@@ -100,7 +101,7 @@ final class SlayerState
 	}
 
 	/** A settled reading: the task the game holds, or null for none. */
-	synchronized void local(@Nullable String incomingMember, @Nullable CompanionSnapshot.Slayer local, String incomingOrder, boolean hide)
+	synchronized void local(@Nullable String incomingMember, @Nullable Slayer local, String incomingOrder, boolean hide)
 	{
 		read(incomingMember, local, incomingOrder, hide);
 		settled = true;
@@ -119,7 +120,7 @@ final class SlayerState
 		dropPlacesOfAnotherTask();
 	}
 
-	private void read(@Nullable String incomingMember, @Nullable CompanionSnapshot.Slayer local, String incomingOrder, boolean hide)
+	private void read(@Nullable String incomingMember, @Nullable Slayer local, String incomingOrder, boolean hide)
 	{
 		if (!Objects.equals(member, incomingMember))
 		{
@@ -203,9 +204,9 @@ final class SlayerState
 		seenRevision = 0;
 	}
 
-	synchronized CompanionSnapshot.SlayerPreferences preferences()
+	synchronized SlayerPreferences preferences()
 	{
-		CompanionSnapshot.SlayerPreferences preferences = new CompanionSnapshot.SlayerPreferences();
+		SlayerPreferences preferences = new SlayerPreferences();
 		preferences.order = order;
 		preferences.hideWilderness = hideWilderness;
 		preferences.seenRevision = seenRevision;
