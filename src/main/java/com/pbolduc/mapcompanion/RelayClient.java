@@ -550,33 +550,24 @@ public class RelayClient
 			return;
 		}
 
-		if (isPermanent(code))
+		/*
+		 * The statuses that always mean the same, then those whose meaning is in the body, which
+		 * permanentReason reads and answers null for anything else. The map answers a member it has never
+		 * heard of with {@code 403 needs_code}, a code it has no group for with {@code 404
+		 * not_found}, and a member it will never hear from again with {@code 410 closed} or
+		 * {@code 410 removed}; a proxy answers 403 or 404 with HTML. Reading the
+		 * reason is what tells those apart, and getting it wrong in either direction is bad:
+		 * retrying a removal every thirty seconds forever, or telling somebody their group is
+		 * closed because a deploy was in progress.
+		 */
+		String permanent = isPermanent(code) ? code == 507 ? describeFull(reason) : describeClientError(code)
+			: permanentReason(code, reason);
+		if (permanent != null)
 		{
-			fatalError = code == 507 ? describeFull(reason) : describeClientError(code);
+			fatalError = permanent;
 			fatalSinceMs = now;
 			refused = refusedFor(code, reason);
 			return;
-		}
-
-		if (code == 403 || code == 404 || code == 410)
-		{
-			/**
-			 * The statuses whose meaning is in the body. The map answers a member it has never
-			 * heard of with {@code 403 needs_code}, a code it has no group for with {@code 404
-			 * not_found}, and a member it will never hear from again with {@code 410 closed} or
-			 * {@code 410 removed}; a proxy answers 403 or 404 with HTML. Reading the
-			 * reason is what tells those apart, and getting it wrong in either direction is bad:
-			 * retrying a removal every thirty seconds forever, or telling somebody their group is
-			 * closed because a deploy was in progress.
-			 */
-			String permanent = permanentReason(code, reason);
-			if (permanent != null)
-			{
-				fatalError = permanent;
-				fatalSinceMs = now;
-				refused = refusedFor(code, reason);
-				return;
-			}
 		}
 
 		if (response.isRedirect())
@@ -695,15 +686,8 @@ public class RelayClient
 		}
 		if (status == 410)
 		{
-			if ("closed".equals(tidy))
-			{
-				return "This group was closed.";
-			}
-			if ("removed".equals(tidy))
-			{
-				return Words.of("relay.removed");
-			}
-			return Words.of("relay.gone");
+			return "closed".equals(tidy) ? "This group was closed." : "removed".equals(tidy) ? Words.of("relay.removed")
+				: Words.of("relay.gone");
 		}
 		return null;
 	}
@@ -724,11 +708,7 @@ public class RelayClient
 	static String describeFull(@Nullable String reason)
 	{
 		String tidy = reason == null ? "" : reason.trim().toLowerCase(Locale.ROOT);
-		if ("capacity".equals(tidy))
-		{
-			return "Map is full · retrying";
-		}
-		return "That group is full.";
+		return "capacity".equals(tidy) ? "Map is full · retrying" : "That group is full.";
 	}
 
 	/**
