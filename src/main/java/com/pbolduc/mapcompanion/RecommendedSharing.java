@@ -149,10 +149,7 @@ final class RecommendedSharing extends JPanel
 		}
 		card.add(gap(4));
 
-		JLabel drawn = label(11f, LIGHT_GRAY_COLOR);
-		refont(drawn, Font.BOLD);
-		drawn.setText(SharingControls.CLIENT_TITLE);
-		card.add(drawn);
+		card.add(sectionHead(SharingControls.CLIENT_TITLE));
 		card.add(new Group(SharingFields.IN_GAME, details).panel);
 		details.add(detailLine("recommended.detail.showDestination", DESTINATIONS_DETAIL));
 		details.add(detailLine("recommended.detail.showGroupOnWorldMap", GROUP_DETAIL));

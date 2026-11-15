@@ -154,10 +154,7 @@ final class RunView extends JPanel
 				new EmptyBorder(5, 0, 1, 0))));
 		capped(legHead);
 		legHead.setVisible(false);
-		legEnd.setBorder(new CompoundBorder(
-			new EmptyBorder(6, 0, 0, 0),
-			BorderFactory.createMatteBorder(1, 0, 0, 0, ColorScheme.MEDIUM_GRAY_COLOR)));
-		capped(legEnd);
+		capped(ruled(legEnd, 6, 0));
 		legEnd.setVisible(false);
 		actions.setOpaque(false);
 		actions.setBorder(new EmptyBorder(5, 0, 0, 0));
