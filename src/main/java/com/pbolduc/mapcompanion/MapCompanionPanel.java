@@ -938,13 +938,13 @@ public class MapCompanionPanel extends PluginPanel
 	 * lines differ in what a hidden one keeps: this empties it, and {@link #showKeeping} leaves the words
 	 * it last showed.
 	 */
-	static void show(JLabel label, @Nullable String text, int width)
+	static void showLine(JLabel label, @Nullable String text, int width)
 	{
 		label.setVisible(text != null);
 		setWrapped(label, text, width);
 	}
 
-	/** The same for a line whose hidden words stay as they were: see {@link #show}. */
+	/** The same for a line whose hidden words stay as they were: see {@link #showLine}. */
 	static void showKeeping(JLabel label, @Nullable String text, int width)
 	{
 		label.setVisible(text != null);

@@ -314,7 +314,7 @@ final class SearchPanel extends JPanel
 	 * read down one edge and are compared without reading a sentence. The name gives up that much
 	 * width; the grey line and a row with no distance keep all of it.
 	 */
-	private JPanel row(Hit hit, boolean live)
+	private JComponent row(Hit hit, boolean live)
 	{
 		JLabel picture = new JLabel();
 		picture.setName("search.picture");
@@ -360,12 +360,7 @@ final class SearchPanel extends JPanel
 			row.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 			row.addMouseListener(rowPresses(row, hit));
 		}
-		JPanel slot = new JPanel(new BorderLayout());
-		slot.setBackground(ColorScheme.DARK_GRAY_COLOR);
-		slot.setBorder(new EmptyBorder(0, 0, 2, 0));
-		slot.add(row);
-		capped(slot);
-		return left(slot);
+		return capped(slot(row, 2));
 	}
 
 	/** The colour a disabled button's words are drawn in, so a row that takes no pick reads as one. */

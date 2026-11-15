@@ -655,7 +655,7 @@ final class GroupPanel extends JPanel
 		 * the cost is a narrower line for where, which may wrap where it fitted before.
 		 */
 		JButton[] buttons = present(route, map);
-		int room = WIDTH - (buttons.length == 0 ? 0 : widest(buttons) + 4);
+		int room = WIDTH - Arrays.stream(buttons).mapToInt(button -> button.getPreferredSize().width + 4).max().orElse(0);
 		JLabel name = label(12f, Color.WHITE);
 		name.setIcon(new Disc(colour(row.colour), MapPin.initials(row.name), presenceColour(row.presence)));
 		name.setIconTextGap(6);
@@ -1202,16 +1202,6 @@ final class GroupPanel extends JPanel
 	private static JButton[] present(@Nullable JButton... buttons)
 	{
 		return Arrays.stream(buttons).filter(Objects::nonNull).toArray(JButton[]::new);
-	}
-
-	private static int widest(JButton... buttons)
-	{
-		int widest = 0;
-		for (JButton button : buttons)
-		{
-			widest = Math.max(widest, button.getPreferredSize().width);
-		}
-		return widest;
 	}
 
 	private static JPanel fill(JComponent component)
