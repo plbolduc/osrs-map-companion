@@ -164,11 +164,7 @@ public final class RewardObserver
 			{
 				continue;
 			}
-			Pending reward = findNamed(item.getKey(), name, false, true);
-			if (reward == null)
-			{
-				reward = add(name, item.getKey());
-			}
+			Pending reward = findOrAdd(item.getKey(), name, false, true);
 			if (reward != null)
 			{
 				reward.loot = true;
@@ -303,11 +299,7 @@ public final class RewardObserver
 			}
 		}
 		// A first collection unlock is an achievement even when later copies are ordinary supplies.
-		Pending reward = findNamed(id, name, true, false);
-		if (reward == null)
-		{
-			reward = add(name, id);
-		}
+		Pending reward = findOrAdd(id, name, true, false);
 		if (reward != null)
 		{
 			reward.collection = true;
@@ -373,7 +365,8 @@ public final class RewardObserver
 		return reward;
 	}
 
-	private Pending findNamed(Integer id, String name, boolean needsCollection, boolean needsLoot)
+	/** The recent reward this sighting joins, else a new one for it: null only while the pending list is full. */
+	private Pending findOrAdd(Integer id, String name, boolean needsCollection, boolean needsLoot)
 	{
 		Pending found = only(reward -> recent(reward) && !(needsCollection && reward.collection)
 			&& !(needsLoot && reward.loot) && !reward.ambiguousCollection && matches(reward, id, name));
@@ -381,7 +374,7 @@ public final class RewardObserver
 		{
 			found.itemId = id;
 		}
-		return found;
+		return found != null ? found : add(name, id);
 	}
 
 	private static boolean matches(Pending reward, Integer id, String name)

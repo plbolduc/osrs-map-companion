@@ -377,7 +377,8 @@ final class DropLuckView
 		List<Monster> out = new ArrayList<>();
 		for (Monster monster : monsters)
 		{
-			if (q.isEmpty() || monster.npc.toLowerCase(Locale.ROOT).contains(q) || anyDrop(monster, q))
+			if (q.isEmpty() || monster.npc.toLowerCase(Locale.ROOT).contains(q)
+				|| monster.drops.stream().anyMatch(drop -> drop.item.toLowerCase(Locale.ROOT).contains(q)))
 			{
 				out.add(monster);
 			}
@@ -396,18 +397,6 @@ final class DropLuckView
 		}
 		out.sort(order.thenComparing(m -> m.npc));
 		return out;
-	}
-
-	private static boolean anyDrop(Monster monster, String q)
-	{
-		for (Drop drop : monster.drops)
-		{
-			if (drop.item.toLowerCase(Locale.ROOT).contains(q))
-			{
-				return true;
-			}
-		}
-		return false;
 	}
 
 	/** The drop a monster's list row speaks for, and the share of players that wait is drier than. */
