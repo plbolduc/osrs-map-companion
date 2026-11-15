@@ -33,8 +33,6 @@ import java.util.*;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import com.pbolduc.mapcompanion.RelayResponse.*;
-import static com.pbolduc.mapcompanion.RelayResponse.Meetup;
-import static com.pbolduc.mapcompanion.RelayResponse.RosterRow;
 import static com.pbolduc.mapcompanion.RouteWire.text;
 
 /**
@@ -73,7 +71,7 @@ final class SocialWire
 	{
 	}
 
-	/** Gson's hook for {@code Directive.roster}; see {@link RouteWire.Lenient} for why a field factory. */
+	/** Gson's hook for {@code Directive.roster}; see {@link Lenient} for why a field factory. */
 	public static final class LenientRoster implements TypeAdapterFactory
 	{
 		@Override
@@ -90,6 +88,28 @@ final class SocialWire
 		public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type)
 		{
 			return list(gson, Meetup.class, SocialWire::meetup);
+		}
+	}
+
+	/**
+	 * Gson's hook for the reply's three cleaned objects, named by {@code @JsonAdapter} on
+	 * {@code Destination.route}, {@code Directive.run} and {@code Directive.slayerOptions}: each
+	 * read by the ordinary reflective adapter, then made safe by its own wire's normalize.
+	 *
+	 * <p>A factory on the field rather than an adapter registered on a Gson of our own: the Hub
+	 * asks plugins to use the client's Gson, and this keeps every other field read exactly as it
+	 * was. The classes themselves carry no annotation, so asking the Gson for a {@code Route}
+	 * adapter here gets the ordinary reflective one and does not come back to this.
+	 */
+	public static final class Lenient implements TypeAdapterFactory
+	{
+		@Override
+		public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type)
+		{
+			Class<?> raw = type.getRawType();
+			return raw == Route.class ? object(gson, Route.class, RouteWire::normalize)
+				: raw == FarmRun.class ? object(gson, FarmRun.class, FarmRunWire::normalize)
+				: raw == SlayerOptions.class ? object(gson, SlayerOptions.class, SlayerWire::normalize) : null;
 		}
 	}
 
@@ -292,18 +312,6 @@ final class SocialWire
 	@Nullable
 	private static String id(@Nullable String id)
 	{
-		if (id == null || id.isEmpty() || id.length() > MAX_ID)
-		{
-			return null;
-		}
-		for (int i = 0; i < id.length(); i++)
-		{
-			char c = id.charAt(i);
-			if (c < 0x20 || c == 0x7f)
-			{
-				return null;
-			}
-		}
-		return id;
+		return id == null || id.isEmpty() || id.length() > MAX_ID || id.chars().anyMatch(RouteWire::control) ? null : id;
 	}
 }

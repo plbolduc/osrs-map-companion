@@ -559,19 +559,8 @@ final class SearchClient
 	@Nullable
 	private static String id(@Nullable String id)
 	{
-		if (id == null || id.trim().isEmpty() || id.length() > 160)
-		{
-			return null;
-		}
-		for (int i = 0; i < id.length(); i++)
-		{
-			char c = id.charAt(i);
-			if (c < 0x20 || c == 0x7f)
-			{
-				return null;
-			}
-		}
-		return id.trim();
+		return id == null || id.trim().isEmpty() || id.length() > 160 || id.chars().anyMatch(RouteWire::control) ? null
+			: id.trim();
 	}
 
 	/** The box's text as the map reads a query: whitespace folded, trimmed, and no longer than it takes. */

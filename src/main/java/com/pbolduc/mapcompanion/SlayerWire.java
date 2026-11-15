@@ -25,8 +25,6 @@
  */
 package com.pbolduc.mapcompanion;
 
-import com.google.gson.*;
-import com.google.gson.reflect.TypeToken;
 import java.util.*;
 import javax.annotation.Nullable;
 import com.pbolduc.mapcompanion.RelayResponse.*;
@@ -37,15 +35,6 @@ final class SlayerWire
 {
 	static final int MAX_SPOTS = 80;
 	static final int MAX_KINDS = 128;
-
-	public static final class Lenient implements TypeAdapterFactory
-	{
-		@Override
-		public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type)
-		{
-			return type.getRawType() != SlayerOptions.class ? null : SocialWire.object(gson, SlayerOptions.class, SlayerWire::normalize);
-		}
-	}
 
 	@Nullable
 	static SlayerOptions normalize(@Nullable SlayerOptions value)

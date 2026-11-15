@@ -122,15 +122,6 @@ final class FarmRunWire
 		}
 	}
 
-	public static final class Lenient implements TypeAdapterFactory
-	{
-		@Override
-		public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type)
-		{
-			return type.getRawType() != FarmRun.class ? null : SocialWire.object(gson, FarmRun.class, FarmRunWire::normalize);
-		}
-	}
-
 	@Nullable
 	static FarmRun normalize(@Nullable FarmRun run)
 	{
