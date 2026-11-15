@@ -98,13 +98,13 @@ public class RelayResponse
 		public String relayEpoch;
 		public Destination destination;
 		/** The member's own ordered farm run; a malformed one cannot cost the rest of the reply. */
-		@JsonAdapter(FarmRunWire.Lenient.class)
+		@JsonAdapter(SocialWire.Lenient.class)
 		public FarmRun run;
 		/** Also sent after End run, so a stale reply cannot revive its old list. */
 		@JsonAdapter(FarmRunWire.Revision.class)
 		public long runRevision;
 		/** Own task's places, sent only until this client acknowledges their revision. */
-		@JsonAdapter(SlayerWire.Lenient.class)
+		@JsonAdapter(SocialWire.Lenient.class)
 		public SlayerOptions slayerOptions;
 		@JsonAdapter(FarmRunWire.Revision.class)
 		public long slayerRevision;
@@ -309,7 +309,7 @@ public class RelayResponse
 		 * same destination can arrive without one and then with one. Read leniently by
 		 * {@link RouteWire}: a route this build cannot read is dropped and the destination kept.
 		 */
-		@JsonAdapter(RouteWire.Lenient.class)
+		@JsonAdapter(SocialWire.Lenient.class)
 		public Route route;
 	}
 

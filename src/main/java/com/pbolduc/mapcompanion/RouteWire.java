@@ -25,17 +25,11 @@
  */
 package com.pbolduc.mapcompanion;
 
-import com.google.gson.*;
-import com.google.gson.reflect.TypeToken;
 import java.util.*;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import com.pbolduc.mapcompanion.RelayResponse.*;
-import static com.pbolduc.mapcompanion.RelayResponse.Gate;
-import static com.pbolduc.mapcompanion.RelayResponse.Route;
-import static com.pbolduc.mapcompanion.RelayResponse.RouteOption;
-import static com.pbolduc.mapcompanion.RelayResponse.RouteStep;
 
 /**
  * Reading a route from the map without letting a bad one cost the reply it rides on.
@@ -85,23 +79,6 @@ final class RouteWire
 
 	private RouteWire()
 	{
-	}
-
-	/**
-	 * Gson's hook for the one field, named by {@code @JsonAdapter} on {@code Destination.route}.
-	 *
-	 * <p>A factory on the field rather than an adapter registered on a Gson of our own: the Hub
-	 * asks plugins to use the client's Gson, and this keeps every other field read exactly as it
-	 * was. The class itself carries no annotation, so asking the Gson for a {@code Route} adapter
-	 * here gets the ordinary reflective one and does not come back to this.
-	 */
-	public static final class Lenient implements TypeAdapterFactory
-	{
-		@Override
-		public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type)
-		{
-			return type.getRawType() != Route.class ? null : SocialWire.object(gson, Route.class, RouteWire::normalize);
-		}
 	}
 
 	/** A route made safe to keep and to draw, or null when nothing in it is a way. */
@@ -334,7 +311,8 @@ final class RouteWire
 		return value == null ? "" : BLANK.matcher(value).replaceAll(" ").trim();
 	}
 
-	private static boolean control(int c)
+	/** A control character, which no id or link the map sends may hold. */
+	static boolean control(int c)
 	{
 		return c < 0x20 || c == 0x7f;
 	}
