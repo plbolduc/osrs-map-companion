@@ -120,13 +120,13 @@ final class RecommendedSharing extends JPanel
 		this.closed = closed;
 		setName("recommendedSharing");
 		/* A card on the sidebar's own grey, with the gap under it that keeps it off the tabs. */
-		setLayout(new java.awt.BorderLayout());
+		setLayout(new BorderLayout());
 		setBackground(ColorScheme.DARK_GRAY_COLOR);
 		setBorder(new EmptyBorder(4, 0, 8, 0));
 		setAlignmentX(Component.LEFT_ALIGNMENT);
 		JPanel card = column();
 		card.setBorder(new EmptyBorder(7, 8, 8, 8));
-		add(card, java.awt.BorderLayout.CENTER);
+		add(card, BorderLayout.CENTER);
 
 		JLabel title = wrapped("Choose what to share", 12f, Color.WHITE, TEXT);
 		refont(title, Font.BOLD);

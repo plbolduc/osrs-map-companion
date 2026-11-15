@@ -905,7 +905,7 @@ class CompanionLoop
 
 		boolean sameAs(RewardContext other)
 		{
-			return java.util.Objects.equals(server, other.server) && code.equals(other.code)
+			return Objects.equals(server, other.server) && code.equals(other.code)
 				   && enabled == other.enabled && pets == other.pets
 				   && collections == other.collections;
 		}

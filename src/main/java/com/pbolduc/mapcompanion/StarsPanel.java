@@ -108,7 +108,7 @@ final class StarsPanel extends JPanel
 	private final ClientThread clientThread;
 	private final DestinationMarker marker;
 	private final RoutePress press;
-	private final java.util.function.Supplier<String> mapUrl;
+	private final Supplier<String> mapUrl;
 	private final DestinationRoute route;
 	@Nullable
 	private final ShortestPath shortestPath;
@@ -166,7 +166,7 @@ final class StarsPanel extends JPanel
 	 * to say it again as of a time since the feed. A refresh that finds nothing else changed runs
 	 * these, where a rebuild for each star's turning minute would be one most seconds.
 	 */
-	private final List<LongConsumer> clocks = new java.util.ArrayList<>();
+	private final List<LongConsumer> clocks = new ArrayList<>();
 	@Nullable
 	private JLabel starSaid;
 	/** The star the way was last asked for, which is where what the map said is drawn. */
@@ -188,7 +188,7 @@ final class StarsPanel extends JPanel
 	 * @param sidebar the sidebar's refresh
 	 */
 	StarsPanel(StarsClient service, DestinationState destinations, ClientThread clientThread,
-		DestinationMarker marker, RoutePress press, java.util.function.Supplier<String> mapUrl, DestinationRoute route,
+		DestinationMarker marker, RoutePress press, Supplier<String> mapUrl, DestinationRoute route,
 		@Nullable ShortestPath shortestPath, @Nullable MapCompanionConfig config, @Nullable GameSprites sprites,
 		Function<Boolean, JButton> homeButton, Runnable sidebar)
 	{

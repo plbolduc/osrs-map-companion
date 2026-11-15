@@ -657,7 +657,7 @@ final class NowCards extends JPanel
 		{
 			/* The scroll's own sprite beside its tier, as the game draws it in the inventory. */
 			Integer scroll = clue.itemId != null && clue.itemId > 0 ? clue.itemId : null;
-			if (!java.util.Objects.equals(scroll, shownClueScroll))
+			if (!Objects.equals(scroll, shownClueScroll))
 			{
 				shownClueScroll = scroll;
 				clueTitle.setIcon(null);

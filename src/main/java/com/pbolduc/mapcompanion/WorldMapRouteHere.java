@@ -25,6 +25,7 @@
  */
 package com.pbolduc.mapcompanion;
 
+import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import lombok.*;
 import javax.inject.*;
@@ -67,7 +68,7 @@ class WorldMapRouteHere
 	 */
 	static final String MEET = "Meet here…";
 	@Nullable
-	java.util.function.Consumer<WorldPoint> meet;
+	Consumer<WorldPoint> meet;
 	/** The press's source, which {@link RoutePress#said} answers by. */
 	static final String SOURCE = "worldmap";
 	/** The route's name when the map's answer names no landmark near the spot. */
@@ -122,7 +123,7 @@ class WorldMapRouteHere
 	}
 
 	/** One entry at the foot of the menu, handed the spot the menu opened on. */
-	private void entry(String option, java.util.function.Consumer<WorldPoint> pressed)
+	private void entry(String option, Consumer<WorldPoint> pressed)
 	{
 		client.getMenu().createMenuEntry(0)
 			.setOption(option)

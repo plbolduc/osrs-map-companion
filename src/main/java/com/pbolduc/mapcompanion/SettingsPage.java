@@ -88,7 +88,7 @@ final class SettingsPage extends JPanel
 	SettingsPage(MapCompanionConfig config, DestinationState destinationState, LootLog lootLog,
 		SnapshotBuilder snapshotBuilder, ClientThread clientThread, ConfigStore settings, MemberIdentity identity,
 		Pairing pairing, Gson gson, FarmRunState farmRunState, FarmRunClient farmRunClient, ConnectCard connectCard,
-		Runnable refresh, Consumer<Boolean> settingsOpen, Supplier<String> mapUrl, java.util.function.BooleanSupplier paths)
+		Runnable refresh, Consumer<Boolean> settingsOpen, Supplier<String> mapUrl, BooleanSupplier paths)
 	{
 		this.config = config;
 		this.destinationState = destinationState;

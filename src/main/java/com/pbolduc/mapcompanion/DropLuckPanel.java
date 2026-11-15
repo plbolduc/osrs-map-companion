@@ -222,9 +222,9 @@ final class DropLuckPanel extends JPanel
 		{
 			return true;
 		}
-		if (component instanceof java.awt.Container)
+		if (component instanceof Container)
 		{
-			for (Component child : ((java.awt.Container) component).getComponents())
+			for (Component child : ((Container) component).getComponents())
 			{
 				if (containsFocus(child))
 				{
@@ -858,9 +858,9 @@ final class DropLuckPanel extends JPanel
 			return;
 		}
 		component.addMouseListener(listener);
-		if (component instanceof java.awt.Container)
+		if (component instanceof Container)
 		{
-			for (Component child : ((java.awt.Container) component).getComponents())
+			for (Component child : ((Container) component).getComponents())
 			{
 				addMouse(child, listener);
 			}

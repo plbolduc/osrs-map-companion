@@ -114,7 +114,7 @@ final class FarmRunState
 			this.following = following;
 			this.generation = generation;
 			this.revision = revision;
-			this.carried = carried == null ? null : Collections.unmodifiableList(new java.util.ArrayList<>(carried));
+			this.carried = carried == null ? null : Collections.unmodifiableList(new ArrayList<>(carried));
 		}
 
 		@Nullable
@@ -492,7 +492,7 @@ final class FarmRunState
 
 	synchronized void carried(@Nullable List<String> flags)
 	{
-		carried = flags == null ? null : new java.util.ArrayList<>(flags);
+		carried = flags == null ? null : new ArrayList<>(flags);
 	}
 
 	synchronized boolean active()
