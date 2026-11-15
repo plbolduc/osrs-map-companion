@@ -210,9 +210,7 @@ final class StarsPanel extends JPanel
 			sidebar.run();
 		}, sprites);
 		setName("companionStars");
-		setBackground(ColorScheme.DARK_GRAY_COLOR);
-		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		setAlignmentX(Component.LEFT_ALIGNMENT);
+		column(this, ColorScheme.DARK_GRAY_COLOR);
 		/* The pinned star first, above the filters: it is the one being walked to. */
 		add(selection);
 		levels.setName("stars.levels");
@@ -245,8 +243,7 @@ final class StarsPanel extends JPanel
 		members.setToolTipText("Show members worlds");
 		free.setToolTipText("Show free-to-play worlds");
 		safe.setToolTipText(Words.of("stars.safeTip"));
-		filters.setToolTipText("More filters");
-		filters.getAccessibleContext().setAccessibleName("More filters");
+		tip(filters, "More filters");
 		filters.setName("stars.filters");
 
 		/*
@@ -404,11 +401,7 @@ final class StarsPanel extends JPanel
 			: model.feed == null ? service.message
 			: f.safe() && !model.feed.worldsAvailable ? Words.of("stars.noWorldList")
 			: service.message != null ? "Couldn't refresh, retrying" : model.feed.stale ? "Star Miners not answering" : null;
-		status.setVisible(notice != null);
-		if (notice != null)
-		{
-			setWrapped(status, notice, TEXT);
-		}
+		showKeeping(status, notice, TEXT);
 		/* Pink only for why there is no list: a held list, and how old it is, is not a refusal. */
 		tone(status, !loggedOut && model.feed == null && service.message != null);
 		/* Why the refresh failed is a hover away, so the line over the list stays short. */
@@ -491,7 +484,7 @@ final class StarsPanel extends JPanel
 		repaint();
 		if (headed)
 		{
-			SwingUtilities.invokeLater(() -> selection.scrollRectToVisible(new Rectangle(0, 0, selection.getWidth(), selection.getHeight())));
+			SwingUtilities.invokeLater(() -> selection.scrollRectToVisible(new Rectangle(selection.getSize())));
 		}
 	}
 
@@ -554,16 +547,15 @@ final class StarsPanel extends JPanel
 		name.setForeground(primary == null ? MUTED : primary.wilderness ? REFUSED : Color.WHITE);
 		JButton favorite = flat(site.favorite ? "★" : "☆");
 		favorite.setForeground(site.favorite ? GOLD : MUTED);
-		favorite.setToolTipText((site.favorite ? "Unfavourite " : "Favourite ") + site.name);
+		tip(favorite, (site.favorite ? "Unfavourite " : "Favourite ") + site.name);
 		favorite.setName("stars.favorite." + site.key);
-		favorite.getAccessibleContext().setAccessibleName(favorite.getToolTipText());
 		favorite.setPreferredSize(new Dimension(20, 16));
 		favorite.addActionListener(e -> change(() -> service.model.toggleFavorite(primary == null ? site.key.substring("favorite:".length()) : primary.favoriteKey, site.name, primary == null ? null : primary.siteKey)));
 		JPanel top = bar(2, ground, null, name, hug(favorite, ground));
 		JComponent head;
 		if (primary == null)
 		{
-			JLabel idle = cell(site.hiddenByFilters ? "Hidden by filters" : "No star right now", MUTED, 0);
+			JLabel idle = cell(site.hiddenByFilters ? "Hidden by filters" : "No star right now", MUTED);
 			head = bar(0, ground, null, top, null);
 			head.add(idle, BorderLayout.SOUTH);
 		}
@@ -576,8 +568,7 @@ final class StarsPanel extends JPanel
 				expand = flat("+" + (site.worlds.size() - 1) + (open ? " ▾" : " ▸"));
 				expand.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
 				expand.setName("stars.expand." + site.key);
-				expand.setToolTipText((open ? "Hide the other " : "Show the other ") + (site.worlds.size() - 1) + " at " + site.name);
-				expand.getAccessibleContext().setAccessibleName(expand.getToolTipText());
+				tip(expand, (open ? "Hide the other " : "Show the other ") + (site.worlds.size() - 1) + " at " + site.name);
 				expand.addActionListener(e ->
 				{
 					if (!expanded.remove(site.key))
@@ -600,14 +591,11 @@ final class StarsPanel extends JPanel
 			pick.setFocusPainted(false);
 			pick.setLayout(new BorderLayout(0, 2));
 			pick.setName("stars.site." + site.key);
-			clock(now ->
-			{
-				pick.setToolTipText("W" + primary.world + " at " + site.name + ", reported " + age(primary.ageMs + now) + (primary.precise ? Words.of("stars.pressTip") : ""));
-				pick.getAccessibleContext().setAccessibleName(pick.getToolTipText());
-			}, elapsed);
+			clock(now -> tip(pick, "W" + primary.world + " at " + site.name + ", reported " + age(primary.ageMs + now)
+				+ (primary.precise ? Words.of("stars.pressTip") : "")), elapsed);
 			pick.addActionListener(e -> select(primary));
 			pick.add(top, BorderLayout.CENTER);
-			pick.add(facts(primary, elapsed, ground, expand, primary.wilderness ? cell("Wilderness", REFUSED, 0) : null), BorderLayout.SOUTH);
+			pick.add(facts(primary, elapsed, ground, expand, primary.wilderness ? cell("Wilderness", REFUSED) : null), BorderLayout.SOUTH);
 			head = pick;
 		}
 		box.add(fill(head));
@@ -621,7 +609,7 @@ final class StarsPanel extends JPanel
 			{
 				list.add(fill(world(site, star, elapsed, box.getBackground(), star == pinned)));
 			}
-			box.add(MapCompanionPanel.gap(4, box.getBackground()));
+			box.add(gap(4, box.getBackground()));
 			box.add(fill(list));
 		}
 		/* Only a guess is picked: a star with a tile of its own is pinned by the press, and heads the tab. */
@@ -641,7 +629,7 @@ final class StarsPanel extends JPanel
 		Color ground = picked ? PICKED : background;
 		JButton world = new Whole();
 		world.setLayout(new BorderLayout());
-		JLabel aged = cell("", MUTED, 0);
+		JLabel aged = cell("", MUTED);
 		clock(now -> aged.setText(age(star.ageMs + now)), elapsed);
 		world.add(facts(star, elapsed, ground, null, aged));
 		world.setName("stars.world." + star.id);
@@ -653,9 +641,8 @@ final class StarsPanel extends JPanel
 		world.setOpaque(picked);
 		world.setFocusPainted(false);
 		world.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		world.setToolTipText(site.name + " · W" + star.world + (star.requiredTotal > 0 ? " · " + star.requiredTotal + "+ skill total" : "")
+		tip(world, site.name + " · W" + star.world + (star.requiredTotal > 0 ? " · " + star.requiredTotal + "+ skill total" : "")
 			+ (Boolean.FALSE.equals(star.members) ? " · Free to play" : "") + (star.pvp ? " · PvP / high-risk" : "") + (star.deadman ? " · Deadman" : ""));
-		world.getAccessibleContext().setAccessibleName(world.getToolTipText());
 		world.addActionListener(e -> select(star));
 		return world;
 	}
@@ -680,13 +667,13 @@ final class StarsPanel extends JPanel
 	private JComponent facts(Star star, long elapsed, Color ground, @Nullable JComponent after, @Nullable JLabel between)
 	{
 		int level = star.tier(elapsed);
-		JLabel tier = cell("T" + level, tierColour(level), 0);
+		JLabel tier = cell("T" + level, tierColour(level));
 		tier.setName("star.tier");
 		refont(tier, Font.BOLD, 12f);
 		tier.setPreferredSize(new Dimension(15, 16));
 		Integer here = service.model.playerWorld;
 		Integer kind = sprites == null ? null : worldStar(star);
-		JLabel world = cell((kind == null ? "W" : "") + star.world, here != null && here == star.world ? HERE : Color.WHITE, 0);
+		JLabel world = cell((kind == null ? "W" : "") + star.world, here != null && here == star.world ? HERE : Color.WHITE);
 		world.setName("star.world");
 		refont(world, Font.BOLD, 12f);
 		JComponent at = world;
@@ -700,7 +687,7 @@ final class StarsPanel extends JPanel
 			at = bar(3, ground, mark, world, null);
 			at.setOpaque(false);
 		}
-		JLabel left = cell("", CARD_INK, 0);
+		JLabel left = cell("", CARD_INK);
 		left.setName("star.left");
 		clock(now ->
 		{
@@ -771,7 +758,7 @@ final class StarsPanel extends JPanel
 			{
 				if (pickedCard != null)
 				{
-					pickedCard.scrollRectToVisible(new Rectangle(0, 0, pickedCard.getWidth(), pickedCard.getHeight()));
+					pickedCard.scrollRectToVisible(new Rectangle(pickedCard.getSize()));
 				}
 			});
 			return;
@@ -842,7 +829,7 @@ final class StarsPanel extends JPanel
 			+ java.net.URLEncoder.encode(star.name, java.nio.charset.StandardCharsets.UTF_8)));
 		JPanel actions = row(box.getBackground());
 		actions.add(open);
-		box.add(MapCompanionPanel.gap(5, box.getBackground()));
+		box.add(gap(5, box.getBackground()));
 		box.add(fill(actions));
 		JLabel note = label("");
 		setWrapped(note, Words.of("stars.approximate"), CARD_WIDE);
@@ -960,7 +947,7 @@ final class StarsPanel extends JPanel
 		here.setName(name);
 		here.setToolTipText(own.getToolTipText());
 		here.setEnabled(own.isEnabled());
-		here.addActionListener(e -> MapCompanionPanel.press(homeButton.apply(rerouting)));
+		here.addActionListener(e -> press(homeButton.apply(rerouting)));
 		/* Home's tip counts a wait down each second: said again here, where a rebuild would eat a press. */
 		clocks.add(at -> here.setToolTipText(homeButton.apply(rerouting) == null ? null : homeButton.apply(rerouting).getToolTipText()));
 		actions.add(here);
@@ -1035,7 +1022,7 @@ final class StarsPanel extends JPanel
 		JPanel holder = new Row();
 		holder.setOpaque(false);
 		holder.add(component, BorderLayout.CENTER);
-		return MapCompanionPanel.left(holder);
+		return left(holder);
 	}
 
 	/**
@@ -1057,23 +1044,24 @@ final class StarsPanel extends JPanel
 		}
 	}
 
-	private static JComponent gap(int height)
+	/** A tip that is also the name a screen reader gives the control. */
+	private static void tip(JComponent component, String tip)
 	{
-		return MapCompanionPanel.gap(height, ColorScheme.DARK_GRAY_COLOR);
+		component.setToolTipText(tip);
+		component.getAccessibleContext().setAccessibleName(tip);
 	}
 
-	private static JLabel cell(String text, Color color, int width)
+	private static JLabel cell(String text, Color color)
 	{
 		JLabel cell = new JLabel(text);
 		refont(cell, 11f);
 		cell.setForeground(color);
-		if (width > 0) cell.setPreferredSize(new Dimension(width, cell.getPreferredSize().height));
 		return cell;
 	}
 
 	private static JLabel label(String text)
 	{
-		return cell(text, ColorScheme.LIGHT_GRAY_COLOR, 0);
+		return cell(text, ColorScheme.LIGHT_GRAY_COLOR);
 	}
 
 	private static JComponent heading(String text)
