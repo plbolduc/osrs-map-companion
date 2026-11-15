@@ -260,7 +260,7 @@ public class DirectiveStream
 
 		/** A client of its own, for a read deadline measured in keep-alives; see READ_TIMEOUT_MS. */
 		OkHttpClient streaming = httpClient.newBuilder()
-								 .readTimeout(READ_TIMEOUT_MS, java.util.concurrent.TimeUnit.MILLISECONDS)
+								 .readTimeout(READ_TIMEOUT_MS, TimeUnit.MILLISECONDS)
 								 .retryOnConnectionFailure(true)
 								 .build();
 

@@ -27,6 +27,7 @@ package com.pbolduc.mapcompanion;
 
 import com.google.inject.*;
 import java.util.*;
+import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.plugins.timetracking.TimeTrackingConfig;
@@ -41,7 +42,7 @@ import static com.pbolduc.mapcompanion.CompanionSnapshot.Birdhouse;
 @Singleton
 public class BirdhouseReader extends SettlingReader
 {
-	private final java.util.function.Function<String, String> stored;
+	private final Function<String, String> stored;
 	private static final String[] IDS = {"meadow-north", "meadow-south", "valley-north", "valley-south"};
 	static final int[] VARPS = {1626, 1627, 1628, 1629};
 
@@ -52,7 +53,7 @@ public class BirdhouseReader extends SettlingReader
 	}
 
 	/** Account-scoped read seam for the harness; no writes to another plugin's configuration. */
-	BirdhouseReader(java.util.function.Function<String, String> stored)
+	BirdhouseReader(Function<String, String> stored)
 	{
 		this.stored = stored;
 	}

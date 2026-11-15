@@ -27,6 +27,7 @@ package com.pbolduc.mapcompanion;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -106,8 +107,8 @@ final class GroupPanel extends JPanel
 	/** A news line's picture: the game's 16px skill icons, and an item's sprite shrunk to match. */
 	private static final int NEWS_PICTURE = 16;
 	/** The picture's place while the client's cache answers, as a route step keeps it. */
-	private static final javax.swing.ImageIcon NO_PICTURE_YET = new javax.swing.ImageIcon(
-		new java.awt.image.BufferedImage(NEWS_PICTURE, NEWS_PICTURE, java.awt.image.BufferedImage.TYPE_INT_ARGB));
+	private static final ImageIcon NO_PICTURE_YET = new ImageIcon(
+		new BufferedImage(NEWS_PICTURE, NEWS_PICTURE, BufferedImage.TYPE_INT_ARGB));
 
 	/**
 	 * Remove from group… for a friend's card: whether this RuneLite may, and the press itself, which
@@ -207,7 +208,7 @@ final class GroupPanel extends JPanel
 		setWrapped(logIn, Words.of("group.logIn"), WIDTH + 16);
 		meetHere.setName("group.meetHere");
 		meetHere.setForeground(ColorScheme.BRAND_ORANGE);
-		meetHere.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+		meetHere.setHorizontalAlignment(SwingConstants.RIGHT);
 		meetHere.setToolTipText(Words.of("group.meetHereTip"));
 		meetHere.addActionListener(e -> openForm(!formOpen));
 		JPanel head = bar(0, DARK_GRAY_COLOR, meetupsHead, null, meetHere);
@@ -234,7 +235,7 @@ final class GroupPanel extends JPanel
 	/** The form: a title, a day and a time, and the button that makes it. Built once. */
 	private void buildForm()
 	{
-		form.setBorder(javax.swing.BorderFactory.createCompoundBorder(
+		form.setBorder(BorderFactory.createCompoundBorder(
 			new javax.swing.border.MatteBorder(0, 0, 3, 0, DARK_GRAY_COLOR), new EmptyBorder(6, 8, 6, 8)));
 		form.add(heading);
 		title.setName("group.meetTitle");
@@ -590,9 +591,9 @@ final class GroupPanel extends JPanel
 				}
 			}
 		});
-		if (part instanceof java.awt.Container)
+		if (part instanceof Container)
 		{
-			for (Component child : ((java.awt.Container) part).getComponents())
+			for (Component child : ((Container) part).getComponents())
 			{
 				offerRemove(child, row);
 			}
@@ -1164,13 +1165,13 @@ final class GroupPanel extends JPanel
 	{
 		Slot()
 		{
-			super(new java.awt.BorderLayout());
+			super(new BorderLayout());
 		}
 
 		@Override
-		public java.awt.Dimension getMaximumSize()
+		public Dimension getMaximumSize()
 		{
-			return new java.awt.Dimension(Integer.MAX_VALUE, getPreferredSize().height);
+			return new Dimension(Integer.MAX_VALUE, getPreferredSize().height);
 		}
 	}
 
@@ -1185,15 +1186,15 @@ final class GroupPanel extends JPanel
 	 */
 	private static JPanel beside(JComponent words, JButton... buttons)
 	{
-		JPanel stack = new JPanel(new java.awt.GridLayout(buttons.length, 1, 0, 4));
+		JPanel stack = new JPanel(new GridLayout(buttons.length, 1, 0, 4));
 		stack.setBackground(DARKER_GRAY_COLOR);
 		for (JButton button : buttons)
 		{
 			stack.add(button);
 		}
-		JPanel hug = new JPanel(new java.awt.BorderLayout());
+		JPanel hug = new JPanel(new BorderLayout());
 		hug.setBackground(DARKER_GRAY_COLOR);
-		hug.add(stack, java.awt.BorderLayout.NORTH);
+		hug.add(stack, BorderLayout.NORTH);
 		return capped(bar(4, DARKER_GRAY_COLOR, null, words, hug));
 	}
 
@@ -1245,7 +1246,7 @@ final class GroupPanel extends JPanel
 		/** The presence dot's size, and where its corner sits on the icon, across and down. */
 		static final int DOT = 6;
 		static final int DOT_AT = 14;
-		private final java.awt.image.BufferedImage disc;
+		private final BufferedImage disc;
 		private final Color presence;
 
 		Disc(Color colour, String initials, Color presence)
@@ -1310,7 +1311,7 @@ final class GroupPanel extends JPanel
 				JLabel word = label(11f, LIGHT_GRAY_COLOR);
 				word.setText(answer.getKey());
 				word.setToolTipText(answer.getKey() + ": " + names(answer.getValue()));
-				java.awt.Dimension size = word.getPreferredSize();
+				Dimension size = word.getPreferredSize();
 				if (x > 0 && x + size.width + AFTER_WORD + STEP * answer.getValue().size() > width)
 				{
 					x = 0;
@@ -1327,7 +1328,7 @@ final class GroupPanel extends JPanel
 						x = 0;
 						y += LINE;
 					}
-					JLabel disc = new JLabel(new javax.swing.ImageIcon(
+					JLabel disc = new JLabel(new ImageIcon(
 						MapPin.disc(colour(face.colour), MapPin.initials(face.name), false)));
 					disc.setToolTipText(name(face));
 					disc.setBounds(x, y, STEP, STEP);
@@ -1336,10 +1337,10 @@ final class GroupPanel extends JPanel
 				}
 				x += BETWEEN;
 			}
-			java.awt.Dimension size = new java.awt.Dimension(width, y + STEP);
+			Dimension size = new Dimension(width, y + STEP);
 			setPreferredSize(size);
 			setMinimumSize(size);
-			setMaximumSize(new java.awt.Dimension(Integer.MAX_VALUE, size.height));
+			setMaximumSize(new Dimension(Integer.MAX_VALUE, size.height));
 			getAccessibleContext().setAccessibleName(rollUpWords(who));
 		}
 	}

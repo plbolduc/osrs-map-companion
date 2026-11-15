@@ -244,7 +244,7 @@ final class SlayerPanel extends JPanel
 					index < 0 && value != null ? "Order: " + value : value, index, selected, focused));
 				order.setSelectedIndex("single".equals(shownOrder) ? 1 : 0);
 				refont(order, 11f);
-				order.setPreferredSize(new java.awt.Dimension(WIDTH, order.getPreferredSize().height));
+				order.setPreferredSize(new Dimension(WIDTH, order.getPreferredSize().height));
 				order.setName("slayer.order");
 				order.setToolTipText(Words.of("slayer.orderTip"));
 				order.addActionListener(e -> choose(order.getSelectedIndex() == 1 ? "single" : "best", config.slayerHideWilderness()));

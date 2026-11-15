@@ -202,7 +202,7 @@ final class SearchPanel extends JPanel
 				if (hit.section != null && !hit.section.equals(section))
 				{
 					JLabel head = wrapped(hit.section, 11f, ColorScheme.LIGHT_GRAY_COLOR, WIDTH);
-					head.setFont(head.getFont().deriveFont(java.awt.Font.BOLD));
+					head.setFont(head.getFont().deriveFont(Font.BOLD));
 					head.setBorder(new EmptyBorder(4, 0, 1, 0));
 					rows.add(head);
 				}
@@ -359,7 +359,7 @@ final class SearchPanel extends JPanel
 			row.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 			row.addMouseListener(rowPresses(row, hit));
 		}
-		JPanel slot = new JPanel(new java.awt.BorderLayout());
+		JPanel slot = new JPanel(new BorderLayout());
 		slot.setBackground(ColorScheme.DARK_GRAY_COLOR);
 		slot.setBorder(new EmptyBorder(0, 0, 2, 0));
 		slot.add(row);

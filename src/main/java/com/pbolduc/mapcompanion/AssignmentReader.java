@@ -132,9 +132,9 @@ public class AssignmentReader extends SettlingReader
 				if (text.startsWith("Your current rumour target is"))
 				{
 					String name = referenced(RUMOURS, lower);
-					String hunter = referenced(java.util.Arrays.asList(HUNTERS), lower);
+					String hunter = referenced(Arrays.asList(HUNTERS), lower);
 					// Rechecking the same assignment cannot un-find an observed rare part.
-					boolean same = rumour != null && rumour.name.equals(name) && java.util.Objects.equals(rumour.detail, hunter);
+					boolean same = rumour != null && rumour.name.equals(name) && Objects.equals(rumour.detail, hunter);
 					if (!same)
 					{
 						rumour = name == null ? null : assignment(name, hunter);

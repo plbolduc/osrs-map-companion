@@ -621,7 +621,7 @@ public class MapCompanionPlugin extends Plugin implements CompanionLoop.Surface
 	@Subscribe
 	public void onHitsplatApplied(HitsplatApplied event)
 	{
-		if (event.getActor() instanceof net.runelite.api.NPC && event.getHitsplat() != null)
+		if (event.getActor() instanceof NPC && event.getHitsplat() != null)
 		{
 			loop.lootLog.onHitsplat(event.getActor().getName(), event.getHitsplat().isMine(), event.getHitsplat().isOthers(),
 				event.getHitsplat().getAmount(), client.getTickCount());
