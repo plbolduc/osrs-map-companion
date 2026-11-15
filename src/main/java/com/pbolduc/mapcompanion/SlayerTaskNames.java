@@ -89,7 +89,7 @@ final class SlayerTaskNames
 			{
 				return null;
 			}
-			Object taskRow = first(client.getDBTableField(sublistRow, DBTableID.SlayerTaskSublist.COL_TASK, 0));
+			Object taskRow = PortTaskReader.first(client.getDBTableField(sublistRow, DBTableID.SlayerTaskSublist.COL_TASK, 0));
 			return taskRow instanceof Integer ? taskName(client, (Integer) taskRow) : null;
 		}
 		catch (RuntimeException | LinkageError e)
@@ -108,7 +108,7 @@ final class SlayerTaskNames
 				DBTableID.SlayerArea.ID, DBTableID.SlayerArea.COL_AREA_ID, 0, areaId));
 			return row == null
 				   ? null
-				   : string(client.getDBTableField(row, DBTableID.SlayerArea.COL_AREA_NAME_IN_HELPER, 0));
+				   : PortTaskReader.string(client.getDBTableField(row, DBTableID.SlayerArea.COL_AREA_NAME_IN_HELPER, 0));
 		}
 		catch (RuntimeException | LinkageError e)
 		{
@@ -119,7 +119,7 @@ final class SlayerTaskNames
 	@Nullable
 	private static String taskName(Client client, int row)
 	{
-		return string(client.getDBTableField(row, DBTableID.SlayerTask.COL_NAME_UPPERCASE, 0));
+		return PortTaskReader.string(client.getDBTableField(row, DBTableID.SlayerTask.COL_NAME_UPPERCASE, 0));
 	}
 
 	/**
@@ -132,19 +132,6 @@ final class SlayerTaskNames
 	private static Integer firstRow(@Nullable List<Integer> rows)
 	{
 		return rows == null || rows.isEmpty() ? null : rows.get(0);
-	}
-
-	@Nullable
-	private static Object first(@Nullable Object[] values)
-	{
-		return values == null || values.length == 0 ? null : values[0];
-	}
-
-	@Nullable
-	private static String string(@Nullable Object[] values)
-	{
-		Object value = first(values);
-		return value instanceof String ? (String) value : null;
 	}
 
 	private SlayerTaskNames()
