@@ -275,19 +275,12 @@ public class DestinationMarker
 		/** Negative for a step done, zero for the current one, positive ahead. */
 		final int place;
 
-		/** The first step this pin stands for, where several end on its tile. */
-		final int first;
 		/** The last step this pin stands for: the next pin's number follows it. */
 		final int lastStep;
 
 		StepPin(int number, WorldPoint where, String title, int place)
 		{
-			this(number, where, title, place, number, number);
-		}
-
-		StepPin(int number, WorldPoint where, String title, int place, int first)
-		{
-			this(number, where, title, place, first, number);
+			this(number, where, title, place, number);
 		}
 
 		@Override
@@ -331,11 +324,11 @@ public class DestinationMarker
 			{
 				if (i == view.step)
 				{
-					pins.set(pins.size() - 1, new StepPin(i + 1, where, list.get(i).title, 0, before.first));
+					pins.set(pins.size() - 1, new StepPin(i + 1, where, list.get(i).title, 0));
 				}
 				else
 				{
-					pins.set(pins.size() - 1, new StepPin(before.number, where, before.title, before.place, before.first, i + 1));
+					pins.set(pins.size() - 1, new StepPin(before.number, where, before.title, before.place, i + 1));
 				}
 				continue;
 			}

@@ -222,15 +222,10 @@ final class RunView extends JPanel
 	}
 
 	/**
-	 * Called on the EDT by the card's refresh. True when this card has a run, a press or a message of
-	 * its own to show; the card decides its own visibility with that.
+	 * Called on the EDT by the card's refresh, as of {@code now}: a confirmation is drawn only while it
+	 * is news. True when this card has a run, a press or a message of its own to show; the card decides
+	 * its own visibility with that.
 	 */
-	boolean refresh(boolean connected)
-	{
-		return refresh(connected, true, System.currentTimeMillis());
-	}
-
-	/** The same, as of {@code now}: a confirmation is drawn only while it is news. */
 	boolean refresh(boolean connected, long now)
 	{
 		return refresh(connected, true, now);
