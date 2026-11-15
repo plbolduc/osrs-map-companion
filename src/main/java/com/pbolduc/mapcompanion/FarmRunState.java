@@ -565,7 +565,7 @@ final class FarmRunState
 
 	static WorldPoint point(FarmStop stop)
 	{
-		return new WorldPoint(stop.tile.x, stop.tile.y, stop.tile.plane == null ? 0 : stop.tile.plane);
+		return DestinationRoute.point(stop.tile);
 	}
 
 	private static String identity(FarmStop stop)

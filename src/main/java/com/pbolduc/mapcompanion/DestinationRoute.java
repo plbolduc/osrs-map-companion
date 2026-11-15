@@ -356,8 +356,7 @@ public class DestinationRoute
 			return false;
 		}
 		boolean there = onWorld && (route != null && step >= route.options.get(chosen).steps.size()
-			|| where.getPlane() == target.getPlane() && Math.abs(where.getX() - target.getX()) <= REACHED
-				&& Math.abs(where.getY() - target.getY()) <= REACHED);
+			|| where.distanceTo(target) <= REACHED);
 		away |= !there;
 		return there && away;
 	}
@@ -718,7 +717,7 @@ public class DestinationRoute
 		if (RouteWire.SAIL.equals(step.slot))
 		{
 			return sailing.aboard && where != null && step.at != null
-				&& Math.abs(where.getX() - step.at.x) <= MOORED && Math.abs(where.getY() - step.at.y) <= MOORED;
+				&& where.distanceTo2D(point(step.at)) <= MOORED;
 		}
 		if (RouteWire.DOCK.equals(step.slot))
 		{
@@ -755,10 +754,7 @@ public class DestinationRoute
 	/** Within {@link #REACHED} tiles each way, on the step's own floor; no floor is the ground floor. */
 	static boolean reached(RelayResponse.RouteTile at, WorldPoint where)
 	{
-		int plane = at.plane == null ? 0 : at.plane;
-		return where.getPlane() == plane
-			&& Math.abs(where.getX() - at.x) <= REACHED
-			&& Math.abs(where.getY() - at.y) <= REACHED;
+		return where.distanceTo(point(at)) <= REACHED;
 	}
 
 	/** A step's end as a tile of the world, on its floor. */
