@@ -43,20 +43,26 @@ import org.junit.Test;
  * <p>The Hub's bot reviews an update by itself only while the source stays under 200k tokens, and
  * it counts src/main/java with comments removed: resources, tests and the README are not counted.
  * 1.4.0 measured 795,928 characters that way and the bot counted 206k tokens, about 3.86
- * characters a token, so it went to a person instead. The budget here is 772,000 characters, about
- * 199.8k tokens at that ratio: the Hub's own limit, by the owner's choice, with no room for the
- * ratio to be off. If a release under it still goes to a person, the ratio moved; measure it again
+ * characters a token, so it went to a person, and the budget became 772,000 characters, the Hub's
+ * own limit at that ratio. 1.10.0 then passed it at about 770,350 characters and the bot counted
+ * 202k tokens: about 3.81 characters a token, so the ratio moves as the source does, and a budget
+ * at the limit with no room for that is a review by a person waiting to happen. The budget is now
+ * 748,000 characters, about 197k tokens at 3.80: the 200k limit with room for the ratio to drift a
+ * little further. If a release under it still goes to a person, the ratio moved again; measure it
  * from that release and lower this.
  *
  * <p>Over budget, the way down is the one the cut that made this test took: tables and words a
  * player reads belong in src/main/resources, behind Resources.lines and Words.of, and code that
- * says the same thing twice can say it once. The number is already the Hub's; past it the review
- * goes to a person.
+ * says the same thing twice can say it once. The number sits just under the Hub's own; raising it
+ * spends the room the ratio needs, and past the Hub's the review goes to a person.
  */
 public class SourceSizeTest
 {
-	/** About 199.8k tokens at 1.4.0's 3.86 characters a token: the Hub's 200k, and no further. */
-	static final int BUDGET = 772_000;
+	/**
+	 * About 197k tokens at 3.80 characters a token, a little under the 3.81 that 1.10.0 measured: the
+	 * Hub's 200k with about 3k to spare for the ratio, which moved by 0.05 between 1.4.0 and 1.10.0.
+	 */
+	static final int BUDGET = 748_000;
 
 	@Test
 	public void theSourceStaysUnderTheSizeTheHubReviewsAutomatically() throws IOException
@@ -72,10 +78,10 @@ public class SourceSizeTest
 		{
 			total += strip(new String(Files.readAllBytes(source), StandardCharsets.UTF_8)).length();
 		}
-		assertTrue("src/main/java is " + total + " characters without comments, about " + Math.round(total / 3860.0)
-			+ "k tokens, over this plugin's budget of " + BUDGET + " (about 199.8k). The Plugin Hub reviews an update"
-			+ " automatically only under 200k tokens, and this is that limit; move tables or words into"
-			+ " src/main/resources, which it does not count.", total <= BUDGET);
+		assertTrue("src/main/java is " + total + " characters without comments, about " + Math.round(total / 3810.0)
+			+ "k tokens, over this plugin's budget of " + BUDGET + " (about 197k). The Plugin Hub reviews an update"
+			+ " automatically only under 200k tokens, and this keeps a little room under that; move tables or words"
+			+ " into src/main/resources, which it does not count.", total <= BUDGET);
 	}
 
 	/** The counting rule on its own: what goes, what stays. */
