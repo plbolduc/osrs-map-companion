@@ -276,7 +276,7 @@ public class AnsweredWherePressedTest
 		}
 		groupPanel.refresh(ready, atMs);
 		card.refreshStatus(Health.LIVE, pairing.code(), paired, ready);
-		card.refreshButtons(paired, ready, pairing.knownCodes(), atMs);
+		card.refreshButtons(paired, ready, true, pairing.knownCodes(), atMs);
 	}
 
 	/** The first label reading these words, in the card above the tabs or in the Group tab's foot. */

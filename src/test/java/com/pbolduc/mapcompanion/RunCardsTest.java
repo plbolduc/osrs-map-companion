@@ -697,7 +697,7 @@ public class RunCardsTest
 		SwingUtilities.invokeAndWait(() ->
 		{
 			card[0] = new FarmRunPanel(state, client, follower, route, shortest, recording, config, store);
-			card[0].refresh(true);
+			card[0].refresh(true, true);
 		});
 		assertEquals(Arrays.asList("item 13126", "item 24961", "sprite 1253"), asked);
 		assertEquals("the birdhouse's walk keeps a picture's place too", 4, slots(card[0]));
@@ -722,18 +722,18 @@ public class RunCardsTest
 		SwingUtilities.invokeAndWait(() ->
 		{
 			card[0] = new FarmRunPanel(state, client, follower, route, shortest, sprites, config, store);
-			card[0].refresh(true);
+			card[0].refresh(true, true);
 		});
 		assertFalse("no run, no bar", drawn(bar(card[0])));
 
 		state.acceptFor(identity.id(), EPOCH, run("/contract/sea-chart-run.json"), 1, System.currentTimeMillis());
-		SwingUtilities.invokeAndWait(() -> card[0].refresh(true));
+		SwingUtilities.invokeAndWait(() -> card[0].refresh(true, true));
 		assertTrue("a charting run's", drawn(bar(card[0])));
 		javax.swing.JProgressBar charting = (javax.swing.JProgressBar) bar(card[0]);
 		assertEquals("one of its four tasks charted", "1 of 4", charting.getValue() + " of " + charting.getMaximum());
 
 		state.acceptFor(identity.id(), EPOCH, run("/contract/farm-run.json"), 2, System.currentTimeMillis());
-		SwingUtilities.invokeAndWait(() -> card[0].refresh(true));
+		SwingUtilities.invokeAndWait(() -> card[0].refresh(true, true));
 		assertTrue("and the farm run's that replaced it", drawn(bar(card[0])));
 		javax.swing.JProgressBar farm = (javax.swing.JProgressBar) bar(card[0]);
 		assertEquals("counting the stops the line under it counts", state.view().trackedDone() + " of " + state.view().tracked(),
@@ -790,7 +790,7 @@ public class RunCardsTest
 		SwingUtilities.invokeAndWait(() ->
 		{
 			card[0] = new FarmRunPanel(state, client, follower, route, shortest, recording, config, store);
-			card[0].refresh(true);
+			card[0].refresh(true, true);
 		});
 		assertEquals("the stops still ahead, each by its task's tool", Arrays.asList("Spyglass", "Captain's log", "Current duck"), asked);
 		String words = String.join("\n", SidebarWords.words(card[0]));
@@ -853,14 +853,14 @@ public class RunCardsTest
 		SwingUtilities.invokeAndWait(() ->
 		{
 			card[0] = new FarmRunPanel(state, client, follower, route, shortest, recording, config, store);
-			card[0].refresh(true);
+			card[0].refresh(true, true);
 		});
 		List<String> closed = shown(card[0]);
 		assertTrue(closed.toString(), closed.contains("▸ Before you leave · 1 not on you"));
 		assertEquals("amber while it counts", MapPin.AMBER, opener(card[0]).getForeground());
 
 		SwingUtilities.invokeAndWait(() -> opener(card[0]).doClick());
-		SwingUtilities.invokeAndWait(() -> card[0].refresh(true));
+		SwingUtilities.invokeAndWait(() -> card[0].refresh(true, true));
 		List<String> open = shown(card[0]);
 		assertTrue("open, the lines say it: " + open, open.contains("▾ Before you leave"));
 		assertEquals(Arrays.asList("item 13126", "item 24961", "supply 2 herb seeds", "supply Rake",
@@ -882,7 +882,7 @@ public class RunCardsTest
 
 		SwingUtilities.invokeAndWait(() -> opener(card[0]).doClick());
 		state.carried(Arrays.asList("skillsNecklace", "stonyBasalt"));
-		SwingUtilities.invokeAndWait(() -> card[0].refresh(true));
+		SwingUtilities.invokeAndWait(() -> card[0].refresh(true, true));
 		assertTrue("nothing missing, nothing added", shown(card[0]).contains("▸ Before you leave"));
 		assertEquals(ColorScheme.LIGHT_GRAY_COLOR, opener(card[0]).getForeground());
 	}
@@ -967,7 +967,7 @@ public class RunCardsTest
 		SwingUtilities.invokeAndWait(() ->
 		{
 			PortTasksPanel card = new PortTasksPanel(delivered, config, store, sprites, state, client, follower, route, shortest);
-			card.refresh(true);
+			card.refresh(true, true);
 			colours[0] = label(card, HONEY).getForeground();
 			colours[1] = label(card, "Port Sarim tern bounty").getForeground();
 		});
@@ -1002,13 +1002,13 @@ public class RunCardsTest
 		SwingUtilities.invokeAndWait(() ->
 		{
 			PortTasksPanel card = new PortTasksPanel(ticking, config, store, sprites, state, client, follower, route, shortest);
-			card.refresh(true);
+			card.refresh(true, true);
 			JLabel drawn = label(card, HONEY);
-			card.refresh(true);
+			card.refresh(true, true);
 			assertSame("a second reading of the same tasks leaves the rows as they are", drawn, label(card, HONEY));
 
 			collected[0] = 1;
-			card.refresh(true);
+			card.refresh(true, true);
 			assertNotSame("a crate collected is a different reading, and is drawn", drawn, label(card, HONEY));
 			assertTrue(label(card, "1/3") != null);
 		});
@@ -1043,7 +1043,7 @@ public class RunCardsTest
 		SwingUtilities.invokeAndWait(() ->
 		{
 			PortTasksPanel card = new PortTasksPanel(held, config, store, sprites, state, client, follower, route, shortest);
-			card.refresh(true);
+			card.refresh(true, true);
 			List<String> words = shown(card);
 			assertEquals("each count follows its task's name, before the line under it: " + words,
 				Arrays.asList(HONEY, "3/3", "Delivered", "Port Khazard fruit delivery", "1/3", "Collect at Brimhaven for Port Khazard",
@@ -1227,11 +1227,11 @@ public class RunCardsTest
 		SwingUtilities.invokeAndWait(() ->
 		{
 			card[0] = new FarmRunPanel(state, waiting, follower, route, shortest, sprites, config, store);
-			card[0].refresh(true);
+			card[0].refresh(true, true);
 		});
 		choose(card[0], "Herb run");
 		press(card[0], "Start run");
-		SwingUtilities.invokeAndWait(() -> card[0].refresh(true));
+		SwingUtilities.invokeAndWait(() -> card[0].refresh(true, true));
 		List<String> planning = shown(card[0]);
 		assertTrue(planning.toString(), planning.contains("Planning Herb run…"));
 		assertTrue(planning.toString(), planning.contains("Cancel"));
@@ -1410,8 +1410,8 @@ public class RunCardsTest
 	{
 		SwingUtilities.invokeAndWait(() ->
 		{
-			farm.refresh(true);
-			ports.refresh(true);
+			farm.refresh(true, true);
+			ports.refresh(true, true);
 		});
 	}
 

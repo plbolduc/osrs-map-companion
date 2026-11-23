@@ -126,7 +126,7 @@ public class SourceCardsTest
 
 	private void refresh() throws Exception
 	{
-		SwingUtilities.invokeAndWait(() -> cards.refresh(true, true));
+		SwingUtilities.invokeAndWait(() -> cards.refresh(true, true, true));
 	}
 
 	/** Died at the Ungael crater a moment ago, through the real death event. */

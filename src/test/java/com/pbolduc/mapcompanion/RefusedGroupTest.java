@@ -180,7 +180,7 @@ public class RefusedGroupTest
 		}
 		groupPanel.refresh(true);
 		card.refreshStatus(health, pairing.code(), true, true);
-		card.refreshButtons(true, true, pairing.knownCodes());
+		card.refreshButtons(true, true, true, pairing.knownCodes(), System.currentTimeMillis());
 	}
 
 	/** The words a player can see: every label and button inside nothing hidden, without their markup. */

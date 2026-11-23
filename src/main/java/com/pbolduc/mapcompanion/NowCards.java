@@ -531,16 +531,11 @@ final class NowCards extends JPanel
 		}
 	}
 
-	/** The five cards and the heading, from the connection the sidebar's refresh has just read. EDT. */
-	void refresh(boolean paired, boolean ready)
-	{
-		refresh(paired, ready, true);
-	}
-
 	/**
-	 * The same, knowing whether a character is logged in. With none, every Route here waits for one,
-	 * greyed, its tooltip saying so, since a route is asked for as a member and a member is a
-	 * character; Follow, Pause and Dismiss act here and stay.
+	 * The five cards and the heading, from the connection the sidebar's refresh has just read. EDT.
+	 * With no character logged in, every Route here waits for one, greyed, its tooltip saying so,
+	 * since a route is asked for as a member and a member is a character; Follow, Pause and Dismiss
+	 * act here and stay.
 	 */
 	void refresh(boolean paired, boolean ready, boolean loggedIn)
 	{
