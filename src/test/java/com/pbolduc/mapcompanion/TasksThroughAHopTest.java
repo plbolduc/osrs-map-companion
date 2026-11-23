@@ -346,7 +346,7 @@ public class TasksThroughAHopTest
 		SwingUtilities.invokeAndWait(() ->
 		{
 			slayerCard.refresh(true);
-			portCard.refresh(true);
+			portCard.refresh(true, true);
 		});
 	}
 

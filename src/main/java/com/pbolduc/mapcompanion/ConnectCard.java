@@ -1297,23 +1297,9 @@ final class ConnectCard extends JPanel
 
 	/**
 	 * The group's buttons, the join field and the orange button, from the remembered groups the
-	 * sidebar's refresh read. EDT.
-	 */
-	void refreshButtons(boolean paired, boolean ready, List<String> known)
-	{
-		refreshButtons(paired, ready, true, known, System.currentTimeMillis());
-	}
-
-	/** The same, as of {@code now}: a confirmation is drawn only while it is news. */
-	void refreshButtons(boolean paired, boolean ready, List<String> known, long now)
-	{
-		refreshButtons(paired, ready, true, known, now);
-	}
-
-	/**
-	 * The same, knowing whether a character is logged in: an invite is asked for as a member, and a
-	 * member is a character, so Copy invite waits for one. Switch ▾, Rename group… and the orange
-	 * button act as the player, and stay.
+	 * sidebar's refresh read, as of {@code now}: a confirmation is drawn only while it is news. EDT.
+	 * An invite is asked for as a member, and a member is a character, so Copy invite waits for one
+	 * to be logged in. Switch ▾, Rename group… and the orange button act as the player, and stay.
 	 */
 	void refreshButtons(boolean paired, boolean ready, boolean loggedIn, List<String> known, long now)
 	{

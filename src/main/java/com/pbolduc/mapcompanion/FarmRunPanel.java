@@ -173,13 +173,10 @@ final class FarmRunPanel extends JPanel
 		return isVisible() ? run.actButton(act) : null;
 	}
 
-	/** Called on the EDT by the sidebar refresh; character state has already been read on a game tick. */
-	void refresh(boolean connected)
-	{
-		refresh(connected, true);
-	}
-
-	/** The same, knowing whether a character is logged in: with none, no run is offered to start. */
+	/**
+	 * Called on the EDT by the sidebar refresh; character state has already been read on a game tick.
+	 * With no character logged in, no run is offered to start.
+	 */
 	void refresh(boolean connected, boolean loggedIn)
 	{
 		boolean showing = run.refresh(connected, loggedIn, System.currentTimeMillis());

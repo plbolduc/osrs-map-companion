@@ -302,7 +302,7 @@ public class DestinationCardTest
 	{
 		destinations.selectLocal(mine());
 		route.sync(destinations.getDestination(), null);
-		SwingUtilities.invokeAndWait(() -> cards.refresh(true, false));
+		SwingUtilities.invokeAndWait(() -> cards.refresh(true, false, true));
 		assertEquals(Arrays.asList("Dismiss"), actions());
 	}
 
@@ -537,7 +537,7 @@ public class DestinationCardTest
 
 	private void refreshNow()
 	{
-		cards.refresh(true, true);
+		cards.refresh(true, true, true);
 	}
 
 	/** A click on a button the player can see and press, on the event thread as Swing makes it. */

@@ -112,13 +112,10 @@ final class PortTasksPanel extends JPanel
 		return isVisible() ? run.actButton(act) : null;
 	}
 
-	/** Called on the EDT by the sidebar refresh, beside the farm run card. */
-	void refresh(boolean connected)
-	{
-		refresh(connected, true);
-	}
-
-	/** The same, knowing whether a character is logged in: with none, Start run waits for one. */
+	/**
+	 * Called on the EDT by the sidebar refresh, beside the farm run card. With no character logged in,
+	 * Start run waits for one.
+	 */
 	void refresh(boolean connected, boolean loggedIn)
 	{
 		List<Slot> slots = settings.on("sharePortTasks") ? reader.shown() : null;
