@@ -757,6 +757,17 @@ under the entries they changed.
       stop the map: Route, a run, a meetup, the search and Stars each say they could not reach it
       in the words they used before, and ask again after their own wait.
 
+## The review of 15 November
+
+Built and tested against hand-built replies and the harness's game. None of it has been seen in a
+client or against the production map.
+
+- [ ] **A change the map refuses as busy.** With several characters posting from one address so
+      the map answers some posts 429, rename the character in the plugin's settings: the new
+      name reaches the map when the wait the reply asked for ends, about five or ten seconds, not
+      at the next heartbeat. The map's log shows no post from that member before the wait is over,
+      and a refused post that carried nothing new is not sent again until the heartbeat.
+
 ## Farming procedure
 
 With Farming patches enabled and the map's farm run open:

@@ -276,11 +276,12 @@ class CompanionLoop
 	private long lastBuildAtMs = 0L;
 	private WorldPoint lastPosition = null;
 	/**
-	 * Gson of the last snapshot that was actually handed to OkHttp, clocks zeroed.
-	 * Null until the first successful enqueue; a fingerprint match with no heartbeat due
-	 * is what stops varbit churn posting every two seconds.
+	 * Gson of the last snapshot the map answered, clocks zeroed: what it has heard, not what was
+	 * handed to OkHttp, so a post it refused as busy is still news. Null until the first lands; a
+	 * fingerprint match with no heartbeat due is what stops varbit churn posting every two seconds.
+	 * Volatile because the reply that sets it arrives on an OkHttp thread.
 	 */
-	String lastSentFingerprint = null;
+	volatile String lastSentFingerprint = null;
 
 	/** The meetups already announced, so one notification is one notification. Game tick only. */
 	final MeetupReminder meetupReminder = new MeetupReminder();
@@ -808,6 +809,13 @@ class CompanionLoop
 		if (!relay.post(server, code, pairing.suffix(server, code), pairing.secret(server, code, postedAs),
 			identity.installationKey(), snapshot, response ->
 	{
+		if (response == null)
+		{
+			/* Busy. The tick after the wait the map asked for builds again, and posts only what the map has not heard. */
+			dirty = true;
+			return;
+		}
+		lastSentFingerprint = fingerprint;
 		/*
 		 * Before the directive, and outside the toggle that guards it. A reader who has turned
 		 * destinations off still needs the events they sent to stop being resent, and an
@@ -829,7 +837,6 @@ class CompanionLoop
 			return;
 		}
 
-		lastSentFingerprint = fingerprint;
 		lastPostAtMs = now;
 	}
 

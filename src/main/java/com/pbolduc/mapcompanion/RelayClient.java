@@ -368,6 +368,8 @@ public class RelayClient
 	 *     so that a plugin older than the feature keeps a group's dots alive. It is the reply to
 	 *     one of these posts that carries the secret in the first place, so a post that refused to
 	 *     go without one could never get one.
+	 * @param onDirective handed the map's reply when the post lands, and null when the map answers
+	 *     that it is busy; not called for any other outcome.
 	 * @return true if the request was handed to OkHttp. False if this returned before touching
 	 *     the network — no pairing code, a latched fatal, or another post already in flight —
 	 *     so the caller must not record the snapshot as sent.
@@ -547,6 +549,11 @@ public class RelayClient
 		{
 			/* Read as every press reads it, with its ceiling: a proxy's huge value must not stop posting until a rejoin. */
 			nextAllowedPostMs = now + Math.max(MapWait.retryDelay(response.header("Retry-After")), DEFAULT_INTERVAL_MS);
+			if (onDirective != null)
+			{
+				/* Null is "busy": the caller's post was not heard, and it alone knows what that post held. */
+				onDirective.accept(null);
+			}
 			return;
 		}
 

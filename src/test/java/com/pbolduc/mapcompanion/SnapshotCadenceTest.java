@@ -61,6 +61,8 @@ public class SnapshotCadenceTest
 	private final HarnessConfig config = new HarnessConfig(store, MapCompanionConfig.DEFAULT_MAP_URL);
 	private final AtomicInteger builds = new AtomicInteger();
 	private final AtomicInteger posts = new AtomicInteger();
+	/** While set, the map answers every post as it does over its budget: 429, try again in five seconds. */
+	private volatile boolean busy;
 	private final MapCompanionPlugin plugin = TestLoop.in(new MapCompanionPlugin()
 	{
 		@Override
@@ -72,7 +74,8 @@ public class SnapshotCadenceTest
 	private final RelayClient relay = new RelayClient(new OkHttpClient.Builder().addInterceptor(chain ->
 	{
 		posts.incrementAndGet();
-		return new Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1).code(200).message("")
+		return new Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1).code(busy ? 429 : 200)
+			.message("").header("Retry-After", "5")
 			.body(ResponseBody.create(MediaType.get("application/json"), "{}")).build();
 	}).build(), gson);
 	private String server;
@@ -162,10 +165,58 @@ public class SnapshotCadenceTest
 		assertEquals(3, builds.get());
 	}
 
+	/**
+	 * A post the map refused as busy was not heard, so what it carried is still news when the wait
+	 * the map asked for ends. The fingerprint was recorded when the post was handed over, so a
+	 * refused rename read as already said and waited for the next heartbeat. Nothing here marks the
+	 * plugin dirty after the refusal: only the refusal itself can bring the change back.
+	 */
+	@Test
+	public void aChangeRefusedAsBusyGoesWhenTheWaitEnds() throws Exception
+	{
+		tick(0);
+		config.nickname("Another name");
+		busy = true;
+		tick(2_400);
+		assertEquals("the change is posted, and refused", 2, posts.get());
+
+		busy = false;
+		quietTick(4_800);
+		assertEquals("the same change goes again once the map is ready, well before a heartbeat", 3, posts.get());
+		quietTick(7_200);
+		assertEquals("and is not repeated once it has landed", 3, posts.get());
+	}
+
+	/**
+	 * The other half: a refused heartbeat that said nothing new is not sent again when the wait ends.
+	 * The map said it was busy, and it has already heard everything this post held.
+	 */
+	@Test
+	public void aRefusedPostWithNothingNewWaitsForTheNextHeartbeat() throws Exception
+	{
+		tick(0);
+		busy = true;
+		tick(6_000);
+		assertEquals("the heartbeat is posted, and refused", 2, posts.get());
+
+		busy = false;
+		quietTick(8_400);
+		quietTick(10_800);
+		assertEquals("nothing has changed, so nothing goes before the next heartbeat", 2, posts.get());
+		quietTick(12_000);
+		assertEquals("which goes as it always did", 3, posts.get());
+	}
+
 	/** One game tick's post step at {@code START + at}, dirty as a varbit would leave it, and its reply landed. */
 	private void tick(long at) throws Exception
 	{
 		set("dirty", true);
+		quietTick(at);
+	}
+
+	/** The same step on a tick where nothing in the game moved. */
+	private void quietTick(long at) throws Exception
+	{
 		plugin.loop.postIfDue(START + at, server, "ABC234");
 		long deadline = System.currentTimeMillis() + 5_000L;
 		while (!relay.isReady(START + at))
