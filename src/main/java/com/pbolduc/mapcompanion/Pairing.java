@@ -161,13 +161,17 @@ public class Pairing
 		return host.equals("localhost") || host.equals("127.0.0.1") || host.equals("::1");
 	}
 
-	/** Server identity includes the scheme, port and base path that requests actually use. */
+	/**
+	 * Server identity includes the scheme, port and base path that requests actually use. An address
+	 * typed without its scheme gets it here, through {@link #withScheme}, since every request's
+	 * address passes through this and a player types "osrs-map.com".
+	 */
 	@Nullable
 	static String normalizeServer(@Nullable String address)
 	{
 		String value = address == null || address.trim().isEmpty()
 			? MapCompanionConfig.DEFAULT_MAP_URL : address.trim();
-		HttpUrl url = HttpUrl.parse(value);
+		HttpUrl url = HttpUrl.parse(withScheme(value));
 		if (url == null || !url.username().isEmpty() || !url.password().isEmpty()
 			|| url.query() != null || url.fragment() != null)
 		{

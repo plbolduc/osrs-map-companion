@@ -222,21 +222,23 @@ public class AnsweredWherePressedTest
 
 	/**
 	 * An address typed without its scheme is the map meant, not a mistake: https for a map anywhere,
-	 * http for one on this machine, and nothing else the address rule refuses is let through.
+	 * http for one on this machine, and nothing else the address rule refuses is let through. Asked of
+	 * normalizeServer itself, which every request's address goes through, so the completion cannot
+	 * exist in a helper nothing calls.
 	 */
 	@Test
 	public void anAddressTypedWithoutItsSchemeIsCompleted()
 	{
-		assertEquals("https://osrs-map.com", Pairing.normalizeServer(Pairing.withScheme(" osrs-map.com ")));
-		assertEquals("https://example.test/map", Pairing.normalizeServer(Pairing.withScheme("example.test/map/")));
-		assertEquals("http://localhost:3000", Pairing.normalizeServer(Pairing.withScheme("localhost:3000")));
-		assertEquals("http://127.0.0.1:3000", Pairing.normalizeServer(Pairing.withScheme("127.0.0.1:3000")));
-		assertEquals("http://localhost:3000", Pairing.withScheme("http://localhost:3000"));
-		assertNull("a scheme of its own is judged as it is", Pairing.normalizeServer(Pairing.withScheme("http://example.test")));
-		assertNull(Pairing.normalizeServer(Pairing.withScheme("file:///tmp/map")));
-		assertNull(Pairing.normalizeServer(Pairing.withScheme("example.test?key=value")));
+		assertEquals("https://osrs-map.com", Pairing.normalizeServer(" osrs-map.com "));
+		assertEquals("https://example.test/map", Pairing.normalizeServer("example.test/map/"));
+		assertEquals("http://localhost:3000", Pairing.normalizeServer("localhost:3000"));
+		assertEquals("http://127.0.0.1:3000", Pairing.normalizeServer("127.0.0.1:3000"));
+		assertEquals("http://localhost:3000", Pairing.normalizeServer("http://localhost:3000"));
+		assertNull("a scheme of its own is judged as it is", Pairing.normalizeServer("http://example.test"));
+		assertNull(Pairing.normalizeServer("file:///tmp/map"));
+		assertNull(Pairing.normalizeServer("example.test?key=value"));
 		assertEquals("empty is still the default map", MapCompanionConfig.DEFAULT_MAP_URL,
-			Pairing.normalizeServer(Pairing.withScheme("")));
+			Pairing.normalizeServer(""));
 	}
 
 	/** The sidebar's own order: the Group tab, then the status card, then the buttons under it. */
