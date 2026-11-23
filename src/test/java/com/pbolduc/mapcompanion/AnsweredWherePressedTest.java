@@ -194,9 +194,14 @@ public class AnsweredWherePressedTest
 		assertTrue(pairing.connect(JoinCode.parse("ABC234"), () -> true));
 		draw();
 		assertTrue(card.copyInviteButton.isEnabled());
+		assertNull("a button that can be pressed needs no reason", card.copyInviteButton.getToolTipText());
 		card.refreshButtons(true, true, false, pairing.knownCodes(), System.currentTimeMillis());
 		assertFalse(card.copyInviteButton.isEnabled());
+		assertEquals("greyed, it says why on hover: the words were only inside the press it no longer takes",
+			"Log in to a character to copy an invite.", card.copyInviteButton.getToolTipText());
 		assertTrue(labelled(card.groupActions, "Switch ▾").isEnabled());
+		card.refreshButtons(true, true, true, pairing.knownCodes(), System.currentTimeMillis());
+		assertNull(card.copyInviteButton.getToolTipText());
 	}
 
 	/** The first button reading these words. */

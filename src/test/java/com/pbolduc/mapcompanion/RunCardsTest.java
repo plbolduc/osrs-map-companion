@@ -267,14 +267,29 @@ public class RunCardsTest
 	@Test
 	public void atTheLoginScreenARunWaitsButEndRunStays() throws Exception
 	{
-		SwingUtilities.invokeAndWait(() -> farm.refresh(true, false));
+		SwingUtilities.invokeAndWait(() ->
+		{
+			farm.refresh(true, false);
+			ports.refresh(true, false);
+		});
 		assertTrue(button(farm, "Start run") != null && !enabled(farm, "Start run"));
 		assertFalse(combo(farm).isEnabled());
+		/* Each greyed press says why on hover, as a Route does, where it kept the tip of a press that could be made. */
+		assertEquals(RoutePress.LOG_IN, button(farm, "Start run").getToolTipText());
+		assertTrue(button(ports, "Start run") != null && !enabled(ports, "Start run"));
+		assertEquals(RoutePress.LOG_IN, button(ports, "Start run").getToolTipText());
 
 		state.acceptFor(identity.id(), EPOCH, run("/contract/farm-run.json"), 1, System.currentTimeMillis());
 		SwingUtilities.invokeAndWait(() -> farm.refresh(true, false));
 		assertTrue(button(farm, "Reroute") != null && !enabled(farm, "Reroute"));
+		assertEquals(RoutePress.LOG_IN, button(farm, "Reroute").getToolTipText());
 		assertTrue(enabled(farm, "End run"));
+
+		state.end();
+		refresh();
+		assertEquals("logged in, Start run says what it asks again", Words.of("farm.startTip"),
+			button(farm, "Start run").getToolTipText());
+		assertEquals(Words.of("port.startTip"), button(ports, "Start run").getToolTipText());
 	}
 
 	/** A refused Start is no run either: the tasks stay, and so does the button that can try again. */

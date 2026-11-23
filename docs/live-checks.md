@@ -788,6 +788,11 @@ client or against the production map.
       nothing and *Near you* is gone. Log in: the dot, *Online* and *Near you* come back as the
       roster says. A roster that stops being refreshed while logged in (an outage, or after being
       removed) still draws as it last was; that half of the review's item was not built.
+- [ ] **Greyed presses at the login screen.** Connected and logged out, hover Copy invite, a
+      meetup's answers, Meet here, the farm card's and Port tasks' Start run and a held run's
+      Reroute: each shows its log-in line. RuneLite's FlatLaf shows a tooltip on a disabled
+      button in the harness's renders; confirm it does in the client. Logged in, the answers
+      have no tooltip and the others say what they did before.
 
 ## Farming procedure
 

@@ -857,8 +857,10 @@ can be picked while *Start run* counts down.
 At the login screen the status card's *Logged out* is said once, and the presses that ask the map
 as a member wait for a character, greyed, since a member is a character: Reroute, Route back, the
 clue's Route, a friend's and a meetup's Route, the answers, Meet here, Copy invite, the run picker
-and Start run, a run's Reroute, Port tasks' Start run and Slayer's Route. A Route's tooltip says
-*Log in to plan a route.* The search box goes, as it does before a group is joined, Stars says
+and Start run, a run's Reroute, Port tasks' Start run and Slayer's Route. Each greyed press says
+why on hover: a Route, Start run and a run's Reroute *Log in to plan a route.*, the answers, Meet
+here and Make meetup *Log in to answer or make a meetup.*, and Copy invite *Log in to a character
+to copy an invite.* The search box goes, as it does before a group is joined, Stars says
 *Log in to see stars.*, and Group, while it holds no friends to list, says *Log in to see your
 group.* over the Meetups heading; friends kept through a logout stay listed, each with a grey
 dot, no word for its presence and no *Near you*, since that roster is the last frame the map sent

@@ -1304,6 +1304,8 @@ final class ConnectCard extends JPanel
 	void refreshButtons(boolean paired, boolean ready, boolean loggedIn, List<String> known, long now)
 	{
 		copyInviteButton.setEnabled(paired && loggedIn && pairing.hasServerConsent() && !copyingInvite);
+		/* Only for want of a character: it is greyed before the map is approved too, and the orange button answers that. */
+		copyInviteButton.setToolTipText(loggedIn ? null : Words.of("connect.inviteLogIn"));
 		knownGroupsRow.setVisible(!paired && !known.isEmpty());
 		List<JButton> groupRow = new ArrayList<>();
 		if (paired)

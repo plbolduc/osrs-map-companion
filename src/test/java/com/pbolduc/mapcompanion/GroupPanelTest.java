@@ -897,11 +897,21 @@ public class GroupPanelTest
 			assertEquals(RoutePress.LOG_IN, route.getToolTipText());
 			assertFalse(named(panel.get(), "group.answer.star-hunt.going").isEnabled());
 			assertFalse(named(panel.get(), "group.meetHere").isEnabled());
+			/* The greyed answers and Meet here say why on hover, as Route does; the answers had no tip at all. */
+			assertEquals(MeetupClient.LOG_IN, named(panel.get(), "group.answer.star-hunt.going").getToolTipText());
+			assertEquals(MeetupClient.LOG_IN, named(panel.get(), "group.meetHere").getToolTipText());
+			assertEquals(MeetupClient.LOG_IN, named(panel.get(), "group.meetMake").getToolTipText());
 			assertTrue("World map draws here", named(panel.get(), "group.show.cara").isEnabled());
 
 			panel.get().routeToFriend("cara");
 			assertFalse("no position is waited for", group.finding("cara", now));
 			assertNotNull(words(panel.get()), saying(panel.get(), RoutePress.LOG_IN));
+
+			panel.get().refresh(true, true, now);
+			assertNull("logged in, an answer is its own word and needs no tip",
+				named(panel.get(), "group.answer.star-hunt.going").getToolTipText());
+			assertEquals(Words.of("group.meetHereTip"), named(panel.get(), "group.meetHere").getToolTipText());
+			assertEquals(Words.of("group.makeTip"), named(panel.get(), "group.meetMake").getToolTipText());
 		});
 	}
 

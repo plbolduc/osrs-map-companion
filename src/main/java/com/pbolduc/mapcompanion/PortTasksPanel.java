@@ -135,7 +135,7 @@ final class PortTasksPanel extends JPanel
 		starter.setVisible(offer && settings.on("shareBoats") && !after);
 		start.setEnabled(connected && loggedIn && client.ready() && !kept);
 		/* Greyed by the wait every Route shares, it says how long is left. A hop's window is not that wait. */
-		MapWait.tip(start, START_TIP, kept ? 0L : routes.pressWait(System.currentTimeMillis()));
+		MapWait.tip(start, loggedIn ? START_TIP : RoutePress.LOG_IN, kept ? 0L : routes.pressWait(System.currentTimeMillis()));
 		hint.setVisible(offer && (!settings.on("shareBoats") || after));
 		setWrapped(hint, after ? AFTER_FARM_RUN : NEEDS_BOATS, WIDTH);
 		if (!worth)

@@ -67,6 +67,8 @@ final class FarmRunPanel extends JPanel
 	private boolean ready;
 	/** The wait every Route shares, as that refresh found it: what Start run says while it is greyed. EDT. */
 	private long wait;
+	/** What Start run says of itself as that refresh found it: what it asks, or that it waits for a character. EDT. */
+	private String tip;
 	/*
 	 * The kind of run and Start run, hidden while a run is going or being planned: there is one run at
 	 * a time, so a press here would replace the run being walked. The Port tasks card holds the same
@@ -161,7 +163,7 @@ final class FarmRunPanel extends JPanel
 		String missing = needs(STARTS.get(kind.getSelectedIndex()).split("\\|")[0], settings);
 		start.setEnabled(ready && missing == null);
 		/* Greyed by the wait alone, it says how long is left; a choice that is off has the line under it. Else what the press asks. */
-		MapWait.tip(start, Words.of("farm.startTip"), missing == null ? wait : 0L);
+		MapWait.tip(start, tip, missing == null ? wait : 0L);
 		needs.setVisible(picker.isVisible() && missing != null);
 		setWrapped(needs, missing == null ? "" : missing, CARD_TEXT_WIDTH);
 	}
@@ -185,6 +187,7 @@ final class FarmRunPanel extends JPanel
 		waiting.setVisible(!run.busy() && run.otherBusy());
 		ready = connected && loggedIn && client.ready();
 		wait = routes.pressWait(System.currentTimeMillis());
+		tip = loggedIn ? Words.of("farm.startTip") : RoutePress.LOG_IN;
 		/* Choosing asks the map nothing, so the wait between presses holds Start run and not the picker. */
 		kind.setEnabled(connected && loggedIn);
 		offer();

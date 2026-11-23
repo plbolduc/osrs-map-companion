@@ -209,7 +209,6 @@ final class GroupPanel extends JPanel
 		meetHere.setName("group.meetHere");
 		meetHere.setForeground(ColorScheme.BRAND_ORANGE);
 		meetHere.setHorizontalAlignment(SwingConstants.RIGHT);
-		meetHere.setToolTipText(Words.of("group.meetHereTip"));
 		meetHere.addActionListener(e -> openForm(!formOpen));
 		JPanel head = bar(0, DARK_GRAY_COLOR, meetupsHead, null, meetHere);
 		head.setName("group.meetupsHead");
@@ -425,8 +424,11 @@ final class GroupPanel extends JPanel
 		}
 		make.setEnabled(asks && meetups.ready() && (meet == null || !meet.sending));
 		/* A wait the map asked for counts down on the greyed button, as Route's does; the spot is the one the form names. */
-		MapWait.tip(make, spot == null ? Words.of("group.makeTip") : Words.of("group.makeSpotTip"), meetups.waitMs(now));
+		MapWait.tip(make, !loggedIn ? MeetupClient.LOG_IN : spot == null ? Words.of("group.makeTip") : Words.of("group.makeSpotTip"),
+			meetups.waitMs(now));
 		meetHere.setEnabled(asks);
+		/* Greyed for want of a character, each press says so on hover, as a Route does. */
+		meetHere.setToolTipText(loggedIn ? Words.of("group.meetHereTip") : MeetupClient.LOG_IN);
 		meetupsOff.setVisible(events == null && !config.showDestination());
 		if (events != null)
 		{
@@ -850,6 +852,7 @@ final class GroupPanel extends JPanel
 				button.setForeground(Color.WHITE);
 			}
 			button.setEnabled(pressable || chosen);
+			button.setToolTipText(loggedIn ? null : MeetupClient.LOG_IN);
 			button.addActionListener(e ->
 			{
 				if (pressable)
