@@ -166,13 +166,7 @@ class WorldMapRouteHere
 		if (refusal != null)
 		{
 			/* Said once, so a wait is the seconds left as it is said: "The map is busy. Try again in 25s." */
-			chat.queue(QueuedMessage.builder()
-				.type(ChatMessageType.GAMEMESSAGE)
-				.runeLiteFormattedMessage(new ChatMessageBuilder()
-					.append(ChatColorType.HIGHLIGHT).append(OPTION + ": ")
-					.append(ChatColorType.NORMAL).append(routePress.words(said, System.currentTimeMillis()))
-					.build())
-				.build());
+			MapCompanionPlugin.say(chat, OPTION + ": ", routePress.words(said, System.currentTimeMillis()));
 		}
 	}
 

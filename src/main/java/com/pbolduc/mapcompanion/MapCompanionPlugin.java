@@ -517,7 +517,7 @@ public class MapCompanionPlugin extends Plugin implements CompanionLoop.Surface
 		String line = DropLuckView.chatLine(drop);
 		if (line != null)
 		{
-			say("Drop luck: ", line);
+			say(chatMessageManager, "Drop luck: ", line);
 		}
 	}
 
@@ -528,7 +528,7 @@ public class MapCompanionPlugin extends Plugin implements CompanionLoop.Surface
 		String line = UpdateNotice.due(ConfigStore.of(configManager), usedBefore);
 		if (line != null)
 		{
-			say("OSRS Map Companion " + CompanionVersion.VERSION + ": ", line + " " + UpdateNotice.WHERE);
+			say(chatMessageManager, "OSRS Map Companion " + CompanionVersion.VERSION + ": ", line + " " + UpdateNotice.WHERE);
 		}
 	}
 
@@ -543,14 +543,17 @@ public class MapCompanionPlugin extends Plugin implements CompanionLoop.Surface
 		if (arrived != null && config.showDestination())
 		{
 			boolean yours = DestinationRoute.sentHere(arrived, arrived.targetMemberId != null ? loop.identity.id() : null);
-			say("Destination: ", NowCards.arrivalLine(arrived, client.getWorld(), config.followHotkey(), yours));
+			say(chatMessageManager, "Destination: ", NowCards.arrivalLine(arrived, client.getWorld(), config.followHotkey(), yours));
 		}
 	}
 
-	/** A game message drawn by this client and sent nowhere: its head highlighted, then its words. */
-	private void say(String head, String line)
+	/**
+	 * A game message drawn by this client and sent nowhere: its head highlighted, then its words. Static
+	 * so every part of the plugin that speaks in the chat box says it the same way.
+	 */
+	static void say(ChatMessageManager chat, String head, String line)
 	{
-		chatMessageManager.queue(QueuedMessage.builder()
+		chat.queue(QueuedMessage.builder()
 			.type(ChatMessageType.GAMEMESSAGE)
 			.runeLiteFormattedMessage(new ChatMessageBuilder()
 				.append(ChatColorType.HIGHLIGHT).append(head)
