@@ -94,7 +94,8 @@ public class DirectiveStream
 	 * <p>A server that refuses this endpoint outright — an older deployment of the map, a proxy in
 	 * the way — refuses it every time, and retrying a flat ten seconds forever is a request every ten
 	 * seconds forever for a connection that is never going to open. Doubling up to five minutes keeps
-	 * a brief restart cheap to recover from while a permanent refusal costs almost nothing.
+	 * a brief restart cheap to recover from while a permanent refusal costs almost nothing. A 5xx is
+	 * held to a minute instead; see {@link #scheduleReconnect}.
 	 */
 	private static final long MAX_RECONNECT_DELAY_MS = 5 * 60_000L;
 
@@ -277,7 +278,7 @@ public class DirectiveStream
 					}
 					connected = false;
 					log.debug("companion stream unreachable", e);
-					scheduleReconnect(url, streamGeneration, secret, onDirective);
+					scheduleReconnect(url, streamGeneration, secret, onDirective, null);
 				}
 			},
 			/*
@@ -327,7 +328,8 @@ public class DirectiveStream
 						if (isCurrent(streamGeneration))
 						{
 							connected = false;
-							scheduleReconnect(url, streamGeneration, secret, onDirective);
+							/* Closed by now, and its status and headers can still be read. */
+							scheduleReconnect(url, streamGeneration, secret, onDirective, response);
 						}
 					}
 				}
@@ -407,11 +409,14 @@ public class DirectiveStream
 	/**
 	 * Queue exactly one reconnect, after a delay that grows while failures keep coming.
 	 *
+	 * <p>{@code reply} is the answer this stream ended with, or null when there was none.
+	 *
 	 * <p>Use RuneLite's shared scheduler without blocking it. Cancellation avoids a pending retry;
 	 * the generation also rejects a task that had already started when stop was called.
 	 */
 	private synchronized void scheduleReconnect(
-		HttpUrl url, long streamGeneration, @Nullable String secret, Consumer<? super StreamDirective> onDirective)
+		HttpUrl url, long streamGeneration, @Nullable String secret, Consumer<? super StreamDirective> onDirective,
+		@Nullable Response reply)
 	{
 		if (!isCurrent(streamGeneration) || reconnectTask != null)
 		{
@@ -419,6 +424,17 @@ public class DirectiveStream
 		}
 
 		long delay = backoffMs(failures.incrementAndGet());
+		if (reply != null)
+		{
+			/*
+			 * A 5xx is a map restarting or briefly ill, not one that refuses this endpoint outright,
+			 * so it is asked again within a minute however long it has been down: the group's dots
+			 * come only by this stream. And a wait the reply names stands when it is the longer; the
+			 * map's caps answer 429 with one, and coming back inside it is asking a map that said it
+			 * was busy. A stream that opened and ended names none.
+			 */
+			delay = Math.max(MapWait.named(reply), reply.code() >= 500 ? Math.min(delay, 60_000L) : delay);
+		}
 		reconnectTask = reconnectScheduler.schedule(() ->
 		{
 			synchronized (DirectiveStream.this)

@@ -129,7 +129,9 @@ for a player who already shares their position; it writes no other sharing setti
 is not in it.
 
 Enabling either drawing choice opens a receive stream; group positions are requested only with
-the latter. **Copy invite**
+the latter. A stream that drops or is refused is opened again after ten seconds, doubling to five
+minutes while it keeps failing, to one minute while the map answers that it is down, and never
+before a wait the map names. **Copy invite**
 makes one request for an expiring invite. While **Stars** is open, logged in and connected,
 the star list is fetched about once a minute without character or group credentials. Its filters,
 favourite sites, Mining level and skill total filter stars locally and are kept in this RuneLite's

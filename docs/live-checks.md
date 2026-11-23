@@ -777,6 +777,12 @@ client or against the production map.
       stream blocked (a proxy that refuses `/api/companion/stream`): posts come every six seconds,
       and a place sent from the map arrives within that. Let the stream connect: twenty again.
       Share only the Slayer task with destinations off: six.
+- [ ] **The receive stream after an outage.** With group dots on, stop the local map for three
+      minutes and start it: the dots are back on the world map within about a minute of the map
+      answering, not five. Put a proxy in front that answers the stream 429 with `Retry-After: 30`:
+      the map's log shows the stream asked for no sooner than every thirty seconds, and posting
+      carries on meanwhile. Whether a Fly deploy shows the plugin a 5xx or a refused connection was
+      not observed; a refused connection keeps the five-minute ceiling.
 
 ## Farming procedure
 

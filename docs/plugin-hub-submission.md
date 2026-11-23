@@ -158,7 +158,9 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RoutePress`, `SearchClien
   Group code and member id are the `code` and `for` query parameters; the member secret is a
   header. `members=1` is added only for group markers, or for a friend the player pressed **Show on
   map** or **Route** beside. Receives destinations, meetups, the group's roster and the requested
-  members; never initiates gameplay.
+  members; never initiates gameplay. A stream that drops or is refused is opened again after ten
+  seconds, doubling to five minutes while it keeps failing, or to one minute while the map answers
+  5xx, and never before the `Retry-After` a refusal names.
 - **GET /api/companion/stars** — while Stars is open, logged in and connected; normally once a
   minute, respecting a longer feed interval. No character/group credentials. The tab's filters,
   favourite sites, Mining level and total stay on this machine.
@@ -212,7 +214,7 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RoutePress`, `SearchClien
 
 Requests carry the versioned User-Agent and `Cache-Control: no-store`, so no reply is written to RuneLite's HTTP cache. The address must be https (plain http only on loopback),
 redirects are not followed, and reply bodies are capped at 1 MB. Snapshot and stream failures back
-off; the Stars, Reroute, route-press, farm-run, search and meetup clients also honour Retry-After. Nothing requests the upstream star feed directly.
+off; the snapshot, stream, Stars, Reroute, route-press, farm-run, search and meetup clients also honour Retry-After. Nothing requests the upstream star feed directly.
 The README's [What you share](../README.md#what-you-share) names every transmitted category, and
 [Network and storage](network.md) covers credentials and storage.
 

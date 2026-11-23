@@ -200,6 +200,71 @@ public class DirectiveStreamLifetimeTest
 		}
 	}
 
+	/**
+	 * The map answers a stream over one of its caps with 429 and {@code Retry-After: 30}. The
+	 * back-off's own ten and twenty seconds came back inside the wait the map had just named, so
+	 * the reconnect waits at least what the reply asks, and its own growing delay once that is longer.
+	 */
+	@Test
+	public void aRefusedStreamWaitsAsLongAsTheMapAsks() throws Exception
+	{
+		assertEquals(java.util.Arrays.asList(30_000L, 30_000L, 40_000L, 80_000L), delaysAfter(429, "30", 4));
+		/* Held as every Retry-After is: a proxy's day is five minutes, and no header changes nothing. */
+		assertEquals(java.util.Arrays.asList(300_000L), delaysAfter(429, "86400", 1));
+		assertEquals(java.util.Arrays.asList(10_000L, 20_000L), delaysAfter(403, null, 2));
+	}
+
+	/**
+	 * Five minutes is the ceiling for a map that refuses the stream outright: an older deployment,
+	 * a proxy in the way. A 5xx is a map that is restarting or briefly ill, and a client that had
+	 * doubled past a two-minute outage kept its friends' dots off the world map for up to five
+	 * minutes after the map was back. A 5xx is asked again within a minute.
+	 */
+	@Test
+	public void aMapThatIsDownIsAskedAgainWithinAMinute() throws Exception
+	{
+		assertEquals(java.util.Arrays.asList(10_000L, 20_000L, 40_000L, 60_000L, 60_000L, 60_000L),
+			delaysAfter(503, null, 6));
+		assertEquals("a 5xx's own Retry-After still stands when it is the longer",
+			java.util.Arrays.asList(120_000L), delaysAfter(503, "120", 1));
+		assertEquals("a refusal that is not the map being down keeps the five-minute ceiling",
+			java.util.Arrays.asList(10_000L, 20_000L, 40_000L, 80_000L, 160_000L, 300_000L), delaysAfter(404, null, 6));
+	}
+
+	/** The waits before each of the first {@code count} reconnects to a map that answers every open this way. */
+	private static java.util.List<Long> delaysAfter(int status, String retryAfter, int count) throws Exception
+	{
+		java.util.concurrent.LinkedBlockingQueue<Long> delays = new java.util.concurrent.LinkedBlockingQueue<>();
+		java.util.concurrent.LinkedBlockingQueue<Runnable> retries = new java.util.concurrent.LinkedBlockingQueue<>();
+		OkHttpClient client = new OkHttpClient.Builder().addInterceptor(chain ->
+		{
+			Response refusal = reply(chain, status, ResponseBody.create(MediaType.get("text/plain"), "no"));
+			return retryAfter == null ? refusal : refusal.newBuilder().header("Retry-After", retryAfter).build();
+		}).build();
+		DirectiveStream stream = new DirectiveStream(client, new Gson(), (action, delay) ->
+		{
+			delays.add(delay);
+			retries.add(action);
+			return new FutureTask<>(action, null);
+		});
+		java.util.List<Long> seen = new java.util.ArrayList<>();
+		try
+		{
+			start(stream, ignored -> { });
+			for (int i = 0; i < count; i++)
+			{
+				seen.add(delays.poll(3, TimeUnit.SECONDS));
+				retries.take().run();
+			}
+		}
+		finally
+		{
+			stream.stop();
+			client.dispatcher().executorService().shutdown();
+		}
+		return seen;
+	}
+
 	@Test
 	public void aKeepAliveRenewsLivenessWithoutDeliveringAFrame() throws Exception
 	{
