@@ -132,7 +132,8 @@ Only `RelayClient`, `DirectiveStream`, `StarsClient`, `RoutePress`, `SearchClien
   member id from the roster. No retry.
 
 - **POST /api/companion/snapshot** — logged-in state changes, at least two seconds apart, plus
-  six-second idle heartbeats (twenty seconds with a stream). JSON comes from `SnapshotBuilder`;
+  twenty-second idle heartbeats (six seconds only with map destinations on or a Slayer task
+  shared, and no stream connected to deliver them). JSON comes from `SnapshotBuilder`;
   each character field is gated independently. With *Slayer task* shared it also sends
   the list's ranking order, Wilderness filter and delivery receipt (`slayerPreferences`).
   With *Notable drops and levels* and the matching quest or diary field on, `milestones` can carry a

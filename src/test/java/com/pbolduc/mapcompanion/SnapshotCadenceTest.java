@@ -102,6 +102,7 @@ public class SnapshotCadenceTest
 		TestFarmRuns.attach(plugin);
 		set("config", config);
 		set("identity", identity);
+		set("settings", store);
 		set("relay", relay);
 		set("snapshotFingerprint", new SnapshotFingerprint(gson));
 		set("directiveStream", new DirectiveStream(new OkHttpClient(), gson, (action, delay) -> null));
@@ -151,10 +152,19 @@ public class SnapshotCadenceTest
 		assertEquals("and posted", 2, posts.get());
 	}
 
-	/** A heartbeat is posted with nothing new in it, and is held to the same floor as any other build. */
+	/**
+	 * A heartbeat is posted with nothing new in it, and is held to the same floor as any other build.
+	 *
+	 * <p>Six seconds is for a client the reply may bring something to: here <i>Show map
+	 * destinations</i> is on and no stream is delivering, so a place, a run or a meetup sent from
+	 * the map can arrive only on a post's reply. This case ran with every setting at its default
+	 * while six seconds was every unstreamed client's heartbeat; it turns the setting on now
+	 * because a client with nothing to be delivered waits twenty, as the next test says.
+	 */
 	@Test
 	public void aHeartbeatStillGoesWhenNothingHasChanged() throws Exception
 	{
+		config.set("showDestination", true);
 		tick(0);
 		tick(5_400);
 		assertEquals("a dirty tick with nothing new", 1, posts.get());
@@ -163,6 +173,37 @@ public class SnapshotCadenceTest
 		tick(7_400);
 		assertEquals("and goes on the first tick the floor allows", 2, posts.get());
 		assertEquals(3, builds.get());
+	}
+
+	/**
+	 * With destinations off and no Slayer task shared, a reply brings only the roster, and nothing
+	 * the player is waiting for. Such a client posted ten times a minute standing still; its
+	 * heartbeat is the twenty seconds a client with a stream keeps, inside the thirty after which
+	 * the map calls a member stale.
+	 */
+	@Test
+	public void aClientTheMapHasNothingToDeliverToHeartbeatsEveryTwentySeconds() throws Exception
+	{
+		tick(0);
+		for (long at = 2_400; at <= 18_000; at += 2_400)
+		{
+			tick(at);
+		}
+		assertEquals("nothing new and nothing to deliver: no post inside twenty seconds", 1, posts.get());
+		tick(20_400);
+		assertEquals("the heartbeat goes at twenty", 2, posts.get());
+	}
+
+	/** The spots for a shared Slayer task ride the reply too, so a Slayer sharer keeps six seconds. */
+	@Test
+	public void aSlayerSharerKeepsTheShortHeartbeat() throws Exception
+	{
+		config.set("shareSlayer", true);
+		tick(0);
+		tick(5_400);
+		assertEquals(1, posts.get());
+		tick(7_400);
+		assertEquals("six seconds, at the first tick the floor allows", 2, posts.get());
 	}
 
 	/**
@@ -194,6 +235,8 @@ public class SnapshotCadenceTest
 	@Test
 	public void aRefusedPostWithNothingNewWaitsForTheNextHeartbeat() throws Exception
 	{
+		/* On, for the six-second heartbeat these times are written against. */
+		config.set("showDestination", true);
 		tick(0);
 		busy = true;
 		tick(6_000);

@@ -99,29 +99,28 @@ class CompanionLoop
 	 */
 	private static final long MIN_POST_INTERVAL_MS = 2_000L;
 	/**
-	 * Sent even when nothing has changed, so a pairing does not look dead while somebody idles —
-	 * and so a destination sent from the map is picked up reasonably soon.
+	 * The heartbeat of a client the reply may bring something to, with no stream delivering it.
 	 *
-	 * <p>That second reason is what sets the number, and it is a plain trade rather than a clever
-	 * one. Directives ride home on the reply to a post, so the map cannot hand one over between
-	 * posts however much it would like to: this server only ever speaks when spoken to. The
-	 * heartbeat is therefore the whole of the latency for somebody standing still, and six seconds
-	 * of it costs an idle client ten requests a minute instead of four — comfortably inside the
-	 * relay's own per-member budget, and worth it so "send this to my client" does not sit for a
-	 * quarter of a minute looking broken.
+	 * <p>A plain trade rather than a clever one. Directives ride home on the reply to a post, so the
+	 * map cannot hand one over between posts however much it would like to: this server only ever
+	 * speaks when spoken to. The heartbeat is therefore the whole of the latency for somebody
+	 * standing still, and six seconds of it costs an idle client ten requests a minute instead of
+	 * three — comfortably inside the relay's own per-member budget, and worth it so "send this to
+	 * my client" does not sit for a quarter of a minute looking broken.
 	 */
 	private static final long HEARTBEAT_MS = 6_000L;
 
 	/**
-	 * The heartbeat once a stream is delivering.
+	 * The heartbeat when nothing waits on the reply: a stream is delivering, or there is nothing to
+	 * deliver. Sent even when nothing has changed, so a pairing does not look dead while somebody idles.
 	 *
 	 * <p>Six seconds was never about liveness — the map does not call anybody stale until thirty —
-	 * it was about being the only moment a destination could arrive. A stream takes that job, so
-	 * the heartbeat goes back to the one it actually has and an idle client posts three times
-	 * a minute instead of ten. Fewer requests and lower latency at once, which is unusual enough
-	 * to be worth writing down. Twenty seconds rather than twenty-five: the map calls a member
-	 * stale at thirty, and five seconds of slack is one tick of jitter plus a missed retry too
-	 * few; twenty leaves ten.
+	 * it was about being the only moment a destination could arrive. A stream takes that job, and
+	 * a client with destinations off and no Slayer task shared has no such job to do, so the
+	 * heartbeat goes back to the one it actually has and an idle client posts three times a minute
+	 * instead of ten. Twenty seconds rather than twenty-five: the map calls a member stale at
+	 * thirty, and five seconds of slack is one tick of jitter plus a missed retry too few; twenty
+	 * leaves ten.
 	 */
 	private static final long STREAMED_HEARTBEAT_MS = 20_000L;
 
@@ -764,7 +763,13 @@ class CompanionLoop
 	 */
 	void postIfDue(long now, String server, String code)
 	{
-		long heartbeat = directiveStream.isConnected() ? STREAMED_HEARTBEAT_MS : HEARTBEAT_MS;
+		/*
+		 * What a reply can bring that the player waits for: a place, a run and the meetups with
+		 * destinations on, and the spots for a shared Slayer task. The roster comes too, and
+		 * twenty seconds is soon enough for a list of who is in the group.
+		 */
+		long heartbeat = directiveStream.isConnected() || !config.showDestination() && !settings.on("shareSlayer")
+			? STREAMED_HEARTBEAT_MS : HEARTBEAT_MS;
 		boolean heartbeatDue = now - lastPostAtMs >= heartbeat;
 		if (!dirty && !heartbeatDue)
 		{

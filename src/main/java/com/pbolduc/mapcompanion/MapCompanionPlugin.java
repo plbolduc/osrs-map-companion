@@ -76,7 +76,8 @@ import static com.pbolduc.mapcompanion.DestinationRoute.standing;
  *
  * <p><b>When it sends.</b> On a game tick, at most every two seconds, when the snapshot's content
  * has changed — position, task, levels, unlocks, clue, patches, kills, death — or when the
- * heartbeat is due (six seconds without a stream, twenty with one). Logging out stops it entirely.
+ * heartbeat is due (twenty seconds; six while a reply is the only way a destination or a Slayer
+ * spot can arrive). Logging out stops it entirely.
  * The server states its own cadence on every reply and this obeys it.
  */
 @Slf4j

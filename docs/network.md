@@ -50,8 +50,9 @@ that the group has already issued a secret to.
 
 While logged in, connecting sends a random member id, your alias, a sender timestamp and pairing
 credentials even with character sharing off. Snapshots are spaced at least two seconds apart;
-an unchanged character normally sends a heartbeat every six seconds, or twenty with the receive
-stream connected. Automatic character sharing stops while logged out.
+an unchanged character sends a heartbeat every twenty seconds. It is every six only while the
+reply is the one way something can reach the game: **Show map destinations** on, or a Slayer task
+shared, with no receive stream connected. Automatic character sharing stops while logged out.
 
 **Where you died** is the tile and age of the character's most recent death, held in memory for
 an hour. It is kept through a logout and a hop, since a relog is when the way back is wanted, and

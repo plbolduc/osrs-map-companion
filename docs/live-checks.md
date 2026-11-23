@@ -771,6 +771,12 @@ client or against the production map.
       and turn to Home before the list draws, then back within the minute: the list is there, not
       *Loading stars…*, and the map's log shows one request for it. Turn the plugin off while a
       list is on its way: nothing follows, and turning it on starts from an empty tab.
+- [ ] **The idle heartbeat.** Connect with **Not now**, so nothing is shared and no stream opens,
+      and stand still: the map's log shows this member's snapshot about every twenty seconds, and
+      the website's roster never calls the member stale. Turn **Show map destinations** on with the
+      stream blocked (a proxy that refuses `/api/companion/stream`): posts come every six seconds,
+      and a place sent from the map arrives within that. Let the stream connect: twenty again.
+      Share only the Slayer task with destinations off: six.
 
 ## Farming procedure
 
