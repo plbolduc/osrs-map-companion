@@ -25,13 +25,22 @@
  */
 package com.pbolduc.mapcompanion;
 
+import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import javax.swing.SwingUtilities;
+import okhttp3.MediaType;
+import okhttp3.Protocol;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
@@ -97,5 +106,60 @@ public class SidebarLifetimeTest
 		SwingUtilities.invokeAndWait(timer);
 		assertEquals("no question is left to ask", "", search.result().query);
 		assertTrue("nothing was sent: " + sidebar.asked, sidebar.asked.isEmpty());
+	}
+
+	/**
+	 * Closing the sidebar leaves a star list that was asked for to land, so the tab has it when the
+	 * player comes back. Turning the plugin off closes the sidebar too, and there the call is
+	 * cancelled: nothing of a reply is read by a plugin that is off.
+	 */
+	@Test
+	public void aStarListStillOnItsWayIsDroppedWhenThePluginStops() throws Exception
+	{
+		CountDownLatch asked = new CountDownLatch(1);
+		CountDownLatch answer = new CountDownLatch(1);
+		CountDownLatch answered = new CountDownLatch(1);
+		String feed = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "companion-stars.sample.json")),
+			StandardCharsets.UTF_8);
+		sidebar.map = chain ->
+		{
+			asked.countDown();
+			try
+			{
+				answer.await();
+			}
+			catch (InterruptedException stopped)
+			{
+				throw new IOException(stopped);
+			}
+			answered.countDown();
+			return new Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1).code(200).message("")
+				.body(ResponseBody.create(MediaType.get("application/json"), feed)).build();
+		};
+		StarsClient stars = sidebar.injector.getInstance(StarsClient.class);
+		Field views = MapCompanionPanel.class.getDeclaredField("views");
+		views.setAccessible(true);
+		SwingUtilities.invokeAndWait(() ->
+		{
+			try
+			{
+				((CompanionViews) views.get(sidebar.panel)).select(CompanionViews.View.STARS);
+			}
+			catch (IllegalAccessException e)
+			{
+				throw new AssertionError(e);
+			}
+			sidebar.panel.onActivate();
+		});
+		assertTrue("the Stars tab asked for its list", asked.await(3, TimeUnit.SECONDS));
+
+		SwingUtilities.invokeAndWait(sidebar.panel::stopRefreshing);
+		answer.countDown();
+		assertTrue(answered.await(3, TimeUnit.SECONDS));
+		for (int i = 0; i < 40; i++)
+		{
+			SwingUtilities.invokeAndWait(() -> assertNull("a stopped plugin keeps no list", stars.model.feed));
+			Thread.sleep(5);
+		}
 	}
 }

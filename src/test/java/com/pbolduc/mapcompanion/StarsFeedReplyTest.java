@@ -31,6 +31,8 @@ import java.io.InputStream;
 import java.lang.reflect.Proxy;
 import java.nio.charset.StandardCharsets;
 import java.util.EnumSet;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import javax.swing.SwingUtilities;
@@ -38,6 +40,7 @@ import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.WorldType;
 import net.runelite.client.callback.ClientThread;
+import okhttp3.Interceptor;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Protocol;
@@ -119,6 +122,104 @@ public class StarsFeedReplyTest
 		});
 	}
 
+	/**
+	 * A list that was asked for is kept when it lands, though the player has turned to another tab
+	 * meanwhile. Turning away used to cancel the call, and the minute before the next ask was
+	 * already counted from its start, so a player who glanced at Stars and away came back to
+	 * <i>Loading stars…</i> for the rest of that minute. The request was made either way; this only
+	 * stops its answer being thrown away.
+	 */
+	@Test
+	public void aListAskedForLandsThoughThePlayerTurnedAway() throws Exception
+	{
+		SlowMap map = new SlowMap();
+		StarsClient stars = map.client();
+		SwingUtilities.invokeAndWait(() -> stars.active(true));
+		map.asked.await();
+		SwingUtilities.invokeAndWait(() -> stars.active(false));
+		map.answer.countDown();
+		until(() -> stars.model.feed != null);
+
+		SwingUtilities.invokeAndWait(() -> stars.active(true));
+		SwingUtilities.invokeAndWait(() ->
+		{
+			assertNotNull("the list is there when the player turns back", stars.model.feed);
+			assertEquals("and turning back inside the minute asks nothing", 1, map.requests.get());
+		});
+	}
+
+	/** Turning away and back while the call is out leaves that one call to answer, and makes no second. */
+	@Test
+	public void turningBackWhileTheListIsOnItsWayKeepsTheOneCall() throws Exception
+	{
+		SlowMap map = new SlowMap();
+		StarsClient stars = map.client();
+		SwingUtilities.invokeAndWait(() -> stars.active(true));
+		map.asked.await();
+		SwingUtilities.invokeAndWait(() -> stars.active(false));
+		SwingUtilities.invokeAndWait(() -> stars.active(true));
+		map.answer.countDown();
+		until(() -> stars.model.feed != null);
+		SwingUtilities.invokeAndWait(() -> assertEquals(1, map.requests.get()));
+	}
+
+	/** Turning the plugin off is not turning away: its call is cancelled and its answer never read. */
+	@Test
+	public void stoppingStillDropsTheCallThatIsOut() throws Exception
+	{
+		SlowMap map = new SlowMap();
+		StarsClient stars = map.client();
+		SwingUtilities.invokeAndWait(() -> stars.active(true));
+		map.asked.await();
+		SwingUtilities.invokeAndWait(stars::stop);
+		map.answer.countDown();
+		map.answered.await();
+		for (int i = 0; i < 40; i++)
+		{
+			SwingUtilities.invokeAndWait(() -> assertNull("a stopped plugin keeps no list", stars.model.feed));
+			Thread.sleep(5);
+		}
+	}
+
+	/** A map that holds its one kind of reply, the sample list, until the test lets it go. */
+	private static final class SlowMap
+	{
+		final AtomicInteger requests = new AtomicInteger();
+		final CountDownLatch asked = new CountDownLatch(1);
+		final CountDownLatch answer = new CountDownLatch(1);
+		final CountDownLatch answered = new CountDownLatch(1);
+
+		StarsClient client() throws IOException
+		{
+			String feed;
+			try (InputStream in = StarsFeedReplyTest.class.getResourceAsStream("/companion-stars.sample.json"))
+			{
+				feed = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+			}
+			HarnessStore store = new HarnessStore();
+			Pairing pairing = new Pairing(store, new Gson());
+			assertTrue(pairing.connect(JoinCode.parse("ABC234"), () -> true));
+			MemberIdentity identity = new MemberIdentity(store);
+			pairing.rememberSecret(pairing.code(), identity.id(), SECRET);
+			return StarsFeedReplyTest.client(store, pairing, identity, chain ->
+			{
+				requests.incrementAndGet();
+				asked.countDown();
+				try
+				{
+					answer.await();
+				}
+				catch (InterruptedException stopped)
+				{
+					throw new IOException(stopped);
+				}
+				answered.countDown();
+				return new Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1)
+					.code(200).message("").body(ResponseBody.create(JSON, feed)).build();
+			});
+		}
+	}
+
 	/** The tab's client with one reply behind it; a status of 0 is a call that never reaches the map. */
 	private static StarsClient client(int status, String body, @Nullable String retryAfter)
 	{
@@ -128,7 +229,7 @@ public class StarsFeedReplyTest
 		MemberIdentity identity = new MemberIdentity(store);
 		pairing.rememberSecret(pairing.code(), identity.id(), SECRET);
 
-		OkHttpClient http = new OkHttpClient.Builder().addInterceptor(chain ->
+		return client(store, pairing, identity, chain ->
 		{
 			if (status == 0)
 			{
@@ -141,8 +242,12 @@ public class StarsFeedReplyTest
 				reply.header("Retry-After", retryAfter);
 			}
 			return reply.build();
-		}).build();
+		});
+	}
 
+	private static StarsClient client(HarnessStore store, Pairing pairing, MemberIdentity identity, Interceptor map)
+	{
+		OkHttpClient http = new OkHttpClient.Builder().addInterceptor(map).build();
 		Client client = (Client) Proxy.newProxyInstance(Client.class.getClassLoader(), new Class<?>[]{Client.class},
 			(proxy, method, args) ->
 			{

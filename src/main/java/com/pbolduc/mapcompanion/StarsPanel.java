@@ -103,7 +103,8 @@ final class StarsPanel extends JPanel
 	private static final int TEXT = COLUMN - 10;
 	/** A line the width of a site card's inside. */
 	private static final int CARD_WIDE = COLUMN - 14;
-	private final StarsClient service;
+	/** Package-private for the plugin turning off, which stops it; everything else about it is this tab's. */
+	final StarsClient service;
 	private final DestinationState destinations;
 	private final ClientThread clientThread;
 	private final DestinationMarker marker;

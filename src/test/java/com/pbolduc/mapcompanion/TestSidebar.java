@@ -42,6 +42,7 @@ import javax.swing.SwingUtilities;
 import net.runelite.api.Client;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.game.ItemManager;
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import static org.junit.Assert.assertTrue;
 
@@ -59,7 +60,8 @@ import static org.junit.Assert.assertTrue;
  * only a running RuneLite can make, its toolbar, overlay manager and keys, is left out, and
  * {@code removeInterface}, which is all that touches them, does nothing here.
  *
- * <p>Nothing leaves the machine: every request the cards could make fails before it is sent. The
+ * <p>Nothing leaves the machine: every request the cards could make fails before it is sent, or is
+ * answered by the test's own {@link #map}. The
  * search's debounce is a list here, as in {@code SearchClientTest}, so a test can see what is
  * still waiting to be asked.
  */
@@ -73,8 +75,10 @@ final class TestSidebar
 	final HarnessConfig config = new HarnessConfig(store, MapCompanionConfig.DEFAULT_MAP_URL);
 	final Pairing pairing = new Pairing(store, gson);
 	final MemberIdentity identity = new MemberIdentity(store);
-	/** Every request a card tried to make. None is answered. */
+	/** Every request a card tried to make. None is answered unless {@link #map} answers it. */
 	final List<String> asked = new ArrayList<>();
+	/** A map for the one test that needs an answer on its way; null, as everywhere else, fails every request. */
+	volatile Interceptor map;
 	/** The search's waiting actions; cancelling one takes it out. */
 	final List<Runnable> waiting = new ArrayList<>();
 	final Injector injector;
@@ -97,6 +101,11 @@ final class TestSidebar
 			synchronized (asked)
 			{
 				asked.add(chain.request().url().encodedPath());
+			}
+			Interceptor answers = map;
+			if (answers != null)
+			{
+				return answers.intercept(chain);
 			}
 			throw new IOException("a test's sidebar asks the map nothing");
 		}).build();

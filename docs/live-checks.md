@@ -767,6 +767,10 @@ client or against the production map.
       name reaches the map when the wait the reply asked for ends, about five or ten seconds, not
       at the next heartbeat. The map's log shows no post from that member before the wait is over,
       and a refused post that carried nothing new is not sent again until the heartbeat.
+- [ ] **A star list asked for and turned away from.** Open Stars for the first time in a session
+      and turn to Home before the list draws, then back within the minute: the list is there, not
+      *Loading stars…*, and the map's log shows one request for it. Turn the plugin off while a
+      list is on its way: nothing follows, and turning it on starts from an empty tab.
 
 ## Farming procedure
 

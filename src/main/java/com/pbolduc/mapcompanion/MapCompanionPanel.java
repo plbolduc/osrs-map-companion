@@ -316,11 +316,13 @@ public class MapCompanionPanel extends PluginPanel
 	 * The plugin shutting down. The timer stops here in case the sidebar was never opened or closed.
 	 * The search is forgotten because it keeps a timer of its own, for the pause after typing or the
 	 * wait the map asked for, and that one would still fire and ask the map as this member with the
-	 * plugin off. EDT, which is where the search's state lives.
+	 * plugin off. The star list's call is cancelled for the same reason: closing the sidebar leaves it
+	 * to land, and this is not that. EDT, which is where the search's and the list's state live.
 	 */
 	void stopRefreshing()
 	{
 		onDeactivate();
+		starsPanel.service.stop();
 		searchPanel.search.clear();
 	}
 

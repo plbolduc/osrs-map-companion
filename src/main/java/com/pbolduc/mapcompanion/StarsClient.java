@@ -36,8 +36,8 @@ import net.runelite.client.config.ConfigManager;
 import okhttp3.*;
 
 /**
- * Reads only this installation's approved map server, while Stars is visible and logged in.
- * No Star Miners address or key exists in the plugin. Cancelling or changing a character,
+ * Asks only this installation's approved map server, and only while Stars is visible and logged in.
+ * No Star Miners address or key exists in the plugin. Stopping, or changing a character,
  * group or server invalidates callbacks before they can touch the new reader's preferences.
  * The filters and favourite sites are kept in RuneLite's character profile on this machine and
  * are never sent: the list is fetched whole and filtered here.
@@ -96,9 +96,14 @@ final class StarsClient
 		this.store = store;
 	}
 
+	/**
+	 * The tab turned to or away from. A call that is out is left to land either way: the request is
+	 * made already and the next is a minute from its start, so dropping its answer would leave the
+	 * tab on "Loading stars…" for that minute. Nothing is asked while the tab is away.
+	 */
 	void active(boolean on)
 	{
-		/* The tab pressed while it shows: nothing has changed, and the call out is still wanted. */
+		/* The tab pressed while it shows: nothing has changed. */
 		if (on && active)
 		{
 			return;
@@ -106,16 +111,17 @@ final class StarsClient
 		active = on;
 		eligible = false;
 		known = false;
-		cancel();
 		if (on)
 		{
 			tick();
 		}
 	}
 
+	/** The plugin turned off, which is not turning away: the call out is cancelled and its answer never read. */
 	void stop()
 	{
 		active(false);
+		cancel();
 	}
 
 	boolean eligible()
@@ -284,7 +290,8 @@ final class StarsClient
 			if (epoch != generation) return;
 			/* Released before the checks below, so a reply that is then ignored cannot hold the slot. */
 			feedCall = null;
-			if (!active || !pairing.hasServerConsent() || scope == null || !scope.equals(store.scopeKey())) return;
+			/* Not whether the tab still shows: a list that was asked for is kept for when it does. */
+			if (!pairing.hasServerConsent() || scope == null || !scope.equals(store.scopeKey())) return;
 			String said = error;
 			if (said == null)
 			{
