@@ -36,6 +36,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -939,6 +940,85 @@ public class GroupPanelTest
 	}
 
 	/**
+	 * The roster is kept through a logout so the tab is not emptied, and nothing refreshes it there.
+	 * Its rows went on saying what the last frame said: a green dot, <i>Online</i>, <i>Near you</i>,
+	 * hours later at the login screen. With nobody logged in a row keeps the friend, their world and
+	 * where they were, and claims no presence: a grey dot, no word for it, and nobody is near a
+	 * player who is nowhere.
+	 */
+	@Test
+	public void aRosterHeldThroughALogoutCallsNobodyOnlineOrNear() throws Exception
+	{
+		AtomicReference<GroupPanel> panel = new AtomicReference<>();
+		SwingUtilities.invokeAndWait(() -> panel.set(panel()));
+		social();
+		long now = System.currentTimeMillis();
+		SwingUtilities.invokeAndWait(() ->
+		{
+			panel.get().refresh(true, true, now);
+			javax.swing.JLabel name = friendName(panel.get(), "cara");
+			assertEquals("Online", name.getToolTipText());
+			assertEquals(GroupPanel.presenceColour("online").getRGB(), presenceDot(name));
+			assertTrue(text(namedComponent(panel.get(), "group.friend.cara")).contains("W302 · near Lumbridge Castle · Near you"));
+
+			panel.get().refresh(true, false, now);
+			name = friendName(panel.get(), "cara");
+			assertNull("no word for a presence nobody is reporting", name.getToolTipText());
+			assertEquals("and the dot is the grey of not known", GroupPanel.presenceColour(null).getRGB(), presenceDot(name));
+			String card = text(namedComponent(panel.get(), "group.friend.cara"));
+			assertTrue("the friend's last world and place stay: " + card, card.contains("W302 · near Lumbridge Castle"));
+			assertFalse("nobody is near a player who is not in the game: " + card, card.contains("Near you"));
+
+			panel.get().refresh(true, true, now);
+			assertEquals("logged in again, the row says what the roster says", "Online",
+				friendName(panel.get(), "cara").getToolTipText());
+		});
+	}
+
+	/** A friend card's name label, the one that carries their disc. */
+	private static javax.swing.JLabel friendName(GroupPanel panel, String id)
+	{
+		List<javax.swing.JLabel> found = new ArrayList<>();
+		labels((Container) namedComponent(panel, "group.friend." + id), found);
+		return found.stream().filter(label -> label.getIcon() instanceof GroupPanel.Disc).findFirst().get();
+	}
+
+	private static void labels(Container parent, List<javax.swing.JLabel> into)
+	{
+		for (Component child : parent.getComponents())
+		{
+			if (child instanceof javax.swing.JLabel)
+			{
+				into.add((javax.swing.JLabel) child);
+			}
+			if (child instanceof Container)
+			{
+				labels((Container) child, into);
+			}
+		}
+	}
+
+	/** Every label's words in a card, tags out and entities read. */
+	private static String text(Component card)
+	{
+		List<javax.swing.JLabel> found = new ArrayList<>();
+		labels((Container) card, found);
+		StringBuilder words = new StringBuilder();
+		for (javax.swing.JLabel label : found)
+		{
+			words.append(String.valueOf(label.getText()).replaceAll("<[^>]+>", "").replace("&middot;", "·")).append('\n');
+		}
+		return words.toString();
+	}
+
+	/** The colour at the middle of a disc's presence dot. */
+	private static int presenceDot(javax.swing.JLabel name)
+	{
+		int middle = GroupPanel.Disc.DOT_AT + GroupPanel.Disc.DOT / 2;
+		return painted((GroupPanel.Disc) name.getIcon()).getRGB(middle, middle);
+	}
+
+	/**
 	 * A friend's Route pressed just before a logout waited on the stream the logout closed, then half
 	 * a minute later said the friend shares no position. At the login screen it stops waiting and says
 	 * to log in, as a press made there does, and the friend is not blamed.
@@ -1266,16 +1346,16 @@ public class GroupPanelTest
 		});
 
 		RelayResponse.RosterRow row = new RelayResponse.RosterRow();
-		assertNull("neither a world nor a place", GroupPanel.whereLine(row));
+		assertNull("neither a world nor a place", GroupPanel.whereLine(row, true));
 		row.world = 302;
-		assertEquals("a world and no place", "W302", GroupPanel.whereLine(row));
+		assertEquals("a world and no place", "W302", GroupPanel.whereLine(row, true));
 		row.near = "near W302 Lounge";
 		assertEquals("the world that leads the line is the one coloured, not the same letters in a place's name",
 			"<html><body width='100'><font color='#34d399'>W302</font> · near W302 Lounge</body></html>",
-			GroupPanel.markup(GroupPanel.whereLine(row), "W302", "#34d399", 100));
+			GroupPanel.markup(GroupPanel.whereLine(row, true), "W302", "#34d399", 100));
 		row.world = null;
 		row.nearYou = true;
-		assertEquals("as before for a friend with no world", "near W302 Lounge · Near you", GroupPanel.whereLine(row));
+		assertEquals("as before for a friend with no world", "near W302 Lounge · Near you", GroupPanel.whereLine(row, true));
 	}
 
 	/** Every label's text on one friend's card, markup and all. */

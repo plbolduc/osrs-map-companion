@@ -657,13 +657,19 @@ final class GroupPanel extends JPanel
 		JButton[] buttons = present(route, map);
 		int room = WIDTH - Arrays.stream(buttons).mapToInt(button -> button.getPreferredSize().width + 4).max().orElse(0);
 		JLabel name = label(12f, Color.WHITE);
-		name.setIcon(new Disc(colour(row.colour), MapPin.initials(row.name), presenceColour(row.presence)));
+		/*
+		 * With nobody logged in the roster is the last frame the map sent, kept so the tab is not
+		 * emptied, and nothing is refreshing it. The friend, their world and where they were stay;
+		 * online and near you are claims about now, and nobody is making them.
+		 */
+		String presence = loggedIn ? row.presence : null;
+		name.setIcon(new Disc(colour(row.colour), MapPin.initials(row.name), presenceColour(presence)));
 		name.setIconTextGap(6);
 		setWrapped(name, row.name, room - name.getIcon().getIconWidth() - name.getIconTextGap());
-		name.setToolTipText(presenceWord(row.presence));
+		name.setToolTipText(loggedIn ? presenceWord(presence) : null);
 		JPanel top = column(DARKER_GRAY_COLOR);
 		top.add(left(name));
-		String where = whereLine(row);
+		String where = whereLine(row, loggedIn);
 		if (where != null)
 		{
 			/* The world leads, so it is read in one place down the rows, and is green on the player's own. */
@@ -920,13 +926,13 @@ final class GroupPanel extends JPanel
 	/**
 	 * "W302 · near Lumbridge Castle · Near you": the world first, where every row has it in one place,
 	 * then where in words. The world alone for a friend who shares one and no place, and null for a
-	 * friend who shares neither.
+	 * friend who shares neither. <i>Near you</i> only while {@code live}: see {@link #friendCard}.
 	 */
 	@Nullable
-	static String whereLine(RosterRow row)
+	static String whereLine(RosterRow row, boolean live)
 	{
 		String where = dotted(row.world == null ? null : "W" + row.world, row.near,
-			Boolean.TRUE.equals(row.nearYou) ? "Near you" : null);
+			live && Boolean.TRUE.equals(row.nearYou) ? "Near you" : null);
 		return where.isEmpty() ? null : where;
 	}
 

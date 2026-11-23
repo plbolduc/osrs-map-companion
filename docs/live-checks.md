@@ -783,6 +783,11 @@ client or against the production map.
       the map's log shows the stream asked for no sooner than every thirty seconds, and posting
       carries on meanwhile. Whether a Fly deploy shows the plugin a 5xx or a refused connection was
       not observed; a refused connection keeps the five-minute ceiling.
+- [ ] **Friends at the login screen.** With a friend online and near you in the Group tab, log
+      out: their row stays with its world and place, its dot goes grey, hovering the name says
+      nothing and *Near you* is gone. Log in: the dot, *Online* and *Near you* come back as the
+      roster says. A roster that stops being refreshed while logged in (an outage, or after being
+      removed) still draws as it last was; that half of the review's item was not built.
 
 ## Farming procedure
 

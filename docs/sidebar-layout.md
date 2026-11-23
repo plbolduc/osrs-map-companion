@@ -860,7 +860,9 @@ clue's Route, a friend's and a meetup's Route, the answers, Meet here, Copy invi
 and Start run, a run's Reroute, Port tasks' Start run and Slayer's Route. A Route's tooltip says
 *Log in to plan a route.* The search box goes, as it does before a group is joined, Stars says
 *Log in to see stars.*, and Group, while it holds no friends to list, says *Log in to see your
-group.* over the Meetups heading; friends kept through a logout stay listed.
+group.* over the Meetups heading; friends kept through a logout stay listed, each with a grey
+dot, no word for its presence and no *Near you*, since that roster is the last frame the map sent
+and nothing is refreshing it. Their world and place stay, as where they were.
 Each press had stayed pressable and answered with a fix for a connection nothing
 was wrong with, *Connect to your map to plan a route.*, on a page with no Connect button, and a
 friend's Route waited half a minute for a position the logout had stopped, then said the friend
