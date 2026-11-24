@@ -42,6 +42,7 @@ import java.util.stream.Stream;
 import net.runelite.api.GameState;
 import net.runelite.api.events.ActorDeath;
 import net.runelite.api.events.GameStateChanged;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.events.RuneScapeProfileChanged;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -135,6 +136,35 @@ public class SessionEndTest
 
 		assertEquals(except("FarmingObserver", "DiaryReader", "DeathWatcher"), unsettled());
 		assertNull("a death is one character's", deaths.snapshot(System.currentTimeMillis()));
+	}
+
+	/**
+	 * RuneLite raises the profile change on whichever thread wrote the profile, which need not be
+	 * the client thread, and ending a session resets what a tick may be reading. So the change is
+	 * handed to the client thread, and nothing is ended on the thread that announced it.
+	 */
+	@Test
+	public void aCharacterSwitchAnnouncedOffTheClientThreadEndsOnIt() throws Exception
+	{
+		List<Runnable> handed = new ArrayList<>();
+		TestLoop.set(plugin, "clientThread", new ClientThread()
+		{
+			@Override
+			public void invoke(Runnable action)
+			{
+				handed.add(action);
+			}
+		});
+		plugin.onRuneScapeProfileChanged(new RuneScapeProfileChanged(null, "a"));
+		plugin.onRuneScapeProfileChanged(new RuneScapeProfileChanged("a", "b"));
+
+		assertEquals("no reader is ended on the announcing thread", Collections.emptySet(), unsettled());
+		assertNotNull("nor the death forgotten", deaths.snapshot(System.currentTimeMillis()));
+		assertEquals("each change is handed over, in order", 2, handed.size());
+
+		handed.forEach(Runnable::run);
+		assertEquals(except("FarmingObserver", "DiaryReader", "DeathWatcher"), unsettled());
+		assertNull(deaths.snapshot(System.currentTimeMillis()));
 	}
 
 	/**

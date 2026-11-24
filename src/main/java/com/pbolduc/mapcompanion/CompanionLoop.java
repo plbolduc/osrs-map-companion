@@ -262,11 +262,11 @@ class CompanionLoop
 	/**
 	 * Whether the boats' pins should be read again: a boat's varbit moved, a session began, the
 	 * setting came on, or the player stepped off a deck. Each read looks every port up in the game's
-	 * database, so it is not done every tick for a reading that has not moved. Volatile because a
-	 * character switch is announced off the client thread that reads it. The pins are the plugin's to
-	 * draw; whether they are due is a session's, and so is ended with it.
+	 * database, so it is not done every tick for a reading that has not moved. Client thread only,
+	 * a character switch included. The pins are the plugin's to draw; whether they are due is a
+	 * session's, and so is ended with it.
 	 */
-	volatile boolean boatPinsStale = true;
+	boolean boatPinsStale = true;
 
 	/** Set when anything worth reporting has happened since the last post. */
 	volatile boolean dirty = true;
@@ -346,7 +346,7 @@ class CompanionLoop
 	 * destination down. A logout closes the stream too, which {@link #gameState} does last, beside
 	 * the words it leaves on the status card.
 	 *
-	 * <p>The client thread, and whichever thread announces a character switch.
+	 * <p>The client thread: a character switch announced on another is handed to it first.
 	 */
 	void end(SessionEnd end)
 	{

@@ -807,6 +807,10 @@ client or against the production map.
       reads *Charting run* while the run is held and *Farm run* again after End run, and the card
       stays folded or open as it was. With a charting run going, the Port tasks card says *Start
       run after the current run ends.* Note that the heading's icon is still the watering can.
+- [ ] **A character switch.** Log out and in as another character: nothing of the first one's
+      task, clue, port tasks, pins or death shows for the second, as before, and RuneLite's log
+      shows no exception from the plugin. The switch is now ended on the client thread; whether
+      RuneLite ever raises `RuneScapeProfileChanged` off it in practice was not observed.
 
 ## Farming procedure
 

@@ -664,21 +664,28 @@ public class MapCompanionPlugin extends Plugin implements CompanionLoop.Surface
 	@Subscribe
 	public void onRuneScapeProfileChanged(RuneScapeProfileChanged event)
 	{
-		loop.lootLog.reload();
-		loop.rewardObserver.reset();
-		String next = event.getNewProfile();
-		loop.lastProfile = rememberedProfile(loop.lastProfile, event.getPreviousProfile());
-		boolean switched = isCharacterSwitch(loop.lastProfile, next);
-		if (next != null)
+		/*
+		 * Raised on whichever thread wrote the profile, which is another plugin's when one creates a
+		 * profile, and everything below resets what a tick owns: run here if this is the client
+		 * thread, and otherwise before its next tick.
+		 */
+		clientThread.invoke(() ->
 		{
-			loop.lastProfile = next;
-		}
-		if (!switched)
-		{
-			return;
-		}
-		loop.end(SessionEnd.SWITCH);
-		loop.dirty = true;
+			loop.lootLog.reload();
+			loop.rewardObserver.reset();
+			String next = event.getNewProfile();
+			loop.lastProfile = rememberedProfile(loop.lastProfile, event.getPreviousProfile());
+			boolean switched = isCharacterSwitch(loop.lastProfile, next);
+			if (next != null)
+			{
+				loop.lastProfile = next;
+			}
+			if (switched)
+			{
+				loop.end(SessionEnd.SWITCH);
+				loop.dirty = true;
+			}
+		});
 	}
 
 	/** Shortest Path's answers to {@link ShortestPath}'s questions, forwarded from here for the reason above. */

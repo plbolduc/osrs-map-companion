@@ -26,6 +26,7 @@
 package com.pbolduc.mapcompanion;
 
 import java.lang.reflect.Field;
+import net.runelite.client.callback.ClientThread;
 
 /**
  * The loop behind a plugin that a focused test assembles by hand, without Guice.
@@ -45,6 +46,21 @@ final class TestLoop
 		{
 			plugin.loop = new CompanionLoop();
 			plugin.loop.surface = plugin;
+			/* What the plugin hands the client thread runs here and now, as it does when the event is raised on that thread. */
+			put(MapCompanionPlugin.class, plugin, "clientThread", new ClientThread()
+			{
+				@Override
+				public void invoke(Runnable action)
+				{
+					action.run();
+				}
+
+				@Override
+				public void invokeLater(Runnable action)
+				{
+					action.run();
+				}
+			});
 		}
 		return plugin;
 	}
