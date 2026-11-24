@@ -1212,7 +1212,7 @@ final class ConnectCard extends JPanel
 
 	/**
 	 * What to do about a refusal, under the field it is done in, or null when the field cannot answer
-	 * it — a plugin the map cannot read, or no refusal at all. {@code group} is the status line's own
+	 * it — a plugin the map cannot read, whose step {@link #refreshStatus} says, or no refusal at all. {@code group} is the status line's own
 	 * name for it.
 	 *
 	 * <p>A group that keeps members takes an invite; one that has gone, or let this member go, takes
@@ -1258,6 +1258,15 @@ final class ConnectCard extends JPanel
 			connectFailed = null;
 		}
 		refused = paired ? relay.getRefused() : null;
+		if (refused == RelayClient.Refused.OUT_OF_DATE)
+		{
+			/*
+			 * The one refusal no field answers, so its step is here and not under the join field,
+			 * which it would open. Said again each refresh while the map holds to it, and let go as
+			 * a confirmation is once the map reads this version.
+			 */
+			under(cardMessage, Words.of("connect.update"), false, true);
+		}
 		Health shown = refused == null ? health : asking ? Health.WAITING : Health.ERROR;
 		dot.setForeground(dotHealth(paired, asking, shown).getColor());
 		/* The status a transient failure came with, which the first line leaves out, for a bug report. */

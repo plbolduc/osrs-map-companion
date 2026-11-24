@@ -34,6 +34,7 @@ import java.util.List;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import net.runelite.client.callback.ClientThread;
+import net.runelite.client.ui.ColorScheme;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Protocol;
@@ -43,6 +44,7 @@ import okhttp3.ResponseBody;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
@@ -126,6 +128,35 @@ public class RefusedGroupTest
 		assertTrue(words.toString(), words.contains("Plugin out of date"));
 		assertEquals(PINK, label("Plugin out of date").getForeground());
 		assertFalse(shown(named(card, "join.field")));
+	}
+
+	/**
+	 * "Plugin out of date" had no step under it: the only advice was "Update the plugin." in a
+	 * tooltip, and RuneLite has no button that updates one plugin. The card says how a Plugin Hub
+	 * plugin is updated, in the status card and not under the join field, which this refusal
+	 * cannot use and the line must not open. It goes once the map reads this version again.
+	 */
+	@Test
+	public void aPluginTheMapCannotReadIsToldHowToUpdate() throws Exception
+	{
+		String step = "Restart RuneLite to get the update from the Plugin Hub.";
+		joined("ABC234");
+		relay.handle(reply(422, "{}"), null);
+		draw(Health.ERROR);
+		draw(Health.ERROR);
+
+		List<String> words = shownWords(card);
+		assertTrue(words.toString(), words.contains(step));
+		assertSame("in the status card, under the group's name", named(card, "companion.cardMessage"), label(step));
+		assertEquals("advice, not a second refusal", ColorScheme.LIGHT_GRAY_COLOR, label(step).getForeground());
+		assertFalse("and no field opens for it", shown(named(card, "join.field")));
+		assertFalse(words.toString(), words.contains("Have an invite?"));
+		assertTrue("the dot's tooltip says the same", relay.getFatalError().endsWith(step));
+
+		relay.handle(reply(200, "{\"pollIntervalMs\":2000}"), null);
+		card.refreshStatus(Health.LIVE, pairing.code(), true, true);
+		card.refreshButtons(true, true, true, pairing.knownCodes(), System.currentTimeMillis() + 11_000L);
+		assertFalse("a map that reads this version again has nothing to update", shownWords(card).contains(step));
 	}
 
 	/** The card's words for each refusal, and what the field under it is for. */

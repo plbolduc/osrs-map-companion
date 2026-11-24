@@ -27,7 +27,7 @@ relay.removed=You were removed from this group.
 relay.gone=That group is gone from the map.
 relay.badCode=That pairing code isn't the right shape — check it on the map's Companion panel.
 relay.tooLarge=This plugin sent more than the map accepts. Please report this.
-relay.unrecognised=The map didn't recognise this plugin's data. Update the plugin.
+relay.unrecognised=The map didn't recognise this plugin's data. Restart RuneLite to get the update from the Plugin Hub.
 
 # MeetupClient: making a meetup and answering one.
 meetup.needsTile=You can't make a meetup inside an instance. Step outside, then press Make meetup.
@@ -64,6 +64,7 @@ connect.makeRoom= to make room, or paste another group's invite here.
 connect.startOver=Paste another group's invite here, or use Leave group in Settings to start over.
 connect.openTip= in your browser, already in your group as you
 connect.inviteLogIn=Log in to a character to copy an invite.
+connect.update=Restart RuneLite to get the update from the Plugin Hub.
 connect.inviteFailed=Couldn't make an invite, so nothing was copied. Try again in a minute.
 connect.inviteByCode= — then install the "OSRS Map Companion" RuneLite plugin and enter code
 connect.clipboardFailed=Couldn't put the invite on the clipboard.

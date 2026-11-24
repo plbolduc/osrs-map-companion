@@ -912,7 +912,10 @@ and it stopped there: the field it named opened only from Switch ▾. Where an i
 answers the refusal, *Have an invite?* and the field now show under the orange button, the field
 Join another group… opens, with the next step under Paste and Join: *Ask someone in Sunday raids
 for an invite and paste it here.*, or, for a group that has let the player go, *Paste another
-group's invite here, or use Leave group in Settings → Advanced to start over.* The relay keeps which
+group's invite here, or use Leave group in Settings → Advanced to start over.* *Plugin out of date*
+is the one refusal no field answers, so its step is in the status card under the group's name and
+opens no field: *Restart RuneLite to get the update from the Plugin Hub.*, since RuneLite updates
+Hub plugins when it starts and has no button for one. The relay keeps which
 refusal it was until a post lands or the code changes, not for the five minutes its sentence keeps
 for one retry, so the field and the words do not go, and the group's name does not come back
 green, between two refusals. The dot, the first line and the gear keep to the first line. Every

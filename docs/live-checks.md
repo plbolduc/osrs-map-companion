@@ -793,6 +793,10 @@ client or against the production map.
       Reroute: each shows its log-in line. RuneLite's FlatLaf shows a tooltip on a disabled
       button in the harness's renders; confirm it does in the client. Logged in, the answers
       have no tooltip and the others say what they did before.
+- [ ] **Plugin out of date.** Against a local map that answers snapshots 422, the status card
+      reads *Plugin out of date*, the group's name, then *Restart RuneLite to get the update from
+      the Plugin Hub.* in grey, and no invite field opens. Confirm the advice against a real Hub
+      update: that restarting RuneLite is what fetches a newer version of an installed plugin.
 
 ## Farming procedure
 
