@@ -92,10 +92,13 @@ class FarmBankOverlay extends WidgetItemOverlay
 		}
 	}
 
-	/** The tests for the teleports the farm run going now needs and the sidebar can see are not carried. */
+	/**
+	 * The tests for the teleports the farm run going now needs and the sidebar can see are not carried.
+	 * None for a run with no stop left: it is held until End run, and needs nothing from the bank.
+	 */
 	static List<ItemTest> wanted(@Nullable FarmRunState.View view)
 	{
-		if (view == null || FarmRunWire.PORT_TASKS.equals(view.run.kind) || view.run.bring == null)
+		if (view == null || view.next() == null || FarmRunWire.PORT_TASKS.equals(view.run.kind) || view.run.bring == null)
 		{
 			return Collections.emptyList();
 		}

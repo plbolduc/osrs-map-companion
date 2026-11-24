@@ -811,6 +811,9 @@ client or against the production map.
       task, clue, port tasks, pins or death shows for the second, as before, and RuneLite's log
       shows no exception from the plugin. The switch is now ended on the client thread; whether
       RuneLite ever raises `RuneScapeProfileChanged` off it in practice was not observed.
+- [ ] **The bank after a finished run.** Finish a farm run that listed a teleport you did not
+      carry and open the bank with the card reading *Run finished*: no item is outlined. Start
+      another run that needs one: its outline is back.
 
 ## Farming procedure
 

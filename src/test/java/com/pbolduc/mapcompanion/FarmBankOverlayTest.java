@@ -29,6 +29,7 @@ import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import net.runelite.api.ItemComposition;
 import net.runelite.api.gameval.ItemID;
 import static org.junit.Assert.assertEquals;
@@ -49,16 +50,37 @@ public class FarmBankOverlayTest
 
 	private static FarmRunState.View run(String kind, List<String> carried)
 	{
+		return run(kind, carried, Collections.emptySet());
+	}
+
+	/** A run of one stop, with the stops in {@code done} replanted. */
+	private static FarmRunState.View run(String kind, List<String> carried, Set<Integer> done)
+	{
 		RelayResponse.FarmRun run = new RelayResponse.FarmRun();
 		run.kind = kind;
+		RelayResponse.FarmStop stop = new RelayResponse.FarmStop();
+		stop.n = 1;
+		run.stops = Collections.singletonList(stop);
 		run.bring = Arrays.asList(
 			line("teleport", "Amulet of glory"),
 			line("teleport", "Ring of the elements"),
 			/* A tablet no travel flag names: the sidebar abstains on it, and so does the bank. */
 			line("teleport", "Catherby tablet"),
 			line("supply", "2 herb seeds"));
-		return new FarmRunState.View(run, Collections.emptySet(), Collections.emptySet(), Collections.emptySet(),
+		return new FarmRunState.View(run, done, Collections.emptySet(), Collections.emptySet(),
 			false, 1, 1, carried);
+	}
+
+	/**
+	 * A run with every stop behind it stays held, reading "Run finished", until End run or three
+	 * hours pass. A player banking after it saw amber outlines on teleports for a run that needs
+	 * none; the setting says "while a farm run is going".
+	 */
+	@Test
+	public void marksNothingOnceTheRunIsFinished()
+	{
+		assertEquals("a stop still ahead", 2, FarmBankOverlay.wanted(run("herb", Collections.emptyList())).size());
+		assertTrue(FarmBankOverlay.wanted(run("herb", Collections.emptyList(), Collections.singleton(1))).isEmpty());
 	}
 
 	@Test
