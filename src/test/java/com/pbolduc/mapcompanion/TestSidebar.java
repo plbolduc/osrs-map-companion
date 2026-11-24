@@ -82,11 +82,19 @@ final class TestSidebar
 	/** The search's waiting actions; cancelling one takes it out. */
 	final List<Runnable> waiting = new ArrayList<>();
 	final Injector injector;
+	/** Every line the plugin said in the chat box, head and words together: there is no chat box here. */
+	final List<String> said = new ArrayList<>();
 	final MapCompanionPlugin plugin = new MapCompanionPlugin()
 	{
 		@Override
 		void removeInterface()
 		{
+		}
+
+		@Override
+		void say(String head, String line)
+		{
+			said.add(head + line);
 		}
 	};
 	final MapCompanionPanel panel;

@@ -797,6 +797,12 @@ client or against the production map.
       reads *Plugin out of date*, the group's name, then *Restart RuneLite to get the update from
       the Plugin Hub.* in grey, and no invite field opens. Confirm the advice against a real Hub
       update: that restarting RuneLite is what fetches a newer version of an installed plugin.
+- [ ] **A Reroute key inside the map's wait.** With a destination followed, the sidebar closed and
+      a Reroute key set, press it twice within five seconds: the first reroutes, and the second
+      prints *Reroute: The map asked to wait. Try again in Ns.* in the chat box and sends nothing.
+      The step box's right-click Reroute does the same. With the sidebar open nothing is printed
+      and the greyed button counts down. A Reroute that is sent and then refused by the map is
+      still drawn only in the sidebar: saying that in chat, as Route here does, was not built.
 
 ## Farming procedure
 

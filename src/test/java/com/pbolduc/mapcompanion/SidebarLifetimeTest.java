@@ -88,6 +88,39 @@ public class SidebarLifetimeTest
 	}
 
 	/**
+	 * The Reroute key and the step box's Reroute are for play with the sidebar shut. Inside the wait
+	 * the map asked for, the card's Reroute is greyed, so the press did nothing and said nothing: the
+	 * countdown is on a button nobody is looking at. Each such press is answered in the chat box.
+	 */
+	@Test
+	public void aRerouteFromTheGameInsideTheMapsWaitSaysSoOnceInChat() throws Exception
+	{
+		DestinationState destinations = sidebar.injector.getInstance(DestinationState.class);
+		DestinationRoute route = sidebar.injector.getInstance(DestinationRoute.class);
+		long now = System.currentTimeMillis();
+		/* The wait first, with nothing to reroute: the key has no button to stand for, and says nothing. */
+		assertNull(route.beginPress(now));
+		route.finishPress(now + 25_000L);
+		SwingUtilities.invokeAndWait(() -> sidebar.panel.act(MapCompanionPanel.Act.REROUTE));
+		assertTrue("no destination, nothing said: " + sidebar.said, sidebar.said.isEmpty());
+
+		String reply = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "contract", "reply.json")),
+			StandardCharsets.UTF_8);
+		destinations.accept(sidebar.gson.fromJson(reply, RelayResponse.class).directive);
+		route.sync(destinations.getDestination(), null);
+		long revision = route.view().revision;
+
+		SwingUtilities.invokeAndWait(() -> sidebar.panel.act(MapCompanionPanel.Act.REROUTE));
+		assertEquals("nothing was asked of the map", revision, route.view().revision);
+		assertEquals(1, sidebar.said.size());
+		assertTrue(sidebar.said.get(0), sidebar.said.get(0).matches("Reroute: The map asked to wait\\. Try again in 2[45]s\\."));
+
+		SwingUtilities.invokeAndWait(() -> sidebar.panel.act(MapCompanionPanel.Act.FOLLOW));
+		assertEquals("a press that is not Reroute has no wait to say: " + sidebar.said, 1, sidebar.said.size());
+		assertTrue("nothing left the machine: " + sidebar.asked, sidebar.asked.isEmpty());
+	}
+
+	/**
 	 * A search waits before it is asked: a moment after the last key, or as long as the map said to,
 	 * which can be minutes. Turned off inside that wait, the plugin still sent it when the wait ended.
 	 */

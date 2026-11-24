@@ -800,7 +800,8 @@ public class MapCompanionPanel extends PluginPanel
 	 * A press from the game, a key's or the box's menu's, taken as the card it acts on would take a
 	 * click: a run's own buttons while a run is shown and no other route is followed, otherwise the
 	 * destination's. It presses that very button, so it obeys every rule the button does — Reroute
-	 * inside its wait is disabled, and Follow is offered only where the card offers it. EDT.
+	 * inside its wait is disabled, and says so in the chat box while the sidebar is not showing, and
+	 * Follow is offered only where the card offers it. EDT.
 	 */
 	void act(Act act)
 	{
@@ -820,7 +821,17 @@ public class MapCompanionPanel extends PluginPanel
 		{
 			button = nowCards.actButton(act);
 		}
-		press(button);
+		long wait = routePress.waitMs(System.currentTimeMillis());
+		if (!press(button) && act == Act.REROUTE && button != null && wait > 0L && !isShowing())
+		{
+			/*
+			 * Greyed by the wait every Route shares, and the countdown is on a button in a sidebar
+			 * that is shut: the press is answered where it was made, as Route here's is, with the
+			 * seconds left as it is said. Nothing is said while a reroute plans, which holds no
+			 * wait, or with nothing to reroute.
+			 */
+			plugin.say("Reroute: ", MapWait.tryAgain(MapWait.ASKED, wait));
+		}
 	}
 
 	/**

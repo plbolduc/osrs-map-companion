@@ -518,7 +518,7 @@ public class MapCompanionPlugin extends Plugin implements CompanionLoop.Surface
 		String line = DropLuckView.chatLine(drop);
 		if (line != null)
 		{
-			say(chatMessageManager, "Drop luck: ", line);
+			say("Drop luck: ", line);
 		}
 	}
 
@@ -529,7 +529,7 @@ public class MapCompanionPlugin extends Plugin implements CompanionLoop.Surface
 		String line = UpdateNotice.due(ConfigStore.of(configManager), usedBefore);
 		if (line != null)
 		{
-			say(chatMessageManager, "OSRS Map Companion " + CompanionVersion.VERSION + ": ", line + " " + UpdateNotice.WHERE);
+			say("OSRS Map Companion " + CompanionVersion.VERSION + ": ", line + " " + UpdateNotice.WHERE);
 		}
 	}
 
@@ -544,7 +544,7 @@ public class MapCompanionPlugin extends Plugin implements CompanionLoop.Surface
 		if (arrived != null && config.showDestination())
 		{
 			boolean yours = DestinationRoute.sentHere(arrived, arrived.targetMemberId != null ? loop.identity.id() : null);
-			say(chatMessageManager, "Destination: ", NowCards.arrivalLine(arrived, client.getWorld(), config.followHotkey(), yours));
+			say("Destination: ", NowCards.arrivalLine(arrived, client.getWorld(), config.followHotkey(), yours));
 		}
 	}
 
@@ -561,6 +561,12 @@ public class MapCompanionPlugin extends Plugin implements CompanionLoop.Surface
 				.append(ChatColorType.NORMAL).append(line)
 				.build())
 			.build());
+	}
+
+	/** The same in the plugin's own chat box, for the sidebar and for a test, which has none and overrides it. */
+	void say(String head, String line)
+	{
+		say(chatMessageManager, head, line);
 	}
 
 	/** Only the observer's named core activity sources qualify; NPC forwarding is ignored there. */

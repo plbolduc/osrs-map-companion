@@ -315,7 +315,8 @@ Shortest Path**, **Boats and Route here** and **Drop luck in chat** start on. Ru
 settings for the plugin keep each of these apart, for turning off half of a row.
 **Route here** sends only when you choose it. The keys for
 Reroute and Follow, and how many minutes before a meetup the reminder comes, are in RuneLite's own
-settings for the plugin.
+settings for the plugin. A Reroute key pressed while the map has asked for a wait says so in the
+chat box.
 
 </details>
 
