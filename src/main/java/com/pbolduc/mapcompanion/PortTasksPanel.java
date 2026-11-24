@@ -63,7 +63,7 @@ final class PortTasksPanel extends JPanel
 	private static final int WIDTH = CARD_TEXT_WIDTH;
 	private static final Color MUTED = ColorScheme.LIGHT_GRAY_COLOR;
 	static final String NEEDS_BOATS = Words.of("port.needsBoats");
-	static final String AFTER_FARM_RUN = "Start run after the farm run ends.";
+	static final String AFTER_FARM_RUN = Words.of("port.afterRun");
 	static final String BOARD_ONCE = Words.of("port.boardOnce");
 	private static final String START_TIP = Words.of("port.startTip");
 	private final PortTaskReader reader;
@@ -89,7 +89,7 @@ final class PortTasksPanel extends JPanel
 		this.client = client;
 		this.routes = routes;
 		this.run = new RunView(true, state, client, follower, routes, shortest, sprites, config);
-		JPanel card = taskCard(this, "portTasks", "Port tasks", sprites, "Sailing", settings);
+		JPanel card = taskCard(this, "portTasks", new JLabel("Port tasks"), sprites, "Sailing", settings);
 		body.setOpaque(false);
 		body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
 		card.add(left(body));

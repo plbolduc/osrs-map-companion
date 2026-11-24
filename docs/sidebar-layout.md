@@ -1046,8 +1046,14 @@ the order: no second Start beside it". The farm card follows it now: the picker 
 shown, planned or ended, and comes back when the card has no run. The rule holds across the two cards
 too, since the map keeps one run a member and either card's Start replaces it: while one card's run
 is walked, planned or ended, the other offers no Start, and one muted line stands where it was,
-*Start a farm run after the port run ends.* or *Start run after the farm run ends.* A finished run
-holds nothing back.
+*Start a run after the port run ends.* or *Start run after the current run ends.*, since the run
+either waits for need not be a farm run. A finished run holds nothing back.
+
+The farm run card starts every run but a port-task one, and is headed *Farm run*. While it holds a
+sea charting run it is headed *Charting run*, over the run's own name, *Charting: Kharidian Sea*:
+a charting run farms nothing. The watering can stays beside it; the Sailing icon the heading wants
+is not drawn yet. A dailies run arrives as an ordinary run named *Dailies run*, which the card
+shows under *Farm run* as before. The card's name and its fold's key stay `farmRun`.
 
 ### Outside the sidebar
 

@@ -181,7 +181,7 @@ luck.stillWaiting=% of players would still be waiting too
 luck.paused=Not counted on this world: drop luck counts normal members worlds only.
 
 # FarmRunPanel, PortTasksPanel and RunView: farm and port-task runs.
-farm.afterPortRun=Start a farm run after the port run ends.
+farm.afterPortRun=Start a run after the port run ends.
 farm.needsPatches=Ready now reads your patches. Turn on Your account in Settings.
 farm.needsContract=Turn on Your account in Settings to plan your contract.
 farm.needsSeaCharts=A charting run plans what you have not charted. Turn on Your account in Settings.
@@ -189,7 +189,9 @@ farm.kindTip=Choose a run the map can build from your character's shared reading
 farm.startTip=Ask the map for the run chosen above, starting from where you stand
 port.needsBoats=Turn on Your account in Settings, which shares your boats, to plan these as one run.
 port.boardOnce=Board your boat once so the run knows its hold.
+port.afterRun=Start run after the current run ends.
 port.startTip=Ask the map for one run over every task you hold, starting from your boat
+run.charting=Charting run
 run.changed=Your port tasks have changed since this run was planned. Reroute plans from what you hold now.
 run.birdhousePending=Ticks when Time Tracking sees it seeded
 run.unfollowTip=Keep this run and stop following it until you press Follow

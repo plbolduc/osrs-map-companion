@@ -73,6 +73,11 @@ final class RunView extends JPanel
 	private final MapCompanionConfig config;
 	/** True on the Port tasks card: it shows port-task runs, and the farm run card every other. */
 	private final boolean port;
+	/**
+	 * The farm run card's own heading, which names the kind of run held: a charting run farms nothing.
+	 * The card's name, its fold's key and the run's keys on the wire stay farmRun. Unused on Port tasks.
+	 */
+	final JLabel heading = new JLabel("Farm run");
 	private final JLabel title = label(12f, Color.WHITE);
 	private final JLabel progress = label(11f, LIGHT_GRAY_COLOR);
 	/** How much of a run is done, as a bar over the count that says it in words. */
@@ -265,6 +270,7 @@ final class RunView extends JPanel
 		shownActions = syncRow(actions, wanted, shownActions);
 		// The Port tasks card's own heading already names its one kind of run.
 		title.setVisible(active && !port);
+		heading.setText(active && FarmRunWire.SEA_CHARTS.equals(view.run.kind) ? Words.of("run.charting") : "Farm run");
 		progress.setVisible(active);
 		/* With the count it sits over, and never on a card that holds no run: a bar is visible until told otherwise. */
 		bar.setVisible(active);

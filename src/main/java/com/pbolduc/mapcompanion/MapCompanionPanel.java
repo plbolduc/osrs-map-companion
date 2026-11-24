@@ -501,15 +501,15 @@ public class MapCompanionPanel extends PluginPanel
 	 *
 	 * <p>The heading folds the card: pressed, or its arrow, everything in that column hides until it is
 	 * pressed again, so a player on a Slayer task can put the farm run and the port tasks away. The
-	 * choice is kept under the card's name, for the next time the sidebar opens.
+	 * choice is kept under the card's name, for the next time the sidebar opens. The heading is the
+	 * card's own label, since the farm run card's words follow the run it holds.
 	 */
-	static JPanel taskCard(JPanel card, String name, String title, GameSprites sprites, String skill, ConfigStore settings)
+	static JPanel taskCard(JPanel card, String name, JLabel heading, GameSprites sprites, String skill, ConfigStore settings)
 	{
 		column(card, ColorScheme.DARKER_GRAY_COLOR);
 		/* Each card's inset; the gap between cards is the Tasks column's to draw. */
 		card.setBorder(new EmptyBorder(8, 8, 8, 8));
 		card.setName(name);
-		JLabel heading = new JLabel(title);
 		heading.setForeground(Color.WHITE);
 		refont(heading, Font.BOLD, 13f);
 		heading.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));

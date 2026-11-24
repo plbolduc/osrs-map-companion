@@ -88,7 +88,7 @@ final class FarmRunPanel extends JPanel
 		this.routes = routes;
 		this.settings = settings;
 		this.run = new RunView(false, state, client, follower, routes, shortest, sprites, config);
-		JPanel card = taskCard(this, "farmRun", "Farm run", sprites, "Farming", settings);
+		JPanel card = taskCard(this, "farmRun", run.heading, sprites, "Farming", settings);
 		picker.setBackground(getBackground());
 		for (String choice : STARTS)
 		{

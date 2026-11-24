@@ -803,6 +803,10 @@ client or against the production map.
       The step box's right-click Reroute does the same. With the sidebar open nothing is printed
       and the greyed button counts down. A Reroute that is sent and then refused by the map is
       still drawn only in the sidebar: saying that in chat, as Route here does, was not built.
+- [ ] **A charting run's heading.** Start a Sea charting run from the farm run card: its heading
+      reads *Charting run* while the run is held and *Farm run* again after End run, and the card
+      stays folded or open as it was. With a charting run going, the Port tasks card says *Start
+      run after the current run ends.* Note that the heading's icon is still the watering can.
 
 ## Farming procedure
 

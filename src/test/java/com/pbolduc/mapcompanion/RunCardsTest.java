@@ -168,6 +168,38 @@ public class RunCardsTest
 	}
 
 	/**
+	 * The card that starts every run but a port-task one is headed "Farm run", and kept that heading
+	 * over a sea charting run, which farms nothing: <i>Farm run</i> over <i>Charting: Kharidian
+	 * Sea</i>. While it holds a charting run it is headed for that, and the Port tasks card's line
+	 * about waiting says "the current run", since the run it waits for may not be a farm run.
+	 */
+	@Test
+	public void aChartingRunIsNotHeadedFarmRun() throws Exception
+	{
+		refresh();
+		assertTrue(shown(farm).toString(), shown(farm).contains("Farm run"));
+
+		state.acceptFor(identity.id(), EPOCH, run("/contract/sea-chart-run.json"), 1, System.currentTimeMillis());
+		refresh();
+		List<String> charting = shown(farm);
+		assertTrue(charting.toString(), charting.contains("Charting run"));
+		assertFalse(charting.toString(), charting.contains("Farm run"));
+		assertTrue("the run's own name stays under it", charting.contains("Charting: Kharidian Sea"));
+		assertEquals("Start run after the current run ends.", PortTasksPanel.AFTER_FARM_RUN);
+		assertTrue(shown(ports).toString(), shown(ports).contains(PortTasksPanel.AFTER_FARM_RUN));
+		assertEquals("the card's name is what its fold is saved under, and stays", "farmRun", farm.getName());
+
+		status = 204;
+		press(farm, "End run");
+		refresh();
+		assertTrue(shown(farm).toString(), shown(farm).contains("Farm run"));
+
+		state.acceptFor(identity.id(), EPOCH, run("/contract/farm-run.json"), 1, System.currentTimeMillis());
+		refresh();
+		assertTrue("a farm run is a farm run", shown(farm).contains("Farm run"));
+	}
+
+	/**
 	 * And a port-task run being walked holds back the farm card's kind of run and Start run, with one
 	 * line in their place. A finished run has nothing left to lose, so the picker comes back with it.
 	 */

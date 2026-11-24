@@ -74,14 +74,6 @@ teleports you are missing, and ticks a stop off once you have replanted it.
 **Dailies run** visits every daily your diaries and quests allow, leaving out what you have
 collected today when **Dailies collected** is on.
 
-<p>
-  <img src="docs/mockups/sidebar-chart-run.png" width="225" alt="A sea charting run in the sidebar: Charting: Kharidian Sea, a bar one eighth full, 1 of 8 charted and 270 tiles left, Chartin' Charles's spyglass in the cave cut to one struck line as Charted, the spyglass view from the cave entrance next with its 20-tile walk, then each task with its tool's picture, a captain's log, a current duck, a fishbowl helmet or a crowbar, and the length of its sail in a column at the right">
-</p>
-
-**Sea charting run** sails your boat through the nearest seas you have not charted, docking where a
-task is done on foot, and ticks each task as the game charts it; it needs **Sea charts charted** on.
-Each task shows the tool it takes and how far its sail or walk is, with a bar for how much is charted.
-
 ## Sailing
 
 <p>
@@ -99,6 +91,15 @@ the world map at the port where it is moored, with nothing sent and no Connect n
 Home lists the port tasks you hold, and **Start run** turns them into one trip: every crate in the
 order your hold allows, then each bounty out to its creature and back. Each stop shows how far its
 sail is, and a bar how much of the run is done.
+
+<p>
+  <img src="docs/mockups/sidebar-chart-run.png" width="225" alt="A sea charting run in the sidebar, the card headed Charting run: Charting: Kharidian Sea, a bar one eighth full, 1 of 8 charted and 270 tiles left, Chartin' Charles's spyglass in the cave cut to one struck line as Charted, the spyglass view from the cave entrance next with its 20-tile walk, then each task with its tool's picture, a captain's log, a current duck, a fishbowl helmet or a crowbar, and the length of its sail in a column at the right">
+</p>
+
+**Sea charting run**, started from the Farm run card, sails your boat through the nearest seas
+you have not charted, docking where a task is done on foot, and ticks each task as the game charts
+it; it needs **Sea charts charted** on. Each task shows the tool it takes and how far its sail or
+walk is, with a bar for how much is charted.
 
 ## Shooting stars
 

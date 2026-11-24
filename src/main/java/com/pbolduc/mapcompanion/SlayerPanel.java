@@ -94,7 +94,7 @@ final class SlayerPanel extends JPanel
 		this.marker = marker;
 		this.clientThread = clientThread;
 		this.sprites = sprites;
-		JPanel card = taskCard(this, "slayer", "Slayer", sprites, "Slayer", settings);
+		JPanel card = taskCard(this, "slayer", new JLabel("Slayer"), sprites, "Slayer", settings);
 		/* The task and its count stay on a folded card: they are what a glance at it is for. */
 		add(task, 1);
 		card.add(status);

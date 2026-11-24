@@ -90,7 +90,8 @@ as **This leg**; a finished stop folds to one line. A bar under the run's name s
 of it is done, a stop still ahead says how far it is at the right of its row, and the line
 under the bar adds the tiles left when every stop ahead has a length.
 Each step has a picture: a teleport's item or spell, a boot for a walk, and a boat
-for boarding, sailing and docking. On a Sea charting run each task shows the
+for boarding, sailing and docking. A Sea charting run heads the card **Charting run**
+while it is held, and each task shows the
 tool it takes, with the length of its sail or walk at the right, and a bar and the tiles left
 under the run's name. **Before you leave** is a bank checklist:
 closed, it counts the teleports it can tell you are not carrying, and in the bank it outlines them.
