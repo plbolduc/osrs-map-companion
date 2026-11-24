@@ -814,6 +814,9 @@ client or against the production map.
 - [ ] **The bank after a finished run.** Finish a farm run that listed a teleport you did not
       carry and open the bank with the card reading *Run finished*: no item is outlined. Start
       another run that needs one: its outline is back.
+- [ ] **The Group tab across a minute.** Hold the pointer on a friend's Route until its tooltip
+      shows and wait past the minute: the tooltip stays, the news line's age moves on, and a
+      meetup's countdown moves with it. A click on Route as the minute turns is taken.
 
 ## Farming procedure
 

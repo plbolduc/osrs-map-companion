@@ -185,8 +185,9 @@ final class GroupPanel extends JPanel
 	private final Set<String> openMeetups = new TreeSet<>();
 	/**
 	 * What redraws itself on every refresh between two rebuilds of the rows: a Route's tooltip while
-	 * the map's wait greys it, and a line counting a wait down. A rebuild each second would eat a
-	 * press under the pointer, so the rows hand these over when they are built and they are run.
+	 * the map's wait greys it, a line counting a wait down, and whatever says a time, the age of a
+	 * friend's news and a meetup's day and countdown. A rebuild each second, or each minute, would
+	 * eat a press under the pointer, so the rows hand these over when they are built and they are run.
 	 */
 	private final List<LongConsumer> ticking = new ArrayList<>();
 
@@ -470,7 +471,7 @@ final class GroupPanel extends JPanel
 				boolean open = i == 0 || openMeetups.contains(meetup.id);
 				if (i > 0)
 				{
-					meetupCards.add(fold(meetup, open, now));
+					meetupCards.add(fold(meetup, open));
 				}
 				if (open)
 				{
@@ -493,12 +494,15 @@ final class GroupPanel extends JPanel
 		}
 	}
 
-	/** Everything a row says, so they are rebuilt only when that changes. */
+	/**
+	 * Everything a row says, so they are rebuilt only when that changes. Not the time: an age or a
+	 * countdown is drawn again in place, through {@link #ticking}, so no minute rebuilds a card.
+	 */
 	private String signature(@Nullable List<RosterRow> roster, @Nullable List<Meetup> events,
 		@Nullable String destinationKey, long now)
 	{
 		StringBuilder sb = new StringBuilder().append(ready).append(loggedIn).append(press.ready()).append(meetups.ready())
-			.append(config.showGroupOnWorldMap()).append('|').append(destinationKey).append('|').append(now / 60_000L);
+			.append(config.showGroupOnWorldMap()).append('|').append(destinationKey);
 		/* No roster draws nothing and an empty one draws the card of a group of one, so they sign apart. */
 		sb.append('|').append(roster == null ? "none" : Integer.toString(roster.size()));
 		if (roster != null)
@@ -691,8 +695,8 @@ final class GroupPanel extends JPanel
 			 */
 			int progress = progressSprite(row.news.kind);
 			boolean pictured = row.news.itemId != null || row.news.skill != null || progress > 0;
-			setWrapped(news, row.news.title + " · " + ago(now - row.news.atMs),
-				pictured ? WIDTH - NEWS_PICTURE - 5 : WIDTH);
+			ticking.add(at -> setWrapped(news, row.news.title + " · " + ago(at - row.news.atMs),
+				pictured ? WIDTH - NEWS_PICTURE - 5 : WIDTH));
 			news.setIconTextGap(5);
 			/*
 			 * The picture arrives later, and the card is measured now: a blank of its size keeps the
@@ -811,8 +815,8 @@ final class GroupPanel extends JPanel
 		setWrapped(name, meetup.title, WIDTH - route.getPreferredSize().width - 4);
 		card.add(left(beside(name, route)));
 		JLabel when = label(11f, LIGHT_GRAY_COLOR);
-		setWhen(when, when(meetup.startsAtMs, now, ZoneId.systemDefault(),
-			Locale.getDefault(Locale.Category.FORMAT)), meetup.startsAtMs, now, WIDTH);
+		ticking.add(at -> setWhen(when, when(meetup.startsAtMs, at, ZoneId.systemDefault(),
+			Locale.getDefault(Locale.Category.FORMAT)), meetup.startsAtMs, at, WIDTH));
 		card.add(when);
 		String where = meetupWhere(meetup);
 		if (!where.isEmpty())
@@ -889,20 +893,21 @@ final class GroupPanel extends JPanel
 	 * A meetup after the next, as one line: its title, day, clock and world, which opens to its card in
 	 * place and reads ▾ while open. Its answers are in the card, not on the line, as on the website.
 	 */
-	private JButton fold(Meetup meetup, boolean open, long now)
+	private JButton fold(Meetup meetup, boolean open)
 	{
-		/* The world held to its dot, so a wrap never leaves it alone on a line or the dot at an end. */
-		String words = meetup.title + " · " + dayAndClock(meetup.startsAtMs, now, ZoneId.systemDefault(),
-			Locale.getDefault(Locale.Category.FORMAT)) + (meetup.world == null ? "" : "\u00a0·\u00a0W" + meetup.world);
 		JButton line = linkButton("");
 		line.setName("group.meetupFold." + meetup.id);
 		/*
+		 * The world held to its dot, so a wrap never leaves it alone on a line or the dot at an end.
 		 * Wrapped as a label is, since the title is whatever the group typed and a button's own text would
 		 * widen the tab; the triangle in a cell of its own, so a wrapped line starts under the title.
+		 * Its day is today's or tomorrow's by the clock, so it is drawn with the ages.
 		 */
-		line.setText(markup(words, onWorld(meetup.world) ? "W" + meetup.world : null, HERE, WIDTH + 4).replace("<body width",
+		ticking.add(at -> line.setText(markup(meetup.title + " · " + dayAndClock(meetup.startsAtMs, at, ZoneId.systemDefault(),
+			Locale.getDefault(Locale.Category.FORMAT)) + (meetup.world == null ? "" : "\u00a0·\u00a0W" + meetup.world),
+			onWorld(meetup.world) ? "W" + meetup.world : null, HERE, WIDTH + 4).replace("<body width",
 			"<body><table cellpadding=0 cellspacing=0><tr><td valign=top>" + (open ? "▾" : "▸") + "\u00a0</td><td width")
-			.replace("</body>", "</td></tr></table></body>"));
+			.replace("</body>", "</td></tr></table></body>")));
 		line.setToolTipText(open ? "Fold this meetup to its line" : Words.of("group.openMeetupTip"));
 		line.addActionListener(e ->
 		{

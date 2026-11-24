@@ -950,6 +950,48 @@ public class GroupPanelTest
 	}
 
 	/**
+	 * A card is rebuilt only when what it says changes, since a rebuild under the pointer eats the
+	 * click and drops the tooltip. The minute was part of what a card says, so every friend's and
+	 * meetup's card was a new set of components once a minute. The ages are drawn again in place:
+	 * the same buttons across the minute, with the news a minute older and the meetup a minute nearer.
+	 */
+	@Test
+	public void aMinutePassingRedrawsTheAgesAndKeepsTheCards() throws Exception
+	{
+		AtomicReference<GroupPanel> panel = new AtomicReference<>();
+		SwingUtilities.invokeAndWait(() -> panel.set(panel()));
+		/* Five minutes after Cara's news in the contract's roster, with its meetup an hour off and a second folded. */
+		long now = 1_799_999_700_000L + 5 * 60_000L;
+		twoMeetups();
+		SwingUtilities.invokeAndWait(() ->
+		{
+			destinations.getEvents().get(0).startsAtMs = now + 3_600_000L;
+			destinations.getEvents().get(1).startsAtMs = now + 26 * 3_600_000L;
+			panel.get().refresh(true, true, now);
+			AbstractButton route = named(panel.get(), "group.route.cara");
+			AbstractButton meetupRoute = named(panel.get(), "group.meetupRoute.star-hunt");
+			AbstractButton fold = named(panel.get(), "group.meetupFold.raids");
+			String before = text(panel.get());
+			assertTrue(before, before.contains("Woodcutting 80 · 5m ago"));
+			assertTrue(before, before.contains("in 1h"));
+
+			panel.get().refresh(true, true, now + 61_000L);
+			assertSame("the same Route button across the minute", route, named(panel.get(), "group.route.cara"));
+			assertSame(meetupRoute, named(panel.get(), "group.meetupRoute.star-hunt"));
+			assertSame(fold, named(panel.get(), "group.meetupFold.raids"));
+			String after = text(panel.get());
+			assertTrue(after, after.contains("Woodcutting 80 · 6m ago"));
+			assertTrue(after, after.contains("in 59m"));
+
+			/* A day on, the folded meetup's line names its day again: it is no longer tomorrow's. */
+			String folded = fold.getText();
+			panel.get().refresh(true, true, now + 24 * 3_600_000L);
+			assertSame(fold, named(panel.get(), "group.meetupFold.raids"));
+			assertNotEquals("the folded line's day is redrawn in place", folded, fold.getText());
+		});
+	}
+
+	/**
 	 * The roster is kept through a logout so the tab is not emptied, and nothing refreshes it there.
 	 * Its rows went on saying what the last frame said: a green dot, <i>Online</i>, <i>Near you</i>,
 	 * hours later at the login screen. With nobody logged in a row keeps the friend, their world and
